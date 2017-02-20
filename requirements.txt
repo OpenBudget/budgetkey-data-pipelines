@@ -1,0 +1,1 @@
+datapackage-pipelines>=1.0.0

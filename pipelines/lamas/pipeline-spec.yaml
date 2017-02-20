@@ -1,0 +1,19 @@
+municipal-data:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: lamas-municipal-data
+    - run: add_resource
+      parameters:
+        name: lamas-municipal-data
+        url: "https://docs.google.com/spreadsheets/d/1vr63-HnCAKx6hW268CJ2I7eqCWifIcJFQU-ldKx-nXo/edit#gid=589378053"
+    - run: stream_remote_resources
+    - run: fix_bad_values
+    - run: set_types
+      parameters:
+        types:
+          '(?!שם  הרשות|symbol|lms_entity_id|district_2014|municipal_status_2014).*':
+            type: number
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/lamas-municipal-data/
