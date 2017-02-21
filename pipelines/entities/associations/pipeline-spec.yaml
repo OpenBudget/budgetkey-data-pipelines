@@ -16,5 +16,5 @@ registry:
     - run: dump.to_sql
       parameters:
         tables:
-          associations_registry:
+          association_registry:
             resource-name: association-registry

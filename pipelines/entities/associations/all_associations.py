@@ -16,7 +16,7 @@ def get_associations():
         )
 
 resource = {
-    'name': 'associations',
+    'name': 'association-registry',
     'path': 'data/associations.csv',
     'schema': {
         'fields': [
