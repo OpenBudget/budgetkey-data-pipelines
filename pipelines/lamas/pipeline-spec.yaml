@@ -17,3 +17,8 @@ municipal-data:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          lamas_muni: 
+            resource-name: lamas-municipal-data
