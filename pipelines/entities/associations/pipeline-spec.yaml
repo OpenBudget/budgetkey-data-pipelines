@@ -1,0 +1,20 @@
+registry:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: association-registry
+    - run: all_associations
+    - run: set_types
+      parameters:
+        types:
+          'Association_Registration_Date':
+            type: date
+            format: 'fmt:%Y-%m-%d %H:%M:%S'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/associations/registry
+    - run: dump.to_sql
+      parameters:
+        tables:
+          associations_registry:
+            resource-name: association-registry
