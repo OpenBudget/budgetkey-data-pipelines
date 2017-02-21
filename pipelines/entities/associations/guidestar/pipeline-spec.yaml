@@ -1,0 +1,29 @@
+guidestar:
+  dependencies:
+    - datapackage: http://next.obudget.org/datapackages/entities/associations/registry/datapackage.json
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: guidestar
+    - run: add_resource
+      parameters:
+        name: association-registry
+        url: http://next.obudget.org/datapackages/entities/associations/registry/data/associations.csv
+    - run: stream_remote_resources
+    - run: scraper
+      parameters:
+        name: guidestar
+        path: data/guidestar.csv
+    - run: set_types
+      parameters:
+        types:
+          'year_established':
+            type: integer
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/associations/guidestar
+    - run: dump.to_sql
+      parameters:
+        tables:
+          guidestar:
+            resource-name: association-registry
