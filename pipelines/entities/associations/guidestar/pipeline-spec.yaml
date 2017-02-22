@@ -1,6 +1,6 @@
 guidestar:
   dependencies:
-    - datapackage: http://next.obudget.org/datapackages/entities/associations/registry/datapackage.json
+    - datapackage: /var/datapackages/entities/associations/registry/datapackage.json
   pipeline:
     - run: add_metadata
       parameters:
@@ -8,7 +8,7 @@ guidestar:
     - run: add_resource
       parameters:
         name: association-registry
-        url: http://next.obudget.org/datapackages/entities/associations/registry/data/associations.csv
+        url: file:///var/datapackages/entities/associations/registry/data/associations.csv
     - run: stream_remote_resources
     - run: scraper
       parameters:
