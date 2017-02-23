@@ -3,6 +3,7 @@ registry:
     - run: add_metadata
       parameters:
         name: association-registry
+        title: עמותות פעילות מרשם העמותות
     - run: all_associations
     - run: set_types
       parameters:

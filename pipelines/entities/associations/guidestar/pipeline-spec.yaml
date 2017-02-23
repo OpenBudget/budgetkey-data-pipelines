@@ -5,6 +5,7 @@ guidestar:
     - run: add_metadata
       parameters:
         name: guidestar
+        title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
     - run: add_resource
       parameters:
         name: current-guidestar
@@ -64,4 +65,4 @@ guidestar:
       parameters:
         tables:
           guidestar:
-            resource-name: association-registry
+            resource-name: guidestar
