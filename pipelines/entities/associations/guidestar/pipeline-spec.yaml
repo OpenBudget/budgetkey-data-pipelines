@@ -7,9 +7,47 @@ guidestar:
         name: guidestar
     - run: add_resource
       parameters:
+        name: current-guidestar
+        url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
+        schema:
+          fields:
+            - { name: id, type: string }
+            - { name: title, type: string }
+            - { name: org_kind, type: string }
+            - { name: proper_management, type: string }
+            - { name: year_established, type: integer }
+            - { name: address, type: string }
+            - { name: objective, type: string }
+            - { name: founders, type: string }
+
+    - run: add_resource
+      parameters:
         name: association-registry
         url: file:///var/datapackages/entities/associations/registry/data/associations.csv
     - run: stream_remote_resources
+      parameters:
+        ignore-missing: true
+    - run: join
+      parameters:
+        source:
+          name: current-guidestar
+          key:
+            - id
+          delete: true
+        target:
+          name: association-registry
+          key:
+            - Association_Number
+        fields:
+          id: null
+          title: null
+          org_kind: null
+          proper_management: null
+          year_established: null
+          address: null
+          objective: null
+          founders: null
+        full: true
     - run: scraper
       parameters:
         name: guidestar

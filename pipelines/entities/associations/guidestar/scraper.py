@@ -18,10 +18,21 @@ classes = {
 }
 
 
-def scrape_guidestar(all_ids):
-    for i, ass_id in enumerate(all_ids):
-        guidestar_url = 'http://www.guidestar.org.il/he/organization/{}'.format(ass_id)
+def scrape_guidestar(ass_recs):
+    count = 0
+    for i, ass_rec in enumerate(ass_recs):
 
+        if ass_rec.get('id') is not None:
+            yield ass_rec
+            continue
+
+        assert 'Association_Number' in ass_rec
+
+        if count > 10:
+            continue
+        count += 1
+
+        guidestar_url = 'http://www.guidestar.org.il/he/organization/{}'.format(ass_rec['Association_Number'])
         page = None
         while page is None:
             try:
@@ -43,15 +54,14 @@ def scrape_guidestar(all_ids):
                 if len(values) > 0:
                     rec[field] = ";".join(values)
             rec.setdefault(field, '')
-        rec['id'] = ass_id
+        rec['id'] = ass_rec['Association_Number']
 
         yield rec
 
 
 def process_resources(res_iter_):
     first = next(res_iter_)
-    all_ids = (rec['Association_Number'] for rec in first)
-    yield scrape_guidestar(all_ids)
+    yield scrape_guidestar(first)
 
     for res in res_iter_:
         yield res
