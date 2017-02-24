@@ -1,0 +1,166 @@
+national-budgets:
+  dependencies:
+    - datapackage: /var/datapackages/budget/national/original/datapackage.json
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: processed-national-budget
+        title: National Budget (Processed)
+    - run: add_resource
+      parameters:
+        name: source-budget
+        url: /var/datapackages/budget/national/original/data/national-budget.csv
+    - run: add_resource
+      parameters:
+        name: budget
+        url: ''
+    - run: stream_remote_resources
+    - run: concatenate
+      parameters:
+        sources: source-budget
+        target:
+          name: national-budget
+        fields:
+          year:
+            - שנה
+          func_cls_code_1:
+            - קוד רמה 1
+          func_cls_title_1:
+            - שם רמה 1
+          func_cls_code_2:
+            - קוד רמה 2
+          func_cls_title_2:
+            - שם רמה 2
+          admin_cls_code_0:
+            - קוד סוג סעיף
+          admin_cls_title_0:
+            - שם סוג סעיף
+          admin_cls_code_2:
+            - קוד סעיף
+          admin_cls_title_2:
+            - שם סעיף
+          admin_cls_code_4:
+            - קוד תחום
+          admin_cls_title_4:
+            - שם תחום
+          admin_cls_code_6:
+            - קוד תכנית
+          admin_cls_title_6:
+            - שם תכנית
+          admin_cls_code_8:
+            - קוד תקנה
+          admin_cls_title_8:
+            - שם תקנה
+          econ_cls_code_1:
+            - קוד מיון רמה 1
+          econ_cls_title_1:
+            - שם מיון רמה 1
+          econ_cls_code_2:
+            - קוד מיון רמה 2
+          econ_cls_title_2:
+            - שם מיון רמה 2
+          direction:
+            - הוצאה/הכנסה
+          non_repeating:
+            - פשח
+          phase:
+            - סוג תקציב
+          net:
+            - הוצאה נטו
+          gross:
+            - הוצאה מותנית בהכנסה
+          dedicated:
+            - הכנסה מיועדת
+          commitment_allowance:
+            - הרשאה להתחייב
+          personnel:
+            - שיא כח אדם
+          contractors:
+            - עבצ
+          amounts:
+            - כמות
+          commitment_balance:
+            - יתרת התחיבויות
+    - run: join_phases
+    - run: join
+      parameters:
+        source:
+          name: national-budget
+          key: ['year', 'code']
+        target:
+          name: budget
+          key: null
+        fields:
+          year: null
+          code: null
+          title: null
+          func_cls_title_1:
+            aggregagte: set
+          func_cls_title_2:
+            aggregagte: set
+          econ_cls_title_1:
+            aggregagte: set
+          econ_cls_title_2:
+            aggregagte: set
+          admin_cls_code_0:
+            aggregagte: set
+          direction:
+            aggregagte: set
+          non_repeating:
+            aggregagte: set
+          net_allocated:
+            aggregagte: sum
+          gross_allocated:
+            aggregagte: sum
+          dedicated_allocated:
+            aggregagte: sum
+          commitment_allowance_allocated:
+            aggregagte: sum
+          personnel_allocated:
+            aggregagte: sum
+          contractors_allocated:
+            aggregagte: sum
+          amounts_allocated:
+            aggregagte: sum
+          commitment_balance_allocated:
+            aggregagte: sum
+          net_revised:
+            aggregagte: sum
+          gross_revised:
+            aggregagte: sum
+          dedicated_revised:
+            aggregagte: sum
+          commitment_allowance_revised:
+            aggregagte: sum
+          personnel_revised:
+            aggregagte: sum
+          contractors_revised:
+            aggregagte: sum
+          amounts_revised:
+            aggregagte: sum
+          commitment_balance_revised:
+            aggregagte: sum
+          net_executed:
+            aggregagte: sum
+          gross_executed:
+            aggregagte: sum
+          dedicated_executed:
+            aggregagte: sum
+          commitment_allowance_executed:
+            aggregagte: sum
+          personnel_executed:
+            aggregagte: sum
+          contractors_executed:
+            aggregagte: sum
+          amounts_executed:
+            aggregagte: sum
+          commitment_balance_executed:
+            aggregagte: sum
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed
+#    - run: dump.to_sql
+#      parameters:
+#        tables:
+#          budget:
+#            resource-name: national-budget
