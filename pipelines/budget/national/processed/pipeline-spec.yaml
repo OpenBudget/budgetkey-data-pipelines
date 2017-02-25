@@ -78,6 +78,17 @@ national-budgets:
           commitment_balance:
             - יתרת התחיבויות
     - run: join_phases
+    - run: set_types
+      parameters:
+        types:
+          'year':
+            type: integer
+          '.+_allocated':
+            type: number
+          '.+_revised':
+            type: number
+          '.+_executed':
+            type: number
     - run: join
       parameters:
         source:
@@ -92,67 +103,67 @@ national-budgets:
           code: null
           title: null
           func_cls_title_1:
-            aggregagte: set
+            aggregate: set
           func_cls_title_2:
-            aggregagte: set
+            aggregate: set
           econ_cls_title_1:
-            aggregagte: set
+            aggregate: set
           econ_cls_title_2:
-            aggregagte: set
+            aggregate: set
           admin_cls_code_0:
-            aggregagte: set
+            aggregate: set
           direction:
-            aggregagte: set
+            aggregate: set
           non_repeating:
-            aggregagte: set
+            aggregate: set
           net_allocated:
-            aggregagte: sum
+            aggregate: sum
           gross_allocated:
-            aggregagte: sum
+            aggregate: sum
           dedicated_allocated:
-            aggregagte: sum
+            aggregate: sum
           commitment_allowance_allocated:
-            aggregagte: sum
+            aggregate: sum
           personnel_allocated:
-            aggregagte: sum
+            aggregate: sum
           contractors_allocated:
-            aggregagte: sum
+            aggregate: sum
           amounts_allocated:
-            aggregagte: sum
+            aggregate: sum
           commitment_balance_allocated:
-            aggregagte: sum
+            aggregate: sum
           net_revised:
-            aggregagte: sum
+            aggregate: sum
           gross_revised:
-            aggregagte: sum
+            aggregate: sum
           dedicated_revised:
-            aggregagte: sum
+            aggregate: sum
           commitment_allowance_revised:
-            aggregagte: sum
+            aggregate: sum
           personnel_revised:
-            aggregagte: sum
+            aggregate: sum
           contractors_revised:
-            aggregagte: sum
+            aggregate: sum
           amounts_revised:
-            aggregagte: sum
+            aggregate: sum
           commitment_balance_revised:
-            aggregagte: sum
+            aggregate: sum
           net_executed:
-            aggregagte: sum
+            aggregate: sum
           gross_executed:
-            aggregagte: sum
+            aggregate: sum
           dedicated_executed:
-            aggregagte: sum
+            aggregate: sum
           commitment_allowance_executed:
-            aggregagte: sum
+            aggregate: sum
           personnel_executed:
-            aggregagte: sum
+            aggregate: sum
           contractors_executed:
-            aggregagte: sum
+            aggregate: sum
           amounts_executed:
-            aggregagte: sum
+            aggregate: sum
           commitment_balance_executed:
-            aggregagte: sum
+            aggregate: sum
     - run: sample
     - run: dump.to_path
       parameters:
@@ -161,4 +172,4 @@ national-budgets:
       parameters:
         tables:
           budget:
-            resource-name: national-budget
+            resource-name: budget

@@ -19,7 +19,6 @@ classes = {
 
 
 def scrape_guidestar(ass_recs):
-    count = 0
     for i, ass_rec in enumerate(ass_recs):
 
         if ass_rec.get('id') is not None:
@@ -27,10 +26,6 @@ def scrape_guidestar(ass_recs):
             continue
 
         assert 'Association_Number' in ass_rec
-
-        if count > 10:
-            continue
-        count += 1
 
         guidestar_url = 'http://www.guidestar.org.il/he/organization/{}'.format(ass_rec['Association_Number'])
         page = None
