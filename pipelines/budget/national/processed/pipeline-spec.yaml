@@ -1,6 +1,6 @@
 national-budgets:
   dependencies:
-    - datapackage: /var/datapackages/budget/national/original/datapackage.json
+    - pipeline: ./budget/national/original/national-budgets
   pipeline:
     - run: add_metadata
       parameters:

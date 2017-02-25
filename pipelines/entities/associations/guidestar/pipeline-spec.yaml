@@ -1,6 +1,6 @@
 guidestar:
   dependencies:
-    - datapackage: /var/datapackages/entities/associations/registry/datapackage.json
+    - pipeline: ./entities/associations/registry
   pipeline:
     - run: add_metadata
       parameters:
