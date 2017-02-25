@@ -4,16 +4,12 @@ national-budgets:
   pipeline:
     - run: add_metadata
       parameters:
-        name: processed-national-budget
         title: National Budget (Processed)
+        name: processed-national-budget
     - run: add_resource
       parameters:
         name: source-budget
         url: /var/datapackages/budget/national/original/data/national-budget.csv
-    - run: add_resource
-      parameters:
-        name: budget
-        url: ''
     - run: stream_remote_resources
     - run: concatenate
       parameters:
@@ -87,6 +83,7 @@ national-budgets:
         source:
           name: national-budget
           key: ['year', 'code']
+          delete: true
         target:
           name: budget
           key: null
@@ -156,11 +153,12 @@ national-budgets:
             aggregagte: sum
           commitment_balance_executed:
             aggregagte: sum
+    - run: sample
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed
-#    - run: dump.to_sql
-#      parameters:
-#        tables:
-#          budget:
-#            resource-name: national-budget
+    - run: dump.to_sql
+      parameters:
+        tables:
+          budget:
+            resource-name: national-budget

@@ -72,9 +72,14 @@ def process_first(rows):
             del row[title_key]
 
         for code_key, title_key in codes_and_titles.items():
-            row['code'] = save[code_key]
+            row['code'] = '00' + save[code_key]
             row['title'] = save[title_key]
             yield row
+
+        row['code'] = '00'
+        row['title'] = 'המדינה'
+        yield row
+
 
 def process_resources(res_iter_):
     first = next(res_iter_)

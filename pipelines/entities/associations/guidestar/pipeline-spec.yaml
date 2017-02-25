@@ -10,6 +10,7 @@ guidestar:
       parameters:
         name: current-guidestar
         url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
+        encoding: utf-8
         schema:
           fields:
             - { name: id, type: string }
