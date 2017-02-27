@@ -1,0 +1,118 @@
+registry:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: company-registry
+        title: חברות פעילות מרשם החברות
+    - run: m_of_justice_resource
+      parameters:
+        key: Company
+        url-key: Companies
+        resource-name: company-registry
+    - run: set_types
+      parameters:
+        types:
+          'Company_Registration_Date':
+            type: date
+            format: 'fmt:%Y-%m-%d %H:%M:%S'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/registrar/registry
+    - run: dump.to_sql
+      parameters:
+        tables:
+          company_registry:
+            resource-name: company-registry
+
+details:
+  dependencies:
+    - pipeline: ./entities/companies/registrar/registry
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: guidestar
+        title: נתונים פומביים על חברות המופיעים באתר רשם החברות
+    - run: add_resource
+      parameters:
+        name: current-details
+        url: file:///var/datapackages/entities/companies/registrar/details/data/details.csv
+        encoding: utf-8
+        schema:
+          fields:
+            - { name: company_city, type: string }
+            - { name: company_country, type: string }
+            - { name: company_description, type: string }
+            - { name: company_goal, type: string }
+            - { name: company_government, type: string }
+            - { name: company_last_report_year, type: integer }
+            - { name: company_limit, type: string }
+            - { name: company_located_at, type: string }
+            - { name: company_mafera, type: string }
+            - { name: company_name, type: string }
+            - { name: company_name_eng, type: string }
+            - { name: company_pob, type: string }
+            - { name: company_pob_city, type: string }
+            - { name: company_pob_postal_code, type: string }
+            - { name: company_postal_code, type: string }
+            - { name: company_status, type: string }
+            - { name: company_street, type: string }
+            - { name: company_street_number, type: string }
+            - { name: company_type, type: string }
+            - { name: id, type: string }
+    - run: add_resource
+      parameters:
+        name: company-registry
+        url: file:///var/datapackages/entities/companies/registrar/registry/data/company-registry.csv
+    - run: stream_remote_resources
+      parameters:
+        ignore-missing: true
+    - run: join
+      parameters:
+        source:
+          name: current-details
+          key:
+            - id
+          delete: true
+        target:
+          name: company-registry
+          key:
+            - Company_Number
+        fields:
+            id: null
+            company_limit: null
+            company_name_eng: null
+            company_country: null
+            company_street: null
+            company_postal_code: null
+            company_city: null
+            company_pob_city: null
+            company_status: null
+            company_street_number: null
+            company_type: null
+            company_goal: null
+            company_name: null
+            company_pob_postal_code: null
+            company_last_report_year: null
+            company_located_at: null
+            company_pob: null
+            company_government: null
+            company_description: null
+            company_mafera: null
+        full: true
+    - run: scraper
+      parameters:
+        name: company-details
+        path: data/details.csv
+    - run: set_types
+      parameters:
+        types:
+          'company_last_report_year':
+            type: integer
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/registrar/details
+    - run: dump.to_sql
+      parameters:
+        tables:
+          company_details:
+            resource-name: company-details

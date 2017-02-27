@@ -4,7 +4,11 @@ registry:
       parameters:
         name: association-registry
         title: עמותות פעילות מרשם העמותות
-    - run: all_associations
+    - run: m_of_justice_resource
+      parameters:
+        key: Association
+        url-key: Associations
+        resource-name: association-registry
     - run: set_types
       parameters:
         types:
@@ -13,7 +17,7 @@ registry:
             format: 'fmt:%Y-%m-%d %H:%M:%S'
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/entities/associations/registry
+        out-path: /var/datapackages/entities/associations/registrar/
     - run: dump.to_sql
       parameters:
         tables:

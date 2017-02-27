@@ -1,6 +1,6 @@
 guidestar:
   dependencies:
-    - pipeline: ./entities/associations/registry
+    - pipeline: ./entities/associations/registrar/registry
   pipeline:
     - run: add_metadata
       parameters:
@@ -25,7 +25,7 @@ guidestar:
     - run: add_resource
       parameters:
         name: association-registry
-        url: file:///var/datapackages/entities/associations/registry/data/associations.csv
+        url: file:///var/datapackages/entities/associations/registrar/data/association-registry.csv
     - run: stream_remote_resources
       parameters:
         ignore-missing: true
