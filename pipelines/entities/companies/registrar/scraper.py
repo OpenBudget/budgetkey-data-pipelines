@@ -1,8 +1,11 @@
+import time
+import logging
+
 from pyquery import PyQuery as pq
+import requests
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-import requests
 
 parameters, datapackage, res_iter = ingest()
 
@@ -29,6 +32,16 @@ selectors = {
 }
 
 
+def retryer(session, method, *args, **kwargs):
+    while True:
+        try:
+            kwargs['timeout'] = 60
+            return getattr(session, method)(*args, **kwargs)
+        except Exception as e:
+            logging.info('Got Exception %s, retrying', e)
+            time.sleep(60)
+
+
 def scrape_company_details(cmp_recs):
     for i, cmp_rec in enumerate(cmp_recs):
 
@@ -44,7 +57,7 @@ def scrape_company_details(cmp_recs):
         }
 
         session = requests.Session()
-        response = session.get('http://havarot.justice.gov.il/CompaniesList.aspx', timeout=60)
+        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
         page = pq(response.text)
 
         form_data = {
@@ -58,13 +71,13 @@ def scrape_company_details(cmp_recs):
 
         form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
 
-        response = session.post('http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data, timeout=60)
+        response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
         page = pq(response.text)
 
         if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
             continue
 
-        response = session.get('http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id, timeout=60)
+        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
         page = pq(response.text)
 
         for k, v in selectors.items():
