@@ -31,7 +31,7 @@ def get_entities():
     reader = csv.DictReader(StringIO(data))
     for rec in reader:
         yield dict(
-            (k, str(v)) for k, v in rec.items()
+            (k.strip(), str(v).strip()) for k, v in rec.items()
         )
 resource = {
     'name': resource_name,

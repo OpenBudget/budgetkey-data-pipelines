@@ -14,14 +14,15 @@ guidestar:
         schema:
           fields:
             - { name: id, type: string }
-            - { name: title, type: string }
-            - { name: org_kind, type: string }
-            - { name: proper_management, type: string }
-            - { name: year_established, type: integer }
-            - { name: address, type: string }
-            - { name: objective, type: string }
-            - { name: founders, type: string }
-
+            - { name: association_title, type: string }
+            - { name: association_guidestar_title, type: string }
+            - { name: association_org_kind, type: string }
+            - { name: association_proper_management, type: string }
+            - { name: association_year_established, type: integer }
+            - { name: association_address, type: string }
+            - { name: association_objective, type: string }
+            - { name: association_founders, type: string }
+            - { name: association_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
     - run: add_resource
       parameters:
         name: association-registry
@@ -42,13 +43,13 @@ guidestar:
             - Association_Number
         fields:
           id: null
-          title: null
-          org_kind: null
-          proper_management: null
-          year_established: null
-          address: null
-          objective: null
-          founders: null
+          association_guidestar_title: null
+          association_org_kind: null
+          association_proper_management: null
+          association_year_established: null
+          association_address: null
+          association_objective: null
+          association_founders: null
         full: true
     - run: scraper
       parameters:
@@ -57,8 +58,7 @@ guidestar:
     - run: set_types
       parameters:
         types:
-          'year_established':
-            type: integer
+          association_year_established: { type: integer }
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/guidestar

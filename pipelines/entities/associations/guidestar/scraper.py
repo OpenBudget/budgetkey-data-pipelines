@@ -7,7 +7,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 parameters, datapackage, res_iter = ingest()
 
 classes = {
-    '.views-field-title-field': 'title',
+    '.views-field-title-field': 'guidestar_title',
     '.views-field-field-gov-objectives.has-text > .field-content': 'objective',
     '.views-field-php-1 > .field-content': 'address',
     '#block-views-organization-page-block-2 .views-field-php > .field-content': 'org_kind',
@@ -37,6 +37,7 @@ def scrape_guidestar(ass_recs):
 
         rec = {}
         for selector, field in classes.items():
+            field = 'association_' + field
             if not field.endswith('[]'):
                 value = page.find(selector).text().strip().replace('\n', '')
                 if len(value) > 0:
@@ -50,6 +51,8 @@ def scrape_guidestar(ass_recs):
                     rec[field] = ";".join(values)
             rec.setdefault(field, '')
         rec['id'] = ass_rec['Association_Number']
+        rec['association_registration_date'] = ass_rec['Association_Registration_Date']
+        rec['association_title'] = ass_rec['Association_Name']
 
         yield rec
 
@@ -63,13 +66,15 @@ def process_resources(res_iter_):
 
 
 headers = ["id",
-           "title",
-           "org_kind",
-           "proper_management",
-           "year_established",
-           "address",
-           "objective",
-           "founders"]
+           "association_title",
+           "association_guidestar_title",
+           "association_org_kind",
+           "association_proper_management",
+           "association_year_established",
+           "association_address",
+           "association_objective",
+           "association_founders",
+           "association_registration_date"]
 
 resource = datapackage['resources'][0]
 resource.update(parameters)

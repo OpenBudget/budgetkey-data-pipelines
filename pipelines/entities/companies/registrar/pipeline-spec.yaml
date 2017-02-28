@@ -54,6 +54,7 @@ details:
             - { name: company_pob_city, type: string }
             - { name: company_pob_postal_code, type: string }
             - { name: company_postal_code, type: string }
+            - { name: company_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
             - { name: company_status, type: string }
             - { name: company_street, type: string }
             - { name: company_street_number, type: string }
