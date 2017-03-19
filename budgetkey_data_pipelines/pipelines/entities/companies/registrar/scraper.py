@@ -43,10 +43,15 @@ def retryer(session, method, *args, **kwargs):
 
 
 def scrape_company_details(cmp_recs):
+    count = 0
     for i, cmp_rec in enumerate(cmp_recs):
 
         if cmp_rec.get('id') is not None:
             yield cmp_rec
+            continue
+
+        count += 1
+        if count > 100:
             continue
 
         assert 'Company_Number' in cmp_rec

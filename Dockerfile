@@ -1,9 +1,6 @@
 FROM frictionlessdata/datapackage-pipelines:latest
 
-ADD pipelines /pipelines
-ADD common /common
-ADD processors /processors
-ADD requirements.txt /
+ADD ./ /
 
 RUN apk add --update libxml2 libxslt git && \
     pip install -U git+https://github.com/frictionlessdata/tabulator-py
@@ -15,13 +12,15 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     ls -la /var/lib && \
     chown dpp.dpp /var/run/redis -R && \
     ls -la /var/lib 
-RUN pip install -r /requirements.txt
+RUN pip install -r /requirements.txt && pip install -e /
 USER dpp
 
 ENV PYTHONPATH=/
-ENV DPP_PROCESSOR_PATH=/processors
+ENV DPP_PROCESSOR_PATH=/budgetkey_data_pipelines/processors
 ENV REDIS_USER=dpp
 ENV REDIS_GROUP=dpp
+
+WORKDIR /pipelines/
 
 EXPOSE 5000
 

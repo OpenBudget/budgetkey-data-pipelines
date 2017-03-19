@@ -1,11 +1,11 @@
-from common.data_gov_il import get_resource
+from budgetkey_data_pipelines.common.data_gov_il import get_resource
 
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
-dataset_name = parameters['dataset-name']
-resource_name = parameters['resource-name']
+dataset_name = str(parameters['dataset-name'])
+resource_name = str(parameters['resource-name'])
 resource = parameters.get('resource', {})
 
 data_gov_il_resource = get_resource(dataset_name, resource_name)
