@@ -1,0 +1,166 @@
+national-budget-changes:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: national-budget-changes
+        title: National Budget Amendments
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2005
+        resource-name: 'שינויי תקציב 2005'
+        resource:
+          name: changes_2005
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2006
+        resource-name: 'שינויי תקציב 2006'
+        resource:
+          name: changes_2006
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2007
+        resource-name: 'שינויי תקציב 2007'
+        resource:
+          name: changes_2007
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2008
+        resource-name: 'שינויי תקציב 2008'
+        resource:
+          name: changes_2008
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2009
+        resource-name: 'שינויי תקציב 2009'
+        resource:
+          name: changes_2009
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2010
+        resource-name: 'שינויי תקציב 2010'
+        resource:
+          name: changes_2010
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 2011
+        resource-name: 'שינויי תקציב 2011'
+        resource:
+          name: changes_2011
+
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 531
+        resource-name: 'שינויי תקציב 2012'
+        resource:
+          name: changes_2012
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: 711
+        resource-name: 'שינויי תקציב 2013'
+        resource:
+          name: changes_2013
+    - run: resource_without_excel_formulas
+      parameters:
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_2014_data.csv
+        resource:
+          name: changes_2014
+          encoding: windows-1255
+          headers: 2
+    - run: resource_without_excel_formulas
+      parameters:
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_2015_data.csv
+        resource:
+          name: changes_2015
+          encoding: windows-1255
+          headers: 2
+    - run: resource_without_excel_formulas
+      parameters:
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
+        resource:
+          name: changes_2016
+          encoding: windows-1255
+          headers: 2
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: national-budget-changes
+        fields:
+          year:
+            - שנה
+          leading_item:
+            - סעיף מוביל
+            - מספר הסעיף
+          req_code:
+            - מספר בקשה
+          req_title:
+            - תיאור בקשה
+          change_code:
+            - קוד שינוי
+          change_title:
+            - שם שינוי
+          change_type_id:
+            - קוד סוג בקשה
+          change_type_name:
+            - שם סוג בקשה
+          committee_id:
+            - מספר וועדה
+          budget_code:
+            - קוד תוכנית
+            - מספר תוכנית
+          budget_title:
+            - שם תוכנית
+          net_expense_diff:
+            - הוצאות נטו
+            - "סכום השינוי: הוצאות נטו"
+          gross_expense_diff:
+            - הוצאה מותנית בהכנסה
+            - "סכום השינוי: הוצאה מותנית"
+          allocated_income_diff:
+            - הכנסה מיועדת
+            - "סכום השינוי: הכנסה מיועדת"
+          commitment_limit_diff:
+            - הרשאה להתחייב
+            - "סכום השינוי: הרשאה להתחייב"
+          personnel_max_diff:
+            - שיא כא
+            - "סכום השינוי: שיא כח אדם"
+          date/approval:
+            - תאריך אישור
+          date/pending:
+            - תאריך משלוח לוועדה
+    - run: set_types
+      parameters:
+        types:
+          year:
+            type: integer
+            required: yes
+          leading_item:
+            type: integer
+          req_code:
+            type: integer
+          change_code:
+            type: integer
+          change_type_id:
+            type: integer
+          committee_id:
+            type: integer
+          net_expense_diff:
+            type: number
+          gross_expense_diff:
+            type: number
+          allocated_income_diff:
+            type: number
+          commitment_limit_diff:
+            type: number
+          personnel_max_diff:
+            type: number
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/original
+    - run: dump.to_sql
+      parameters:
+        tables:
+          budget_changes:
+            resource-name: national-budget-changes

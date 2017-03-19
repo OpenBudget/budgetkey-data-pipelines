@@ -51,8 +51,6 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
-        if count > 100:
-            continue
 
         assert 'Company_Number' in cmp_rec
         company_id = cmp_rec['Company_Number']
