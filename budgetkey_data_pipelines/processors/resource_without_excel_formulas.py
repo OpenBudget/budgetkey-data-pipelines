@@ -1,3 +1,4 @@
+import logging
 import requests
 import tempfile
 
@@ -14,6 +15,8 @@ content = content.replace(b',="', b',"')
 
 out = tempfile.NamedTemporaryFile(suffix='.csv', delete=False)
 out.write(content)
+
+logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:1000])
 
 resource['url'] = 'file://'+out.name
 datapackage['resources'].append(resource)

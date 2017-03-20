@@ -99,6 +99,7 @@ details:
             company_government: null
             company_description: null
             company_mafera: null
+            company_registration_date: null
         full: true
     - run: scraper
       parameters:
