@@ -1,6 +1,7 @@
 FROM frictionlessdata/datapackage-pipelines:latest
 
 ADD ./ /
+ADD dpp-runners.yaml /budgetkey_data_pipelines/pipelines/
 
 RUN apk add --update libxml2 libxslt git sudo && \
     pip install -U git+https://github.com/frictionlessdata/tabulator-py

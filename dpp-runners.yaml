@@ -1,0 +1,10 @@
+tzabar:
+  kind: wrapped-python
+  parameters:
+    wrapper: >
+      ssh adam@tzabar.obudget.org 
+      "docker run 
+      -i --entrypoint /bin/sh 
+      budgetkey/budgetkey-data-pipelines 
+      -c 'cd /budgetkey_data_pipelines/pipelines/{path} ; {cmd}'"
+
