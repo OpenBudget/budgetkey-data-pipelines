@@ -3,7 +3,7 @@ tzabar:
   parameters:
     wrapper: >
       ssh adam@tzabar.obudget.org 
-      "docker run 
+      "docker pull budgetkey/budgetkey-data-pipelines > /dev/null && docker run 
       -i --entrypoint /bin/sh 
       budgetkey/budgetkey-data-pipelines 
       -c 'cd /budgetkey_data_pipelines/pipelines/{path} ; {cmd}'"
