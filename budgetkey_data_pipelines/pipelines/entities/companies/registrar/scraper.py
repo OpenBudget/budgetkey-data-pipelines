@@ -51,12 +51,16 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
+        if count > 10000:
+            yield cmp_rec
+            continue
 
         assert 'Company_Number' in cmp_rec
         company_id = cmp_rec['Company_Number']
 
         row = {
-            'id': company_id
+            'id': company_id,
+            'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
         session = requests.Session()
@@ -105,5 +109,9 @@ resource.setdefault('schema', {})['fields'] = [
     {'name': header, 'type': 'string'}
     for header in headers + ['id']
     ]
+resource['schema']['fields'].append({
+    'name': 'company_registration_date',
+    'type': 'date'
+})
 
 spew(datapackage, process_resources(res_iter))
