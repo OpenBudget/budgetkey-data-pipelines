@@ -3,7 +3,7 @@ national-budgets:
     - run: add_metadata
       parameters:
         name: national-budget
-        title: National Budgets
+        title: National Budget
     - run: data_gov_il_resource
       parameters:
         dataset-name: 2004-1997

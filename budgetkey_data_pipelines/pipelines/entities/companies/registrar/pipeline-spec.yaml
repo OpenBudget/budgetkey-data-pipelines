@@ -104,6 +104,7 @@ details:
             company_registration_date: null
         full: true
     - run: scraper
+      runner: tzabar
       parameters:
         name: company-details
         path: data/details.csv
