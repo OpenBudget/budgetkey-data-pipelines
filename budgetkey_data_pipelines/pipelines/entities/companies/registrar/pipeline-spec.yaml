@@ -28,7 +28,7 @@ details:
   dependencies:
     - pipeline: ./entities/companies/registrar/registry
   schedule:
-    crontab: 0 0 * * *
+    crontab: 0 * * * *
   pipeline:
     - run: add_metadata
       parameters:
