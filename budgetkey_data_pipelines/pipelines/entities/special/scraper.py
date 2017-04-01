@@ -1,15 +1,17 @@
-from datapackage_pipelines.wrapper import ingest, spew
+import time
+import itertools
+import logging
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
-import time
-import itertools
-
-import logging
 from selenium.webdriver.remote.remote_connection import LOGGER
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+from datapackage_pipelines.wrapper import ingest, spew
+
+
 LOGGER.setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
@@ -35,10 +37,14 @@ slugs = {u"  \u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8
 
 headers = ['kind', 'name', 'id', 'street', 'house_number', 'city', 'zipcode']
 
+
 def scrape():
 
     # Prepare Driver
-    driver = webdriver.PhantomJS(service_args=['--ignore-ssl-errors=true'])
+    driver = webdriver.Remote(
+        command_executor='http://tzabar.obudget.org:8910',
+        desired_capabilities=DesiredCapabilities.PHANTOMJS)
+
     driver.set_window_size(1200, 800)
 
     def prepare():
@@ -62,7 +68,7 @@ def scrape():
         driver.find_element_by_css_selector('option[value="%s"]' % selection).click()
         driver.find_element_by_id('btnHipus').click()
         while True:
-            WebDriverWait(driver, 10).until(
+            WebDriverWait(driver, 60).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
             )
             rows = driver.find_elements_by_css_selector('#dgReshima tr.row1, #dgReshima tr.row2')
