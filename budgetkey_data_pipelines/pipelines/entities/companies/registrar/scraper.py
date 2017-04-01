@@ -81,14 +81,12 @@ def scrape_company_details(cmp_recs):
         response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
         page = pq(response.text)
 
-        if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
-            continue
+        if len(page.find('#CPHCenter_GridBlock').find('a')) >= 0:
+            response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
+            page = pq(response.text)
 
-        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
-        page = pq(response.text)
-
-        for k, v in selectors.items():
-            row[v] = page.find(k).text()
+            for k, v in selectors.items():
+                row[v] = page.find(k).text()
 
         yield row
 

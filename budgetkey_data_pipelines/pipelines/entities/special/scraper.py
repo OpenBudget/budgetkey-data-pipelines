@@ -68,10 +68,12 @@ def scrape():
         driver.find_element_by_css_selector('option[value="%s"]' % selection).click()
         driver.find_element_by_id('btnHipus').click()
         while True:
+            logging.info('PAGE')
             WebDriverWait(driver, 60).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
             )
             rows = driver.find_elements_by_css_selector('#dgReshima tr.row1, #dgReshima tr.row2')
+            logging.info('GOT %d ROWS', len(rows))
             for row in rows:
                 if len(set(row.get_attribute('class').split()).intersection({'row1', 'row2'})) > 0:
                     row = ([slugs[options[selection]]] +
@@ -82,7 +84,7 @@ def scrape():
             try:
                 next_button = driver.find_element_by_id('btnHaba')
                 next_button.click()
-                time.sleep(1)
+                time.sleep(10)
             except Exception:
                 break
 
