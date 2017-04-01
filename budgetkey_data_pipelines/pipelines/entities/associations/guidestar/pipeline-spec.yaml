@@ -15,14 +15,14 @@ guidestar:
         encoding: utf-8
         schema:
           fields:
-            - { name: association_title, type: string }
+            - { name: association_address, type: string }
+            - { name: association_founders, type: array }
+            - { name: association_guidestar_slogan, type: string }
             - { name: association_guidestar_title, type: string }
+            - { name: association_objective, type: string }
             - { name: association_org_kind, type: string }
             - { name: association_proper_management, type: string }
             - { name: association_year_established, type: integer }
-            - { name: association_address, type: string }
-            - { name: association_objective, type: string }
-            - { name: association_founders, type: string }
             - { name: id, type: string }
             - { name: association_title, type: string}
             - { name: association_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
@@ -47,6 +47,7 @@ guidestar:
         fields:
           id: null
           association_guidestar_title: null
+          association_guidestar_slogan: null
           association_org_kind: null
           association_proper_management: null
           association_year_established: null
