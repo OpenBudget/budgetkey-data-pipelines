@@ -40,6 +40,9 @@ entities:
           name_en: []
           kind: []
           details: []
+    - run: set_primary_key
+      parameters:
+        entities: ['id']
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/all
