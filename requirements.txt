@@ -1,3 +1,4 @@
 pyquery
 demjson
 requests
+selenium
