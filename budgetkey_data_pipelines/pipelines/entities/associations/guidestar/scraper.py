@@ -26,8 +26,8 @@ def scrape_guidestar(ass_recs):
             yield ass_rec
             continue
 
-        count+=1
-        if count > 10:
+        count += 1
+        if count > 10000:
             continue
 
         assert 'Association_Number' in ass_rec
@@ -85,7 +85,11 @@ resource = datapackage['resources'][0]
 resource.update(parameters)
 resource.setdefault('schema', {})['fields'] = [
     {'name': header, 'type': 'string'}
-    for header in headers
+    for header in headers + ['id', 'association_title']
 ]
+resource['schema']['fields'].append({
+    'name': 'association_registration_date',
+    'type': 'date'
+})
 
 spew(datapackage, process_resources(res_iter))

@@ -32,7 +32,7 @@ details:
   pipeline:
     - run: add_metadata
       parameters:
-        name: guidestar
+        name: company-details
         title: נתונים פומביים על חברות המופיעים באתר רשם החברות
     - run: add_resource
       parameters:
