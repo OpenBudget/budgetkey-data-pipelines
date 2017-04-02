@@ -9,6 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.remote_connection import LOGGER
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+from pyquery import PyQuery as pq
+
 from datapackage_pipelines.wrapper import ingest, spew
 
 
@@ -69,23 +71,26 @@ def scrape():
         driver.find_element_by_id('btnHipus').click()
         while True:
             logging.info('PAGE')
-            WebDriverWait(driver, 60).until(
+            WebDriverWait(driver, 60, poll_frequency=5).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
             )
-            rows = driver.find_elements_by_css_selector('#dgReshima tr.row1, #dgReshima tr.row2')
+            page = pq(driver.page_source)
+            rows = page.find('#dgReshima tr.row1, #dgReshima tr.row2')
+            # rows = driver.find_elements_by_css_selector('#dgReshima tr.row1, #dgReshima tr.row2')
             logging.info('GOT %d ROWS', len(rows))
             for row in rows:
-                if len(set(row.get_attribute('class').split()).intersection({'row1', 'row2'})) > 0:
-                    row = ([slugs[options[selection]]] +
-                           [x.text for x in row.find_elements_by_tag_name('td')])
-                    datum = dict(zip(headers, row))
-                    yield datum
+                # if len(set(row.get_attribute('class').split()).intersection({'row1', 'row2'})) > 0:
+                row = ([slugs[options[selection]]] +
+                       [pq(x).text() for x in pq(row).find('td')])
+                datum = dict(zip(headers, row))
+                yield datum
 
             try:
                 next_button = driver.find_element_by_id('btnHaba')
                 next_button.click()
                 time.sleep(10)
-            except Exception:
+            except Exception as e:
+                logging.info('EXCEPTION %r', e)
                 break
 
 

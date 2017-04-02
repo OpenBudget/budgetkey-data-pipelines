@@ -28,6 +28,7 @@ def scrape_guidestar(ass_recs):
 
         count += 1
         if count > 10000:
+            yield ass_rec
             continue
 
         assert 'Association_Number' in ass_rec
