@@ -3,6 +3,7 @@ import itertools
 import logging
 
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,7 +19,7 @@ LOGGER.setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
 
-slugs = {u"  \u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8  (\u05d9\u05d5''\u05e9 )": 'west_bank_corporation',
+slugs = {u"\u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8  (\u05d9\u05d5''\u05e9 )": 'west_bank_corporation',
          u'\u05d0\u05d9\u05d2\u05d5\u05d3\u05d9 \u05e2\u05e8\u05d9\u05dd': 'conurbation',
          u'\u05d0\u05d9\u05d2\u05d5\u05d3\u05d9\u05dd \u05de\u05e7\u05e6\u05d5\u05e2\u05d9\u05d9\u05dd': 'professional_association',
          u'\u05d2\u05d5\u05e4\u05d9\u05dd \u05e2"\u05e4 \u05d3\u05d9\u05df': 'law_mandated_organization',
@@ -50,6 +51,7 @@ def scrape():
     driver.set_window_size(1200, 800)
 
     def prepare():
+        logging.info('PREPARING')
         driver.get("http://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
         bakasha = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.ID, "RadioBakasha1"))
@@ -59,38 +61,45 @@ def scrape():
     prepare()
 
     # Prepare options
-    select = driver.find_element_by_id("DropdownlistSugYeshut")
-    options = {}
-    for option in select.find_elements_by_tag_name('option')[1:]:
-        options[option.get_attribute('value')] = option.text
+    logging.info('GETTING OPTIONS')
+    page = pq(driver.page_source)
+    options = [pq(opt) for opt in page.find('#DropdownlistSugYeshut option')]
+    options = dict((opt.attr('value'), opt.text()) for opt in options[1:])
+
+    def select_option(selection_):
+        logging.info('OPTION %s (%s)', selection_, options[selection_])
+        driver.find_element_by_css_selector('option[value="%s"]' % selection_).click()
+        driver.find_element_by_id('btnHipus').click()
 
     for selection in options.keys():
-        logging.info('OPTION %s (%s)', selection, options[selection])
         prepare()
-        driver.find_element_by_css_selector('option[value="%s"]' % selection).click()
-        driver.find_element_by_id('btnHipus').click()
+        select_option(selection)
         while True:
             logging.info('PAGE')
-            WebDriverWait(driver, 60, poll_frequency=5).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
-            )
+            try:
+                WebDriverWait(driver, 60, poll_frequency=5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
+                )
+            except TimeoutException:
+                select_option(selection)
+                continue
+
             page = pq(driver.page_source)
             rows = page.find('#dgReshima tr.row1, #dgReshima tr.row2')
-            # rows = driver.find_elements_by_css_selector('#dgReshima tr.row1, #dgReshima tr.row2')
             logging.info('GOT %d ROWS', len(rows))
             for row in rows:
-                # if len(set(row.get_attribute('class').split()).intersection({'row1', 'row2'})) > 0:
                 row = ([slugs[options[selection]]] +
                        [pq(x).text() for x in pq(row).find('td')])
                 datum = dict(zip(headers, row))
                 yield datum
 
-            try:
+            logging.info('NEXT %r', page.find('#btnHaba'))
+            if len(page.find('#btnHaba')) > 0:
                 next_button = driver.find_element_by_id('btnHaba')
+                logging.info('NEXT %r', next_button)
                 next_button.click()
                 time.sleep(10)
-            except Exception as e:
-                logging.info('EXCEPTION %r', e)
+            else:
                 break
 
 
