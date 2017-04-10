@@ -1,4 +1,7 @@
 # budgetkey-data-pipelines
+
+[![Build Status](https://travis-ci.org/OpenBudget/budgetkey-data-pipelines.svg?branch=master)](https://travis-ci.org/OpenBudget/budgetkey-data-pipelines)
+
 Budget Key data processing pipelines
 
 ## Quickstart
