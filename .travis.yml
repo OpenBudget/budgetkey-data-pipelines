@@ -1,0 +1,9 @@
+sudo: false
+language: python
+python:
+- 3.6
+before_script:
+- pip install -r requirements.txt
+- pip install -e .
+script:
+- ./run_tests.sh

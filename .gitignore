@@ -2,6 +2,7 @@
 .idea
 *iml
 .dpp.db
+.data.db
 .cache
 bkp/
 *.pyc
