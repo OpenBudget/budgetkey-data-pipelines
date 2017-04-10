@@ -1,6 +1,8 @@
 guidestar:
   dependencies:
     - pipeline: ./entities/associations/registrar/registry
+  schedule:
+    crontab: 15 * * * *
   pipeline:
     - run: add_metadata
       parameters:
@@ -13,15 +15,16 @@ guidestar:
         encoding: utf-8
         schema:
           fields:
-            - { name: id, type: string }
-            - { name: association_title, type: string }
+            - { name: association_address, type: string }
+            - { name: association_founders, type: array }
+            - { name: association_guidestar_slogan, type: string }
             - { name: association_guidestar_title, type: string }
+            - { name: association_objective, type: string }
             - { name: association_org_kind, type: string }
             - { name: association_proper_management, type: string }
             - { name: association_year_established, type: integer }
-            - { name: association_address, type: string }
-            - { name: association_objective, type: string }
-            - { name: association_founders, type: string }
+            - { name: id, type: string }
+            - { name: association_title, type: string}
             - { name: association_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
     - run: add_resource
       parameters:
@@ -44,14 +47,18 @@ guidestar:
         fields:
           id: null
           association_guidestar_title: null
+          association_guidestar_slogan: null
           association_org_kind: null
           association_proper_management: null
           association_year_established: null
           association_address: null
           association_objective: null
           association_founders: null
+          association_title: null
+          association_registration_date: null
         full: true
     - run: scraper
+      runner: tzabar
       parameters:
         name: guidestar
         path: data/guidestar.csv

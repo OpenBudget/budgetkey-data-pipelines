@@ -51,12 +51,16 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
+        if count > 10000:
+            yield cmp_rec
+            continue
 
         assert 'Company_Number' in cmp_rec
         company_id = cmp_rec['Company_Number']
 
         row = {
-            'id': company_id
+            'id': company_id,
+            'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
         session = requests.Session()
@@ -77,14 +81,12 @@ def scrape_company_details(cmp_recs):
         response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
         page = pq(response.text)
 
-        if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
-            continue
+        if len(page.find('#CPHCenter_GridBlock').find('a')) >= 0:
+            response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
+            page = pq(response.text)
 
-        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
-        page = pq(response.text)
-
-        for k, v in selectors.items():
-            row[v] = page.find(k).text()
+            for k, v in selectors.items():
+                row[v] = page.find(k).text()
 
         yield row
 
@@ -105,5 +107,9 @@ resource.setdefault('schema', {})['fields'] = [
     {'name': header, 'type': 'string'}
     for header in headers + ['id']
     ]
+resource['schema']['fields'].append({
+    'name': 'company_registration_date',
+    'type': 'date'
+})
 
 spew(datapackage, process_resources(res_iter))

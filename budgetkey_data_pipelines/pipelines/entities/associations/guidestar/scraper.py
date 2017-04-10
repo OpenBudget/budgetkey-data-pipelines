@@ -8,13 +8,13 @@ parameters, datapackage, res_iter = ingest()
 
 classes = {
     '.views-field-title-field': 'guidestar_title',
+    '.views-field-field-vol-slogan': 'guidestar_slogan',
     '.views-field-field-gov-objectives.has-text > .field-content': 'objective',
     '.views-field-php-1 > .field-content': 'address',
     '#block-views-organization-page-block-2 .views-field-php > .field-content': 'org_kind',
     '#block-views-organization-page-block-2 .views-field-field-gov-year-established > .field-content': 'year_established',
     '#block-views-organization-page-block-2 .views-field-field-gov-proper-management > .field-content': 'proper_management',
-    '.field-collection-item-field-gov-founder .content': 'founders[]',
-    '#nonononono': 'id'
+    '.field-collection-item-field-gov-founder .content': 'founders[]'
 }
 
 
@@ -26,8 +26,9 @@ def scrape_guidestar(ass_recs):
             yield ass_rec
             continue
 
-        count+=1
-        if count > 10:
+        count += 1
+        if count > 10000:
+            yield ass_rec
             continue
 
         assert 'Association_Number' in ass_rec
@@ -53,7 +54,7 @@ def scrape_guidestar(ass_recs):
                 values = [pq(value).text().strip().replace('\n', '') for value in values]
                 values = [value for value in values if len(value) > 0]
                 if len(values) > 0:
-                    rec[field] = ";".join(values)
+                    rec[field] = values
             rec.setdefault(field, '')
         rec['id'] = ass_rec['Association_Number']
         rec['association_registration_date'] = ass_rec['Association_Registration_Date']
@@ -70,22 +71,28 @@ def process_resources(res_iter_):
         yield res
 
 
-headers = ["id",
-           "association_title",
-           "association_guidestar_title",
-           "association_org_kind",
-           "association_proper_management",
-           "association_year_established",
-           "association_address",
-           "association_objective",
-           "association_founders",
-           "association_registration_date"]
+headers = sorted(classes.values())
 
 resource = datapackage['resources'][0]
 resource.update(parameters)
 resource.setdefault('schema', {})['fields'] = [
-    {'name': header, 'type': 'string'}
+    {'name': 'association_' + header.replace('[]', ''),
+     'type': 'string' if not header.endswith('[]') else 'array'}
     for header in headers
 ]
+resource['schema']['fields'].extend([
+    {
+        'name': 'id',
+        'type': 'string'
+    },
+    {
+        'name': 'association_title',
+        'type': 'string'
+    },
+    {
+        'name': 'association_registration_date',
+        'type': 'date'
+    }
+])
 
 spew(datapackage, process_resources(res_iter))

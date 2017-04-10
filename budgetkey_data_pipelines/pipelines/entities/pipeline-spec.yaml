@@ -1,0 +1,53 @@
+entities:
+  dependencies:
+    - pipeline: ./entities/companies/registrar/details
+    - pipeline: ./entities/associations/guidestar/guidestar
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entities
+        title: All Entities
+    - run: add_resource
+      parameters:
+        name: company
+        url: file:///var/datapackages/entities/companies/registrar/details/data/details.csv
+    - run: add_resource
+      parameters:
+        name: association
+        url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
+    - run: stream_remote_resources
+    - run: compact_entities
+      parameters:
+        company:
+          remove-prefix: company_
+          kind: company
+          id-column: id
+          name-column: company_name
+          name-en-column: company_name_eng
+        association:
+          remove-prefix: association_
+          kind: association
+          id-column: id
+          name-column: association_title
+    - run: sample
+    - run: concatenate
+      parameters:
+        target:
+          name: entities
+        fields:
+          id: []
+          name: []
+          name_en: []
+          kind: []
+          details: []
+    - run: set_primary_key
+      parameters:
+        entities: ['id']
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities:
+            resource-name: entities

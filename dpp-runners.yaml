@@ -1,0 +1,12 @@
+tzabar:
+  kind: wrapped-python
+  parameters:
+    wrapper: >
+      ssh adam@tzabar.obudget.org 
+      "docker system prune -fa > /dev/null && 
+      docker pull budgetkey/budgetkey-data-pipelines > /dev/null && 
+      docker run 
+      -i --entrypoint /bin/sh 
+      budgetkey/budgetkey-data-pipelines 
+      -c 'cd /budgetkey_data_pipelines/pipelines/{path} ; {cmd}'"
+

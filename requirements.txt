@@ -1,6 +1,7 @@
 pyquery
 demjson
 requests
+selenium
 Scrapy==1.3.3
 
 # code depends on the following datapackage-pipelines pull requests:

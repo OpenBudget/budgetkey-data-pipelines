@@ -164,7 +164,9 @@ national-budgets:
             aggregate: sum
           commitment_balance_executed:
             aggregate: sum
-    - run: sample
+    - run: set_primary_key
+      parameters:
+        budget: ['code', 'year']
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed

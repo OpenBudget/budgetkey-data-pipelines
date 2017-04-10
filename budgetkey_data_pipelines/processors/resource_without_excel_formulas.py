@@ -1,6 +1,8 @@
 import logging
 import requests
 import tempfile
+import tabulator
+import itertools
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -18,7 +20,17 @@ out.write(content)
 
 logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:1000])
 
-resource['url'] = 'file://'+out.name
 datapackage['resources'].append(resource)
 
-spew(datapackage, res_iter)
+stream = \
+    tabulator.Stream('file://'+out.name, **parameters.get('tabulator', {}))\
+    .open()
+resource['schema'] = {
+    'fields': [
+        {'name': h, 'type': 'string'}
+        for h in stream.headers
+    ]
+}
+
+spew(datapackage,
+     itertools.chain(res_iter, [stream.iter(keyed=True)]))

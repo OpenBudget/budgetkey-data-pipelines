@@ -27,10 +27,12 @@ registry:
 details:
   dependencies:
     - pipeline: ./entities/companies/registrar/registry
+  schedule:
+    crontab: 0 * * * *
   pipeline:
     - run: add_metadata
       parameters:
-        name: guidestar
+        name: company-details
         title: נתונים פומביים על חברות המופיעים באתר רשם החברות
     - run: add_resource
       parameters:
@@ -54,12 +56,12 @@ details:
             - { name: company_pob_city, type: string }
             - { name: company_pob_postal_code, type: string }
             - { name: company_postal_code, type: string }
-            - { name: company_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
             - { name: company_status, type: string }
             - { name: company_street, type: string }
             - { name: company_street_number, type: string }
             - { name: company_type, type: string }
             - { name: id, type: string }
+            - { name: company_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
     - run: add_resource
       parameters:
         name: company-registry
@@ -102,6 +104,7 @@ details:
             company_registration_date: null
         full: true
     - run: scraper
+      runner: tzabar
       parameters:
         name: company-details
         path: data/details.csv
