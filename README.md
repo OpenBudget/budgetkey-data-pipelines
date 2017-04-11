@@ -10,7 +10,7 @@ $ sudo apt-get install build-essential python3-dev libxml2-dev libxslt1-dev
 $ python --version
 Python 3.6.1
 $ sudo mkdir -p /var/datapackages && sudo chown $USER /var/datapackages/
-$ pip install -r requirements.txt && pip install -e .
+$ make install
 $ budgetkey-dpp
 INFO    :Main                            :Skipping redis connection, host:None, port:6379
 Available Pipelines:
@@ -22,7 +22,7 @@ Available Pipelines:
 
 #### unit tests
 ```
-$ ./run_tests.sh
+$ tox
 ```
 
 #### running a pipeline

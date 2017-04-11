@@ -15,6 +15,12 @@ setup(
     name='budgetkey-data-pipelines',
     version=version,
     packages=find_packages(exclude=["tests", "test.*"]),
-    install_requires=['datapackage-pipelines'],
+    install_requires=['pyquery',
+                      'demjson',
+                      'requests',
+                      'selenium',
+                      'Scrapy==1.3.3',
+                      'datapackage-pipelines'],
+    extras_require={'develop': ["tox"]},
     entry_points={'console_scripts': ['budgetkey-dpp = budgetkey_data_pipelines.cli:main']}
 )

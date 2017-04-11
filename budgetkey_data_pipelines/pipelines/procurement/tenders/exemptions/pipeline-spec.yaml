@@ -1,8 +1,8 @@
-exemptions-publishers:
+publishers:
   pipeline:
     - run: add_metadata
       parameters:
-        name: "tenders-exemptions-publishers"
+        name: "procurement-tenders-exemptions-publishers"
     - run: add_resource
       parameters:
         name: "mr-gov-il-search-exemption-messages"
@@ -12,4 +12,4 @@ exemptions-publishers:
     - run: add_exemptions_publishers_resource
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/tenders-exemptions-publishers/
+        out-path: /var/datapackages/procurement/tenders/exemptions/publishers/
