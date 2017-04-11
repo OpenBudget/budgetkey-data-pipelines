@@ -22,7 +22,24 @@ Available Pipelines:
 
 #### unit tests
 ```
-$ tox
+$ make test
+```
+
+##### run a specific test / modify test arguments
+
+any arguments added to tox will be added to the underlying py.test command
+
+```
+$ tox tests/tenders/test_fixtures.py
+```
+
+tox can be a bit slow, especially when doing tdd
+
+to run tests faster you can run py.test directly, but you will need to setup the test environment first
+
+```
+$ pip install pytest
+$ py.test tests/tenders/test_fixtures.py -svk test_tenders_fixtures_publishers
 ```
 
 #### running a pipeline

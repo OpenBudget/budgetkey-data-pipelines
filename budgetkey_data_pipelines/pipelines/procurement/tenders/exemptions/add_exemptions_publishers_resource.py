@@ -1,6 +1,6 @@
 from datapackage_pipelines.wrapper import ingest, spew
 import logging
-from scrapy.selector import Selector
+from pyquery import PyQuery as pq
 from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
 
 
@@ -21,21 +21,13 @@ output_resource_descriptor = {"name": output_resource_name,
                               "schema": {"fields": [{"name": "id", "type": "integer"},
                                                     {"name": "name", "type": "string"}]}}
 
-def _must_exist_xpath(sel, xpath):
-    ret = sel.xpath(xpath)
-    if len(ret) == 0:
-        raise Exception()
-    return ret
-
 def get_publishers_generator(resource_data):
     html_text = "\n".join([r["data"] for r in resource_data])
-    sel = Selector(text=html_text)
-    options_xpath_selector = '//*[@id="ctl00_m_g_cf609c81_a070_46f2_9543_e90c7ce5195b_ctl00_ddlPublisher"]/option'
-    publishers_generator = ({"id": int(e.xpath('@value')[0].extract()),
-                             "name": e.xpath('@title')[0].extract()}
-                            for e in _must_exist_xpath(sel, options_xpath_selector)
-                            if int(e.xpath('@value')[0].extract()) != 0)
-    return publishers_generator
+    options = pq(html_text)("#ctl00_m_g_cf609c81_a070_46f2_9543_e90c7ce5195b_ctl00_ddlPublisher").find("option")
+    for option in options:
+        publisher = {"id": int(option.attrib["value"]), "name": option.attrib["title"]}
+        if publisher["id"] != 0:
+            yield publisher
 
 def scrape_publishers(resource_iterator):
     input_resource_data = None

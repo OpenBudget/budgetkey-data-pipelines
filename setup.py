@@ -19,7 +19,6 @@ setup(
                       'demjson',
                       'requests',
                       'selenium',
-                      'Scrapy==1.3.3',
                       'datapackage-pipelines'],
     extras_require={'develop': ["tox"]},
     entry_points={'console_scripts': ['budgetkey-dpp = budgetkey_data_pipelines.cli:main']}
