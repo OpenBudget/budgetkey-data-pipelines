@@ -1,5 +1,10 @@
 national-budgets:
-  dependencies:
+  title: National Yearly Budgets - Processed
+  description: >
+    This pipeline joins the different phases of the budget (allocated, revised and executed).
+    In the original file there's a separate row for each of the phases. We like it better as a single row with all phase info.
+
+dependencies:
     - pipeline: ./budget/national/original/national-budgets
   pipeline:
     - run: add_metadata
