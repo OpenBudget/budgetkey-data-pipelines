@@ -1,0 +1,15 @@
+publishers:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "procurement-tenders-exemptions-publishers"
+    - run: add_resource
+      parameters:
+        name: "mr-gov-il-search-exemption-messages"
+        url: "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
+        format: "txt"
+    - run: stream_remote_resources
+    - run: add_exemptions_publishers_resource
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/exemptions/publishers/

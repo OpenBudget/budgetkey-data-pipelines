@@ -1,4 +1,0 @@
-pyquery
-demjson
-requests
-selenium
