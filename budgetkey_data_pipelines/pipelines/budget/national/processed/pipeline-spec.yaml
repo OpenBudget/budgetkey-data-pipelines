@@ -3,6 +3,7 @@ national-budgets:
   description: >
     This pipeline joins the different phases of the budget (allocated, revised and executed).
     In the original file there's a separate row for each of the phases. We like it better as a single row with all phase info.
+    Another thing this pipeline does is to rename the column titles, and to create rows for all hierarchies.
 
   dependencies:
     - pipeline: ./budget/national/original/national-budgets
