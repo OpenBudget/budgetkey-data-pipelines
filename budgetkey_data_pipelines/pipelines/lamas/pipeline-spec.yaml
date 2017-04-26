@@ -1,3 +1,22 @@
+municipality-to-city:
+  title: Match Area Municipalities with the list of localities inside them
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: lamas-municipality-locality-map
+    - run: add_resource
+      parameters:
+        name: municipality-locality-map
+        url: "file://municipality-to-city.csv"
+    - run: stream_remote_resources
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/lamas-municipality-locality-map/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          lamas_muni_map:
+            resource-name: municipality-locality-map
 municipal-data:
   pipeline:
     - run: add_metadata
