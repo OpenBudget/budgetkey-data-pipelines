@@ -8,3 +8,11 @@ bkp/
 *.pyc
 *.egg-info
 /.tox
+.code/
+.github*/
+celerybeat-schedule
+schedule.db
+celerybeat.pid
+dump.rdb
+ghostdriver.log
+
