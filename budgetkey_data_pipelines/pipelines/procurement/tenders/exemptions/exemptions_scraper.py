@@ -1,16 +1,24 @@
 import requests
 from pyquery import PyQuery as pq
 import math
+import logging
+from requests.exceptions import HTTPError, ConnectionError
+
+
+logger = logging.getLogger(__name__)
 
 
 class ExemptionsPublisherScraper(object):
 
-    def __init__(self, publisher_id):
+    def __init__(self, publisher_id, wait_between_retries=60, max_retries=10, timeout=180):
         self._publisher_id = publisher_id
+        self._wait_between_retries = wait_between_retries
+        self._max_retries = max_retries
+        self._timeout = timeout
 
     def get_urls(self):
         self._initialize_session()
-        self._page = pq(self._get_search_page_text())
+        self._page = pq(self._get_page_text_retry())
         self._cur_page_num = 0
         while self._has_next_page():
             for url in self._get_next_page_urls():
@@ -28,14 +36,26 @@ class ExemptionsPublisherScraper(object):
             if href.startswith(base_exemption_message_url):
                 yield href
 
-    def _get_search_page_text(self):
-        return self._session.request("GET", timeout=180,
-                                     url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx").text
 
-    def _get_post_page_text(self, form_data):
-        return self._session.request("POST", timeout = 180,
-                                     url = "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
-                                     data = form_data).text
+    def _get_page_text(self, form_data=None):
+        response = self._session.request("POST" if form_data else "GET",
+                                         timeout=self._timeout,
+                                         url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
+                                         data=form_data)
+        response.raise_for_status()
+        return response.text
+
+    def _get_page_text_retry(self, form_data=None):
+        i = 0
+        while True:
+            try:
+                return self._get_page_text(form_data)
+            except (HTTPError, ConnectionError) as e:
+                i += 1
+                if i > self._max_retries:
+                    raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
+                else:
+                    logger.exception(e)
 
     def _has_next_page(self):
         if self._cur_page_num == 0:
@@ -72,20 +92,7 @@ class ExemptionsPublisherScraper(object):
         for input_elt in self._page("#WebPartWPQ3 input"):
             if input_elt.get("name"):
                 form_data[input_elt.attrib["name"]] = ""
-        # hard-code the form_data to search next page and other required properties
-        form_data.update({
-                             "__EVENTTARGET": "" if self._cur_page_num == 1 else "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$grvMichrazim$ctl13$lnkNext",
-                             "__EVENTARGUMENT": "",
-                             "ctl00_PlaceHolderHorizontalNav_RadMenu1_ClientState": "",
-                             "ctl00$Accessibility$bigAccimg": "",
-                             "ctl00$Accessibility$normalAccimg": "",
-                             "ctl00$Accessibility$smallAccimg": "",
-                             "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnClear": "",
-                             "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch": "\u05d7\u05e4\u05e9",
-                             "SearchFreeText": "\u05d7\u05e4\u05e9"})
-        # for some reason above code doesn't work
-        # I found that hard-coding the values works better
-        # while taking only what's needed from the auto-generated form_data
+        # hard-code the form data with relevant elements from the html input elements
         form_data = {
             "MSOWebPartPage_PostbackSource": "",
             "MSOTlPn_SelectedWpId": "",
@@ -94,7 +101,7 @@ class ExemptionsPublisherScraper(object):
             "MSOGallery_SelectedLibrary": "",
             "MSOGallery_FilterString": "",
             "MSOTlPn_Button": "none",
-            "__EVENTTARGET": form_data["__EVENTTARGET"],
+            "__EVENTTARGET": "" if self._cur_page_num == 1 else "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$grvMichrazim$ctl13$lnkNext",
             "__EVENTARGUMENT": "",
             "__REQUESTDIGEST": form_data["__REQUESTDIGEST"],
             "MSOSPWebPartManager_DisplayModeName": "Browse",
@@ -124,14 +131,18 @@ class ExemptionsPublisherScraper(object):
             "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$dtEnd$dtEndDate": "",
             "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$txtMinAmount": "",
             "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$txtMaxAmount": "",
-            "ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch": "חפש",
             "_wpcmWpid": "",
             "wpcmVal": "",
         }
-        if self._cur_page_num != 1:
-            form_data.pop("ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch")
+        if self._cur_page_num == 1:
+            # if this attribute exists when getting pages after the 1st page - you get an error page about bad request
+            form_data["ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch"] = "חפש"
         return form_data
 
     def _post_next_page(self, publisher_id):
         form_data = self._get_next_page_form_data(publisher_id)
-        self._page = pq(self._get_post_page_text(form_data))
+        self._page = pq(self._get_page_text_retry(form_data))
+
+
+class TooManyFailuresException(Exception):
+    pass
