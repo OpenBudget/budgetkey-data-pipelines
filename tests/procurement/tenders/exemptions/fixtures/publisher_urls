@@ -1,0 +1,45 @@
+pipelines/procurement/tenders/exemptions/add_publisher_urls_resource
+--
+{}
+--
+{
+    "name": "procurement-tenders-exemptions-publisher-urls",
+    "resources": [
+        {
+            "name": "publishers",
+            "path": "data/publishers.csv",
+            "format": "csv",
+            "schema": {"fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "name", "type": "string"}
+            ]}
+        }
+    ]
+}
+--
+{"id": 71, "name": "\u05d4\u05d4\u05e1\u05ea\u05d3\u05e8\u05d5\u05ea \u05d4\u05e6\u05d9\u05d5\u05e0\u05d9\u05ea \u05d4\u05e2\u05d5\u05dc\u05de\u05d9\u05ea - \u05d4\u05d7\u05d8\u05d9\u05d1\u05d4 \u05dc\u05d4\u05ea\u05d9\u05e9\u05d1\u05d5\u05ea"}
+{"id": 96, "name": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d0\u05d6\u05e8\u05d7\u05d9\u05dd \u05d5\u05ea\u05d9\u05e7\u05d9\u05dd"}
+{"id": 45, "name": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05e4\u05e0\u05d9\u05dd"}
+{"id": 10, "name": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05e4\u05e0\u05d9\u05dd - \u05de\u05e9\u05d8\u05e8\u05ea \u05d9\u05e9\u05e8\u05d0\u05dc"}
+--
+{
+    "name": "procurement-tenders-exemptions-publisher-urls",
+    "resources": [
+        {
+            "name": "publisher-urls",
+            "path": "data/publisher-urls.csv",
+            "format": "csv",
+            "schema": {"fields": [
+                {"name": "id", "type": "integer"},
+                {"name": "url", "type": "string"}
+            ]}
+        }
+    ]
+}
+--
+{"id": 71, "url": "\u05d4\u05d4\u05e1\u05ea\u05d3\u05e8\u05d5\u05ea \u05d4\u05e6\u05d9\u05d5\u05e0\u05d9\u05ea \u05d4\u05e2\u05d5\u05dc\u05de\u05d9\u05ea - \u05d4\u05d7\u05d8\u05d9\u05d1\u05d4 \u05dc\u05d4\u05ea\u05d9\u05e9\u05d1\u05d5\u05ea"}
+{"id": 96, "url": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d0\u05d6\u05e8\u05d7\u05d9\u05dd \u05d5\u05ea\u05d9\u05e7\u05d9\u05dd"}
+{"id": 45, "url": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05e4\u05e0\u05d9\u05dd"}
+{"id": 10, "url": "\u05d4\u05de\u05e9\u05e8\u05d3 \u05dc\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05e4\u05e0\u05d9\u05dd - \u05de\u05e9\u05d8\u05e8\u05ea \u05d9\u05e9\u05e8\u05d0\u05dc"}
+
+{}

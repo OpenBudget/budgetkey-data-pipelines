@@ -14,7 +14,7 @@ pipelines/procurement/tenders/exemptions/add_exemptions_publishers_resource
     ]
 }
 --
-{"__STREAM_TXT_FORMAT_REMOTE_RESOURCE_FROM_FILE__": "tenders/SearchExemptionMessages.aspx"}
+{"__STREAM_TXT_FORMAT_REMOTE_RESOURCE_FROM_FILE__": "procurement/tenders/exemptions/SearchExemptionMessages.aspx"}
 --
 {
     "name": "tenders-exemptions-publishers",
