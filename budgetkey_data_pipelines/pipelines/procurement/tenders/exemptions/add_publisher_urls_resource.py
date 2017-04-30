@@ -1,50 +1,29 @@
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
-import requests
-from pyquery import PyQuery as pq
+from budgetkey_data_pipelines.pipelines.procurement.tenders.exemptions.exemptions_scraper import ExemptionsPublisherScraper
 
+# TODO: find a better way to have a "mock" processor
+# currently this is the best way I found to do it, it allows to test this processor using the fixture tests
+# this completely overrides the scraping from html pages, that's why I separated the scraping into a self-contained class
+# the ExemptionsPublisherScraper has it's own unit test - that way we have complete coverage
+MOCK_URLS = {10: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
+                  '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596879',
+                  '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596880', ],
+             71: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596739',
+                  '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596740',
+                  '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596741', ],
+             96: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596751', ],
+             45: []}
 
-def filter(resource_data):
+def resources_filter(resource_data, parameters):
     for publisher in resource_data:
-        search_params = {"publisher_index": publisher["id"]}
-        # get the main search page
-        session = requests.Session()
-        response = session.request("GET", timeout=180, url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx")
-        page = pq(response.text)
-        # post the search form
-        form_data = {'__EVENTTARGET': '', '__EVENTARGUMENT': '', }
-        for input_elt in page("#aspnetForm input"):
-            if "name" in input_elt.attrib and "value" in input_elt.attrib:
-                    form_data[input_elt.attrib["name"]] = input_elt.attrib["value"]
-        for select_elt in page("#WebPartWPQ3 select"):
-            form_data[select_elt.attrib["name"]] = 0
-        for input_elt in page("#WebPartWPQ3 input"):
-            form_data[input_elt.attrib["name"]] = ""
-        form_data['ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$ddlPublisher'] = search_params['publisher_index']
-        # the clear button was not clicked
-        form_data.pop('ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnClear')
-        if form_data['__EVENTTARGET']:
-            # if a page number was presses, the search button was not clicked
-            form_data.pop('ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch')
-        response = session.request("POST", timeout=180, url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx", data=form_data)
-        page = pq(response.text)
-        records_range_str = page(".resultsSummaryDiv").text()
-        # "tozaot 1-10 mitoch 100 reshumot
-        if len(records_range_str.split(' ')) == 3:  # lo nimtzeu reshoomot
-            result_indexes = {'range': [0, 0], 'total': 0}
-        else:
-            result_indexes = {'range': [int(x) for x in records_range_str.split(' ')[1].split('-')],
-                             'total': int((records_range_str.split(' ')[3]))}
-        records_per_page = 10
-        total_pages = (result_indexes['total'] + (records_per_page - 1)) / records_per_page
-        for page_num in range(1, int(total_pages) + 1):
-            # web_page.go_to_page_num(page_num)
-            urls = (e for e in page("#ctl00_m_g_cf609c81_a070_46f2_9543_e90c7ce5195b_ctl00_grvMichrazim a") if e.attrib.get("href", "").startswith("http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID="))
-            for url in urls:
-                yield {"id": publisher["id"], "url": url}
+        scraper = ExemptionsPublisherScraper(publisher["id"])
+        urls = scraper.get_urls() if not parameters.get("mock") else MOCK_URLS[publisher["id"]]
+        for url in urls:
+            yield {"id": publisher["id"], "url": url}
 
 ResourceFilterProcessor(default_input_resource="publishers",
                         default_output_resource="publisher-urls",
                         default_replace_resource=True,
-                        table_schema={"fields": [{"name": "id", "type": "integer"},
-                                                 {"name": "url", "type": "string"}]},
-                        filter=filter).spew()
+                        table_schema={"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
+                                                 {"name": "url", "type": "string", "title": "Exemption Url"}]},
+                        resources_filter=resources_filter).spew()

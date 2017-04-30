@@ -6,12 +6,12 @@ class ResourceFilterProcessor(object):
 
     def __init__(self, ingest_response=None,
                  default_input_resource=None, default_output_resource=None, default_replace_resource=True,
-                 table_schema=None, filter=None):
+                 table_schema=None, resources_filter=None):
         if not ingest_response:
             ingest_response = ingest()
         self.parameters, self.datapackage, self.resource_iterator = ingest_response
         self.set_default_parameters(default_input_resource, default_output_resource, default_replace_resource)
-        self.filter = filter
+        self.resources_filter = resources_filter
         self.input_resource_matcher = ResourceMatcher(self.parameters["input_resource"])
         self.output_resource_name = self.parameters["output_resource"]
         self.output_resource_descriptor = {"name": self.output_resource_name,
@@ -30,7 +30,7 @@ class ResourceFilterProcessor(object):
             if self.parameters["replace_resource"] and self.input_resource_matcher.match(resource_descriptor["name"]):
                 input_resource_data = resource_data
             if resource_descriptor["name"] == self.parameters["output_resource"]:
-                yield self.filter(input_resource_data if input_resource_data else resource_data)
+                yield self.resources_filter(input_resource_data if input_resource_data else resource_data, self.parameters)
             else:
                 yield resource_data
 

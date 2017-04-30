@@ -25,7 +25,8 @@ publisher-urls:
       parameters:
         name: publishers
         url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
+    - run: stream_remote_resources
     - run: add_publisher_urls_resource
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackage/procurement/tenders/exemptions/publisher-urls/
+        out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
