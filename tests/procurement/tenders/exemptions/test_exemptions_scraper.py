@@ -2,6 +2,7 @@ from budgetkey_data_pipelines.pipelines.procurement.tenders.exemptions.exemption
 import os
 import json
 from requests.exceptions import HTTPError, ConnectionError
+from itertools import islice
 
 
 class MockExemptionsPublisherScraper(ExemptionsPublisherScraper):
@@ -9,11 +10,12 @@ class MockExemptionsPublisherScraper(ExemptionsPublisherScraper):
     opens files from local filesystem instead of from the source
     """
 
-    def __init__(self, publisher_id, write_prefix=None, mock_http_failures=0):
+    def __init__(self, publisher_id, write_prefix=None, mock_http_failures=0, **kwargs):
         self.write_prefix = write_prefix
         self._num_requests = {}
         self._mock_http_failures = mock_http_failures
-        super(MockExemptionsPublisherScraper, self).__init__(publisher_id, wait_between_retries=0.001)
+        kwargs.setdefault("wait_between_retries", 0.001)
+        super(MockExemptionsPublisherScraper, self).__init__(publisher_id, **kwargs)
 
     def _get_page_text(self, form_data=None):
         if form_data:
@@ -43,6 +45,21 @@ class MockExemptionsPublisherScraper(ExemptionsPublisherScraper):
         else:
             raise HTTPError("fake http error")
 
+class MockExemptionsPublisherScraperUnlimitedPages(ExemptionsPublisherScraper):
+
+    def __init__(self, **kwargs):
+        super(MockExemptionsPublisherScraperUnlimitedPages, self).__init__(10, **kwargs)
+
+    def _get_page_text(self, form_data=None):
+        if form_data:
+            filename = "SearchExemptionMessages.aspx.publisher10-page1"
+        else:
+            filename = "SearchExemptionMessages.aspx"
+        with open(os.path.join(os.path.dirname(__file__), filename)) as f:
+            return f.read()
+
+    def _get_num_pages(self):
+        return self._cur_page_num + 1
 
 def test():
     # 10 =  המשרד לביטחון פנים - משטרת ישראל
@@ -79,6 +96,16 @@ def test_retries_too_many_failures():
     # then we get a TooManyFailuresException
     assert got_exception
 
+def test_max_pages():
+    # 1 page = 10 results
+    assert_max_pages(max_pages=1, num_expected_results=10)
+    assert_max_pages(max_pages=2, num_expected_results=20)
+    # the scraper yields unlimited results
+    assert_max_pages(max_pages=6, num_expected_results=60)
+    # 0 or negative number - will yield all pages (in the assertion we islice it to 300)
+    assert_max_pages(max_pages=0, num_expected_results=300)
+    assert_max_pages(max_pages=-1, num_expected_results=300)
+
 def assert_publisher_10_urls(actual_urls):
     assert actual_urls == [
         '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
@@ -95,3 +122,9 @@ def assert_publisher_10_urls(actual_urls):
         '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596700',
         '/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596714'
     ]
+
+def assert_max_pages(max_pages, num_expected_results):
+    scraper = MockExemptionsPublisherScraperUnlimitedPages(max_pages=max_pages)
+    # the scraper will yield unlimited results, we stop at 300 results
+    urls = islice(scraper.get_urls(), 300)
+    assert sum(1 for _ in urls) == num_expected_results

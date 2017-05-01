@@ -3,6 +3,7 @@ from pyquery import PyQuery as pq
 import math
 import logging
 from requests.exceptions import HTTPError, ConnectionError
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -10,11 +11,20 @@ logger = logging.getLogger(__name__)
 
 class ExemptionsPublisherScraper(object):
 
-    def __init__(self, publisher_id, wait_between_retries=60, max_retries=10, timeout=180):
+    def __init__(self, publisher_id,
+                 # seconds to wait between retries of http requests
+                 wait_between_retries=60,
+                 # maximum number of retries - once reached entire process fails
+                 max_retries=10,
+                 # http request timeout in seconds
+                 timeout=180,
+                 # maximum number of results pages to fetch, default is to get all results
+                 max_pages=-1):
         self._publisher_id = publisher_id
         self._wait_between_retries = wait_between_retries
         self._max_retries = max_retries
         self._timeout = timeout
+        self._max_pages = max_pages
 
     def get_urls(self):
         self._initialize_session()
@@ -56,10 +66,13 @@ class ExemptionsPublisherScraper(object):
                     raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
                 else:
                     logger.exception(e)
+                    time.sleep(self._wait_between_retries)
 
     def _has_next_page(self):
         if self._cur_page_num == 0:
             return True
+        elif 0 < self._max_pages <= self._cur_page_num:
+            return False
         else:
             num_pages = self._get_num_pages()
             return self._cur_page_num < num_pages
