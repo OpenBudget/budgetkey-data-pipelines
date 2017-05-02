@@ -109,7 +109,23 @@ quarterly-reports:
             - error
           entity_id:
             - מספר ח"פ
+    - run: fix-report-values
     - run: set_types
+      parameters:
+        resources: spending-quarterly-reports
+        types:
+          executed:
+            type: number
+          volume:
+            type: number
+          end_date:
+            type: date
+          start_date:
+            type: date
+          order_date:
+            type: date
+          sensitive_order:
+            type: boolean
     - run: sample
     - run: dump.to_path
       parameters:
