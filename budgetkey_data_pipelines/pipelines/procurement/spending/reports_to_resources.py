@@ -16,7 +16,8 @@ for i, report in enumerate(reports.iter()):
         canary = tabulator.Stream(report['report-url']).open().iter()
         headers = None
         for j, row in enumerate(canary):
-            logging.error(row)
+            if j > 10:
+                break
             row = [str(x).strip() if x is not None else '' for x in row]
             if len(row) < 0 and row[0] == '':
                 continue
@@ -25,8 +26,6 @@ for i, report in enumerate(reports.iter()):
                 row.remove('')
             if len(row) <= 4:
                 continue
-            if j > 10:
-                break
             if 'הזמנת רכש' not in row:
                 raise ValueError('Bad report format (order_id)')
             if 'תקנה תקציבית' not in row and 'תקנה' not in row:
