@@ -1,6 +1,7 @@
 import re
 import requests
 import csv
+import logging
 from io import StringIO
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -17,7 +18,9 @@ def get_entities():
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
     data = requests.get(all_db_url).content.decode('cp1255', 'replace')
 
-    assert len(data)>0
+    assert len(data) > 0
+    logging.info('GOT DATA %r', data[:1024])
+    logging.info('GOT DATA %d bytes', len(data))
 
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
