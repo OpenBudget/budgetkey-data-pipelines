@@ -9,6 +9,7 @@ registry:
         name: association-registry
         title: עמותות פעילות מרשם העמותות
     - run: m_of_justice_resource
+      runner: tzabar
       parameters:
         key: Association
         url-key: Associations

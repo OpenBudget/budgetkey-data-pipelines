@@ -17,6 +17,8 @@ def get_entities():
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
     data = requests.get(all_db_url).content.decode('cp1255', 'replace')
 
+    assert len(data)>0
+
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
     repl3 = re.compile("[\r\n]+(?=[^5])")
