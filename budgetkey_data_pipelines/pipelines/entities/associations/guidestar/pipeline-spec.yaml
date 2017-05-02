@@ -1,8 +1,6 @@
 guidestar:
   dependencies:
     - pipeline: ./entities/associations/registrar/registry
-  schedule:
-    crontab: 15 * * * *
   pipeline:
     - run: add_metadata
       parameters:
