@@ -108,4 +108,8 @@ quarterly-reports:
             - error
           entity_id:
             - מספר ח"פ
-
+    - run: set_types
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-spending-reports

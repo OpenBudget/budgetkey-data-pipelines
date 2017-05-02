@@ -5,17 +5,19 @@ import tabulator
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-import logging
 parameters, dp, res_iter = ingest()
 input_file = parameters['input-file']
 
 loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
 for i, report in enumerate(reports.iter()):
+    canary = None
     try:
-        canary = tabulator.Stream(report['report-url']).open().iter()
+        canary = tabulator.Stream(report['report-url'])
+        canary.open()
+        canary_rows = canary.iter()
         headers = None
-        for j, row in enumerate(canary):
+        for j, row in enumerate(canary_rows):
             if j > 10:
                 break
             row = [str(x).strip() if x is not None else '' for x in row]
@@ -37,14 +39,17 @@ for i, report in enumerate(reports.iter()):
         dp['resources'].append({
             'url': report['report-url'],
             'name': 'report_{}'.format(i),
-            'headers': headers
+            'headers': headers,
+            'constants': report
         })
         report['report-headers-row'] = headers
         report['load-error'] = None
     except Exception as e:
         report['report-headers-row'] = None
         report['load-error'] = str(e)
-    logging.error("%s: %s", i, report)
+    finally:
+        if canary is not None:
+            canary.close()
     loading_results.append(report)
 
 schema = deepcopy(reports.descriptor['schema'])

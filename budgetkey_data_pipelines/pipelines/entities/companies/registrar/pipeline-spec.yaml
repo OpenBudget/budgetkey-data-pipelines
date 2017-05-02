@@ -1,6 +1,8 @@
 registry:
+  title: חברות פעילות מרשם החברות
+  description: רשימת כלל החברות הפעילות, מתעדכן שבועית.
   schedule:
-    crontab: 0 0 * * 0
+    crontab: 0 0 * * *
   pipeline:
     - run: add_metadata
       parameters:
