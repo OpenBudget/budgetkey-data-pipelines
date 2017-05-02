@@ -13,6 +13,7 @@ quarterly-report-uris:
         target-resource:
           name: quarterly-report-uris
           path: data/quarterly-report-uris.csv
+    - run: add-report-metadata
     - run: collect_report_pages
       parameters:
         resource-name: quarterly-report-uris
