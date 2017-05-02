@@ -1,6 +1,6 @@
 quarterly-report-uris:
   schedule:
-    crontab: "0 H/4 * * *"
+    crontab: "0 */4 * * *"
   pipeline:
     - run: add_metadata
       runner: tzabar
@@ -22,16 +22,14 @@ quarterly-report-uris:
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-report-uris
 
-
-
 quarterly-reports:
   title: דוחות רבעוניים מתוך מרכבה, לפי נוהל היחידה לחופש המידע.
   description: >
     כל משרדי הממשלה ויחידות הסמך (שמחוברות למערכת מרכבה) צריכים לפרסם אחת לרבעון (תוך 45 יום מסוף הרבעון)
     דו״ח התקשרויות לפי פורמט מוגדר היטב הממומש כדו״ח מובנה במערכת המרכבה.
     כל המשרדים מדווחים עצמאית והדו״חות עולים לאתר היחידה לחופש המידע, משם אנו אוספים אותם.
-  schedule:
-    crontab: "0 H/4 * * *"
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-report-uris
   pipeline:
     - run: add_metadata
       parameters:
@@ -39,12 +37,12 @@ quarterly-reports:
         title: Quarterly Spending Reports
     - run: reports_to_resources
       parameters:
-        input-file: /var/datapackages/procurement/spending/quarterly-report-uris/data/quarterly-report-uris.csv
+        input-file: /var/datapackages/procurement/spending/quarterly-report-uris/datapackage.json
     - run: stream_remote_resources
       runner: tzabar
-#    - run: validate_reports
     - run: concatenate
       parameters:
+        sources: "report_[0-9]+"
         target:
           name: spending-quarterly-reports
         fields:
