@@ -4,6 +4,7 @@ import datapackage
 import tabulator
 
 from datapackage_pipelines.wrapper import ingest, spew
+from decimal import Decimal
 
 parameters, dp, res_iter = ingest()
 input_file = parameters['input-file']
@@ -33,9 +34,17 @@ for i, report in enumerate(reports.iter()):
             if 'תקנה תקציבית' not in row and 'תקנה' not in row:
                 raise ValueError('Bad report format (budget_code)')
             headers = j+1
+            headers_row = row
             break
         if headers is None:
             raise ValueError('Failed to find headers')
+        sample_row = next(canary_rows)
+        sample_row = dict(zip(headers_row, sample_row))
+        # Test some things make sense
+        try:
+            v = [Decimal(sample_row[k]) for k in headers_row if k.startswith('ביצוע') or k.startswith('ערך')]
+        except Exception as e:
+            raise ValueError('Bad value for column (%s)' % e) from e
         dp['resources'].append({
             'url': report['report-url'],
             'name': 'report_{}'.format(i),
