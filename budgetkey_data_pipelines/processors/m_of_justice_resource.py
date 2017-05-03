@@ -2,6 +2,7 @@ import re
 import requests
 import csv
 import logging
+import time
 from io import StringIO
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -16,12 +17,21 @@ resource_name = params['resource-name']
 def get_entities():
 
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
-    data = requests.get(all_db_url).content
-    logging.info('GOT DATA %r', data[:1024])
 
-    data = data.decode('cp1255', 'replace')
-    logging.info('GOT DATA %d bytes', len(data))
-    assert len(data) > 1024
+    attempts = 0
+    while True:
+        data = requests.get(all_db_url).content
+        logging.info('GOT DATA %r', data[:1024])
+
+        data = data.decode('cp1255', 'replace')
+        logging.info('GOT DATA %d bytes', len(data))
+
+        if len(data) > 1024:
+            break
+
+        attempts += 1
+        assert attempts < 10
+        time.sleep(60)
 
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
