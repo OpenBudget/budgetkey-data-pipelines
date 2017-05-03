@@ -20,7 +20,12 @@ def get_entities():
 
     attempts = 0
     while True:
-        data = requests.get(all_db_url).content
+        resp = requests.get(all_db_url)
+        if 'accept-ranges' in resp.headers:
+            content_length = resp.headers['content-length']
+            resp = requests.get(all_db_url, headers={'range': 'bytes=0-%s' % content_length})
+
+        data = resp.content
         logging.info('GOT DATA %r', data[:1024])
 
         data = data.decode('cp1255', 'replace')
