@@ -46,14 +46,28 @@ def budget_code(x):
         return None
     return x
 
+BAD_WORDS = [
+    'סה"כ',
+    'סה״כ',
+    '=SUBTOTAL',
+    '=SUM'
+]
 
 def process_row(row, *_):
-    for x in ['sensitive_order']:
-        row[x] = boolean(row.get(x))
-    for x in ['budget_code']:
-        row[x] = budget_code(row.get(x))
-    for x in ['end_date', 'order_date', 'start_date']:
-        row[x] = date(row.get(x))
+    for v in row.values():
+        for bw in BAD_WORDS:
+            if isinstance(v, str) and bw in v:
+                return
+
+    for k, v in row.items():
+        if k in ['sensitive_order']:
+            row[k] = boolean(v)
+        elif k in ['budget_code']:
+            row[k] = budget_code(v)
+        elif k in ['end_date', 'order_date', 'start_date']:
+            row[k] = date(v)
+        elif isinstance(v, str):
+            row[k] = v.strip()
     return row
 
 process(process_row=process_row)
