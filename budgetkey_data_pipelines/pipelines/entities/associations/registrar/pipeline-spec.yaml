@@ -2,7 +2,7 @@ registry:
   title: עמותות פעילות מרשם העמותות
   description: רשימת כלל העמותות הפעילות, מתעדכן שבועית.
   schedule:
-    crontab: 15 * * * *
+    crontab: 15 15 * * 1
   pipeline:
     - run: add_metadata
       parameters:
