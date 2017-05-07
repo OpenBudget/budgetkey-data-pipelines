@@ -14,7 +14,7 @@ MOCK_URLS = {10: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
              96: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596751', ],
              45: []}
 
-def resources_filter(resource_data, parameters):
+def resource_filter(resource_data, parameters):
     for publisher in resource_data:
         scraper = ExemptionsPublisherScraper(publisher["id"])
         urls = scraper.get_urls() if not parameters.get("mock") else MOCK_URLS[publisher["id"]]
@@ -26,4 +26,4 @@ ResourceFilterProcessor(default_input_resource="publishers",
                         default_replace_resource=True,
                         table_schema={"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
                                                  {"name": "url", "type": "string", "title": "Exemption Url"}]},
-                        resources_filter=resources_filter).spew()
+                        resource_filter=resource_filter).spew()
