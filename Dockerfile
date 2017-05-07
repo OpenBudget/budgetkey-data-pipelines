@@ -14,7 +14,7 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     chown dpp.dpp /budgetkey_data_pipelines -R && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 USER dpp
-RUN sudo pip install -e / && sudo pip install -U /dpp/
+RUN sudo pip install -e / 
 
 ENV PYTHONPATH=/
 ENV DPP_PROCESSOR_PATH=/budgetkey_data_pipelines/processors

@@ -1,7 +1,0 @@
-github:
-  repository: OpenBudget/budgetkey-data-pipelines
-  base-path: budgetkey_data_pipelines/pipelines
-  pull-requests:
-    local: {}
-
-
