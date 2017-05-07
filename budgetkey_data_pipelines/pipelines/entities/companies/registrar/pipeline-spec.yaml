@@ -1,10 +1,15 @@
 registry:
+  title: חברות פעילות מרשם החברות
+  description: רשימת כלל החברות הפעילות, מתעדכן שבועית.
+  schedule:
+    crontab: 0 0 * * 1
   pipeline:
     - run: add_metadata
       parameters:
         name: company-registry
         title: חברות פעילות מרשם החברות
     - run: m_of_justice_resource
+      runner: tzabar
       parameters:
         key: Company
         url-key: Companies
@@ -25,8 +30,6 @@ registry:
             resource-name: company-registry
 
 details:
-  dependencies:
-    - pipeline: ./entities/companies/registrar/registry
   schedule:
     crontab: 0 * * * *
   pipeline:

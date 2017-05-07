@@ -1,0 +1,132 @@
+quarterly-report-uris:
+  schedule:
+    crontab: "0 */4 * * *"
+  pipeline:
+    - run: add_metadata
+      runner: tzabar
+      parameters:
+        name: quarterly-report-uris
+        title: Quarterly Spending Reports
+    - run: collect_report_uris
+      runner: tzabar
+      parameters:
+        target-resource:
+          name: quarterly-report-uris
+          path: data/quarterly-report-uris.csv
+    - run: add-report-metadata
+    - run: collect_report_pages
+      parameters:
+        resource-name: quarterly-report-uris
+    - run: set_types
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-report-uris
+
+quarterly-reports:
+  title: דוחות רבעוניים מתוך מרכבה, לפי נוהל היחידה לחופש המידע.
+  description: >
+    כל משרדי הממשלה ויחידות הסמך (שמחוברות למערכת מרכבה) צריכים לפרסם אחת לרבעון (תוך 45 יום מסוף הרבעון)
+    דו״ח התקשרויות לפי פורמט מוגדר היטב הממומש כדו״ח מובנה במערכת המרכבה.
+    כל המשרדים מדווחים עצמאית והדו״חות עולים לאתר היחידה לחופש המידע, משם אנו אוספים אותם.
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-report-uris
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: spending-quarterly-reports
+        title: Quarterly Spending Reports
+    - run: reports_to_resources
+      parameters:
+        input-file: /var/datapackages/procurement/spending/quarterly-report-uris/datapackage.json
+    - run: stream_remote_resources
+      runner: tzabar
+    - run: concatenate
+      parameters:
+        sources: "report_[0-9]+"
+        target:
+          name: spending-quarterly-reports
+        fields:
+          executed:
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצמדות
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצ
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצ בש"ח
+            - ביצוע חשבוניות כולל מע"מ
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ
+            - ביצוע ערך קבלות הטובין במט"מ
+          manof_ref:
+            - מס' פנייה במנו"ף/מנור"
+          volume:
+            - ערך ההזמנה כולל מע"מ
+            - ערך ההזמנה כולל מע"מ בש"ח
+            - ערך הזמנה במ.ט.מ
+          purchase_method:
+            - אופן רכישה
+            - אופן רכישה מעודכן
+          sensitive_order:
+            - הזמנה רגישה
+          order_id:
+            - הזמנת רכש
+          currency:
+            - מטבע
+            - מטבע חשבונית
+          purpose:
+            - מטרת התקשרות
+            - מטרת התקשרות (חדש)
+            - תאור התחייבות (מרכבה)
+            - תאור ההזמנה
+            - מטרת התקשרות + תאור התחייבות
+          exemption_reason:
+            - סיבת פטור
+          end_date:
+            - סיום תקופת תוקף
+          purchasing_unit_code:
+            - קבוצה רוכשת
+          supplier_code:
+            - קוד ספק
+            - קוד חברה
+          purchasing_unit:
+            - שם אתר
+          supplier_name:
+            - שם הספק
+          publisher:
+            - שם חברה
+            - שם חברה/אתר
+          buyer_description:
+            - תאור של ארגון רכש
+          order_date:
+            - תאריך יצירת ההזמנה
+          start_date:
+            - התחלת תקופת תוקף
+          budget_title:
+            - תיאור תקנה תקציבית
+          budget_code:
+            - תקנה תקציבית
+            - תקנה
+          explanation:
+            - הבהרות
+          report_error:
+            - error
+          entity_id:
+            - מספר ח"פ
+    - run: fix-report-values
+    - run: set_types
+      parameters:
+        resources: spending-quarterly-reports
+        types:
+          executed:
+            type: number
+          volume:
+            type: number
+          end_date:
+            type: date
+          start_date:
+            type: date
+          order_date:
+            type: date
+          sensitive_order:
+            type: boolean
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-spending-reports
