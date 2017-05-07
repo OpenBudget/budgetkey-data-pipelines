@@ -89,24 +89,41 @@ class ExemptionsPublisherScraper(object):
         records_per_page = 10
         return math.ceil(total_results / records_per_page)
 
-    def _get_next_page_form_data(self, publisher_id):
+    def _get_form_data(self, publisher_id):
+        """
+        collects data from the input and select fields on the current page
+        :param publisher_id: optionally - set the publisher id select box to this value
+        :return: dict of data gathered from the input and select fields
+        """
         form_data = {}
-        # copy all the form data from the html input elements
+        # input elementss
         for input_elt in self._page("#aspnetForm input"):
             if input_elt.attrib.get("name") and input_elt.attrib.get("value"):
                 form_data[input_elt.attrib["name"]] = input_elt.attrib["value"]
+        # select boxes
         for select_elt in self._page("#WebPartWPQ3 select"):
             if select_elt.attrib.get("name"):
-                if select_elt.attrib["name"].endswith("$ddlPublisher"):
+                if publisher_id and select_elt.attrib["name"].endswith("$ddlPublisher"):
                     # set the publisher id
                     form_data[select_elt.attrib["name"]] = publisher_id
                 elif select_elt.attrib["name"]:
                     form_data[select_elt.attrib["name"]] = 0
+        # some more input elements
         for input_elt in self._page("#WebPartWPQ3 input"):
             if input_elt.get("name"):
                 form_data[input_elt.attrib["name"]] = ""
-        # hard-code the form data with relevant elements from the html input elements
-        form_data = {
+        return form_data
+
+    def _get_next_page_post_data(self, publisher_id=None):
+        """
+        return dict with post data for getting the next page
+        :param publisher_id:
+        :return: dict
+        """
+        # form_data is the input and select values collected from the current page
+        form_data = self._get_form_data(publisher_id)
+        # we use some of this collected data in the post_data dict below
+        post_data = {
             "MSOWebPartPage_PostbackSource": "",
             "MSOTlPn_SelectedWpId": "",
             "MSOTlPn_View": "0",
@@ -149,11 +166,11 @@ class ExemptionsPublisherScraper(object):
         }
         if self._cur_page_num == 1:
             # if this attribute exists when getting pages after the 1st page - you get an error page about bad request
-            form_data["ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch"] = "חפש"
-        return form_data
+            post_data["ctl00$m$g_cf609c81_a070_46f2_9543_e90c7ce5195b$ctl00$btnSearch"] = "חפש"
+        return post_data
 
     def _post_next_page(self, publisher_id):
-        form_data = self._get_next_page_form_data(publisher_id)
+        form_data = self._get_next_page_post_data(publisher_id)
         self._page = pq(self._get_page_text_retry(form_data))
 
 
