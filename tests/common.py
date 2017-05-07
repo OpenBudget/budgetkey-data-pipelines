@@ -3,6 +3,15 @@ import os
 import json
 
 
+def listify_resources(resources):
+    return [[row for row in resource] for resource in resources]
+
+
+def unlistify_resources(resources):
+    for resource in resources:
+        yield (row for row in resource)
+
+
 class BudgetkeyProcessorsFixturesTests(ProcessorFixtureTestsBase):
 
     def __init__(self, fixtures_path, fixtures_options):

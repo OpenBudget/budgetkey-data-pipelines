@@ -11,7 +11,7 @@ class ResourceFilterProcessor(object):
             ingest_response = ingest()
         self.parameters, self.datapackage, self.resource_iterator = ingest_response
         self.set_default_parameters(default_input_resource, default_output_resource, default_replace_resource)
-        self.resource_filter = resource_filter
+        self._resource_filter_param = resource_filter
         self.input_resource_matcher = ResourceMatcher(self.parameters["input_resource"])
         self.output_resource_name = self.parameters["output_resource"]
         self.output_resource_descriptor = {"name": self.output_resource_name,
@@ -24,13 +24,10 @@ class ResourceFilterProcessor(object):
         self.parameters.setdefault("replace_resource", default_replace_resource)
 
     def filter_data(self):
-        input_resource_data = None
         for resource_descriptor in self.datapackage["resources"]:
             resource_data = next(self.resource_iterator)
-            if self.parameters["replace_resource"] and self.input_resource_matcher.match(resource_descriptor["name"]):
-                input_resource_data = resource_data
-            if resource_descriptor["name"] == self.parameters["output_resource"]:
-                yield self.resource_filter(input_resource_data if input_resource_data else resource_data, self.parameters)
+            if self._is_matching_resource(resource_descriptor):
+                yield self.filter_resource_data(resource_data, self.parameters)
             else:
                 yield resource_data
 
@@ -41,7 +38,20 @@ class ResourceFilterProcessor(object):
                     resource.update(self.output_resource_descriptor)
         else:
             self.datapackage["resources"].append(self.output_resource_descriptor)
+        return self.datapackage
+
+    def filter_resource_data(self, data, parameters):
+        return self._resource_filter_param(data, parameters)
 
     def spew(self):
-        self.filter_datapackage()
-        spew(self.datapackage, self.filter_data())
+        spew(*self._get_spew_params())
+
+    @classmethod
+    def main(cls, **kwargs):
+        cls(ingest_response=ingest(), **kwargs).spew()
+
+    def _get_spew_params(self):
+        return self.filter_datapackage(), self.filter_data()
+
+    def _is_matching_resource(self, resource_descriptor):
+        return resource_descriptor["name"] == self.parameters["output_resource"]
