@@ -26,10 +26,10 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
     def _get_exemption_data(self, publisher_id, url):
         return {"pid": publisher_id,
                 "url": url,
-                "data": self._get_url_response_text("{}{}".format(self._url_prefix, url))}
+                "data": self._get_url_response_text("{}{}".format(self._url_prefix, url), self._timeout)}
 
-    def _get_url_response_text(self, url):
-        response = requests.get(url, self._timeout)
+    def _get_url_response_text(self, url, timeout):
+        response = requests.get(url, timeout=timeout)
         response.raise_for_status()
         return response.text
 

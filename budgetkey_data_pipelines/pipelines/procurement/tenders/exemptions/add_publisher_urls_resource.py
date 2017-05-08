@@ -16,7 +16,10 @@ MOCK_URLS = {10: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
 
 def resource_filter(resource_data, parameters):
     for publisher in resource_data:
-        scraper = ExemptionsPublisherScraper(publisher["id"])
+        kwargs = {}
+        if "max_pages" in parameters:
+            kwargs["max_pages"] = parameters["max_pages"]
+        scraper = ExemptionsPublisherScraper(publisher["id"], **kwargs)
         urls = scraper.get_urls() if not parameters.get("mock") else MOCK_URLS[publisher["id"]]
         for url in urls:
             yield {"id": publisher["id"], "url": url}

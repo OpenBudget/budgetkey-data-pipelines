@@ -2,47 +2,70 @@ from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFi
 import json
 from pyquery import PyQuery as pq
 
+INPUT_RESOURCE = "publisher-urls-downloaded-data"
+OUTPUT_RESOURCE = "exemptions"
+DOCUMENTS_JSON_FIELD = "documents_json"
+TABLE_SCHEMA = {
+    # we take the safe route here and use a combination of values to determine the primary key
+    # I'm not sure how consistent the source data is, and how much we should rely on it for reference keys
+    "primaryKeys": ["publisher_id", "page_url", "publication_id"],
+    "fields": [
+        {"name": "publisher_id", "type": "integer"},
+        {"name": "page_url", "title": "exemption page url", "type": "string"},
+        {"name": "publication_id", "type": "string"},
+        {"name": 'description', "type": "string"},
+        {"name": "supplier_id", "type": "string"},
+        {"name": "supplier", "type": "string"},
+        {"name": "contact", "type": "string"},
+        {"name": "publisher", "type": "string"},
+        {"name": "contact_email", "type": "string"},
+        {"name": "claim_date", "type": "string"},
+        {"name": "last_update_date", "type": "string"},
+        {"name": "reason", "type": "string"},
+        {"name": "source_currency", "type": "string"},
+        {"name": "regulation", "type": "string"},
+        {"name": "volume", "type": "string"},
+        {"name": "subjects", "type": "string"},
+        {"name": "start_date", "type": "string"},
+        {"name": "end_date", "type": "string"},
+        {"name": "decision", "type": "string"},
+        {"name": "page_title", "type": "string"},
+        # this resource is removed and added as a new resource in the add_exemption_documents_resource processor
+        {"name": DOCUMENTS_JSON_FIELD, "type": "string"}
+    ]
+}
+BASE_URL = "http://www.mr.gov.il"
+INPUT_FIELDS_TEXT_MAP = {
+    "publication_id": "SERIAL_NUMBER",
+    "description": "PublicationName",
+    "supplier_id": "SupplierNum",
+    "supplier": "SupplierName",
+    "contact": "ContactPersonName",
+    "publisher": "PUBLISHER",
+    "contact_email": "ContactPersonEmail",
+    "claim_date": "ClaimDate",
+    "last_update_date": "UpdateDate",
+    "reason": "PtorReason",
+    "source_currency": "Currency",
+    "regulation": "Regulation",
+    "volume": "TotalAmount",
+    "subjects": "PublicationSUBJECT",
+    "start_date": "StartDate",
+    "end_date": "EndDate",
+    "decision": "Decision",
+    "page_title": "PublicationType",
+}
+
 
 class ParseExemptionDataProcessor(ResourceFilterProcessor):
 
     def __init__(self, **kwargs):
-        super(ParseExemptionDataProcessor, self).__init__(
-            default_input_resource="publisher-urls-downloaded-data",
-            default_output_resource="exemptions",
-            default_replace_resource=True,
-            table_schema={
-                # we take the safe route here and use a combination of values to determine the primary key
-                # I'm not sure how consistent the source data is, and how much we should rely on it for reference keys
-                "primaryKeys": ["publisher_id", "page_url", "publication_id"],
-                "fields": [
-                    {"name": "publisher_id", "type": "integer"},
-                    {"name": "page_url", "title": "exemption page url", "type": "string"},
-                    {"name": "publication_id", "type": "string"},
-                    {"name": 'description', "type": "string"},
-                    {"name": "supplier_id", "type": "string"},
-                    {"name": "supplier", "type": "string"},
-                    {"name": "contact", "type": "string"},
-                    {"name": "publisher", "type": "string"},
-                    {"name": "contact_email", "type": "string"},
-                    {"name": "claim_date", "type": "string"},
-                    {"name": "last_update_date", "type": "string"},
-                    {"name": "reason", "type": "string"},
-                    {"name": "source_currency", "type": "string"},
-                    {"name": "regulation", "type": "string"},
-                    {"name": "volume", "type": "string"},
-                    {"name": "subjects", "type": "string"},
-                    {"name": "start_date", "type": "string"},
-                    {"name": "end_date", "type": "string"},
-                    {"name": "decision", "type": "string"},
-                    {"name": "page_title", "type": "string"},
-                    # TODO: figure out a better way to return the related documents
-                    # ideally - would like to have the documents as a separate linked resource
-                    # but I couldn't find a good way to do it while supporting streaming
-                    {"name": "documents_json", "type": "string"}
-                ]
-            },
-            **kwargs
-        )
+        self._base_url = kwargs.pop("base_url", BASE_URL)
+        super(ParseExemptionDataProcessor, self).__init__(default_input_resource=INPUT_RESOURCE,
+                                                          default_output_resource=OUTPUT_RESOURCE,
+                                                          default_replace_resource=True,
+                                                          table_schema=TABLE_SCHEMA,
+                                                          **kwargs)
 
     def filter_resource_data(self, data, parameters):
         for exemption in data:
@@ -52,30 +75,14 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
                 documents.append({"description": img_elt.attrib.get("alt", ""),
-                                  "link": "{}{}".format("http://www.mr.gov.il", link_elt.attrib.get("href", "")),
+                                  "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time_elt.text,})
-            yield {"publisher_id": exemption["pid"],
-                   "page_url": exemption["url"],
-                   "publication_id": page("#ctl00_PlaceHolderMain_lbl_SERIAL_NUMBER").text(),
-                   "description": page("#ctl00_PlaceHolderMain_lbl_PublicationName").text(),
-                   "supplier_id": page("#ctl00_PlaceHolderMain_lbl_SupplierNum").text(),
-                   "supplier": page("#ctl00_PlaceHolderMain_lbl_SupplierName").text(),
-                   "contact": page("#ctl00_PlaceHolderMain_lbl_ContactPersonName").text(),
-                   "publisher": page("#ctl00_PlaceHolderMain_lbl_PUBLISHER").text(),
-                   "contact_email": page("#ctl00_PlaceHolderMain_lbl_ContactPersonEmail").text(),
-                   "claim_date": page("#ctl00_PlaceHolderMain_lbl_ClaimDate").text(),
-                   "last_update_date": page("#ctl00_PlaceHolderMain_lbl_UpdateDate").text(),
-                   "reason": page("#ctl00_PlaceHolderMain_lbl_PtorReason").text(),
-                   "source_currency": page("#ctl00_PlaceHolderMain_lbl_Currency").text(),
-                   "regulation": page("#ctl00_PlaceHolderMain_lbl_Regulation").text(),
-                   "volume": page("#ctl00_PlaceHolderMain_lbl_TotalAmount").text(),
-                   "subjects": page("#ctl00_PlaceHolderMain_lbl_PublicationSUBJECT").text(),
-                   "start_date": page("#ctl00_PlaceHolderMain_lbl_StartDate").text(),
-                   "end_date": page("#ctl00_PlaceHolderMain_lbl_EndDate").text(),
-                   "decision": page("#ctl00_PlaceHolderMain_lbl_Decision").text(),
-                   "page_title": page("#ctl00_PlaceHolderMain_lbl_PublicationType").text(),
-                   "documents_json": json.dumps(documents)}
-
+            exemption_data = {
+                k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)) for k, v in INPUT_FIELDS_TEXT_MAP.items()}
+            exemption_data.update({"publisher_id": exemption["pid"],
+                                   "page_url": exemption["url"],
+                                   "documents_json": json.dumps(documents)})
+            yield exemption_data
 
 if __name__ == "__main__":
     ParseExemptionDataProcessor.main()

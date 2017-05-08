@@ -15,7 +15,9 @@ class MockDownloadExemptionPagesDataProcessor(DownloadExemptionPagesDataProcesso
     def spew(self):
         return self._get_spew_params()
 
-    def _get_url_response_text(self, url):
+    def _get_url_response_text(self, url, timeout):
+        if timeout != 180:
+            raise Exception("invalid timeout: {}".format(timeout))
         if url == "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431":
             return get_mock_exemption_data("595431")
         elif url == "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269":

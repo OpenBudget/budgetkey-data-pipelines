@@ -27,6 +27,26 @@ publisher-urls:
         url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
     - run: stream_remote_resources
     - run: add_publisher_urls_resource
+      parameters:
+        max_pages: 1
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
+
+exemptions:
+  dependencies:
+    - pipeline: ./procurement/tenders/exemptions/publisher-urls
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "procurement-tenders-exemptions"
+    - run: add_resource
+      parameters:
+        name: publisher-urls
+        url: /var/datapackages/procurement/tenders/exemptions/publisher-urls/data/publisher-urls.csv
+    - run: stream_remote_resources
+    - run: download_exemption_pages_data
+    - run: parse_exemption_data
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/exemptions/
