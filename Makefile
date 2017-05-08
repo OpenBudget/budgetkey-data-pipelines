@@ -4,4 +4,4 @@ install:
 	pip install --upgrade -e .[develop]
 
 test:
-	tox
+	tox -r
