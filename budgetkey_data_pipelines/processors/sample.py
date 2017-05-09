@@ -1,5 +1,5 @@
 import logging
-import json
+from datapackage_pipelines.utilities.extended_json import json
 
 from datapackage_pipelines.wrapper import spew, ingest
 

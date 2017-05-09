@@ -29,6 +29,7 @@ quarterly-reports:
     כל משרדי הממשלה ויחידות הסמך (שמחוברות למערכת מרכבה) צריכים לפרסם אחת לרבעון (תוך 45 יום מסוף הרבעון)
     דו״ח התקשרויות לפי פורמט מוגדר היטב הממומש כדו״ח מובנה במערכת המרכבה.
     כל המשרדים מדווחים עצמאית והדו״חות עולים לאתר היחידה לחופש המידע, משם אנו אוספים אותם.
+    התוצר של השרשר הזה הוא פירוט כל הדיווחים של כל המשרדים.
   dependencies:
     - pipeline: ./procurement/spending/quarterly-report-uris
   pipeline:
@@ -41,6 +42,7 @@ quarterly-reports:
         input-file: /var/datapackages/procurement/spending/quarterly-report-uris/datapackage.json
     - run: stream_remote_resources
       runner: tzabar
+    - run: sample
     - run: concatenate
       parameters:
         sources: "report_[0-9]+"
@@ -109,6 +111,13 @@ quarterly-reports:
             - error
           entity_id:
             - מספר ח"פ
+
+          report-date: []
+          report-title: []
+          report-publisher: []
+          report-url: []
+
+    - run: sample
     - run: fix-report-values
     - run: set_types
       parameters:
