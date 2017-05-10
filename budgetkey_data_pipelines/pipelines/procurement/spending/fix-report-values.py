@@ -22,7 +22,7 @@ def date(x):
         return None
 
     parts = DATE_RE.findall(x)
-    if len(parts) == 3:
+    if len(parts) >= 3:
         day = int(parts[0])
         month = int(parts[1])
         year = int(parts[2])
