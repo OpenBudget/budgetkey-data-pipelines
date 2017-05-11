@@ -60,7 +60,7 @@ class ExemptionsPublisherScraper(object):
         while True:
             try:
                 return self._get_page_text(form_data)
-            except (HTTPError, ConnectionError) as e:
+            except (HTTPError, ConnectionError, requests.exceptions.ReadTimeout) as e:
                 i += 1
                 if i > self._max_retries:
                     raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
