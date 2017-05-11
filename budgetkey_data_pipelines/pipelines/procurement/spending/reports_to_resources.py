@@ -91,6 +91,11 @@ for i, report in enumerate(reports.iter()):
 
     loading_results.append(report)
 
+dp['resources'] = sorted(dp['resources'],
+                         key=lambda res: '%s:%s' %
+                                         (res['constants']['report-year'],
+                                          res['constants']['report-period']))
+
 schema = deepcopy(reports.descriptor['schema'])
 schema['fields'].extend([
     {

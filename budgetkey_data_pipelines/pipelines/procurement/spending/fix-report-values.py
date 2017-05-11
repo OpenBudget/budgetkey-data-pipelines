@@ -86,7 +86,7 @@ def process_row(row, row_index, spec, resource_index, *_):
                 elif isinstance(v, str):
                     row[k] = v.strip()
         except Exception as e:
-            logging.error('ERROR in row %d: %r', row_index, row)
+            logging.exception('ERROR in row %d: %r', row_index, row)
             bad_rows[row['report-url']] += 1
             return
     elif resource_index == 1: # the errors

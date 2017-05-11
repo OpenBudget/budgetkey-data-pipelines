@@ -168,7 +168,7 @@ latest-contract-spending:
             - budget_code
           delete: true
         target:
-          name: latest-contract-spending
+          name: contract-spending
           key: null
         fields:
           executed:
@@ -217,7 +217,7 @@ latest-contract-spending:
     - run: sample
     - run: set_types
       parameters:
-        resources: latest-contract-spending
+        resources: contract-spending
         types:
           executed:
             type: number
@@ -237,4 +237,4 @@ latest-contract-spending:
       parameters:
         tables:
           contract_spending:
-            resource-name: latest-contract-spending
+            resource-name: contract-spending
