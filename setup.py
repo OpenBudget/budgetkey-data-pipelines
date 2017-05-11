@@ -20,7 +20,7 @@ setup(
                       'requests',
                       'selenium',
                       'fuzzywuzzy',
-                     ],
+                      'datapackage-pipelines'],
     extras_require={'develop': ["tox"]},
     entry_points={'console_scripts': ['budgetkey-dpp = budgetkey_data_pipelines.cli:main']}
 )

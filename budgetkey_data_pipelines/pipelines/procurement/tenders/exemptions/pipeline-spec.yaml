@@ -13,3 +13,20 @@ publishers:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/exemptions/publishers/
+
+publisher-urls:
+  dependencies:
+    - pipeline: ./procurement/tenders/exemptions/publishers
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "procurement-tenders-exemptions-publisher-urls"
+    - run: add_resource
+      parameters:
+        name: publishers
+        url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
+    - run: stream_remote_resources
+    - run: add_publisher_urls_resource
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
