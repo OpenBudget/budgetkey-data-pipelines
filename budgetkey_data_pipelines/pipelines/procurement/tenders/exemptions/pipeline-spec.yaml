@@ -9,6 +9,7 @@ publishers:
         url: "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
         format: "txt"
     - run: stream_remote_resources
+      runner: tzabar
     - run: add_exemptions_publishers_resource
     - run: dump.to_path
       parameters:
@@ -27,6 +28,7 @@ publisher-urls:
         url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
     - run: stream_remote_resources
     - run: add_publisher_urls_resource
+      runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
