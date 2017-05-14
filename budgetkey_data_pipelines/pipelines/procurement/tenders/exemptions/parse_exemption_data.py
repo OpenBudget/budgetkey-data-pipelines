@@ -78,7 +78,7 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time_elt.text,})
             exemption_data = {
-                k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)) for k, v in INPUT_FIELDS_TEXT_MAP.items()}
+                k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in INPUT_FIELDS_TEXT_MAP.items()}
             exemption_data.update({"publisher_id": exemption["pid"],
                                    "page_url": exemption["url"],
                                    "documents_json": json.dumps(documents)})
