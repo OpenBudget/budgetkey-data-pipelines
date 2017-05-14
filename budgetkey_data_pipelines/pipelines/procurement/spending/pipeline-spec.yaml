@@ -1,51 +1,53 @@
-quarterly-report-uris:
+quarterly-contract-spending-report-uris:
   schedule:
     crontab: "0 */4 * * *"
   pipeline:
     - run: add_metadata
       runner: tzabar
       parameters:
-        name: quarterly-report-uris
-        title: Quarterly Spending Reports
+        name: quarterly-contract-spending-report-uris
+        title: Quarterly Contact Spending Report URIs
     - run: collect_report_uris
       runner: tzabar
       parameters:
         target-resource:
-          name: quarterly-report-uris
-          path: data/quarterly-report-uris.csv
+          name: quarterly-contract-spending-report-uris
+          path: data/quarterly-contract-spending-report-uris.csv
     - run: add-report-metadata
     - run: collect_report_pages
       parameters:
-        resource-name: quarterly-report-uris
+        resource-name: quarterly-contract-spending-report-uris
     - run: set_types
     - run: sample
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/procurement/spending/quarterly-report-uris
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris
 
-quarterly-reports:
+
+quarterly-contract-spending-reports:
   title: דוחות רבעוניים מתוך מרכבה, לפי נוהל היחידה לחופש המידע.
   description: >
     כל משרדי הממשלה ויחידות הסמך (שמחוברות למערכת מרכבה) צריכים לפרסם אחת לרבעון (תוך 45 יום מסוף הרבעון)
     דו״ח התקשרויות לפי פורמט מוגדר היטב הממומש כדו״ח מובנה במערכת המרכבה.
     כל המשרדים מדווחים עצמאית והדו״חות עולים לאתר היחידה לחופש המידע, משם אנו אוספים אותם.
+    התוצר של השרשר הזה הוא פירוט כל הדיווחים של כל המשרדים.
   dependencies:
-    - pipeline: ./procurement/spending/quarterly-report-uris
+    - pipeline: ./procurement/spending/quarterly-contract-spending-report-uris
   pipeline:
     - run: add_metadata
       parameters:
-        name: spending-quarterly-reports
-        title: Quarterly Spending Reports
+        name: quarterly-contract-spending-reports
+        title: Quarterly Contract Spending Reports
     - run: reports_to_resources
       parameters:
-        input-file: /var/datapackages/procurement/spending/quarterly-report-uris/datapackage.json
+        input-file: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris/datapackage.json
     - run: stream_remote_resources
       runner: tzabar
     - run: concatenate
       parameters:
         sources: "report_[0-9]+"
         target:
-          name: spending-quarterly-reports
+          name: quarterly-contract-spending-reports
         fields:
           executed:
             - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצמדות
@@ -109,10 +111,16 @@ quarterly-reports:
             - error
           entity_id:
             - מספר ח"פ
+
+          report-date: []
+          report-title: []
+          report-publisher: []
+          report-url: []
+
     - run: fix-report-values
     - run: set_types
       parameters:
-        resources: spending-quarterly-reports
+        resources: quarterly-contract-spending-reports
         types:
           executed:
             type: number
@@ -126,7 +134,107 @@ quarterly-reports:
             type: date
           sensitive_order:
             type: boolean
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
+    - run: dump.to_sql
+      parameters:
+        tables:
+          quarterly_contract_spending_reports:
+            resource-name: quarterly-contract-spending-reports
+
+latest-contract-spending:
+  title: התקשרויות רכש ממשלתיות
+  description: >
+    אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-contract-spending-reports
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: latest-contract-spending
+        title: Latest Contract Spending
+    - run: add_resource
+      parameters:
+        name: quarterly-contract-spending-reports
+        url: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/data/quarterly-contract-spending-reports.csv
+    - run: stream_remote_resources
+    - run: join
+      parameters:
+        source:
+          name: quarterly-contract-spending-reports
+          key:
+            - order_id
+            - budget_code
+          delete: true
+        target:
+          name: contract-spending
+          key: null
+        fields:
+          executed:
+            aggregate: last
+          manof_ref:
+            aggregate: set
+          volume:
+            aggregate: last
+          purchase_method:
+            aggregate: set
+          sensitive_order:
+            aggregate: set
+          order_id: {}
+          currency:
+            aggregate: last
+          purpose:
+            aggregate: last
+          exemption_reason:
+            aggregate: set
+          end_date:
+            aggregate: last
+          purchasing_unit_code:
+            aggregate: set
+          supplier_code:
+            aggregate: set
+          purchasing_unit:
+            aggregate: set
+          supplier_name:
+            aggregate: set
+          publisher:
+            aggregate: set
+          buyer_description:
+            aggregate: set
+          order_date:
+            aggregate: last
+          start_date:
+            aggregate: last
+          budget_title:
+            aggregate: last
+          budget_code:
+            aggregate: last
+          explanation:
+            aggregate: set
+          entity_id:
+            aggregate: last
+    - run: sample
+    - run: set_types
+      parameters:
+        resources: contract-spending
+        types:
+          executed:
+            type: number
+          volume:
+            type: number
+          end_date:
+            type: date
+          start_date:
+            type: date
+          order_date:
+            type: date
     - run: sample
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/procurement/spending/quarterly-spending-reports
+        out-path: /var/datapackages/procurement/spending/latest-contract-spending
+    - run: dump.to_sql
+      parameters:
+        tables:
+          contract_spending:
+            resource-name: contract-spending

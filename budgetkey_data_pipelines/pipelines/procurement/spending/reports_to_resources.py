@@ -69,6 +69,8 @@ for i, report in enumerate(reports.iter()):
             })
             report['report-headers-row'] = headers
             report['report-sheets'] = sheet
+            report['report-rows'] = None
+            report['report-bad-rows'] = None
             report['load-error'] = None
             errd = False
         except Exception as e:
@@ -77,6 +79,8 @@ for i, report in enumerate(reports.iter()):
                 report['report-sheets'] = 0
                 report['report-headers-row'] = None
                 report['load-error'] = str(e)
+                report['report-rows'] = None
+                report['report-bad-rows'] = None
             else:
                 logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
         finally:
@@ -86,6 +90,11 @@ for i, report in enumerate(reports.iter()):
             break
 
     loading_results.append(report)
+
+dp['resources'] = sorted(dp['resources'],
+                         key=lambda res: '%s:%s' %
+                                         (res['constants']['report-year'],
+                                          res['constants']['report-period']))
 
 schema = deepcopy(reports.descriptor['schema'])
 schema['fields'].extend([
@@ -100,7 +109,15 @@ schema['fields'].extend([
     {
         'name': 'load-error',
         'type': 'string'
-    }
+    },
+    {
+        'name': 'report-rows',
+        'type': 'integer'
+    },
+    {
+        'name': 'report-bad-rows',
+        'type': 'integer'
+    },
 ])
 dp['resources'].append({
     'path': 'data/report-loading-results.csv',

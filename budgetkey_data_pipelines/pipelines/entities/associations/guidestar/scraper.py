@@ -27,7 +27,7 @@ def scrape_guidestar(ass_recs):
             continue
 
         count += 1
-        if count > 10000:
+        if count > 25000:
             yield ass_rec
             continue
 
