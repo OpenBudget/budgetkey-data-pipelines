@@ -30,7 +30,7 @@ TABLE_SCHEMA = {
         {"name": "end_date", "type": "string"},
         {"name": "decision", "type": "string"},
         {"name": "page_title", "type": "string"},
-        # this resource is removed and added as a new resource in the add_exemption_documents_resource processor
+        # documents should be in a related table (there could be multiple documents per exemption)
         {"name": DOCUMENTS_JSON_FIELD, "type": "string"}
     ]
 }
