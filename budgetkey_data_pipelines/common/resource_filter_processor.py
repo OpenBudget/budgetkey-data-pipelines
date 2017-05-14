@@ -46,12 +46,15 @@ class ResourceFilterProcessor(object):
     def spew(self):
         spew(*self._get_spew_params())
 
+    def get_stats(self):
+        return {}
+
     @classmethod
     def main(cls, **kwargs):
         cls(ingest_response=ingest(), **kwargs).spew()
 
     def _get_spew_params(self):
-        return self.filter_datapackage(), self.filter_data()
+        return self.filter_datapackage(), self.filter_data(), self.get_stats()
 
     def _is_matching_resource(self, resource_descriptor):
         return resource_descriptor["name"] == self.parameters["output_resource"]

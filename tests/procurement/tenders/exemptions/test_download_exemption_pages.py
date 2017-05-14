@@ -32,7 +32,7 @@ def test():
         {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269"}
     ]]
     ingest_response = ({}, {"resources": [{"name": "publisher-urls"}]}, unlistify_resources(resources))
-    datapackage, resources = MockDownloadExemptionPagesDataProcessor(ingest_response=ingest_response).spew()
+    datapackage, resources, stats = MockDownloadExemptionPagesDataProcessor(ingest_response=ingest_response).spew()
     assert datapackage == {"resources": [{
         "name": "publisher-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
@@ -48,3 +48,4 @@ def test():
         {"pid": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431", "data": get_mock_exemption_data("595431")},
         {"pid": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269", "data": get_mock_exemption_data("594269")}
     ]]
+    assert stats == {}

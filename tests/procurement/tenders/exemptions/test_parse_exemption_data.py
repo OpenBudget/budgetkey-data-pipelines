@@ -29,7 +29,7 @@ def test():
         }
     }]}
     ingest_response = ({}, datapackage, unlistify_resources(resources))
-    datapackage, resources = MockParseExemptionDataProcessor(ingest_response=ingest_response).spew()
+    datapackage, resources, stats = MockParseExemptionDataProcessor(ingest_response=ingest_response).spew()
     assert datapackage == {"resources": [{
         "name": "exemptions",
         "path": "data/exemptions.csv",
@@ -85,3 +85,4 @@ def test():
                                        "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
                                        "update_time": "תאריך עדכון מסמך:   00:00 14/03/2017"}])
     }
+    assert stats == {}
