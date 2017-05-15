@@ -14,5 +14,5 @@ support-criteria:
           path: data.csv
     -
       run: dump.to_path
-        parameters:
-          out-path: /var/budgetkey_data_pipelines/supports/criteria
+      parameters:
+        out-path: ~/workspace/budgetkey_data_pipelines/pipelines/supports/criteria
