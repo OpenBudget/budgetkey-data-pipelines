@@ -12,13 +12,13 @@ URL = "http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&P
 
 
 def get_all_reports():
-    page = 0
+    page = 1
     session = requests.session()
     done = False
     while not done:
-        page = session.get(URL.format(page), verify=False).text
-        page = pq(page)
-        rows = page.find('#cqwpGridViewTable .zbTRBlue, #cqwpGridViewTable .Trtblclss')
+        response = session.get(URL.format(page), verify=False).text
+        response = pq(response)
+        rows = response.find('#cqwpGridViewTable .zbTRBlue, #cqwpGridViewTable .Trtblclss')
         rows = list(rows)
         for r in rows:
             row = pq(r)
@@ -31,7 +31,7 @@ def get_all_reports():
                 "pdf-url": pq(cells[4].find('a')).attr('href').split("'")[-2]
             }
             yield rec
-        if len(page) == 0:
+        if len(response) == 0:
             done = True
         page += 1
 
