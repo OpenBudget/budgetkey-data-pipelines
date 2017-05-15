@@ -52,7 +52,7 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
-        if count > 100000:
+        if count > 1000:
             yield cmp_rec
             continue
 
