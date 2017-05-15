@@ -19,7 +19,7 @@ def get_all_reports():
         response = pq(response)
         rows = response.find('#cqwpGridViewTable .zbTRBlue, #cqwpGridViewTable .Trtblclss')
         rows = list(rows)
-        print (len(rows))
+        logging.info(len(rows))
         for r in rows:
             row = pq(r)
             cells = [pq(td) for td in row.find('td')]
