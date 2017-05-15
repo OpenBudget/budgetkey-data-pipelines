@@ -1,0 +1,18 @@
+support-criteria:
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: 'co2-emissions'
+        title: 'CO2 emissions (metric tons per capita)'
+        homepage: 'http://worldbank.org/'
+    -
+      run: scraper
+      parameters:
+        target-resource:
+          name: data
+          path: data.csv
+    -
+      run: dump.to_zip
+      parameters:
+          out-file: co2-emissions-wb.zip
