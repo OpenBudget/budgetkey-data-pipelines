@@ -214,7 +214,6 @@ latest-contract-spending:
             aggregate: set
           entity_id:
             aggregate: last
-    - run: sample
     - run: set_types
       parameters:
         resources: contract-spending
@@ -229,7 +228,11 @@ latest-contract-spending:
             type: date
           order_date:
             type: date
-    - run: sample
+    - run: set_primary_key
+      parameters:
+        contract-spending:
+          - order_id
+          - budget_code
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending
