@@ -13,6 +13,6 @@ support-criteria:
           name: data
           path: data.csv
     -
-      run: dump.to_zip
-      parameters:
-          out-file: co2-emissions-wb.zip
+      run: dump.to_path
+        parameters:
+          out-path: /var/budgetkey_data_pipelines/supports/criteria

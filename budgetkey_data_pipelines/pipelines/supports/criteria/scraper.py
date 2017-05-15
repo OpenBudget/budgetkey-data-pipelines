@@ -30,6 +30,7 @@ def get_all_reports():
                 "date": cells[3].text(),
                 "pdf-url": pq(cells[4].find('a')).attr('href').split("'")[-2]
             }
+            logging.info(rec)
             yield rec
 
 
