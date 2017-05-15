@@ -15,4 +15,4 @@ support-criteria:
     -
       run: dump.to_path
       parameters:
-        out-path: ~/workspace/budgetkey_data_pipelines/pipelines/supports/criteria
+        out-path: data
