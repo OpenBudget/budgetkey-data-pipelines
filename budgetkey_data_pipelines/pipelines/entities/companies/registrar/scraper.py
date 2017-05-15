@@ -46,7 +46,8 @@ def scrape_company_details(cmp_recs):
     count = 0
     for i, cmp_rec in enumerate(cmp_recs):
 
-        if cmp_rec.get('id') is not None:
+        cmp_name = cmp_rec.get('company_name')
+        if cmp_name is not None and cmp_name.strip() != '':
             yield cmp_rec
             continue
 
