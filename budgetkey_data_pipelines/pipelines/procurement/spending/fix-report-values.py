@@ -12,9 +12,13 @@ def boolean(x):
 
 
 def date(x):
-    if isinstance(x, int) or isinstance(x, float):
+    try:
+        x = float(x)
         return datetime.date(1900, 1, 1) + datetime.timedelta(days=int(x))
-    elif not isinstance(x, str):
+    except ValueError:
+        pass
+
+    if not isinstance(x, str):
         return x
 
     x = x.strip()
