@@ -32,3 +32,8 @@ ottoman-association-registry:
     - run: dump.to_path
       parameters:
           out-path: /var/datapackages/entities/ottoman/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ottoman_associations:
+            resource-name: ottoman-association-registry
