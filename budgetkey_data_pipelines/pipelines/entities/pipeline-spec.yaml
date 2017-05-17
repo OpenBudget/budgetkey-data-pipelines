@@ -2,6 +2,8 @@ entities:
   dependencies:
     - pipeline: ./entities/companies/registrar/details
     - pipeline: ./entities/associations/guidestar/guidestar
+    - pipeline: ./entities/special/registry
+    - pipeline: ./entities/ottoman/ottoman-association-registry
   pipeline:
     - run: add_metadata
       parameters:
@@ -15,6 +17,14 @@ entities:
       parameters:
         name: association
         url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
+    - run: add_resource
+      parameters:
+        name: special
+        url: file:///var/datapackages/entities/special/data/special-entities.csv
+    - run: add_resource
+      parameters:
+        name: ottoman
+        url: file:///var/datapackages/entities/ottoman/data/ottoman-association-registry.csv
     - run: stream_remote_resources
     - run: compact_entities
       parameters:
@@ -29,6 +39,14 @@ entities:
           kind: association
           id-column: id
           name-column: association_title
+        special:
+          kind-column: kind
+          id-column: id
+          name-column: name
+        ottoman:
+          kind-column: kind
+          id-column: id
+          name-column: name
     - run: sample
     - run: concatenate
       parameters:

@@ -35,15 +35,20 @@ def process_resource(resource):
         res_params = parameters[spec['name']]
         prefix = res_params.get('remove-prefix', '')
         prefix = re.compile('^'+prefix)
-        kind = res_params['kind']
+        kind = res_params.get('kind')
+        kind_column = res_params.get('kind-column')
+        conds = [kind is not None, kind_column is not None]
+        assert any(conds) and not all(conds)
         id_column = res_params['id-column']
         name_column = res_params['name-column']
         name_en_column = res_params.get('name-en-column')
 
         for row in resource:
-            if row[id_column]:
+            if kind_column is not None and not row[kind_column]:
+                continue
+            if row[id_column] and row[name_column]:
                 new_row = {
-                    'kind': kind,
+                    'kind': kind if kind is not None else row[kind_column],
                     'id': row[id_column],
                     'name': row[name_column],
                     'name-en': row.get(name_en_column),
