@@ -1,8 +1,6 @@
 ottoman-association-registry:
   title: רשימת אגודות עותומניות
-  description: רשימת אגודות עותומניות, מתעדכן שבועית.
-  schedule:
-    crontab: 15 15 * * 1
+  description: רשימת אגודות עותומניות, מתוך תשובה לבקשת חופש מידע
   pipeline:
     - run: add_metadata
       parameters:
@@ -10,9 +8,17 @@ ottoman-association-registry:
         title: רשימת אגודות עותומניות
     - run: add_resource
       parameters:
-        name: ottoman-association-registry
+        name: foi-response
         url: "https://foi.gov.il/sites/default/files/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A4%D7%A0%D7%99%D7%9D%20-%20%D7%90%D7%92%D7%95%D7%93%D7%95%D7%AA%20%D7%A2%D7%95%D7%AA%D7%9E%D7%A0%D7%99%D7%95%D7%AA.xls"
+        headers:
+          - id
+          - name
+          - address
+        skip_rows: 1
+        constants:
+          kind: "ottoman-association"
     - run: stream_remote_resources
+    - run: sample
     - run: concatenate
       parameters:
         target:
@@ -21,7 +27,8 @@ ottoman-association-registry:
           id: ['מספר ישות']
           name: ['שם הישות (שם האגודה)']
           address: ['כתובת']
-    - run: fix_id
-    - run: dump.to_zip
+          kind: []
+    - run: fix_values
+    - run: dump.to_path
       parameters:
-          out-file: ottoman-association-registry.zip
+          out-path: /var/datapackages/entities/ottoman/
