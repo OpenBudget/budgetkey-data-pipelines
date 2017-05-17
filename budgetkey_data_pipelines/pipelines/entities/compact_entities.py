@@ -55,7 +55,7 @@ def process_resource(resource):
                     'details': dict(
                         (prefix.sub('', k), v)
                         for k, v in row.items()
-                        if k not in [name_column, name_en_column, id_column]
+                        if k not in [name_column, name_en_column, id_column, kind_column]
                     )
                 }
                 yield new_row
