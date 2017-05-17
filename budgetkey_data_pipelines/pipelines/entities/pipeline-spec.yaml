@@ -58,6 +58,15 @@ entities:
           name_en: []
           kind: []
           details: []
+    - run: set_types
+      parameters:
+        types:
+          kind:
+            constraints:
+              pattern: "[a-z-_]+"
+          id:
+            constraints:
+              pattern: "[0-9]+"
     - run: set_primary_key
       parameters:
         entities: ['id']
