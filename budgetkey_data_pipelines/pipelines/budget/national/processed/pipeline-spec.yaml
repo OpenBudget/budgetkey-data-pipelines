@@ -110,6 +110,7 @@ national-budgets:
           year: null
           code: null
           title: null
+          hierarchy: null
           func_cls_title_1:
             aggregate: set
           func_cls_title_2:

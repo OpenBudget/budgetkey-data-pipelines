@@ -34,6 +34,10 @@ new_fields = [{
     {
         'name': 'title',
         'type': 'string'
+    },
+    {
+        'name': 'hierarchy',
+        'type': 'array'
     }
 ]
 for field in fields:
@@ -71,13 +75,17 @@ def process_first(rows):
             del row[code_key]
             del row[title_key]
 
+        hierarchy = [['00', 'המדינה']]
         for code_key, title_key in codes_and_titles.items():
             row['code'] = '00' + save[code_key]
             row['title'] = save[title_key]
+            row['hierarchy'] = hierarchy
             yield row
+            hierarchy.append([row['code'], row['title']])
 
         row['code'] = '00'
         row['title'] = 'המדינה'
+        row['hierarchy'] = []
         yield row
 
 
