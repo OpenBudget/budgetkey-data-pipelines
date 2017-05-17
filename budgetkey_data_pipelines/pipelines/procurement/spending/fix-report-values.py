@@ -22,13 +22,20 @@ def date(x):
         return None
 
     parts = DATE_RE.findall(x)
-    if len(parts) >= 3:
+    if len(parts) == 3:
         day = int(parts[0])
         month = int(parts[1])
         year = int(parts[2])
-        if year < 100:
-            year += 2000
-        return datetime.date(year=year, month=month, day=day)
+    elif len(parts) == 6:
+        year = int(parts[0])
+        month = int(parts[1])
+        day = int(parts[2])
+    else:
+        assert False
+
+    if year < 100:
+        year += 2000
+    return datetime.date(year=year, month=month, day=day)
 
 
 def budget_code(x):
