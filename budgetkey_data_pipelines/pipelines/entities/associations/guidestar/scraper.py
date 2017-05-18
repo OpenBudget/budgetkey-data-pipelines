@@ -45,7 +45,9 @@ def scrape_guidestar(ass_recs):
         for selector, field in classes.items():
             field = 'association_' + field
             if not field.endswith('[]'):
-                value = page.find(selector).text().strip().replace('\n', '')
+                value = page.find(selector)
+                if len(value) > 0:
+                    value = pq(value[0]).text().strip().replace('\n', '')
                 if len(value) > 0:
                     rec[field] = value
             else:
