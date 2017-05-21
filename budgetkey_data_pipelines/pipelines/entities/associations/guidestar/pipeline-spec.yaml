@@ -1,6 +1,6 @@
 guidestar:
   schedule:
-    crontab: 0 0 * * *
+    crontab: "*/15 * * * *"
   pipeline:
     - run: add_metadata
       parameters:

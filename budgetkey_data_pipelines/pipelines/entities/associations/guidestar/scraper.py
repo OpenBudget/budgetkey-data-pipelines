@@ -22,12 +22,12 @@ def scrape_guidestar(ass_recs):
     count = 0
     for i, ass_rec in enumerate(ass_recs):
 
-        if ass_rec.get('guidestar_title') is not None:
+        if ass_rec.get('association_guidestar_title') is not None:
             yield ass_rec
             continue
 
         count += 1
-        if count > 25000:
+        if count > 1000:
             yield ass_rec
             continue
 
