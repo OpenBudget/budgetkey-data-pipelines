@@ -93,7 +93,7 @@ def process_row(row, row_index, spec, resource_index, *_):
                 elif k in ['volume']:
                     row[k] = float(v)
                 elif k in ['executed']:
-                    row[k] = float(v if v is not None else 0)
+                    row[k] = float(v if v is not None and v != '' else 0)
                 elif isinstance(v, str):
                     row[k] = v.strip()
         except Exception as e:
