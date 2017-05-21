@@ -1,24 +1,32 @@
 import logging
+
+from datapackage_pipelines.utilities.extended_json import LazyJsonLine
 from datapackage_pipelines.utilities.extended_json import json
 
 from datapackage_pipelines.wrapper import spew, ingest
 
 parameters, datapackage, res_iter = ingest()
+res_name = parameters.get('resource', datapackage['resources'][0]['name'])
 
 
 def show_sample(res):
+    logging.info('SAMPLE OF LINES from %s', res.spec['name'])
     for i, row in enumerate(res):
         if i < 10:
-            logging.info('#%s: %r', i, row)
+            if isinstance(row, LazyJsonLine):
+                logging.info('#%s: %s', i, row.line)
+            else:
+                logging.info('#%s: %r', i, row)
         yield row
 
 
 def process_resources(res_iter_):
-    first = next(res_iter_)
-    yield show_sample(first)
-
     for res in res_iter_:
-        yield res
+        logging.info('? from %s', res.spec['name'])
+        if res.spec['name'] == res_name:
+            yield show_sample(res)
+        else:
+            yield res
 
 logging.info(json.dumps(datapackage, indent=2))
 

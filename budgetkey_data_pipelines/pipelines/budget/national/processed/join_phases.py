@@ -38,6 +38,10 @@ new_fields = [{
     {
         'name': 'hierarchy',
         'type': 'array'
+    },
+    {
+        'name': 'parent',
+        'type': 'string'
     }
 ]
 for field in fields:
@@ -71,6 +75,8 @@ def process_first(rows):
         save = {}
         for code_key, title_key in codes_and_titles.items():
             save[code_key] = row[code_key]
+            if len(save[code_key]) % 2 == 1:
+                save[code_key] = '0' + save[code_key]
             save[title_key] = row[title_key]
             del row[code_key]
             del row[title_key]
@@ -80,6 +86,7 @@ def process_first(rows):
             row['code'] = '00' + save[code_key]
             row['title'] = save[title_key]
             row['hierarchy'] = hierarchy
+            row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
             yield row
             hierarchy.append([row['code'], row['title']])
 
