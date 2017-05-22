@@ -158,7 +158,7 @@ def process_resources(res_iter_):
             process_curated(res)
         if res.spec['name'] == 'budget':
             yield process_budgets(res)
-    yield errors
+    # yield errors
 
 schema = dp['resources'][1]['schema']
 schema['fields'].append({
@@ -171,11 +171,11 @@ dp['resources'] = [
         'path': 'data/budget-items.csv',
         'schema': schema
     },
-    {
-        'name': 'unmatched',
-        'path': 'data/unmatched.csv',
-        'schema': schema
-    }
+    # {
+    #     'name': 'unmatched',
+    #     'path': 'data/unmatched.csv',
+    #     'schema': schema
+    # }
 ]
 
 spew(dp, process_resources(res_iter))

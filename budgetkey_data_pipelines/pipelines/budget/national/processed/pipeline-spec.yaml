@@ -240,7 +240,7 @@ with-extras:
           children: null
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/budget/national/processed-with-extras
+        out-path: /var/datapackages/budget/national/processed/with-extras
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
@@ -297,7 +297,7 @@ connected-national-budgets:
             type: array
     - run: load_resource
       parameters:
-        url: /var/datapackages/budget/national/processed-with-extras/datapackage.json
+        url: /var/datapackages/budget/national/processed/with-extras/datapackage.json
         resource: budget
     - run: item-connections
     - run: dump.to_path
