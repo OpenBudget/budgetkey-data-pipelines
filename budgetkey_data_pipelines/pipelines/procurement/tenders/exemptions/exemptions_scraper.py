@@ -14,6 +14,8 @@ class ExemptionsPublisherScraper(object):
     def __init__(self, publisher_id,
                  # seconds to wait between retries of http requests
                  wait_between_retries=60,
+                 # seconds to wait between two http requests
+                 wait_between_requests=1,
                  # maximum number of retries - once reached entire process fails
                  max_retries=10,
                  # http request timeout in seconds
@@ -25,6 +27,7 @@ class ExemptionsPublisherScraper(object):
         self._max_retries = max_retries
         self._timeout = timeout
         self._max_pages = max_pages
+        self._wait_between_requests = wait_between_requests
 
     def get_urls(self):
         self._initialize_session()
@@ -48,6 +51,7 @@ class ExemptionsPublisherScraper(object):
 
 
     def _get_page_text(self, form_data=None):
+        time.sleep(self._wait_between_requests)
         response = self._session.request("POST" if form_data else "GET",
                                          timeout=self._timeout,
                                          url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
