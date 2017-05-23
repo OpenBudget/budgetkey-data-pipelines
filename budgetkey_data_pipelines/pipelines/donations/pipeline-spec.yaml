@@ -1,0 +1,46 @@
+parties:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: donations-parties
+    - run: get_parties
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/donations/parties
+
+candidates:
+  dependencies:
+    - pipeline: ./donations/parties
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: donations-parties
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/donations/parties/datapackage.json
+        resource: 0
+    - run: get_candidates
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/donations/candidates
+
+transactions:
+  dependencies:
+    - pipeline: ./donations/candidates
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: donations-transactions
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/donations/candidates/datapackage.json
+        resource: 0
+    - run: get_transactions
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/donations/transactions
+    - run: dump.to_sql
+      parameters:
+        tables:
+          political_donations:
+            resource-name: donations-transactions
