@@ -35,7 +35,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
         ids = [{'code': row['code'], 'title': row['title']}]
         while len(ids) > 0:
-            logging.info('%d/%r: ids: %r', cur_year, row['code'], ids)
+            logging.debug('%d/%r: ids: %r', cur_year, row['code'], ids)
             id = ids.pop(0)
 
             # Find curated record for id
@@ -49,7 +49,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                         logging.warning('%d/%r: Failed to find curated item %s/%s',
                                         cur_year, row['code'], year, code)
                 if len(equivs) > 0:
-                    logging.info('FOUND CURATED ITEM for %r', id)
+                    logging.debug('FOUND CURATED ITEM for %r', id)
                     continue
                 else:
                     logging.warning('FOUND 0 CURATED ITEMS for %r', id)
@@ -58,7 +58,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
             if id['code'] in connected_items:
                 connected_item = connected_items[id['code']]
                 if similar(id['title'], connected_item['title']):
-                    logging.info('FOUND EXACT ITEM for %r', id)
+                    logging.debug('FOUND EXACT ITEM for %r', id)
                     equivs.append(connected_item)
                     continue
 
@@ -80,19 +80,19 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                     if len(candidates) == 1:
                         connected_item = connected_items.get(candidates[0]['code'])
                         if connected_item is not None:
-                            logging.info('FOUND MOVED ITEM for %r', id)
+                            logging.debug('FOUND MOVED ITEM for %r', id)
                             equivs.append(connected_item)
                             continue
 
             # Split into children
             if children is not None and len(children) > 0:
-                logging.info('SPLITTING TO CHILDREN for %r', id)
+                logging.debug('SPLITTING TO CHILDREN for %r', id)
                 ids.extend({'code': x['code'], 'title': x['title']} for x in children)
                 children = None
                 continue
 
             # Couldn't find match - no point in continuing
-            logging.info('FAILED TO FIND MATCH for %s/%s', cur_year, id)
+            logging.debug('FAILED TO FIND MATCH for %s/%s', cur_year, id)
             unmatched.append(row)
             row = None
             break
