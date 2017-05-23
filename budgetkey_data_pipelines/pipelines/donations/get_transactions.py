@@ -83,7 +83,7 @@ def process_resources(res_iter_):
     yield get_transactions(first)
 
 dp['resources'][0] = {
-    'name': 'candidates',
+    'name': 'transactions',
     'path': 'data/candidates.csv',
     'schema': {
         'fields': [

@@ -43,4 +43,4 @@ transactions:
       parameters:
         tables:
           political_donations:
-            resource-name: donations-transactions
+            resource-name: transactions
