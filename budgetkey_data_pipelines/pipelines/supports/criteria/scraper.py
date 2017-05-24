@@ -1,25 +1,32 @@
 from itertools import chain
 
-import requests
-import logging
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
+
+from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
 
 parameters, datapackage, res_iter = ingest()
 
 URL = "http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&PN={0}"
 
 
+def extract_url(href):
+    marker = "OpenWindow(this,'"
+    start = href.find(marker)
+    assert start > 0
+    start += len(marker)
+    return href[start:-2]
+
+
 def get_all_reports():
-    num_of_page = 37
-    session = requests.session()
-    for pid in range(1, num_of_page):
-        response = session.get(URL.format(pid), verify=False).text
+    pid = 1
+    while True:
+        response = cookie_monster_get(URL.format(pid))
+        response = response.decode('utf8')
         response = pq(response)
         rows = response.find('#cqwpGridViewTable .zbTRBlue, #cqwpGridViewTable .Trtblclss')
         rows = list(rows)
-        logging.info(len(rows))
         for r in rows:
             row = pq(r)
             cells = [pq(td) for td in row.find('td')]
@@ -28,11 +35,12 @@ def get_all_reports():
                 "paper_type": cells[1].text(),
                 "office": cells[2].text(),
                 "date": cells[3].text(),
-                "pdf-url": pq(cells[4].find('a')).attr('href').split("'")[-2]
+                "pdf_url": extract_url(pq(cells[4].find('a')).attr('href'))
             }
-            logging.info(rec)
             yield rec
-
+        if len(rows) == 0:
+            break
+        pid += 1
 
 resource = parameters['target-resource']
 resource['schema'] = {
@@ -55,7 +63,7 @@ resource['schema'] = {
             'type': 'string'
         },
         {
-            'name': 'pdf-url',
+            'name': 'pdf_url',
             'type': 'string',
             'format': 'uri'
         }
@@ -63,5 +71,4 @@ resource['schema'] = {
 }
 datapackage['resources'].append(resource)
 
-logging.info(datapackage)
 spew(datapackage, chain(res_iter, [get_all_reports()]))

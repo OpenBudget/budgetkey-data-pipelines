@@ -1,18 +1,16 @@
 support-criteria:
   pipeline:
-    -
-      run: add_metadata
+    - run: add_metadata
       parameters:
-        name: 'co2-emissions'
-        title: 'CO2 emissions (metric tons per capita)'
-        homepage: 'http://worldbank.org/'
-    -
-      run: scraper
+        name: support-criteria
+        title: רשימת מבחני תמיכה ומסמכים רלוונטיים
+        homepage: http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx
+    - run: scraper
       parameters:
         target-resource:
-          name: data
-          path: data.csv
-    -
-      run: dump.to_path
+          name: criteria
+          path: data/criteria.csv
+    - run: set_types
+    - run: dump.to_path
       parameters:
-        out-path: data
+        out-path: /var/datapackages/supports/criteria
