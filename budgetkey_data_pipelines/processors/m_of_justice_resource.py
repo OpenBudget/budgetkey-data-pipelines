@@ -34,11 +34,12 @@ def get_entities():
         logging.info('GOT RESPONSE %r %r', resp.status_code, resp.headers)
 
         if len(data) < 1024:
-            logging.info('GOT DATA %r %r', data, codecs.encode(data, 'hex'))
-            data = data.decode('ascii')
-            logging.info('DECODED DATA %r', data)
-            logging.info('LENGTH DATA %d bytes', len(data))
-            found_cookies = cookie_re.findall(data)
+            decoded = codecs.encode(data, 'hex')
+            logging.info('GOT DATA %s', decoded)
+            decoded = codecs.decode(decoded, 'hex').decode('ascii')
+            logging.info('GOT DATA %s', decoded)
+            logging.info('LENGTH DATA %d bytes', len(decoded))
+            found_cookies = cookie_re.findall(decoded)
             if len(found_cookies) > 0:
                 session.cookies.set(found_cookies[0], found_cookies[1], path='/')
                 continue
