@@ -12,24 +12,36 @@ params, datapackage, res_iter = ingest()
 key = params['key']
 url_key = params['url-key']
 resource_name = params['resource-name']
+session = requests.Session()
 
+cookie_re = re.compile("document.cookie='([^=]+)=([^;]+); path=/'")
 
 def get_entities():
 
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
+    headers = {}
+    while True:
 
-    resp = requests.get(all_db_url)
-    if 'accept-ranges' in resp.headers:
-        content_length = resp.headers['content-length']
-        resp = requests.get(all_db_url, headers={'range': 'bytes=0-%s' % content_length})
+        resp = requests.get(all_db_url, headers=headers)
+        if 'accept-ranges' in resp.headers and not 'content-range' in resp.headers:
+            content_length = resp.headers['content-length']
+            headers['range'] = 'bytes=0-%s' % content_length
+            logging.info('Accept Ranges %r', headers)
+            continue
 
-    data = resp.content
-    logging.info('GOT DATA %r', data[:1024])
+        data = resp.content
+        logging.info('GOT DATA %r', data[:1024])
 
-    data = data.decode('cp1255', 'replace')
-    logging.info('GOT DATA %d bytes', len(data))
+        data = data.decode('cp1255', 'replace')
+        logging.info('GOT DATA %d bytes', len(data))
 
-    assert len(data) > 1024
+        found_cookies = cookie_re.findall(data)
+        if len(found_cookies)>0:
+            session.cookies.set(found_cookies[0], found_cookies[1], path='/')
+            continue
+
+        assert len(data) > 1024
+        break
         
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
