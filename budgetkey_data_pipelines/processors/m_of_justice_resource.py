@@ -2,7 +2,7 @@ import re
 import requests
 import csv
 import logging
-import time
+import codecs
 from io import StringIO
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -34,7 +34,7 @@ def get_entities():
         logging.info('GOT RESPONSE %r %r', resp.status_code, resp.headers)
 
         if len(data) < 1024:
-            logging.info('GOT DATA %r', data)
+            logging.info('GOT DATA %r %r', data, codecs.encode(data, 'hex'))
             data = data.decode('ascii')
             logging.info('DECODED DATA %r', data)
             logging.info('LENGTH DATA %d bytes', len(data))
