@@ -1,10 +1,8 @@
 import re
-import requests
 import csv
 import logging
-import html
-import time
 from io import StringIO
+from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -13,46 +11,20 @@ params, datapackage, res_iter = ingest()
 key = params['key']
 url_key = params['url-key']
 resource_name = params['resource-name']
-session = requests.Session()
 
-cookie_re = re.compile("document.cookie='([^=]+)=([^;]+); path=/'")
 
 def get_entities():
 
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
-    headers = {}
-    while True:
 
-        resp = session.get(all_db_url, headers=headers)
-        if 'accept-ranges' in resp.headers and not 'content-range' in resp.headers:
-            content_length = resp.headers['content-length']
-            headers['range'] = 'bytes=0-%s' % content_length
-            logging.info('Accept Ranges %r', headers)
-            continue
+    data = cookie_monster_get(all_db_url)
 
-        data = resp.content
+    assert data is not None
+    data = data.decode('cp1255', 'replace')
 
-        logging.info('GOT RESPONSE %r %r', resp.status_code, resp.headers)
+    logging.info('DECODED DATA %r', data[:1024])
+    logging.info('LENGTH DATA %d bytes', len(data))
 
-        if len(data) < 1024:
-            decoded = data.decode('ascii')
-            logging.info('GOT DATA %s', html.escape(decoded, quote=False))
-            logging.info('LENGTH DATA %d bytes', len(decoded))
-            found_cookies = cookie_re.findall(decoded)
-            if len(found_cookies) > 0:
-                found_cookies = found_cookies[0]
-                logging.info('COOKIE %r', found_cookies)
-                session.cookies.set(found_cookies[0], found_cookies[1], path='/')
-                continue
-
-            assert False
-
-        else:
-            data = data.decode('cp1255', 'replace')
-            logging.info('DECODED DATA %r', data[:1024])
-            logging.info('LENGTH DATA %d bytes', len(data))
-            break
-        
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
     repl3 = re.compile("[\r\n]+(?=[^5])")
@@ -69,6 +41,7 @@ def get_entities():
         yield dict(
             (k.strip(), str(v).strip()) for k, v in rec.items()
         )
+
 resource = {
     'name': resource_name,
     'path': 'data/{}.csv'.format(resource_name),
