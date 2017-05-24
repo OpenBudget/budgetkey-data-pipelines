@@ -18,4 +18,4 @@ support-criteria:
       parameters:
         tables:
           support_criteria:
-            resource_name: criteria
+            resource-name: criteria
