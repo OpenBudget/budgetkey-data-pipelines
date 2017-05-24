@@ -32,11 +32,12 @@ def get_entities():
         data = resp.content
 
         logging.info('GOT RESPONSE %r %r', resp.status_code, resp.headers)
-        logging.info('GOT DATA %r', data[:1024])
 
         if len(data) < 1024:
+            logging.info('GOT DATA %r', data)
             data = data.decode('ascii')
-            logging.info('GOT DATA %r', data[:1024])
+            logging.info('DECODED DATA %r', data)
+            logging.info('LENGTH DATA %d bytes', len(data))
             found_cookies = cookie_re.findall(data)
             if len(found_cookies) > 0:
                 session.cookies.set(found_cookies[0], found_cookies[1], path='/')
@@ -46,8 +47,8 @@ def get_entities():
 
         else:
             data = data.decode('cp1255', 'replace')
-            logging.info('GOT DATA %r', data[:1024])
-            logging.info('GOT DATA %d bytes', len(data))
+            logging.info('DECODED DATA %r', data[:1024])
+            logging.info('LENGTH DATA %d bytes', len(data))
             break
         
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
