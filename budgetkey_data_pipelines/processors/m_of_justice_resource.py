@@ -2,7 +2,8 @@ import re
 import requests
 import csv
 import logging
-import codecs
+import html
+import time
 from io import StringIO
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -22,7 +23,7 @@ def get_entities():
     headers = {}
     while True:
 
-        resp = requests.get(all_db_url, headers=headers)
+        resp = session.get(all_db_url, headers=headers)
         if 'accept-ranges' in resp.headers and not 'content-range' in resp.headers:
             content_length = resp.headers['content-length']
             headers['range'] = 'bytes=0-%s' % content_length
@@ -34,13 +35,13 @@ def get_entities():
         logging.info('GOT RESPONSE %r %r', resp.status_code, resp.headers)
 
         if len(data) < 1024:
-            decoded = codecs.encode(data, 'hex')
-            logging.info('GOT DATA %s', decoded)
-            decoded = codecs.decode(decoded, 'hex').decode('ascii')
-            logging.info('GOT DATA %s', decoded)
+            decoded = data.decode('ascii')
+            logging.info('GOT DATA %s', html.escape(decoded, quote=False))
             logging.info('LENGTH DATA %d bytes', len(decoded))
             found_cookies = cookie_re.findall(decoded)
             if len(found_cookies) > 0:
+                found_cookies = found_cookies[0]
+                logging.info('COOKIE %r', found_cookies)
                 session.cookies.set(found_cookies[0], found_cookies[1], path='/')
                 continue
 
