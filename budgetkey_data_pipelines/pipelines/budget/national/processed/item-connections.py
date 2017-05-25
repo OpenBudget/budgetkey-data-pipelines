@@ -1,14 +1,23 @@
-import json
 import logging
 import itertools
-from fuzzywuzzy import fuzz
+import os
+import shutil
 
+from decimal import Decimal
+from fuzzywuzzy import fuzz
+import plyvel
+
+from datapackage_pipelines.utilities.extended_json import json, LazyDict
 from datapackage_pipelines.wrapper import ingest, spew
 
+logging.getLogger().setLevel(logging.INFO)
 curated = {}
 errors = []
 
 parameters, dp, res_iter = ingest()
+
+CURRENT_DB = 'connected_items.db'
+NEW_CURRENT_DB = 'new_connected_items.db'
 
 
 def similar(s1, s2):
@@ -20,6 +29,48 @@ def process_curated(rows):
         curated[tuple(row['current'])] = tuple(row['previous'])
 
 
+def put(db, key, value):
+    assert value is not None
+    enc = json.dumps(value)
+    db.put(key.encode('utf8'), enc.encode('ascii'))
+
+
+def get(db, key):
+    v = db.get(key.encode('utf8'))
+    if v is not None:
+        return json.loads(v)
+
+
+def delete(db, key):
+    db.delete(key.encode('utf8'))
+
+
+def iterate_values(db):
+    for k, v in db:
+        ret = json.loads(v)
+        assert ret is not None
+        yield ret
+
+
+def normalize(obj):
+    if isinstance(obj, (str, bool, int, float)):
+        return obj
+    elif isinstance(obj, (list, set)):
+        return [normalize(i) for i in obj]
+    elif isinstance(obj, dict):
+        return dict(
+            (k, normalize(v))
+            for k, v in obj.items()
+        )
+    elif isinstance(obj, Decimal):
+        return float(obj)
+    elif isinstance(obj, LazyDict):
+        return normalize(obj.inner)
+    elif obj is None:
+        return None
+    assert False, 'Bad object %r' % obj
+
+
 def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
     logging.info('cur_year: %r', cur_year)
@@ -29,6 +80,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
     mapped_levels = {}
     unmatched = []
     for row in rows:
+        row = normalize(row)
         equivs = []
         parent = row['parent']
         children = row['children']
@@ -43,10 +95,11 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
             if curated_items is not None:
                 for year, code in curated_items:
                     assert year == cur_year-1
-                    if code in connected_items:
-                        equivs.append(connected_items[code])
+                    value = get(connected_items, code)
+                    if value is not None:
+                        equivs.append(value)
                     else:
-                        logging.warning('%d/%r: Failed to find curated item %s/%s',
+                        logging.warning('%d/%s: Failed to find curated item %s/%s',
                                         cur_year, row['code'], year, code)
                 if len(equivs) > 0:
                     logging.debug('FOUND CURATED ITEM for %r', id)
@@ -55,8 +108,8 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                     logging.warning('FOUND 0 CURATED ITEMS for %r', id)
 
             # Find connected item with same code and title
-            if id['code'] in connected_items:
-                connected_item = connected_items[id['code']]
+            connected_item = get(connected_items, id['code'])
+            if connected_item is not None:
                 if similar(id['title'], connected_item['title']):
                     logging.debug('FOUND EXACT ITEM for %r', id)
                     equivs.append(connected_item)
@@ -64,8 +117,8 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
             # Try to find similar named items which moved to a new parent
             if parent is not None:
-                if parent in new_connected_items:
-                    connected_item = new_connected_items[parent]
+                connected_item = get(new_connected_items, parent)
+                if connected_item is not None:
                     parent = None
                     assert connected_item['year'] == cur_year
                     prev_year_rows = connected_item['history'].get(cur_year-1, [])
@@ -78,7 +131,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                             if similar(prev_year_child['title'], id['title']):
                                 candidates.append(prev_year_row)
                     if len(candidates) == 1:
-                        connected_item = connected_items.get(candidates[0]['code'])
+                        connected_item = get(connected_items, candidates[0]['code'])
                         if connected_item is not None:
                             logging.debug('FOUND MOVED ITEM for %r', id)
                             equivs.append(connected_item)
@@ -111,20 +164,19 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                 if len(row['code']) in s:
                     logging.warning('DOUBLE BOOKING for %s/%s from %s/%s', equiv['year'], equiv['code'], row['year'], row['code'])
                     logging.warning('DOUBLE BOOKING %r', equivs)
-                    for nci in new_connected_items.values():
+                    for nci in iterate_values(new_connected_items):
                         for hist_item in nci.get('history', {}).get(equiv['year'], []):
                             if hist_item['code'] == equiv['code']:
                                 logging.warning('FOUND\n%s', json.dumps(nci, indent=2))
                 else:
                     s.add(len(row['code']))
-                if equiv['code'] in connected_items:
-                    del connected_items[equiv['code']]
+                delete(connected_items, equiv['code'])
                 for year, items in equiv['history'].items():
                     new_history.setdefault(year, []).extend(items)
                 del equiv['history']
                 new_history.setdefault(equiv['year'], []).append(equiv)
             row['history'] = new_history
-            new_connected_items[row['code']] = row
+            put(new_connected_items, row['code'], row)
 
     logging.error('UNMATCHED %d: %d', cur_year, len(unmatched))
 
@@ -132,10 +184,14 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
 
 def process_budgets(rows_):
-    connected_items = {}
-    new_connected_items = {}
+
+    shutil.rmtree(CURRENT_DB, ignore_errors=True)
+    shutil.rmtree(NEW_CURRENT_DB, ignore_errors=True)
 
     for cur_year, rows in itertools.groupby(rows_, lambda r: r['year']):
+
+        connected_items = plyvel.DB(CURRENT_DB, create_if_missing=True)
+        new_connected_items = plyvel.DB(NEW_CURRENT_DB, create_if_missing=True)
 
         unmatched = calc_equivs(cur_year, rows,
                                 connected_items, new_connected_items)
@@ -144,11 +200,18 @@ def process_budgets(rows_):
 
         for row in unmatched:
             row['history'] = {}
-            new_connected_items[row['code']] = row
+            put(new_connected_items, row['code'], row)
 
-        yield from iter(connected_items.values())
-        connected_items = new_connected_items
-        new_connected_items = {}
+        yield from iterate_values(connected_items)
+
+        del connected_items
+        new_connected_items.close()
+        del new_connected_items
+
+        shutil.rmtree(CURRENT_DB)
+        os.replace(NEW_CURRENT_DB, CURRENT_DB)
+
+    shutil.rmtree(CURRENT_DB)
 
 
 def process_resources(res_iter_):
