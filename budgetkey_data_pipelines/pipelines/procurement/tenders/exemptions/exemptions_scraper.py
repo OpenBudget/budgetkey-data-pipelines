@@ -13,13 +13,13 @@ class ExemptionsPublisherScraper(object):
 
     def __init__(self, publisher_id,
                  # seconds to wait between retries of http requests
-                 wait_between_retries=60,
+                 wait_between_retries=600,
                  # seconds to wait between two http requests
-                 wait_between_requests=3,
+                 wait_between_requests=1,
                  # maximum number of retries - once reached entire process fails
-                 max_retries=10,
+                 max_retries=3,
                  # http request timeout in seconds
-                 timeout=180,
+                 timeout=60,
                  # maximum number of results pages to fetch, default is to get all results
                  max_pages=-1):
         self._publisher_id = publisher_id
