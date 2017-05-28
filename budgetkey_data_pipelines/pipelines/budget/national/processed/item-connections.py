@@ -91,8 +91,9 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
             id = ids.pop(0)
 
             test_value = sum(
-                abs(row.get(f, 0))
+                abs(row[f])
                 for f in ('net_allocated','gross_allocated','net_revised','commitment_allocated','net_used')
+                if row.get(f) is not None
             )
             non_repeating = row.get('non_repeating', [])
             active = '1' in non_repeating and len(non_repeating) == 1
