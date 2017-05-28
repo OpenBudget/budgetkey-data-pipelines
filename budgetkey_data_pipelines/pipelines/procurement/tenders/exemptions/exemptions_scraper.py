@@ -44,7 +44,7 @@ class ExemptionsPublisherScraper(object):
                     retries += 1
                     if retries > self._max_retries:
                         raise
-                    logger.exception("Failed to get page URLS, reinitializing session (attempt %d)", i)
+                    logger.exception("Failed to get page URLS, reinitializing session (attempt %d)", retries)
                     self._initialize_session()
                     self._cur_page_num -= 1
 
