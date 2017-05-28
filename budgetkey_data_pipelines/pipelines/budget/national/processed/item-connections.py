@@ -242,8 +242,8 @@ schema['fields'].append({
 })
 dp['resources'] = [
     {
-        'name': 'budget-items',
-        'path': 'data/budget-items.csv',
+        'name': 'budget',
+        'path': 'data/budget.csv',
         'schema': schema
     },
     # {

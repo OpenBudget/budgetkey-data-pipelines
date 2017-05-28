@@ -302,7 +302,7 @@ connected-national-budgets:
     - run: item-connections
     - run: set_primary_key
       parameters:
-        budget-items: ['code', 'year']
+        budget: ['code', 'year']
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items
@@ -310,4 +310,4 @@ connected-national-budgets:
       parameters:
         tables:
           budget:
-            resource-name: budget-items
+            resource-name: budget
