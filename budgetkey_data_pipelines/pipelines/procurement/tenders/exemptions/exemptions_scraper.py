@@ -13,9 +13,9 @@ class ExemptionsPublisherScraper(object):
 
     def __init__(self, publisher_id,
                  # seconds to wait between retries of http requests
-                 wait_between_retries=600,
+                 wait_between_retries=10,
                  # seconds to wait between two http requests
-                 wait_between_requests=1,
+                 wait_between_requests=0,
                  # maximum number of retries - once reached entire process fails
                  max_retries=3,
                  # http request timeout in seconds
@@ -34,8 +34,19 @@ class ExemptionsPublisherScraper(object):
         self._page = pq(self._get_page_text_retry())
         self._cur_page_num = 0
         while self._has_next_page():
-            for url in self._get_next_page_urls():
-                yield url
+            retries = 0
+            while True:
+                try:
+                    for url in self._get_next_page_urls():
+                        yield url
+                    break
+                except TooManyFailuresException:
+                    retries += 1
+                    if retries > self._max_retries:
+                        raise
+                    logger.exception("Failed to get page URLS, reinitializing session (attempt %d)", i)
+                    self._initialize_session()
+                    self._cur_page_num -= 1
 
     def _initialize_session(self):
         self._session = requests.Session()
@@ -48,7 +59,6 @@ class ExemptionsPublisherScraper(object):
             href = a_elt.attrib.get("href", "")
             if href.startswith(base_exemption_message_url):
                 yield href
-
 
     def _get_page_text(self, form_data=None):
         time.sleep(self._wait_between_requests)
@@ -69,7 +79,7 @@ class ExemptionsPublisherScraper(object):
                 if i > self._max_retries:
                     raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
                 else:
-                    logger.exception(e)
+                    logger.exception("Failed to get page text, attempt %d", i)
                     time.sleep(self._wait_between_retries)
 
     def _has_next_page(self):
