@@ -90,6 +90,17 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
             logging.debug('%d/%r: ids: %r', cur_year, row['code'], ids)
             id = ids.pop(0)
 
+            test_value = sum(
+                abs(row.get(f, 0))
+                for f in ('net_allocated','gross_allocated','net_revised','commitment_allocated','net_used')
+            )
+            non_repeating = row.get('non_repeating', [])
+            active = '1' in non_repeating and len(non_repeating) == 1
+            if (test_value == 0 and not row['code'].endswith('99')) or not active:
+                unmatched.append(row)
+                row = None
+                break
+
             # Find curated record for id
             curated_items = curated.get((cur_year, id['code']))
             if curated_items is not None:
