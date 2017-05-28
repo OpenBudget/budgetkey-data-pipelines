@@ -35,18 +35,21 @@ class ExemptionsPublisherScraper(object):
         self._cur_page_num = 0
         while self._has_next_page():
             retries = 0
-            while True:
+            while retries < self._max_retries:
                 try:
                     for url in self._get_next_page_urls():
                         yield url
                     break
                 except TooManyFailuresException:
                     retries += 1
-                    if retries > self._max_retries:
-                        raise
-                    logger.exception("Failed to get page URLS, reinitializing session (attempt %d)", retries)
-                    self._initialize_session()
-                    self._cur_page_num -= 1
+                    if retries < self._max_retries:
+                        logger.error("Failed to get page URLS, reinitializing session (attempt %d)", retries)
+                        self._initialize_session()
+                        self._cur_page_num -= 1
+                    else:
+                        logger.error("Failed to get page URLS for publisher %d, got %d / %d",
+                                     self._publisher_id, self._cur_page_num, self._max_pages)
+                        self._max_pages = self._cur_page_num
 
     def _initialize_session(self):
         self._session = requests.Session()
@@ -79,7 +82,7 @@ class ExemptionsPublisherScraper(object):
                 if i > self._max_retries:
                     raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
                 else:
-                    logger.exception("Failed to get page text, attempt %d", i)
+                    logger.error("Failed to get page text, attempt %d (%s)", i, e)
                     time.sleep(self._wait_between_retries)
 
     def _has_next_page(self):
