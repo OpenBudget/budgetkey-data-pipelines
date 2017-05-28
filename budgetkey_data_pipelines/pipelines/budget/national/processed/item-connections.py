@@ -96,8 +96,8 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                 if row.get(f) is not None
             )
             non_repeating = row.get('non_repeating', [])
-            active = '1' in non_repeating and len(non_repeating) == 1
-            if (test_value == 0 and not row['code'].endswith('99')) or not active:
+            non_repeating = '1' in non_repeating and len(non_repeating) == 1
+            if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
                 unmatched.append(row)
                 row = None
                 break
