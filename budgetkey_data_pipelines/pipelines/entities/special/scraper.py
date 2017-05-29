@@ -36,9 +36,14 @@ slugs = {u"\u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8  
          u'\u05e8\u05e9\u05d5\u05d9\u05d5\u05ea \u05e0\u05d9\u05e7\u05d5\u05d6': 'drainage_authority',
          u'\u05e8\u05e9\u05d9\u05de\u05d5\u05ea \u05dc\u05e8\u05e9\u05d5\u05d9\u05d5\u05ea \u05d4\u05de\u05e7\u05d5\u05de\u05d9\u05d5\u05ea': 'municipal_parties',
          u'\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9 \u05d1\u05e8\u05d9\u05d0\u05d5\u05ea': 'health_service',
-         u'\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9 \u05d3\u05ea': 'religion_service'}
+         u'\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9 \u05d3\u05ea': 'religion_service',
+         u'\u05d2\u05de\u05d9\u05dc\u05d5\u05ea \u05d7\u05e1\u05d3\u05d9\u05dd  (\u05d2\u05de\u05d7 )': None
+         }
 
 headers = ['kind', 'name', 'id', 'street', 'house_number', 'city', 'zipcode']
+
+
+scraped_ids = set()
 
 
 def scrape():
@@ -73,9 +78,11 @@ def scrape():
 
     for selection in options.keys():
         prepare()
+        if slugs.get(options[selection]) is None:
+            logging.warning('SKIPPING option #%d (%s)', selection, options[selection])
+            continue
         select_option(selection)
         while True:
-            logging.info('PAGE')
             try:
                 WebDriverWait(driver, 60, poll_frequency=5).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
@@ -91,12 +98,13 @@ def scrape():
                 row = ([slugs[options[selection]]] +
                        [pq(x).text() for x in pq(row).find('td')])
                 datum = dict(zip(headers, row))
-                yield datum
+                the_id = datum['id']
+                if the_id not in scraped_ids:
+                    scraped_ids.add(the_id)
+                    yield datum
 
-            logging.info('NEXT %r', page.find('#btnHaba'))
             if len(page.find('#btnHaba')) > 0:
                 next_button = driver.find_element_by_id('btnHaba')
-                logging.info('NEXT %r', next_button)
                 next_button.click()
                 time.sleep(10)
             else:

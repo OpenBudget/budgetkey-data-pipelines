@@ -70,8 +70,13 @@ BAD_WORDS = [
 bad_rows = {}
 total_rows = {}
 
-def process_row(row, row_index, spec, resource_index, *_):
-    if resource_index == 0: # the data
+
+def process_row(row, row_index, spec, resource_index, parameters, stats):
+    if resource_index == 0:  # the data
+        if row_index == 0:
+            stats['bad-lines'] = 0
+            stats['good-lines'] = 0
+
         bad_rows.setdefault(row['report-url'], 0)
         total_rows.setdefault(row['report-url'], 0)
 
@@ -97,7 +102,9 @@ def process_row(row, row_index, spec, resource_index, *_):
                     row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif isinstance(v, str):
                     row[k] = v.strip()
+            stats['good-lines'] += 1
         except Exception as e:
+            stats['bad-lines'] += 1
             logging.exception('ERROR in row %d: %r', row_index, row)
             bad_rows[row['report-url']] += 1
             return

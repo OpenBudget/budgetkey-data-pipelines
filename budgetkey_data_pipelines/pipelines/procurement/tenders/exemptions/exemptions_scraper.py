@@ -13,11 +13,13 @@ class ExemptionsPublisherScraper(object):
 
     def __init__(self, publisher_id,
                  # seconds to wait between retries of http requests
-                 wait_between_retries=60,
+                 wait_between_retries=10,
+                 # seconds to wait between two http requests
+                 wait_between_requests=0,
                  # maximum number of retries - once reached entire process fails
-                 max_retries=10,
+                 max_retries=3,
                  # http request timeout in seconds
-                 timeout=180,
+                 timeout=60,
                  # maximum number of results pages to fetch, default is to get all results
                  max_pages=-1):
         self._publisher_id = publisher_id
@@ -25,14 +27,29 @@ class ExemptionsPublisherScraper(object):
         self._max_retries = max_retries
         self._timeout = timeout
         self._max_pages = max_pages
+        self._wait_between_requests = wait_between_requests
 
     def get_urls(self):
         self._initialize_session()
         self._page = pq(self._get_page_text_retry())
         self._cur_page_num = 0
         while self._has_next_page():
-            for url in self._get_next_page_urls():
-                yield url
+            retries = 0
+            while retries < self._max_retries:
+                try:
+                    for url in self._get_next_page_urls():
+                        yield url
+                    break
+                except TooManyFailuresException:
+                    retries += 1
+                    if retries < self._max_retries:
+                        logger.error("Failed to get page URLS, reinitializing session (attempt %d)", retries)
+                        self._initialize_session()
+                        self._cur_page_num -= 1
+                    else:
+                        logger.error("Failed to get page URLS for publisher %d, got %d / %d",
+                                     self._publisher_id, self._cur_page_num, self._max_pages)
+                        self._max_pages = self._cur_page_num
 
     def _initialize_session(self):
         self._session = requests.Session()
@@ -46,8 +63,8 @@ class ExemptionsPublisherScraper(object):
             if href.startswith(base_exemption_message_url):
                 yield href
 
-
     def _get_page_text(self, form_data=None):
+        time.sleep(self._wait_between_requests)
         response = self._session.request("POST" if form_data else "GET",
                                          timeout=self._timeout,
                                          url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
@@ -65,7 +82,7 @@ class ExemptionsPublisherScraper(object):
                 if i > self._max_retries:
                     raise TooManyFailuresException("too many failures, last exception message: {}".format(e))
                 else:
-                    logger.exception(e)
+                    logger.error("Failed to get page text, attempt %d (%s)", i, e)
                     time.sleep(self._wait_between_retries)
 
     def _has_next_page(self):

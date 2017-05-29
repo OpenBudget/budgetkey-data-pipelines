@@ -15,7 +15,7 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 USER dpp
 
-RUN sudo apk --update --no-cache --virtual=build-dependencies add build-base
+RUN sudo apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev
 RUN sudo pip install -e /
 RUN sudo apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/*

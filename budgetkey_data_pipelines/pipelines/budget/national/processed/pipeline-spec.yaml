@@ -300,14 +300,14 @@ connected-national-budgets:
         url: /var/datapackages/budget/national/processed/with-extras/datapackage.json
         resource: budget
     - run: item-connections
+    - run: set_primary_key
+      parameters:
+        budget: ['code', 'year']
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items
-    - run: set_primary_key
-      parameters:
-        budget-items: ['code', 'year']
     - run: dump.to_sql
       parameters:
         tables:
           budget:
-            resource-name: budget-items
+            resource-name: budget
