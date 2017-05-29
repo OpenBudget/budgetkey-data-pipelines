@@ -71,9 +71,10 @@ def normalize(obj):
     assert False, 'Bad object %r' % obj
 
 
-def calc_equivs(cur_year, rows, connected_items, new_connected_items):
+def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_delete=False):
 
-    logging.info('cur_year: %r', cur_year)
+    # rows = list(rows)
+    # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
     # logging.info('connected_items: %r', connected_items)
     # logging.info('new_connected_items: %r', new_connected_items)
 
@@ -105,6 +106,11 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
             # Find curated record for id
             curated_items = curated.get((cur_year, id['code']))
             if curated_items is not None:
+                if len(curated_items) == 0:
+                    unmatched.append(row)
+                    row = None
+                    break
+
                 for year, code in curated_items:
                     assert year == cur_year-1
                     value = get(connected_items, code)
@@ -112,7 +118,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                         equivs.append(value)
                     else:
                         logging.warning('%d/%s: Failed to find curated item %s/%s',
-                                        cur_year, row['code'], year, code)
+                                        cur_year, id['code'], year, code)
                 if len(equivs) > 0:
                     logging.debug('FOUND CURATED ITEM for %r', id)
                     continue
@@ -175,14 +181,15 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                 s = mapped_levels.setdefault(equiv['code'], set())
                 if len(row['code']) in s:
                     logging.warning('DOUBLE BOOKING for %s/%s from %s/%s', equiv['year'], equiv['code'], row['year'], row['code'])
-                    logging.warning('DOUBLE BOOKING %r', equivs)
                     for nci in iterate_values(new_connected_items):
                         for hist_item in nci.get('history', {}).get(equiv['year'], []):
                             if hist_item['code'] == equiv['code']:
-                                logging.warning('FOUND\n%s', json.dumps(nci, indent=2))
+                                logging.warning('FOUND')
+                                logging.warning('%s', json.dumps(nci, indent=2))
                 else:
                     s.add(len(row['code']))
-                delete(connected_items, equiv['code'])
+                if should_delete:
+                    delete(connected_items, equiv['code'])
                 for year, items in equiv['history'].items():
                     new_history.setdefault(year, []).extend(items)
                 del equiv['history']
@@ -208,7 +215,7 @@ def process_budgets(rows_):
         unmatched = calc_equivs(cur_year, rows,
                                 connected_items, new_connected_items)
         unmatched = calc_equivs(cur_year, reversed(unmatched),
-                                connected_items, new_connected_items)
+                                connected_items, new_connected_items, True)
 
         for row in unmatched:
             row['history'] = {}
