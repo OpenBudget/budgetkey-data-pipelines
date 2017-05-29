@@ -78,3 +78,33 @@ entities:
         tables:
           entities:
             resource-name: entities
+
+fingerprints:
+  dependencies:
+    - pipeline: ./entities/entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entity_fingerprints
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+    - run: fingerprint
+      parameters:
+        source-field: name
+        target-field: fingerprint
+        resource-name: entities
+    - run: concatenate
+      parameters:
+        target:
+          name: entities
+        fields:
+          id: null
+          name: null
+          kind: null
+          fingerprint: null
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/fingerprints
+

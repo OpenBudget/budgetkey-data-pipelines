@@ -17,11 +17,18 @@ municipality-to-city:
         tables:
           lamas_muni_map:
             resource-name: municipality-locality-map
+
 municipal-data:
+  dependencies:
+    - pipeline: ./entities/fingerprints
   pipeline:
     - run: add_metadata
       parameters:
         name: lamas-municipal-data
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+        resource: entities
     - run: add_resource
       parameters:
         name: lamas-municipal-data-1
@@ -52,6 +59,7 @@ municipal-data:
     - run: fix_bad_values
     - run: concatenate
       parameters:
+        sources: 'lamas-municipal-data-[0-9]+'
         target:
           name: lamas-municipal-data
         fields:
@@ -439,6 +447,7 @@ municipal-data:
           year_reception_status_municipal: []
     - run: set_types
       parameters:
+        resources: lamas-municipal-data
         types:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
@@ -835,6 +844,29 @@ municipal-data:
           waste_solid_residential_commercial_cutting_kg_daily_per_capita_2015: null
           year_reception_status_municipal: null
 #    - run: sample
+    - run: fingerprint
+      parameters:
+        source-field: name_municipality
+        target-field: fingerprint
+        resource-name: lamas-municipal-data
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+          delete: true
+        target:
+          name: lamas-municipal-data
+          key:
+            - fingerprint
+        fields:
+          entity_id:
+            name: id
+          entity_name:
+            name: name
+          entity_kind:
+            name: kind
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/
