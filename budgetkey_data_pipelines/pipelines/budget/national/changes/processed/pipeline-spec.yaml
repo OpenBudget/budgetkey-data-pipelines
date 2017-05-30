@@ -1,0 +1,15 @@
+transactions:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget (Transactions)
+        name: national-budget-changes-transactions
+    - run: load_resource
+      parameters:
+        name: budget-changes
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: 0
+    - run: extract-change-groups
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/processed/transactions
