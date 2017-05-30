@@ -224,10 +224,12 @@ latest-contract-spending:
             type: number
           end_date:
             type: date
+            search:time-range: to
           start_date:
             type: date
           order_date:
             type: date
+            search:time-range: from
     - run: set_primary_key
       parameters:
         contract-spending:

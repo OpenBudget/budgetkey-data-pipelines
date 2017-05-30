@@ -303,6 +303,11 @@ connected-national-budgets:
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
+    - run: set_types
+      parameters:
+        types:
+          year:
+            search:time-range: "from, to"
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items
