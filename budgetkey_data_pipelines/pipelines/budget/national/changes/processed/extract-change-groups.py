@@ -3,11 +3,13 @@ from datetime import datetime
 import itertools
 import logging
 
-fields = ['net_expense_diff',
-          'gross_expense_diff',
-          'allocated_income_diff',
-          'commitment_limit_diff',
-          'personnel_max_diff']
+value_fields = [
+    'net_expense_diff',
+    'gross_expense_diff',
+    'allocated_income_diff',
+    'commitment_limit_diff',
+    'personnel_max_diff'
+]
 
 
 def update_datapackage(datapackage):
@@ -28,7 +30,7 @@ def update_datapackage(datapackage):
 
 
 def transfer_code(change):
-    return "%d/%02d-%03d" % (
+    return '%d/%02d-%03d' % (
         change['year'],
         change['leading_item'],
         change['req_code']
@@ -38,7 +40,9 @@ def transfer_code(change):
 def powerset(iterable):
     s = list(iterable)
     return itertools.chain.from_iterable(
-        combinations(s, r) for r in range(2, min(len(s) + 1, 6)))
+        combinations(s, r)
+        for r in range(2, min(len(s) + 1, 6))
+    )
 
 
 def subsets(s):
@@ -96,7 +100,7 @@ def get_changes(rows):
         #         change['date/approval'], '%d/%m/%Y').year
 
         change['trcode'] = transfer_code(change)
-        change['_value'] = sum(change.get(x, 0) for x in fields)
+        change['_value'] = sum(change.get(x, 0) for x in value_fields)
         for k, v in change.items():
             if k.startswith('date'):
                 if v is None:
@@ -119,169 +123,141 @@ def get_groups(changes):
     def get_date(x):
         return x['date_kind']
 
-    def sum_fields_for_prefix(l, prefix, fields):
-        return sum(
-            sum(x[f] for f in fields)
-            for x in l if x['budget_code'].startswith(prefix)
-        )
-
     def get_keys_for_prefix(ch, prefix):
         return set(
             (x['leading_item'], x['req_code'])
             for x in ch if x['budget_code'].startswith(prefix)
         )
 
-    changes.sort(key=get_date)
-
-    groups = []
-    selected_transfer_codes = set()
-    for date_kind, date_changes in itertools.groupby(changes, get_date):
-        date_changes = list(date_changes)
-        date = date_changes[0]['date']
-        date_reserve = [
-            c for c in date_changes
-            if c['budget_code'].startswith('0047') and c['leading_item'] != 47
-            if sum(c[field] * c[field] for field in fields) > 0
-        ]
-        logging.debug('reserve date: kind:%s num:%s' % (
-            date_kind, len(date_reserve)
-        ))
-        num_found = 0
-        i = 0
-        for comb_size in range(2, min(len(date_reserve) + 1, 7)):
-            done = False
-            while not done:
-                not_selected = list(
-                    x for x in date_reserve
-                    if x['trcode'] not in selected_transfer_codes
-                )
-                logging.debug('len(not_selected)=%d' % len(not_selected))
-                date_groups = combinations(not_selected, comb_size)
-                found = None
-                done = True
-                try:
-                    while True:
-                        i += 1
-                        if i % 100000 == 0:
-                            logging.debug('%s %s %s %s' % (
-                                date, len(date_reserve), num_found, i
-                            ))
-                        group = date_groups.send(found)
-                        found = False
-                        sumvec = sum(
-                            sum(c.get(x, 0) for c in group) ** 2
-                            for x in fields
-                        )
-                        if sumvec == 0:
-                            pending = group[0]['pending']
-                            transfer_codes = set(x['trcode'] for x in group)
-                            if len(selected_transfer_codes & transfer_codes) > 0:
-                                continue
-                            selected_transfer_codes.update(transfer_codes)
-                            transfer_codes = list(transfer_codes)
-                            transfer_codes.sort()
-                            num_found += len(transfer_codes)
-                            to_append = {
-                                'transfer_ids': transfer_codes,
-                                'date': date,
-                                'pending': pending,
-                            }
-                            groups.append(to_append)
-                            found = True
-                except StopIteration:
-                    pass
-    for change in changes:
-        if not change['trcode'] in selected_transfer_codes:
-            selected_transfer_codes.add(change['trcode'])
-            groups.append({
-                'transfer_ids': [change['trcode']],
-                'date': change['date'],
-                'pending': change['pending']
-            })
-    non_groups = []
-    for group in groups:
-        trcodes = set(group['transfer_ids'])
-        years = list(set(int(x.split('/')[0]) for x in trcodes))
-        assert(len(years) == 1)
-        group['year'] = years[0]
-        group['transfer_ids'] = list(set(x.split('/')[1] for x in trcodes))
-        sample_changes = [
-            next(filter(lambda x:x['trcode'] == trcode, changes))
-            for trcode in trcodes
-        ]
-        transfer_changes = list(filter(
-            lambda x: x['trcode'] in trcodes, changes))
-        group['committee_ids'] = list(set(
-            x['committee_id'] for x in transfer_changes
-            if x['committee_id'] is not None
-        ))
-        group['req_titles'] = [x['req_title'] for x in sample_changes]
-        group['budget_codes'] = list(set(
-            x['budget_code'] for x in transfer_changes
-        ))
-        group['prefixes'] = list(set(
-            itertools.chain.from_iterable(
-                [code[:l] for l in range(2, 10, 2)]
-                for code in group['budget_codes']
-            )
-        ))
-        group['prefixes'].sort(key=lambda x: int('1' + x))
-        group['changes'] = [
-            {
-                'keys': get_keys_for_prefix(transfer_changes, code),
-                'budget_code': code,
-                'expense_change': sum_fields_for_prefix(
-                    transfer_changes, code, [
-                        'net_expense_diff',
-                        'gross_expense_diff',
-                        'allocated_income_diff'
-                    ]),
-                'commitment_change': sum_fields_for_prefix(
-                    transfer_changes, code, [
-                        'commitment_limit_diff'
-                    ]),
-                'personnel_change': sum_fields_for_prefix(
-                    transfer_changes, code, [
-                        'personnel_max_diff'
-                    ])
-            }
-            for code in group['prefixes']
-        ]
-        group['group_id'] = group['transfer_ids'][0]
-        trcodes = list(trcodes)
-        trcodes.sort()
-        for trcode in trcodes:
-            per_transfer_changes = list(filter(
-                lambda x:
-                    x['trcode'] == trcode and
-                    not x['budget_code'].startswith("0047"),
-                transfer_changes
+    def initialize_groups(changes):
+        result = []
+        selected_transfer_codes = set()
+        for date_kind, date_changes in itertools.groupby(changes, get_date):
+            date_changes = list(date_changes)
+            date = date_changes[0]['date']
+            date_reserve = [
+                c for c in date_changes
+                if c['budget_code'].startswith('0047') and c['leading_item'] != 47
+                if sum(c[field] * c[field] for field in value_fields) > 0
+            ]
+            logging.debug('reserve date: kind:%s num:%s' % (
+                date_kind, len(date_reserve)
             ))
-            s = sum(sum(x[f] for f in fields) for x in per_transfer_changes)
-            if s > 0:
-                group['group_id'] = trcode.split('/')[1]
-                logging.debug(
-                    'selected group id %(group_id)s as '
-                    'representative for %(transfer_ids)r' % group)
-                break
-        for trcode in trcodes:
-            group_id = trcode.split('/')[1]
-            if group_id != group['group_id']:
-                nongroup = {
-                    'group_id': group_id,
-                    'year': group['year'],
-                    'transfer_ids': [],
-                    'committee_ids': [],
-                    'req_titles': [],
-                    'budget_codes': [],
-                    'prefixes': [],
-                    'changes': [],
-                    'pending': None
-                }
-                non_groups.append(nongroup)
+            num_found = 0
+            i = 0
+            for comb_size in range(2, min(len(date_reserve) + 1, 7)):
+                done = False
+                while not done:
+                    not_selected = list(
+                        x for x in date_reserve
+                        if x['trcode'] not in selected_transfer_codes
+                    )
+                    logging.debug('len(not_selected)=%d' % len(not_selected))
+                    date_groups = combinations(not_selected, comb_size)
+                    found = None
+                    done = True
+                    try:
+                        while True:
+                            i += 1
+                            if i % 100000 == 0:
+                                logging.debug('%s %s %s %s' % (
+                                    date, len(date_reserve), num_found, i
+                                ))
+                            group = date_groups.send(found)
+                            found = False
+                            sumvec = sum(
+                                sum(c.get(x, 0) for c in group) ** 2
+                                for x in value_fields
+                            )
+                            if sumvec == 0:
+                                pending = group[0]['pending']
+                                transfer_codes = set(x['trcode'] for x in group)
+                                if len(selected_transfer_codes & transfer_codes) > 0:
+                                    continue
+                                selected_transfer_codes.update(transfer_codes)
+                                transfer_codes = list(transfer_codes)
+                                transfer_codes.sort()
+                                num_found += len(transfer_codes)
+                                to_append = {
+                                    'transfer_ids': transfer_codes,
+                                    'date': date,
+                                    'pending': pending,
+                                }
+                                result.append(to_append)
+                                found = True
+                    except StopIteration:
+                        pass
+        for change in changes:
+            if not change['trcode'] in selected_transfer_codes:
+                selected_transfer_codes.add(change['trcode'])
+                result.append({
+                    'transfer_ids': [change['trcode']],
+                    'date': change['date'],
+                    'pending': change['pending']
+                })
+        return result
 
-    groups.extend(non_groups)
-    return groups
+    def build_groups(groups, changes):
+        for group in groups:
+            trcodes = set(group['transfer_ids'])
+            years = set(
+                int(x.split('/')[0])
+                for x in trcodes
+            )
+            assert(len(years) == 1)
+
+            group['transfer_ids'] = list(set(
+                x.split('/')[1]
+                for x in trcodes
+            ))
+            group['group_id'] = group['transfer_ids'][0]
+
+            transfer_changes = list(filter(
+                lambda x: x['trcode'] in trcodes,
+                changes
+            ))
+            group['budget_codes'] = list(set(
+                x['budget_code']
+                for x in transfer_changes
+            ))
+            group['prefixes'] = list(set(
+                itertools.chain.from_iterable(
+                    [code[:l] for l in range(2, 10, 2)]
+                    for code in group['budget_codes']
+                )
+            ))
+            group['prefixes'].sort(key=lambda x: int('1' + x))
+            group['changes'] = [
+                {'keys': get_keys_for_prefix(transfer_changes, code)}
+                for code in group['prefixes']
+            ]
+
+            trcodes = list(trcodes)
+            trcodes.sort()
+            for trcode in trcodes:
+                per_transfer_changes = list(filter(
+                    lambda x:
+                        x['trcode'] == trcode and
+                        not x['budget_code'].startswith('0047'),
+                    transfer_changes
+                ))
+                s = sum(
+                    sum(x[f] for f in value_fields)
+                    for x in per_transfer_changes
+                )
+                if s > 0:
+                    group['group_id'] = trcode.split('/')[1]
+                    logging.debug(
+                        'selected group id %(group_id)s as '
+                        'representative for %(transfer_ids)r' % group)
+                    break
+
+        return groups
+
+    changes.sort(key=get_date)
+    result = initialize_groups(changes)
+    result = build_groups(result, changes)
+    return result
 
 
 def process_resource(rows):
