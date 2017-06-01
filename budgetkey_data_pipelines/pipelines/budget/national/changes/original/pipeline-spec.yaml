@@ -118,6 +118,7 @@ national-budget-changes:
         fields:
           year:
             - שנה
+            - ' שנה'
           leading_item:
             - סעיף מוביל
             - מספר הסעיף
@@ -159,12 +160,14 @@ national-budget-changes:
             - תאריך אישור
           date/pending:
             - תאריך משלוח לוועדה
+    - run: fix_values
     - run: set_types
       parameters:
         types:
           year:
             type: integer
-            required: yes
+            constraints:
+              required: yes
           leading_item:
             type: integer
           req_code:
@@ -185,6 +188,10 @@ national-budget-changes:
             type: number
           personnel_max_diff:
             type: number
+          date/approval:
+            type: date
+          date/pending:
+            type: date
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/original
