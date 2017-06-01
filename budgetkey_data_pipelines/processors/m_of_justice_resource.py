@@ -2,6 +2,8 @@ import re
 import csv
 import logging
 from io import StringIO
+
+import itertools
 from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -11,6 +13,7 @@ params, datapackage, res_iter = ingest()
 key = params['key']
 url_key = params['url-key']
 resource_name = params['resource-name']
+status_type = params.get('status-type', 'Registration')
 
 
 def get_entities():
@@ -49,11 +52,11 @@ resource = {
         'fields': [
             {'name': '{}_Number'.format(key), 'type': 'string'},
             {'name': '{}_Name'.format(key), 'type': 'string'},
-            {'name': '{}_Registration_Date'.format(key), 'type': 'string'},
+            {'name': '{}_{}_Date'.format(key, status_type), 'type': 'string'},
         ]
     }
 }
 
 datapackage['resources'].append(resource)
 
-spew(datapackage, [get_entities()])
+spew(datapackage, itertools.chain(res_iter, [get_entities()]))
