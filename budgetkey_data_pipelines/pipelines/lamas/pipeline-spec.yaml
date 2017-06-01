@@ -880,9 +880,3 @@ municipal-data:
         tables:
           lamas_muni:
             resource-name: lamas-municipal-data
-    - run: dump.to_sql
-      parameters:
-        engine: env://BUDGETKEY_OLD_DB
-        tables:
-          lamas_muni:
-            resource-name: lamas-municipal-data
