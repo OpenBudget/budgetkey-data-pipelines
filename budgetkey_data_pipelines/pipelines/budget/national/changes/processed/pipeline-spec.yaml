@@ -6,9 +6,8 @@ transactions:
         name: national-budget-changes-transactions
     - run: load_resource
       parameters:
-        name: budget-changes
         url: /var/datapackages/budget/national/changes/original/datapackage.json
-        resource: 0
+        resource: national-budget-changes
     - run: extract-change-groups
     - run: dump.to_path
       parameters:
