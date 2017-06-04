@@ -23,6 +23,12 @@ def process_row(row, *_):
                 except ValueError:
                     continue
 
+    k = 'budget_code'
+    v = row[k].strip()
+    assert len(v) > 0
+    v = '0' * (8-len(v)) + v
+    row[k] = v
+
     return row
 
 
