@@ -7,6 +7,7 @@ import tempfile
 import shutil
 import requests
 from textract.parsers.doc_parser import Parser
+from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
@@ -40,11 +41,14 @@ def get_explanations(url):
         assert False
 
     for name, item in files:
-        logging.info('Got filename %s', name)
         with tempfile.NamedTemporaryFile(suffix=name, mode='wb', delete=False) as tmp:
             shutil.copyfileobj(item, tmp)
             tmp.close()
-            text = DocParser().process(tmp.name, '')
+            try:
+                text = DocParser().process(tmp.name, '')
+            except ShellError:
+                logging.exception('Error with filename %s', name)
+                text = ''
 
             lines = text.split('\n')
             lines = itertools.takewhile(
