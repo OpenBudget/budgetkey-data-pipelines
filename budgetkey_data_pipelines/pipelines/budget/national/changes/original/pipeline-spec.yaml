@@ -213,12 +213,14 @@ national-budget-change-explanations:
           path: data/explanation-history.csv
         url: https://www.dropbox.com/s/3sfjno7l2v3lkpy/explanations.tar.gz?dl=1
     - run: explanations
+      runner: tzabar
       parameters:
         resource:
           name: explanation-current
           path: data/explanation-current.csv
         url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_explain.zip
     - run: explanations
+      runner: tzabar
       parameters:
         resource:
           name: explanation-pending
