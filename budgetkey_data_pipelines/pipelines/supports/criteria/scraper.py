@@ -58,7 +58,7 @@ resource['schema'] = {
             'name': 'paper_type',
             'type': 'string'
         },
-{
+        {
             'name': 'office',
             'type': 'string'
         },
