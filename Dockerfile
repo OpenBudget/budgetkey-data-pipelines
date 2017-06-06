@@ -3,7 +3,7 @@ FROM frictionlessdata/datapackage-pipelines:latest
 ADD ./ /
 ADD dpp-runners.yaml /budgetkey_data_pipelines/pipelines/
 
-RUN apk add --update libxml2 libxslt sudo openssh-client curl
+RUN apk add --update libxml2 libxslt sudo openssh-client curl jpeg-dev antiword
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
