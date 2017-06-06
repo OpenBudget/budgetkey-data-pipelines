@@ -89,7 +89,10 @@ def scrape_company_details(cmp_recs):
             for k, v in selectors.items():
                 row[v] = page.find(k).text()
             if row['company_name'].strip() == '':
-                logging.error('Failed to get data for company %s: %r', company_id, row)
+                if row['company_name_eng'].strip() != '':
+                    row['company_name'] = row['company_name_eng']
+                else:
+                    logging.error('Failed to get data for company %s: %r', company_id, row)
 
         yield row
 
