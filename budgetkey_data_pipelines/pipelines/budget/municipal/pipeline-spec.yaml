@@ -1,0 +1,31 @@
+flattened:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-municipal-budgets
+        title: All Municipal Budgets
+    - run: add_resource
+      parameters:
+        url: http://www.omuni.org/static/obudget
+        name: flattened
+        format: ndjson
+    - run: stream_remote_resources
+    - run: set_types
+      parameters:
+        types:
+          amount:
+            type: number
+          children:
+            type: array
+          expense:
+            type: boolean
+          year:
+            type: integer
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/municipal/flattened
+    - run: dump.to_sql
+      parameters:
+        tables:
+          muni_budget:
+            resource-name: flattened
