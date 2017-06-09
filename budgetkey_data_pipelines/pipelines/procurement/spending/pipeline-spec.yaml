@@ -246,7 +246,7 @@ latest-contract-spending:
             es:itemType: string
           purchasing_unit_code:
             es:itemType: string
-          purchasing_unit_code:
+          sensitive_order:
             es:itemType: boolean
           supplier_code:
             es:itemType: string
