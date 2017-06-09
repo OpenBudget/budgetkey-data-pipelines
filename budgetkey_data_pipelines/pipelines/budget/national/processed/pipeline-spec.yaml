@@ -307,7 +307,22 @@ connected-national-budgets:
       parameters:
         types:
           year:
-            search:time-range: "from, to"
+            es:time-range: "from, to"
+          admin_cls_code_0:
+            es:itemType: string
+          direction:
+            es:itemType: string
+          econ_cls_title_.*:
+            es:itemType: string
+          func_cls_title_.*:
+            es:itemType: string
+          hierarchy:
+            es:itemType: object
+          non_repeating:
+            es:itemType: boolean
+          children:
+            es:itemType: object
+
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items
