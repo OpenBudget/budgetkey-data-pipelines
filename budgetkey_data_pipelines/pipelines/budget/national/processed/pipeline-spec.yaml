@@ -317,12 +317,18 @@ connected-national-budgets:
           func_cls_title_.*:
             es:itemType: string
           hierarchy:
-            es:itemType: object
+            es:itemType: string
           non_repeating:
             es:itemType: boolean
           children:
             es:itemType: object
-
+            es:schema:
+              fields:
+                - {name: code, type: string}
+                - {name: title, type: string}
+                - {name: net_allocated, type: number}
+          history:
+            es:index: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items
