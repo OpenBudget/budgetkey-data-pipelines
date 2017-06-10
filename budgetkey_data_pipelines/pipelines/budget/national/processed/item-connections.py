@@ -193,6 +193,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_del
                 for year, items in equiv['history'].items():
                     new_history.setdefault(year, []).extend(items)
                 del equiv['history']
+                del equiv['children']
                 new_history.setdefault(equiv['year'], []).append(equiv)
             row['history'] = new_history
             put(new_connected_items, row['code'], row)
