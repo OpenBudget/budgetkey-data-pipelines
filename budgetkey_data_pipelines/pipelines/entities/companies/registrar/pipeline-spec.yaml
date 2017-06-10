@@ -31,7 +31,7 @@ registry:
 
 details:
   schedule:
-    crontab: "*/15 * * * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
