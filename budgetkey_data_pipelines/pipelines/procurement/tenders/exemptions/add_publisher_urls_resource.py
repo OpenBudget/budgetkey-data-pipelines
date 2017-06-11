@@ -18,7 +18,7 @@ MOCK_URLS = {10: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
 
 def resource_filter(resource_data, parameters):
     kwargs = {
-        "max_pages": os.environ.get("OVERRIDE_EXEMPTION_PUBLISHERS_MAX_PAGES", parameters.get("max_pages", -1))
+        "max_pages": int(os.environ.get("OVERRIDE_EXEMPTION_PUBLISHERS_MAX_PAGES", parameters.get("max_pages", -1)))
     }
     limit_publisher_ids = os.environ.get("EXEMPTIONS_LIMIT_PUBLISHER_IDS", None)
     if limit_publisher_ids:
@@ -27,6 +27,7 @@ def resource_filter(resource_data, parameters):
     for publisher in resource_data:
         publisher_id = publisher["id"]
         if not limit_publisher_ids or publisher_id in map(int, limit_publisher_ids):
+            logging.info("processing publisher {}".format(publisher_id))
             scraper = ExemptionsPublisherScraper(publisher_id, **kwargs)
             urls = scraper.get_urls() if not parameters.get("mock") else MOCK_URLS[publisher_id]
             for url in urls:

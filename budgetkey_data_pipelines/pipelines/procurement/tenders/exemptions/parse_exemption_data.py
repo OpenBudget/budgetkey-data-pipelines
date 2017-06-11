@@ -5,33 +5,34 @@ from pyquery import PyQuery as pq
 INPUT_RESOURCE = "publisher-urls-downloaded-data"
 OUTPUT_RESOURCE = "exemptions"
 DOCUMENTS_JSON_FIELD = "documents_json"
+DEFAULT_DATE_FORMAT = "fmt:%d/%m/%Y"
 TABLE_SCHEMA = {
     # we take the safe route here and use a combination of values to determine the primary key
     # I'm not sure how consistent the source data is, and how much we should rely on it for reference keys
-    "primaryKeys": ["publisher_id", "page_url", "publication_id"],
+    "primaryKey": ["publisher_id", "page_url", "publication_id"],
     "fields": [
-        {"name": "publisher_id", "type": "integer"},
-        {"name": "page_url", "title": "exemption page url", "type": "string"},
-        {"name": "publication_id", "type": "string"},
-        {"name": 'description', "type": "string"},
-        {"name": "supplier_id", "type": "string"},
-        {"name": "supplier", "type": "string"},
-        {"name": "contact", "type": "string"},
-        {"name": "publisher", "type": "string"},
-        {"name": "contact_email", "type": "string"},
-        {"name": "claim_date", "type": "string"},
-        {"name": "last_update_date", "type": "string"},
-        {"name": "reason", "type": "string"},
-        {"name": "source_currency", "type": "string"},
-        {"name": "regulation", "type": "string"},
-        {"name": "volume", "type": "string"},
-        {"name": "subjects", "type": "string"},
-        {"name": "start_date", "type": "string"},
-        {"name": "end_date", "type": "string"},
-        {"name": "decision", "type": "string"},
-        {"name": "page_title", "type": "string"},
+        {"name": "publisher_id", "type": "integer", "required": True},
+        {"name": "page_url", "title": "exemption page url", "type": "string", "format": "uri", "required": True},
+        {"name": "publication_id", "type": "integer", "required": True},
+        {"name": 'description', "type": "string", "required": True},
+        {"name": "supplier_id", "type": "integer", "required": False, "missingValue": ["", "0"]},
+        {"name": "supplier", "type": "string", "required": True},
+        {"name": "contact", "type": "string", "required": False},
+        {"name": "publisher", "type": "string", "required": True},
+        {"name": "contact_email", "type": "string", "format": "email", "required": False},
+        {"name": "claim_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": False},
+        {"name": "last_update_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
+        {"name": "reason", "type": "string", "required": False},
+        {"name": "source_currency", "type": "string", "required": True},
+        {"name": "regulation", "type": "string", "required": True},
+        {"name": "volume", "type": "string", "required": False, "missingValue": ["", "0"]},
+        {"name": "subjects", "type": "string", "required": True},
+        {"name": "start_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
+        {"name": "end_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
+        {"name": "decision", "type": "string", "required": True},
+        {"name": "page_title", "type": "string", "required": True},
         # documents should be in a related table (there could be multiple documents per exemption)
-        {"name": DOCUMENTS_JSON_FIELD, "type": "string"}
+        {"name": DOCUMENTS_JSON_FIELD, "type": "string", "required": True}
     ]
 }
 BASE_URL = "http://www.mr.gov.il"

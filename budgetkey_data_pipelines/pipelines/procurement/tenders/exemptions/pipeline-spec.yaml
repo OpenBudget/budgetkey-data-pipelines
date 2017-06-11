@@ -3,20 +3,31 @@ exemptions:
     - run: add_metadata
       parameters:
         name: "procurement-tenders-exemptions"
+    # get the main HTML page of the exemptions search
     - run: add_resource
       parameters:
         name: "mr-gov-il-search-exemption-messages"
         url: "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
         format: "txt"
+    # download it (using tzabar runner which does some magic that bypasses network security)
     - run: stream_remote_resources
       runner: tzabar
+    # parse all the publisher ids from the main search page
     - run: add_exemptions_publishers_resource
+    # go over each publisher and get urls for all exemptions related to this publisher
+    # max_pages parameter can be used to limit number of pages for each publisher
     - run: add_publisher_urls_resource
       runner: tzabar
       parameters:
-        max_pages: 1
+        max_pages: -1  # get all pages
+    # download the data from each exemption page
     - run: download_exemption_pages_data
+    # parse the data for each exemption
     - run: parse_exemption_data
-    - run: dump.to_path
+    # update the SQL table (based on the primary keys defined in the schemas)
+    - run: dump.to_sql
       parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions/
+        tables:
+          procurement_tenders_exemptions:
+            mode: update
+            resource-name: exemptions

@@ -1,6 +1,8 @@
 from datapackage_pipelines.utilities.lib_test_helpers import ProcessorFixtureTestsBase
 import os
 import json
+from jsontableschema import Schema
+import logging
 
 
 def listify_resources(resources):
@@ -10,6 +12,16 @@ def listify_resources(resources):
 def unlistify_resources(resources):
     for resource in resources:
         yield (row for row in resource)
+
+
+def assert_doc_conforms_to_schema(doc, schema):
+    row = [doc[field["name"]] for field in schema["fields"]]
+    try:
+        Schema(schema).cast_row(row)
+    except Exception as e:
+        logging.exception(e)
+        raise Exception("row does not conform to schema\nrow='{}'\nschema='{}'".format(json.dumps(row),
+                                                                                       json.dumps(schema)))
 
 
 class BudgetkeyProcessorsFixturesTests(ProcessorFixtureTestsBase):
