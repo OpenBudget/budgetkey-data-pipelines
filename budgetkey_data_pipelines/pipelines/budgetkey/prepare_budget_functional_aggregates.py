@@ -8,9 +8,10 @@ curyear = datetime.datetime.now().year
 def process_row(row, *_):
     if len(row['code']) == 10 and row['year'] == curyear:
         ret = {
+            'year': row['year'],
             'func_cls_title_1': row['func_cls_title_1'][0],
             'func_cls_title_2': row['func_cls_title_2'][0],
-            'net_allocated': row['net_allocated']
+            'net_allocated': int(row['net_allocated']),
         }
         return ret
 
@@ -19,7 +20,8 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'] = [
         {'name': 'func_cls_title_1', 'type': 'string'},
         {'name': 'func_cls_title_2', 'type': 'string'},
-        {'name': 'net_allocated', 'type': 'number'},
+        {'name': 'net_allocated', 'type': 'integer'},
+        {'name': 'year', 'type': 'integer'},
     ]
     return dp
 

@@ -71,6 +71,19 @@ def normalize(obj):
     assert False, 'Bad object %r' % obj
 
 
+def update_equiv(e1, e2):
+    for k, v in e2.items():
+        if k != 'year' and isinstance(v, (int, float)):
+            e1.setdefault(k, 0)
+            e1[k] += v
+    e1.setdefault('code_titles', [])
+    if 'code' in e2:
+        e1['code_titles'].append('%s:%s' % (e2['code'], e2['title']))
+    else:
+        e1['code_titles'].extend(e2['code_titles'])
+    e1['code_titles'] = sorted(set(e1['code_titles']))
+
+
 def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_delete=False):
 
     # rows = list(rows)
@@ -190,11 +203,9 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_del
                     s.add(len(row['code']))
                 if should_delete:
                     delete(connected_items, equiv['code'])
-                for year, items in equiv['history'].items():
-                    new_history.setdefault(year, []).extend(items)
-                del equiv['history']
-                del equiv['children']
-                new_history.setdefault(equiv['year'], []).append(equiv)
+                for year, hist_item in equiv['history'].items():
+                    update_equiv(new_history.setdefault(year, {}), hist_item)
+                update_equiv(new_history.setdefault(equiv['year'], {}), equiv)
             row['history'] = new_history
             put(new_connected_items, row['code'], row)
 
