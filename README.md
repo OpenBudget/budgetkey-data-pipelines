@@ -6,7 +6,7 @@ Budget Key data processing pipelines
 
 ## Quickstart
 ```bash
-$ sudo apt-get install build-essential python3-dev libxml2-dev libxslt1-dev
+$ sudo apt-get install build-essential python3-dev libxml2-dev libxslt1-dev libleveldb-dev
 $ python --version
 Python 3.6.0+
 $ sudo mkdir -p /var/datapackages && sudo chown $USER /var/datapackages/
