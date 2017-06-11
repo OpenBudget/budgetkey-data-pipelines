@@ -1,34 +1,34 @@
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
 import json
 from pyquery import PyQuery as pq
+from datetime import datetime
 
 INPUT_RESOURCE = "publisher-urls-downloaded-data"
 OUTPUT_RESOURCE = "exemptions"
 DOCUMENTS_JSON_FIELD = "documents_json"
-DEFAULT_DATE_FORMAT = "fmt:%d/%m/%Y"
 TABLE_SCHEMA = {
     # we take the safe route here and use a combination of values to determine the primary key
     # I'm not sure how consistent the source data is, and how much we should rely on it for reference keys
-    "primaryKey": ["publisher_id", "page_url", "publication_id"],
+    "primaryKey": ["publisher_id", "publication_id"],
     "fields": [
         {"name": "publisher_id", "type": "integer", "required": True},
-        {"name": "page_url", "title": "exemption page url", "type": "string", "format": "uri", "required": True},
         {"name": "publication_id", "type": "integer", "required": True},
+        {"name": "page_url", "title": "exemption page url", "type": "string", "format": "uri", "required": True},
         {"name": 'description', "type": "string", "required": True},
         {"name": "supplier_id", "type": "integer", "required": False, "missingValue": ["", "0"]},
         {"name": "supplier", "type": "string", "required": True},
         {"name": "contact", "type": "string", "required": False},
         {"name": "publisher", "type": "string", "required": True},
         {"name": "contact_email", "type": "string", "format": "email", "required": False},
-        {"name": "claim_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": False},
-        {"name": "last_update_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
+        {"name": "claim_date", "type": "date", "required": False},
+        {"name": "last_update_date", "type": "date", "required": True},
         {"name": "reason", "type": "string", "required": False},
         {"name": "source_currency", "type": "string", "required": True},
         {"name": "regulation", "type": "string", "required": True},
         {"name": "volume", "type": "string", "required": False, "missingValue": ["", "0"]},
         {"name": "subjects", "type": "string", "required": True},
-        {"name": "start_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
-        {"name": "end_date", "type": "date", "format": DEFAULT_DATE_FORMAT, "required": True},
+        {"name": "start_date", "type": "date", "required": True},
+        {"name": "end_date", "type": "date", "required": True},
         {"name": "decision", "type": "string", "required": True},
         {"name": "page_title", "type": "string", "required": True},
         # documents should be in a related table (there could be multiple documents per exemption)
@@ -78,12 +78,31 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time_elt.text,})
-            exemption_data = {
+            source_data = {
                 k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in INPUT_FIELDS_TEXT_MAP.items()}
-            exemption_data.update({"publisher_id": exemption["pid"],
-                                   "page_url": exemption["url"],
-                                   "documents_json": json.dumps(documents)})
-            yield exemption_data
+            yield {
+                "publisher_id": int(exemption["pid"]),
+                "publication_id": int(source_data["publication_id"]),
+                "page_url": exemption["url"],
+                "description": source_data["description"],
+                "supplier_id": int(source_data["supplier_id"]),
+                "supplier": source_data["supplier"],
+                "contact": source_data["contact"],
+                "publisher": source_data["publisher"],
+                "contact_email": source_data["contact_email"],
+                "claim_date": datetime.strptime(source_data["claim_date"], "%d/%m/%Y").date() if source_data["claim_date"] else None,
+                "last_update_date": datetime.strptime(source_data["last_update_date"], "%d/%m/%Y").date() if source_data["last_update_date"] else None,
+                "reason": source_data["reason"],
+                "source_currency": source_data["source_currency"],
+                "regulation": source_data["regulation"],
+                "volume": source_data["volume"],
+                "subjects": source_data["subjects"],
+                "start_date": datetime.strptime(source_data["start_date"], "%d/%m/%Y").date() if source_data["start_date"] else None,
+                "end_date": datetime.strptime(source_data["end_date"], "%d/%m/%Y").date() if source_data["end_date"] else None,
+                "decision": source_data["decision"],
+                "page_title": source_data["page_title"],
+                "documents_json": json.dumps(documents)
+            }
 
 if __name__ == "__main__":
     ParseExemptionDataProcessor.main()
