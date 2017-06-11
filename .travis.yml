@@ -1,7 +1,10 @@
-sudo: false
+dist: trusty
+sudo: required
 language: python
 python:
 - 3.6
+install:
+- sudo apt-get install libleveldb-dev libleveldb1
 before_script:
 - make install
 script:

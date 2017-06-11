@@ -10,6 +10,7 @@ from decimal import Decimal
 parameters, dp, res_iter = ingest()
 input_file = parameters['input-file']
 
+stats = {'bad-reports': 0}
 loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
 for i, report in enumerate(reports.iter()):
@@ -75,6 +76,7 @@ for i, report in enumerate(reports.iter()):
             errd = False
         except Exception as e:
             if sheet == 1:
+                stats['bad-reports'] += 1
                 logging.info("ERROR '%s' in %s", e, report['report-url'])
                 report['report-sheets'] = 0
                 report['report-headers-row'] = None
@@ -125,4 +127,4 @@ dp['resources'].append({
     'schema': schema
 })
 
-spew(dp, chain(res_iter, [loading_results]))
+spew(dp, chain(res_iter, [loading_results]), stats)

@@ -13,10 +13,10 @@ amounts = [
     'commitment_balance',
 ]
 
-codes_and_titles = dict(
+codes_and_titles = [
     ('admin_cls_code_%d' % l, 'admin_cls_title_%d' % l)
     for l in range(2,10,2)
-)
+]
 
 phases = {
     'מקורי': 'allocated',
@@ -34,6 +34,14 @@ new_fields = [{
     {
         'name': 'title',
         'type': 'string'
+    },
+    {
+        'name': 'hierarchy',
+        'type': 'array'
+    },
+    {
+        'name': 'parent',
+        'type': 'string'
     }
 ]
 for field in fields:
@@ -44,9 +52,9 @@ for field in fields:
                 'name': name + '_' + phase,
                 'type': field['type']
             })
-    elif name in list(codes_and_titles.keys()):
+    elif name in list(dict(codes_and_titles).keys()):
         pass
-    elif name in list(codes_and_titles.values()):
+    elif name in list(dict(codes_and_titles).values()):
         pass
     elif name == 'phase':
         pass
@@ -65,19 +73,27 @@ def process_first(rows):
             del row[amount]
 
         save = {}
-        for code_key, title_key in codes_and_titles.items():
+        for code_key, title_key in codes_and_titles:
             save[code_key] = row[code_key]
+            if len(save[code_key]) % 2 == 1:
+                save[code_key] = '0' + save[code_key]
             save[title_key] = row[title_key]
             del row[code_key]
             del row[title_key]
 
-        for code_key, title_key in codes_and_titles.items():
-            row['code'] = '00' + save[code_key]
+        hierarchy = [['00', 'המדינה']]
+        for i, (code_key, title_key) in enumerate(codes_and_titles):
+            expected_length = i*2 + 4
+            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
             row['title'] = save[title_key]
+            row['hierarchy'] = hierarchy
+            row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
             yield row
+            hierarchy.append([row['code'], row['title']])
 
         row['code'] = '00'
         row['title'] = 'המדינה'
+        row['hierarchy'] = []
         yield row
 
 

@@ -22,12 +22,12 @@ def scrape_guidestar(ass_recs):
     count = 0
     for i, ass_rec in enumerate(ass_recs):
 
-        if ass_rec.get('id') is not None:
+        if ass_rec.get('association_guidestar_title') is not None:
             yield ass_rec
             continue
 
         count += 1
-        if count > 25000:
+        if count > 1000:
             yield ass_rec
             continue
 
@@ -45,7 +45,9 @@ def scrape_guidestar(ass_recs):
         for selector, field in classes.items():
             field = 'association_' + field
             if not field.endswith('[]'):
-                value = page.find(selector).text().strip().replace('\n', '')
+                value = page.find(selector)
+                if len(value) > 0:
+                    value = pq(value[0]).text().strip().replace('\n', '')
                 if len(value) > 0:
                     rec[field] = value
             else:

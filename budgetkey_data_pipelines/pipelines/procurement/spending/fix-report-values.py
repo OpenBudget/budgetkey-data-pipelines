@@ -1,6 +1,7 @@
 import re
 import datetime
 import logging
+from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
 
@@ -12,9 +13,13 @@ def boolean(x):
 
 
 def date(x):
-    if isinstance(x, int) or isinstance(x, float):
+    try:
+        x = float(x)
         return datetime.date(1900, 1, 1) + datetime.timedelta(days=int(x))
-    elif not isinstance(x, str):
+    except ValueError:
+        pass
+
+    if not isinstance(x, str):
         return x
 
     x = x.strip()
@@ -22,13 +27,20 @@ def date(x):
         return None
 
     parts = DATE_RE.findall(x)
-    if len(parts) >= 3:
+    if len(parts) == 3:
         day = int(parts[0])
         month = int(parts[1])
         year = int(parts[2])
-        if year < 100:
-            year += 2000
-        return datetime.date(year=year, month=month, day=day)
+    elif len(parts) == 6:
+        year = int(parts[0])
+        month = int(parts[1])
+        day = int(parts[2])
+    else:
+        assert False
+
+    if year < 100:
+        year += 2000
+    return datetime.date(year=year, month=month, day=day)
 
 
 def budget_code(x):
@@ -58,8 +70,13 @@ BAD_WORDS = [
 bad_rows = {}
 total_rows = {}
 
-def process_row(row, row_index, spec, resource_index, *_):
-    if resource_index == 0: # the data
+
+def process_row(row, row_index, spec, resource_index, parameters, stats):
+    if resource_index == 0:  # the data
+        if row_index == 0:
+            stats['bad-lines'] = 0
+            stats['good-lines'] = 0
+
         bad_rows.setdefault(row['report-url'], 0)
         total_rows.setdefault(row['report-url'], 0)
 
@@ -80,12 +97,14 @@ def process_row(row, row_index, spec, resource_index, *_):
                 elif k in ['end_date', 'order_date', 'start_date']:
                     row[k] = date(v)
                 elif k in ['volume']:
-                    row[k] = float(v)
+                    row[k] = Decimal(v.replace(',', ''))
                 elif k in ['executed']:
-                    row[k] = float(v if v is not None else 0)
+                    row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif isinstance(v, str):
                     row[k] = v.strip()
+            stats['good-lines'] += 1
         except Exception as e:
+            stats['bad-lines'] += 1
             logging.exception('ERROR in row %d: %r', row_index, row)
             bad_rows[row['report-url']] += 1
             return

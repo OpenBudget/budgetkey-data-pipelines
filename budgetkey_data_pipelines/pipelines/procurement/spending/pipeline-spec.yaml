@@ -214,7 +214,6 @@ latest-contract-spending:
             aggregate: set
           entity_id:
             aggregate: last
-    - run: sample
     - run: set_types
       parameters:
         resources: contract-spending
@@ -225,11 +224,39 @@ latest-contract-spending:
             type: number
           end_date:
             type: date
+            es:time-range: to
           start_date:
             type: date
           order_date:
             type: date
-    - run: sample
+            es:time-range: from
+          buyer_description:
+            es:itemType: string
+          exemption_reason:
+            es:itemType: string
+          explanation:
+            es:itemType: string
+          manof_ref:
+            es:itemType: string
+          publisher:
+            es:itemType: string
+          purchase_method:
+            es:itemType: string
+          purchasing_unit:
+            es:itemType: string
+          purchasing_unit_code:
+            es:itemType: string
+          sensitive_order:
+            es:itemType: boolean
+          supplier_code:
+            es:itemType: string
+          supplier_name:
+            es:itemType: string
+    - run: set_primary_key
+      parameters:
+        contract-spending:
+          - order_id
+          - budget_code
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending

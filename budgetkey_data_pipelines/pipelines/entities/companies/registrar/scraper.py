@@ -46,12 +46,13 @@ def scrape_company_details(cmp_recs):
     count = 0
     for i, cmp_rec in enumerate(cmp_recs):
 
-        if cmp_rec.get('id') is not None:
+        cmp_name = cmp_rec.get('company_name')
+        if cmp_name is not None and cmp_name.strip() != '':
             yield cmp_rec
             continue
 
         count += 1
-        if count > 100000:
+        if count > 5000:
             yield cmp_rec
             continue
 
@@ -87,6 +88,11 @@ def scrape_company_details(cmp_recs):
 
             for k, v in selectors.items():
                 row[v] = page.find(k).text()
+            if row['company_name'].strip() == '':
+                if row['company_name_eng'].strip() != '':
+                    row['company_name'] = row['company_name_eng']
+                else:
+                    logging.error('Failed to get data for company %s: %r', company_id, row)
 
         yield row
 

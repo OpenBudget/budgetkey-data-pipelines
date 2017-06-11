@@ -1,9 +1,8 @@
 import re
-import requests
 import csv
 import logging
-import time
 from io import StringIO
+from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -18,25 +17,13 @@ def get_entities():
 
     all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
 
-    attempts = 0
-    while True:
-        resp = requests.get(all_db_url)
-        if 'accept-ranges' in resp.headers:
-            content_length = resp.headers['content-length']
-            resp = requests.get(all_db_url, headers={'range': 'bytes=0-%s' % content_length})
+    data = cookie_monster_get(all_db_url)
 
-        data = resp.content
-        logging.info('GOT DATA %r', data[:1024])
+    assert data is not None
+    data = data.decode('cp1255', 'replace')
 
-        data = data.decode('cp1255', 'replace')
-        logging.info('GOT DATA %d bytes', len(data))
-
-        if len(data) > 1024:
-            break
-
-        attempts += 1
-        assert attempts < 10
-        time.sleep(60)
+    logging.info('DECODED DATA %r', data[:1024])
+    logging.info('LENGTH DATA %d bytes', len(data))
 
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
     repl2 = re.compile("[\r\n\t ]+,")
@@ -54,6 +41,7 @@ def get_entities():
         yield dict(
             (k.strip(), str(v).strip()) for k, v in rec.items()
         )
+
 resource = {
     'name': resource_name,
     'path': 'data/{}.csv'.format(resource_name),

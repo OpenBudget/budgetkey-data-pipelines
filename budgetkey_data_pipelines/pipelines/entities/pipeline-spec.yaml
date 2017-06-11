@@ -2,33 +2,50 @@ entities:
   dependencies:
     - pipeline: ./entities/companies/registrar/details
     - pipeline: ./entities/associations/guidestar/guidestar
+    - pipeline: ./entities/special/registry
+    - pipeline: ./entities/ottoman/ottoman-association-registry
   pipeline:
     - run: add_metadata
       parameters:
         name: entities
         title: All Entities
-    - run: add_resource
+    - run: load_resource
       parameters:
-        name: company
-        url: file:///var/datapackages/entities/companies/registrar/details/data/details.csv
-    - run: add_resource
+        resource: company-details
+        url: /var/datapackages/entities/companies/registrar/details/datapackage.json
+    - run: load_resource
       parameters:
-        name: association
-        url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
-    - run: stream_remote_resources
+        resource: guidestar
+        url: /var/datapackages/entities/associations/guidestar/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: special-entities
+        url: /var/datapackages/entities/special/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: ottoman-association-registry
+        url: /var/datapackages/entities/ottoman/datapackage.json
     - run: compact_entities
       parameters:
-        company:
+        company-details:
           remove-prefix: company_
           kind: company
           id-column: id
           name-column: company_name
           name-en-column: company_name_eng
-        association:
+        guidestar:
           remove-prefix: association_
           kind: association
           id-column: id
           name-column: association_title
+        special-entities:
+          kind-column: kind
+          id-column: id
+          name-column: name
+        ottoman-association-registry:
+          kind-column: kind
+          id-column: id
+          name-column: name
     - run: sample
     - run: concatenate
       parameters:
@@ -40,6 +57,15 @@ entities:
           name_en: []
           kind: []
           details: []
+    - run: set_types
+      parameters:
+        types:
+          kind:
+            constraints:
+              pattern: "[a-z-_]+"
+          id:
+            constraints:
+              pattern: "[0-9]+"
     - run: set_primary_key
       parameters:
         entities: ['id']
@@ -51,3 +77,33 @@ entities:
         tables:
           entities:
             resource-name: entities
+
+fingerprints:
+  dependencies:
+    - pipeline: ./entities/entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entity_fingerprints
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+    - run: fingerprint
+      parameters:
+        source-field: name
+        target-field: fingerprint
+        resource-name: entities
+    - run: concatenate
+      parameters:
+        target:
+          name: entities
+        fields:
+          id: null
+          name: null
+          kind: null
+          fingerprint: null
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/fingerprints
+

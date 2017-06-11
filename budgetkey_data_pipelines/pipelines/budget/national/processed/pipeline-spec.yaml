@@ -1,10 +1,10 @@
-national-budgets:
+aggregated-yearly:
   title: National Yearly Budgets - Processed
   description: >
     This pipeline joins the different phases of the budget (allocated, revised and executed).
     In the original file there's a separate row for each of the phases. We like it better as a single row with all phase info.
     Another thing this pipeline does is to rename the column titles - to more friendly English names.
-    Also, it create rows for all hierarchies - where upper hierarchies (2, 4 & 6 digits) are plain aggregations of the 
+    Also, it create rows for all hierarchies - where upper hierarchies (2, 4 & 6 digits) are plain aggregations of the
     8-digit items they contain.
 
   dependencies:
@@ -13,7 +13,7 @@ national-budgets:
     - run: add_metadata
       parameters:
         title: National Budget (Processed)
-        name: processed-national-budget
+        name: processed-national-budget-aggregated-yearly
     - run: add_resource
       parameters:
         name: source-budget
@@ -110,6 +110,8 @@ national-budgets:
           year: null
           code: null
           title: null
+          hierarchy: null
+          parent: null
           func_cls_title_1:
             aggregate: set
           func_cls_title_2:
@@ -172,12 +174,164 @@ national-budgets:
             aggregate: sum
           commitment_balance_executed:
             aggregate: sum
+    - run: join
+      parameters:
+        source:
+          name: budget
+          key: ['year', 'parent']
+        target:
+          name: immediate-children
+          key: null
+        fields:
+          year: null
+          code:
+            name: parent
+          children-code:
+            name: code
+            aggregate: array
+          children-title:
+            name: title
+            aggregate: array
+          children-net_allocated:
+            name: net_allocated
+            aggregate: array
+    - run: combine-immediate-children
+      parameters:
+        resource-name: immediate-children
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/aggregated-yearly
+
+with-extras:
+  title: National Yearly Budgets - With Extras
+  description: >
+    This pipeline joins the different phases of the budget (allocated, revised and executed).
+    In the original file there's a separate row for each of the phases. We like it better as a single row with all phase info.
+    Another thing this pipeline does is to rename the column titles - to more friendly English names.
+    Also, it create rows for all hierarchies - where upper hierarchies (2, 4 & 6 digits) are plain aggregations of the
+    8-digit items they contain.
+
+  dependencies:
+    - pipeline: ./budget/national/processed/aggregated-yearly
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget (With Extras)
+        name: processed-national-budget-with-extras
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/processed/aggregated-yearly/datapackage.json
+        resource: immediate-children
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/processed/aggregated-yearly/datapackage.json
+        resource: budget
+    - run: stream_remote_resources
+    - run: join
+      parameters:
+        source:
+          name: immediate-children
+          key: ['year', 'code']
+          delete: true
+        target:
+          name: budget
+          key: ['year', 'code']
+        fields:
+          children: null
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/with-extras
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
+    - run: dump.to_sql
+      parameters:
+        tables:
+          raw_budget:
+            resource-name: budget
+
+connected-national-budgets:
+  title: National Yearly Budgets - Connected
+  description: >
+    This pipeline joins budget items that span across years.
+
+  dependencies:
+    - pipeline: ./budget/national/processed/with-extras
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget (Connected)
+        name: connected-national-budget
+    - run: add_resource
+      parameters:
+        name: curated2
+        url: http://www.obudget.org/api/budget-matches
+        format: json
+        headers: ['current', 'previous']
+        schema:
+          fields:
+            - name: current
+              type: array
+            - name: previous
+              type: array
+    - run: add_resource
+      parameters:
+        name: curated1
+        url: https://api.fieldbook.com/v1/591d7c0794771a0300cd3bd5/curated
+        format: json
+        headers: 1
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: curated
+        fields:
+          current: []
+          previous: []
+    - run: set_types
+      parameters:
+        types:
+          previous:
+            type: array
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/processed/with-extras/datapackage.json
+        resource: budget
+    - run: item-connections
+    - run: set_primary_key
+      parameters:
+        budget: ['code', 'year']
+    - run: set_types
+      parameters:
+        types:
+          year:
+            es:time-range: "from, to"
+          admin_cls_code_0:
+            es:itemType: string
+          direction:
+            es:itemType: string
+          econ_cls_title_.*:
+            es:itemType: string
+          func_cls_title_.*:
+            es:itemType: string
+          hierarchy:
+            es:itemType: string
+          non_repeating:
+            es:itemType: boolean
+          children:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: code, type: string}
+                - {name: title, type: string}
+                - {name: net_allocated, type: number}
+          history:
+            es:index: false
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/budget/national/processed
+        out-path: /var/datapackages/budget/national/processed/connected-items
     - run: dump.to_sql
       parameters:
         tables:

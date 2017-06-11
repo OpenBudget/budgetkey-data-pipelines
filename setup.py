@@ -19,7 +19,9 @@ setup(
                       'demjson',
                       'requests',
                       'selenium',
-                      'fuzzywuzzy'],
+                      'fuzzywuzzy[speedup]',
+                      'plyvel', 'textract',
+                      ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = budgetkey_data_pipelines.cli:main']}
 )
