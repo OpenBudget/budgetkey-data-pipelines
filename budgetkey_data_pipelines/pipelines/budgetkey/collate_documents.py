@@ -17,7 +17,7 @@ dp['resources'] = [
         'schema': {
             'fields': [
                 {'name': 'key', 'type': 'string'},
-                {'name': 'value', 'type': 'array', 'es:itemType': 'object', 'es:enabled': False}
+                {'name': 'value', 'type': 'array', 'es:itemType': 'object', 'es:index': False}
             ],
             'primaryKey': ['key']
         }
