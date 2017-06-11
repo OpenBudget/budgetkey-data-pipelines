@@ -17,8 +17,11 @@ MOCK_URLS = {10: ['/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=596877',
              45: []}
 
 def resource_filter(resource_data, parameters):
+    max_pages = os.environ.get("EXEMPTION_PUBLISHERS_MAX_PAGES", "")
+    if not max_pages:
+        max_pages = parameters.get("max_pages", "-1")
     kwargs = {
-        "max_pages": int(os.environ.get("EXEMPTION_PUBLISHERS_MAX_PAGES", parameters.get("max_pages", -1)))
+        "max_pages": int(max_pages)
     }
     limit_publisher_ids = os.environ.get("EXEMPTIONS_LIMIT_PUBLISHER_IDS", None)
     if limit_publisher_ids:

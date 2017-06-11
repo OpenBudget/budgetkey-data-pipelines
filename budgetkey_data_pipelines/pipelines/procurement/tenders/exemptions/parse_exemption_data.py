@@ -19,7 +19,7 @@ TABLE_SCHEMA = {
         {"name": "supplier", "type": "string", "required": True},
         {"name": "contact", "type": "string", "required": False},
         {"name": "publisher", "type": "string", "required": True},
-        {"name": "contact_email", "type": "string", "format": "email", "required": False},
+        {"name": "contact_email", "type": "string", "required": False},
         {"name": "claim_date", "type": "date", "required": False},
         {"name": "last_update_date", "type": "date", "required": True},
         {"name": "reason", "type": "string", "required": False},

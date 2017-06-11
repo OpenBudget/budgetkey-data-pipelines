@@ -21,7 +21,7 @@ exemptions:
       parameters:
         # meant for running in cronjob every day
         # for a one-time download of all data set environment variable: EXEMPTION_PUBLISHERS_MAX_PAGES=-1
-        max_pages: 2
+        max_pages: 5
     # download the data from each exemption page
     - run: download_exemption_pages_data
     # parse the data for each exemption
