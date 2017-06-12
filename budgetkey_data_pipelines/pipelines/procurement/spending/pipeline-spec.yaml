@@ -309,6 +309,7 @@ latest-contract-spending:
             name: id
           entity_kind:
             name: kind
+    - run: calc-spending-score
     - run: set_primary_key
       parameters:
         contract-spending:
@@ -325,6 +326,8 @@ latest-contract-spending:
 
 
 spending-by-entity:
+  dependencies:
+    - pipeline: ./procurement/spending/latest-contract-spending
   pipeline:
     - run: add_metadata
       parameters:
