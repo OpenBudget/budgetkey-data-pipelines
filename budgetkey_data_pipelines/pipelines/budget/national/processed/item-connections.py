@@ -84,7 +84,7 @@ def update_equiv(e1, e2):
     e1['code_titles'] = sorted(set(e1['code_titles']))
 
 
-def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_delete=False):
+def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
     # rows = list(rows)
     # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
@@ -201,8 +201,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_del
                                 logging.warning('%s', json.dumps(nci, indent=2))
                 else:
                     s.add(len(row['code']))
-                if should_delete:
-                    delete(connected_items, equiv['code'])
+                delete(connected_items, equiv['code'])
                 for year, hist_item in equiv['history'].items():
                     update_equiv(new_history.setdefault(year, {}), hist_item)
                 update_equiv(new_history.setdefault(equiv['year'], {}), equiv)
@@ -227,7 +226,7 @@ def process_budgets(rows_):
         unmatched = calc_equivs(cur_year, rows,
                                 connected_items, new_connected_items)
         unmatched = calc_equivs(cur_year, reversed(unmatched),
-                                connected_items, new_connected_items, True)
+                                connected_items, new_connected_items)
 
         for row in unmatched:
             row['history'] = {}
