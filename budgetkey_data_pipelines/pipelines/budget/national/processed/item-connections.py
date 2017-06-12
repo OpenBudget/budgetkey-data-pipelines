@@ -241,6 +241,10 @@ def process_budgets(rows_):
         shutil.rmtree(CURRENT_DB)
         os.replace(NEW_CURRENT_DB, CURRENT_DB)
 
+    connected_items = plyvel.DB(CURRENT_DB, create_if_missing=True)
+    yield from iterate_values(connected_items)
+    del connected_items
+
     shutil.rmtree(CURRENT_DB)
 
 
