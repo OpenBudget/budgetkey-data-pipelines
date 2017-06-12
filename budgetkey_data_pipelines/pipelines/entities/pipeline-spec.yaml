@@ -177,7 +177,7 @@ entities:
             - id
           full: true
         fields:
-          amount: null
+          score: null
 
     - run: set_types
       parameters:
