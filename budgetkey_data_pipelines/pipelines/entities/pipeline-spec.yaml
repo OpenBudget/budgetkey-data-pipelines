@@ -1,4 +1,4 @@
-entities:
+all:
   dependencies:
     - pipeline: ./entities/companies/registrar/details
     - pipeline: ./entities/associations/guidestar/guidestar
@@ -80,7 +80,7 @@ entities:
 
 fingerprints:
   dependencies:
-    - pipeline: ./entities/entities
+    - pipeline: ./entities/all
   pipeline:
     - run: add_metadata
       parameters:
@@ -106,4 +106,87 @@ fingerprints:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/fingerprints
+
+entities:
+  dependencies:
+    - pipeline: ./procurement/spending/spending-by-entity
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: scored-entities
+        title: Entities with scores
+
+    # Collect amounts from different spending routes
+    ## Contracts
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/spending/spending-by-entity/datapackage.json
+        resource: spending-by-entity
+    ## Here be supports, exemptions etc...
+
+    # Concatenate all these amounts
+    - run: concatenate
+      parameters:
+        target:
+          name: amounts
+        fields:
+          id: []
+          name: []
+          kind: []
+          amount: []
+
+    # Deduplicate amounts by summing on entity
+    - run: join
+      parameters:
+        source:
+          name: amounts
+          key:
+            - id
+          delete: true
+        target:
+          name: amounts
+          key: null
+        fields:
+          id: null
+          name: null
+          kind: null
+          score:
+            name: amount
+            aggregate: sum
+
+    # Calculate score
+    - run: calc-entity-score
+
+    # Load entities
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+
+    # Load scores into entity table
+    - run: join
+      parameters:
+        source:
+          name: amounts
+          key:
+            - id
+          delete: true
+        target:
+          name: entities
+          key:
+            - id
+          full: true
+        fields:
+          amount: null
+
+    - run: set_types
+      parameters:
+        types:
+          score:
+            es:score-column: true
+
+    # And dump it
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/scored
 
