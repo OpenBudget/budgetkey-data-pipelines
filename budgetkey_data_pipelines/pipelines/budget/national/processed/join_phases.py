@@ -7,11 +7,16 @@ amounts = [
     'gross',
     'dedicated',
     'commitment_allowance',
+    'commitment_balance',
+
     'personnel',
     'contractors',
     'amounts',
-    'commitment_balance',
 ]
+factors = [
+    1000, 1000, 1000, 1000, 1000, 1, 1, 1,
+]
+
 
 codes_and_titles = [
     ('admin_cls_code_%d' % l, 'admin_cls_title_%d' % l)
@@ -68,8 +73,8 @@ def process_first(rows):
         phase_key = phases[row['phase']]
         del row['phase']
 
-        for amount in amounts:
-            row[amount + '_' + phase_key] = row[amount]
+        for amount, factor in zip(amounts, factors):
+            row[amount + '_' + phase_key] = row[amount] * factor
             del row[amount]
 
         save = {}
