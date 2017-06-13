@@ -1,4 +1,5 @@
 from datapackage_pipelines.wrapper import spew, ingest
+from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
 
@@ -74,7 +75,10 @@ def process_first(rows):
         del row['phase']
 
         for amount, factor in zip(amounts, factors):
-            row[amount + '_' + phase_key] = row[amount] * factor
+            value = row[amount]
+            if value is not None and value.strip() != '':
+                value = Decimal(row[amount]) * factor
+            row[amount + '_' + phase_key] = value
             del row[amount]
 
         save = {}
