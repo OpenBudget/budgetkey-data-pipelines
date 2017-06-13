@@ -1,8 +1,9 @@
 import math
-
+import datetime
 import logging
 from datapackage_pipelines.wrapper import process
 
+curyear = datetime.datetime.now().date().year + 1
 
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
@@ -18,8 +19,13 @@ def process_row(row, *_):
     if amount is None:
         logging.warning('net_allocated is None: %r', row)
         amount = 0
-    year_score = (row['year'] - 1990) / 3.0
-    row['score'] = math.log(max(1, amount)) + year_score
+    # Account for relevance
+    year_score = 2**abs(curyear - row['year'])
+    amount /= year_score
+    # Account for depth
+    depth = len(row['code'])/2
+    amount /= depth
+    row['score'] = math.log(max(1, amount))
     return row
 
 
