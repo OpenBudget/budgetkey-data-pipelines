@@ -150,7 +150,7 @@ entities:
           id: null
           name: null
           kind: null
-          score:
+          received_amount:
             name: amount
             aggregate: sum
 
