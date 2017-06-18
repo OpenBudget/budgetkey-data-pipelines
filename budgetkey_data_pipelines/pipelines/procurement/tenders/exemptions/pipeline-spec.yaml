@@ -1,34 +1,36 @@
-publishers:
+exemptions:
+  schedule:
+    crontab: 0 0 * * *
   pipeline:
     - run: add_metadata
       parameters:
-        name: "procurement-tenders-exemptions-publishers"
+        name: "procurement-tenders-exemptions"
+    # get the main HTML page of the exemptions search
     - run: add_resource
       parameters:
         name: "mr-gov-il-search-exemption-messages"
         url: "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
         format: "txt"
+    # download it (using tzabar runner which does some magic that bypasses network security)
     - run: stream_remote_resources
       runner: tzabar
+    # parse all the publisher ids from the main search page
     - run: add_exemptions_publishers_resource
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions/publishers/
-
-publisher-urls:
-  dependencies:
-    - pipeline: ./procurement/tenders/exemptions/publishers
-  pipeline:
-    - run: add_metadata
-      parameters:
-        name: "procurement-tenders-exemptions-publisher-urls"
-    - run: add_resource
-      parameters:
-        name: publishers
-        url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
-    - run: stream_remote_resources
+    # go over each publisher and get urls for all exemptions related to this publisher
     - run: add_publisher_urls_resource
       runner: tzabar
-    - run: dump.to_path
+    # download the data from each exemption page
+    - run: download_exemption_pages_data
+      runner: tzabar
       parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
+        # will compare with the items in DB and only download new items
+        db-table: procurement_tenders_exemptions
+    # parse the data for each exemption
+    - run: parse_exemption_data
+    # update the SQL table (based on the primary keys defined in the schemas)
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tenders_exemptions:
+            mode: update
+            resource-name: exemptions
