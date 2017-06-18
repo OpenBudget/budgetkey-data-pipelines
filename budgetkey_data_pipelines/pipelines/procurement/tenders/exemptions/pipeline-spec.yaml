@@ -1,4 +1,6 @@
 exemptions:
+  schedule:
+    crontab: 0 0 * * *
   pipeline:
     - run: add_metadata
       parameters:
@@ -18,24 +20,14 @@ exemptions:
     # max_pages parameter can be used to limit number of pages for each publisher
     - run: add_publisher_urls_resource
       runner: tzabar
-      parameters:
-        # meant for running in cronjob every day
-        # for a one-time download of all data set environment variable: EXEMPTION_PUBLISHERS_MAX_PAGES=-1
-        max_pages: 5
     # download the data from each exemption page
     - run: download_exemption_pages_data
+      runner: tzabar
+      parameters:
+        # will compare with the items in DB and only download new items
+        db-table: procurement_tenders_exemptions
     # parse the data for each exemption
     - run: parse_exemption_data
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions
-    # remove the documents json field before updating SQL
-    - run: set_types
-      parameters:
-        resources:
-          exemptions
-        types:
-          documents_json: null
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
@@ -43,27 +35,3 @@ exemptions:
           procurement_tenders_exemptions:
             mode: update
             resource-name: exemptions
-
-exemption-documents:
-  pipeline:
-    - run: add_metadata
-      parameters:
-        name: "procurement-tenders-exemption-documents"
-    # add the exemption documents resource from the previously saved exemption data
-    - run: add_resource
-      parameters:
-        name: "exemptions"
-        url: /var/datapackages/procurement/tenders/exemptions/data/exemptions.csv
-    - run: stream_remote_resources
-    # convert the exemption resource to documents resource
-    - run: convert_to_documents_resource
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/procurement/tenders/exemption-documents
-    # update the documents in SQL
-    - run: dump.to_sql
-      parameters:
-        tables:
-          procurement_tenders_exemption_documents:
-            mode: update
-            resource-name: exemption-documents

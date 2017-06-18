@@ -34,7 +34,7 @@ EXPECTED_OUTPUT_RESOURCE_1_ROW_1 = {
     "publication_id": 595431,
     "page_url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
     "description": """התקשרות עם ספקית תשתית התקשרות ואינטרנט וכן מתן שרותי תמיכה, סיוע לקוחות בכל אתרי החטיבה בארץ, גיבוי, אבטחת מידע, שרתי תקשורת וכיוצ"ב עפ"י המתואר במסמך המצורף. הנ"ל מהווה חסכון של כ- 300 אלף ש"ח לכל שנה""",
-    "supplier_id": 510791734,
+    "supplier_id": "510791734",
     "supplier": "לשכה לעיבוד נתונים של הסוכנות היהוד",
     "contact": "",
     "publisher": "ההסתדרות הציונית העולמית - החטיבה להתישבות",
@@ -50,9 +50,9 @@ EXPECTED_OUTPUT_RESOURCE_1_ROW_1 = {
     "end_date": date(2021, 12, 31),
     "decision": "נרשם",
     "page_title": "דיווח פטור משרדי",
-    "documents_json": json.dumps([{"description": "חוות דעת מקצועית",
+    "documents": [{"description": "חוות דעת מקצועית",
                                    "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
-                                   "update_time": "תאריך עדכון מסמך:   00:00 14/03/2017"}])
+                                   "update_time": "תאריך עדכון מסמך:   00:00 14/03/2017"}]
 }
 
 

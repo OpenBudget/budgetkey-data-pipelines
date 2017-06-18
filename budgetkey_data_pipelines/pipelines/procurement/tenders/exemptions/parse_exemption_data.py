@@ -5,17 +5,16 @@ from datetime import datetime
 
 INPUT_RESOURCE = "publisher-urls-downloaded-data"
 OUTPUT_RESOURCE = "exemptions"
-DOCUMENTS_JSON_FIELD = "documents_json"
 TABLE_SCHEMA = {
     # we take the safe route here and use a combination of values to determine the primary key
     # I'm not sure how consistent the source data is, and how much we should rely on it for reference keys
-    "primaryKey": ["publisher_id", "publication_id"],
+    "primaryKey": ["publication_id"],
     "fields": [
         {"name": "publisher_id", "type": "integer", "required": True},
         {"name": "publication_id", "type": "integer", "required": True},
         {"name": "page_url", "title": "exemption page url", "type": "string", "format": "uri", "required": True},
         {"name": 'description', "type": "string", "required": True},
-        {"name": "supplier_id", "type": "integer", "required": False, "missingValue": ["", "0"]},
+        {"name": "supplier_id", "type": "string", "required": False, "missingValue": ["", "0"]},
         {"name": "supplier", "type": "string", "required": True},
         {"name": "contact", "type": "string", "required": False},
         {"name": "publisher", "type": "string", "required": True},
@@ -32,7 +31,7 @@ TABLE_SCHEMA = {
         {"name": "decision", "type": "string", "required": True},
         {"name": "page_title", "type": "string", "required": True},
         # documents should be in a related table (there could be multiple documents per exemption)
-        {"name": DOCUMENTS_JSON_FIELD, "type": "string", "required": True}
+        {"name": "documents", "type": "array", "required": True}
     ]
 }
 BASE_URL = "http://www.mr.gov.il"
@@ -85,7 +84,7 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                 "publication_id": int(source_data["publication_id"]),
                 "page_url": exemption["url"],
                 "description": source_data["description"],
-                "supplier_id": int(source_data["supplier_id"]),
+                "supplier_id": source_data["supplier_id"],
                 "supplier": source_data["supplier"],
                 "contact": source_data["contact"],
                 "publisher": source_data["publisher"],
@@ -101,7 +100,7 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                 "end_date": datetime.strptime(source_data["end_date"], "%d/%m/%Y").date() if source_data["end_date"] else None,
                 "decision": source_data["decision"],
                 "page_title": source_data["page_title"],
-                "documents_json": json.dumps(documents)
+                "documents": documents
             }
 
 if __name__ == "__main__":
