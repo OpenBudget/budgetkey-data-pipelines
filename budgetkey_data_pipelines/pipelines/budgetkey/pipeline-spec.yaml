@@ -45,7 +45,7 @@ documents:
     - run: add_metadata
       parameters:
         name: indexable-documents
-        title: Indexable documents
+        title: Indexable Documents
         description: Indexable documents with key and value (to be used in the website)
     - run: load_resource
       parameters:

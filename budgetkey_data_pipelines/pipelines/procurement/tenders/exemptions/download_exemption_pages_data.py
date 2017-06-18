@@ -4,7 +4,7 @@ import logging
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
 
 
@@ -52,7 +52,7 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
     def _get_all_existing_ids(self, db_table):
         try:
             return [o[0] for o in self.db_session.query("publication_id from {0}".format(db_table))]
-        except OperationalError as e:
+        except (OperationalError, ProgrammingError) as e:
             # this is probably due to the table not existing but even if there is another problem -
             # dump.to_sql will handle it. it's safe to let that processor handle the specifics of sql errors
             # (in case the problem is not table does not exist)
