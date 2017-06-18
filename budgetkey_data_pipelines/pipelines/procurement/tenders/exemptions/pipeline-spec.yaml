@@ -17,7 +17,6 @@ exemptions:
     # parse all the publisher ids from the main search page
     - run: add_exemptions_publishers_resource
     # go over each publisher and get urls for all exemptions related to this publisher
-    # max_pages parameter can be used to limit number of pages for each publisher
     - run: add_publisher_urls_resource
       runner: tzabar
     # download the data from each exemption page
