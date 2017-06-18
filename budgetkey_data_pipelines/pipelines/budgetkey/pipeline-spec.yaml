@@ -1,5 +1,9 @@
 budget-functional-aggregates:
   title: Main Page - Aggregated budget by functional classification
+
+  dependencies:
+    - pipeline: ./budget/national/processed/aggregated-yearly
+
   pipeline:
     - run: add_metadata
       parameters:
@@ -33,6 +37,10 @@ budget-functional-aggregates:
         out-path: /var/datapackages/budgetkey/budget-functional-aggregates
 
 documents:
+
+  dependencies:
+    - pipeline: ./budgetkey/budget-functional-aggregates
+
   pipeline:
     - run: add_metadata
       parameters:
