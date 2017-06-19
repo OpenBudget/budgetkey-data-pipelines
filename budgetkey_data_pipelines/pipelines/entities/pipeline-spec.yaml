@@ -178,6 +178,7 @@ entities:
           full: true
         fields:
           score: null
+          received_amount: null
 
     - run: set_types
       parameters:
