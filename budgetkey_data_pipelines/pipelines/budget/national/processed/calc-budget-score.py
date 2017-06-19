@@ -25,7 +25,7 @@ def process_row(row, *_):
     # Account for depth
     depth = len(row['code'])/2
     amount /= depth
-    row['score'] = math.log(max(1, amount))
+    row['score'] = max(1, amount / 1000)
     return row
 
 
