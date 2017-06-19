@@ -201,6 +201,29 @@ national-budget-changes:
           budget_changes:
             resource-name: national-budget-changes
 
+fake-grouping:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: fake-change-grouping
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: national-budget-changes
+    - run: concatenate
+      parameters:
+        target:
+          name: national-budget-change-transactions
+        fields:
+          year: []
+          leading_item: []
+          req_code: []
+    - run: fake_transaction_id
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/transactions
+
+
 national-budget-change-explanations:
   pipeline:
     - run: add_metadata
