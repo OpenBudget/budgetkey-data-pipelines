@@ -47,7 +47,10 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
         return parse_qs(urlparse(url).query)["pID"][0]
 
     def _initialize_db_session(self):
-        self.db_session = sessionmaker(bind=create_engine(os.environ.get("DPP_DB_ENGINE")))()
+        connection_string = os.environ.get("DPP_DB_ENGINE")
+        logging.info('Creating engine for %s', connection_string)
+        engine = create_engine(connection_string)
+        self.db_session = sessionmaker(bind=engine)()
 
     def _get_all_existing_ids(self, db_table):
         try:
