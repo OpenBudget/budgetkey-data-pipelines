@@ -48,6 +48,9 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
 
     def _initialize_db_session(self):
         connection_string = os.environ.get("DPP_DB_ENGINE")
+        assert connection_string is not None, \
+            "Couldn't connect to DB - " \
+            "Please set your '%s' environment variable" % "DPP_DB_ENGINE"
         logging.info('Creating engine for %s', connection_string)
         engine = create_engine(connection_string)
         self.db_session = sessionmaker(bind=engine)()

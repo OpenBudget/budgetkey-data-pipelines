@@ -6,7 +6,7 @@ tzabar:
       "docker system prune -fa > /dev/null && 
       docker pull budgetkey/budgetkey-data-pipelines > /dev/null && 
       docker run 
-      -i --entrypoint /bin/sh 
+      -i --entrypoint /bin/sh -e DPP_DB_ENGINE={env['DPP_DB_ENGINE']}
       budgetkey/budgetkey-data-pipelines 
       -c 'cd /budgetkey_data_pipelines/pipelines/{path} ; {cmd}'"
 
