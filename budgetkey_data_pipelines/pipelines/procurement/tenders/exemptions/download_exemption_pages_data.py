@@ -1,10 +1,4 @@
 import requests
-import os
-import logging
-from urllib.parse import urlparse, parse_qs
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import OperationalError, ProgrammingError
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
 
 
@@ -28,52 +22,13 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
             table_schema=TABLE_SCHEMA,
             **kwargs
         )
-        if "db-table" in self.parameters:
-            # initialize a database session, which we will use later to fetch all existing ids
-            self._initialize_db_session()
 
     def filter_resource_data(self, data, parameters):
         for exemption in data:
             publisher_id = exemption["id"]
             url = exemption["url"]
-            if self._is_new_exemption_url(url):
+            if exemption['is_new']:
                 yield self._get_exemption_data(publisher_id, url)
-
-    def _is_new_exemption_url(self, url):
-        exemption_id = self._get_exemption_id(url)
-        return self._is_new_exemption_id(exemption_id)
-
-    def _get_exemption_id(self, url):
-        return parse_qs(urlparse(url).query)["pID"][0]
-
-    def _initialize_db_session(self):
-        connection_string = os.environ.get("DPP_DB_ENGINE")
-        assert connection_string is not None, \
-            "Couldn't connect to DB - " \
-            "Please set your '%s' environment variable" % "DPP_DB_ENGINE"
-        logging.info('Creating engine for %s', connection_string)
-        engine = create_engine(connection_string)
-        self.db_session = sessionmaker(bind=engine)()
-
-    def _get_all_existing_ids(self, db_table):
-        try:
-            return [o[0] for o in self.db_session.query("publication_id from {0}".format(db_table))]
-        except (OperationalError, ProgrammingError) as e:
-            # this is probably due to the table not existing but even if there is another problem -
-            # dump.to_sql will handle it. it's safe to let that processor handle the specifics of sql errors
-            # (in case the problem is not table does not exist)
-            logging.info("OperationError in getting all existing ids, this is fine and most likely due to table not existing")
-            logging.debug(str(e))
-            return []
-
-    def _is_new_exemption_id(self, id):
-        if "db-table" in self.parameters:
-            if not hasattr(self, "all_existing_ids"):
-                self.all_existing_ids = self._get_all_existing_ids(self.parameters["db-table"])
-                logging.info('Found %d ids: %r', len(self.all_existing_ids), self.all_existing_ids[:20])
-            return int(id) not in self.all_existing_ids
-        else:
-            return True
 
     def _get_exemption_data(self, publisher_id, url):
         url = "{}{}".format(self._url_prefix, url)

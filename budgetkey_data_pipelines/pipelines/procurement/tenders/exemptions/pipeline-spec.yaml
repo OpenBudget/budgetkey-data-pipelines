@@ -20,11 +20,12 @@ exemptions:
     - run: add_publisher_urls_resource
       runner: tzabar
     # download the data from each exemption page
-    - run: download_exemption_pages_data
-      runner: tzabar
+    - run: check_existing
       parameters:
         # will compare with the items in DB and only download new items
         db-table: procurement_tenders_exemptions
+    - run: download_exemption_pages_data
+      runner: tzabar
     # parse the data for each exemption
     - run: parse_exemption_data
     # update the SQL table (based on the primary keys defined in the schemas)
