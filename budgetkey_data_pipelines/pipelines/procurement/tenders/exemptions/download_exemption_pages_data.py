@@ -70,7 +70,7 @@ class DownloadExemptionPagesDataProcessor(ResourceFilterProcessor):
         if "db-table" in self.parameters:
             if not hasattr(self, "all_existing_ids"):
                 self.all_existing_ids = self._get_all_existing_ids(self.parameters["db-table"])
-                self.engine = create_engine(os.environ.get("DPP_DB_ENGINE"))
+                logging.info('Found %d ids: %r', len(self.all_existing_ids), self.all_existing_ids[:20])
             return int(id) not in self.all_existing_ids
         else:
             return True
