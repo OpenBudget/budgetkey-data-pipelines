@@ -52,7 +52,7 @@ EXPECTED_OUTPUT_RESOURCE_1_ROW_1 = {
     "page_title": "דיווח פטור משרדי",
     "documents": [{"description": "חוות דעת מקצועית",
                                    "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
-                                   "update_time": "תאריך עדכון מסמך:   00:00 14/03/2017"}]
+                                   "update_time": "2017-03-14"}]
 }
 
 
