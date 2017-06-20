@@ -57,6 +57,12 @@ INPUT_FIELDS_TEXT_MAP = {
 }
 
 
+def parse_date(s):
+    if s is None or s.strip() == '':
+        return None
+    return datetime.strptime(s, "%d/%m/%Y").date()
+
+
 class ParseExemptionDataProcessor(ResourceFilterProcessor):
 
     def __init__(self, **kwargs):
@@ -74,9 +80,12 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
             for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
+                update_time = parse_date(update_time_elt.text.split()[-1])
+                if update_time is not None:
+                    update_time = update_time.isoformat()
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
-                                  "update_time": update_time_elt.text,})
+                                  "update_time": update_time})
             source_data = {
                 k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in INPUT_FIELDS_TEXT_MAP.items()}
             yield {
@@ -89,15 +98,15 @@ class ParseExemptionDataProcessor(ResourceFilterProcessor):
                 "contact": source_data["contact"],
                 "publisher": source_data["publisher"],
                 "contact_email": source_data["contact_email"],
-                "claim_date": datetime.strptime(source_data["claim_date"], "%d/%m/%Y").date() if source_data["claim_date"] else None,
-                "last_update_date": datetime.strptime(source_data["last_update_date"], "%d/%m/%Y").date() if source_data["last_update_date"] else None,
+                "claim_date": parse_date(source_data["claim_date"]),
+                "last_update_date": parse_date(source_data["last_update_date"]),
                 "reason": source_data["reason"],
                 "source_currency": source_data["source_currency"],
                 "regulation": source_data["regulation"],
                 "volume": source_data["volume"],
                 "subjects": source_data["subjects"],
-                "start_date": datetime.strptime(source_data["start_date"], "%d/%m/%Y").date() if source_data["start_date"] else None,
-                "end_date": datetime.strptime(source_data["end_date"], "%d/%m/%Y").date() if source_data["end_date"] else None,
+                "start_date": parse_date(source_data["start_date"]),
+                "end_date": parse_date(source_data["end_date"]),
                 "decision": source_data["decision"],
                 "page_title": source_data["page_title"],
                 "documents": documents
