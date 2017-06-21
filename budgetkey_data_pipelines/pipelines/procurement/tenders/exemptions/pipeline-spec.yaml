@@ -28,6 +28,8 @@ exemptions:
       runner: tzabar
     # parse the data for each exemption
     - run: parse_exemption_data
+    # Do type conversion if needed
+    - run: set_types
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
