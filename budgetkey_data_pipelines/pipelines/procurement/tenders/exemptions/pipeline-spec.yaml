@@ -1,4 +1,4 @@
-exemptions:
+scraper:
   schedule:
     crontab: 0 0 * * *
   pipeline:
@@ -37,6 +37,27 @@ exemptions:
           procurement_tenders_exemptions:
             mode: update
             resource-name: exemptions
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/exemptions/scraper
+
+exemptions:
+  title: Load exemption data from DB to flat file
+
+  dependencies:
+    - pipeline: ./procurement/tenders/exemptions/scraper
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "procurement-tenders-exemptions"
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/tenders/exemptions/scraper/datapackage.json
+        resource: exemptions
+        table: procurement_tenders_exemptions
+    - run: stream_remote_resources
+    - run: set_types
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/exemptions/all
