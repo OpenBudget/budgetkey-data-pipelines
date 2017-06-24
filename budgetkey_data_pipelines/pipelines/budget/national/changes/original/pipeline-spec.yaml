@@ -372,7 +372,30 @@ national-budget-changes-aggregated:
           full: true
         fields:
           explanation: null
-    - run: sample
+    # Calculate score
+    - run: calc-transaction-score
+    # Set types
+    - run: set_types
+      types:
+        req_title:
+          es:itemType: string
+        change_code:
+          es:itemType: integer
+        change_title:
+          es:itemType: string
+        change_type_id:
+          es:itemType: integer
+        change_type_name:
+          es:itemType: string
+        committee_id:
+          es:itemType: integer
+        budget_code_title:
+          es:itemType: string
+        date/approval:
+          es:itemType: date
+        date/pending:
+          es:itemType: date
+    # And we're done
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/full

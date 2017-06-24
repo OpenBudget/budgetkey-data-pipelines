@@ -146,6 +146,12 @@ processed:
       parameters:
         exemptions:
           - publication_id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tenders_exemptions_processed:
+            mode: update
+            resource-name: exemptions
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/exemptions/processed
