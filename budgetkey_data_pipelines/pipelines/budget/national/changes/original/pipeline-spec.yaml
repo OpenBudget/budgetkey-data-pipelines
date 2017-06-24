@@ -395,6 +395,10 @@ national-budget-changes-aggregated:
           es:itemType: date
         date/pending:
           es:itemType: date
+    - run: set_primary_key
+      parameters:
+        exemptions:
+          - transaction_id
     # And we're done
     - run: dump.to_path
       parameters:
