@@ -325,6 +325,7 @@ national-budget-changes-aggregated:
           year: null
           leading_item: null
           req_code: null
+          transaction_id: null
           req_title:
             aggregate: set
           change_code:
