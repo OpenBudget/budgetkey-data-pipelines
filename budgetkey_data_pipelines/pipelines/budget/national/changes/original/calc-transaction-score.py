@@ -1,6 +1,8 @@
 import math
 import datetime
 import logging
+from decimal import Decimal
+
 from datapackage_pipelines.wrapper import process
 
 
@@ -27,7 +29,7 @@ def process_row(row, *_):
         if amount is None:
             logging.warning('volume is None: %r', row)
             amount = 0
-        amount /= divider
+        amount /= Decimal(divider)
         sum += abs(amount)
     row['score'] = max(1, sum)
     return row
