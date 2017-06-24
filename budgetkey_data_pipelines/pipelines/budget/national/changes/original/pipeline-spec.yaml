@@ -377,25 +377,26 @@ national-budget-changes-aggregated:
     - run: calc-transaction-score
     # Set types
     - run: set_types
-      types:
-        req_title:
-          es:itemType: string
-        change_code:
-          es:itemType: integer
-        change_title:
-          es:itemType: string
-        change_type_id:
-          es:itemType: integer
-        change_type_name:
-          es:itemType: string
-        committee_id:
-          es:itemType: integer
-        budget_code_title:
-          es:itemType: string
-        date/approval:
-          es:itemType: date
-        date/pending:
-          es:itemType: date
+      parameters:
+        types:
+          req_title:
+            es:itemType: string
+          change_code:
+            es:itemType: integer
+          change_title:
+            es:itemType: string
+          change_type_id:
+            es:itemType: integer
+          change_type_name:
+            es:itemType: string
+          committee_id:
+            es:itemType: integer
+          budget_code_title:
+            es:itemType: string
+          date/approval:
+            es:itemType: date
+          date/pending:
+            es:itemType: date
     - run: set_primary_key
       parameters:
         national-budget-changes:
