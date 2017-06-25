@@ -8,6 +8,12 @@ formats = [
     '%m/%d/%y',
 ]
 
+amounts = [
+    'net_expense_diff',
+    'gross_expense_diff',
+    'allocated_income_diff',
+    'commitment_limit_diff',
+]
 
 def process_row(row, *_):
     for k in list(row.keys()):
@@ -28,6 +34,12 @@ def process_row(row, *_):
     assert len(v) > 0
     v = '0' * (8-len(v)) + v
     row[k] = v
+
+    for amount in amounts:
+        if isinstance(row[amount], str):
+            row[amount] += '000'
+        else:
+            row[amount] *= 1000
 
     return row
 
