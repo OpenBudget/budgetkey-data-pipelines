@@ -1,5 +1,5 @@
-companies-manning:
-  title: Israely companies manning
+themarker:
+  title: Israely companies manning from TheMarker
   description: Name, job and company description.
   pipeline:
     -
@@ -16,7 +16,6 @@ companies-manning:
         headers: 1
     -
       run: stream_remote_resources
-      cache: True
     -
       run: set_types
       parameters:
@@ -29,4 +28,4 @@ companies-manning:
     -
       run: dump.to_path
       parameters:
-          out-file: /var/datapackages/appointments/themarker
+          out-file: /var/datapackages/people/appointments/media/themarker
