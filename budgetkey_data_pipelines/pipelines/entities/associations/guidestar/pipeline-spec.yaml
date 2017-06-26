@@ -1,6 +1,6 @@
 guidestar:
   schedule:
-    crontab: "*/15 * * * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -64,6 +64,8 @@ guidestar:
       parameters:
         types:
           association_year_established: { type: integer }
+          association_founders:
+            es:itemType: string
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/guidestar

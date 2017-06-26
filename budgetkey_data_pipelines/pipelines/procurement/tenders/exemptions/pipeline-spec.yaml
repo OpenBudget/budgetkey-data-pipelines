@@ -1,34 +1,159 @@
-publishers:
+scraper:
+  schedule:
+    crontab: 0 0 * * *
   pipeline:
     - run: add_metadata
       parameters:
-        name: "procurement-tenders-exemptions-publishers"
+        name: "procurement-tenders-exemptions"
+    # get the main HTML page of the exemptions search
     - run: add_resource
       parameters:
         name: "mr-gov-il-search-exemption-messages"
         url: "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
         format: "txt"
+    # download it (using tzabar runner which does some magic that bypasses network security)
     - run: stream_remote_resources
       runner: tzabar
+    # parse all the publisher ids from the main search page
     - run: add_exemptions_publishers_resource
+    # go over each publisher and get urls for all exemptions related to this publisher
+    - run: add_publisher_urls_resource
+      runner: tzabar
+    # download the data from each exemption page
+    - run: check_existing
+      parameters:
+        # will compare with the items in DB and only download new items
+        db-table: procurement_tenders_exemptions
+    - run: download_exemption_pages_data
+      runner: tzabar
+    # parse the data for each exemption
+    - run: parse_exemption_data
+    # Do type conversion if needed
+    - run: set_types
+    # update the SQL table (based on the primary keys defined in the schemas)
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tenders_exemptions:
+            mode: update
+            resource-name: exemptions
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions/publishers/
+        out-path: /var/datapackages/procurement/tenders/exemptions/scraper
 
-publisher-urls:
+exemptions:
+  title: Load exemption data from DB to flat file
+
   dependencies:
-    - pipeline: ./procurement/tenders/exemptions/publishers
+    - pipeline: ./procurement/tenders/exemptions/scraper
+
   pipeline:
     - run: add_metadata
       parameters:
-        name: "procurement-tenders-exemptions-publisher-urls"
-    - run: add_resource
+        name: "procurement-tenders-exemptions"
+    - run: add_sql_resource
       parameters:
-        name: publishers
-        url: /var/datapackages/procurement/tenders/exemptions/publishers/data/publishers.csv
+        datapackage: /var/datapackages/procurement/tenders/exemptions/scraper/datapackage.json
+        resource: exemptions
+        table: procurement_tenders_exemptions
     - run: stream_remote_resources
-    - run: add_publisher_urls_resource
-      runner: tzabar
+    - run: set_types
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/procurement/tenders/exemptions/publisher-urls/
+        out-path: /var/datapackages/procurement/tenders/exemptions/all
+
+processed:
+  dependencies:
+    - pipeline: ./procurement/tenders/exemptions/exemptions
+    - pipeline: ./entities/fingerprints
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: procurement-tenders-exemptions-processed
+    # Load entity fingerprints
+    - run: load_resource
+      parameters:
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+    # Load scraped exemptions
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/tenders/exemptions/all/datapackage.json
+        resource: exemptions
+    # Fingerprint exemption suppliers
+    - run: fingerprint
+      parameters:
+        resource-name: exemptions
+        source-field: supplier
+        target-field: entity_fingerprint
+    # Join with entities on entity name fingerprint
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+        target:
+          name: exemptions
+          key:
+            - entity_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
+    # Join with entities on supplier id
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: exemptions
+          key:
+            - supplier_id
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
+    # Set types for ES
+    - run: set_types
+      parameters:
+        types:
+          end_date:
+            es:time-range: to
+          start_date:
+            es:time-range: from
+          documents:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: link, type: string}
+                - {name: description, type: string}
+                - {name: update_time, type: string}
+    - run: calc-score
+    - run: set_primary_key
+      parameters:
+        exemptions:
+          - publication_id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tenders_exemptions_processed:
+            mode: update
+            resource-name: exemptions
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/exemptions/processed
+
+

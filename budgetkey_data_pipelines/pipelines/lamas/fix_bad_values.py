@@ -29,6 +29,9 @@ def process_resource(res_):
 
 def process_resources(res_iter_):
     for res in res_iter_:
-        yield process_resource(res)
+        if 'lamas' in res.spec['name']:
+            yield process_resource(res)
+        else:
+            yield res
 
 spew(datapackage, process_resources(res_iter))

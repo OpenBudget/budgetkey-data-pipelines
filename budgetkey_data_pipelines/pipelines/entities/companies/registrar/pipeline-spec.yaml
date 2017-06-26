@@ -31,7 +31,7 @@ registry:
 
 details:
   schedule:
-    crontab: "*/15 * * * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -84,27 +84,27 @@ details:
           key:
             - Company_Number
         fields:
-            id: null
-            company_limit: null
-            company_name_eng: null
-            company_country: null
-            company_street: null
-            company_postal_code: null
-            company_city: null
-            company_pob_city: null
-            company_status: null
-            company_street_number: null
-            company_type: null
-            company_goal: null
-            company_name: null
-            company_pob_postal_code: null
-            company_last_report_year: null
-            company_located_at: null
-            company_pob: null
-            company_government: null
-            company_description: null
-            company_mafera: null
-            company_registration_date: null
+            id: { "aggregate": "max" }
+            company_limit: { "aggregate": "max" }
+            company_name_eng: { "aggregate": "max" }
+            company_country: { "aggregate": "max" }
+            company_street: { "aggregate": "max" }
+            company_postal_code: { "aggregate": "max" }
+            company_city: { "aggregate": "max" }
+            company_pob_city: { "aggregate": "max" }
+            company_status: { "aggregate": "max" }
+            company_street_number: { "aggregate": "max" }
+            company_type: { "aggregate": "max" }
+            company_goal: { "aggregate": "max" }
+            company_name: { "aggregate": "max" }
+            company_pob_postal_code: { "aggregate": "max" }
+            company_last_report_year: { "aggregate": "max" }
+            company_located_at: { "aggregate": "max" }
+            company_pob: { "aggregate": "max" }
+            company_government: { "aggregate": "max" }
+            company_description: { "aggregate": "max" }
+            company_mafera: { "aggregate": "max" }
+            company_registration_date: { "aggregate": "max" }
         full: true
     - run: scraper
       runner: tzabar

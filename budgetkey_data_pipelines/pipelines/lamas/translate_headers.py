@@ -456,11 +456,16 @@ def process_resource(res_):
 
 def process_resources(res_iter_):
     for res in res_iter_:
-        yield process_resource(res)
+        if 'lamas' in res.spec['name']:
+            yield process_resource(res)
+        else:
+            yield res
 
 
 def process_datapackage(datapackage):
     for resource in datapackage['resources']:
+        if 'lamas' not in resource['name']:
+            continue
         new_fields = []
         for field in resource['schema']['fields']:
             orig_name = field['name']

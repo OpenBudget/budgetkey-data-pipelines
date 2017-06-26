@@ -109,7 +109,7 @@ quarterly-contract-spending-reports:
             - הבהרות
           report_error:
             - error
-          entity_id:
+          company_id:
             - מספר ח"פ
 
           report-date: []
@@ -149,15 +149,21 @@ latest-contract-spending:
     אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
   dependencies:
     - pipeline: ./procurement/spending/quarterly-contract-spending-reports
+    - pipeline: ./entities/fingerprints
+
   pipeline:
     - run: add_metadata
       parameters:
         name: latest-contract-spending
         title: Latest Contract Spending
-    - run: add_resource
+    - run: load_resource
       parameters:
-        name: quarterly-contract-spending-reports
-        url: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/data/quarterly-contract-spending-reports.csv
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: quarterly-contract-spending-reports
+        url: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
     - run: stream_remote_resources
     - run: join
       parameters:
@@ -212,8 +218,11 @@ latest-contract-spending:
             aggregate: last
           explanation:
             aggregate: set
-          entity_id:
+          company_id:
             aggregate: last
+          supplier_name_fingerprint:
+            name: supplier_name
+            aggregate: max
     - run: set_types
       parameters:
         resources: contract-spending
@@ -228,6 +237,79 @@ latest-contract-spending:
             type: date
           order_date:
             type: date
+    - run: set_types
+      parameters:
+        resources: contract-spending
+        types:
+          end_date:
+            es:time-range: to
+          order_date:
+            es:time-range: from
+          buyer_description:
+            es:itemType: string
+          exemption_reason:
+            es:itemType: string
+          explanation:
+            es:itemType: string
+          manof_ref:
+            es:itemType: string
+          publisher:
+            es:itemType: string
+          purchase_method:
+            es:itemType: string
+          purchasing_unit:
+            es:itemType: string
+          purchasing_unit_code:
+            es:itemType: string
+          sensitive_order:
+            es:itemType: boolean
+          supplier_code:
+            es:itemType: string
+          supplier_name:
+            es:itemType: string
+    - run: fingerprint
+      parameters:
+        resource-name: contract-spending
+        source-field: supplier_name_fingerprint
+        target-field: entity_fingerprint
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+        target:
+          name: contract-spending
+          key:
+            - entity_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: contract-spending
+          key:
+            - company_id
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
+    - run: calc-spending-score
     - run: set_primary_key
       parameters:
         contract-spending:
@@ -241,3 +323,40 @@ latest-contract-spending:
         tables:
           contract_spending:
             resource-name: contract-spending
+
+
+spending-by-entity:
+  dependencies:
+    - pipeline: ./procurement/spending/latest-contract-spending
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: spending-by-entity
+        title: Total contract spending, by entity id
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+        resource: contract-spending
+    - run: join
+      parameters:
+        source:
+          name: contract-spending
+          key:
+            - entity_id
+          delete: true
+        target:
+          name: spending-by-entity
+          key: null
+        fields:
+          id:
+            name: entity_id
+          name:
+            name: entity_name
+          kind:
+            name: entity_kind
+          amount:
+            name: executed
+            aggregate: sum
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/spending-by-entity

@@ -118,6 +118,7 @@ national-budget-changes:
         fields:
           year:
             - שנה
+            - ' שנה'
           leading_item:
             - סעיף מוביל
             - מספר הסעיף
@@ -159,12 +160,14 @@ national-budget-changes:
             - תאריך אישור
           date/pending:
             - תאריך משלוח לוועדה
+    - run: fix_values
     - run: set_types
       parameters:
         types:
           year:
             type: integer
-            required: yes
+            constraints:
+              required: yes
           leading_item:
             type: integer
           req_code:
@@ -185,6 +188,10 @@ national-budget-changes:
             type: number
           personnel_max_diff:
             type: number
+          date/approval:
+            type: date
+          date/pending:
+            type: date
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/original
@@ -193,3 +200,208 @@ national-budget-changes:
         tables:
           budget_changes:
             resource-name: national-budget-changes
+
+fake-grouping:
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: fake-change-grouping
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: national-budget-changes
+    - run: concatenate
+      parameters:
+        target:
+          name: transactions
+        fields:
+          year: []
+          leading_item: []
+          req_code: []
+    - run: fake_transaction_id
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/transactions
+
+
+national-budget-change-explanations:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: change-explanations
+    - run: explanations
+      parameters:
+        resource:
+          name: explanation-history
+          path: data/explanation-history.csv
+        url: https://www.dropbox.com/s/3sfjno7l2v3lkpy/explanations.tar.gz?dl=1
+    - run: explanations
+      runner: tzabar
+      parameters:
+        resource:
+          name: explanation-current
+          path: data/explanation-current.csv
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_explain.zip
+    - run: explanations
+      runner: tzabar
+      parameters:
+        resource:
+          name: explanation-pending
+          path: data/explanation-pending.csv
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/vaada_explain.zip
+    - run: concatenate
+      parameters:
+        target:
+          name: explanations
+        fields:
+          year: []
+          leading_item: []
+          req_code: []
+          explanation: []
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/explanations
+
+national-budget-changes-aggregated:
+  title: Changes, grouped by transaction_id, with explanations
+
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-change-explanations
+    - pipeline: ./budget/national/changes/original/fake-grouping
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: national-budget-changes-full
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/explanations/datapackage.json
+        resource: explanations
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/transactions/datapackage.json
+        resource: transactions
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: national-budget-changes
+    - run: filter_reserve
+    # Add transaction id to all changes
+    - run: join
+      parameters:
+        source:
+          name: transactions
+          key:
+            - year
+            - leading_item
+            - req_code
+          delete: true
+        target:
+          name: national-budget-changes
+          key:
+            - year
+            - leading_item
+            - req_code
+          full: true
+        fields:
+          transaction_id: null
+    # Aggregate changes into transactions based on transaction id
+    - run: join
+      parameters:
+        source:
+          name: national-budget-changes
+          key:
+            - transaction_id
+          delete: true
+        target:
+          name: national-budget-changes
+          key: null
+        fields:
+          year: null
+          leading_item: null
+          req_code: null
+          transaction_id: null
+          req_title:
+            aggregate: set
+          change_code:
+            aggregate: set
+          change_title:
+            aggregate: set
+          change_type_id:
+            aggregate: set
+          change_type_name:
+            aggregate: set
+          committee_id:
+            aggregate: set
+          budget_code_title:
+            aggregate: set
+          net_expense_diff:
+            aggregate: sum
+          gross_expense_diff:
+            aggregate: sum
+          allocated_income_diff:
+            aggregate: sum
+          commitment_limit_diff:
+            aggregate: sum
+          personnel_max_diff:
+            aggregate: sum
+          date/approval:
+            aggregate: set
+          date/pending:
+            aggregate: set
+    # Attach explanation to transaction
+    - run: join
+      parameters:
+        source:
+          name: explanations
+          key:
+            - year
+            - leading_item
+            - req_code
+          delete: true
+        target:
+          name: national-budget-changes
+          key:
+            - year
+            - leading_item
+            - req_code
+          full: true
+        fields:
+          explanation: null
+    # Calculate score
+    - run: calc-transaction-score
+    # Set types
+    - run: set_types
+      parameters:
+        types:
+          req_title:
+            es:itemType: string
+          change_code:
+            es:itemType: integer
+          change_title:
+            es:itemType: string
+          change_type_id:
+            es:itemType: integer
+          change_type_name:
+            es:itemType: string
+          committee_id:
+            es:itemType: integer
+          budget_code_title:
+            es:itemType: string
+          date/approval:
+            es:itemType: date
+          date/pending:
+            es:itemType: date
+    - run: set_primary_key
+      parameters:
+        national-budget-changes:
+          - transaction_id
+    # And we're done
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/full

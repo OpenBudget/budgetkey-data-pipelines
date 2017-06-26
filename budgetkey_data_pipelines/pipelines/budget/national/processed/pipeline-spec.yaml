@@ -300,9 +300,36 @@ connected-national-budgets:
         url: /var/datapackages/budget/national/processed/with-extras/datapackage.json
         resource: budget
     - run: item-connections
+    - run: calc-budget-score
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
+    - run: set_types
+      parameters:
+        types:
+          year:
+            es:time-range: "from, to"
+          admin_cls_code_0:
+            es:itemType: string
+          direction:
+            es:itemType: string
+          econ_cls_title_.*:
+            es:itemType: string
+          func_cls_title_.*:
+            es:itemType: string
+          hierarchy:
+            es:itemType: string
+          non_repeating:
+            es:itemType: boolean
+          children:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: code, type: string}
+                - {name: title, type: string}
+                - {name: net_allocated, type: number}
+          history:
+            es:index: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items

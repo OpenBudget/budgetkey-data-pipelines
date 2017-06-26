@@ -1,4 +1,5 @@
 from datapackage_pipelines.wrapper import spew, ingest
+from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
 
@@ -7,16 +8,21 @@ amounts = [
     'gross',
     'dedicated',
     'commitment_allowance',
+    'commitment_balance',
+
     'personnel',
     'contractors',
     'amounts',
-    'commitment_balance',
+]
+factors = [
+    1000, 1000, 1000, 1000, 1000, 1, 1, 1,
 ]
 
-codes_and_titles = dict(
+
+codes_and_titles = [
     ('admin_cls_code_%d' % l, 'admin_cls_title_%d' % l)
     for l in range(2,10,2)
-)
+]
 
 phases = {
     'מקורי': 'allocated',
@@ -52,9 +58,9 @@ for field in fields:
                 'name': name + '_' + phase,
                 'type': field['type']
             })
-    elif name in list(codes_and_titles.keys()):
+    elif name in list(dict(codes_and_titles).keys()):
         pass
-    elif name in list(codes_and_titles.values()):
+    elif name in list(dict(codes_and_titles).values()):
         pass
     elif name == 'phase':
         pass
@@ -68,12 +74,15 @@ def process_first(rows):
         phase_key = phases[row['phase']]
         del row['phase']
 
-        for amount in amounts:
-            row[amount + '_' + phase_key] = row[amount]
+        for amount, factor in zip(amounts, factors):
+            value = row[amount]
+            if value is not None and value.strip() != '':
+                value = Decimal(row[amount]) * factor
+            row[amount + '_' + phase_key] = value
             del row[amount]
 
         save = {}
-        for code_key, title_key in codes_and_titles.items():
+        for code_key, title_key in codes_and_titles:
             save[code_key] = row[code_key]
             if len(save[code_key]) % 2 == 1:
                 save[code_key] = '0' + save[code_key]
@@ -82,8 +91,9 @@ def process_first(rows):
             del row[title_key]
 
         hierarchy = [['00', 'המדינה']]
-        for code_key, title_key in codes_and_titles.items():
-            row['code'] = '00' + save[code_key]
+        for i, (code_key, title_key) in enumerate(codes_and_titles):
+            expected_length = i*2 + 4
+            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
             row['title'] = save[title_key]
             row['hierarchy'] = hierarchy
             row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]

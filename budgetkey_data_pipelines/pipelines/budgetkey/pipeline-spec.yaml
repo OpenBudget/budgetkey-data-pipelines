@@ -1,0 +1,60 @@
+budget-functional-aggregates:
+  title: Main Page - Aggregated budget by functional classification
+
+  dependencies:
+    - pipeline: ./budget/national/processed/aggregated-yearly
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: budget-functional-aggregates
+        title: Main Page - Aggregated budget by functional classification
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/processed/aggregated-yearly/datapackage.json
+        resource: budget
+    - run: prepare_budget_functional_aggregates
+      cache: true
+    - run: join
+      parameters:
+        source:
+          name: budget
+          key:
+            - func_cls_title_1
+            - func_cls_title_2
+          delete: true
+        target:
+          name: budget-functional-aggregates
+          key: null
+        fields:
+          func_cls_title_1: null
+          func_cls_title_2: null
+          net_allocated:
+            aggregate: sum
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budgetkey/budget-functional-aggregates
+
+documents:
+
+  dependencies:
+    - pipeline: ./budgetkey/budget-functional-aggregates
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: indexable-documents
+        title: Indexable Documents
+        description: Indexable documents with key and value (to be used in the website)
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budgetkey/budget-functional-aggregates/datapackage.json
+        resource: 0
+    - run: collate_documents
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budgetkey/documents
+
+
+

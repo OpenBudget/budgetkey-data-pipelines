@@ -17,11 +17,18 @@ municipality-to-city:
         tables:
           lamas_muni_map:
             resource-name: municipality-locality-map
+
 municipal-data:
+  dependencies:
+    - pipeline: ./entities/special/registry
   pipeline:
     - run: add_metadata
       parameters:
         name: lamas-municipal-data
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/special/datapackage.json
+        resource: special-entities
     - run: add_resource
       parameters:
         name: lamas-municipal-data-1
@@ -52,6 +59,7 @@ municipal-data:
     - run: fix_bad_values
     - run: concatenate
       parameters:
+        sources: 'lamas-municipal-data-[0-9]+'
         target:
           name: lamas-municipal-data
         fields:
@@ -439,9 +447,13 @@ municipal-data:
           year_reception_status_municipal: []
     - run: set_types
       parameters:
+        resources: lamas-municipal-data
         types:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
+          (symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
+            constraints:
+              required: true
     - run: join
       parameters:
         source:
@@ -539,7 +551,8 @@ municipal-data:
           density_population_area_build_residential_person_per_km3_2013: null
           depreciation_water_total_1000s_m3_2015: null
           distance_border_district_tel_aviv_km_2004: null
-          district_2015: null
+          district_2015:
+            aggregate: max
           done_construction_area_1000s_m2_total_2015: null
           done_construction_area_residential_1000s_m2_2015: null
           done_construction_number_flats_2015: null
@@ -632,7 +645,8 @@ municipal-data:
           index_compact_2006_rating_from_1_to_197_1_compact_most: null
           index_inequality_employees_index_gini_0_equality_full_in_2014: null
           index_peripheral_2004_cluster_from_1_to_10_1_compact_most: null
-          index_peripheral_2004_grade_by_group_cluster: null
+          index_peripheral_2004_grade_by_group_cluster:
+            aggregate: max
           index_peripheral_2004_rating_by_ingredients_rating_closeness_to_border_district_tel_aviv_from_1_to_252_1_farthest_most: null
           index_peripheral_2004_rating_by_ingredients_rating_index_accessibility_potential_from_1_to_252_1_accessibility_lowest_most: null
           index_peripheral_2004_rating_from_1_to_252_1_compact_most: null
@@ -655,7 +669,8 @@ municipal-data:
           moshav_incl_kfar_sharing_2015: null
           moshav_sharing_2015: null
           muslim_pct_2015: null
-          name_committee_planning_construction_2015: null
+          name_committee_planning_construction_2015:
+            aggregate: max
           name_municipality: null
           number_employees_in_2014: null
           number_everything_load_loans_to_end_the_year_incl_difference_linked_2015: null
@@ -753,7 +768,8 @@ municipal-data:
           schools_total_2015_2014/15: null
           settlement_first_of_immigrants_2015: null
           space_sea_municipalities_local_bordering_beach_sea: null
-          status_municipal_2015: null
+          status_municipal_2015:
+            aggregate: max
           students_in_schools_elementary_incl_education_special_2015_2014/15: null
           students_in_schools_high_2015_2014/15: null
           students_middle_school_2015_2014/15: null
@@ -835,6 +851,34 @@ municipal-data:
           waste_solid_residential_commercial_cutting_kg_daily_per_capita_2015: null
           year_reception_status_municipal: null
 #    - run: sample
+    - run: fingerprint
+      parameters:
+        source-field: name
+        target-field: fingerprint
+        resource-name: special-entities
+    - run: fingerprint
+      parameters:
+        source-field: name_municipality
+        target-field: fingerprint
+        resource-name: lamas-municipal-data
+    - run: join
+      parameters:
+        source:
+          name: special-entities
+          key:
+            - fingerprint
+          delete: true
+        target:
+          name: lamas-municipal-data
+          key:
+            - fingerprint
+        fields:
+          entity_id:
+            name: id
+          entity_name:
+            name: name
+          entity_kind:
+            name: kind
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/

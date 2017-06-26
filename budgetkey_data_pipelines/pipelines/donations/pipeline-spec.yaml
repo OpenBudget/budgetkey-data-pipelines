@@ -4,6 +4,7 @@ parties:
       parameters:
         name: donations-parties
     - run: get_parties
+      runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/donations/parties
@@ -20,6 +21,7 @@ candidates:
         url: /var/datapackages/donations/parties/datapackage.json
         resource: 0
     - run: get_candidates
+      runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/donations/candidates
@@ -36,6 +38,7 @@ transactions:
         url: /var/datapackages/donations/candidates/datapackage.json
         resource: 0
     - run: get_transactions
+      runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/donations/transactions

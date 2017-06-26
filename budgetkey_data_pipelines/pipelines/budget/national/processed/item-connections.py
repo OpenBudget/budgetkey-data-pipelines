@@ -71,7 +71,20 @@ def normalize(obj):
     assert False, 'Bad object %r' % obj
 
 
-def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_delete=False):
+def update_equiv(e1, e2):
+    for k, v in e2.items():
+        if k != 'year' and isinstance(v, (int, float)):
+            e1.setdefault(k, 0)
+            e1[k] += v
+    e1.setdefault('code_titles', [])
+    if 'code' in e2:
+        e1['code_titles'].append('%s:%s' % (e2['code'], e2['title']))
+    else:
+        e1['code_titles'].extend(e2['code_titles'])
+    e1['code_titles'] = sorted(set(e1['code_titles']))
+
+
+def calc_equivs(cur_year, rows, connected_items, new_connected_items):
 
     # rows = list(rows)
     # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
@@ -188,12 +201,10 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, should_del
                                 logging.warning('%s', json.dumps(nci, indent=2))
                 else:
                     s.add(len(row['code']))
-                if should_delete:
-                    delete(connected_items, equiv['code'])
-                for year, items in equiv['history'].items():
-                    new_history.setdefault(year, []).extend(items)
-                del equiv['history']
-                new_history.setdefault(equiv['year'], []).append(equiv)
+                delete(connected_items, equiv['code'])
+                for year, hist_item in equiv['history'].items():
+                    update_equiv(new_history.setdefault(year, {}), hist_item)
+                update_equiv(new_history.setdefault(equiv['year'], {}), equiv)
             row['history'] = new_history
             put(new_connected_items, row['code'], row)
 
@@ -215,7 +226,7 @@ def process_budgets(rows_):
         unmatched = calc_equivs(cur_year, rows,
                                 connected_items, new_connected_items)
         unmatched = calc_equivs(cur_year, reversed(unmatched),
-                                connected_items, new_connected_items, True)
+                                connected_items, new_connected_items)
 
         for row in unmatched:
             row['history'] = {}
@@ -229,6 +240,10 @@ def process_budgets(rows_):
 
         shutil.rmtree(CURRENT_DB)
         os.replace(NEW_CURRENT_DB, CURRENT_DB)
+
+    connected_items = plyvel.DB(CURRENT_DB, create_if_missing=True)
+    yield from iterate_values(connected_items)
+    del connected_items
 
     shutil.rmtree(CURRENT_DB)
 
