@@ -14,8 +14,14 @@ parameters, datapackage, res_iter = ingest()
 
 headers = ['name', 'href', 'ministry_responsible', 'last_activity_report_href', 'last_financial_report_href']
 
+hostname = 'http://mof.gov.il'
 
-scraped_ids = set()
+
+def get_href(href):
+    if href is None:
+        return href
+    else:
+        return hostname + href
 
 
 def get_element_from_row(row):
@@ -23,15 +29,15 @@ def get_element_from_row(row):
     row_data = pq(row).children()
     name_href_element = pq(row_data[0]).find('a')
     element['name'] = name_href_element.text().strip()
-    element['href'] = name_href_element.attr['href']
+    element['href'] = get_href(name_href_element.attr['href'])
 
     element['ministry_responsible'] = pq(row_data[1]).find('.tableTRText').text().strip()
 
     last_activity_report_href_element = pq(row_data[2]).find('a')
-    element['last_activity_report_href'] = last_activity_report_href_element.attr['href']
+    element['last_activity_report_href'] = get_href(last_activity_report_href_element.attr['href'])
 
     last_financial_report_href_element = pq(row_data[3]).find('a')
-    element['last_financial_report_href'] = last_financial_report_href_element.attr['href']
+    element['last_financial_report_href'] = get_href(last_financial_report_href_element.attr['href'])
 
     return element
 
@@ -55,16 +61,16 @@ def scrape():
 
     driver.set_window_size(1200, 800)
 
-    driver.get("http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx")
     logging.info('GETTING DATA')
+    driver.get(hostname + "/GCA/CompaniesInformation/Pages/default.aspx")
 
     page = pq(driver.page_source)
     rows = page.find('.gcaCompamies tbody tr')
     logging.info('GOT %d ROWS', len(rows))
-    # values = []
     verify_row_structure(rows[0])
     for row in rows:
         yield dict(get_element_from_row(row))
+
 
 datapackage['resources'].append({
     'name': 'government-companies',
