@@ -3,6 +3,8 @@ import logging
 
 from selenium import webdriver
 from selenium.webdriver.remote.remote_connection import LOGGER
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -54,10 +56,10 @@ def verify_row_structure(row):
 def scrape():
     logging.info('PREPARING')
     # Prepare Driver
-    driver = webdriver.Chrome()
-    # driver = webdriver.Remote(
-    #     command_executor='http://tzabar.obudget.org:8910',
-    #     desired_capabilities=DesiredCapabilities.PHANTOMJS)
+    # driver = webdriver.Chrome()
+    driver = webdriver.Remote(
+        command_executor='http://tzabar.obudget.org:8910',
+        desired_capabilities=DesiredCapabilities.PHANTOMJS)
 
     driver.set_window_size(1200, 800)
 

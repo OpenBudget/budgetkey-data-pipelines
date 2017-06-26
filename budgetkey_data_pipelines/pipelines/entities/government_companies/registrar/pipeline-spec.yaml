@@ -11,11 +11,12 @@ government_companies:
             web: http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx
     - run: all-companies-scraper
     - run: company-page-scraper
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/entities/government_companies/registrar
+    - run: set_types
     - run: dump.to_sql
       parameters:
         tables:
           government_companies:
             resource-name: government-companies
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/government_companies/registrar
