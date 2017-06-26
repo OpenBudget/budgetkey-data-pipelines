@@ -5,6 +5,8 @@ from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
 
+curyear = datetime.datetime.now().date().year + 1
+
 
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
@@ -31,6 +33,11 @@ def process_row(row, *_):
             amount = 0
         amount /= Decimal(divider)
         sum += abs(amount)
+
+    # Account for relevance
+    year_score = 2**abs(curyear - row['year'])
+    sum /= year_score
+
     row['score'] = max(1, sum)
     return row
 
