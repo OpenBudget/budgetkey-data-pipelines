@@ -43,7 +43,7 @@ def get_changes(rows):
         row['trcode'] = transfer_code(row)
 
         if row['date/approval'] is None:
-            row['date_kind'] = 'pending/00/00/%s' % row['trcode']
+            row['date_kind'] = 'pending/%s' % row['trcode']
         else:
             row['date_kind'] = 'approved/' + (
                 row['date/approval'].strftime('%d/%m/%Y')
@@ -152,6 +152,9 @@ def get_transactions(changes):
             ))
             rest_changes = date_reserve
             for comb_size in range(2, min(len(date_reserve) + 1, 7)):
+                if len(rest_changes) < comb_size:
+                    break
+
                 transactions, rest_changes = find_all_transactions(
                     rest_changes, comb_size)
 
@@ -163,9 +166,6 @@ def get_transactions(changes):
 
                 for transaction in transactions:
                     yield set(x['trcode'] for x in transaction)
-
-                if len(rest_changes) < comb_size:
-                    break
 
     def assign_transactions(groups, changes):
         # This allows to perform search ~10 times faster
