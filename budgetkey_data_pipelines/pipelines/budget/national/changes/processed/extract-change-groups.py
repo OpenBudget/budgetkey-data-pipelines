@@ -1,7 +1,7 @@
 from datapackage_pipelines.wrapper import spew, ingest
-from datetime import datetime
 import itertools
 import logging
+
 
 value_fields = [
     'net_expense_diff',
@@ -37,25 +37,13 @@ def transfer_code(change):
     )
 
 
-def powerset(iterable):
-    s = list(iterable)
-    return itertools.chain.from_iterable(
-        itertools.combinations(s, r)
-        for r in range(2, min(len(s) + 1, 6))
-    )
-
-
-def subsets(s):
-    return map(set, powerset(s))
-
-
 def get_changes(rows):
-    now = datetime.now().strftime('%d/%m/%Y')
+    # now = datetime.now().strftime('%d/%m/%Y')
     for row in rows:
         row['trcode'] = transfer_code(row)
 
         if row['date/approval'] is None:
-            row['date_kind'] = 'pending/' + now
+            row['date_kind'] = 'pending/00/00/%s' % row['trcode']
         else:
             row['date_kind'] = 'approved/' + (
                 row['date/approval'].strftime('%d/%m/%Y')
@@ -81,71 +69,110 @@ def get_transactions(changes):
 
         return result
 
+    def try_complete_transaction(prefix, skip_leading_items, skip_indexes,
+                                 items, start_index, count_needed):
+        if count_needed > 1:
+            # try combinations
+            for i in range(start_index, len(items) - count_needed + 1):
+                if i in skip_indexes:
+                    continue
+                item = items[i]
+                if item['leading_item'] in skip_leading_items:
+                    continue
+                transaction, new_skip_indexes = try_complete_transaction(
+                    prefix + [item],
+                    skip_leading_items.union({item['leading_item']}),
+                    skip_indexes.union({i}),
+                    items,
+                    i + 1,
+                    count_needed - 1
+                )
+                if transaction is not None:
+                    return transaction, new_skip_indexes
+        else:
+            # we need to find last item; it should turn sum by each
+            # field into zero
+            checksum = {
+                field: sum(c.get(field, 0) for c in prefix)
+                for field in value_fields
+            }
+            for i in range(start_index, len(items)):
+                if i in skip_indexes:
+                    continue
+                item = items[i]
+                if item['leading_item'] in skip_leading_items:
+                    continue
+                matches = all([
+                    item[field] + checksum[field] == 0
+                    for field in value_fields
+                ])
+                if matches:
+                    return prefix + [item], skip_indexes.union({i})
+        return None, skip_indexes
+
+    def find_all_transactions(items, count_needed):
+        transactions = []
+        used_indexes = set()
+        for i in range(0, len(items) - count_needed + 1):
+            if i not in used_indexes:
+                if count_needed >= 5:
+                    logging.debug('%s / %s' % (i, len(items)))
+                item = items[i]
+                transaction, new_used_indexes = try_complete_transaction(
+                    [item],
+                    {item['leading_item']},
+                    used_indexes.union({i}),
+                    items,
+                    i + 1,
+                    count_needed - 1
+                )
+                if transaction is not None:
+                    used_indexes = new_used_indexes
+                    transactions.append(transaction)
+
+        unmatched = []
+        for i in range(0, len(items)):
+            if i not in used_indexes:
+                unmatched.append(items[i])
+
+        return transactions, unmatched
+
     def find_groups(changes):
-        selected_transfer_codes = set()
-        for date_kind, date_changes in itertools.groupby(changes, get_date):
-            date_reserve = [
-                c for c in date_changes
-                if c['budget_code'].startswith('0047') and c['leading_item'] != 47
-                if any(c[field] for field in value_fields)
-            ]
-            logging.debug('Reserve date: kind:%s num:%s' % (
+        reserve_changes = [
+            c for c in changes
+            if c['budget_code'].startswith('0047') and c['leading_item'] != 47
+            if any(c[field] for field in value_fields)
+        ]
+        groups = itertools.groupby(reserve_changes, get_date)
+
+        for date_kind, date_reserve in groups:
+            date_reserve = list(date_reserve)
+            logging.debug('Reserve date: kind: %s, count: %s' % (
                 date_kind, len(date_reserve)
             ))
-            num_found = 0  # these two - only to show progress
-            i = 0          #
+            rest_changes = date_reserve
             for comb_size in range(2, min(len(date_reserve) + 1, 7)):
-                done = False
-                while not done:
-                    not_selected = list(
-                        x for x in date_reserve
-                        if x['trcode'] not in selected_transfer_codes
-                    )
-                    logging.debug('len(not_selected)=%d' % len(not_selected))
-                    date_transactions = itertools.combinations(
-                        not_selected, comb_size)
-                    found = None
-                    done = True
-                    try:
-                        while True:
-                            i += 1
-                            if i % 100000 == 0:
-                                logging.debug('%s %s %s' % (
-                                    len(date_reserve), num_found, i
-                                ))
-                            transaction = date_transactions.send(found)
-                            found = False
-                            sumvec = sum(
-                                sum(c.get(x, 0) for c in transaction) ** 2
-                                for x in value_fields
-                            )
-                            if sumvec == 0:
-                                transfer_codes = set(
-                                    x['trcode']
-                                    for x in transaction
-                                )
-                                if len(selected_transfer_codes & transfer_codes) > 0:
-                                    continue
-                                selected_transfer_codes.update(transfer_codes)
-                                transfer_codes = sorted(transfer_codes)
-                                num_found += len(transfer_codes)
-                                yield set(transfer_codes),
-                                found = True
-                    except StopIteration:
-                        pass
-        for change in changes:
-            if not change['trcode'] in selected_transfer_codes:
-                selected_transfer_codes.add(change['trcode'])
-                yield {change['trcode']}
+                transactions, rest_changes = find_all_transactions(
+                    rest_changes, comb_size)
+
+                logging.debug(
+                    'Combination size: %s, transactions: %s, '
+                    'changes left: %s' %
+                    (comb_size, len(transactions), len(rest_changes)
+                     ))
+
+                for transaction in transactions:
+                    yield set(x['trcode'] for x in transaction)
+
+                if len(rest_changes) < comb_size:
+                    break
 
     def assign_transactions(groups, changes):
-
         # This allows to perform search ~10 times faster
         changes_by_year = {}
         for x in changes:
             year = x['year']
-            changes_by_year[year] = changes_by_year.get(year, [])
-            changes_by_year[year].append(x)
+            changes_by_year.setdefault(year, []).append(x)
 
         processed_count = 0
         for trcodes in groups:
@@ -199,7 +226,7 @@ def get_transactions(changes):
                     if s > 0:
                         transaction['id'] = trcode.split('/')[1]
                         logging.debug(
-                            'selected transaction id %s as '
+                            'Selected transaction id %s as '
                             'representative for %r' %
                             (transaction['id'], transfer_ids))
                         break
