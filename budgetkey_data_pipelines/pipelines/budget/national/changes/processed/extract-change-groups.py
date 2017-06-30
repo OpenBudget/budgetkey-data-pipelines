@@ -115,8 +115,8 @@ def get_transactions(changes):
         used_indexes = set()
         for i in range(0, len(items) - count_needed + 1):
             if i not in used_indexes:
-                if count_needed >= 5:
-                    logging.debug('%s / %s' % (i, len(items)))
+                # if count_needed >= 5:
+                #     logging.debug('%s / %s' % (i, len(items)))
                 item = items[i]
                 transaction, new_used_indexes = try_complete_transaction(
                     [item],
