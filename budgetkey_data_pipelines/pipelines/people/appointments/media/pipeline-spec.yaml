@@ -1,5 +1,5 @@
 themarker:
-  title: Israely companies manning from TheMarker
+  title: Israeli companies manning from TheMarker
   description: Name, job and company description.
   pipeline:
     -
@@ -17,15 +17,29 @@ themarker:
     -
       run: stream_remote_resources
     -
+      run: concatenate
+      parameters:
+        fields:
+          full_name:
+            - name
+          start_date:
+            - date
+          position:
+            - title
+          organisation_name:
+            - company
+          details:
+            - detiles
+          gender: []
+    -
       run: set_types
       parameters:
-         resources: manning-data
-         types:
-           img: null
-           date:
-              type: date
-              format: "fmt:%d/%m/%Y"
+        resources: manning-data
+        types:
+          start_date:
+            type: date
+            format: "fmt:%d/%m/%Y"
     -
       run: dump.to_path
       parameters:
-          out-file: /var/datapackages/people/appointments/media/themarker
+          out-path: /var/datapackages/people/appointments/media/themarker

@@ -52,6 +52,8 @@ SIMPLIFICATIONS = [
                     ("וו", "ו"),
                     ("יי", "י"),
                     (",", ""),
+                    (". ", " "),
+                    (".", " "),
                     (")", " "),
                     ("(", " "),
                     ("/", " "),
@@ -76,10 +78,15 @@ def fingerprint(rows):
             while not done:
                 done = True
                 for suffix in CLEAN_SUFFIXES:
-                    if tgt.endswith(suffix):
-                        tgt = tgt[:-len(suffix)]
-                        done = False
-                        break
+                    for l in range(len(suffix), 0, -1):
+                        if tgt.endswith(suffix[:l]):
+                            tgt = tgt[:-l]
+                            done = False
+                            break
+
+            for prefix in CLEAN_TITLES:
+                if tgt.startswith(prefix + ' '):
+                    tgt = tgt[len(prefix)+1:]
 
             for f, t in SIMPLIFICATIONS:
                 tgt = tgt.replace(f, t)
@@ -87,20 +94,7 @@ def fingerprint(rows):
             tgt = DIGITS.sub('', tgt)
             tgt = ENGLISH.sub('', tgt)
 
-            done = False
-            while not done:
-                done = True
-                for suffix in CLEAN_SUFFIXES:
-                    if tgt.endswith(suffix):
-                        tgt = tgt[:-len(suffix)]
-                        done = False
-                        break
-
-            for prefix in CLEAN_TITLES:
-                if tgt.startswith(prefix + ' '):
-                    tgt = tgt[len(prefix)+1:]
-
-            tgt = ' '.join(tgt.split())
+            tgt = ' '.join(sorted(tgt.strip()[:30].split()))
 
             if len(tgt) == 0:
                 tgt = None
