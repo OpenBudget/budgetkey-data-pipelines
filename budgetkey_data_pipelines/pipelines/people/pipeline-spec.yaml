@@ -1,0 +1,105 @@
+all:
+  dependencies:
+    - pipeline: ./people/appointments/all-appointments
+
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: raw-people-information
+        title: Information regarding people
+
+    -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/all/datapackage.json
+        resource: 0
+
+    -
+      run: concatenate
+      parameters:
+        target:
+          name: people
+        fields:
+          full_name: []
+          start_date: []
+          position: []
+          organisation_name: []
+          details: []
+          gender: []
+
+    -
+      run: fingerprint
+      parameters:
+        source-field: full_name
+        target-field: key
+        resource-name: people
+
+    -
+      run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/all
+
+aggregated:
+  dependencies:
+    - pipeline: ./people/all
+
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: aggregated-people-information
+        title: Aggregated Information regarding people
+
+    -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/all/datapackage.json
+        resource: 0
+
+    -
+      run: aggregate-people
+
+    -
+      run: join
+      parameters:
+        source:
+          name: people
+          key:
+            - key
+          delete: true
+        target:
+          name: people
+          key: null
+        fields:
+          key: null
+          details:
+            aggregate: array
+
+    -
+      run: set_types
+      parameters:
+        types:
+          details:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {'name': 'full_name', 'type': 'string'}
+                - {'name': 'start_date', 'type': 'string'}
+                - {'name': 'position', 'type': 'string'}
+                - {'name': 'organisation_name', 'type': 'string'}
+                - {'name': 'details', 'type': 'string'}
+                - {'name': 'gender', 'type': 'string'}
+
+    -
+      run: calc-person-score
+
+    -
+      run: set_primary_key
+      parameters:
+        people: ['key']
+
+    -
+      run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/aggregated

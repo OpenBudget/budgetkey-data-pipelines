@@ -1,0 +1,45 @@
+themarker:
+  title: Israeli companies manning from TheMarker
+  description: Name, job and company description.
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: 'companies-manning'
+        title: 'companies manning (name and title to company)'
+        homepage: 'http://www.themarker.com'
+    -
+      run: add_resource
+      parameters:
+        name: 'mannning-data'
+        url: http://www.themarker.com/st/inter/DB/tm/2015/minuyim30.xlsx
+        headers: 1
+    -
+      run: stream_remote_resources
+    -
+      run: concatenate
+      parameters:
+        fields:
+          full_name:
+            - name
+          start_date:
+            - date
+          position:
+            - title
+          organisation_name:
+            - company
+          details:
+            - detiles
+          gender: []
+    -
+      run: set_types
+      parameters:
+        resources: manning-data
+        types:
+          start_date:
+            type: date
+            format: "fmt:%d/%m/%Y"
+    -
+      run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/appointments/media/themarker

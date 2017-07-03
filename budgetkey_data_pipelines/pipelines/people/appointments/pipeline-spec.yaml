@@ -1,0 +1,34 @@
+all-appointments:
+  dependencies:
+    - pipeline: ./people/appointments/media/themarker
+
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: all-appointment-data
+        title: Appointment data from various sources
+
+    -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/media/themarker/datapackage.json
+        resource: 0
+
+    -
+      run: concatenate
+      parameters:
+        target:
+          name: appointments
+        fields:
+          full_name: []
+          start_date: []
+          position: []
+          organisation_name: []
+          details: []
+          gender: []
+
+    -
+      run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/appointments/all

@@ -142,6 +142,8 @@ quarterly-contract-spending-reports:
         tables:
           quarterly_contract_spending_reports:
             resource-name: quarterly-contract-spending-reports
+          quarterly_contract_spending_reports_errors:
+            resource-name: report-loading-results
 
 latest-contract-spending:
   title: התקשרויות רכש ממשלתיות
