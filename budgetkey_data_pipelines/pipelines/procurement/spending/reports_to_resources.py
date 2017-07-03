@@ -28,7 +28,7 @@ for i, report in enumerate(reports.iter()):
             canary_rows = canary.iter()
             headers = None
             for j, row in enumerate(canary_rows):
-                if j > 10:
+                if j > 20:
                     break
                 row = [str(x).strip() if x is not None else '' for x in row]
                 if len(row) < 0 and row[0] == '':
