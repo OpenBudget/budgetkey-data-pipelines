@@ -1,6 +1,8 @@
 government_companies:
+  title: חברות ממשלתיות
+  description: רשימת כלל החברות הממשלתיות, מתעדכן שבועית.
   schedule:
-    crontab: "*/15 * * * *"
+    crontab: 0 0 * * 1
   pipeline:
     - run: add_metadata
       parameters:
