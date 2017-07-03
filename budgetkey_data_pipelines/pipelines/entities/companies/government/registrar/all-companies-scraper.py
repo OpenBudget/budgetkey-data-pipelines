@@ -57,6 +57,7 @@ def scrape():
     logging.info('PREPARING')
     # Prepare Driver
     # driver = webdriver.Chrome()
+
     driver = webdriver.Remote(
         command_executor='http://tzabar.obudget.org:8910',
         desired_capabilities=DesiredCapabilities.PHANTOMJS)

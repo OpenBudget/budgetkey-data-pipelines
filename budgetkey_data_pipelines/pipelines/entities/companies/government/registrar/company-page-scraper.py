@@ -5,6 +5,7 @@ from lxml.html import HtmlElement
 
 from selenium import webdriver
 from selenium.webdriver.remote.remote_connection import LOGGER
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -244,11 +245,11 @@ def get_last_activity_report_data(last_activity_report_href):
 def scrape_company_details(cmp_recs):
     logging.info('PREPARING')
     # Prepare Driver
-    driver = webdriver.Chrome()
+    # driver = webdriver.Chrome()
 
-    # driver = webdriver.Remote(
-    #     command_executor='http://tzabar.obudget.org:8910',
-    #     desired_capabilities=DesiredCapabilities.PHANTOMJS)
+    driver = webdriver.Remote(
+        command_executor='http://tzabar.obudget.org:8910',
+        desired_capabilities=DesiredCapabilities.PHANTOMJS)
     driver.set_window_size(1200, 800)
     for i, cmp_rec in enumerate(cmp_recs):
         logging.debug('GETTING DATA FOR COMPANY: ' + cmp_rec['name'])
@@ -263,9 +264,9 @@ def scrape_company_details(cmp_recs):
             if last_activity_report_data is not None and last_activity_report_data['company_number'] is not None:
                 cmp_rec['company_number'] = last_activity_report_data['company_number']
 
-        for h in headers:
-            if h in company_data:
-                cmp_rec[h] = company_data[h]
+        for header in headers:
+            if header in company_data:
+                cmp_rec[header] = company_data[header]
 
         logging.debug('DATA: ' + str(cmp_rec.__dict__['_inner']))
 

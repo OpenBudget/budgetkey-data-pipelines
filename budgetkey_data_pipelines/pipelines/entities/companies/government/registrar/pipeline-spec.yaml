@@ -21,4 +21,4 @@ government_companies:
             resource-name: government-companies
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/entities/government_companies/registrar
+        out-path: /var/datapackages/entities/companies/government/registrar
