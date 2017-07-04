@@ -1,0 +1,24 @@
+government_companies:
+  title: חברות ממשלתיות
+  description: רשימת כלל החברות הממשלתיות, מתעדכן שבועית.
+  schedule:
+    crontab: 0 0 * * 1
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: government-companies
+        title: נתונים פומביים מרשות החברות הממשלתיות
+        sources:
+          - name: אתר רשות החברות הממשלתיות
+            web: http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx
+    - run: all-companies-scraper
+    - run: company-page-scraper
+    - run: set_types
+    - run: dump.to_sql
+      parameters:
+        tables:
+          government_companies:
+            resource-name: government-companies
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/government/registrar
