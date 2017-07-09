@@ -4,6 +4,10 @@ import os
 import logging
 
 
+PUBLISHER_URLS_TABLE_SCHEMA = {"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
+                                          {"name": "url", "type": "string", "title": "Page Url"}]}
+
+
 def resource_filter(resource_data, parameters):
     if os.environ.get("OVERRIDE_PUBLISHER_URLS_MAX_PAGES", "") != "":
         max_pages = os.environ["OVERRIDE_PUBLISHER_URLS_MAX_PAGES"]
@@ -31,6 +35,5 @@ if __name__ == "__main__":
     ResourceFilterProcessor(default_input_resource="publishers",
                             default_output_resource="publisher-urls",
                             default_replace_resource=True,
-                            table_schema={"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
-                                                     {"name": "url", "type": "string", "title": "Exemption Url"}]},
+                            table_schema=PUBLISHER_URLS_TABLE_SCHEMA,
                             resource_filter=resource_filter).spew()

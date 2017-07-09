@@ -24,11 +24,11 @@ scraper:
       parameters:
         tender_type: "exemptions"
       runner: tzabar
-    # download the data from each exemption page
-    - run: check_existing
+    # adds is_new column which indicates whether item already exists or DB or not (based on publication id)
+    - run: ..check_existing
       parameters:
-        # will compare with the items in DB and only download new items
         db-table: procurement_tenders_exemptions
+    # download the data from exemption pages which don't exist in DB (is_new == False)
     - run: download_exemption_pages_data
       runner: tzabar
     # parse the data for each exemption
