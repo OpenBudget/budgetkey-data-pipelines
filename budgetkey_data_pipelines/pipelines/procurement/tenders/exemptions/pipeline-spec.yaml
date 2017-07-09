@@ -32,7 +32,10 @@ scraper:
     - run: ..download_pages_data
       runner: tzabar
     # parse the data for each exemption
-    - run: parse_exemption_data
+    - run: ..parse_page_data
+      parameters:
+        output_resource: exemptions
+        tender_type: exemptions
     # Do type conversion if needed
     - run: set_types
     # update the SQL table (based on the primary keys defined in the schemas)
@@ -146,7 +149,8 @@ processed:
                 - {name: link, type: string}
                 - {name: description, type: string}
                 - {name: update_time, type: string}
-    - run: calc-score
+    # add score field based on exemption amount and volume
+    - run: calc-score-volume
     - run: set_primary_key
       parameters:
         exemptions:
