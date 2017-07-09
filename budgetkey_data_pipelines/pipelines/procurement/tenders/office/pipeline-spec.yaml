@@ -1,0 +1,29 @@
+scraper:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "procurement-tenders-office"
+    # get the main HTML page of the office tenders search
+    - run: add_resource
+      parameters:
+        name: "mr-gov-il-search-office-tenders"
+        url: "https://www.mr.gov.il/OfficesTenders/Pages/SearchOfficeTenders.aspx"
+        format: "txt"
+    # download it (using tzabar runner which does some magic that bypasses network security)
+    - run: stream_remote_resources
+      runner: tzabar
+    # parse all the publisher ids from the main search page
+    - run: ..add_publishers_resource
+      parameters:
+        input_resource: "mr-gov-il-search-office-tenders"
+        tender_type: "office"
+    # go over each publisher and get urls for all office tenders related to this publisher
+    - run: ..add_publisher_urls_resource
+      parameters:
+        tender_type: "office"
+      runner: tzabar
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/office/scraper

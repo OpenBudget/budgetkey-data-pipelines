@@ -15,9 +15,14 @@ scraper:
     - run: stream_remote_resources
       runner: tzabar
     # parse all the publisher ids from the main search page
-    - run: add_exemptions_publishers_resource
+    - run: ..add_publishers_resource
+      parameters:
+        input_resource: "mr-gov-il-search-exemption-messages"
+        tender_type: "exemptions"
     # go over each publisher and get urls for all exemptions related to this publisher
-    - run: add_publisher_urls_resource
+    - run: ..add_publisher_urls_resource
+      parameters:
+        tender_type: "exemptions"
       runner: tzabar
     # download the data from each exemption page
     - run: check_existing
