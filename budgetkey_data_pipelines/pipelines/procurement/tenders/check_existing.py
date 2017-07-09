@@ -19,8 +19,8 @@ CHECK_EXISTING_TABLE_SCHEMA = dict(PUBLISHER_URLS_TABLE_SCHEMA,
 class CheckExistingProcessor(ResourceFilterProcessor):
 
     def __init__(self, **kwargs):
-        super(CheckExistingProcessor, self).__init__(default_input_resource="publisher-urls",
-                                                     default_output_resource="publisher-urls",
+        super(CheckExistingProcessor, self).__init__(default_input_resource="tender-urls",
+                                                     default_output_resource="tender-urls",
                                                      default_replace_resource=True,
                                                      table_schema=CHECK_EXISTING_TABLE_SCHEMA,
                                                      **kwargs)
@@ -30,7 +30,7 @@ class CheckExistingProcessor(ResourceFilterProcessor):
     def get_all_existing_ids(self):
         db_session = self.initialize_db_session()
         try:
-            return [o[0] for o in db_session.query("publication_id from {0}".format(self.parameters['db-table']))]
+            return [(int(o[0]), o[1]) for o in db_session.query("publication_id, tender_type from {0}".format(self.parameters['db-table']))]
         except (OperationalError, ProgrammingError) as e:
             # this is probably due to the table not existing but even if there is another problem -
             # dump.to_sql will handle it. it's safe to let that processor handle the specifics of sql errors
@@ -50,12 +50,12 @@ class CheckExistingProcessor(ResourceFilterProcessor):
 
     def filter_resource_data(self, data, parameters):
         for row in data:
-            row["is_new"] = self.is_new_exemption_url(row["url"])
+            row["is_new"] = self.is_new_exemption_url(row["url"], row["tender_type"])
             yield row
 
-    def is_new_exemption_url(self, url):
+    def is_new_exemption_url(self, url, tender_type):
         exemption_id = parse_qs(urlparse(url).query)["pID"][0]
-        return int(exemption_id) not in self.existing_ids
+        return (int(exemption_id), tender_type) not in self.existing_ids
 
 
 if __name__ == "__main__":

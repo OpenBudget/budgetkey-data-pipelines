@@ -5,7 +5,8 @@ import logging
 
 
 PUBLISHER_URLS_TABLE_SCHEMA = {"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
-                                          {"name": "url", "type": "string", "title": "Page Url"}]}
+                                          {"name": "url", "type": "string", "title": "Page Url"},
+                                          {"name": "tender_type", "type": "string", "enum": ["office", "exemptions"]}]}
 
 
 def resource_filter(resource_data, parameters):
@@ -28,7 +29,7 @@ def resource_filter(resource_data, parameters):
             scraper = publisher_scraper_class(publisher_id, **publisher_scraper_kwargs)
             urls = scraper.get_urls()
             for url in urls:
-                yield {"id": publisher_id, "url": url}
+                yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
 
 
 if __name__ == "__main__":

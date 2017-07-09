@@ -7,6 +7,7 @@ TABLE_SCHEMA = {
     "fields": [
         {"name": "publisher_id", "type": "integer", "required": True},
         {"name": "publication_id", "type": "integer", "required": True},
+        {"name": "tender_type", "type": "string", "required": True},
         {"name": "page_url", "title": "page url", "type": "string", "format": "uri", "required": True},
         {"name": 'description', "type": "string", "required": True},
         {"name": "supplier_id", "type": "string", "required": False},
@@ -35,19 +36,25 @@ BASE_URL = "http://www.mr.gov.il"
 def parse_date(s):
     if s is None or s.strip() == '':
         return None
-    return datetime.strptime(s, "%d/%m/%Y").date()
+    try:
+        return datetime.strptime(s, "%H:%M %d/%m/%Y")
+    except ValueError:
+        return datetime.strptime(s, "%d/%m/%Y")
 
 def parse_datetime(s):
     if s is None or s.strip() == '':
         return None
-    return datetime.strptime(s, "%H:%M %d/%m/%Y")
+    try:
+        return datetime.strptime(s, "%H:%M %d/%m/%Y")
+    except ValueError:
+        return datetime.strptime(s, "%d/%m/%Y")
 
 
 class ParsePageDataProcessor(ResourceFilterProcessor):
 
     def __init__(self, **kwargs):
         self._base_url = kwargs.pop("base_url", BASE_URL)
-        super(ParsePageDataProcessor, self).__init__(default_input_resource="publisher-urls-downloaded-data",
+        super(ParsePageDataProcessor, self).__init__(default_input_resource="tender-urls-downloaded-data",
                                                           default_replace_resource=True,
                                                           table_schema=TABLE_SCHEMA,
                                                           **kwargs)
@@ -65,9 +72,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time})
-            if parameters["tender_type"] == "exemptions":
+            if row["tender_type"] == "exemptions":
                 yield self.get_exemptions_data(row, page, documents)
-            elif parameters["tender_type"] == "office":
+            elif row["tender_type"] == "office":
                 yield self.get_office_data(row, page, documents)
 
     def get_exemptions_data(self, row, page, documents):
@@ -96,6 +103,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         return {
             "publisher_id": int(row["pid"]),
             "publication_id": int(source_data["publication_id"]),
+            "tender_type": "exemptions",
             "page_url": row["url"],
             "description": source_data["description"],
             "supplier_id": source_data["supplier_id"],
@@ -103,15 +111,15 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "contact": source_data["contact"],
             "publisher": source_data["publisher"],
             "contact_email": source_data["contact_email"],
-            "claim_date": parse_date(source_data["claim_date"]),
-            "last_update_date": parse_date(source_data["last_update_date"]),
+            "claim_date": parse_datetime(source_data["claim_date"]),
+            "last_update_date": parse_date(source_data["last_update_date"]).date(),
             "reason": source_data["reason"],
             "source_currency": source_data["source_currency"],
             "regulation": source_data["regulation"],
             "volume": source_data["volume"],
             "subjects": source_data["subjects"],
-            "start_date": parse_date(source_data["start_date"]),
-            "end_date": parse_date(source_data["end_date"]),
+            "start_date": parse_date(source_data["start_date"]).date(),
+            "end_date": parse_date(source_data["end_date"]).date(),
             "decision": source_data["decision"],
             "page_title": source_data["page_title"],
             "documents": documents
@@ -132,6 +140,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         return {
             "publisher_id": int(row["pid"]),
             "publication_id": int(source_data["publication_id"]),
+            "tender_type": "office",
             "page_url": row["url"],
             "description": source_data["description"],
             "publisher": source_data["publisher"],
