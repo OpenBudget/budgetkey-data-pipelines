@@ -29,7 +29,7 @@ scraper:
       parameters:
         db-table: procurement_tenders_exemptions
     # download the data from exemption pages which don't exist in DB (is_new == False)
-    - run: download_exemption_pages_data
+    - run: ..download_pages_data
       runner: tzabar
     # parse the data for each exemption
     - run: parse_exemption_data

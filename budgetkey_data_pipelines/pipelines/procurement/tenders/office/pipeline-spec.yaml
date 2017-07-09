@@ -24,10 +24,13 @@ scraper:
       parameters:
         tender_type: "office"
       runner: tzabar
-    # adds is_new column which indicates whether item already exists or DB or not (based on publication id)
+    # adds is_new column which indicates whether item already exists in DB or not (based on publication id)
     - run: ..check_existing
       parameters:
         db-table: procurement_tenders_office
+    # download the data from exemption pages which don't exist in DB (is_new == False)
+    - run: ..download_pages_data
+      runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/office/scraper
