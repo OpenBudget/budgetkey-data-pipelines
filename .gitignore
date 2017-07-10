@@ -15,4 +15,5 @@ schedule.db
 celerybeat.pid
 dump.rdb
 ghostdriver.log
+temp
 /.env
