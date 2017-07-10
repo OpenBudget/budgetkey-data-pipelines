@@ -1,6 +1,8 @@
 import logging
 import re
 import tempfile
+from time import sleep
+
 from lxml.html import HtmlElement
 
 from selenium import webdriver
@@ -255,8 +257,12 @@ def scrape_company_details(cmp_recs):
         logging.debug('GETTING DATA FOR COMPANY: ' + cmp_rec['name'])
         driver.get(cmp_rec['href'])
 
-        page = pq(driver.page_source)
-        company_page_data_pq = pq(page.find('.CompanyPage > div'))
+        company_page_data = []
+        while len(company_page_data) == 0:
+            page = pq(driver.page_source)
+            company_page_data = page.find('.CompanyPage > div')
+            sleep(1)
+        company_page_data_pq = pq(company_page_data)
 
         company_data = get_company_data(company_page_data_pq)
         if cmp_rec['last_activity_report_href'] is not None:
