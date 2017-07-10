@@ -67,19 +67,22 @@ for i, report in enumerate(reports.iter()):
             if headers is None:
                 raise ValueError('Failed to find headers')
             sample_row = None
-            for s in range(20):  # 20 sample rows
-                sample_row = next(canary_rows)
-                sample_row = dict(zip(headers_row, sample_row))
-                # Test some things make sense
-                try:
-                    v = [Decimal(sample_row[k]) if sample_row[k] is not None else 0
-                         for k in headers_row
-                         if k.startswith('ביצוע') or k.startswith('ערך')]
-                    assert all(sample_row[k] in ['כן', 'לא', '', 'ערך היסטורי', None]
-                               for k in headers_row if k.startswith('הזמנה רגישה'))
-                except Exception as e:
-                    logging.info('BAD SAMPLE ROW in %s:\n%r', report['report-url'], sample_row)
-                    raise ValueError('Bad value for column (%s)' % e) from e
+            try:
+                for s in range(20):  # 20 sample rows
+                    sample_row = next(canary_rows)
+                    sample_row = dict(zip(headers_row, sample_row))
+                    # Test some things make sense
+                    try:
+                        v = [Decimal(sample_row[k]) if sample_row[k] is not None else 0
+                             for k in headers_row
+                             if k.startswith('ביצוע') or k.startswith('ערך')]
+                        assert all(sample_row[k] in ['כן', 'לא', '', 'ערך היסטורי', None]
+                                   for k in headers_row if k.startswith('הזמנה רגישה'))
+                    except Exception as e:
+                        logging.info('BAD SAMPLE ROW in %s:\n%r', report['report-url'], sample_row)
+                        raise ValueError('Bad value for column (%s)' % e) from e
+            except StopIteration as e:
+                pass
             dp['resources'].append({
                 'url': report['report-url'],
                 'name': 'report_{}'.format(i),
