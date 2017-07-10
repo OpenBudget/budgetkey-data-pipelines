@@ -16,3 +16,5 @@ celerybeat.pid
 dump.rdb
 ghostdriver.log
 /.env
+.vscode
+geckodriver.log

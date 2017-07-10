@@ -1,0 +1,14 @@
+moital_service_providers:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: moital_service_providers
+        title: Moital Service Providers
+    - run: scraper
+      parameters:
+        name: manpower_contractors
+        url: https://apps.moital.gov.il/WebServicesHandlers/ManpowerContractors.aspx
+        format: html
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/moital_service_providers
