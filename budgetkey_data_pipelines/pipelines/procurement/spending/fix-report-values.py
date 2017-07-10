@@ -63,6 +63,7 @@ def budget_code(x):
 BAD_WORDS = [
     'סה"כ',
     'סה״כ',
+    'הזמנת רכש רגישה',
     '=SUBTOTAL',
     '=SUM'
 ]
