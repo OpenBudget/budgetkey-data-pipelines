@@ -10,6 +10,23 @@ from decimal import Decimal
 parameters, dp, res_iter = ingest()
 input_file = parameters['input-file']
 
+order_id_headers = [
+    'הזמנת רכש',
+    'מספר הזמנה'
+]
+
+budget_code_headers = [
+    'תקנה תקציבית',
+    'תקנה',
+    'פריט התחייבות'
+]
+
+volume_headers = [
+    'ערך ההזמנה כולל מע"מ',
+    'ערך ההזמנה כולל מע"מ בש"ח',
+    'ערך הזמנה במ.ט.מ'
+]
+
 stats = {'bad-reports': 0}
 loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
@@ -38,10 +55,12 @@ for i, report in enumerate(reports.iter()):
                     row_fields.remove('')
                 if len(row_fields) <= 4:
                     continue
-                if 'הזמנת רכש' not in row_fields and 'מספר הזמנה' not in row_fields:
+                if not set.intersection(row_fields, order_id_headers):
                     raise ValueError('Bad report format (order_id)')
-                if 'תקנה תקציבית' not in row_fields and 'תקנה' not in row_fields and 'פריט התחייבות' not in row_fields:
+                if not set.intersection(row_fields, budget_code_headers):
                     raise ValueError('Bad report format (budget_code)')
+                if not set.intersection(row_fields, volume_headers):
+                    raise ValueError('Bad report format (volume)')
                 headers = j+1
                 headers_row = row
                 break
