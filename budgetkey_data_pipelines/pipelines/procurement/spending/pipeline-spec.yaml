@@ -105,6 +105,7 @@ quarterly-contract-spending-reports:
           budget_code:
             - תקנה תקציבית
             - תקנה
+            - פריט התחייבות
           explanation:
             - הבהרות
           report_error:

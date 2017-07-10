@@ -38,9 +38,9 @@ for i, report in enumerate(reports.iter()):
                     row_fields.remove('')
                 if len(row_fields) <= 4:
                     continue
-                if 'הזמנת רכש' not in row_fields:
+                if 'הזמנת רכש' not in row_fields and 'מספר הזמנה' not in row_fields:
                     raise ValueError('Bad report format (order_id)')
-                if 'תקנה תקציבית' not in row_fields and 'תקנה' not in row_fields:
+                if 'תקנה תקציבית' not in row_fields and 'תקנה' not in row_fields and 'פריט התחייבות' not in row_fields:
                     raise ValueError('Bad report format (budget_code)')
                 headers = j+1
                 headers_row = row
