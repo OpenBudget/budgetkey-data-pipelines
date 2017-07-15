@@ -23,28 +23,32 @@ class DocParser(Parser):
 
 
 def get_explanations(url):
-    logging.info('Connecting to %r', url)
-    resp = requests.get(url, stream=True)
-    stream = resp.raw
-    if '.tar.gz' in url:
-        t_archive = tarfile.open(fileobj=stream, mode='r|gz')
-        files = ((os.path.basename(member.name), t_archive.extractfile(member))
-                 for member in t_archive
-                 if member is not None and member.isfile())
-    elif '.zip' in url:
-        tmp = tempfile.NamedTemporaryFile()
-        shutil.copyfileobj(stream, tmp)
-        z_archive = zipfile.ZipFile(tmp)
-        files = ((os.path.basename(member.filename), z_archive.open(member))
-                 for member in z_archive.filelist)
-    else:
-        assert False
+    with tempfile.NamedTemporaryFile(mode='wb', delete=False) as archive:
+        logging.info('Connecting to %r', url)
+        resp = requests.get(url, stream=True)
+        stream = resp.raw
+        shutil.copyfileobj(stream, archive)
+        archive = open(archive.name, 'rb')
 
-    for name, item in files:
-        with tempfile.NamedTemporaryFile(suffix=name, mode='wb', delete=False) as tmp:
-            shutil.copyfileobj(item, tmp)
-            tmp.close()
-            yield {'filename': tmp.name, 'orig_name': name}
+        if '.tar.gz' in url:
+            t_archive = tarfile.open(fileobj=archive, mode='r|gz')
+            files = ((os.path.basename(member.name), t_archive.extractfile(member))
+                     for member in t_archive
+                     if member is not None and member.isfile())
+        elif '.zip' in url:
+            z_archive = zipfile.ZipFile(archive)
+            files = ((os.path.basename(member.filename), z_archive.open(member))
+                     for member in z_archive.filelist)
+        else:
+            assert False
+
+        for name, item in files:
+            with tempfile.NamedTemporaryFile(suffix=name, mode='wb', delete=False) as tmp:
+                shutil.copyfileobj(item, tmp)
+                tmp.close()
+                yield {'filename': tmp.name, 'orig_name': name}
+
+        os.unlink(archive.name)
 
 
 resource = parameters['resource']
