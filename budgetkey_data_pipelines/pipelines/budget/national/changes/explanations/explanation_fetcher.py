@@ -6,6 +6,7 @@ import zipfile
 import tempfile
 import shutil
 import requests
+import base64
 from textract.parsers.doc_parser import Parser
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -43,10 +44,8 @@ def get_explanations(url):
             assert False
 
         for name, item in files:
-            with tempfile.NamedTemporaryFile(suffix=name, mode='wb', delete=False) as tmp:
-                shutil.copyfileobj(item, tmp)
-                tmp.close()
-                yield {'filename': tmp.name, 'orig_name': name}
+            contents = base64.b64encode(item.read()).decode('ascii')
+            yield {'contents': contents, 'orig_name': name}
 
         os.unlink(archive.name)
 
@@ -54,7 +53,7 @@ def get_explanations(url):
 resource = parameters['resource']
 schema = {
     'fields': [
-        {'name': 'filename', 'type': 'string'},
+        {'name': 'contents', 'type': 'string'},
         {'name': 'orig_name', 'type': 'string'},
     ]
 }

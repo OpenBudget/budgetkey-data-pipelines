@@ -1,6 +1,8 @@
+import base64
 import itertools
 import logging
-import os
+import tempfile
+
 from textract.parsers.doc_parser import Parser
 from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
@@ -22,35 +24,36 @@ def get_explanations(res_iter_):
 
     for res in res_iter_:
         for row in res:
-            filename = row['filename']
-            orig_name = row['orig_name']
-            try:
-                text = DocParser().process(filename, '')
-            except ShellError:
-                logging.exception('Error with filename %s', orig_name)
-                text = ''
-            os.unlink(filename)
+            with tempfile.NamedTemporaryFile(mode='wb') as tmp:
+                tmp.write(base64.b64decode(row['contents'].encode('ascii')))
+                filename = tmp.name
+                orig_name = row['orig_name']
+                try:
+                    text = DocParser().process(filename, '')
+                except ShellError:
+                    logging.exception('Error with filename %s', orig_name)
+                    text = ''
 
-            lines = text.split('\n')
-            lines = itertools.takewhile(
-                lambda line: all(x not in line
-                                 for x in ['בברכה', 'בכבוד רב']),
-                itertools.dropwhile(
-                    lambda line: 'הנדון' not in line,
-                    lines
+                lines = text.split('\n')
+                lines = itertools.takewhile(
+                    lambda line: all(x not in line
+                                     for x in ['בברכה', 'בכבוד רב']),
+                    itertools.dropwhile(
+                        lambda line: 'הנדון' not in line,
+                        lines
+                    )
                 )
-            )
-            text = '\n'.join(lines)
+                text = '\n'.join(lines)
 
-            parts = orig_name.split(".")[0].split("_")
-            parts = map(int, parts)
-            year, leading_item, req_code = parts
-            yield {
-                'year': year,
-                'leading_item': leading_item,
-                'req_code': req_code,
-                'explanation': text.strip()
-            }
+                parts = orig_name.split(".")[0].split("_")
+                parts = map(int, parts)
+                year, leading_item, req_code = parts
+                yield {
+                    'year': year,
+                    'leading_item': leading_item,
+                    'req_code': req_code,
+                    'explanation': text.strip()
+                }
 
 
 resource = parameters['resource']
