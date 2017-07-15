@@ -13,8 +13,9 @@ value_fields = [
 
 
 def update_datapackage(datapackage):
-    key_fields = ['leading_item', 'req_code']
+    key_fields = ['year', 'leading_item', 'req_code']
     resource = datapackage['resources'][0]
+    resource['name'] = 'transactions'
     fields = resource['schema']['fields']
     new_fields = []
     for field in fields:
@@ -38,16 +39,16 @@ def transfer_code(change):
 
 
 def get_changes(rows):
-    # now = datetime.now().strftime('%d/%m/%Y')
     for row in rows:
         row['trcode'] = transfer_code(row)
 
-        if row['date/approval'] is None:
-            row['date_kind'] = 'pending/%s' % row['trcode']
+        if row['date'] is None:
+            if row['pending']:
+                row['date_kind'] = 'pending'
+            else:
+                row['date_kind'] = row['trcode']
         else:
-            row['date_kind'] = 'approved/' + (
-                row['date/approval'].strftime('%d/%m/%Y')
-            )
+            row['date_kind'] = row['date'].isoformat()
 
         yield row
 
@@ -55,19 +56,6 @@ def get_changes(rows):
 def get_transactions(changes):
     def get_date(x):
         return x['date_kind']
-
-    def get_keys_for_prefixes(ch, prefixes):
-        result = set()
-
-        for c in ch:
-            key = (c['leading_item'], c['req_code'])
-            if key not in result:
-                for prefix in prefixes:
-                    if c['budget_code'].startswith(prefix):
-                        result.add(key)
-                        break
-
-        return result
 
     def try_complete_transaction(prefix, skip_leading_items, skip_indexes,
                                  items, start_index, count_needed):
@@ -167,68 +155,50 @@ def get_transactions(changes):
                 for transaction in transactions:
                     yield set(x['trcode'] for x in transaction)
 
+            for rest in rest_changes:
+                yield [rest['trcode']]
+
     def assign_transactions(groups, changes):
         # This allows to perform search ~10 times faster
-        changes_by_year = {}
+        changes_by_trcode = {}
         for x in changes:
-            year = x['year']
-            changes_by_year.setdefault(year, []).append(x)
+            if x['budget_code'].startswith('0047'):
+                continue
+            trcode = x['trcode']
+            changes_by_trcode.setdefault(trcode, []).append(x)
 
         processed_count = 0
         for trcodes in groups:
-            # Just a check
-            years = set(
-                int(x.split('/')[0])
-                for x in trcodes
-            )
-            assert(len(years) == 1)
-            year = years.pop()
+            transfer_changes = []
+            date_kinds = set()
+            trcodes = sorted(list(trcodes))
+            for trcode in trcodes:
+                changes = changes_by_trcode[trcode]
+                transfer_changes.extend(changes_by_trcode[trcode])
+                date_kinds.update(change['date_kind'] for change in changes)
 
-            transfer_changes = list(filter(
-                lambda x: x['trcode'] in trcodes,
-                changes_by_year[year]
-            ))
-
-            budget_codes = set(
-                x['budget_code']
-                for x in transfer_changes
-            )
-            prefixes = sorted(set(
-                itertools.chain.from_iterable(
-                    [code[:l] for l in range(2, 10, 2)]
-                    for code in budget_codes
-                )
-            ), key=lambda x: int('1' + x))
-
-            transfer_ids = list(set(
-                x.split('/')[1]
-                for x in trcodes
-            ))
+            # Sanity check
+            assert len(date_kinds) == 1
+            date_kind = date_kinds.pop()
 
             transaction = {
-                'id': transfer_ids[0],
-                'changes': get_keys_for_prefixes(transfer_changes, prefixes),
+                'id': trcodes[0],
+                'changes': set((c['year'], c['leading_item'], c['req_code']) for c in transfer_changes)
             }
 
             if len(trcodes) > 1:
-                trcodes = sorted(trcodes)
                 for trcode in trcodes:
-                    per_transfer_changes = list(filter(
-                        lambda x:
-                            x['trcode'] == trcode and
-                            not x['budget_code'].startswith('0047'),
-                        transfer_changes
-                    ))
+                    per_transfer_changes = changes_by_trcode[trcode]
                     s = sum(
                         sum(x[f] for f in value_fields)
                         for x in per_transfer_changes
                     )
                     if s > 0:
-                        transaction['id'] = trcode.split('/')[1]
+                        transaction['id'] = trcode
                         logging.debug(
-                            'Selected transaction id %s as '
+                            '%s: Selected transaction id %s as '
                             'representative for %r' %
-                            (transaction['id'], transfer_ids))
+                            (date_kind, transaction['id'], trcodes))
                         break
 
             processed_count += 1
@@ -244,11 +214,13 @@ def get_transactions(changes):
 def process_resource(rows):
     for transaction in get_transactions(get_changes(rows)):
         for change_key in transaction['changes']:
-            yield {
-                'leading_item': change_key[0],
-                'req_code': change_key[1],
+            ret = {
+                'year': change_key[0],
+                'leading_item': change_key[1],
+                'req_code': change_key[2],
                 'transaction_id': transaction['id']
             }
+            yield ret
 
 
 def process_resources(resources):

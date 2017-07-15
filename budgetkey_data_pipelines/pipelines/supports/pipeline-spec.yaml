@@ -1,0 +1,106 @@
+all:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, in raw form
+    - run: add_resource
+      parameters:
+        name: s2008
+        url: https://www.dropbox.com/s/fg4hqkhbr10qoq0/2008.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2009
+        url: https://www.dropbox.com/s/kqmd5zpcj4rrqyr/2009.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2010
+        url: https://www.dropbox.com/s/m76u9cgiu5o8qkl/2010.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2011
+        url: https://www.dropbox.com/s/nb8fqpluixct64t/2011.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2012
+        url: https://www.dropbox.com/s/dvoxtc4pquayt0g/2012.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2013
+        url: https://www.dropbox.com/s/mio4pr079fld5zy/2013.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2014
+        url: https://www.dropbox.com/s/j0k23vc4fwog0b4/2014.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2015
+        url: https://www.dropbox.com/s/w00a72ji87xc3sc/2015.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2016
+        url: https://www.dropbox.com/s/7ycroayic05226x/2016.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2017
+        url: https://www.dropbox.com/s/fh3oyg05oh25kjd/2017.csv?dl=1
+        format: csv
+
+
+    - run: stream_remote_resources
+    - run: concatenate
+      parameters:
+        fields:
+          support_title:
+            - ZZTXT40
+          recipient:
+            - מגיש
+          supporting_ministry:
+            - משרד
+          amount_total:
+            - 'סה"כ'
+          request_type:
+            - סוג בקשה
+          amount_approved:
+            - סכום מאושר
+          amount_advance:
+            - סכום מקדמות
+          amount_paid:
+            - סכום תשלום
+          year_requested:
+            - שנת בקשה
+          year_paid:
+            - שנת תשלום
+          budget_extra_data:
+            - תקנה
+          budget_code:
+            - "תקנה - מפתח"
+    - run: fix_values
+    - run: set_types
+      parameters:
+        types:
+          amount.+:
+            type: number
+          year.+:
+            type: integer
+          budget_code:
+            constraints:
+              required: true
+              pattern: '[0-9]+'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          raw_supports:
+            resource-name: concat
