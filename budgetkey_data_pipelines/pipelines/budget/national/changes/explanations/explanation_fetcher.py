@@ -7,7 +7,6 @@ import tempfile
 import shutil
 import requests
 from textract.parsers.doc_parser import Parser
-from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
@@ -24,6 +23,7 @@ class DocParser(Parser):
 
 
 def get_explanations(url):
+    logging.info('Connecting to %r', url)
     resp = requests.get(url, stream=True)
     stream = resp.raw
     if '.tar.gz' in url:
@@ -44,42 +44,14 @@ def get_explanations(url):
         with tempfile.NamedTemporaryFile(suffix=name, mode='wb', delete=False) as tmp:
             shutil.copyfileobj(item, tmp)
             tmp.close()
-            try:
-                text = DocParser().process(tmp.name, '')
-            except ShellError:
-                logging.exception('Error with filename %s', name)
-                text = ''
-
-            lines = text.split('\n')
-            lines = itertools.takewhile(
-                lambda line: all(x not in line
-                                 for x in ['בברכה', 'בכבוד רב']),
-                itertools.dropwhile(
-                    lambda line: 'הנדון' not in line,
-                    lines
-                )
-            )
-            text = '\n'.join(lines)
-
-            parts = name.split(".")[0].split("_")
-            parts = map(int, parts)
-            year, leading_item, req_code = parts
-            yield {
-                'year': year,
-                'leading_item': leading_item,
-                'req_code': req_code,
-                'explanation': text.strip()
-            }
-            os.unlink(tmp.name)
+            yield {'filename': tmp.name, 'orig_name': name}
 
 
 resource = parameters['resource']
 schema = {
     'fields': [
-        {'name': 'year', 'type': 'integer'},
-        {'name': 'leading_item', 'type': 'integer'},
-        {'name': 'req_code', 'type': 'integer'},
-        {'name': 'explanation', 'type': 'string'},
+        {'name': 'filename', 'type': 'string'},
+        {'name': 'orig_name', 'type': 'string'},
     ]
 }
 resource['schema'] = schema

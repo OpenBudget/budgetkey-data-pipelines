@@ -3,35 +3,31 @@ all:
     - run: add_metadata
       parameters:
         name: change-explanations
-    - run: explanations
+    - run: explanation_fetcher
       parameters:
         resource:
           name: explanation-history
           path: data/explanation-history.csv
         url: https://www.dropbox.com/s/3sfjno7l2v3lkpy/explanations.tar.gz?dl=1
-    - run: explanations
+    - run: explanation_fetcher
       runner: tzabar
       parameters:
         resource:
           name: explanation-current
           path: data/explanation-current.csv
         url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_explain.zip
-    - run: explanations
+    - run: explanation_fetcher
       runner: tzabar
       parameters:
         resource:
           name: explanation-pending
           path: data/explanation-pending.csv
         url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/vaada_explain.zip
-    - run: concatenate
+    - run: explanation_extractor
       parameters:
-        target:
+        resource:
           name: explanations
-        fields:
-          year: []
-          leading_item: []
-          req_code: []
-          explanation: []
+          path: data/explanations.csv
     - run: sample
     - run: dump.to_path
       parameters:
