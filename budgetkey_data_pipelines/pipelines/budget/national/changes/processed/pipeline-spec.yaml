@@ -1,0 +1,156 @@
+transactions:
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget (Transactions)
+        name: national-budget-changes-transactions
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: national-budget-changes
+    - run: extract-change-groups
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/transactions
+
+
+
+national-budget-changes-aggregated:
+  title: Changes, grouped by transaction_id, with explanations
+
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+    - pipeline: ./budget/national/changes/explanations/all
+    - pipeline: ./budget/national/changes/processed/transactions
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: national-budget-changes-full
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/explanations/datapackage.json
+        resource: explanations
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/transactions/datapackage.json
+        resource: transactions
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/original/datapackage.json
+        resource: national-budget-changes
+    - run: filter_reserve
+    # Add transaction id to all changes
+    - run: join
+      parameters:
+        source:
+          name: transactions
+          key:
+            - year
+            - leading_item
+            - req_code
+          delete: true
+        target:
+          name: national-budget-changes
+          key:
+            - year
+            - leading_item
+            - req_code
+          full: true
+        fields:
+          transaction_id: null
+    # Aggregate changes into transactions based on transaction id
+    - run: join
+      parameters:
+        source:
+          name: national-budget-changes
+          key:
+            - transaction_id
+          delete: true
+        target:
+          name: national-budget-changes
+          key: null
+        fields:
+          year: null
+          leading_item: null
+          req_code: null
+          transaction_id: null
+          req_title:
+            aggregate: set
+          change_code:
+            aggregate: set
+          change_title:
+            aggregate: set
+          change_type_id:
+            aggregate: set
+          change_type_name:
+            aggregate: set
+          committee_id:
+            aggregate: set
+          budget_code_title:
+            aggregate: set
+          net_expense_diff:
+            aggregate: sum
+          gross_expense_diff:
+            aggregate: sum
+          allocated_income_diff:
+            aggregate: sum
+          commitment_limit_diff:
+            aggregate: sum
+          personnel_max_diff:
+            aggregate: sum
+          date:
+            aggregate: set
+          pending:
+            aggregate: set
+    # Attach explanation to transaction
+    - run: join
+      parameters:
+        source:
+          name: explanations
+          key:
+            - year
+            - leading_item
+            - req_code
+          delete: true
+        target:
+          name: national-budget-changes
+          key:
+            - year
+            - leading_item
+            - req_code
+          full: true
+        fields:
+          explanation: null
+    # Calculate score
+    - run: calc-transaction-score
+    # Set types
+    - run: set_types
+      parameters:
+        types:
+          req_title:
+            es:itemType: string
+          change_code:
+            es:itemType: integer
+          change_title:
+            es:itemType: string
+          change_type_id:
+            es:itemType: integer
+          change_type_name:
+            es:itemType: string
+          committee_id:
+            es:itemType: integer
+          budget_code_title:
+            es:itemType: string
+          date:
+            es:itemType: date
+    - run: set_primary_key
+      parameters:
+        national-budget-changes:
+          - transaction_id
+    # And we're done
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/full

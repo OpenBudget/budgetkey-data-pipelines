@@ -17,7 +17,7 @@ amounts = [
 
 def process_row(row, *_):
     for k in list(row.keys()):
-        if k.startswith('date/'):
+        if k == 'date':
             v = row[k]
             if v is None or v.strip() == '':
                 row[k] = None
