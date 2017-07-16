@@ -41,4 +41,7 @@ def test():
     assert len(resource) == 120
     assert resource[0] == {'id': None, 'tender_type': 'central',
                            'url': 'http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx'}
-
+    all_urls = [r["url"] for r in resource]
+    assert "http://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx" in all_urls
+    assert "http://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx" in all_urls
+    assert "http://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx" in all_urls

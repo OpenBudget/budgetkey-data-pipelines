@@ -205,10 +205,10 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             documents.append({"description": pq(elt).text().strip(),
                               "link": pq(elt).find("a")[0].attrib["href"],
                               "update_time": None})
-        page("#ctl00_PlaceHolderMain_SummaryLinksPanel")
+        publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
         return {
             "publisher_id": None,
-            "publication_id": int(page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()),
+            "publication_id": int(publication_id) if publication_id else None,
             "tender_type": "central",
             "page_url": row["url"],
             "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),

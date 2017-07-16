@@ -38,6 +38,12 @@ class MockDownloadExemptionPagesDataProcessor(DownloadPagesDataProcessor):
             return get_mock_exemption_data("596915", url)
         elif url == "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx":
             return get_mock_exemption_data("Goods-3-2013", url)
+        elif url == "http://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx":
+            return get_mock_exemption_data("technology-15-2016", url)
+        elif url == "http://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx":
+            return get_mock_exemption_data("Goods-19-2017", url)
+        elif url == "http://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx":
+            return get_mock_exemption_data("network-michraz3", url)
         else:
             raise Exception("invalid url: {}".format(url))
 
@@ -80,7 +86,13 @@ def test():
         {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
          "tender_type": "central", "is_new": True},
         {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx",
-         "tender_type": "central", "is_new": False}
+         "tender_type": "central", "is_new": False},
+        {"id": None, "url": "http://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx",
+         "tender_type": "central", "is_new": True},
+        {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx",
+         "tender_type": "central", "is_new": True},
+        {"id": None, "url": "http://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx",
+         "tender_type": "central", "is_new": True},
     ]])
     assert_downloaded_resource(resource, [
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
