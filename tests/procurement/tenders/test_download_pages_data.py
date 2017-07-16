@@ -61,27 +61,26 @@ def assert_downloaded_resource(resource, expected_resource):
         assert item["tender_type"] == expected_item["tender_type"]
 
 
-def test_exemptions():
+def test():
     resource = run_download_processor([[
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431", "is_new": True, "tender_type": "exemptions"},
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269", "is_new": True, "tender_type": "exemptions"},
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=666666", "is_new": False, "tender_type": "exemptions"}
+        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431", "is_new": True,
+         "tender_type": "exemptions"},
+        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269", "is_new": True,
+         "tender_type": "exemptions"},
+        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=666666", "is_new": False,
+         "tender_type": "exemptions"},
+        {"id": 50, "url": "/officestenders/Pages/officetender.aspx?pID=598379", "is_new": True,
+         "tender_type": "office"},
+        {"id": 21, "url": "/officestenders/Pages/officetender.aspx?pID=596915", "is_new": True,
+         "tender_type": "office"},
+        {"id": 71, "url": "/officestenders/Pages/officetender.aspx?pID=666666", "is_new": False,
+         "tender_type": "office"}
     ]])
     assert_downloaded_resource(resource, [
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269",
          "data": get_mock_exemption_data("594269"), "tender_type": "exemptions"},
-    ])
-
-
-def test_office():
-    resource = run_download_processor([[
-        {"id": 50, "url": "/officestenders/Pages/officetender.aspx?pID=598379", "is_new": True, "tender_type": "office"},
-        {"id": 21, "url": "/officestenders/Pages/officetender.aspx?pID=596915", "is_new": True, "tender_type": "office"},
-        {"id": 71, "url": "/officestenders/Pages/officetender.aspx?pID=666666", "is_new": False, "tender_type": "office"}
-    ]])
-    assert_downloaded_resource(resource, [
         {"pid": 50, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379",
          "data": get_mock_exemption_data("598379"), "tender_type": "office"},
         {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",

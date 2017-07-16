@@ -10,9 +10,7 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
         return self._get_spew_params()
 
 
-def run_parse_processor(type, resource):
-    parameters = {"output_resource": type,
-                  "tender_type": type}
+def run_parse_processor(resource):
     datapackage = {"resources": [{
         "name": "tender-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
@@ -25,21 +23,25 @@ def run_parse_processor(type, resource):
         }
     }]}
     resources = unlistify_resources([resource])
-    ingest_response = (parameters, datapackage, resources)
+    ingest_response = ({}, datapackage, resources)
     datapackage, resources, stats = MockParseExemptionDataProcessor(ingest_response=ingest_response).spew()
     resources = listify_resources(resources)
     assert len(resources) == 1
     return resources[0]
 
 
-def test_exemptions():
-    resource = run_parse_processor("exemptions", [
+def test():
+    resource = run_parse_processor([
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269",
          "data": get_mock_exemption_data("594269"), "tender_type": "exemptions"},
+        {"pid": 50, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379",
+         "data": get_mock_exemption_data("598379"), "tender_type": "office"},
+        {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
+         "data": get_mock_exemption_data("596915"), "tender_type": "office"},
     ])
-    assert len(resource) == 2
+    assert len(resource) == 4
     assert resource[0] == {
         "publisher_id": 71,
         "publication_id": 595431,
@@ -51,40 +53,32 @@ def test_exemptions():
         "publisher": "ההסתדרות הציונית העולמית - החטיבה להתישבות",
         "contact_email": "",
         "claim_date": None,
-        "last_update_date": datetime.date(2017, 3, 14),
+        "last_update_date": '2017-03-14',
         "reason": "ספק יחיד בנסיבות העניין. לא היו השגות עד למועד שנקבע",
         "source_currency": "שקל",
         "regulation": "התקשרות עם ספק יחיד",
         "volume": "2,569,700",
         "subjects": "מחשוב ותקשורת",
-        "start_date": datetime.date(2017, 3, 1),
-        "end_date": datetime.date(2021, 12, 31),
+        "start_date": '2017-03-01',
+        "end_date": '2021-12-31',
         "decision": "נרשם",
         "page_title": "דיווח פטור משרדי",
         "tender_type": "exemptions",
+        "tender_id": None,
         "documents": [{"description": "חוות דעת מקצועית",
                                        "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
                                        "update_time": "2017-03-14"}]
     }
     assert resource[1]["publication_id"] == 594269
-
-def test_office():
-    resource = run_parse_processor("office", [
-        {"pid": 50, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379",
-         "data": get_mock_exemption_data("598379"), "tender_type": "office"},
-        {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
-         "data": get_mock_exemption_data("596915"), "tender_type": "office"},
-    ])
-    assert len(resource) == 2
-    assert resource[0] == {'publisher_id': 50,
+    assert resource[2] == {'publisher_id': 50,
                            'publication_id': 598379,
                            'page_url': 'http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379',
                            'description': 'לניהול אירועי שנת ה-70 למדינת ישראל - פרסום נוסף',
                            'publisher': 'משרד המדע התרבות והספורט',
-                           'claim_date': datetime.datetime(2017, 7, 19, 12),
-                           'last_update_date': datetime.datetime(2017, 7, 9),
+                           'claim_date': '2017-07-19T12:00:0Z',
+                           'last_update_date': '2017-07-09',
                            'subjects': 'שירותי עריכה,כתיבה ,עיצוב ,גרפיקה ואומנות; שירותי עריכה ותרגום; כתיבה יצירתית; שירותי הדפסה; שירותי הפקת וידאו; שירותים הקשורים לטלוויזיה',
-                           'start_date': datetime.datetime(2017, 5, 25),
+                           'start_date': '2017-05-25',
                            "tender_id": "18/2017",
                            "tender_type": "office",
                            "decision": "עודכן",
@@ -126,5 +120,15 @@ def test_office():
                                           'update_time': '2017-05-28'},
                                          {'description': 'מודעה לעיתונות בעברית',
                                           'link': 'http://www.mr.gov.il/Files_Michrazim/239148.docx',
-                                          'update_time': '2017-05-28'}]}
-    assert resource[1]["publication_id"] == 596915
+                                          'update_time': '2017-05-28'}],
+                           'contact': None,
+                           'contact_email': None,
+                           'end_date': None,
+                           'page_title': None,
+                           'reason': None,
+                           'regulation': None,
+                           'source_currency': None,
+                           'supplier': None,
+                           'supplier_id': None,
+                           'volume': None}
+    assert resource[3]["publication_id"] == 596915
