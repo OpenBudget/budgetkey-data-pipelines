@@ -223,12 +223,14 @@ by-request-year:
         resource-name: supports
         source-field: recipient
         target-field: recipient_fingerprint
+
     - run: join
       parameters:
         source:
           name: entities
           key:
             - fingerprint
+          delete: true
         target:
           name: supports
           key:
