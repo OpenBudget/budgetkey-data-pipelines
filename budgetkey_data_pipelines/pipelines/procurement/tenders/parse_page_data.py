@@ -1,47 +1,56 @@
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
+from budgetkey_data_pipelines.pipelines.procurement.tenders.check_existing import tender_id_from_url
 from pyquery import PyQuery as pq
 from datetime import datetime
 
 TABLE_SCHEMA = {
-    "primaryKey": ["publication_id", "tender_type"],
+    "primaryKey": ["publication_id", "tender_type", "tender_id"],
     "fields": [
-        {"name": "publisher_id", "type": "integer", "required": True},
-        {"name": "publication_id", "type": "integer", "required": True},
+        {"name": "publisher_id", "type": "integer", "required": False},
+        {"name": "publication_id", "type": "integer", "required": False, "description": "* exemptions: pId\n"
+                                                                                        "* office: pId\n"
+                                                                                        "* central: מספר המכרז במנוף"},
         {"name": "tender_type", "type": "string", "required": True},
         {"name": "page_url", "title": "page url", "type": "string", "format": "uri", "required": True},
         {"name": 'description', "type": "string", "required": True},
         {"name": "supplier_id", "type": "string", "required": False, "description": "* exemptions: ח.פ\n"
                                                                                     "* office: not used"},
-        {"name": "supplier", "type": "string", "required": True, "description": "* exemptions: supplier company name\n"
-                                                                                "* office: not used"},
+        {"name": "supplier", "type": "string", "required": False, "description": "* exemptions: supplier company name\n"
+                                                                                "* office: not used\n"
+                                                                                 "* central: ספק זוכה"},
         {"name": "contact", "type": "string", "required": False, "description": "* exemptions: supplier contact name\n"
-                                                                                "* office: not used"},
-        {"name": "publisher", "type": "string", "required": True},
+                                                                                "* office: not used\n"
+                                                                                "* central: איש קשר"},
+        {"name": "publisher", "type": "string", "required": False},
         {"name": "contact_email", "type": "string", "required": False, "description": "* exemptions: supplier contact email\n"
                                                                                       "* office: not used"},
         {"name": "claim_date", "type": "datetime", "required": False, "description": "* exemptions: תאריך אחרון להגשת השגות\n"
                                                                                      "* office: מועד אחרון להגשה"},
-        {"name": "last_update_date", "type": "date", "required": True, "description": "* exemptions: תאריך עדכון אחרון\n"
+        {"name": "last_update_date", "type": "date", "required": False, "description": "* exemptions: תאריך עדכון אחרון\n"
                                                                                       "* office: תאריך עדכון אחרון"},
         {"name": "reason", "type": "string", "required": False, "description": "* exemptions: נימוקים לבקשת הפטור\n"
                                                                                "* office: not used"},
-        {"name": "source_currency", "type": "string", "required": True},
-        {"name": "regulation", "type": "string", "required": True, "description": "* exemptions: מתן הפטור מסתמך על תקנה\n"
-                                                                                  "* office: not used"},
+        {"name": "source_currency", "type": "string", "required": False},
+        {"name": "regulation", "type": "string", "required": False, "description": "* exemptions: מתן הפטור מסתמך על תקנה\n"
+                                                                                  "* office: not used\n"
+                                                                                   "* central: סוג ההליך"},
         {"name": "volume", "type": "number", "required": False, "groupChar": ","},
-        {"name": "subjects", "type": "string", "required": True, "description": "* exemptions: נושא/ים\n"
-                                                                                "* office: נושא/ים"},
-        {"name": "start_date", "type": "date", "required": True, "description": "* exemptions: תחילת תקופת התקשרות\n"
+        {"name": "subjects", "type": "string", "required": False, "description": "* exemptions: נושא/ים\n"
+                                                                                "* office: נושא/ים\n"
+                                                                                 "* central: נושא/ים"},
+        {"name": "start_date", "type": "date", "required": False, "description": "* exemptions: תחילת תקופת התקשרות\n"
                                                                                 "* office: תאריך פרסום"},
-        {"name": "end_date", "type": "date", "required": True, "description": "* exemptions: תום תקופת ההתקשרות\n"
-                                                                              "* office: not used"},
-        {"name": "decision", "type": "string", "required": True, "description": "* exemptions: סטטוס החלטה\n"
-                                                                                "* office: סטטוס"},
-        {"name": "page_title", "type": "string", "required": True, "description": "* exemptions: title of the exemption page\n"
+        {"name": "end_date", "type": "date", "required": False, "description": "* exemptions: תום תקופת ההתקשרות\n"
+                                                                              "* office: not used\n"
+                                                                               "* central: תאריך סיום תוקף מכרז"},
+        {"name": "decision", "type": "string", "required": False, "description": "* exemptions: סטטוס החלטה\n"
+                                                                                "* office: סטטוס\n"
+                                                                                 "* central: סטטוס"},
+        {"name": "page_title", "type": "string", "required": False, "description": "* exemptions: title of the exemption page\n"
                                                                                   "* office: not used"},
         {"name": "tender_id", "type": "string", "required": False, "description": "* exemptions: not used\n"
                                                                                   "* office: מספר המכרז"},
-        {"name": "documents", "type": "array", "required": True}
+        {"name": "documents", "type": "array", "required": False}
     ]
 }
 
@@ -91,6 +100,10 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 yield self.get_exemptions_data(row, page, documents)
             elif row["tender_type"] == "office":
                 yield self.get_office_data(row, page, documents)
+            elif row["tender_type"] == "central":
+                yield self.get_central_data(row, page, documents)
+            else:
+                raise Exception("invalid tender_type: {}".format(row["tender_type"]))
 
     def get_exemptions_data(self, row, page, documents):
         input_fields_text_map = {
@@ -178,6 +191,44 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "decision": source_data["status"],
             "page_title": None,
             "tender_id": source_data["publishnum"],
+            "documents": documents,
+        }
+
+    def get_central_data(self, row, page, documents):
+        # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
+        documents = []
+        for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
+            documents.append({"description": elt.text,
+                              "link": elt.attrib["href"],
+                              "update_time": None})
+        for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
+            documents.append({"description": pq(elt).text().strip(),
+                              "link": pq(elt).find("a")[0].attrib["href"],
+                              "update_time": None})
+        page("#ctl00_PlaceHolderMain_SummaryLinksPanel")
+        return {
+            "publisher_id": None,
+            "publication_id": int(page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()),
+            "tender_type": "central",
+            "page_url": row["url"],
+            "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
+            "supplier_id": None,
+            "supplier": page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip(),
+            "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
+            "publisher": None,
+            "contact_email": None,
+            "claim_date": None,
+            "last_update_date": None,
+            "reason": None,
+            "source_currency": None,
+            "regulation": page("#ctl00_PlaceHolderMain_MIchrazTypePanel div.value").text().strip(),
+            "volume": None,
+            "subjects": page("#ctl00_PlaceHolderMain_MMDCategoryPanel div.value").text().strip(),
+            "start_date": None,
+            "end_date": parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()),
+            "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
+            "page_title": page("h1.MainTitle").text().strip(),
+            "tender_id": tender_id_from_url(row["url"]),
             "documents": documents,
         }
 

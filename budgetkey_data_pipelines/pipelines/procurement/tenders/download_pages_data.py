@@ -32,7 +32,8 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
                 yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
 
     def _get_exemption_data(self, publisher_id, url, tender_type):
-        url = "{}{}".format(self._url_prefix, url)
+        if not url.startswith("http"):
+            url = "{}{}".format(self._url_prefix, url)
         return {"pid": publisher_id,
                 "url": url,
                 "data": self._get_url_response_text(url, self._timeout),

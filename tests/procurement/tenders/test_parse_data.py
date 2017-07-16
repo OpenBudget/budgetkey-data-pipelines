@@ -40,8 +40,10 @@ def test():
          "data": get_mock_exemption_data("598379"), "tender_type": "office"},
         {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
          "data": get_mock_exemption_data("596915"), "tender_type": "office"},
+        {"pid": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
+         "data": get_mock_exemption_data("Goods-3-2013"), "tender_type": "central"},
     ])
-    assert len(resource) == 4
+    assert len(resource) == 5
     assert resource[0] == {
         "publisher_id": 71,
         "publication_id": 595431,
@@ -132,3 +134,32 @@ def test():
                            'supplier_id': None,
                            'volume': None}
     assert resource[3]["publication_id"] == 596915
+    assert resource[4] == {'claim_date': None,
+                           'contact': 'אביתר פרץ;מנהל תחום התקשרויות;02-6663424',
+                           'contact_email': None,
+                           'decision': 'בתוקף',
+                           'description': '\u200bמכרז מרכזי מממ-03-2013 נועד להסדיר רכישה של סולר ומזוט '
+                                          'על ידי כל משרדי הממשלה ויחידות הסמך בכל רחבי הארץ.',
+                           'documents': [{'description': 'מסמכי המכרז',
+                                          'link': '/officestenders/Pages/officetender.aspx?pID=542781',
+                                          'update_time': None},
+                                         {'description': 'הוראת שעה בתוקף 16.8.0.2 - אספקת סולר ומזוט למשרדי הממשלה',
+                                          'link': 'http://www.mof.gov.il/takam/pages/horaot.aspx?k=16.8.0.2',
+                                          'update_time': None}],
+                           'end_date': '2017-12-31',
+                           'last_update_date': None,
+                           'page_title': "מכרז 3-2013: אספקת סולר להסקה, סולר לתחבורה (עבור גנרטורים) ומזוט עבור משרדי הממשלה",
+                           'page_url': 'http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx',
+                           'publication_id': 542781,
+                           'publisher': None,
+                           'publisher_id': None,
+                           'reason': None,
+                           'regulation': 'מכרז',
+                           'source_currency': None,
+                           'start_date': None,
+                           'subjects': 'דלקים ותוספי דלק, שמנים, חומרי סיכה וחומרים נגד חלודה (קורוזיה)',
+                           'supplier': 'פז חברת דלק בע"מ',
+                           'supplier_id': None,
+                           'tender_id': 'Goods-3-2013',
+                           'tender_type': 'central',
+                           'volume': None}

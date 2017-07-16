@@ -62,10 +62,24 @@ scraper-office:
       parameters:
         out-path: /var/datapackages/procurement/tenders/scraper-office
 
+scraper-central:
+  schedule:
+    crontab: "0 */4 * * *"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: procurement-tenders-central-urls
+    - run: add_central_urls_resource
+      runner: tzabar
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/scraper-central
+
 scraper:
   dependencies:
     - pipeline: ./procurement/tenders/scraper-exemptions
     - pipeline: ./procurement/tenders/scraper-office
+    - pipeline: ./procurement/tenders/scraper-central
 
   pipeline:
     - run: load_resource
@@ -76,6 +90,10 @@ scraper:
       parameters:
         resource: office
         url: /var/datapackages/procurement/tenders/scraper-office/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: central
+        url: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
     - run: stream_remote_resources
     - run: concatenate
       parameters:

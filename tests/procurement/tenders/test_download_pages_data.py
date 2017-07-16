@@ -36,6 +36,8 @@ class MockDownloadExemptionPagesDataProcessor(DownloadPagesDataProcessor):
             return get_mock_exemption_data("598379", url)
         elif url == "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915":
             return get_mock_exemption_data("596915", url)
+        elif url == "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx":
+            return get_mock_exemption_data("Goods-3-2013", url)
         else:
             raise Exception("invalid url: {}".format(url))
 
@@ -74,7 +76,11 @@ def test():
         {"id": 21, "url": "/officestenders/Pages/officetender.aspx?pID=596915", "is_new": True,
          "tender_type": "office"},
         {"id": 71, "url": "/officestenders/Pages/officetender.aspx?pID=666666", "is_new": False,
-         "tender_type": "office"}
+         "tender_type": "office"},
+        {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
+         "tender_type": "central", "is_new": True},
+        {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx",
+         "tender_type": "central", "is_new": False}
     ]])
     assert_downloaded_resource(resource, [
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
@@ -85,4 +91,6 @@ def test():
          "data": get_mock_exemption_data("598379"), "tender_type": "office"},
         {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
          "data": get_mock_exemption_data("596915"), "tender_type": "office"},
+        {"pid": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
+         "data": get_mock_exemption_data("Goods-3-2013"), "tender_type": "central"},
     ])
