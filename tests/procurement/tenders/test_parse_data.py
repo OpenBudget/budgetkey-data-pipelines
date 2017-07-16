@@ -14,7 +14,7 @@ def run_parse_processor(type, resource):
     parameters = {"output_resource": type,
                   "tender_type": type}
     datapackage = {"resources": [{
-        "name": "publisher-urls-downloaded-data",
+        "name": "tender-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
         "schema": {
             "fields": [
@@ -35,9 +35,9 @@ def run_parse_processor(type, resource):
 def test_exemptions():
     resource = run_parse_processor("exemptions", [
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
-         "data": get_mock_exemption_data("595431")},
+         "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
         {"pid": 71, "url": "http://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269",
-         "data": get_mock_exemption_data("594269")},
+         "data": get_mock_exemption_data("594269"), "tender_type": "exemptions"},
     ])
     assert len(resource) == 2
     assert resource[0] == {
@@ -61,6 +61,7 @@ def test_exemptions():
         "end_date": datetime.date(2021, 12, 31),
         "decision": "נרשם",
         "page_title": "דיווח פטור משרדי",
+        "tender_type": "exemptions",
         "documents": [{"description": "חוות דעת מקצועית",
                                        "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
                                        "update_time": "2017-03-14"}]
@@ -70,11 +71,10 @@ def test_exemptions():
 def test_office():
     resource = run_parse_processor("office", [
         {"pid": 50, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379",
-         "data": get_mock_exemption_data("598379")},
+         "data": get_mock_exemption_data("598379"), "tender_type": "office"},
         {"pid": 21, "url": "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
-         "data": get_mock_exemption_data("596915")},
+         "data": get_mock_exemption_data("596915"), "tender_type": "office"},
     ])
-    print(resource)
     assert len(resource) == 2
     assert resource[0] == {'publisher_id': 50,
                            'publication_id': 598379,
@@ -82,9 +82,12 @@ def test_office():
                            'description': 'לניהול אירועי שנת ה-70 למדינת ישראל - פרסום נוסף',
                            'publisher': 'משרד המדע התרבות והספורט',
                            'claim_date': datetime.datetime(2017, 7, 19, 12),
-                           'last_update_date': datetime.date(2017, 7, 9),
+                           'last_update_date': datetime.datetime(2017, 7, 9),
                            'subjects': 'שירותי עריכה,כתיבה ,עיצוב ,גרפיקה ואומנות; שירותי עריכה ותרגום; כתיבה יצירתית; שירותי הדפסה; שירותי הפקת וידאו; שירותים הקשורים לטלוויזיה',
-                           'start_date': datetime.date(2017, 5, 25),
+                           'start_date': datetime.datetime(2017, 5, 25),
+                           "tender_id": "18/2017",
+                           "tender_type": "office",
+                           "decision": "עודכן",
                            'documents': [{'description': ' מענה לשאלות הבהרה מכרז פומבי 18/2017',
                                           'link': 'http://www.mr.gov.il/Files_Michrazim/242223.pdf',
                                           'update_time': '2017-07-09'},

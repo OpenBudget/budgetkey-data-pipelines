@@ -10,22 +10,37 @@ TABLE_SCHEMA = {
         {"name": "tender_type", "type": "string", "required": True},
         {"name": "page_url", "title": "page url", "type": "string", "format": "uri", "required": True},
         {"name": 'description', "type": "string", "required": True},
-        {"name": "supplier_id", "type": "string", "required": False},
-        {"name": "supplier", "type": "string", "required": True},
-        {"name": "contact", "type": "string", "required": False},
+        {"name": "supplier_id", "type": "string", "required": False, "description": "* exemptions: ח.פ\n"
+                                                                                    "* office: not used"},
+        {"name": "supplier", "type": "string", "required": True, "description": "* exemptions: supplier company name\n"
+                                                                                "* office: not used"},
+        {"name": "contact", "type": "string", "required": False, "description": "* exemptions: supplier contact name\n"
+                                                                                "* office: not used"},
         {"name": "publisher", "type": "string", "required": True},
-        {"name": "contact_email", "type": "string", "required": False},
-        {"name": "claim_date", "type": "datetime", "required": False},
-        {"name": "last_update_date", "type": "date", "required": True},
-        {"name": "reason", "type": "string", "required": False},
+        {"name": "contact_email", "type": "string", "required": False, "description": "* exemptions: supplier contact email\n"
+                                                                                      "* office: not used"},
+        {"name": "claim_date", "type": "datetime", "required": False, "description": "* exemptions: תאריך אחרון להגשת השגות\n"
+                                                                                     "* office: מועד אחרון להגשה"},
+        {"name": "last_update_date", "type": "date", "required": True, "description": "* exemptions: תאריך עדכון אחרון\n"
+                                                                                      "* office: תאריך עדכון אחרון"},
+        {"name": "reason", "type": "string", "required": False, "description": "* exemptions: נימוקים לבקשת הפטור\n"
+                                                                               "* office: not used"},
         {"name": "source_currency", "type": "string", "required": True},
-        {"name": "regulation", "type": "string", "required": True},
+        {"name": "regulation", "type": "string", "required": True, "description": "* exemptions: מתן הפטור מסתמך על תקנה\n"
+                                                                                  "* office: not used"},
         {"name": "volume", "type": "number", "required": False, "groupChar": ","},
-        {"name": "subjects", "type": "string", "required": True},
-        {"name": "start_date", "type": "date", "required": True},
-        {"name": "end_date", "type": "date", "required": True},
-        {"name": "decision", "type": "string", "required": True},
-        {"name": "page_title", "type": "string", "required": True},
+        {"name": "subjects", "type": "string", "required": True, "description": "* exemptions: נושא/ים\n"
+                                                                                "* office: נושא/ים"},
+        {"name": "start_date", "type": "date", "required": True, "description": "* exemptions: תחילת תקופת התקשרות\n"
+                                                                                "* office: תאריך פרסום"},
+        {"name": "end_date", "type": "date", "required": True, "description": "* exemptions: תום תקופת ההתקשרות\n"
+                                                                              "* office: not used"},
+        {"name": "decision", "type": "string", "required": True, "description": "* exemptions: סטטוס החלטה\n"
+                                                                                "* office: סטטוס"},
+        {"name": "page_title", "type": "string", "required": True, "description": "* exemptions: title of the exemption page\n"
+                                                                                  "* office: not used"},
+        {"name": "tender_id", "type": "string", "required": False, "description": "* exemptions: not used\n"
+                                                                                  "* office: מספר המכרז"},
         {"name": "documents", "type": "array", "required": True}
     ]
 }
@@ -55,9 +70,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
     def __init__(self, **kwargs):
         self._base_url = kwargs.pop("base_url", BASE_URL)
         super(ParsePageDataProcessor, self).__init__(default_input_resource="tender-urls-downloaded-data",
-                                                          default_replace_resource=True,
-                                                          table_schema=TABLE_SCHEMA,
-                                                          **kwargs)
+                                                     default_replace_resource=True,
+                                                     table_schema=TABLE_SCHEMA,
+                                                     **kwargs)
 
     def filter_resource_data(self, data, parameters):
         for row in data:
@@ -66,7 +81,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
-                update_time = parse_date(update_time_elt.text.split()[-1])
+                update_time = parse_date(update_time_elt.text.split()[-1]).date()
                 if update_time is not None:
                     update_time = update_time.isoformat()
                 documents.append({"description": img_elt.attrib.get("alt", ""),
@@ -128,12 +143,14 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
     def get_office_data(self, row, page, documents):
         input_fields_text_map = {
             "publication_id": "SERIAL_NUMBER",
+            "publishnum": "PublishNum",
             "description": "PublicationName",
             "publisher": "Publisher",
             "claim_date": "ClaimDate",
             "last_update_date": "UpdateDate",
             "subjects": "PublicationSUBJECT",
             "publish_date": "PublishDate",
+            "status": "PublicationSTATUS"
         }
         source_data = {
             k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
@@ -148,6 +165,8 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "last_update_date": parse_date(source_data["last_update_date"]),
             "subjects": source_data["subjects"],
             "start_date": parse_date(source_data["publish_date"]),
+            "decision": source_data["status"],
+            "tender_id": source_data["publishnum"],
             "documents": documents,
         }
 

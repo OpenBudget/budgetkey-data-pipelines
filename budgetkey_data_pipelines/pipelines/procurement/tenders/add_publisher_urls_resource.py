@@ -15,7 +15,8 @@ def resource_filter(resource_data, parameters):
     else:
         max_pages = parameters.get("max_pages", "-1")
     publisher_scraper_kwargs = {
-        "max_pages": int(max_pages)
+        "max_pages": int(max_pages),
+        "tender_type": parameters["tender_type"]
     }
     if os.environ.get("OVERRIDE_PUBLISHER_URLS_LIMIT_PUBLISHER_IDS", "") != "":
         limit_publisher_ids = map(int, os.environ["OVERRIDE_PUBLISHER_URLS_LIMIT_PUBLISHER_IDS"].split(","))

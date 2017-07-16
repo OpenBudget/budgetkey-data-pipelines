@@ -1,7 +1,6 @@
 from pyquery import PyQuery as pq
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
 
-
 def resource_filter(resource_data, parameters):
     html_text = "\n".join([r["data"] for r in resource_data])
     if parameters["tender_type"] == "office":

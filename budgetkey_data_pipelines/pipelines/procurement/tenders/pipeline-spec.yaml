@@ -1,4 +1,4 @@
-scraper-exemption-urls:
+scraper-exemptions:
   schedule:
     crontab: "0 */4 * * *"
   pipeline:
@@ -24,13 +24,13 @@ scraper-exemption-urls:
     - run: add_publisher_urls_resource
       parameters:
         tender_type: exemptions
-        output_resource: exemption-urls
+        output_resource: exemptions
       runner: tzabar
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/scraper-exemptions
 
-scraper-office-urls:
+scraper-office:
   schedule:
     crontab: "0 */4 * * *"
   pipeline:
@@ -56,7 +56,7 @@ scraper-office-urls:
     - run: add_publisher_urls_resource
       parameters:
         tender_type: office
-        output_resource: office-urls
+        output_resource: office
       runner: tzabar
     - run: dump.to_path
       parameters:
@@ -64,17 +64,17 @@ scraper-office-urls:
 
 scraper:
   dependencies:
-    - pipeline: ./procurement/tenders/scraper-exemption-urls
-    - pipeline: ./procurement/tenders/scraper-office-urls
+    - pipeline: ./procurement/tenders/scraper-exemptions
+    - pipeline: ./procurement/tenders/scraper-office
 
   pipeline:
     - run: load_resource
       parameters:
-        resource: exemption-urls
+        resource: exemptions
         url: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
     - run: load_resource
       parameters:
-        resource: office-urls
+        resource: office
         url: /var/datapackages/procurement/tenders/scraper-office/datapackage.json
     - run: stream_remote_resources
     - run: concatenate
@@ -89,7 +89,7 @@ scraper:
     - run: check_existing
       parameters:
         db-table: procurement_tenders
-    # download the data from office pages which don't exist in DB (is_new == False)
+    # download the data from pages which don't exist in DB (is_new == False)
     - run: download_pages_data
       runner: tzabar
     # parse the data for each exemption
