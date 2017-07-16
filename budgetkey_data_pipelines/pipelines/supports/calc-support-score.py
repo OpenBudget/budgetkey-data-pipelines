@@ -1,8 +1,9 @@
 import math
-
+import datetime
 import logging
 from datapackage_pipelines.wrapper import process
 
+curyear = datetime.datetime.now().date().year + 1
 
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
@@ -14,10 +15,11 @@ def modify_datapackage(dp, *_):
 
 
 def process_row(row, *_):
-    amount = row.get('volume', 0)
+    amount = row.get('amount_total', 0)
     if amount is None:
-        logging.warning('volume is None: %r', row)
+        logging.warning('amount_total is None: %r', row)
         amount = 0
+    # Account for relevance
     row['score'] = max(1, amount / 1000)
     return row
 
