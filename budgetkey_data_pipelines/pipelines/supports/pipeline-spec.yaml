@@ -59,6 +59,8 @@ all:
     - run: stream_remote_resources
     - run: concatenate
       parameters:
+        target:
+          name: supports
         fields:
           support_title:
             - ZZTXT40
@@ -95,7 +97,7 @@ all:
           budget_code:
             constraints:
               required: true
-              pattern: '[0-9]+'
+              pattern: '[0-9]{10}'
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/supports/all
@@ -103,4 +105,123 @@ all:
       parameters:
         tables:
           raw_supports:
-            resource-name: concat
+            resource-name: supports
+
+by-payment-year:
+  dependencies:
+    - pipeline: ./supports/all
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, aggregated by payment year
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/all/datapackage.json
+        resource: supports
+
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - budget_code
+            - year_paid
+            - recipient
+            - request_type
+        target:
+          name: supports
+          key: null
+        fields:
+          budget_code: null
+          year_paid: null
+          recipient: null
+          request_type: null
+
+          support_title:
+            aggregate: max
+          supporting_ministry:
+            aggregate: set
+
+          amount_total:
+            aggregate: sum
+          amount_approved:
+            aggregate: sum
+          amount_advance:
+            aggregate: sum
+          amount_paid:
+            aggregate: sum
+
+          years_requested:
+            name: year_requested
+            aggregate: set
+          budget_extra_data:
+            aggregate: max
+
+    - run: set_types
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/by-payment-year
+    - run: dump.to_sql
+      parameters:
+        tables:
+          supports_by_payment_year:
+            resource-name: supports
+
+by-request-year:
+  dependencies:
+    - pipeline: ./supports/all
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, aggregated by payment year
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/all/datapackage.json
+        resource: supports
+
+    - run: collate
+      parameters:
+        resource: supports
+        key:
+          - budget_code
+          - year_requested
+          - recipient
+          - request_type
+        collated-field-name: collated
+
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - budget_code
+            - year_requested
+            - recipient
+            - request_type
+          delete: true
+        target:
+          name: supports
+          key: null
+        fields:
+          budget_code: null
+          year_requested: null
+          recipient: null
+          request_type: null
+          payments:
+            name: collated
+            aggregate: array
+
+    - run: fix_values_by_request_year
+    - run: set_types
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/by-request-year
+    - run: dump.to_sql
+      parameters:
+        tables:
+          supports_by_request_year:
+            resource-name: supports
+

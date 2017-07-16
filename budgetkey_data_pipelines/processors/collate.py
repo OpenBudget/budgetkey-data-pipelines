@@ -3,17 +3,17 @@ from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
 
 parameters, dp, res_iter = ingest()
 
-resource = ResourceMatcher(parameters['resource'])
+resource_matcher = ResourceMatcher(parameters['resource'])
 key = parameters['key']
 collated_field_name = parameters['collated-field-name']
 assert isinstance(key, list)
 
 
 for res in dp['resources']:
-    if resource.match(res['name']):
+    if resource_matcher.match(res['name']):
         outer_fields = []
         inner_fields = []
-        for field in resource['schema']['fields']:
+        for field in res['schema']['fields']:
             if field['name'] in key:
                 outer_fields.append(field)
             else:
@@ -26,10 +26,10 @@ for res in dp['resources']:
         schema = {
             'fields': outer_fields,
         }
-        pk = resource['schema'].get('primaryKey')
+        pk = res['schema'].get('primaryKey')
         if pk is not None:
             schema['primaryKey'] = pk
-        resource['schema'] = schema
+        res['schema'] = schema
 
 
 def process_resource(res):
@@ -45,12 +45,12 @@ def process_resource(res):
             if k in key
         )
         outer[collated_field_name] = inner
-        yield row
+        yield outer
 
 
 def process_resources(res_iter_):
     for res in res_iter_:
-        if resource.match(res.spec['name']):
+        if resource_matcher.match(res.spec['name']):
             yield process_resource(res)
         else:
             yield res
