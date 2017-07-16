@@ -217,7 +217,14 @@ by-request-year:
     - run: collate_schema
     - run: calc-support-score
     - run: set_types
-    - run: sample
+    - run: set_primary_key
+      parameters:
+        supports:
+          - budget_code
+          - year_requested
+          - recipient
+          - request_type
+
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/supports/by-request-year

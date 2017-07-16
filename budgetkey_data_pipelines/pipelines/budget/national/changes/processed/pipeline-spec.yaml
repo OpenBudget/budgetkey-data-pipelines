@@ -146,6 +146,8 @@ national-budget-changes-aggregated:
             es:itemType: string
           date:
             es:itemType: date
+          pending:
+            es:itemType: boolean
     - run: set_primary_key
       parameters:
         national-budget-changes:
