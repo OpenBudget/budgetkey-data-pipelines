@@ -30,7 +30,9 @@ for res in dp['resources']:
         if pk is not None:
             schema['primaryKey'] = pk
         res['schema'] = schema
-        dp['collated-schema:{}:{}'.format(res['name'], collated_field_name)] = inner_fields
+        dp['collated-schema:{}:{}'.format(res['name'], collated_field_name)] = {
+            'fields': inner_fields
+        }
 
 
 def process_resource(res):
