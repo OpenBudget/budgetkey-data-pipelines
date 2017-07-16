@@ -172,11 +172,16 @@ by-payment-year:
 by-request-year:
   dependencies:
     - pipeline: ./supports/all
+    - pipeline: ./entities/fingerprints
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: All support data, aggregated by request year
+    - run: load_resource
+      parameters:
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/all/datapackage.json
@@ -212,6 +217,30 @@ by-request-year:
           request_type: null
           payments:
             aggregate: array
+
+    - run: fingerprint
+      parameters:
+        resource-name: supports
+        source-field: recipient
+        target-field: recipient_fingerprint
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+        target:
+          name: supports
+          key:
+            - recipient_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
 
     - run: fix_values_by_request_year
     - run: collate_schema
