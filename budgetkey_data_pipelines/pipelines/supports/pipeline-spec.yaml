@@ -190,7 +190,7 @@ by-request-year:
           - year_requested
           - recipient
           - request_type
-        collated-field-name: collated
+        collated-field-name: payments
 
     - run: join
       parameters:
@@ -211,7 +211,6 @@ by-request-year:
           recipient: null
           request_type: null
           payments:
-            name: collated
             aggregate: array
 
     - run: fix_values_by_request_year
