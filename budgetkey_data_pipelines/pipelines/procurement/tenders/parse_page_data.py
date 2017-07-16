@@ -3,7 +3,7 @@ from pyquery import PyQuery as pq
 from datetime import datetime
 
 TABLE_SCHEMA = {
-    "primaryKey": ["publication_id"],
+    "primaryKey": ["publication_id", "tender_type"],
     "fields": [
         {"name": "publisher_id", "type": "integer", "required": True},
         {"name": "publication_id", "type": "integer", "required": True},
@@ -52,17 +52,17 @@ def parse_date(s):
     if s is None or s.strip() == '':
         return None
     try:
-        return datetime.strptime(s, "%H:%M %d/%m/%Y")
+        return datetime.strptime(s, "%H:%M %d/%m/%Y").strftime("%Y-%m-%d")
     except ValueError:
-        return datetime.strptime(s, "%d/%m/%Y")
+        return datetime.strptime(s, "%d/%m/%Y").strftime("%Y-%m-%d")
 
 def parse_datetime(s):
     if s is None or s.strip() == '':
         return None
     try:
-        return datetime.strptime(s, "%H:%M %d/%m/%Y")
+        return datetime.strptime(s, "%H:%M %d/%m/%Y").strftime("%Y-%m-%dT%H:%M:0Z")
     except ValueError:
-        return datetime.strptime(s, "%d/%m/%Y")
+        return datetime.strptime(s, "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:0Z")
 
 
 class ParsePageDataProcessor(ResourceFilterProcessor):
@@ -81,9 +81,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
-                update_time = parse_date(update_time_elt.text.split()[-1]).date()
+                update_time = parse_date(update_time_elt.text.split()[-1])
                 if update_time is not None:
-                    update_time = update_time.isoformat()
+                    update_time = update_time
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time})
@@ -127,16 +127,17 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "publisher": source_data["publisher"],
             "contact_email": source_data["contact_email"],
             "claim_date": parse_datetime(source_data["claim_date"]),
-            "last_update_date": parse_date(source_data["last_update_date"]).date(),
+            "last_update_date": parse_date(source_data["last_update_date"]),
             "reason": source_data["reason"],
             "source_currency": source_data["source_currency"],
             "regulation": source_data["regulation"],
             "volume": source_data["volume"],
             "subjects": source_data["subjects"],
-            "start_date": parse_date(source_data["start_date"]).date(),
-            "end_date": parse_date(source_data["end_date"]).date(),
+            "start_date": parse_date(source_data["start_date"]),
+            "end_date": parse_date(source_data["end_date"]),
             "decision": source_data["decision"],
             "page_title": source_data["page_title"],
+            "tender_id": None,
             "documents": documents
         }
 
@@ -160,12 +161,22 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "tender_type": "office",
             "page_url": row["url"],
             "description": source_data["description"],
+            "supplier_id": None,
+            "supplier": None,
+            "contact": None,
             "publisher": source_data["publisher"],
+            "contact_email": None,
             "claim_date": parse_datetime(source_data["claim_date"]),
             "last_update_date": parse_date(source_data["last_update_date"]),
+            "reason": None,
+            "source_currency": None,
+            "regulation": None,
+            "volume": None,
             "subjects": source_data["subjects"],
             "start_date": parse_date(source_data["publish_date"]),
+            "end_date": None,
             "decision": source_data["status"],
+            "page_title": None,
             "tender_id": source_data["publishnum"],
             "documents": documents,
         }

@@ -2,7 +2,7 @@ import os
 import logging
 from urllib.parse import urlparse, parse_qs
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
@@ -29,8 +29,12 @@ class CheckExistingProcessor(ResourceFilterProcessor):
 
     def get_all_existing_ids(self):
         db_session = self.initialize_db_session()
+        db_conn = db_session.connection()
+        sql_query = text("select publication_id, tender_type from {0}".format(self.parameters['db-table']))
         try:
-            return [(int(o[0]), o[1]) for o in db_session.query("publication_id, tender_type from {0}".format(self.parameters['db-table']))]
+            return [(int(publication_id), tender_type)
+                    for publication_id, tender_type
+                    in db_conn.execute(sql_query)]
         except (OperationalError, ProgrammingError) as e:
             # this is probably due to the table not existing but even if there is another problem -
             # dump.to_sql will handle it. it's safe to let that processor handle the specifics of sql errors

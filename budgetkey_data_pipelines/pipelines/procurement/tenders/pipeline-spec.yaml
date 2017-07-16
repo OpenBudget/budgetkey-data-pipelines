@@ -99,15 +99,6 @@ scraper:
     - run: set_types
       parameters:
         resources: tenders
-        types:
-          claim_date:
-            type: datetime
-          last_update_date:
-            type: date
-          start_date:
-            type: date
-          end_date:
-            type: date
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
@@ -132,6 +123,9 @@ all:
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/procurement/tenders/scraper/datapackage.json
+        fields:
+          - name: claim_date
+            format: fmt:%Y-%m-%dT%H:%M:%S
         resource: tenders
         table: procurement_tenders
     - run: stream_remote_resources
