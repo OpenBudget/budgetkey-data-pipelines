@@ -1,5 +1,6 @@
 import itertools
 import logging
+from time import sleep
 
 from selenium import webdriver
 from selenium.webdriver.remote.remote_connection import LOGGER
@@ -64,10 +65,16 @@ def scrape():
 
     driver.set_window_size(1200, 800)
 
-    logging.info('GETTING DATA')
+    url = hostname + "/GCA/CompaniesInformation/Pages/default.aspx"
+    logging.info('GETTING DATA %s', url)
     driver.get(hostname + "/GCA/CompaniesInformation/Pages/default.aspx")
 
-    page = pq(driver.page_source)
+    rows = []
+    while len(rows) == 0:
+        page = pq(driver.page_source)
+        rows = page.find('.gcaCompamies tbody tr')
+        sleep(1)
+
     rows = page.find('.gcaCompamies tbody tr')
     logging.info('GOT %d ROWS', len(rows))
     verify_row_structure(rows[0])

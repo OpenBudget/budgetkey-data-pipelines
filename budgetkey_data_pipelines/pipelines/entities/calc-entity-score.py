@@ -18,7 +18,7 @@ def process_row(row, *_):
     if amount is None:
         logging.warning('received_amount is None: %r', row)
         amount = 0
-    row['score'] = math.log(max(1, amount))
+    row['score'] = max(1, amount/1000)
     return row
 
 

@@ -1,6 +1,6 @@
 scraper:
   schedule:
-    crontab: 0 0 * * *
+    crontab: "0 */4 * * *"
   pipeline:
     - run: add_metadata
       parameters:

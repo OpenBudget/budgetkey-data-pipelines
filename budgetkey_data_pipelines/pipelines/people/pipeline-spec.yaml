@@ -58,7 +58,13 @@ aggregated:
         resource: 0
 
     -
-      run: aggregate-people
+      run: collate
+      parameters:
+        resource: people
+        key:
+          - key
+        collated-field-name: details
+    - run: sample
 
     -
       run: join
