@@ -46,17 +46,13 @@ def scrape_company_details(cmp_recs):
     count = 0
     for i, cmp_rec in enumerate(cmp_recs):
 
-        cmp_name = cmp_rec.get('company_name')
-        if cmp_name is not None and cmp_name.strip() != '':
-            yield cmp_rec
+        if not cmp_rec['__is_stale']:
             continue
 
         count += 1
-        if count > 5000:
-            yield cmp_rec
+        if count > 1000:
             continue
 
-        assert 'Company_Number' in cmp_rec
         company_id = cmp_rec['Company_Number']
 
         row = {
