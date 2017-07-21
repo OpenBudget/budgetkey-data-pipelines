@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from datapackage_pipelines.wrapper import process
 
@@ -31,7 +32,9 @@ def process_row(row, *_):
 
     k = 'budget_code'
     v = row[k].strip()
-    assert len(v) > 0
+    if len(v) == 0:
+        logging.error('BAD row')
+        return
     v = '0' * (8-len(v)) + v
     row[k] = v
 
