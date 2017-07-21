@@ -148,11 +148,23 @@ national-budget-changes-aggregated:
             es:itemType: date
           pending:
             es:itemType: boolean
+    - run: manage-revisions
+      parameters:
+        resource-name: national-budget-changes
+        db-table: budget_changes
+        key-fields:
+          - transaction_id
     - run: set_primary_key
       parameters:
         national-budget-changes:
           - transaction_id
     # And we're done
+    - run: dump.to_sql
+      parameters:
+        tables:
+          budget_changes:
+            resource-name: national-budget-changes
+            mode: update
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/full

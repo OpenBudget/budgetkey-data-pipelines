@@ -46,11 +46,12 @@ _note: To understand a bit more on the difference between the different types of
 - Try to understand where is the change that you want to make supposed to reside? 
     - Is it related to one of the existing pipelines?
     - Is it something new altogether?
-- Find one or more similar existing pipelines and read their code to get some ideas, inspiration and know-how regarding our custom processors as well as 
-
+- Find one or more similar existing pipelines and read their code to get some ideas, inspiration and know-how regarding our custom processors as well as common solutions to common problems.
 
 ## Common
 
+_TODO: Documenting our common processors_
+ 
 ## Quickstart
 
 ### Installation of the Package
