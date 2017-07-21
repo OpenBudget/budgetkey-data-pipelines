@@ -22,13 +22,11 @@ def scrape_guidestar(ass_recs):
     count = 0
     for i, ass_rec in enumerate(ass_recs):
 
-        if ass_rec.get('association_guidestar_title') is not None:
-            yield ass_rec
+        if not ass_rec['__is_stale']:
             continue
 
         count += 1
         if count > 1000:
-            yield ass_rec
             continue
 
         assert 'Association_Number' in ass_rec

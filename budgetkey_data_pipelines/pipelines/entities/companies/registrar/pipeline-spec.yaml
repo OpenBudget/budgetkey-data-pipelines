@@ -79,8 +79,6 @@ details-scraper:
           company_details:
             resource-name: company-details
             mode: update
-            keys:
-              - id
 
 
 details:
@@ -95,7 +93,7 @@ details:
       parameters:
         url: env://DPP_DB_ENGINE
         name: company-details
-        table: company_detailsd
+        table: company_details
     - run: stream_remote_resources
     - run: set_types
       parameters:

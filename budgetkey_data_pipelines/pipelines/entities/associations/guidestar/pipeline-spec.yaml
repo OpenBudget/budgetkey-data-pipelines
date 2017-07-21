@@ -1,60 +1,26 @@
-guidestar:
+guidestar-scraper:
+  dependencies:
+    - pipeline: ./entities/associations/registrar/registry
   schedule:
-    crontab: "0 0 * * *"
+    crontab: "*/4 * * * *"
   pipeline:
     - run: add_metadata
       parameters:
         name: guidestar
         title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
-    - run: add_resource
+    - run: load_resource
       parameters:
-        name: current-guidestar
-        url: file:///var/datapackages/entities/associations/guidestar/data/guidestar.csv
-        encoding: utf-8
-        schema:
-          fields:
-            - { name: association_address, type: string }
-            - { name: association_founders, type: array }
-            - { name: association_guidestar_slogan, type: string }
-            - { name: association_guidestar_title, type: string }
-            - { name: association_objective, type: string }
-            - { name: association_org_kind, type: string }
-            - { name: association_proper_management, type: string }
-            - { name: association_year_established, type: integer }
-            - { name: id, type: string }
-            - { name: association_title, type: string}
-            - { name: association_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
-    - run: add_resource
+        resource: association-registry
+        url: /var/datapackages/entities/associations/registrar/datapackage.json
+    - run: manage-revisions
       parameters:
-        name: association-registry
-        url: file:///var/datapackages/entities/associations/registrar/data/association-registry.csv
-    - run: stream_remote_resources
-      parameters:
-        ignore-missing: true
-    - run: join
-      parameters:
-        source:
-          name: current-guidestar
-          key:
-            - id
-          delete: true
-        target:
-          name: association-registry
-          key:
-            - Association_Number
-        fields:
-          id: null
-          association_guidestar_title: null
-          association_guidestar_slogan: null
-          association_org_kind: null
-          association_proper_management: null
-          association_year_established: null
-          association_address: null
-          association_objective: null
-          association_founders: null
-          association_title: null
-          association_registration_date: null
-        full: true
+        resource-name: association-registry
+        db-table: guidestar
+        key-fields:
+          - Association_Number
+        db-key-fields:
+          - id
+        hash-fields: []
     - run: scraper
       runner: tzabar
       parameters:
@@ -66,11 +32,45 @@ guidestar:
           association_year_established: { type: integer }
           association_founders:
             es:itemType: string
-    - run: dump.to_path
+    - run: manage-revisions
       parameters:
-        out-path: /var/datapackages/entities/associations/guidestar
+        resource-name: guidestar
+        db-table: guidestar
+        key-fields:
+          - id
+    - run: set_primary_key
+      parameters:
+        guidestar:
+          - id
     - run: dump.to_sql
       parameters:
         tables:
           guidestar:
             resource-name: guidestar
+            mode: update
+
+
+
+guidestar:
+  dependencies:
+    - pipeline: ./entities/associations/guidestar/guidestar-scraper
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: guidestar
+        title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
+    - run: add_resource
+      parameters:
+        url: env://DPP_DB_ENGINE
+        name: guidestar
+        table: guidestar
+    - run: stream_remote_resources
+    - run: set_types
+      parameters:
+        types:
+          association_year_established: { type: integer }
+          association_founders:
+            es:itemType: string
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/associations/guidestar
