@@ -33,7 +33,7 @@ details-scraper:
   dependencies:
     - pipeline: ./entities/companies/registrar/registry
   schedule:
-    crontab: "*/4 * * * *"
+    crontab: "*/12 * * * *"
   pipeline:
     - run: add_metadata
       parameters:

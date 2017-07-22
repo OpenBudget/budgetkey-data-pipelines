@@ -44,14 +44,14 @@ def retryer(session, method, *args, **kwargs):
 
 def scrape_company_details(cmp_recs):
     count = 0
-    erred = False
+    erred = 0
     for i, cmp_rec in enumerate(cmp_recs):
 
         if not cmp_rec['__is_stale']:
             continue
 
         count += 1
-        if count > 1000 or erred:
+        if count > 1000 or erred > 4:
             continue
 
         company_id = cmp_rec['Company_Number']
@@ -90,7 +90,7 @@ def scrape_company_details(cmp_recs):
                     row['company_name'] = row['company_name_eng']
                 else:
                     logging.error('Failed to get data for company %s: %r', company_id, row)
-                    erred = True
+                    erred += 1
 
         yield row
 
