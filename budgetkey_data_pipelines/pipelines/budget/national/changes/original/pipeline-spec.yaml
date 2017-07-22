@@ -201,7 +201,7 @@ national-budget-changes:
     - run: dump.to_sql
       parameters:
         tables:
-          budget_changes:
+          raw_budget_changes:
             resource-name: national-budget-changes
 
 #fake-grouping:
