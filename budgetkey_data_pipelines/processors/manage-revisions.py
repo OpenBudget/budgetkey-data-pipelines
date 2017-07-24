@@ -16,7 +16,8 @@ STATUS_FIELDS = [
     {'name': '__last_modified_at', 'type': 'datetime'},
     {'name': '__is_new',           'type': 'boolean'},
     {'name': '__is_stale',         'type': 'boolean'},
-    {'name': '__next_update_days', 'type': 'integer'}
+    {'name': '__next_update_days', 'type': 'integer'},
+    {'name': '__hash',             'type': 'string'},
 ]
 STATUS_FIELD_NAMES = list(f['name'] for f in STATUS_FIELDS)
 
@@ -29,12 +30,16 @@ def get_connection_string():
     return connection_string
 
 
-def calc_key_and_hash(row, key_fields, hash_fields):
+def calc_key(row, key_fields):
     key = '|'.join(str(row[k]) for k in key_fields)
+    return key
+
+
+def calc_hash(row, hash_fields):
     hash = '|'.join(str(row[k]) for k in hash_fields)
     if len(hash) > 0:
         hash = hashlib.md5(hash.encode('utf8')).hexdigest()
-    return key, hash
+    return hash
 
 
 def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields):
@@ -50,8 +55,7 @@ def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields):
                 (k, v) for k, v in rec.items()
                 if k in STATUS_FIELD_NAMES
             )
-            key, hash = calc_key_and_hash(rec, key_fields, hash_fields)
-            existing_id['__hash'] = hash
+            key = calc_key(rec, key_fields)
             ret.set(key, existing_id)
 
     return ret
@@ -59,18 +63,19 @@ def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields):
 
 def process_resource(res, key_fields, hash_fields, existing_ids):
     for row in res:
-        key, hash = calc_key_and_hash(row, key_fields, hash_fields)
+        key = calc_key(row, key_fields)
+        hash = calc_hash(row, hash_fields)
 
         try:
-            existing_hash = existing_ids.get(key)
-            days_since_last_update = (now - existing_hash['__last_updated_at']).days
-            is_stale = days_since_last_update > existing_hash['__next_update_days']
+            existing_id = existing_ids.get(key)
+            days_since_last_update = (now - existing_id['__last_updated_at']).days
+            is_stale = days_since_last_update > existing_id['__next_update_days']
             row.update({
                 '__is_new': False,
                 '__is_stale': is_stale,
                 '__last_updated_at': now,
             })
-            if hash == existing_hash:
+            if hash == existing_id['__hash']:
                 row.update({
                     '__next_update_days': days_since_last_update + 1
                 })
