@@ -1,0 +1,24 @@
+calcalist:
+  title: Israelis personas titles and description from Calcalist
+  description: TBD
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: 'persona-titles'
+        title: 'TBD'
+        homepage: 'http://www.calcalist.co.il/local/home/0,7340,L-3789,00.html'
+    -
+      run: add_resource
+      parameters:
+        name: 'calcalist-data'
+        url: http://www.calcalist.co.il/local/home/0,7340,L-3789,00.html
+        headers: 1
+        format: 'txt'
+    -
+      run: stream_remote_resources
+    -
+      run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/media/calcalist
+
