@@ -21,7 +21,6 @@ national-budget-changes-aggregated:
   title: Changes, grouped by transaction_id, with explanations
 
   dependencies:
-    - pipeline: ./budget/national/changes/original/national-budget-changes
     - pipeline: ./budget/national/changes/explanations/all
     - pipeline: ./budget/national/changes/processed/transactions
 
@@ -61,6 +60,14 @@ national-budget-changes-aggregated:
           full: true
         fields:
           transaction_id: null
+    # Aggregate changes into transactions based on transaction id
+    - run: set_types
+      parameters:
+        resources: national-budget-changes
+        types:
+          transaction_id:
+            constraints:
+              required: true
     # Aggregate changes into transactions based on transaction id
     - run: join
       parameters:
