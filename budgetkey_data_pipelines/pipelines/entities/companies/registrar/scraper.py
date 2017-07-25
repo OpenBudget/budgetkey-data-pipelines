@@ -45,6 +45,20 @@ def retryer(session, method, *args, **kwargs):
 def scrape_company_details(cmp_recs):
     count = 0
     erred = 0
+
+    session = requests.Session()
+    response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
+    page = pq(response.text)
+
+    form_data = {
+        '__EVENTTARGET': '',
+        '__EVENTARGUMENT': '',
+    }
+
+    for form_data_elem_ in page.find('#aspnetForm input'):
+        form_data_elem = pq(form_data_elem_)
+        form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
+
     for i, cmp_rec in enumerate(cmp_recs):
 
         if not cmp_rec['__is_stale']:
@@ -61,36 +75,25 @@ def scrape_company_details(cmp_recs):
             'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
-        session = requests.Session()
-        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
+        if count == 1:
+            form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
+
+            response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
+            _ = pq(response.text)
+
+            # if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
+
+        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
         page = pq(response.text)
 
-        form_data = {
-            '__EVENTTARGET': '',
-            '__EVENTARGUMENT': '',
-        }
-
-        for form_data_elem_ in page.find('#aspnetForm input'):
-            form_data_elem = pq(form_data_elem_)
-            form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
-
-        form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
-
-        response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
-        page = pq(response.text)
-
-        if len(page.find('#CPHCenter_GridBlock').find('a')) >= 0:
-            response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
-            page = pq(response.text)
-
-            for k, v in selectors.items():
-                row[v] = page.find(k).text()
-            if row['company_name'].strip() == '':
-                if row['company_name_eng'].strip() != '':
-                    row['company_name'] = row['company_name_eng']
-                else:
-                    logging.error('Failed to get data for company %s: %r', company_id, row)
-                    erred += 1
+        for k, v in selectors.items():
+            row[v] = page.find(k).text()
+        if row['company_name'].strip() == '':
+            if row['company_name_eng'].strip() != '':
+                row['company_name'] = row['company_name_eng']
+            else:
+                logging.error('Failed to get data for company %s: %r', company_id, row)
+                erred += 1
 
         yield row
 
