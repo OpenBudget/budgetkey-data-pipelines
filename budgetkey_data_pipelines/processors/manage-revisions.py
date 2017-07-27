@@ -74,6 +74,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids):
                 '__is_new': False,
                 '__is_stale': is_stale,
                 '__last_updated_at': now,
+                '__hash': hash,
             })
             if hash == existing_id['__hash']:
                 row.update({
@@ -91,7 +92,8 @@ def process_resource(res, key_fields, hash_fields, existing_ids):
                 '__is_stale': True,
                 '__last_updated_at': now,
                 '__last_modified_at': now,
-                '__next_update_days': 1
+                '__next_update_days': 1,
+                '__hash': hash,
             })
 
         yield row
