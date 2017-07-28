@@ -65,6 +65,7 @@ def init_session():
 
     return form_data, session
 
+
 def scrape_company_details(cmp_recs):
     count = 0
     erred = 0
@@ -77,9 +78,10 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
-        if count > 1000 or erred > 4:
+        if erred > 4:
             continue
 
+        time.sleep(1)
         company_id = cmp_rec['Company_Number']
 
         row = {
