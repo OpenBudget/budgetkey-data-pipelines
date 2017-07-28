@@ -33,13 +33,19 @@ selectors = {
 
 
 def retryer(session, method, *args, **kwargs):
-    while True:
+    kwargs['timeout'] = 60
+    retries = 5
+    exc = None
+    while retries > 0:
         try:
-            kwargs['timeout'] = 60
+            retries -= 1
             return getattr(session, method)(*args, **kwargs)
         except Exception as e:
             logging.info('Got Exception %s, retrying', e)
             time.sleep(60)
+            exc = e
+    raise exc
+
 
 
 def scrape_company_details(cmp_recs):
