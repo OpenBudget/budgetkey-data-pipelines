@@ -47,13 +47,11 @@ def retryer(session, method, *args, **kwargs):
     raise exc
 
 
-
-def scrape_company_details(cmp_recs):
-    count = 0
-    erred = 0
-
+def init_session():
     session = requests.Session()
+    status = None
     response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
+    assert response.status_code == 200, "Got status code %d" % response.status_code
     page = pq(response.text)
 
     form_data = {
@@ -64,6 +62,14 @@ def scrape_company_details(cmp_recs):
     for form_data_elem_ in page.find('#aspnetForm input'):
         form_data_elem = pq(form_data_elem_)
         form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
+
+    return form_data, session
+
+def scrape_company_details(cmp_recs):
+    count = 0
+    erred = 0
+
+    form_data, session = init_session()
 
     for i, cmp_rec in enumerate(cmp_recs):
 
@@ -97,11 +103,13 @@ def scrape_company_details(cmp_recs):
         if row['company_name'].strip() == '':
             if row['company_name_eng'].strip() != '':
                 row['company_name'] = row['company_name_eng']
+                erred = 0
             else:
                 logging.error('Failed to get data for company %s: %r', company_id, row)
                 erred += 1
+                form_data, session = init_session()
 
-        yield row
+    yield row
 
 
 def process_resources(res_iter_):
