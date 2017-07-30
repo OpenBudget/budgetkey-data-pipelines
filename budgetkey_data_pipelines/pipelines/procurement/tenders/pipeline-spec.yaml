@@ -1,6 +1,7 @@
 scraper-exemptions:
   schedule:
     crontab: "0 */4 * * *"
+
   pipeline:
     - run: add_metadata
       parameters:
@@ -33,6 +34,7 @@ scraper-exemptions:
 scraper-office:
   schedule:
     crontab: "0 */4 * * *"
+
   pipeline:
     - run: add_metadata
       parameters:

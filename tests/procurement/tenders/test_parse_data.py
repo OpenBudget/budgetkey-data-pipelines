@@ -72,7 +72,7 @@ def test():
         "decision": "נרשם",
         "page_title": "דיווח פטור משרדי",
         "tender_type": "exemptions",
-        "tender_id": None,
+        "tender_id": "",
         "documents": [{"description": "חוות דעת מקצועית",
                                        "link": "http://www.mr.gov.il/Files_Michrazim/234734.pdf",
                                        "update_time": "2017-03-14"}]
@@ -169,7 +169,7 @@ def test():
                            'tender_id': 'Goods-3-2013',
                            'tender_type': 'central',
                            'volume': None}
-    assert resource[5] == {'publisher_id': None, 'publication_id': None, 'tender_type': 'central',
+    assert resource[5] == {'publisher_id': None, 'publication_id': 0, 'tender_type': 'central',
                            'page_url': 'http://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx',
                            'description': '', 'supplier_id': None, 'supplier': '',
                            'contact': 'ניסים בן-צרפתי;מנהל פרויקטים;02-6663439', 'publisher': None,

@@ -150,7 +150,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "end_date": parse_date(source_data["end_date"]),
             "decision": source_data["decision"],
             "page_title": source_data["page_title"],
-            "tender_id": None,
+            "tender_id": "",
             "documents": documents
         }
 
@@ -208,7 +208,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
         return {
             "publisher_id": None,
-            "publication_id": int(publication_id) if publication_id else None,
+            "publication_id": int(publication_id) if publication_id else 0,
             "tender_type": "central",
             "page_url": row["url"],
             "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
