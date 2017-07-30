@@ -78,7 +78,7 @@ def scrape_company_details(cmp_recs):
             continue
 
         count += 1
-        if erred > 4:
+        if count > 36000 or erred > 4:
             continue
 
         time.sleep(1)
