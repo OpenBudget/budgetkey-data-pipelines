@@ -191,3 +191,24 @@ entities:
       parameters:
         out-path: /var/datapackages/entities/scored
 
+geocode:
+  dependencies:
+    - pipeline: ./entities/all
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+        table: entities
+    - run: stream_remote_resources
+    - run: geocode_entities
+      parameters:
+        input-resource: entities
+        output-resource: entities-geo
+        geo-table: entities_geo
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities_geo:
+            resource-name: entities-geo
+            mode: append
