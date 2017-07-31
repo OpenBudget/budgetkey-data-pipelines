@@ -54,7 +54,8 @@ class ResourceFilterProcessor(object):
         cls(ingest_response=ingest(), **kwargs).spew()
 
     def _get_spew_params(self):
-        return self.filter_datapackage(), self.filter_data(), self.get_stats()
+        datapackage = self.filter_datapackage()
+        return datapackage, self.filter_data(), self.get_stats()
 
     def _is_matching_resource(self, resource_descriptor):
         return resource_descriptor["name"] == self.parameters["output_resource"]
