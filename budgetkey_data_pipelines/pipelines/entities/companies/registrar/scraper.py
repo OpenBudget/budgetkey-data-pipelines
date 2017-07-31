@@ -111,7 +111,7 @@ def scrape_company_details(cmp_recs):
                 erred += 1
                 form_data, session = init_session()
 
-    yield row
+        yield row
 
 
 def process_resources(res_iter_):
