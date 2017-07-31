@@ -27,7 +27,7 @@ volume_headers = [
     'ערך הזמנה במ.ט.מ'
 ]
 
-uri_to_fixed_file = {
+url_to_fixed_file = {
     'https://foi.gov.il/sites/default/files/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A8%D7%95%D7%95%D7%97%D7%94%20%D7%95%D7%94%D7%A9%D7%99%D7%A8%D7%95%D7%AA%D7%99%D7%9D%20%D7%94%D7%97%D7%91%D7%A8%D7%AA%D7%99%D7%99%D7%9D%20%D7%93%D7%95%D7%97%20%D7%94%D7%AA%D7%A7%D7%A9%D7%A8%D7%95%D7%99%D7%95%D7%AA%20%D7%9C%D7%A9%D7%A0%D7%AA%202016.xlsx':
         'file://manual_fixes/משרד הרווחה והשירותים החברתיים דוח התקשרויות לשנת 2016 מתוקן.xlsx',
     'https://foi.gov.il/sites/default/files/%D7%A2%D7%95%D7%AA%D7%A7%20%D7%A9%D7%9C%20%D7%A7%D7%95%D7%91%D7%A5%20%D7%A1%D7%95%D7%A4%D7%99%20%D7%94%D7%AA%D7%A7%D7%A9%D7%A8%D7%95%D7%99%D7%95%D7%AA%202015%20%D7%9E%D7%A0%D7%94%D7%9C%20%D7%94%D7%AA%D7%9B%D7%A0%D7%95%D7%9F%20%D7%A0%D7%95%D7%94%D7%9C%2010.xls':
@@ -39,8 +39,8 @@ loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
 for i, report in enumerate(reports.iter()):
     url_to_use = report['report-url']
-    if url_to_use in uri_to_fixed_file:
-        url_to_use = uri_to_fixed_file[url_to_use]
+    if url_to_use in url_to_fixed_file:
+        url_to_use = url_to_fixed_file[url_to_use]
         logging.info("Using fixed file: %s", url_to_use)
     for sheet in range(1, 20):
         canary = None
