@@ -17,10 +17,11 @@ parameters, datapackage, res_iter = ingest()
 def scrape():
     logging.info('Scraping calcalist')
 
-    driver = webdriver.Remote(
-        command_executor='http://tzabar.obudget.org:8910',
-        desired_capabilities=DesiredCapabilities.PHANTOMJS
-    )
+    # driver = webdriver.Remote(
+    #     command_executor='http://localhost',
+    #     desired_capabilities=DesiredCapabilities.PHANTOMJS
+    # )
+    driver = webdriver.PhantomJS()
     driver.set_window_size(1200, 800)
 
     logging.info('Selenium driver initialized')
@@ -41,12 +42,15 @@ def scrape():
     nominations_iframe = driver.find_element_by_id('CdaNominationList')
     src = nominations_iframe.get_attribute('src')
     url = urljoin(base_url, src)
-    logging.info('Assembled URL: %s from iframe' % url)
+    logging.info('IFrame URL: %s' % url)
     driver.get(url)
 
     page = pq(driver.page_source)
     area = page('.MainArea')
-    logging.info('There are #%s elements in the div' % len(area.items()))
+    for nomination in area:
+        logging.info('nomination: %s' % nomination)
+
+    logging.info('Finished printing nominations')
     return []
 
 
