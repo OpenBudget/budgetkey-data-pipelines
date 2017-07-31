@@ -14,7 +14,7 @@ def show_sample(res):
     for i, row in enumerate(res):
         if i < 10:
             if isinstance(row, LazyJsonLine):
-                logging.info('#%s: %s', i, row.line)
+                logging.info('#%s: %s', i, row._evaluate())
             else:
                 logging.info('#%s: %r', i, row)
         yield row

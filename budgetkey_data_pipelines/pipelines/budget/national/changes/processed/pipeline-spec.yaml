@@ -21,7 +21,6 @@ national-budget-changes-aggregated:
   title: Changes, grouped by transaction_id, with explanations
 
   dependencies:
-    - pipeline: ./budget/national/changes/original/national-budget-changes
     - pipeline: ./budget/national/changes/explanations/all
     - pipeline: ./budget/national/changes/processed/transactions
 
@@ -61,6 +60,14 @@ national-budget-changes-aggregated:
           full: true
         fields:
           transaction_id: null
+    # Aggregate changes into transactions based on transaction id
+    - run: set_types
+      parameters:
+        resources: national-budget-changes
+        types:
+          transaction_id:
+            constraints:
+              required: true
     # Aggregate changes into transactions based on transaction id
     - run: join
       parameters:
@@ -148,11 +155,23 @@ national-budget-changes-aggregated:
             es:itemType: date
           pending:
             es:itemType: boolean
+    - run: manage-revisions
+      parameters:
+        resource-name: national-budget-changes
+        db-table: budget_changes
+        key-fields:
+          - transaction_id
     - run: set_primary_key
       parameters:
         national-budget-changes:
           - transaction_id
     # And we're done
+    - run: dump.to_sql
+      parameters:
+        tables:
+          budget_changes:
+            resource-name: national-budget-changes
+            mode: update
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/full

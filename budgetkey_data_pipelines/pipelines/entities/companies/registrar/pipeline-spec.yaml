@@ -29,83 +29,29 @@ registry:
           company_registry:
             resource-name: company-registry
 
-details:
+details-scraper:
+  dependencies:
+    - pipeline: ./entities/companies/registrar/registry
   schedule:
-    crontab: "0 0 * * *"
+    crontab: "*/12 * * * *"
   pipeline:
     - run: add_metadata
       parameters:
-        name: company-details
-        title: נתונים פומביים על חברות המופיעים באתר רשם החברות
-    - run: add_resource
+        name: company-details-scraper
+        title: גרדן של נתונים פומביים על חברות המופיעים באתר רשם החברות
+    - run: load_resource
       parameters:
-        name: current-details
-        url: file:///var/datapackages/entities/companies/registrar/details/data/details.csv
-        encoding: utf-8
-        schema:
-          fields:
-            - { name: company_city, type: string }
-            - { name: company_country, type: string }
-            - { name: company_description, type: string }
-            - { name: company_goal, type: string }
-            - { name: company_government, type: string }
-            - { name: company_last_report_year, type: integer }
-            - { name: company_limit, type: string }
-            - { name: company_located_at, type: string }
-            - { name: company_mafera, type: string }
-            - { name: company_name, type: string }
-            - { name: company_name_eng, type: string }
-            - { name: company_pob, type: string }
-            - { name: company_pob_city, type: string }
-            - { name: company_pob_postal_code, type: string }
-            - { name: company_postal_code, type: string }
-            - { name: company_status, type: string }
-            - { name: company_street, type: string }
-            - { name: company_street_number, type: string }
-            - { name: company_type, type: string }
-            - { name: id, type: string }
-            - { name: company_registration_date, type: date, format: 'fmt:%Y-%m-%d'}
-    - run: add_resource
+        resource: company-registry
+        url: /var/datapackages/entities/companies/registrar/registry/datapackage.json
+    - run: manage-revisions
       parameters:
-        name: company-registry
-        url: file:///var/datapackages/entities/companies/registrar/registry/data/company-registry.csv
-    - run: stream_remote_resources
-      parameters:
-        ignore-missing: true
-    - run: join
-      parameters:
-        source:
-          name: current-details
-          key:
-            - id
-          delete: true
-        target:
-          name: company-registry
-          key:
-            - Company_Number
-        fields:
-            id: { "aggregate": "max" }
-            company_limit: { "aggregate": "max" }
-            company_name_eng: { "aggregate": "max" }
-            company_country: { "aggregate": "max" }
-            company_street: { "aggregate": "max" }
-            company_postal_code: { "aggregate": "max" }
-            company_city: { "aggregate": "max" }
-            company_pob_city: { "aggregate": "max" }
-            company_status: { "aggregate": "max" }
-            company_street_number: { "aggregate": "max" }
-            company_type: { "aggregate": "max" }
-            company_goal: { "aggregate": "max" }
-            company_name: { "aggregate": "max" }
-            company_pob_postal_code: { "aggregate": "max" }
-            company_last_report_year: { "aggregate": "max" }
-            company_located_at: { "aggregate": "max" }
-            company_pob: { "aggregate": "max" }
-            company_government: { "aggregate": "max" }
-            company_description: { "aggregate": "max" }
-            company_mafera: { "aggregate": "max" }
-            company_registration_date: { "aggregate": "max" }
-        full: true
+        resource-name: company-registry
+        db-table: company_details
+        key-fields:
+          - Company_Number
+        db-key-fields:
+          - id
+        hash-fields: []
     - run: scraper
       runner: tzabar
       parameters:
@@ -116,11 +62,44 @@ details:
         types:
           'company_last_report_year':
             type: integer
-    - run: dump.to_path
+    - run: manage-revisions
       parameters:
-        out-path: /var/datapackages/entities/companies/registrar/details
+        resource-name: company-details
+        db-table: company_details
+        key-fields:
+          - id
+    - run: sample
+    - run: set_primary_key
+      parameters:
+        company-details:
+          - id
     - run: dump.to_sql
       parameters:
         tables:
           company_details:
             resource-name: company-details
+            mode: update
+
+
+details:
+  dependencies:
+    - pipeline: ./entities/companies/registrar/details-scraper
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: company-details
+        title: נתונים פומביים על חברות המופיעים באתר רשם החברות
+    - run: add_resource
+      parameters:
+        url: env://DPP_DB_ENGINE
+        name: company-details
+        table: company_details
+    - run: stream_remote_resources
+    - run: set_types
+      parameters:
+        types:
+          'company_last_report_year':
+            type: integer
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/registrar/details

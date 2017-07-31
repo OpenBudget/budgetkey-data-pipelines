@@ -10,6 +10,10 @@ def modify_datapackage(dp, parameters, *_):
     for resource in source_datapackage.resources:
         descriptor = resource.descriptor
         if descriptor['name'] == parameters['resource']:
+            # override field attributes based on parameters and matching on field name
+            override_fields = {field["name"]: field for field in parameters.get("fields", [])}
+            for field in descriptor["schema"]["fields"]:
+                field.update(override_fields.get(field["name"], {}))
             resource = {
                 'name': descriptor['name'],
                 'schema': descriptor['schema'],

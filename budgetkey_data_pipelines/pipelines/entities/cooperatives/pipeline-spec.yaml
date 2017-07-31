@@ -1,0 +1,26 @@
+cooperatives:
+  title: רשימת אגודות שיתופיות
+  description: רשימת אגודות שיתופיות, מתוך ממשק נתונים של מאגר של משרד הכלכלה / האגף לאיגוד שיתופי, מתעדכן שבועית
+  schedule:
+    crontab: 0 0 * * 1
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entities-cooperatives
+        title: רשימת אגודות שיתופיות
+        sources:
+          - name: אתר משרד הכלכלה
+            web: https://apps.moital.gov.il/CooperativeSocieties/
+    - run: cooperatives_scraper
+      runner: tzabar
+      parameters:
+        resource-name: cooperatives
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/entities/cooperatives/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          cooperatives:
+            resource-name: cooperatives
+            mode: update

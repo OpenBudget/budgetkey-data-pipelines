@@ -33,30 +33,55 @@ selectors = {
 
 
 def retryer(session, method, *args, **kwargs):
-    while True:
+    kwargs['timeout'] = 60
+    retries = 5
+    exc = None
+    while retries > 0:
         try:
-            kwargs['timeout'] = 60
+            retries -= 1
             return getattr(session, method)(*args, **kwargs)
         except Exception as e:
             logging.info('Got Exception %s, retrying', e)
             time.sleep(60)
+            exc = e
+    raise exc
+
+
+def init_session():
+    session = requests.Session()
+    status = None
+    response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
+    assert response.status_code == 200, "Got status code %d" % response.status_code
+    page = pq(response.text)
+
+    form_data = {
+        '__EVENTTARGET': '',
+        '__EVENTARGUMENT': '',
+    }
+
+    for form_data_elem_ in page.find('#aspnetForm input'):
+        form_data_elem = pq(form_data_elem_)
+        form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
+
+    return form_data, session
 
 
 def scrape_company_details(cmp_recs):
     count = 0
+    erred = 0
+
+    form_data, session = init_session()
+
     for i, cmp_rec in enumerate(cmp_recs):
 
-        cmp_name = cmp_rec.get('company_name')
-        if cmp_name is not None and cmp_name.strip() != '':
-            yield cmp_rec
+        if not cmp_rec['__is_stale']:
             continue
 
         count += 1
-        if count > 5000:
-            yield cmp_rec
+        if count > 36000 or erred > 4:
             continue
 
-        assert 'Company_Number' in cmp_rec
+        time.sleep(1)
         company_id = cmp_rec['Company_Number']
 
         row = {
@@ -64,35 +89,27 @@ def scrape_company_details(cmp_recs):
             'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
-        session = requests.Session()
-        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
+        if count == 1:
+            form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
+
+            response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
+            _ = pq(response.text)
+
+            # if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
+
+        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
         page = pq(response.text)
 
-        form_data = {
-            '__EVENTTARGET': '',
-            '__EVENTARGUMENT': '',
-        }
-
-        for form_data_elem_ in page.find('#aspnetForm input'):
-            form_data_elem = pq(form_data_elem_)
-            form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
-
-        form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
-
-        response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
-        page = pq(response.text)
-
-        if len(page.find('#CPHCenter_GridBlock').find('a')) >= 0:
-            response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
-            page = pq(response.text)
-
-            for k, v in selectors.items():
-                row[v] = page.find(k).text()
-            if row['company_name'].strip() == '':
-                if row['company_name_eng'].strip() != '':
-                    row['company_name'] = row['company_name_eng']
-                else:
-                    logging.error('Failed to get data for company %s: %r', company_id, row)
+        for k, v in selectors.items():
+            row[v] = page.find(k).text()
+        if row['company_name'].strip() == '':
+            if row['company_name_eng'].strip() != '':
+                row['company_name'] = row['company_name_eng']
+                erred = 0
+            else:
+                logging.error('Failed to get data for company %s: %r', company_id, row)
+                erred += 1
+                form_data, session = init_session()
 
         yield row
 
