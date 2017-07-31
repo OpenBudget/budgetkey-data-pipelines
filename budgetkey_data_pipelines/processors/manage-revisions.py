@@ -36,9 +36,12 @@ def calc_key(row, key_fields):
 
 
 def calc_hash(row, hash_fields):
-    hash = '|'.join(str(row[k]) for k in hash_fields)
-    if len(hash) > 0:
-        hash = hashlib.md5(hash.encode('utf8')).hexdigest()
+    hash_fields = sorted(hash_fields)
+    hash_src = '|'.join(str(row[k]) for k in hash_fields)
+    if len(hash_src) > 0:
+        hash = hashlib.md5(hash_src.encode('utf8')).hexdigest()
+    else:
+        hash = ''
     return hash
 
 
