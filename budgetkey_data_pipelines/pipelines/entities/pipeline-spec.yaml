@@ -211,4 +211,4 @@ geocode:
         tables:
           entities_geo:
             resource-name: entities-geo
-            mode: append
+            mode: update
