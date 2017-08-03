@@ -21,6 +21,7 @@ setup(
                       'selenium',
                       'fuzzywuzzy[speedup]',
                       'plyvel',
+                      'datapackage-pipelines-elasticsearch',
                       'textract==1.5.0',  # later versions of textract introduce unnecesary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
                       'geocoder'],

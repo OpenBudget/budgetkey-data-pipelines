@@ -81,7 +81,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids):
             })
             if hash == existing_id['__hash']:
                 row.update({
-                    '__next_update_days': days_since_last_update + 1
+                    '__next_update_days': days_since_last_update + 2
                 })
             else:
                 row.update({
