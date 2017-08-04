@@ -1,4 +1,6 @@
 index_people:
+  dependencies:
+    - pipeline: ./people/aggregated
   pipeline:
     - run: add_metadata
       parameters:
