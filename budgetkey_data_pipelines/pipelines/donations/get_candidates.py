@@ -11,7 +11,8 @@ def get_candidates(rows):
         party_id = row['ID']
         resp = requests.post('https://statements.mevaker.gov.il/Handler/GuarantyDonationPublisherHandler.ashx',
                              data={'action': 'gcbp',
-                                   'p': party_id}).json()
+                                   'p': party_id,
+                                   'ele': 'null'}).json()
         for rr in resp:
             rr['Party'] = row['Name']
             yield rr

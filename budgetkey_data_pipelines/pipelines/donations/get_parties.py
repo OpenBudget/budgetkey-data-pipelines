@@ -6,9 +6,15 @@ from datapackage_pipelines.wrapper import ingest, spew
 params, dp, res_iter = ingest()
 
 
+REQUEST_DATA = {'action': 'gpbce',
+                'iup': "false",
+                'can': "null",
+                'ele': "null"}
+
+
 def get_parties():
     resp = requests.post('https://statements.mevaker.gov.il/Handler/GuarantyDonationPublisherHandler.ashx',
-                         data={'action': 'gpn'}).json()
+                         data=REQUEST_DATA).json()
     import logging; logging.info('%r', resp)
     return resp
 
