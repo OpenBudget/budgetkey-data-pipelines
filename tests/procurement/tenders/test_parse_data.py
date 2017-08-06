@@ -207,3 +207,19 @@ def test():
                                          {'description': 'הוראת שעה בתוקף 16.3.2',
                                           'link': 'http://hozrim.mof.gov.il/doc/hashkal/horaot.nsf/bynum/%d7%9e.16.3.2',
                                           'update_time': None}]}
+
+
+def test_invalid_response():
+    for tender_type in ["office", "central", "exemptions"]:
+        for mock_data in ["invalid", "blocked"]:
+            if tender_type == "office" or tender_type == "exemptions":
+                url = "http://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=11111"
+            elif tender_type == "central":
+                url = "http://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx"
+            error = None
+            try:
+                run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
+                                      "tender_type": tender_type},])
+            except Exception as e:
+                error = e
+            assert str(error) == "invalid or blocked response"
