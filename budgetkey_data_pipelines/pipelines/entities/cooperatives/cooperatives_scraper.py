@@ -59,7 +59,7 @@ class CooperativesScraper(object):
     def get_resource_descriptor(self, resource_name):
         return {"name": resource_name,
                 "path": resource_name+".csv",
-                "schema": {"fields": [{'name': 'id', 'type': 'integer'},
+                "schema": {"fields": [{'name': 'id', 'type': 'string'},
                                       {'name': 'name', 'type': 'string'},
                                       {'name': 'registration_date', 'type': 'datetime'},
                                       {'name': 'phone', 'type': 'string'},
