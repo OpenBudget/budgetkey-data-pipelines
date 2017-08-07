@@ -31,7 +31,13 @@ url_to_fixed_file = {
     'https://foi.gov.il/sites/default/files/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A8%D7%95%D7%95%D7%97%D7%94%20%D7%95%D7%94%D7%A9%D7%99%D7%A8%D7%95%D7%AA%D7%99%D7%9D%20%D7%94%D7%97%D7%91%D7%A8%D7%AA%D7%99%D7%99%D7%9D%20%D7%93%D7%95%D7%97%20%D7%94%D7%AA%D7%A7%D7%A9%D7%A8%D7%95%D7%99%D7%95%D7%AA%20%D7%9C%D7%A9%D7%A0%D7%AA%202016.xlsx':
         'file://manual_fixes/משרד הרווחה והשירותים החברתיים דוח התקשרויות לשנת 2016 מתוקן.xlsx',
     'https://foi.gov.il/sites/default/files/%D7%A2%D7%95%D7%AA%D7%A7%20%D7%A9%D7%9C%20%D7%A7%D7%95%D7%91%D7%A5%20%D7%A1%D7%95%D7%A4%D7%99%20%D7%94%D7%AA%D7%A7%D7%A9%D7%A8%D7%95%D7%99%D7%95%D7%AA%202015%20%D7%9E%D7%A0%D7%94%D7%9C%20%D7%94%D7%AA%D7%9B%D7%A0%D7%95%D7%9F%20%D7%A0%D7%95%D7%94%D7%9C%2010.xls':
-        'file://manual_fixes/עותק של קובץ סופי התקשרויות 2015 מנהל התכנון נוהל 10 מתוקן.xls'
+        'file://manual_fixes/עותק של קובץ סופי התקשרויות 2015 מנהל התכנון נוהל 10 מתוקן.xls',
+    'https://foi.gov.il/sites/default/files/2015_0.xlsx':
+        'file://manual_fixes/2015_0 מתוקן.xlsx',
+    'https://foi.gov.il/sites/default/files/%D7%90%27%202016.xlsx':
+        'file://manual_fixes/א 2016 מתוקן.xlsx',
+    'https://foi.gov.il/sites/default/files/%D7%91%27%202016.xlsx':
+        'file://manual_fixes/ב 2016 מתוקן.xlsx'
 }
 
 stats = {'bad-reports': 0}
