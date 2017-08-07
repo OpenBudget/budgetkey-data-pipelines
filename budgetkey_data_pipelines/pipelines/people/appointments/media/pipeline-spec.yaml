@@ -1,6 +1,8 @@
 themarker:
-  title: Israeli companies manning from TheMarker
+  title: Appointment notices from TheMarker
   description: Name, job and company description.
+  schedule:
+    crontab: 0 0 * * *
   pipeline:
     -
       run: add_metadata

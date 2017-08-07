@@ -192,15 +192,15 @@ entities:
         out-path: /var/datapackages/entities/scored
 
 geocode:
-  dependencies:
-    - pipeline: ./entities/all
+  schedule:
+    crontab: "0 0 * * *"
   pipeline:
-    - run: add_sql_resource
+    - run: load_sql_table
       parameters:
-        datapackage: /var/datapackages/entities/all/datapackage.json
-        resource: entities
         table: entities
-    - run: stream_remote_resources
+        columns:
+          id:
+          details:
     - run: geocode_entities
       parameters:
         input-resource: entities

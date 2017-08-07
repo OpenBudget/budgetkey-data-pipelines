@@ -36,9 +36,12 @@ def calc_key(row, key_fields):
 
 
 def calc_hash(row, hash_fields):
-    hash = '|'.join(str(row[k]) for k in hash_fields)
-    if len(hash) > 0:
-        hash = hashlib.md5(hash.encode('utf8')).hexdigest()
+    hash_fields = sorted(hash_fields)
+    hash_src = '|'.join(str(row[k]) for k in hash_fields)
+    if len(hash_src) > 0:
+        hash = hashlib.md5(hash_src.encode('utf8')).hexdigest()
+    else:
+        hash = ''
     return hash
 
 
@@ -78,7 +81,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids):
             })
             if hash == existing_id['__hash']:
                 row.update({
-                    '__next_update_days': days_since_last_update + 1
+                    '__next_update_days': days_since_last_update + 2
                 })
             else:
                 row.update({

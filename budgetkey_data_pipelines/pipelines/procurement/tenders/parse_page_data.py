@@ -1,5 +1,6 @@
 from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
-from budgetkey_data_pipelines.pipelines.procurement.tenders.check_existing import tender_id_from_url
+from budgetkey_data_pipelines.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
+                                                                                   publication_id_from_url)
 from pyquery import PyQuery as pq
 from datetime import datetime
 
@@ -128,9 +129,12 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         }
         source_data = {
             k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
+        publication_id = publication_id_from_url(row["url"])
+        if str(publication_id) != str(source_data["publication_id"]):
+            raise Exception("invalid or blocked response")
         return {
             "publisher_id": int(row["pid"]),
-            "publication_id": int(source_data["publication_id"]),
+            "publication_id": publication_id,
             "tender_type": "exemptions",
             "page_url": row["url"],
             "description": source_data["description"],
@@ -168,9 +172,12 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         }
         source_data = {
             k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
+        publication_id = publication_id_from_url(row["url"])
+        if str(publication_id) != str(source_data["publication_id"]):
+            raise Exception("invalid or blocked response")
         return {
             "publisher_id": int(row["pid"]),
-            "publication_id": int(source_data["publication_id"]),
+            "publication_id": publication_id,
             "tender_type": "office",
             "page_url": row["url"],
             "description": source_data["description"],
@@ -206,7 +213,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                               "link": pq(elt).find("a")[0].attrib["href"],
                               "update_time": None})
         publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
-        return {
+        outrow = {
             "publisher_id": None,
             "publication_id": int(publication_id) if publication_id else 0,
             "tender_type": "central",
@@ -231,6 +238,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "tender_id": tender_id_from_url(row["url"]),
             "documents": documents,
         }
+        if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
+            raise Exception("invalid or blocked response")
+        return outrow
 
 if __name__ == "__main__":
     ParsePageDataProcessor.main()
