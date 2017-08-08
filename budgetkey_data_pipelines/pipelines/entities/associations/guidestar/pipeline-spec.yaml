@@ -2,7 +2,7 @@ guidestar-scraper:
   dependencies:
     - pipeline: ./entities/associations/registrar/registry
   schedule:
-    crontab: "*/4 * * * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
