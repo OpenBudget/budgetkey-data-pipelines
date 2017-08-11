@@ -7,7 +7,7 @@ moital_service_providers:
     - run: scraper
       parameters:
         url: https://apps.moital.gov.il/WebServicesHandlers/
-        contractors_csv: ManpowerContractors, ServiceContractors
+        contractors_csv: ServiceContractors, ManpowerContractors
         page_extention: .aspx
         delay: 1
     - run: dump.to_path

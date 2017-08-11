@@ -6,14 +6,9 @@ from pyquery import PyQuery as pq
 from datapackage_pipelines.wrapper import ingest, spew
 
 from selenium import webdriver
-# from selenium.common.exceptions import TimeoutException
-# from selenium.webdriver.common import utils
-# from selenium.webdriver.remote.remote_connection import RemoteConnection
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.remote.remote_connection import LOGGER
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 parameters, datapackage, res_iter = ingest()
@@ -23,8 +18,8 @@ contractors = parameters['contractors_csv'].split(',')
 extention = parameters['page_extention']
 
 delay = parameters['delay']
-headers = ['close_corporation', 'name', 'id', 'license_number', 'company_owner', 'company_ceo', 
-  'address', 'city', 'expired', 'status']
+headers = ['close_corporation', 'name', 'activity', 'id', 'license_number', 
+    'company_owner', 'company_ceo', 'address', 'city', 'expired', 'status']
 
 def nextPageElement(page):
     return page.find('#gvContractors table[border="0"] span').parent().next()
@@ -81,5 +76,5 @@ datapackage['resources'].append({
 
 spew(datapackage, [scrape()])
 
-# for run the pipeline
+# command for run the pipeline -
 # budgetkey-dpp run ./entities/moital/moital_service_providers
