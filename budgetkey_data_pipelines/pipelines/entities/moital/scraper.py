@@ -6,6 +6,9 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 from selenium import webdriver
 # from selenium.common.exceptions import TimeoutException
+# from selenium.webdriver.common import utils
+# from selenium.webdriver.remote.remote_connection import RemoteConnection
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -15,6 +18,7 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 parameters, datapackage, res_iter = ingest()
 
 host = parameters['url']
+delay = parameters['delay']
 headers = ['close_corporation', 'name', 'id', 'license_number', 'company_owner', 'company_ceo', 
   'address', 'city', 'expired', 'status']
 
@@ -22,8 +26,9 @@ def nextPageElement(page):
     return page.find('#gvContractors table[border="0"] span').parent().next()
 
 def scrape(host_):
+
     driver = webdriver.Remote(
-        command_executor='http://tzabar.obudget.org:8910',
+        command_executor='http://127.0.0.1:4444/wd/hub',
         desired_capabilities=DesiredCapabilities.PHANTOMJS)
 
     driver.set_window_size(1200, 800)
@@ -52,7 +57,7 @@ def scrape(host_):
             logging.info('Navigate to page #%s',nextElem.find('a').text())
             next_page = driver.find_element_by_xpath("//*[@border=0]/tbody/tr/td/span/parent::td/following-sibling::td/a")
             next_page.click()
-            time.sleep(5)
+            time.sleep(delay)
         else:
             break
 

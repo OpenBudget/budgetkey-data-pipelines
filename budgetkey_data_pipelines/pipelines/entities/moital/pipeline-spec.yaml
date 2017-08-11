@@ -8,7 +8,7 @@ moital_service_providers:
       parameters:
         name: manpower_contractors
         url: https://apps.moital.gov.il/WebServicesHandlers/ManpowerContractors.aspx
-        format: html
+        delay: 1
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/moital_service_providers
