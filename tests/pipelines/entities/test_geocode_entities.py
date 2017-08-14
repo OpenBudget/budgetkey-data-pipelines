@@ -6,9 +6,16 @@ from sqlalchemy.orm.session import sessionmaker
 
 class MockGeoCodeEntities(GeoCodeEntities):
 
+    PROVIDERS = [
+        {
+            "provider": "google",
+            "limit": 2500
+        },
+    ]
+
     def __init__(self, parameters, datapackage, resources):
         super(MockGeoCodeEntities, self).__init__(parameters, datapackage, resources)
-        self.geocode_location_calls = []
+        self.geocoder_get_calls = []
 
     def initialize_db_session(self):
         connection_string = "sqlite://"
@@ -19,14 +26,17 @@ class MockGeoCodeEntities(GeoCodeEntities):
                              Column("entity_id", Text),
                              Column("location", Text),
                              Column("lat", Float),
-                             Column("lng", Float))
+                             Column("lng", Float),
+                             Column("provider", Text),
+                             Column("geojson", Text))
         entities_geo.create()
         entities_geo.insert().values(entity_id='589114263', location=' , בנימינה-גבעת עדה, , 3050000',
-                                     lat=123.456, lng=456.123).execute()
+                                     lat=123.456, lng=456.123, provider="google", geojson="{}").execute()
         return session
 
-    def geocoder_google(self, location):
-        self.geocode_location_calls.append(location)
+    def geocoder_get(self, location, provider, timeout):
+        assert provider == "google"
+        self.geocoder_get_calls.append(location)
         if location == 'קרן קימת לישראל 16, בת ים, , 5953101':
             filename = "kakal_16_batyam_5953101"
         elif location == ' , בנימינה-גבעת עדה, , 3050000':
@@ -40,15 +50,15 @@ class MockGeoCodeEntities(GeoCodeEntities):
         filename = os.path.join(os.path.dirname(__file__), filename)
         if not os.path.exists(filename):
             with open(filename, "w") as f:
-                g = super(MockGeoCodeEntities, self).geocoder_google(location)
-                res = {"ok": g.ok, "lat": None, "lng": None}
+                g = super(MockGeoCodeEntities, self).geocoder_get(location, provider, 0)
+                res = {"ok": g.ok, "lat": None, "lng": None, "geojson": g.geojson}
                 if res["ok"]:
                     res["lat"], res["lng"] = g.latlng
                 json.dump(res, f)
         with open(filename) as f:
             res = json.load(f)
             return type("MockGeo", (object,),
-                        {"ok": res["ok"], "latlng": (res["lat"], res["lng"])})
+                        {"ok": res["ok"], "latlng": (res["lat"], res["lng"]), "geojson": res["geojson"]})
 
 
 def test():
@@ -91,7 +101,7 @@ def test():
     resources = list(resources)
     assert len(resources) == 1
     resource = list(resources[0])
-    assert len(resource) == 7
+    assert len(resource) == 5
     assert resource[0] == {'entity_id': '500107487',
                            'lat': 32.0233437, 'lng': 34.7564211,
                            'location': 'קרן קימת לישראל 16, בת ים, , 5953101'}
