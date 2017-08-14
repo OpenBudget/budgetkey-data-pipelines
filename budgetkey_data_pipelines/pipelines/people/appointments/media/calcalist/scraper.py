@@ -271,8 +271,8 @@ def test_html():
 
 
 datapackage['resources'].append({
+            'path': 'data/nominations-list.csv',
             'name': 'nominations-list',
-            'path': 'nominations-list.csv',
             'schema': {
                 'fields': [
                     {'name': 'date', 'type': 'string'},

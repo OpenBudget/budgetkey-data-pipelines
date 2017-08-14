@@ -6,7 +6,7 @@ calcalist:
       run: add_metadata
       parameters:
         name: 'nominations'
-        title: 'TBD'
+        title: 'companies nominations'
         homepage: 'http://www.calcalist.co.il/local/home/0,7340,L-3789,00.html'
     - run: scraper
     - run: stream_remote_resources
