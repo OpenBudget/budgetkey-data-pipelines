@@ -1,16 +1,30 @@
 calcalist:
-  title: Israelis personas titles and description from Calcalist
-  description: TBD
+  title: מינויים בכלכליסט
+  description: רשימת כל המינויים והחברות מאתר כלכליסט
   pipeline:
     -
       run: add_metadata
       parameters:
-        name: 'persona-titles'
+        name: 'nominations'
         title: 'TBD'
         homepage: 'http://www.calcalist.co.il/local/home/0,7340,L-3789,00.html'
     - run: scraper
+    - run: stream_remote_resources
     -
-      run: stream_remote_resources
+      run: set_types
+      parameters:
+        types:
+          date:
+            type: date
+            format: "fmt:%d.%m.%Y"
+          title:
+            type: string
+          company:
+            type: string
+          description:
+            type: string
+          proof_url:
+            type: string
     -
       run: dump.to_path
       parameters:

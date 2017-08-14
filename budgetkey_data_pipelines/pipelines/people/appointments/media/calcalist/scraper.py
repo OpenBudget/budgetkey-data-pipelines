@@ -1,57 +1,320 @@
-import itertools
 import logging
 
 from selenium import webdriver
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from urllib.parse import urljoin
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-parameters, datapackage, res_iter = ingest()
+parameters, datapackage, _ = ingest()
+
+CALCALIST_BASE_URL = 'http://www.calcalist.co.il'
 
 
 def scrape():
     logging.info('Scraping calcalist')
 
-    # driver = webdriver.Remote(
-    #     command_executor='http://localhost',
-    #     desired_capabilities=DesiredCapabilities.PHANTOMJS
-    # )
     driver = webdriver.PhantomJS()
     driver.set_window_size(1200, 800)
 
     logging.info('Selenium driver initialized')
 
-    # WebDriverWait(driver, 10).until(
-    #     EC.presence_of_element_located((By.CLASS_NAME, 'MainArea'))
-    # )
-    #
-    # logging.info('Finished waiting for driver')
-
-    base_url = 'http://www.calcalist.co.il'
-    full_url = '%s/local/home/0,7340,L-3789,00.html' % base_url
-    logging.info('Querying: %s' % full_url)
-    driver.get(full_url)
-    logging.info('Finished querying first URL')
-    # CdaNominationList
-    # CdaNominationList
-    nominations_iframe = driver.find_element_by_id('CdaNominationList')
-    src = nominations_iframe.get_attribute('src')
-    url = urljoin(base_url, src)
+    full_init_url = urljoin(CALCALIST_BASE_URL, '/local/home/0,7340,L-3789,00.html')
+    logging.info('Initial URL: %s' % full_init_url)
+    driver.get(full_init_url)
+    iframe_url = extract_init_iframe_url_path(driver)
+    url = urljoin(CALCALIST_BASE_URL, iframe_url)
     logging.info('IFrame URL: %s' % url)
-    driver.get(url)
 
-    page = pq(driver.page_source)
-    area = page('.MainArea')
-    for nomination in area:
-        logging.info('nomination: %s' % nomination)
+    # html = test_html()
+    # page = pq(html)
+    i = 0
+    while url is not None and i < 10:
+        logging.info('iteration #%d with url: %s' % (i, url))
+        driver.get(url)
+        page = pq(driver.page_source)
+        yield from get_nominations(page, url)
+        url = extract_next_url_from_page(page)
+        i += 1
 
-    logging.info('Finished printing nominations')
-    return []
+
+def extract_next_url_from_page(page):
+    next_url_path = extract_next_url_path(page)
+    return urljoin(CALCALIST_BASE_URL, next_url_path)
 
 
-spew(datapackage, itertools.chain(res_iter, [scrape()]))
+def extract_next_url_path(page):
+    iframe_links = page('.Comments_Pagging')('td')('a')
+    logging.info('links: %s' % iframe_links)
+    for i, html_link in enumerate(iframe_links.items()):
+        # logging.info('%d) TD: %s' % (i, html_link))
+        link_desc = html_link.text()
+        find = link_desc.find('הבא')
+        if find == 0:
+            href = html_link.attr['href']
+            logging.info('href: %s', href)
+            return href
+
+    return None
+
+
+def extract_init_iframe_url_path(driver):
+    nominations_iframe = driver.find_element_by_id('CdaNominationList')
+    return nominations_iframe.get_attribute('src')
+
+
+def get_nominations(page, proof_url):
+    logging.info('Extracting nominations')
+
+    nominations_inner = page('.MainArea_Inner')
+    for inner in nominations_inner.items():
+        nomination_tables = inner('table')
+        for i, table in enumerate(nomination_tables.items()):
+            if table.attr['class'] is None:
+                date = table('.Nom_Date').html()
+                title = table('.Nom_Title').text()
+                comp = table('.Nom_Comp').text()
+                description = table('.Nom_SubTitle').text()
+                logging.info('i: %d\ndate: %s\ntitle: %s\ncomp: %s\ndescrption: %s' % (i, date, title, comp, description))
+                yield dict(
+                    date=date,
+                    title=title,
+                    company=comp,
+                    description=description,
+                    proof_url=proof_url
+                )
+
+
+def test_html():
+    return """
+   <BODY style='margin:0px;' bgcolor=#e9e8e3 onload='goSetHeight()'>
+   <a name='topnomination'></a>
+   <div class=MainArea>
+      <div class=MainArea_Inner>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>15.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>ירון יצהרי</a></div>
+                  <div class=Nom_Comp>מדטרוניק</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >ירון יצהרי מונה למנכ"ל חברת המיכשור הרפואי מדטרוניק בישראל. קודם היה סמנכ"ל ומנהל הפתוח העסקי של החברה</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/15/664573/14_s.jpg' border=0  alt='צילום: רמי זרנגר'  title='צילום: רמי זרנגר'   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>13.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>גיל רשף</a></div>
+                  <div class=Nom_Comp>המכללה האקדמית נתניה</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >גיל רשף מונה למנכ"ל המכללה האקדמית נתניה. קודם כיהן בשורת תפקידי ניהול בכירים במוסדות אקדמיים, בהם: מנכ"ל המכללה האקדמית אונו, מנכ"ל המרכז ללימודים אקדמיים אור יהודה ומנכ"ל ומייסד ועד המכללות הלא מתוקצבות</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/13/663877/15_s.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>13.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>פרופ' שוש ארד</a></div>
+                  <div class=Nom_Comp>המכללה האקדמית אחוה</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >פרופ' שוש ארד מונתה לנשיאת המכללה האקדמית אחוה. קודם היתה נשיאת המרכז האקדמי רופין</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/13/663875/14_S.jpg' border=0  alt='צילום: יח&quot;צ'  title='צילום: יח&quot;צ'   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>13.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>דניאל לבנטל</a></div>
+                  <div class=Nom_Comp>מישורים</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >דניאל לבנטל מונה למנכ"ל חברת הנדל"ן מישורים. בתפקידו האחרון שימש כמשנה למנכ"ל קבוצת בסט</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/13/663870/555_s.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>13.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>רונית רובין</a></div>
+                  <div class=Nom_Comp>אולקלאוד</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >רונית רובין מונתה למנכ"לית לחברת אולקלאוד. קודם היתה היתה חברת הנהלה וסמנכ"ל החטיבה העסקית בפרטנר</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/13/663871/13.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>13.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>אייל ברש</a></div>
+                  <div class=Nom_Comp>ArcServe </div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >אייל ברש (43), מונה למנהל פעילות ArcServe בישראל. בתפקדיו הקודמים שימש כמנהל שיווק אזורי באפריקה ואגן הים התיכון בנט-אפ (NettApp), דירקטור ערוצים ושותפים ב-CA  ישראל, מנהל פיתוח עסקי ב-EMC באזור איבריה, שוויץ, ישראל ויוון, ומנהל פעילות פיתוח עסקי בחברת Musketeer ובמתחם היזמות OpenValley ברמת-ישי</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/13/663825/123_s.jpg' border=0  alt='צילום: קובי קנטור'  title='צילום: קובי קנטור'   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date></div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>שלומית פן</a></div>
+                  <div class=Nom_Comp>לפידות</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >שלומית פן, מונתה לדירקטורית בחברת לפידות, שבבעלות יעקב לוקסמבורג. פן,  בעלת תואר ראשון בכלכלה ומדעי המדינה מאונ' תל אביב ותואר שני MBA מאוניברסיטת ברדפורד, מכהנת בין היתר כדח''צית בחברות וויליפוד השקעות ואולטרה אקוויטי.</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer2/20122005/398441/aaa_S.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>06.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>עדי נאה גמליאל </a></div>
+                  <div class=Nom_Comp>2BSecure</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >עדי נאה גמליאל (37) מונה ל-CTO ב- 2BSecure, חברת אבטחת המידע והסייבר של מטריקס. בין תפקידיו האחרונים שימש נאה גמליאל כמנהל ארכיטקטורה וחדשנות באורבוטק</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/06/661891/3_s.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>02.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>מנשה דלל</a></div>
+                  <div class=Nom_Comp>ברוקרים</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >מנשה דלל מונה למנכ"ל חברת "ברוקרים". בתפקידו האחרון שימש כמנכ"ל רשת התיווך והזכיינות הבינלאומית בישראל, Realty Executives. בעברו כיהן גם כמנהל הנדל"ן והעסקים בקבוצת פז נפט</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/02/661285/1_s.jpg' border=0  alt=''  title=''   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <table cellspacing='0' cellpadding='0'>
+            <tr>
+               <td align=right valign=top>
+                  <div class=Nom_Date>01.11.2016</div>
+                  <div class=Nom_Title><a href='javascript:;'  style='cursor:default' target=_parent>שלי שמיר-קינן</a></div>
+                  <div class=Nom_Comp>החברה המרכזית לייצור משקאות קלים</div>
+                  <div class=Nom_SubTitle><a href='javascript:;'  style='cursor:default' target=_parent >שלי שמיר-קינן מונתה לסמנכ"לית השיווק של קוקה-קולה ישראל מקבוצת החברה המרכזית לייצור משקאות קלים. קודם היתה סמנכ"לית השיווק של חברת נביעות</a></div>
+               </td>
+               <td width=10></td>
+               <td width=130 align=right valign=top><a href='javascript:;'  style='cursor:default' target=_parent ><img src='https://images1.calcalist.co.il/PicServer3/2016/11/01/660823/4_s.jpg' border=0  alt='צילום: שוקה כהן'  title='צילום: שוקה כהן'   width=128 height=88 HM=1></a></td>
+            </tr>
+         </table>
+         <div class=sep></div>
+         <style>
+            .Comments_Pagging {	font-family:'Arial','Arial (Hebrew)','David (Hebrew)','Courier New (Hebrew)';
+            font-size:12px;text-align:center;width:auto;
+            margin-top:-20px
+            }	
+            .Comments_Pagging td {direction:rtl;border:1px solid #dddddd;background:#f7f7f5;
+            padding:2px 7px 2px 7px;margin:4px;}
+            .Pagging_Active {border:1px solid #ffffff !important;background:#ffffff !important;font-weight:bold;
+            color:#000000 !important;
+            }
+            .Pagging_Active a {text-decoration:none;color:#000000 !important;font-weight:bold;}
+            .Comments_Pagging a	{text-decoration:none;color:#555553!important;}
+            .Pagging_dash {
+            border:1px solid #ffffff !important;
+            background:#ffffff !important;
+            background:url(/Story/Images/Story_Seporator.jpg) repeat-x bottom !important;
+            margin-right:0px !important;
+            margin-left:0px !important;
+            height:16px;
+            }
+         </style>
+         <table cellspacing=6  cellpadding=6 align=center class='Comments_Pagging'>
+            <tr>
+               <td><a  href='/Ext/Comp/NominationList/CdaNominationList_Iframe/1,15014,L-0-2,00.html?parms=5543' >הבא&gt;</a></td>
+               <td><a  href='/Ext/Comp/NominationList/CdaNominationList_Iframe/1,15014,L-0-299,00.html?parms=5543'>299</a></td>
+               <td class=Pagging_dash></td>
+               <td><a  href='/Ext/Comp/NominationList/CdaNominationList_Iframe/1,15014,L-0-3,00.html?parms=5543'>3</a></td>
+               <td><a  href='/Ext/Comp/NominationList/CdaNominationList_Iframe/1,15014,L-0-2,00.html?parms=5543'>2</a></td>
+               <td  class=Pagging_Active>1</td>
+               &nbsp;
+            </tr>
+         </table>
+         <div dir=rtl align=center class=minu>(2990 מינויים)</div>
+      </div>
+   </div>
+   <SCRIPT>
+      function goSetHeight() {if (parent == window) return;else parent.setIframeHeight('CdaNominationList');
+      
+      }
+      
+   </SCRIPT>
+</BODY> 
+    """
+
+
+datapackage['resources'].append({
+            'name': 'nominations-list',
+            'path': 'nominations-list.csv',
+            'schema': {
+                'fields': [
+                    {'name': 'date', 'type': 'string'},
+                    {'name': 'title', 'type': 'string'},
+                    {'name': 'company', 'type': 'string'},
+                    {'name': 'description', 'type': 'string'},
+                    {'name': 'proof_url', 'type': 'string'}
+                ]
+            }
+})
+
+logging.info('datapackage: %s' % datapackage)
+
+# datapackage['resources'].append({
+#     'name': 'government-companies',
+#     'path': 'data/government-companies.csv',
+#     'schema': {
+#         'fields': [
+#             {'name': h, 'type': 'string'} for h in headers
+#         ]
+#     }
+# })
+
+# datapackage = {
+#     'resources': [
+#         {
+#             'name': 'nominations-list',
+#             'path': 'nominations-list.csv',
+#             'schema': {
+#                 'fields': [
+#                     {'name': 'date', 'type': 'string'},
+#                     {'name': 'title', 'type': 'string'},
+#                     {'name': 'company', 'type': 'string'},
+#                     {'name': 'description', 'type': 'string'},
+#                     {'name': 'proof_url', 'type': 'string'}
+#                 ]
+#             }
+#         }
+#     ]
+# }
+
+
+spew(datapackage, [scrape()])
+
+
