@@ -30,10 +30,8 @@ def scrape():
     url = urljoin(CALCALIST_BASE_URL, iframe_url)
     logging.info('IFrame URL: %s' % url)
 
-    # html = test_html()
-    # page = pq(html)
     i = 0
-    while url is not None and i < 10:
+    while url is not None and i < 3:
         logging.info('iteration #%d with url: %s' % (i, url))
         driver.get(url)
         page = pq(driver.page_source)
@@ -76,13 +74,13 @@ def get_nominations(page, proof_url):
         for i, table in enumerate(nomination_tables.items()):
             if table.attr['class'] is None:
                 date = table('.Nom_Date').html()
-                title = table('.Nom_Title').text()
+                full_name = table('.Nom_Title').text()
                 comp = table('.Nom_Comp').text()
                 description = table('.Nom_SubTitle').text()
-                logging.info('i: %d\ndate: %s\ntitle: %s\ncomp: %s\ndescrption: %s' % (i, date, title, comp, description))
+                logging.info('i: %d\ndate: %s\nfull_name: %s\ncomp: %s\ndescrption: %s' % (i, date, full_name, comp, description))
                 yield dict(
                     date=date,
-                    title=title,
+                    full_name=full_name,
                     company=comp,
                     description=description,
                     proof_url=proof_url
@@ -276,7 +274,7 @@ datapackage['resources'].append({
             'schema': {
                 'fields': [
                     {'name': 'date', 'type': 'string'},
-                    {'name': 'title', 'type': 'string'},
+                    {'name': 'full_name', 'type': 'string'},
                     {'name': 'company', 'type': 'string'},
                     {'name': 'description', 'type': 'string'},
                     {'name': 'proof_url', 'type': 'string'}
