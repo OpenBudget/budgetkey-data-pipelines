@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from urllib.parse import urljoin
 from pyquery import PyQuery as pq
+from init_nominations_page import InitNominationsPage
+from nominations_page import NominationsPage
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -26,65 +28,20 @@ def scrape():
     full_init_url = urljoin(CALCALIST_BASE_URL, '/local/home/0,7340,L-3789,00.html')
     logging.info('Initial URL: %s' % full_init_url)
     driver.get(full_init_url)
-    iframe_url = extract_init_iframe_url_path(driver)
-    url = urljoin(CALCALIST_BASE_URL, iframe_url)
+    init_page = InitNominationsPage(CALCALIST_BASE_URL, driver.page_source)
+    url = init_page.nominations_url()
     logging.info('IFrame URL: %s' % url)
 
     i = 0
     while url is not None and i < 3:
         logging.info('iteration #%d with url: %s' % (i, url))
         driver.get(url)
-        page = pq(driver.page_source)
-        yield from get_nominations(page, url)
-        url = extract_next_url_from_page(page)
+        nominations_page = NominationsPage(url, CALCALIST_BASE_URL, driver.page_source)
+        for nomination in nominations_page.nominations():
+            yield nomination
+        url = nominations_page.next_url()
+        logging.info('next URL: %s' % url)
         i += 1
-
-
-def extract_next_url_from_page(page):
-    next_url_path = extract_next_url_path(page)
-    return urljoin(CALCALIST_BASE_URL, next_url_path)
-
-
-def extract_next_url_path(page):
-    iframe_links = page('.Comments_Pagging')('td')('a')
-    logging.info('links: %s' % iframe_links)
-    for i, html_link in enumerate(iframe_links.items()):
-        # logging.info('%d) TD: %s' % (i, html_link))
-        link_desc = html_link.text()
-        find = link_desc.find('הבא')
-        if find == 0:
-            href = html_link.attr['href']
-            logging.info('href: %s', href)
-            return href
-
-    return None
-
-
-def extract_init_iframe_url_path(driver):
-    nominations_iframe = driver.find_element_by_id('CdaNominationList')
-    return nominations_iframe.get_attribute('src')
-
-
-def get_nominations(page, proof_url):
-    logging.info('Extracting nominations')
-
-    nominations_inner = page('.MainArea_Inner')
-    for inner in nominations_inner.items():
-        nomination_tables = inner('table')
-        for i, table in enumerate(nomination_tables.items()):
-            if table.attr['class'] is None:
-                date = table('.Nom_Date').html()
-                full_name = table('.Nom_Title').text()
-                comp = table('.Nom_Comp').text()
-                description = table('.Nom_SubTitle').text()
-                logging.info('i: %d\ndate: %s\nfull_name: %s\ncomp: %s\ndescrption: %s' % (i, date, full_name, comp, description))
-                yield dict(
-                    date=date,
-                    full_name=full_name,
-                    company=comp,
-                    description=description,
-                    proof_url=proof_url
-                )
 
 
 def test_html():
