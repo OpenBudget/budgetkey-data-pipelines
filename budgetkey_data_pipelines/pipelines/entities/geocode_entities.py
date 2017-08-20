@@ -157,10 +157,8 @@ class GeoCodeEntities(object):
                 self.warn_once("provider {} is blacklisted".format(geocode_provider))
             elif self.provider_request_counts[geocode_provider] > provider["limit"]:
                 self.warn_once("provider {} reached limit".format(geocode_provider))
-                continue
             elif "" in [os.environ.get(env_var, "") for env_var in provider.get("env_vars", [])]:
                 self.warn_once("provider {} requires environment variables {}".format(geocode_provider, provider["env_vars"]))
-                continue
             else:
                 # valid provider
                 if provider["sleep_seconds"] > 0:
@@ -171,15 +169,14 @@ class GeoCodeEntities(object):
                 except Exception:
                     logging.exception("geocoding exception, blacklist this provider")
                     self.blacklist_providers.append(geocode_provider)
-                    # try next provider
-                    continue
-                if g.ok and g.confidence > 0:
-                    # got valid geo data
-                    return g.lat, g.lng, geocode_provider, g.geojson
                 else:
-                    self.warn_once("couldn't get any geo data for provider {}, will not try again".format(geocode_provider))
-                    # return the response and provider to allow to inspect it later in DB
-                    return None, None, geocode_provider, g.geojson
+                    if g.ok and g.confidence > 0:
+                        # got valid geo data
+                        return g.lat, g.lng, geocode_provider, g.geojson
+                    else:
+                        self.warn_once("couldn't get any geo data for provider {}, will not try again".format(geocode_provider))
+                        # return the response and provider to allow to inspect it later in DB
+                        return None, None, geocode_provider, g.geojson
         self.warn_once("exhausted all providers, couldn't find any geo data")
         return None
 
