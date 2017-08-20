@@ -49,16 +49,19 @@ class MockGeoCodeEntities(GeoCodeEntities):
             raise Exception("unknown location: '{}'".format(location))
         filename = os.path.join(os.path.dirname(__file__), filename)
         if not os.path.exists(filename):
+            g = super(MockGeoCodeEntities, self).geocoder_get(location, provider, 5)
+            res = {"ok": g.ok, "lat": None, "lng": None, "geojson": g.geojson, "confidence": g.confidence}
+            if res["ok"]:
+                res["lat"], res["lng"] = g.latlng
             with open(filename, "w") as f:
-                g = super(MockGeoCodeEntities, self).geocoder_get(location, provider, 0)
-                res = {"ok": g.ok, "lat": None, "lng": None, "geojson": g.geojson}
-                if res["ok"]:
-                    res["lat"], res["lng"] = g.latlng
                 json.dump(res, f)
         with open(filename) as f:
             res = json.load(f)
-            return type("MockGeo", (object,),
-                        {"ok": res["ok"], "latlng": (res["lat"], res["lng"]), "geojson": res["geojson"]})
+        return type("MockGeo", (object,),
+                    {"ok": res["ok"],
+                     "lat": res["lat"], "lng": res["lng"],
+                     "geojson": res["geojson"],
+                     "confidence": res["confidence"]})
 
 
 def test():
@@ -104,25 +107,24 @@ def test():
     assert len(resource) == 5
     assert resource[0] == {'entity_id': '500107487',
                            'lat': 32.0233437, 'lng': 34.7564211,
-                           'location': 'קרן קימת לישראל 16, בת ים, , 5953101'}
+                           'location': 'קרן קימת לישראל 16, בת ים, , 5953101',
+                           'provider': 'google', 'geojson': {"type": "Feature", "properties": {"accuracy": "ROOFTOP", "address": "Kakal St 16, Bat Yam, Israel", "bbox": [34.7550721197085, 32.02199471970849, 34.7577700802915, 32.02469268029149], "city": "Bat Yam", "confidence": 9, "country": "IL", "encoding": "utf-8", "housenumber": "16", "lat": 32.0233437, "lng": 34.7564211, "location": "\u05e7\u05e8\u05df \u05e7\u05d9\u05de\u05ea \u05dc\u05d9\u05e9\u05e8\u05d0\u05dc 16, \u05d1\u05ea \u05d9\u05dd, , 5953101", "ok": True, "place": "ChIJM2gbRkGzAhURlVxwg59dKVo", "provider": "google", "quality": "street_address", "state": "Center District", "status": "OK", "status_code": 200, "street": "Kakal St"}, "bbox": [34.7550721197085, 32.02199471970849, 34.7577700802915, 32.02469268029149], "geometry": {"type": "Point", "coordinates": [34.7564211, 32.0233437]}}}
     assert resource[1] == {'entity_id': '500213525',
                            'lat': 123.456, 'lng': 456.123,
-                           'location': ' , בנימינה-גבעת עדה, , 3050000'}
+                           'location': ' , בנימינה-גבעת עדה, , 3050000',
+                           'provider': 'google', 'geojson': '{}'}
     assert resource[2] == {'entity_id': '500302369',
                            'lat': None, 'lng': None,
-                           'location': 'ברל נורא 5, בני ברק, , 0'}
-    assert resource[3] == {'entity_id': '500409362',
-                           'lat': None, 'lng': None,
-                           'location': None}
-    assert resource[4] == {'entity_id': '510000268',
+                           'location': 'ברל נורא 5, בני ברק, , 0',
+                           'provider': 'google', 'geojson': {'type': 'Feature', 'properties': {'encoding': 'utf-8', 'location': 'ברל נורא 5, בני ברק, , 0', 'provider': 'google', 'status': 'ZERO_RESULTS', 'status_code': 200, 'ok': False}}}
+    assert resource[3] == {'entity_id': '510000268',
                            'lat': 32.8187663, 'lng': 34.9987921,
-                           'location': 'כיאט 3, חיפה, ישראל, 33261'}
-    assert resource[5] == {'entity_id': '589114263',
+                           'location': 'כיאט 3, חיפה, ישראל, 33261',
+                           'provider': 'google', 'geojson': {'type': 'Feature', 'properties': {'accuracy': 'RANGE_INTERPOLATED', 'address': 'Khayat St 3, Haifa, Israel', 'bbox': [34.9974502697085, 32.8174121697085, 35.0001482302915, 32.8201101302915], 'city': 'Haifa', 'confidence': 9, 'country': 'IL', 'county': 'Haifa', 'encoding': 'utf-8', 'housenumber': '3', 'lat': 32.8187663, 'lng': 34.9987921, 'location': 'כיאט 3, חיפה, ישראל, 33261', 'ok': True, 'place': 'EiDXm9eZ15DXmCAzLCDXl9eZ16TXlCwg15nXqdeo15DXnA', 'provider': 'google', 'quality': 'street_address', 'state': 'Haifa District', 'status': 'OK', 'status_code': 200, 'street': 'Khayat St'}, 'bbox': [34.9974502697085, 32.8174121697085, 35.0001482302915, 32.8201101302915], 'geometry': {'type': 'Point', 'coordinates': [34.9987921, 32.8187663]}}}
+    assert resource[4] == {'entity_id': '500302369',
                            'lat': None, 'lng': None,
-                           'location': None}
-    assert resource[6] == {'entity_id': '500302369',
-                           'lat': None, 'lng': None,
-                           'location': 'ברל נורא 5, בני ברק, , 0'}
-    assert processor.geocode_location_calls == ['קרן קימת לישראל 16, בת ים, , 5953101',
-                                                'ברל נורא 5, בני ברק, , 0',
-                                                'כיאט 3, חיפה, ישראל, 33261']
+                           'location': 'ברל נורא 5, בני ברק, , 0',
+                           'provider': 'google', 'geojson': {'type': 'Feature', 'properties': {'encoding': 'utf-8', 'location': 'ברל נורא 5, בני ברק, , 0', 'provider': 'google', 'status': 'ZERO_RESULTS', 'status_code': 200, 'ok': False}}}
+    assert processor.geocoder_get_calls == ['קרן קימת לישראל 16, בת ים, , 5953101',
+                                            'ברל נורא 5, בני ברק, , 0',
+                                            'כיאט 3, חיפה, ישראל, 33261']
