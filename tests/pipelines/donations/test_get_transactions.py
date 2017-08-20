@@ -29,7 +29,7 @@ def test_donations_get_transactions():
                                                              "Party": "מפלגת העבודה הישראלית"},
                                                             {"ID": 260,  # candidate id
                                                              "Party": "הליכוד תנועה לאומית"}]))
-    assert len(resource) == 3053
+    assert len(resource) == 6553
     assert resource[0] == {'CandidateName': 'שי נחמן',
                            'City': 'Booca Raton',
                            'Country': 'ארה"ב-FL',
