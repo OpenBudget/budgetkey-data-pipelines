@@ -155,7 +155,7 @@ class GeoCodeEntities(object):
             geocode_provider = provider["provider"]
             if geocode_provider in self.blacklist_providers:
                 self.warn_once("provider {} is blacklisted".format(geocode_provider))
-            elif self.provider_request_counts[geocode_provider] > provider["limit"]:
+            elif self.provider_request_counts[geocode_provider] >= provider["limit"]:
                 self.warn_once("provider {} reached limit".format(geocode_provider))
             elif "" in [os.environ.get(env_var, "") for env_var in provider.get("env_vars", [])]:
                 self.warn_once("provider {} requires environment variables {}".format(geocode_provider, provider["env_vars"]))
@@ -192,7 +192,9 @@ class GeoCodeEntities(object):
             if entity_location:
                 entity_row = self.get_entity_row(entity_id)
                 if self.is_update_needed(entity_row, entity_location):
-                    yield self.get_row(entity_id, entity_location)
+                    row = self.get_row(entity_id, entity_location)
+                    if row:
+                        yield row
                 else:
                     logging.info("no update needed: {}".format(entity_id))
         self.requests_session.close()
@@ -215,7 +217,10 @@ class GeoCodeEntities(object):
             else:
                 # need to geocode
                 res = self.geocode(entity_location)
-                if res is not None:
+                if res is None:
+                    # this means all providers were exhausted, we skip those rows and don't cache or yield them
+                    return None
+                else:
                     lat, lng, provider, geojson = res
             # store the result in internal cache - whether it's from geocode or from DB
             self.locations_cache[entity_location] = lat, lng, provider, geojson
