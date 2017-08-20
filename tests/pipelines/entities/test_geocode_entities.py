@@ -166,11 +166,11 @@ def assert_geocode_provider(provider):
 
 
 def test_google():
+    # we force the bing api key to be empty - this will cause the free google provider to be used
     os.environ["BING_API_KEY"] = ""
     assert_geocode_provider("google")
 
 def test_bing():
-    if not BING_API_KEY:
-        pytest.skip("please set BING_API_KEY to test bing provider")
-    os.environ["BING_API_KEY"] = BING_API_KEY
+    # set the bing api token, when using the mocks, the token can be invalid, as we don't make any http request
+    os.environ["BING_API_KEY"] = BING_API_KEY if BING_API_KEY else "fake-bing-api-token"
     assert_geocode_provider("bing")
