@@ -86,8 +86,8 @@ scraper-central:
 scraper:
   dependencies:
     - pipeline: ./procurement/tenders/scraper-exemptions
-#    - pipeline: ./procurement/tenders/scraper-office
-#    - pipeline: ./procurement/tenders/scraper-central
+    - pipeline: ./procurement/tenders/scraper-office
+    - pipeline: ./procurement/tenders/scraper-central
 
   pipeline:
     - run: load_resource
