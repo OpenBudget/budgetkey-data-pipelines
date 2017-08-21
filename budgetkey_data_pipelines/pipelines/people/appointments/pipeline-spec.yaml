@@ -16,6 +16,11 @@ all-appointments:
         resource: 0
 
     -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/media/calcalist/datapackage.json
+        resource: nominations-list
+    -
       run: concatenate
       parameters:
         target:
