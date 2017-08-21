@@ -3,7 +3,7 @@ import json
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
-import datetime
+import datetime, os
 
 
 class MockParseExemptionDataProcessor(ParsePageDataProcessor):
@@ -11,8 +11,23 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
     def spew(self):
         return self._get_spew_params()
 
+    def requests_get_content(self, url):
+        if url == "http://www.mr.gov.il/Files_Michrazim/201813.signed":
+            filename = "Files_Michrazim_201813.signed"
+        else:
+            raise Exception("unknown url: {}".format(url))
+        filename = os.path.join(os.path.dirname(__file__), "fixtures", filename)
+        if not os.path.exists(filename):
+            content = super(MockParseExemptionDataProcessor, self).requests_get_content(url)
+            with open(filename, "wb") as f:
+                f.write(content)
+        with open(filename, "rb") as f:
+            return f.read()
 
 def run_parse_processor(resource):
+    parameters = {
+        "out-path": "/var/datapackages/procurement/tenders/scraper"
+    }
     datapackage = {"resources": [{
         "name": "tender-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
@@ -25,7 +40,7 @@ def run_parse_processor(resource):
         }
     }]}
     resources = unlistify_resources([resource])
-    ingest_response = ({}, datapackage, resources)
+    ingest_response = (parameters, datapackage, resources)
     datapackage, resources, stats = MockParseExemptionDataProcessor(ingest_response=ingest_response).spew()
     resources = listify_resources(resources)
     assert len(resources) == 1
@@ -36,11 +51,20 @@ def docs(x):
     return json.dumps(x, sort_keys=True, ensure_ascii=False)
 
 def test_parse_data():
+    unsigned_doc_link = '/var/datapackages/procurement/tenders/scraper/Files_Michrazim/201813.pdf'
+    if os.path.exists(unsigned_doc_link):
+        os.unlink(unsigned_doc_link)
+    else:
+        os.makedirs(os.path.dirname(unsigned_doc_link), exist_ok=True)
     resource = run_parse_processor([
         {"pid": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
         {"pid": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269",
          "data": get_mock_exemption_data("594269"), "tender_type": "exemptions"},
+        {"pid": 50, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=574896",
+         "data": get_mock_exemption_data("574896",
+                                         url="https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=574896"),
+         "tender_type": "exemptions"},
         {"pid": 50, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379",
          "data": get_mock_exemption_data("598379"), "tender_type": "office"},
         {"pid": 21, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=596915",
@@ -54,7 +78,7 @@ def test_parse_data():
         {"pid": None, "url": "https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx",
          "data": get_mock_exemption_data("network-michraz3"), "tender_type": "central"},
     ])
-    assert len(resource) == 8
+    assert len(resource) == 9
     assert resource[0] == {
         "publisher_id": 71,
         "publication_id": 595431,
@@ -83,7 +107,16 @@ def test_parse_data():
                             "update_time": "2017-03-14"}])
     }
     assert resource[1]["publication_id"] == 594269
-    assert resource[2] == {'publisher_id': 50,
+    assert resource[2]["publication_id"] == 574896
+    assert resource[2]["documents"] == [{'description': 'חוות דעת מקצועית',
+                                         'link': unsigned_doc_link,
+                                         'update_time': '2015-12-31'}]
+    assert os.path.exists(unsigned_doc_link)
+    with open(unsigned_doc_link, "rb") as actual:
+        with open(os.path.join(os.path.dirname(__file__), "fixtures", "Files_Michrazim_201813.pdf"), "rb") as expected:
+            assert actual.read() == expected.read()
+    os.unlink(unsigned_doc_link)
+    assert resource[3] == {'publisher_id': 50,
                            'publication_id': 598379,
                            'page_url': 'https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379',
                            'description': 'לניהול אירועי שנת ה-70 למדינת ישראל - פרסום נוסף',
@@ -144,8 +177,8 @@ def test_parse_data():
                            'supplier': None,
                            'supplier_id': None,
                            'volume': None}
-    assert resource[3]["publication_id"] == 596915
-    assert resource[4] == {'claim_date': None,
+    assert resource[4]["publication_id"] == 596915
+    assert resource[5] == {'claim_date': None,
                            'contact': 'אביתר פרץ;מנהל תחום התקשרויות;02-6663424',
                            'contact_email': None,
                            'decision': 'בתוקף',
@@ -174,7 +207,7 @@ def test_parse_data():
                            'tender_id': 'Goods-3-2013',
                            'tender_type': 'central',
                            'volume': None}
-    assert resource[5] == {'publisher_id': None, 'publication_id': 0, 'tender_type': 'central',
+    assert resource[6] == {'publisher_id': None, 'publication_id': 0, 'tender_type': 'central',
                            'page_url': 'https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx',
                            'description': '', 'supplier_id': None, 'supplier': '',
                            'contact': 'ניסים בן-צרפתי;מנהל פרויקטים;02-6663439', 'publisher': None,
@@ -184,7 +217,7 @@ def test_parse_data():
                            'start_date': None, 'end_date': '2017-11-01', 'decision': 'עתידי',
                            'page_title': 'מכרז 15-2016: אספקת שירותי הקמה ואינטגרציה של חדרים חכמים',
                            'tender_id': 'technology-15-2016', 'documents': docs([])}
-    assert resource[6] == {'publisher_id': None, 'publication_id': 598403, 'tender_type': 'central',
+    assert resource[7] == {'publisher_id': None, 'publication_id': 598403, 'tender_type': 'central',
                            'page_url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx',
                            'description': '', 'supplier_id': None,
                            'supplier': 'כחלק מפעילות מינהל הרכש הממשלתי לייעול תהליכי הרכש בממשלה והרחבת היצע הספקים לממשלה ומגוון ספקיה, אנו שמחים לבשר על הקמת הקניון הדיגיטלי הממשלתי , מערכת רכש ממוחשבת חדשה אשר תשמש את משרדי הממשלה לצורך ביצוע הליכי תיחור ורכש ביעילות ובמהירות, ותאפשר בחירת זוכים בזמן מהיר. מינהל הרכש הממשלתי באגף החשב הכללי במשרד האוצר יוצא במכרז למתן שירותי ייעוץ בתחום נגישות השירות למשרדי הממשלה ויחידות הסמך. במסגרת המכרז, תורכב על ידי מינהל הרכש הממשלתי רשימת ספקים רשומים, והמשרדים יצאו באופן עצמאי בפניות פרטניות לקבלת הצעות מחיר מהספקים הרשומים באמצעות הקניון הדיגיטלי הממשלתי .',
@@ -198,7 +231,7 @@ def test_parse_data():
                            'documents': docs([{'description': 'מסמכי המכרז',
                                                'link': '/officestenders/Pages/officetender.aspx?pID=598403',
                                                'update_time': None}])}
-    assert resource[7] == {'publisher_id': None, 'publication_id': 537982, 'tender_type': 'central',
+    assert resource[8] == {'publisher_id': None, 'publication_id': 537982, 'tender_type': 'central',
                            'page_url': 'https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx',
                            'description': 'מכרז מממ-8-2009 לאספקת שירותי תקשורת בינלאומיים.', 'supplier_id': None,
                            'supplier': '', 'contact': 'ניסים בן-צרפתי;מנהל פרויקטים;02-6663439', 'publisher': None,
@@ -221,10 +254,11 @@ def test_invalid_response():
                 url = "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=11111"
             elif tender_type == "central":
                 url = "https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx"
-            error = None
             try:
                 run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
                                       "tender_type": tender_type},])
             except Exception as e:
-                error = e
-            assert str(error) == "invalid or blocked response"
+                if str(e) != "invalid or blocked response":
+                    raise
+            else:
+                assert False, "should raise an exception"
