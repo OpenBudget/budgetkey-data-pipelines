@@ -3,7 +3,7 @@ import json
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
-import datetime, os
+import os, tempfile, shutil
 
 
 class MockParseExemptionDataProcessor(ParsePageDataProcessor):
@@ -24,9 +24,9 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
         with open(filename, "rb") as f:
             return f.read()
 
-def run_parse_processor(resource):
+def run_parse_processor(resource, temp_dir):
     parameters = {
-        "out-path": "/var/datapackages/procurement/tenders/scraper"
+        "out-path": temp_dir
     }
     datapackage = {"resources": [{
         "name": "tender-urls-downloaded-data",
@@ -51,7 +51,8 @@ def docs(x):
     return json.dumps(x, sort_keys=True, ensure_ascii=False)
 
 def test_parse_data():
-    unsigned_doc_link = '/var/datapackages/procurement/tenders/scraper/Files_Michrazim/201813.pdf'
+    temp_dir = tempfile.mkdtemp(prefix="budgetkey-data-pipelines-tests-procurement-tenders-")
+    unsigned_doc_link = os.path.join(temp_dir, 'Files_Michrazim', '201813.pdf')
     if os.path.exists(unsigned_doc_link):
         os.unlink(unsigned_doc_link)
     else:
@@ -77,7 +78,7 @@ def test_parse_data():
          "data": get_mock_exemption_data("Goods-19-2017"), "tender_type": "central"},
         {"pid": None, "url": "https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx",
          "data": get_mock_exemption_data("network-michraz3"), "tender_type": "central"},
-    ])
+    ], temp_dir)
     assert len(resource) == 9
     assert resource[0] == {
         "publisher_id": 71,
@@ -245,9 +246,11 @@ def test_parse_data():
                                                {'description': 'הוראת שעה בתוקף 16.3.2',
                                                'link': 'http://hozrim.mof.gov.il/doc/hashkal/horaot.nsf/bynum/%d7%9e.16.3.2',
                                                'update_time': None}])}
+    shutil.rmtree(temp_dir)
 
 
 def test_invalid_response():
+    temp_dir = tempfile.mkdtemp(prefix="budgetkey-data-pipelines-tests-procurement-tenders")
     for tender_type in ["office", "central", "exemptions"]:
         for mock_data in ["invalid", "blocked"]:
             if tender_type == "office" or tender_type == "exemptions":
@@ -256,9 +259,11 @@ def test_invalid_response():
                 url = "https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx"
             try:
                 run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
-                                      "tender_type": tender_type},])
+                                      "tender_type": tender_type},],
+                                    temp_dir)
             except Exception as e:
                 if str(e) != "invalid or blocked response":
                     raise
             else:
                 assert False, "should raise an exception"
+    shutil.rmtree(temp_dir)
