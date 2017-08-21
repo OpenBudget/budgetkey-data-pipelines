@@ -23,16 +23,17 @@ all-appointments:
     -
       run: concatenate
       parameters:
+        sources: ['cancat', 'nominations-list']
         target:
           name: appointments
         fields:
-          full_name: []
-          start_date: []
-          position: []
-          organisation_name: []
+          full_name: ['name', 'full_name']
+          company: []
+          date: []
+          position: ['title', 'description']
           details: []
           gender: []
-
+          proof_url: []
     -
       run: dump.to_path
       parameters:
