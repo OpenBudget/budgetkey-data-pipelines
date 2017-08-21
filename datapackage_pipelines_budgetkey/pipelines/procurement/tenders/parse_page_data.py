@@ -5,7 +5,7 @@ from datapackage_pipelines.utilities.extended_json import json
 
 from pyquery import PyQuery as pq
 from datetime import datetime
-import requests, os, base64
+import requests, os, base64, mimetypes
 
 TABLE_SCHEMA = {
     "primaryKey": ["publication_id", "tender_type", "tender_id"],
@@ -99,9 +99,10 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         filename = url.replace("http://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
         page = pq(self.requests_get_content(url))
         data_elt = page(page(page.children()[1]).children()[0]).children()[0]
-        if data_elt.attrib != {'MimeType': 'application/pdf', 'DataEncodingType': 'base64'}:
-            raise Exception("unknown attrib: {}".format(data_elt.attrib))
-        filename = os.path.join(self.unsigned_path, filename+".pdf")
+        if data_elt.attrib["DataEncodingType"] != "base64":
+            raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
+        ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
+        filename = os.path.join(self.unsigned_path, filename + ext)
         if not os.path.exists(filename):
             with open(filename, "wb") as f:
                 f.write(base64.decodebytes(data_elt.text.encode("ascii")))
