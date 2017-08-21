@@ -3,16 +3,13 @@ import time, logging, datetime
 
 
 def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
-    last_log_seconds = None
+    last_log_seconds = 0
     num_processed_rows = 0
     for row in resource:
         yield row
         num_processed_rows += 1
         elapsed_seconds = (datetime.datetime.now()-start_time).total_seconds()
-        if not last_log_seconds:
-            seconds_since_last_log = elapsed_seconds
-        else:
-            seconds_since_last_log = elapsed_seconds - last_log_seconds
+        seconds_since_last_log = elapsed_seconds - last_log_seconds
         if seconds_since_last_log > log_interval_seconds:
             last_log_seconds = elapsed_seconds
             logging.info("processed {} rows, elapsed time (seconds)={}".format(num_processed_rows,

@@ -22,8 +22,8 @@ scraper-exemptions:
         tender_type: exemptions
     - run: throttle
       # parameters:
-        # sleep-seconds: 0.5
-        # log-interval-seconds: 2
+      #   sleep-seconds: 0.5
+      #   log-interval-seconds: 2
     # go over each publisher and get urls for all exemptions related to this publisher
     # also adds tender_type column - which is needed as all tenders are on same table
     - run: add_publisher_urls_resource
