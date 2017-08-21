@@ -17,3 +17,5 @@ dump.rdb
 ghostdriver.log
 temp
 /.env
+.vscode
+geckodriver.log
