@@ -49,7 +49,7 @@ aggregated:
       run: add_metadata
       parameters:
         name: aggregated-people-information
-        title: Aggregated Information regarding people
+        title: Aggregated Information regarding People
 
     -
       run: load_resource

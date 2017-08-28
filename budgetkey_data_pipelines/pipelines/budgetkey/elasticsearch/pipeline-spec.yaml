@@ -1,0 +1,35 @@
+index_people:
+  dependencies:
+    - pipeline: ./people/aggregated
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_people
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/people/aggregated/datapackage.json
+        resource: people
+    - run: manage-revisions
+      parameters:
+        resource-name: people
+        db-table: _elasticsearch_mirror__people
+        key-fields:
+          - key
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__people:
+            resource-name: people
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: people
+              doc-type: people
