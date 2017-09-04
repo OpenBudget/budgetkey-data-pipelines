@@ -42,6 +42,9 @@ national-budget-changes-aggregated:
         resource: national-budget-changes
     - run: filter_reserve
     # Add transaction id to all changes
+    - run: sample
+      parameters:
+        resource: transactions
     - run: join
       parameters:
         source:
@@ -61,6 +64,9 @@ national-budget-changes-aggregated:
         fields:
           transaction_id: null
     # Aggregate changes into transactions based on transaction id
+    - run: sample
+      parameters:
+        resource: national-budget-changes
     - run: set_types
       parameters:
         resources: national-budget-changes
