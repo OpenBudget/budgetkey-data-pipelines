@@ -31,7 +31,7 @@ def test_office():
 
 
 def test_exemptions():
-    publishers = run_add_publishers_resource_processor(url="http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
+    publishers = run_add_publishers_resource_processor(url="https://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx",
                                                        fixture_file_name="SearchExemptionMessages.aspx",
                                                        parameters={"tender_type": "exemptions"})
     assert_publishers(publishers)

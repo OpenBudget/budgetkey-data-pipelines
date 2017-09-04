@@ -55,7 +55,7 @@ TABLE_SCHEMA = {
     ]
 }
 
-BASE_URL = "http://www.mr.gov.il"
+BASE_URL = "https://www.mr.gov.il"
 
 
 def parse_date(s):

@@ -13,7 +13,7 @@ TABLE_SCHEMA = {"fields": [{"name": "pid", "title": "publisher id", "type": "int
 
 class DownloadPagesDataProcessor(ResourceFilterProcessor):
 
-    def __init__(self, timeout=180, url_prefix="http://www.mr.gov.il", **kwargs):
+    def __init__(self, timeout=180, url_prefix="https://www.mr.gov.il", **kwargs):
         self._timeout = timeout
         self._url_prefix = url_prefix
         super(DownloadPagesDataProcessor, self).__init__(

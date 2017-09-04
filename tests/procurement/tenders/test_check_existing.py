@@ -36,9 +36,9 @@ def test():
                      "tender_type": "exemptions"},
                     {"id": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=8888",
                      "tender_type": "exemptions"},
-                    {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
+                    {"id": None, "url": "https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
                      "tender_type": "central"},
-                    {"id": None, "url": "http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx",
+                    {"id": None, "url": "https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx",
                      "tender_type": "central"}
                     ]]))
     datapackage, resources, stats = MockCheckExistingProcessor(mock_existing_ids=[(5, "exemptions", None),
@@ -69,7 +69,7 @@ def test():
                              "tender_type": "exemptions", "is_new": True},
                             {'id': None, 'is_new': True,
                              'tender_type': 'central',
-                             'url': 'http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx'},
+                             'url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx'},
                             {'id': None, 'is_new': False,
                              'tender_type': 'central',
-                             'url': 'http://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx'}]
+                             'url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx'}]
