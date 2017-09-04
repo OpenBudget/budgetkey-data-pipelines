@@ -18,7 +18,7 @@ def modify_datapackage(dp, *_):
         if resource['name'] == 'national-budget-changes':
             fields = []
             for field in resource['schema']['fields']:
-                if not field['name'].startswith('budget-'):
+                if not field['name'].startswith('budget_'):
                     fields.append(field)
                 fields.append({
                     'name': 'budget_code_title',
