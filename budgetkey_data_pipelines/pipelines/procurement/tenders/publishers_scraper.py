@@ -38,7 +38,7 @@ class PublisherScraper(object):
         else:
             self._elts_guid = "cf609c81_a070_46f2_9543_e90c7ce5195b"
             self._base_exemption_message_url = "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID="
-            self._search_page_url = "http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
+            self._search_page_url = "https://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx"
 
     def get_urls(self):
         self._initialize_session()

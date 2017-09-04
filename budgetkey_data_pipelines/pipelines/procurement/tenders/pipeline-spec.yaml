@@ -10,7 +10,7 @@ scraper-exemptions:
     - run: add_resource
       parameters:
         name: mr-gov-il-search-exemption-messages
-        url: http://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx
+        url: https://www.mr.gov.il/ExemptionMessage/Pages/SearchExemptionMessages.aspx
         format: txt
     # download it (using tzabar runner which does some magic that bypasses network security)
     - run: stream_remote_resources
@@ -20,6 +20,10 @@ scraper-exemptions:
       parameters:
         input_resource: mr-gov-il-search-exemption-messages
         tender_type: exemptions
+    - run: throttle
+      # parameters:
+      #   sleep-seconds: 0.5
+      #   log-interval-seconds: 2
     # go over each publisher and get urls for all exemptions related to this publisher
     # also adds tender_type column - which is needed as all tenders are on same table
     - run: add_publisher_urls_resource
@@ -53,6 +57,7 @@ scraper-office:
       parameters:
         input_resource: mr-gov-il-search-office-tenders
         tender_type: office
+    - run: throttle
     # go over each publisher and get urls for all office tenders related to this publisher
     # also adds tender_type column - which is needed as all tenders are on same table
     - run: add_publisher_urls_resource
@@ -71,6 +76,7 @@ scraper-central:
     - run: add_metadata
       parameters:
         name: procurement-tenders-central-urls
+    - run: throttle
     - run: add_central_urls_resource
       runner: tzabar
     - run: dump.to_path
@@ -109,6 +115,7 @@ scraper:
     - run: check_existing
       parameters:
         db-table: procurement_tenders
+    - run: throttle
     # download the data from pages which don't exist in DB (is_new == False)
     - run: download_pages_data
       runner: tzabar
