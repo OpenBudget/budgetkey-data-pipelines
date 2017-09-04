@@ -27,7 +27,7 @@ def nextPageElement(page):
 def scrape():
 
     driver = webdriver.Remote(
-        command_executor='http://127.0.0.1:4444/wd/hub',
+        command_executor='http://tzabar.obudget.org:8910',
         desired_capabilities=DesiredCapabilities.PHANTOMJS)
 
     driver.set_window_size(1200, 800)
