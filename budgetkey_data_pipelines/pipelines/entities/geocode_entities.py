@@ -27,6 +27,7 @@ class GeoCodeEntities(object):
 
     # the processor will try each provider that has the env_vars in order up to the limit
     PROVIDERS = [
+        # google seems to provide the best results, so we try to use it first
         # https://developers.google.com/maps/documentation/geocoding/usage-limits
         # $0.50 USD / 1000 up to 100000
         {
@@ -45,11 +46,17 @@ class GeoCodeEntities(object):
             "env_vars": ["BING_API_KEY"],
             "limit": 50000
         },
-        # free
+        # up 2500 daily free requests which it's worth to use
+        # we could analyze the data later and decide which providers to use (we store the provider along with the lat / lng)
         {
             "provider": "google",
             "limit": 2500
         },
+        # free and unlimited, but seems to provide lower quality results
+        {
+            "provider": "osm",
+            "limit": 50000
+        }
     ]
 
     def __init__(self, parameters, datapackage, resources):
@@ -58,7 +65,7 @@ class GeoCodeEntities(object):
         self.resources = resources
         self.locations_cache = {}
         # we will append providers that failed during this pipeline run here - to prevent retrying them again
-        self.blacklist_providers = []
+        self.blacklist_providers = parameters.get("blacklist-providers", [])
         self.provider_request_counts = {provider["provider"]: 0 for provider in self.PROVIDERS}
 
     @staticmethod
