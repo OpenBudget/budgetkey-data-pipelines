@@ -1,6 +1,6 @@
 national-budget-changes:
   schedule:
-    crontab: "0 0 * * fri"
+    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -100,7 +100,7 @@ national-budget-changes:
           path: data/changes_2017.csv
         tabulator:
           encoding: windows-1255
-          headers: 2
+          headers: 3
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
@@ -110,7 +110,7 @@ national-budget-changes:
           path: data/pending_changes.csv
         tabulator:
           encoding: windows-1255
-          headers: 2
+          headers: 3
     - run: stream_remote_resources
       cache: true
     - run: set_pending
@@ -127,6 +127,7 @@ national-budget-changes:
           leading_item:
             - סעיף מוביל
             - מספר הסעיף
+            - סעיף
           req_code:
             - מספר בקשה
           req_title:

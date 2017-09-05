@@ -31,11 +31,15 @@ def update_datapackage(datapackage):
 
 
 def transfer_code(change):
-    return '%d/%02d-%03d' % (
-        change['year'],
-        change['leading_item'],
-        change['req_code']
-    )
+    try:
+        return '%d/%02d-%03d' % (
+            change['year'],
+            change['leading_item'],
+            change['req_code']
+        )
+    except:
+        logging.error('Failed to extract code from change %r', change)
+        raise
 
 
 def get_changes(rows):
@@ -126,11 +130,23 @@ def get_transactions(changes):
         return transactions, unmatched
 
     def find_groups(changes):
+        changes = [
+            c for c in changes
+            if c['leading_item'] != 47
+        ]
+
         reserve_changes = [
             c for c in changes
-            if c['budget_code'].startswith('0047') and c['leading_item'] != 47
+            if c['budget_code'].startswith('0047')
             if any(c[field] for field in value_fields)
         ]
+
+        all_trcodes = {c['trcode'] for c in changes}
+        other_change_trcodes = all_trcodes - {c['trcode'] for c in reserve_changes}
+        logging.debug('Non-Reserve change count: %d', len(other_change_trcodes))
+        for trcode in sorted(other_change_trcodes):
+            yield [trcode]
+
         groups = itertools.groupby(reserve_changes, get_date)
 
         for date_kind, date_reserve in groups:
