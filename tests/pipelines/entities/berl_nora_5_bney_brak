@@ -1,1 +1,1 @@
-{"ok": false, "lat": null, "lng": null}
+{"ok": false, "lat": null, "lng": null, "geojson": {"type": "Feature", "properties": {"encoding": "utf-8", "location": "\u05d1\u05e8\u05dc \u05e0\u05d5\u05e8\u05d0 5, \u05d1\u05e0\u05d9 \u05d1\u05e8\u05e7, , 0", "provider": "google", "status": "ZERO_RESULTS", "status_code": 200, "ok": false}}, "confidence": 0, "provider": "google"}
