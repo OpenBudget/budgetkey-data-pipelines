@@ -21,9 +21,9 @@ scraper-exemptions:
         input_resource: mr-gov-il-search-exemption-messages
         tender_type: exemptions
     - run: throttle
-      # parameters:
-      #   sleep-seconds: 0.5
-      #   log-interval-seconds: 2
+      parameters:
+        sleep-seconds: 0.25
+#         log-interval-seconds: 0
     # go over each publisher and get urls for all exemptions related to this publisher
     # also adds tender_type column - which is needed as all tenders are on same table
     - run: add_publisher_urls_resource
@@ -115,11 +115,13 @@ scraper:
     - run: check_existing
       parameters:
         db-table: procurement_tenders
-    - run: throttle
     # download the data from pages which don't exist in DB (is_new == False)
     - run: download_pages_data
       runner: tzabar
     # parse the data for each exemption
+    - run: throttle
+      parameters:
+        sleep-seconds: 0.25
     - run: parse_page_data
       parameters:
         output_resource: tenders
