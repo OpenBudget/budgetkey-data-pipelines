@@ -12,12 +12,38 @@ registry:
       runner: tzabar
       parameters:
         key: Company
+        url-key: Liquidations
+        resource-name: liquidations-registry
+        status-type: 'Status'
+    - run: sample
+    - run: m_of_justice_resource
+      runner: tzabar
+      parameters:
+        key: Company
         url-key: Companies
         resource-name: company-registry
+    - run: join
+      parameters:
+        source:
+          name: liquidations-registry
+          key:
+            - Company_Number
+          delete: true
+        target:
+          name: company-registry
+          key:
+            - Company_Number
+          full: true
+        fields:
+          Company_Liquidation_Date:
+            name: Company_Status_Date
     - run: set_types
       parameters:
         types:
           'Company_Registration_Date':
+            type: date
+            format: 'fmt:%Y-%m-%d %H:%M:%S'
+          'Company_Liquidation_Date':
             type: date
             format: 'fmt:%Y-%m-%d %H:%M:%S'
     - run: dump.to_path
