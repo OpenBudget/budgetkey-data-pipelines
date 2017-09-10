@@ -12,7 +12,7 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
  
  The framework we're using to accomplish all of this is called `datapackage-pipelines`. This framework allows us to write simple 'pipelines', each consisting of a set of predefined processing steps. These pipelines are not coded, but rather defined in a set of YAML files. Most of the pipelines use of a set of common building-blocks, and some custom processors - mainly custom scrapers for exotic sources.
      
- To see what's the current processing status of each pipeline, just hop to the (dashboard)[https://next.obudget.org/pipelines/].
+ To see what's the current processing status of each pipeline, just hop to the [dashboard](https://next.obudget.org/pipelines/).
  
  ## The directory structure
  
@@ -37,11 +37,11 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
     - `tenders`: Pipelines for retrieving data on government tendering process (and the lack of it)
 - `supports/`: Pipelines for retrieving data on government supports and its relevant processes
 
-_note: To understand a bit more on the difference between the different types of government spending, please read this excellent (blog post)[https://blog.okfn.org/2017/05/18/what-is-the-difference-between-budget-spending-and-procurement-data/]._
+_note: To understand a bit more on the difference between the different types of government spending, please read this excellent [blog post](https://blog.okfn.org/2017/05/18/what-is-the-difference-between-budget-spending-and-procurement-data/)._
 
 ## Developing a new pipeline
 
-- Read about `datapackage-pipelines` (here)[https://github.com/frictionlessdata/datapackage.pipelines/]
+- Read about `datapackage-pipelines` [here](https://github.com/frictionlessdata/datapackage-pipelines)
 - Install this package (`budgetkey-data-pipelines`) using the instructions in the Quickstart section below
 - Try to understand where is the change that you want to make supposed to reside? 
     - Is it related to one of the existing pipelines?
