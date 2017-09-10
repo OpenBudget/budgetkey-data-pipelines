@@ -1,4 +1,4 @@
-FROM frictionlessdata/datapackage-pipelines:v1
+FROM frictionlessdata/datapackage-pipelines:latest
 
 RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && \

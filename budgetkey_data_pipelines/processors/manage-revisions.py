@@ -3,7 +3,7 @@ import logging
 import datetime
 import hashlib
 
-from jsontableschema_sql.storage import Storage
+from tableschema_sql.storage import Storage
 
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.kvstore import DB
