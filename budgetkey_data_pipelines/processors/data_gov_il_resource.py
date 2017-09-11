@@ -14,7 +14,8 @@ resource['url'] = data_gov_il_resource['url']
 
 datapackage['resources'].append(resource)
 datapackage.setdefault('sources', []).append({
-    'web': data_gov_il_resource['url']
+    'title': '{}/{}'.format(dataset_name, resource_name),
+    'path': data_gov_il_resource['url']
 })
 
 spew(datapackage, res_iter)

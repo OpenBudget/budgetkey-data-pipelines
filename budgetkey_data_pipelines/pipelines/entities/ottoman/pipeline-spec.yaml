@@ -7,8 +7,8 @@ ottoman-association-registry:
         name: ottoman-association-registry
         title: רשימת אגודות עותומניות
         sources:
-          - name: אתר היחידה לחופש המידע
-            web: https://foi.gov.il/he/node/1908
+          - title: אתר היחידה לחופש המידע
+            path: https://foi.gov.il/he/node/1908
     - run: add_resource
       parameters:
         name: foi-response

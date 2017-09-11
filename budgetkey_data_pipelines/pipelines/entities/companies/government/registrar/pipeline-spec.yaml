@@ -9,8 +9,8 @@ government_companies:
         name: government-companies
         title: נתונים פומביים מרשות החברות הממשלתיות
         sources:
-          - name: אתר רשות החברות הממשלתיות
-            web: http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx
+          - title: אתר רשות החברות הממשלתיות
+            path: http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx
     - run: all-companies-scraper
     - run: company-page-scraper
     - run: set_types

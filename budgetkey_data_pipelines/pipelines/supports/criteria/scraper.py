@@ -48,7 +48,7 @@ resource['schema'] = {
         {
             'name': 'date',
             'type': 'date',
-            'format': 'fmt:%d-%m-%Y'
+            'format': '%d-%m-%Y'
         },
         {
             'name': 'title',

@@ -40,7 +40,7 @@ themarker:
         types:
           start_date:
             type: date
-            format: "fmt:%d/%m/%Y"
+            format: "%d/%m/%Y"
     -
       run: dump.to_path
       parameters:

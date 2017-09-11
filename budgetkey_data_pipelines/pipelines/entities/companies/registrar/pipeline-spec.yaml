@@ -19,7 +19,7 @@ registry:
         types:
           'Company_Registration_Date':
             type: date
-            format: 'fmt:%Y-%m-%d %H:%M:%S'
+            format: '%Y-%m-%d %H:%M:%S'
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/registrar/registry
