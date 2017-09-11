@@ -57,8 +57,8 @@ def scrape():
 
     def prepare():
         logging.info('PREPARING')
-        driver.get("http://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
-        bakasha = WebDriverWait(driver, 10).until(
+        driver.get("https://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
+        bakasha = WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.ID, "RadioBakasha1"))
         )
         bakasha.click()
