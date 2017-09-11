@@ -1,4 +1,5 @@
 from budgetkey_data_pipelines.common.data_gov_il import get_resource
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -10,7 +11,8 @@ resource = parameters.get('resource', {})
 
 data_gov_il_resource = get_resource(dataset_name, resource_name)
 
-resource['url'] = data_gov_il_resource['url']
+resource['streamedFrom'] = data_gov_il_resource['url']
+resource['path'] = PATH_PLACEHOLDER
 
 datapackage['resources'].append(resource)
 datapackage.setdefault('sources', []).append({
