@@ -3,5 +3,5 @@ def process_row(row, *_):
         return None
     row['id'] = row['id'][:-2]
     row['name'] = row['name'].strip()
-    row['address'] = row['address'].strip()
+    row['address'] = row['address'].strip() if row['address'] else None
     return row

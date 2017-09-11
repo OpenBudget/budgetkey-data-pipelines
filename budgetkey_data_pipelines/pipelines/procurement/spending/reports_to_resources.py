@@ -46,7 +46,8 @@ stats = {'bad-reports': 0}
 loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
 try:
-    for i, report in enumerate(reports.iter()):
+    for i, report in enumerate(reports.iter(keyed=True)):
+        logging.info('#%r: %r', i, report)
         url_to_use = report['report-url']
         if url_to_use in url_to_fixed_file:
             url_to_use = url_to_fixed_file[url_to_use]

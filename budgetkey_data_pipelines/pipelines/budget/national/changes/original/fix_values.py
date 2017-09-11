@@ -40,7 +40,7 @@ def process_row(row, *_):
 
     for amount in amounts:
         if isinstance(row[amount], str):
-            row[amount] += '000'
+            row[amount] = row[amount].replace(',', '') + '000'
         else:
             row[amount] *= 1000
 
