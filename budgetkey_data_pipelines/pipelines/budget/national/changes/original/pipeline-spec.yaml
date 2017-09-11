@@ -186,14 +186,19 @@ national-budget-changes:
             type: integer
           net_expense_diff:
             type: number
+            groupChar: ','
           gross_expense_diff:
             type: number
+            groupChar: ','
           allocated_income_diff:
             type: number
+            groupChar: ','
           commitment_limit_diff:
             type: number
+            groupChar: ','
           personnel_max_diff:
             type: number
+            groupChar: ','
           date:
             type: date
     - run: dump.to_path

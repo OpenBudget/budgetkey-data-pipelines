@@ -1,5 +1,6 @@
 import os
 
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
 from datapackage_pipelines.wrapper import process
 import datapackage
 
@@ -17,7 +18,8 @@ def modify_datapackage(dp, parameters, *_):
             resource = {
                 'name': descriptor['name'],
                 'schema': descriptor['schema'],
-                'url': os.environ['DPP_DB_ENGINE'],
+                'streamedFrom': os.environ['DPP_DB_ENGINE'],
+                'path': PATH_PLACEHOLDER,
                 'table': parameters['table']
             }
             dp['resources'].append(resource)
