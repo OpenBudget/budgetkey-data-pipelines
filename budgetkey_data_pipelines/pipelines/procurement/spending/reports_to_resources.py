@@ -4,6 +4,7 @@ import datapackage
 import tabulator
 import logging
 
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
 
@@ -105,7 +106,8 @@ try:
                 except StopIteration as e:
                     pass
                 dp['resources'].append({
-                    'url': url_to_use,
+                    'streamedFrom': url_to_use,
+                    'path': PATH_PLACEHOLDER,
                     'name': 'report_{}'.format(i),
                     'headers': headers,
                     'sheet': sheet,

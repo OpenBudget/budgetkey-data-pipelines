@@ -1,3 +1,238 @@
+## Index Budgets
+index_budget:
+  dependencies:
+    - pipeline: ./budget/national/processed/connected-national-budgets
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_budget
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/processed/connected-items/datapackage.json
+        resource: budget
+    - run: manage-revisions
+      parameters:
+        resource-name: budget
+        db-table: _elasticsearch_mirror__budget
+        key-fields:
+          - code
+          - year
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__budget:
+            resource-name: budget
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: budget
+              doc-type: budget
+
+
+## Index Budget Changes
+index_national_budget_changes:
+  dependencies:
+    - pipeline: ./budget/national/changes/national-budget-changes-aggregated
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_national_budget_changes
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budget/national/changes/full/datapackage.json
+        resource: national-budget-changes
+    - run: manage-revisions
+      parameters:
+        resource-name: national-budget-changes
+        db-table: _elasticsearch_mirror__national_budget_changes
+        key-fields:
+          - transaction_id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__national_budget_changes:
+            resource-name: national-budget-changes
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: national-budget-changes
+              doc-type: national-budget-changes
+
+
+## Index Entities
+index_entities:
+  dependencies:
+    - pipeline: ./entities/all
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_entities
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/scored/datapackage.json
+        resource: entities
+    - run: manage-revisions
+      parameters:
+        resource-name: entities
+        db-table: _elasticsearch_mirror__entities
+        key-fields:
+          - id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__entities:
+            resource-name: entities
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: entities
+              doc-type: entities
+
+
+## Index Contract Spending
+index_contract_spending:
+  dependencies:
+    - pipeline: ./procurement/spending/latest-contract-spending
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_contract_spending
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+        resource: contract-spending
+    - run: manage-revisions
+      parameters:
+        resource-name: contract-spending
+        db-table: _elasticsearch_mirror__contract_spending
+        key-fields:
+          - order_id
+          - budget_code
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__contract_spending:
+            resource-name: contract-spending
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: contract-spending
+              doc-type: contract-spending
+
+
+## Index Supports
+index_supports:
+  dependencies:
+    - pipeline: ./supports/by-request-year
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_supports
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/by-request-year/datapackage.json
+        resource: supports
+    - run: manage-revisions
+      parameters:
+        resource-name: supports
+        db-table: _elasticsearch_mirror__supports
+        key-fields:
+          - budget_code
+          - year_requested
+          - recipient
+          - request_type
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__supports:
+            resource-name: supports
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: supports
+              doc-type: supports
+
+
+## Index Tenders
+index_tenders:
+  dependencies:
+    - pipeline: ./procurement/tenders/processed
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: index_tenders
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/tenders/processed/datapackage.json
+        resource: tenders
+    - run: manage-revisions
+      parameters:
+        resource-name: tenders
+        db-table: _elasticsearch_mirror__tenders
+        key-fields:
+          - publication_id
+          - tender_type
+    - run: dump.to_sql
+      parameters:
+        tables:
+          _elasticsearch_mirror__tenders:
+            resource-name: tenders
+            mode: update
+    - run: filter
+      parameters:
+        resources:
+        in:
+          - __next_update_days: 1
+    - run: elasticsearch.dump.to_index
+      parameters:
+        indexes:
+          budgetkey:
+            -
+              resource-name: tenders
+              doc-type: tenders
+
+
+## Index People
 index_people:
   dependencies:
     - pipeline: ./people/aggregated

@@ -195,6 +195,7 @@ aggregated-yearly:
           children-net_allocated:
             name: net_allocated
             aggregate: array
+    - run: sample
     - run: combine-immediate-children
       parameters:
         resource-name: immediate-children

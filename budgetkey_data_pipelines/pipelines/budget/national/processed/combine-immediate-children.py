@@ -1,3 +1,4 @@
+import logging
 from datapackage_pipelines.wrapper import ingest, spew
 
 
@@ -15,7 +16,11 @@ res_name = params['resource-name']
 def combine_immediate_children(rows):
     for row in rows:
         row['children-net_allocated'] = map(int, row['children-net_allocated'])
-        children = zip(*(row['children-'+x] for x in FIELDS))
+        try:
+            children = zip(*(row['children-'+x] for x in FIELDS))
+        except TypeError:
+            logging.error('Failed to process children for row %r', row)
+            raise
         children = [dict(zip(FIELDS, x)) for x in children]
         row['children'] = children
         for x in FIELDS:
