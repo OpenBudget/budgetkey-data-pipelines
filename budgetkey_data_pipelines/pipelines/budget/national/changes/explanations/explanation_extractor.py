@@ -3,6 +3,7 @@ import itertools
 import logging
 import tempfile
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.doc_parser import Parser
 from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
@@ -57,6 +58,7 @@ def get_explanations(res_iter_):
 
 
 resource = parameters['resource']
+resource[PROP_STREAMING] = True
 schema = {
     'fields': [
         {'name': 'year', 'type': 'integer'},

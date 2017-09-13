@@ -2,6 +2,7 @@ import itertools
 import logging
 from time import sleep
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from selenium import webdriver
 from selenium.webdriver.remote.remote_connection import LOGGER
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
@@ -84,6 +85,7 @@ def scrape():
 
 datapackage['resources'].append({
     'name': 'government-companies',
+    PROP_STREAMING: True,
     'path': 'data/government-companies.csv',
     'schema': {
         'fields': [

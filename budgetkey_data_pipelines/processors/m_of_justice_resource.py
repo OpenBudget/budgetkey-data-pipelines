@@ -2,6 +2,9 @@ import re
 import csv
 import logging
 from io import StringIO
+
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
+
 from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -44,6 +47,7 @@ def get_entities():
 
 resource = {
     'name': resource_name,
+    PROP_STREAMING: True,
     'path': 'data/{}.csv'.format(resource_name),
     'schema': {
         'fields': [

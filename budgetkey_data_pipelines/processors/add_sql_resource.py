@@ -1,6 +1,6 @@
 import os
 
-from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMED_FROM
 from datapackage_pipelines.wrapper import process
 import datapackage
 
@@ -17,8 +17,8 @@ def modify_datapackage(dp, parameters, *_):
                 field.update(override_fields.get(field["name"], {}))
             resource = {
                 'name': descriptor['name'],
+                PROP_STREAMED_FROM: os.environ['DPP_DB_ENGINE'],
                 'schema': descriptor['schema'],
-                'streamedFrom': os.environ['DPP_DB_ENGINE'],
                 'path': PATH_PLACEHOLDER,
                 'table': parameters['table']
             }

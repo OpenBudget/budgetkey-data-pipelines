@@ -2,6 +2,7 @@ import time
 import itertools
 import logging
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
@@ -118,6 +119,7 @@ def scrape():
 
 datapackage['resources'].append({
     'name': 'special-entities',
+    PROP_STREAMING: True,
     'path': 'data/special-entities.csv',
     'schema': {
         'fields': [

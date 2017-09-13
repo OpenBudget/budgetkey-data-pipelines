@@ -1,5 +1,6 @@
 import itertools
 import requests
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -20,6 +21,7 @@ def get_parties():
 
 dp['resources'].append({
     'name': 'parties',
+    PROP_STREAMING: True,
     'path': 'data/parties.csv',
     'schema': {
         'fields': [

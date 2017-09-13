@@ -1,3 +1,4 @@
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
@@ -13,6 +14,7 @@ def process_resources(res_iter_):
 dp['resources'] = [
     {
         'name': 'document',
+        PROP_STREAMING: True,
         'path': 'data/documents.csv',
         'schema': {
             'fields': [

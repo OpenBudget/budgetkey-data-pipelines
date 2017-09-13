@@ -1,6 +1,7 @@
 import datetime
 import re
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
@@ -16,6 +17,7 @@ def process_datapackage(datapackage):
             res_params = parameters[resource['name']]
             new_resource = {
                 'name': resource['name'],
+                PROP_STREAMING: True,
                 'path': resource['path'],
                 'schema': {
                     'fields': [

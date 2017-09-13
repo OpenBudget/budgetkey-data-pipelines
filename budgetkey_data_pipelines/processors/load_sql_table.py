@@ -1,3 +1,4 @@
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from itertools import chain
 from sqlalchemy.orm import sessionmaker
@@ -46,7 +47,8 @@ def get_schema():
 
 datapackage["resources"].append({"name": parameters["table"],
                                  "path": parameters["table"]+".csv",
-                                 "schema": get_schema()})
+                                 "schema": get_schema(),
+                                 PROP_STREAMING: True})
 
 
 spew(datapackage, chain(resources, [get_resource()]))

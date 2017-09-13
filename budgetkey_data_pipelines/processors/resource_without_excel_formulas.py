@@ -4,12 +4,14 @@ import tempfile
 import tabulator
 import itertools
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
 url = parameters.get('url')
 resource = parameters.get('resource')
+resource[PROP_STREAMING] = True
 
 content = requests.get(url).content
 content = content.replace(b'\n="', b'\n"')

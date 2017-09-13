@@ -1,3 +1,4 @@
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 import requests, logging, datetime, os
 
@@ -58,6 +59,7 @@ class CooperativesScraper(object):
 
     def get_resource_descriptor(self, resource_name):
         return {"name": resource_name,
+                PROP_STREAMING: True,
                 "path": resource_name+".csv",
                 "schema": {"fields": [{'name': 'id', 'type': 'string'},
                                       {'name': 'name', 'type': 'string'},

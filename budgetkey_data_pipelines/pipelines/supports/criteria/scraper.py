@@ -1,5 +1,6 @@
 from itertools import chain
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
@@ -43,6 +44,7 @@ def get_all_reports():
         pid += 1
 
 resource = parameters['target-resource']
+resource[PROP_STREAMING] = True
 resource['schema'] = {
     'fields': [
         {

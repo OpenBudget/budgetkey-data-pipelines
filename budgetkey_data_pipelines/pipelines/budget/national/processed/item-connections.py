@@ -4,6 +4,8 @@ import os
 import shutil
 
 from decimal import Decimal
+
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from fuzzywuzzy import fuzz
 import plyvel
 
@@ -265,6 +267,7 @@ schema['fields'].append({
 dp['resources'] = [
     {
         'name': 'budget',
+        PROP_STREAMING: True,
         'path': 'data/budget.csv',
         'schema': schema
     },

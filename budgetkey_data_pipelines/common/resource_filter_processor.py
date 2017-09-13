@@ -1,3 +1,4 @@
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
 
@@ -15,6 +16,7 @@ class ResourceFilterProcessor(object):
         self.input_resource_matcher = ResourceMatcher(self.parameters["input_resource"])
         self.output_resource_name = self.parameters["output_resource"]
         self.output_resource_descriptor = {"name": self.output_resource_name,
+                                           PROP_STREAMING: True,
                                            "path": "data/{}.csv".format(self.output_resource_name),
                                            "schema": table_schema}
 

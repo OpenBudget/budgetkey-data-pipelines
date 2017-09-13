@@ -1,5 +1,6 @@
 import itertools
 import requests
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -23,6 +24,7 @@ def process_resources(res_iter_):
 
 dp['resources'][0] = {
     'name': 'candidates',
+    PROP_STREAMING: True,
     'path': 'data/candidates.csv',
     'schema': {
         'fields': [

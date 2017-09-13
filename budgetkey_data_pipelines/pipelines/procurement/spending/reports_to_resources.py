@@ -4,7 +4,7 @@ import datapackage
 import tabulator
 import logging
 
-from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMING, PROP_STREAMED_FROM
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
 
@@ -106,7 +106,7 @@ try:
                 except StopIteration as e:
                     pass
                 dp['resources'].append({
-                    'streamedFrom': url_to_use,
+                    PROP_STREAMED_FROM: url_to_use,
                     'path': PATH_PLACEHOLDER,
                     'name': 'report_{}'.format(i),
                     'headers': headers,
@@ -172,6 +172,7 @@ schema['fields'].extend([
 ])
 dp['resources'].append({
     'path': 'data/report-loading-results.csv',
+    PROP_STREAMING: True,
     'name': 'report-loading-results',
     'schema': schema
 })

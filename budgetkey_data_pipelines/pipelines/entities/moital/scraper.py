@@ -2,6 +2,7 @@ import time
 import requests
 import logging
 
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from pyquery import PyQuery as pq
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -66,6 +67,7 @@ def scrape():
 
 datapackage['resources'].append({
     'name': 'name',
+    PROP_STREAMING: True,
     'path': 'out-path',
     'schema': {
         'fields': [

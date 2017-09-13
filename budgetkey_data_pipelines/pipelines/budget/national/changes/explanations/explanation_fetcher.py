@@ -7,6 +7,8 @@ import tempfile
 import shutil
 import requests
 import base64
+
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.doc_parser import Parser
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -51,6 +53,7 @@ def get_explanations(url):
 
 
 resource = parameters['resource']
+resource[PROP_STREAMING] = True
 schema = {
     'fields': [
         {'name': 'contents', 'type': 'string'},
