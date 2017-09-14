@@ -94,7 +94,7 @@ def process_first(rows):
         for i, (code_key, title_key) in enumerate(codes_and_titles):
             expected_length = i*2 + 4
             row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
-            row['title'] = save[title_key]
+            row['title'] = save[title_key] or 'לא ידוע'
             row['hierarchy'] = hierarchy
             row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
             yield row
