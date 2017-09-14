@@ -2,7 +2,7 @@ all:
   dependencies:
     - pipeline: ./entities/companies/registrar/details
     - pipeline: ./entities/associations/guidestar/guidestar
-    - pipeline: ./entities/special/registry
+    # - pipeline: ./entities/special/registry
     - pipeline: ./entities/ottoman/ottoman-association-registry
   pipeline:
     - run: add_metadata
