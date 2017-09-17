@@ -103,6 +103,7 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
                     row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif isinstance(v, str):
                     row[k] = v.strip()
+                assert row['order_id']
             stats['good-lines'] += 1
         except Exception as e:
             stats['bad-lines'] += 1
