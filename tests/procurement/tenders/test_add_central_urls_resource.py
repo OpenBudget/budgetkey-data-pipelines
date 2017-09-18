@@ -24,9 +24,9 @@ class MockAddCentralUrls(AddCentralUrlsResource):
             raise Exception("invalid url: {}".format(url))
         filename = os.path.join(os.path.dirname(__file__), "fixtures", filename)
         if not os.path.exists(filename):
-            with open(filename, "w") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write(super(MockAddCentralUrls, self).requests_get(url))
-        with open(filename) as f:
+        with open(filename, encoding="utf-8") as f:
             return f.read()
 
 

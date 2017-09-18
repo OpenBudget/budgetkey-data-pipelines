@@ -1,7 +1,7 @@
 from datapackage_pipelines.utilities.lib_test_helpers import ProcessorFixtureTestsBase
 import os
 import json
-from jsontableschema import Schema
+from tableschema import Schema
 import logging
 
 
