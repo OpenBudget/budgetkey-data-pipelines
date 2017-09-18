@@ -254,7 +254,7 @@ with-extras:
             resource-name: budget
 
 connected-national-budgets:
-  title: National Yearly Budgets - Connected
+  title: National Yearly Budgets - Connected Items
   description: >
     This pipeline joins budget items that span across years.
 
@@ -312,6 +312,8 @@ connected-national-budgets:
         types:
           year:
             es:time-range: "from, to"
+          title:
+            es:title: true
           admin_cls_code_0:
             es:itemType: string
           direction:
