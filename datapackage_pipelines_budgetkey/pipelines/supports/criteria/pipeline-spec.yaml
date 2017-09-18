@@ -10,6 +10,7 @@ support-criteria:
         target-resource:
           name: criteria
           path: data/criteria.csv
+    - run: parser
     - run: set_types
     - run: dump.to_path
       parameters:
