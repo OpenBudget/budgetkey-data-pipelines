@@ -63,6 +63,10 @@ all:
           kind:
             constraints:
               pattern: "[a-z-_]+"
+          name:
+            es:title: true
+          name_en:
+            es:title: true
           id:
             constraints:
               pattern: "[0-9]+"

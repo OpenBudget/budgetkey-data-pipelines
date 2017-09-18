@@ -28,7 +28,7 @@ index_budget:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -66,7 +66,7 @@ index_national_budget_changes:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -104,7 +104,7 @@ index_entities:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -143,7 +143,7 @@ index_contract_spending:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -184,7 +184,7 @@ index_supports:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -223,7 +223,7 @@ index_tenders:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
@@ -261,7 +261,7 @@ index_people:
         resources:
         in:
           - __next_update_days: 1
-    - run: elasticsearch.dump.to_index
+    - run: dump_to_es
       parameters:
         indexes:
           budgetkey:
