@@ -1,0 +1,16 @@
+version: '3.2'
+
+# minimal app configuration - common to all environments
+
+services:
+
+  pipelines:
+    image: budgetkey/budgetkey-data-pipelines
+    build: .
+    volumes:
+    - "data:/var/datapackages"
+    ports:
+    - "5000:5000"
+
+volumes:
+  data:

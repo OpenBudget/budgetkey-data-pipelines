@@ -1,0 +1,1 @@
+from datapackage_pipelines_load_data.generator import Generator
