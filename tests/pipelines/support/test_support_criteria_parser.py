@@ -26,13 +26,14 @@ def test_support_criteria_parser():
     i = 0
     num_parsed = 0
     num_expected_purposes = 0
-    for i, row in enumerate(dp.resources[0].iter()):
+    for i, row in enumerate(dp.resources[0].iter(keyed=True)):
         parsed_row = parse_row(row)
         if len(parsed_row["purpose"]) > 0 and parsed_row["purpose"] != row["title"]:
             num_parsed += 1
-        if len(row["expected_purpose"]) > 0:
+        row_expected_purpose = row["expected_purpose"] if row["expected_purpose"] else ""
+        if len(row_expected_purpose) > 0:
             num_expected_purposes += 1
-            assert parsed_row["purpose"] == row["expected_purpose"], "{}".format({"i":i, "row":row, "parsed_row":parsed_row, "expected_purpose":row["expected_purpose"]})
+            assert parsed_row["purpose"] == row_expected_purpose, "{}".format({"i":i, "row":row, "parsed_row":parsed_row, "expected_purpose":row_expected_purpose})
     assert i == 358
     assert num_expected_purposes > 20, "not enough purposes were checked, might be something wrong with the criteria.csv file"
     assert num_parsed > 190, "not enough parsed rows"
