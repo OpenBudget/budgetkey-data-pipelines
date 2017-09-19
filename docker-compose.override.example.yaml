@@ -1,5 +1,9 @@
 version: '3.2'
 
+# example configuration for local development
+# runs all services inside the docker compose environments
+# connects services appropriately to the pipelines instance
+
 services:
 
   pipelines:
@@ -11,7 +15,9 @@ services:
       DPP_DB_ENGINE: postgresql://postgres:123456@db:5432/postgres"
       DPP_REDIS_HOST: redis
       DPP_ELASTICSEARCH: elasticsearch:9200
-
+    # simple configuration which only runs serve and allows to run commands using docker-compose exec
+    # useful for local development - where you most likely want to run only a specific pipeline
+    entrypoint: ["sh", "-c", "dpp init && dpp serve"]
 
   redis:
     image: redis:alpine

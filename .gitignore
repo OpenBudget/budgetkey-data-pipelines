@@ -19,3 +19,4 @@ temp
 /.env
 .vscode
 geckodriver.log
+docker-compose.override.yaml
