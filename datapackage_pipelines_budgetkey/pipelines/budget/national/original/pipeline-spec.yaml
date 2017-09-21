@@ -11,36 +11,36 @@ national-budgets:
       parameters:
         name: national-budget
         title: National Budget
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2004-1997
-        resource-name: 'תקציב וביצוע 2004-1997 כולל התחיבויות'
-        resource:
-          name: budget_2004_1997
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2012-2005
-        resource-name: 'תקציב וביצוע 2012-2005 כולל התחיבויות'
-        resource:
-          name: budget_2012_2005
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2015-2013
-        resource-name: 'תקציב וביצוע 2015-2013 כולל התחיבויות'
-        resource:
-          name: budget_2015_2013
+#    - run: data_gov_il_resource
+#      parameters:
+#        dataset-name: 2004-1997
+#        resource-name: 'תקציב וביצוע 2004-1997 כולל התחיבויות'
+#        resource:
+#          name: budget_2004_1997
+#    - run: data_gov_il_resource
+#      parameters:
+#        dataset-name: 2012-2005
+#        resource-name: 'תקציב וביצוע 2012-2005 כולל התחיבויות'
+#        resource:
+#          name: budget_2012_2005
+#    - run: data_gov_il_resource
+#      parameters:
+#        dataset-name: 2015-2013
+#        resource-name: 'תקציב וביצוע 2015-2013 כולל התחיבויות'
+#        resource:
+#          name: budget_2015_2013
     - run: data_gov_il_resource
       parameters:
         dataset-name: a2016
         resource-name: 'תקציב מקורי ומאושר 2016'
         resource:
           name: budget_2016
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2018-2017
-        resource-name: 'תקציב מקורי 2018-2017 ברמת תקנה'
-        resource:
-          name: budget_2017_2018
+#    - run: data_gov_il_resource
+#      parameters:
+#        dataset-name: 2018-2017
+#        resource-name: 'תקציב מקורי 2018-2017 ברמת תקנה'
+#        resource:
+#          name: budget_2017_2018
     - run: stream_remote_resources
       cache: true
     - run: concatenate

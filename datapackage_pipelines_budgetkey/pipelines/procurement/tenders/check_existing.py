@@ -6,8 +6,8 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
-from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_publisher_urls_resource import \
+from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_publisher_urls_resource import \
     PUBLISHER_URLS_TABLE_SCHEMA
 
 

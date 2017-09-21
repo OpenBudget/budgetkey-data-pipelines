@@ -1,5 +1,5 @@
 import os, requests
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_publishers_resource import resource_filter
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_publishers_resource import resource_filter
 
 
 def run_add_publishers_resource_processor(url, fixture_file_name, parameters):

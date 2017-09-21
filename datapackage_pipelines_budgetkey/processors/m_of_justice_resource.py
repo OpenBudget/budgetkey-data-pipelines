@@ -5,7 +5,7 @@ from io import StringIO
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
+from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster_get
 
 from datapackage_pipelines.wrapper import ingest, spew
 

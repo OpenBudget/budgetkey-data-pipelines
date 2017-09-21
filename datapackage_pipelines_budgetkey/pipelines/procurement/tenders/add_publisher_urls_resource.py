@@ -1,5 +1,5 @@
-from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
-from budgetkey_data_pipelines.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
+from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
 import os
 import logging
 

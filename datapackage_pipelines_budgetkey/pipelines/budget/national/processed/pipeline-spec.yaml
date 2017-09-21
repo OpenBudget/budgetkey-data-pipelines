@@ -335,6 +335,7 @@ connected-national-budgets:
                 - {name: net_allocated, type: number}
           history:
             es:index: false
+    - run: sample
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items

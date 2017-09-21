@@ -13,9 +13,9 @@ RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-
 RUN pip install textract==1.5.0 pyquery "rfc3986<1.0"
 
 ADD ./ /
-ADD dpp-runners.yaml /budgetkey_data_pipelines/pipelines/
+ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
 
-RUN chown dpp.dpp /budgetkey_data_pipelines -R
+RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/*
@@ -24,12 +24,12 @@ USER dpp
 
 
 ENV PYTHONPATH=/
-ENV DPP_PROCESSOR_PATH=/budgetkey_data_pipelines/processors
+ENV DPP_PROCESSOR_PATH=/datapackage_pipelines_budgetkey/processors
 ENV DPP_REDIS_HOST=localhost
 ENV REDIS_USER=dpp
 ENV REDIS_GROUP=dpp
 
-WORKDIR /budgetkey_data_pipelines/pipelines/
+WORKDIR /datapackage_pipelines_budgetkey/pipelines/
 
 EXPOSE 5000
 

@@ -16,7 +16,7 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
  
  ## The directory structure
  
- All the pipeline definitions can be found under `budgetkey_data_pipeline/pipelines`.
+ All the pipeline definitions can be found under `datapackage_pipelines_budgetkey_data_pipeline/pipelines`.
  
  There we can see the following directory structure (the most interesting parts of it, anyway):
  - `budget/`
@@ -42,7 +42,7 @@ _note: To understand a bit more on the difference between the different types of
 ## Developing a new pipeline
 
 - Read about `datapackage-pipelines` [here](https://github.com/frictionlessdata/datapackage-pipelines)
-- Install this package (`budgetkey-data-pipelines`) using the instructions in the Quickstart section below
+- Install this package (`datapackage-pipelines-budgetkey`) using the instructions in the Quickstart section below
 - Try to understand where is the change that you want to make supposed to reside? 
     - Is it related to one of the existing pipelines?
     - Is it something new altogether?
@@ -108,8 +108,8 @@ $ budgetkey-dpp run ./entities/companies/registrar/registry
 
 The following files will be created:
 * `/var/datapackages` - data saved in datapackages
-* `budgetkey_data_pipelines/.data.db` - data saved in DB (to use a different DB, set DPP_DB_ENGINE env var using sqlalchemy connection url format)
-* `budgetkey_data_pipelines/pipelines/.dpp.db` - metadata about the pipelines themselves and run status
+* `datapackage_pipelines_budgetkey/.data.db` - data saved in DB (to use a different DB, set DPP_DB_ENGINE env var using sqlalchemy connection url format)
+* `datapackage_pipelines_budgetkey/pipelines/.dpp.db` - metadata about the pipelines themselves and run status
 
 
 ### Writing Tests

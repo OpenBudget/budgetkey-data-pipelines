@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.common.data_gov_il import get_resource
+from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMED_FROM
 
 from datapackage_pipelines.wrapper import ingest, spew

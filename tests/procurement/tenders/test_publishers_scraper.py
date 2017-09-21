@@ -1,5 +1,5 @@
 import os
-from budgetkey_data_pipelines.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
 
 
 class MockPublishersScraper(PublisherScraper):

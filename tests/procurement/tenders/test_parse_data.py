@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
 import datetime

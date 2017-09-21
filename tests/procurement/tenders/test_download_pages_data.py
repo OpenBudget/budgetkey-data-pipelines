@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.download_pages_data import (
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.download_pages_data import (
     DownloadPagesDataProcessor, TABLE_SCHEMA as DOWNLOAD_PAGES_DATA_TABLE_SCHEMA
 )
 from ...common import listify_resources, unlistify_resources

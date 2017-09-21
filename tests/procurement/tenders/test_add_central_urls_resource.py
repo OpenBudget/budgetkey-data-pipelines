@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_central_urls_resource import AddCentralUrlsResource
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_central_urls_resource import AddCentralUrlsResource
 from tests.common import listify_resources, unlistify_resources
 import os, requests
 

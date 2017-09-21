@@ -1,5 +1,5 @@
 import requests
-from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
 
 
 DEFAULT_INPUT_RESOURCE = "tender-urls"

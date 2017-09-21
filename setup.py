@@ -12,7 +12,7 @@ else:
 
 print(find_packages(exclude=["tests", "test.*"]))
 setup(
-    name='budgetkey-data-pipelines',
+    name='datapackage-pipelines-budgetkey',
     version=version,
     packages=find_packages(exclude=["tests", "test.*"]),
     install_requires=['pyquery',
@@ -26,5 +26,5 @@ setup(
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
                       'geocoder'],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
-    entry_points={'console_scripts': ['budgetkey-dpp = budgetkey_data_pipelines.cli:main']}
+    entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}
 )

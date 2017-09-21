@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.entities.cooperatives.cooperatives_scraper import CooperativesScraper
+from datapackage_pipelines_budgetkey.pipelines.entities.cooperatives.cooperatives_scraper import CooperativesScraper
 import os, json, datetime
 from tests.common import assert_doc_conforms_to_schema
 

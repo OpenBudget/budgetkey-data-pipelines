@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.entities.geocode_entities import GeoCodeEntities
+from datapackage_pipelines_budgetkey.pipelines.entities.geocode_entities import GeoCodeEntities
 import os, json, pytest
 from sqlalchemy import create_engine, MetaData, Table, Column, Float, Text
 from sqlalchemy.orm.session import sessionmaker

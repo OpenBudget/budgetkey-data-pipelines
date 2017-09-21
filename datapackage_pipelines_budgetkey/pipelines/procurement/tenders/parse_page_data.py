@@ -1,6 +1,6 @@
-from budgetkey_data_pipelines.common.resource_filter_processor import ResourceFilterProcessor
-from budgetkey_data_pipelines.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
-                                                                                   publication_id_from_url)
+from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
+                                                                                          publication_id_from_url)
 from pyquery import PyQuery as pq
 from datetime import datetime
 

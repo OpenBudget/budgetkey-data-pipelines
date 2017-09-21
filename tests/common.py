@@ -37,7 +37,7 @@ class BudgetkeyProcessorsFixturesTests(ProcessorFixtureTestsBase):
 
     def _get_processor_file(self, processor):
         processor = processor.replace('.', '/')
-        return os.path.join(os.path.dirname(__file__), os.pardir, "budgetkey_data_pipelines", processor.strip() + '.py')
+        return os.path.join(os.path.dirname(__file__), os.pardir, "datapackage_pipelines_budgetkey", processor.strip() + '.py')
 
     def _replace_data_input_tokens(self, data_in):
         """preliminary support for replacing tokens inside the fixture data input"""

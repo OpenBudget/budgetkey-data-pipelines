@@ -5,7 +5,7 @@ from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-from budgetkey_data_pipelines.common.cookie_monster import cookie_monster_get
+from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster_get
 
 parameters, datapackage, res_iter = ingest()
 
