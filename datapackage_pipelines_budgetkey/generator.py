@@ -61,7 +61,22 @@ class Generator(GeneratorBase):
                         'indexes': {
                             'budgetkey': [
                                 {'resource-name': doc_type,
-                                 'doc_type': doc_type}
+                                 'doc-type': doc_type}
+                            ]
+                        }
+                    }),
+                    ('convert_to_key_value', {
+                        'key-prefix': doc_type,
+                        'key-fields': key_fields
+                    }),
+                    ('sample'
+
+                    ),
+                    ('dump_to_es', {
+                        'indexes': {
+                            'budgetkey': [
+                                {'resource-name': 'document',
+                                 'doc-type': 'document'}
                             ]
                         }
                     })

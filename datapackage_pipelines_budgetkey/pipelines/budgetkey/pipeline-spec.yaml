@@ -26,6 +26,7 @@ budget-functional-aggregates:
         target:
           name: budget-functional-aggregates
           key: null
+
         fields:
           func_cls_title_1: null
           func_cls_title_2: null
