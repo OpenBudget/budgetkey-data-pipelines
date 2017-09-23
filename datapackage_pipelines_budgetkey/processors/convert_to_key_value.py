@@ -3,14 +3,13 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
 
-prefix = parameters['key-prefix']
-key_fields = parameters['key-fields']
+key_pattern = parameters['key-fields']
 
 def process_resources(res_iter_):
     for res in res_iter_:
         for row in res:
             yield {
-                'key': '/'.join([prefix] + [str(row[k]) for k in key_fields]),
+                'key': key_pattern.format(**row)
                 'value': dict(row)
             }
 

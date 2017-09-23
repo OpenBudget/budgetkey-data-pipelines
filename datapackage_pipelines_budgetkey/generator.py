@@ -27,6 +27,7 @@ class Generator(GeneratorBase):
                 dependent_pipeline_id = parameters['dependent_pipeline']
                 source_datapackage = parameters['source_datapackage']
                 key_fields = parameters['key-fields']
+                key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
                 pipeline_id = 'index_{}'.format(snake_doc_type)
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
 
@@ -67,11 +68,9 @@ class Generator(GeneratorBase):
                         }
                     }),
                     ('convert_to_key_value', {
-                        'key-prefix': doc_type,
-                        'key-fields': key_fields
+                        'key-pattern': key_pattern
                     }),
                     ('sample'
-
                     ),
                     ('dump_to_es', {
                         'indexes': {
