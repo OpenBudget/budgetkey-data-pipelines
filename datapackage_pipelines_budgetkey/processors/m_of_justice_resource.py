@@ -26,6 +26,9 @@ def get_entities():
     data = data.decode('cp1255', 'replace')
 
     logging.info('DECODED DATA %r', data[:1024])
+    logging.info('DECODED STARTING LINES:\n%s', data[:1024].split('\n')[:-1])
+    logging.info('DECODED ENDING LINES:\n%s', data[-1024:].split('\n')[1:])
+    logging.info('DECODED DATA %r', data[:1024])
     logging.info('LENGTH DATA %d bytes', len(data))
 
     repl1 = re.compile(",[\r\n\t ]+(?=[^5])")
