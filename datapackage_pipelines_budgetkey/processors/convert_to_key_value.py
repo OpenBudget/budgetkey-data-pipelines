@@ -3,7 +3,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
 
-key_pattern = parameters['key-fields']
+key_pattern = parameters['key-pattern']
 
 def process_resources(res_iter_):
     for res in res_iter_:

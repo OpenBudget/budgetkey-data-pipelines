@@ -26,7 +26,7 @@ class Generator(GeneratorBase):
                 snake_doc_type = doc_type.replace('-', '_')
                 dependent_pipeline_id = parameters['dependent_pipeline']
                 source_datapackage = parameters['source_datapackage']
-                key_fields = parameters['key-fields']
+                key_fields = parameters.get('key-fields', [])
                 key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
                 key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = 'index_{}'.format(snake_doc_type)
