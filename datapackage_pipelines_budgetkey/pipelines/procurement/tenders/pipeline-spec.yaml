@@ -249,6 +249,7 @@ processed:
         tenders:
           - publication_id
           - tender_type
+          - tender_id
     - run: dump.to_sql
       parameters:
         tables:

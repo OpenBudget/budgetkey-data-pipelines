@@ -5,7 +5,7 @@ from pyquery import PyQuery as pq
 from datetime import datetime
 
 TABLE_SCHEMA = {
-    "primaryKey": ["publication_id"],
+    "primaryKey": ["publication_id", "tender_type", "tender_id"],
     "fields": [
         {"name": "publisher_id", "type": "integer", "required": False},
         {"name": "publication_id", "type": "integer", "required": False, "description": "* exemptions: pId\n"

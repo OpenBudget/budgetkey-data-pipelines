@@ -28,6 +28,7 @@ class Generator(GeneratorBase):
                 source_datapackage = parameters['source_datapackage']
                 key_fields = parameters['key-fields']
                 key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
+                key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = 'index_{}'.format(snake_doc_type)
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
 

@@ -19,6 +19,7 @@ entities:
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   key-fields:
     - id
+  key-pattern: 'org/{kind}/{id}'
 
 contract-spending:
   kind: indexer
@@ -45,6 +46,7 @@ tenders:
   key-fields:
     - publication_id
     - tender_type
+    - tender_id
 
 people:
   kind: indexer
