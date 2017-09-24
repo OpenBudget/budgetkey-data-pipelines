@@ -20,6 +20,15 @@ registry:
           'Company_Registration_Date':
             type: date
             format: '%Y-%m-%d %H:%M:%S'
+          'Company_Number':
+            type: string
+            constraints:
+              minLength: 9
+              maxLength: 9
+          'Company_Name':
+            type: string
+            constraints:
+              minLength: 1
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/registrar/registry

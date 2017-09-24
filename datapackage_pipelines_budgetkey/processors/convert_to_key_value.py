@@ -9,7 +9,7 @@ def process_resources(res_iter_):
     for res in res_iter_:
         for row in res:
             yield {
-                'key': key_pattern.format(**row)
+                'key': key_pattern.format(**row),
                 'value': dict(row)
             }
 
