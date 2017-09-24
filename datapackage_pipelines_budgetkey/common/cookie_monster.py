@@ -28,12 +28,16 @@ def cookie_monster_get(url):
                 continue
 
             return None
+        else:
+            return data
 
     data = b''
     for ofs in range(0, content_length, 1024*1024):
         headers['range'] = 'bytes={}-{}'.format(ofs, ofs+1024*1024-1)
         resp = session.get(url, headers=headers)
-        if resp.status_code not in (200,206) or resp.headers.get('content-length') == 0:
+        if resp.status_code not in (206) or resp.headers.get('content-length') == 0:
+            break
+        if len(resp.content) > 1024*1024:
             break
         data += resp.content
 
