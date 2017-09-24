@@ -35,7 +35,6 @@ class Generator(GeneratorBase):
                 pipeline_steps = [
                     ('add_metadata', {
                         'name': pipeline_id,
-                        'title': 'index_of_{}'.format(doc_type)
                     }),
                     ('load_resource', {
                         'url': source_datapackage,

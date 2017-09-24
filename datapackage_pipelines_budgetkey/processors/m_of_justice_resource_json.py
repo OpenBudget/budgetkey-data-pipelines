@@ -31,16 +31,20 @@ res = [
 
 def treat(data):
     for i, d in enumerate(data):
+        d=d[0]
         if i == 0:
             yield d
         else:
-            d=d[0]
             if d == 'null':
                 yield None
             else:
                 d = d[1:-1]
                 yield d
 
+
+def ifindall(r, data):
+    for match in r.finditer(data):
+        yield tuple(match.groups())
 
 def get_entities():
 
@@ -63,11 +67,9 @@ def get_entities():
     data = data.replace('\n',' ')
 
     datums = [
-        r.findall(data)
+        ifindall(r, data)
         for r in res
     ]
-    logging.info('LENGTHS: %r', list(map(len, datums)))
-
     datums = zip(*datums)
 
     headers = [hdr_num, hdr_name, hdr_reg_date]

@@ -154,7 +154,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "end_date": parse_date(source_data["end_date"]),
             "decision": source_data["decision"],
             "page_title": source_data["page_title"],
-            "tender_id": "",
+            "tender_id": "none",
             "documents": documents
         }
 
