@@ -90,7 +90,10 @@ def process_first(rows):
             del row[code_key]
             del row[title_key]
 
-        hierarchy = [['00', 'המדינה']]
+        if int(save[codes_and_titles[0][0]]) != 0:
+            hierarchy = [['00', 'המדינה']]
+        else:
+            hierarchy = []
         for i, (code_key, title_key) in enumerate(codes_and_titles):
             expected_length = i*2 + 4
             row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
@@ -100,10 +103,11 @@ def process_first(rows):
             yield row
             hierarchy.append([row['code'], row['title']])
 
-        row['code'] = '00'
-        row['title'] = 'המדינה'
-        row['hierarchy'] = []
-        yield row
+        if not row['code'].startswith('0000'):
+            row['code'] = '00'
+            row['title'] = 'המדינה'
+            row['hierarchy'] = []
+            yield row
 
 
 def process_resources(res_iter_):
