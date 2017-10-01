@@ -8,7 +8,7 @@ registry:
       parameters:
         name: company-registry
         title: חברות פעילות מרשם החברות
-    - run: m_of_justice_resource_json
+    - run: m_of_justice_resource
       runner: tzabar
       parameters:
         key: Company
