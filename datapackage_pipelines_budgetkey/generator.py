@@ -5,6 +5,8 @@ from datapackage_pipelines.generators import (
     GeneratorBase, steps
 )
 
+from datapackage_pipelines_metrics import append_metrics
+
 import logging
 
 
@@ -88,4 +90,4 @@ class Generator(GeneratorBase):
                     ],
                     'pipeline': steps(*pipeline_steps)
                 }
-                yield pipeline_id, pipeline
+                yield pipeline_id, append_metrics(pipeline)
