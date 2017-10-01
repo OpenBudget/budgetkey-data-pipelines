@@ -1,6 +1,8 @@
 from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
                                                                                           publication_id_from_url)
+from datapackage_pipelines.utilities.extended_json import json
+
 from pyquery import PyQuery as pq
 from datetime import datetime
 
@@ -97,6 +99,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time})
+            documents = json.dumps(documents)
             if row["tender_type"] == "exemptions":
                 yield self.get_exemptions_data(row, page, documents)
             elif row["tender_type"] == "office":

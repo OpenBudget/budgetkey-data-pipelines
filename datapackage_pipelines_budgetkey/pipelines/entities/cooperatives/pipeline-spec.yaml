@@ -15,6 +15,7 @@ cooperatives:
       runner: tzabar
       parameters:
         resource-name: cooperatives
+    - run: set_types
     - run: dump.to_path
       parameters:
           out-path: /var/datapackages/entities/cooperatives/
