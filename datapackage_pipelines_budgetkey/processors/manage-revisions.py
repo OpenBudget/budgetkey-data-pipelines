@@ -45,12 +45,16 @@ def calc_hash(row, hash_fields):
     return hash
 
 
-def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, schema):
+def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, array_fields):
     ret = DB()
     storage = Storage(create_engine(connection_string))
 
     if db_table in storage.buckets:
-        descriptor = storage.describe(db_table, schema)
+        descriptor = storage.describe(db_table)
+        for field in descriptor['fields']:
+            if field['name'] in array_fields:
+                field['type'] = 'array'
+        storage.describe(db_table, descriptor)
         db_fields = [f['name'] for f in descriptor['fields']]
         for rec in storage.iter(db_table):
             rec = dict(zip(db_fields, rec))
@@ -121,6 +125,7 @@ def main():
     resource_name = parameters['resource-name']
     input_key_fields = parameters['key-fields']
     input_hash_fields = parameters.get('hash-fields')
+    array_fields = parameters.get('array-fields', [])
 
     for res in dp['resources']:
         if resource_name == res['name']:
@@ -133,12 +138,18 @@ def main():
             db_key_fields = parameters.get('db-key-fields', input_key_fields)
             db_hash_fields = parameters.get('db-hash-fields', input_hash_fields)
 
+            schema_array_fields = [
+                field['name']
+                for field in res['schema']['fields']
+                if field['type'] == 'array'
+            ]
+
             existing_ids = \
                 get_all_existing_ids(connection_string,
                                      parameters['db-table'],
                                      db_key_fields,
                                      db_hash_fields,
-                                     res['schema'])
+                                     array_fields + schema_array_fields)
             break
 
     assert existing_ids is not None

@@ -13,6 +13,9 @@ def boolean(x):
 
 
 def date(x):
+    if x is None:
+        return None
+
     try:
         x = float(x)
         return datetime.date(1900, 1, 1) + datetime.timedelta(days=int(x))
