@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.supports.criteria.parser import parse_row
+from datapackage_pipelines_budgetkey.pipelines.supports.criteria.parser import parse_row
 from datapackage import DataPackage
 
 
