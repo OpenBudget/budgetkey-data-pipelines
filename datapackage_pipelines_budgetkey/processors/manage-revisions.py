@@ -45,12 +45,12 @@ def calc_hash(row, hash_fields):
     return hash
 
 
-def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields):
+def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, schema):
     ret = DB()
     storage = Storage(create_engine(connection_string))
 
     if db_table in storage.buckets:
-        descriptor = storage.describe(db_table)
+        descriptor = storage.describe(db_table, schema)
         db_fields = [f['name'] for f in descriptor['fields']]
         for rec in storage.iter(db_table):
             rec = dict(zip(db_fields, rec))
@@ -137,7 +137,8 @@ def main():
                 get_all_existing_ids(connection_string,
                                      parameters['db-table'],
                                      db_key_fields,
-                                     db_hash_fields)
+                                     db_hash_fields,
+                                     res['schema'])
             break
 
     assert existing_ids is not None
