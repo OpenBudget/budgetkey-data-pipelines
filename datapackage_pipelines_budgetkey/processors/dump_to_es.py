@@ -4,6 +4,22 @@ from tableschema_elasticsearch.mappers import MappingGenerator
 
 class BoostingMappingGenerator(MappingGenerator):
 
+    def __init__(self):
+        super(BoostingMappingGenerator, self).__init__(base={
+            "dynamic_templates": [
+                {
+                    "strings": {
+                        "match": "*",
+                        "match_mapping_type": "text",
+                        "mapping": {
+                            "type": "text",
+                            "analyzer": "hebrew",
+                        }
+                    }
+                }
+            ]
+        })
+
     @classmethod
     def _convert_type(cls, schema_type, field, prefix):
         prop = super(BoostingMappingGenerator, cls)._convert_type(schema_type, field, prefix)
