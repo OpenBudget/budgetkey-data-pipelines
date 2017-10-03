@@ -15,7 +15,7 @@ national-budget-changes:
 
 entities:
   kind: indexer
-  dependent_pipeline: ./entities/all
+  dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   key-fields:
     - id
