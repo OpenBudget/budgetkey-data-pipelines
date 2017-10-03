@@ -143,7 +143,6 @@ You can use the following commands to run local InfluxDB and Grafana to visualiz
 ```
 docker run -d -p 8086:8086 --name influxdb influxdb:1.3-alpine
 docker run -d -p 3000:3000 --name grafana -h grafana grafana/grafana
-export DPP_DB_ENGINE=sqlite:///.data.db
 export DPP_INFLUXDB_URL=http://localhost:8086
 export DPP_INFLUXDB_ROWS_BATCH_SIZE=1  # don't batch metrics - good for debugging
 pushd datapackage_pipelines_budgetkey && budgetkey-dpp run ./donations/parties && budgetkey-dpp run ./donations/candidates && budgetkey-dpp run ./donations/transactions && popd
@@ -152,7 +151,7 @@ pushd datapackage_pipelines_budgetkey && budgetkey-dpp run ./donations/parties &
 Keep the pipelines running in background, you should be able to see some metrics in Grafana:
 
 * Log-in to grafana
-  * http://localhost:13000
+  * http://localhost:3000
   * default username/password is admin/admin
 * Add a datasource
   * Name: influxdb
@@ -163,6 +162,6 @@ Keep the pipelines running in background, you should be able to see some metrics
 * Import the metrics dashboard
   * Dashboards > Import
   * Upload the following json file: https://github.com/OriHoch/datapackage-pipelines-metrics/raw/master/grafana-dashboard.json
-  * Choost database influxdb
+  * Choost influxdb source
 * View the dashboard
   * If you ran the pipelines you should see some metrics
