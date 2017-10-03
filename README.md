@@ -135,3 +135,33 @@ to run tests faster you can run py.test directly, but you will need to setup the
 $ pip install pytest
 $ py.test tests/tenders/test_fixtures.py -svk test_tenders_fixtures_publishers
 ```
+
+### Enabling Metrics collection
+
+You can use the following commands to run local InfluxDB and Grafana to visualize metrics:
+
+```
+docker run -d -p 8086:8086 --name influxdb influxdb:1.3-alpine
+docker run -d -p 3000:3000 --name grafana -h grafana grafana/grafana
+export DPP_INFLUXDB_URL=http://localhost:8086
+export DPP_INFLUXDB_ROWS_BATCH_SIZE=1  # don't batch metrics - good for debugging
+pushd datapackage_pipelines_budgetkey && budgetkey-dpp run ./donations/parties && budgetkey-dpp run ./donations/candidates && budgetkey-dpp run ./donations/transactions && popd
+```
+
+Keep the pipelines running in background, you should be able to see some metrics in Grafana:
+
+* Log-in to grafana
+  * http://localhost:3000
+  * default username/password is admin/admin
+* Add a datasource
+  * Name: influxdb
+  * Type: InfluxDB
+  * Url: http://localhost:8086
+  * Access: direct
+  * Database: dpp
+* Import the metrics dashboard
+  * Dashboards > Import
+  * Upload the following json file: https://github.com/OriHoch/datapackage-pipelines-metrics/raw/master/grafana-dashboard.json
+  * Choost influxdb source
+* View the dashboard
+  * If you ran the pipelines you should see some metrics

@@ -24,7 +24,8 @@ setup(
                       'datapackage-pipelines-elasticsearch>=0.0.5',
                       'textract==1.5.0',  # later versions of textract introduce unnecesary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
-                      'geocoder'],
+                      'geocoder',
+                      'datapackage-pipelines-metrics'],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}
 )
