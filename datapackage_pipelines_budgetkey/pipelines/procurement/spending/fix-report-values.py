@@ -47,6 +47,8 @@ def date(x):
 
 
 def budget_code(x):
+    assert x is not None, 'Budget code is None'
+
     x = str(x).strip()
     if x.endswith('.0'):
         x = x[:-2]
@@ -60,7 +62,7 @@ def budget_code(x):
         assert('-' not in x and '=' not in x)
         x = '000'+x
     else:
-        return None
+        assert False, 'Bad budget code %s' % x
     return x
 
 BAD_WORDS = [

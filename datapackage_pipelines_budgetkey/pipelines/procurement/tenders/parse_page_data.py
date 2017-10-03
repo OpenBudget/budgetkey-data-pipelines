@@ -200,7 +200,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "end_date": None,
             "decision": source_data["status"],
             "page_title": None,
-            "tender_id": source_data["publishnum"],
+            "tender_id": source_data["publishnum"] or 'none',
             "documents": documents,
         }
 
