@@ -23,8 +23,10 @@ class Generator(GeneratorBase):
 
     @classmethod
     def generate_pipeline(cls, source):
-        for doc_type, parameters in source.items():
-            if parameters['kind'] == 'indexer':
+        for pipeline_id, pipeline in source.items():
+            # TODO: ensure there won't be any edge-cases where a pipeline with kind=indexer will be run through this
+            if pipeline.get('kind') == 'indexer':
+                doc_type, parameters = pipeline_id, pipeline
                 snake_doc_type = doc_type.replace('-', '_')
                 dependent_pipeline_id = parameters['dependent_pipeline']
                 source_datapackage = parameters['source_datapackage']
@@ -90,4 +92,4 @@ class Generator(GeneratorBase):
                     ],
                     'pipeline': steps(*pipeline_steps)
                 }
-                yield pipeline_id, append_metrics(pipeline)
+            yield pipeline_id, append_metrics(pipeline)
