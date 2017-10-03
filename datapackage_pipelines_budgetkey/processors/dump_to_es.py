@@ -26,6 +26,8 @@ class BoostingMappingGenerator(MappingGenerator):
         if schema_type == 'string':
             if 'es:title' in field:
                 prop['boost'] = 10
+        if prop.get('type') == 'text':
+            prop['analyzer'] = "hebrew"
         return prop
 
 
