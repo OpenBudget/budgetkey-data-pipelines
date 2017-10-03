@@ -158,9 +158,6 @@ entities:
             name: amount
             aggregate: sum
 
-    # Calculate score
-    - run: calc-entity-score
-
     # Load entities
     - run: load_resource
       parameters:
@@ -181,8 +178,10 @@ entities:
             - id
           full: true
         fields:
-          score: null
           received_amount: null
+
+    # Calculate score
+    - run: calc-entity-score
 
     - run: set_types
       parameters:
