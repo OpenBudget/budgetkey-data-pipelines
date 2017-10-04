@@ -20,11 +20,11 @@ def process_row(row, *_):
         logging.warning('net_allocated is None: %r', row)
         amount = 0
     # Account for relevance
-    year_score = 2**abs(curyear - row['year'])
-    amount /= year_score
-    # Account for depth
-    depth = len(row['code'])/2
-    amount /= depth
+    # year_score = 2**abs(curyear - row['year'])
+    # amount /= year_score
+    # # Account for depth
+    # depth = len(row['code'])/2
+    # amount /= depth
     row['score'] = max(1, amount / 1000)
     return row
 
