@@ -1,3 +1,5 @@
+import json
+
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
@@ -72,10 +74,10 @@ def test():
         "decision": "נרשם",
         "page_title": "דיווח פטור משרדי",
         "tender_type": "exemptions",
-        "tender_id": "",
-        "documents": [{"description": "חוות דעת מקצועית",
-                                       "link": "https://www.mr.gov.il/Files_Michrazim/234734.pdf",
-                                       "update_time": "2017-03-14"}]
+        "tender_id": "none",
+        "documents": json.dumps([{"description": "חוות דעת מקצועית",
+                                                 "link": "https://www.mr.gov.il/Files_Michrazim/234734.pdf",
+                                                 "update_time": "2017-03-14"}])
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2] == {'publisher_id': 50,
