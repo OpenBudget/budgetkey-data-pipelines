@@ -1,9 +1,12 @@
 all:
+  schedule:
+    crontab: "0 0 0 * *"
+
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
-        title: All support data, in raw form
+        title: All support data, in raw form (manually scraped)
     - run: add_resource
       parameters:
         name: s2008
