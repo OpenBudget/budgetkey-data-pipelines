@@ -134,6 +134,7 @@ def main():
             input_hash_fields = set(input_hash_fields) - set(input_key_fields)
             if len(input_hash_fields.intersection(STATUS_FIELD_NAMES)) == 0:
                 res['schema']['fields'].extend(STATUS_FIELDS)
+            input_hash_fields = set(input_hash_fields) - set(STATUS_FIELD_NAMES)
 
             db_key_fields = parameters.get('db-key-fields', input_key_fields)
             db_hash_fields = parameters.get('db-hash-fields', input_hash_fields)
