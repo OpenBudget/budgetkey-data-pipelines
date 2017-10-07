@@ -77,7 +77,8 @@ def test():
         "tender_id": "none",
         "documents": json.dumps([{"description": "חוות דעת מקצועית",
                                                  "link": "https://www.mr.gov.il/Files_Michrazim/234734.pdf",
-                                                 "update_time": "2017-03-14"}])
+                                                 "update_time": "2017-03-14"}],
+                                sort_keys=True, ensure_ascii=False)
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2] == {'publisher_id': 50,
