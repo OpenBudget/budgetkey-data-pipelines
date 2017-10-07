@@ -16,6 +16,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
     def __init__(self, timeout=180, url_prefix="https://www.mr.gov.il", **kwargs):
         self._timeout = timeout
         self._url_prefix = url_prefix
+        self.session = requests.session()
         super(DownloadPagesDataProcessor, self).__init__(
             default_input_resource=DEFAULT_INPUT_RESOURCE,
             default_output_resource=DEFAULT_OUTPUT_RESOURCE,
@@ -40,7 +41,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
                 "tender_type": tender_type}
 
     def _get_url_response_text(self, url, timeout):
-        response = requests.get(url, timeout=timeout)
+        response = self.session.get(url, timeout=timeout)
         response.raise_for_status()
         return response.text
 

@@ -159,6 +159,11 @@ all:
         table: procurement_tenders
     - run: stream_remote_resources
     - run: set_types
+      parameters:
+        types:
+          tender_id:
+            constraints:
+              required: true
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/all
