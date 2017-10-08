@@ -99,7 +99,6 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 documents.append({"description": img_elt.attrib.get("alt", ""),
                                   "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time})
-            documents = json.dumps(documents, sort_keys=True)
             if row["tender_type"] == "exemptions":
                 yield self.get_exemptions_data(row, page, documents)
             elif row["tender_type"] == "office":
@@ -158,7 +157,8 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "decision": source_data["decision"],
             "page_title": source_data["page_title"],
             "tender_id": "none",
-            "documents": documents
+            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False)
+
         }
 
     def get_office_data(self, row, page, documents):
@@ -201,7 +201,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "decision": source_data["status"],
             "page_title": None,
             "tender_id": source_data["publishnum"] or 'none',
-            "documents": documents,
+            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
         }
 
     def get_central_data(self, row, page, documents):
@@ -239,7 +239,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
             "page_title": page("h1.MainTitle").text().strip(),
             "tender_id": tender_id_from_url(row["url"]),
-            "documents": documents,
+            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
         }
         if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
             raise Exception("invalid or blocked response")

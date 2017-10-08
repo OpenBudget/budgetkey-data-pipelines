@@ -27,7 +27,7 @@ def test():
     assert cooperative == {'address': 'דופקר ++++',
                            'id': '570000018',
                            'inspector': 'צוק חיים',
-                           'last_status_date': '06/02/1921 00:00:00',
+                           'last_status_date': '29/01/1970 12:00:00',
                            'legal_status': 'הודעה שניה על מחיקה',
                            'legal_status_id': '23',
                            'municipality': '',
@@ -36,7 +36,7 @@ def test():
                            'phone': '',
                            'primary_type': 'שיכון',
                            'primary_type_id': '43',
-                           'registration_date': '29/01/1970 12:00:00',
+                           'registration_date': '06/02/1921 00:00:00',
                            'secondary_type': 'שיכון',
                            'secondary_type_id': '61',
                            'type': 'התאחדות האיכרים'}
