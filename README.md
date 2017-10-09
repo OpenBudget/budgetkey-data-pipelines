@@ -135,3 +135,37 @@ to run tests faster you can run py.test directly, but you will need to setup the
 $ pip install pytest
 $ py.test tests/tenders/test_fixtures.py -svk test_tenders_fixtures_publishers
 ```
+
+## Using Docker Compose
+
+Docker Compose can be used to run a full environment with all required services - similar to the production environment.
+
+### Installation
+
+* Install Docker and Docker Compose (Refer to Docker documentation)
+* `cp docker-compose.override.example.yaml docker-compose.override.yaml`
+* (Optional) review the configuration in `docker-compose.override.yaml` and modify if needed
+* (Optional) Build the image from current directory: `docker-compose build pipelines`
+* Run the environment services in the background:
+  * `docker-compose up -d`
+* If you used the default docker-compose override, you should have the following endpoints available:
+  * Pipelines dashboard - `http://localhost:5000/`
+  * DB - `postgresql://postgres:123456@localhost:15432/postgres`
+  * Elasticsearch - `http://localhost:19200/`
+  * Kibana - `http://localhost:15601/`
+* You can run budgetkey-dpp command from inside the docker container:
+  * `docker-compose exec pipelines sh -c "budgetkey-dpp"`
+
+## Loading datapackages to Elasticsearch
+
+* This method allows to load the prepared datapackage to elasticsearch
+* Data is then available for exploration via Kibana
+* Assuming a properly configured dpp environment:
+  * if you use docker compose, you can run the commands inside the pipelines container with `docker-compose exec pipelines sh -c "budgetkey-dpp"`
+  * get the list of available data (corresponds to elasticsearch doc types):
+    * `ES_LOAD_DATA=1 budgetkey-dpp | grep 'load_data enabled'`
+  * load all data for a doc type:
+    * `ES_LOAD_DATA=1 budgetkey-dpp run ./budgetkey/elasticsearch/index_tenders`
+  * loading all the data takes a long time, you can limit it:
+    * `ES_LOAD_DATA_ROWS=100 budgetkey-dpp run ./budgetkey/elasticsearch/index_tenders`
+    * it will still load all the data - but will only update to ES the first 100 rows
