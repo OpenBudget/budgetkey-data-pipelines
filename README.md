@@ -147,7 +147,7 @@ Docker Compose can be used to run a full environment with all required services 
 * Run the minimal required environment services in the background:
   * `docker-compose up -d redis db pipelines`
 * You should have the following endpoints available:
-  * Pipelines dashboard - `http://localhost:5000/`
+  * Pipelines dashboard - `http://localhost:5000/` (doesn't run any workers by default)
   * DB - `postgresql://postgres:123456@localhost:15432/postgres`
 * You can run budgetkey-dpp command from inside the docker container:
   * `docker-compose exec pipelines sh -c "budgetkey-dpp"`
