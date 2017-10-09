@@ -59,6 +59,9 @@ class Generator(GeneratorBase):
                             {'__next_update_days': 1}
                         ]
                     }),
+                    ('add_doc_id', {
+                        'doc-id-pattern': key_pattern
+                    }),
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [
@@ -67,9 +70,8 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
-                    ('convert_to_key_value', {
-                        'key-pattern': key_pattern
-                    }),
+                    ('convert_to_key_value'
+                    ),
                     ('sample'
                     ),
                     ('dump_to_es', {
