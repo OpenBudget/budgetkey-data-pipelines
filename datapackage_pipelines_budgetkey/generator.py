@@ -26,6 +26,9 @@ class Generator(GeneratorBase):
                 snake_doc_type = doc_type.replace('-', '_')
                 dependent_pipeline_id = parameters['dependent_pipeline']
                 source_datapackage = parameters['source_datapackage']
+                if os.environ.get("ES_LOAD_FROM_URL") == "1":
+                    # this allows to populate elasticsearch data without running dependant pipelines
+                    source_datapackage = source_datapackage.replace("/var/datapackages", "http://next.obudget.org/datapackages")
                 key_fields = parameters.get('key-fields', [])
                 key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
                 key_pattern = parameters.get('key-pattern', key_pattern)
@@ -82,10 +85,19 @@ class Generator(GeneratorBase):
                     })
                 ]
 
+                if os.environ.get("ES_LIMIT_ROWS"):
+                    dump_to_sql_index = [i for i, s in enumerate(pipeline_steps) if s[0] == "dump.to_sql"][0]
+                    pipeline_steps.insert(
+                        dump_to_sql_index,
+                        ("limit_rows", {"stop-after-rows": int(os.environ.get("ES_LIMIT_ROWS"))})
+                    )
+
                 pipeline = {
                     'dependencies': [
                         {'pipeline': dependent_pipeline_id}
                     ],
                     'pipeline': steps(*pipeline_steps)
                 }
+                if os.environ.get("ES_LOAD_FROM_URL") == "1":
+                    del pipeline["dependencies"]
                 yield pipeline_id, pipeline

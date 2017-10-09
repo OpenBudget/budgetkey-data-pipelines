@@ -135,3 +135,52 @@ to run tests faster you can run py.test directly, but you will need to setup the
 $ pip install pytest
 $ py.test tests/tenders/test_fixtures.py -svk test_tenders_fixtures_publishers
 ```
+
+## Using Docker Compose
+
+Docker Compose can be used to run a full environment with all required services - similar to the production environment.
+
+### Installation
+
+* Install Docker and Docker Compose (Refer to Docker documentation)
+* (Optional) Build the image from current directory: `docker-compose build pipelines`
+* Run the minimal required environment services in the background:
+  * `docker-compose up -d redis db pipelines`
+* You should have the following endpoints available:
+  * Pipelines dashboard - `http://localhost:5000/` (doesn't run any workers by default)
+  * DB - `postgresql://postgres:123456@localhost:15432/postgres`
+* You can run budgetkey-dpp command from inside the docker container:
+  * `docker-compose exec pipelines sh -c "budgetkey-dpp"`
+* Elasticsearch and Kibana are also available, to start:
+  * `docker-compose up -d elasticsearch kibana`
+* To connect to the service in docker from local PC:
+  * `source .env.example`
+  * `dpp`
+
+## Loading datapackages to Elasticsearch
+
+This method allows to load the prepared datapackages to elasticsearch, the data is then available for exploration via Kibana
+
+This snippet will delete all local docker-compose volumes - so make sure you don't have anything important there beforehand..
+
+It loads the first 100 rows from each pipeline, you can modify ES_LIMIT_ROWS below or remove it to load all data
+
+```
+docker-compose down -v && docker-compose pull elasticsearch db && docker-compose up -d elasticsearch db
+export DPP_DB_ENGINE="postgresql://postgres:123456@localhost:15432/postgres"
+export DPP_ELASTICSEARCH="localhost:19200"
+for doctype in `budgetkey-dpp | grep .budgetkey/elasticsearch/index_ | cut -d"_" -f2 - | cut -d" " -f1 -`; do
+    echo " > Loading ${doctype}"
+    ES_LOAD_FROM_URL=1 ES_LIMIT_ROWS=100 budgetkey-dpp run ./budgetkey/elasticsearch/index_$doctype
+done
+```
+
+Now you can start Kibana to explore the data
+
+```
+docker-compose up -d kibana
+```
+
+Kibana should be available at http://localhost:15601/ (It might take some time to start up properly)
+
+Index name is `budgetkey`
