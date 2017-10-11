@@ -44,8 +44,8 @@ tenders:
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   key-fields:
-    - publication_id
     - tender_type
+    - publication_id
     - tender_id
 
 people:
