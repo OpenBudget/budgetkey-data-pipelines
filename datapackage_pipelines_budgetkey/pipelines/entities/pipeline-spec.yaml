@@ -2,7 +2,8 @@ all:
   dependencies:
     - pipeline: ./entities/companies/registrar/details
     - pipeline: ./entities/associations/guidestar/guidestar
-    # - pipeline: ./entities/special/registry
+    - pipeline: ./entities/special/registry
+    - pipeline: ./entities/cooperatives/cooperatives
     - pipeline: ./entities/ottoman/ottoman-association-registry
   pipeline:
     - run: add_metadata
@@ -25,6 +26,14 @@ all:
       parameters:
         resource: ottoman-association-registry
         url: /var/datapackages/entities/ottoman/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: cooperatives
+        url: /var/datapackages/entities/cooperatives/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: lamas-municipal-data
+        url: /var/datapackages/lamas-municipal-data/datapackage.json
     - run: compact_entities
       parameters:
         company-details:
@@ -46,6 +55,14 @@ all:
           kind-column: kind
           id-column: id
           name-column: name
+        cooperatives:
+          kind: cooperative
+          id-column: id
+          name-column: name
+        lamas-municipal-data:
+          kind: municipality
+          id-column: entity_id
+          name-column: entity_name
     - run: sample
     - run: concatenate
       parameters:
@@ -81,6 +98,7 @@ all:
         tables:
           entities:
             resource-name: entities
+            mode: update
 
 fingerprints:
   dependencies:

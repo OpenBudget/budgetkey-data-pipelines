@@ -1,10 +1,12 @@
+import re
 import time
 import itertools
 import logging
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -38,7 +40,7 @@ slugs = {u"\u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8  
          u'\u05e8\u05e9\u05d9\u05de\u05d5\u05ea \u05dc\u05e8\u05e9\u05d5\u05d9\u05d5\u05ea \u05d4\u05de\u05e7\u05d5\u05de\u05d9\u05d5\u05ea': 'municipal_parties',
          u'\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9 \u05d1\u05e8\u05d9\u05d0\u05d5\u05ea': 'health_service',
          u'\u05e9\u05d9\u05e8\u05d5\u05ea\u05d9 \u05d3\u05ea': 'religion_service',
-         u'\u05d2\u05de\u05d9\u05dc\u05d5\u05ea \u05d7\u05e1\u05d3\u05d9\u05dd  (\u05d2\u05de\u05d7 )': None
+         u'\u05d2\u05de\u05d9\u05dc\u05d5\u05ea \u05d7\u05e1\u05d3\u05d9\u05dd  (\u05d2\u05de\u05d7 )': 'gamach',
          }
 
 headers = ['kind', 'name', 'id', 'street', 'house_number', 'city', 'zipcode']
@@ -58,8 +60,9 @@ def scrape():
     driver = webdriver.Remote(
         command_executor='http://tzabar.obudget.org:8910',
         desired_capabilities=dcap)
+    driver = webdriver.Chrome()
 
-    driver.set_window_size(1200, 800)
+    driver.set_window_size(1200, 1024)
 
     def prepare():
         logging.info('PREPARING')
@@ -72,10 +75,13 @@ def scrape():
     prepare()
 
     # Prepare options
+    time.sleep(3)
     logging.info('GETTING OPTIONS')
-    page = pq(driver.page_source)
-    options = [pq(opt) for opt in page.find('#DropdownlistSugYeshut option')]
-    options = dict((opt.attr('value'), opt.text()) for opt in options[1:])
+    page = driver.page_source
+    option_re = re.compile('<option value="(\d+)">([^<]+)</option>')
+    options = option_re.findall(page)
+    logging.info('GETTING OPTIONS: %r', options)
+    options = dict((k.strip(), v.strip()) for k, v in options)
 
     def select_option(selection_):
         logging.info('OPTION %s (%s)', selection_, options[selection_])
@@ -85,7 +91,7 @@ def scrape():
     for selection in options.keys():
         prepare()
         if slugs.get(options[selection]) is None:
-            logging.warning('SKIPPING option #%d (%s)', selection, options[selection])
+            logging.warning('SKIPPING option #%s (%s)', selection, options[selection])
             continue
         select_option(selection)
         while True:
@@ -97,22 +103,34 @@ def scrape():
                 select_option(selection)
                 continue
 
-            page = pq(driver.page_source)
-            rows = page.find('#dgReshima tr.row1, #dgReshima tr.row2')
-            logging.info('GOT %d ROWS', len(rows))
-            for row in rows:
-                row = ([slugs[options[selection]]] +
-                       [pq(x).text() for x in pq(row).find('td')])
-                datum = dict(zip(headers, row))
-                the_id = datum['id']
-                if the_id not in scraped_ids:
-                    scraped_ids.add(the_id)
-                    yield datum
+            page = driver.page_source
+            row_re = re.compile('(<td.+</td>)')
+            for line in page.split('\n'):
+                row = row_re.findall(line)
+                if len(row) > 0:
+                    row = row[0]
+                    logging.info('ROW %r', row)
+                    row = ([slugs[options[selection]]] +
+                           [pq(x).text() for x in pq(row).find('td')])
+                    if len(row) == 1:
+                        continue
+                    logging.info('ROW %r', row)
+                    datum = dict(zip(headers, row))
+                    the_id = datum['id']
+                    if the_id not in scraped_ids:
+                        scraped_ids.add(the_id)
+                        yield datum
 
-            if len(page.find('#btnHaba')) > 0:
-                next_button = driver.find_element_by_id('btnHaba')
-                next_button.click()
-                time.sleep(10)
+            if 'btnHaba' in page:
+                try:
+                    next_button = driver.find_element_by_id('btnHaba')
+                except NoSuchElementException:
+                    break
+                hover = ActionChains(driver).move_to_element(next_button)\
+                                            .move_to_element_with_offset(next_button, xoffset=10, yoffset=10)\
+                                            .click()\
+                                            .perform()
+                time.sleep(3)
             else:
                 break
 

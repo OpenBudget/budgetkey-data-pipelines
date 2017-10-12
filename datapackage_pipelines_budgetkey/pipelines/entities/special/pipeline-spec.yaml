@@ -1,10 +1,24 @@
-registry:
+scraper:
   pipeline:
     - run: add_metadata
       parameters:
         name: special-entities-registry
         title: מרשם ישויות ללא רשם בחוק
     - run: scraper
+    - run: dump.to_path
+      parameters:
+        out-path: ./data/
+
+registry:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: special-entities-registry
+        title: מרשם ישויות ללא רשם בחוק
+    - run: load_resource
+      parameters:
+        url: ./data/datapackage.json
+        resource: 0
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/special/
