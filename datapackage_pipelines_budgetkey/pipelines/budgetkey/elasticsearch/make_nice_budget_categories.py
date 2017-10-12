@@ -42,5 +42,11 @@ dp['resources'][0]['schema']['fields'].append(
         'type': 'string'
     }
 )
+dp['resources'][0]['schema']['fields'].append(
+    {
+        'name': 'nice-econ-category',
+        'type': 'string'
+    }
+)
 
 spew(dp, process_resources(res_iter))

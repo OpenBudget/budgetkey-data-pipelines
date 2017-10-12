@@ -3,6 +3,7 @@ import re
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
+from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
 
@@ -83,6 +84,8 @@ def process_resource(resource):
                         k = prefix.sub('', k)
                         if isinstance(v, datetime.date):
                             v = v.isoformat()
+                        elif isinstance(v, Decimal):
+                            v = float(v)
                         details[k] = v
                 new_row = {
                     'kind': kind if kind is not None else row[kind_column],
