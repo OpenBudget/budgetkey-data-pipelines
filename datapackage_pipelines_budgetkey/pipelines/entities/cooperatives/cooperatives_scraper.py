@@ -22,7 +22,7 @@ class CooperativesScraper(object):
         for cooperative in cooperatives:
             yield {"id": self.parse_integer(cooperative["N_AGUDA"]),
                    "name": cooperative["SHEM_AGUDA"],
-                   "registration_date": cooperative["D_RISHUM_AGUDA"],
+                   "cooperative_registration_date": cooperative["D_RISHUM_AGUDA"],
                    "phone": cooperative["TELEPHON1"],
                    "primary_type_id": self.parse_integer(cooperative["C_SUG_RASHI"]),
                    "primary_type": cooperative["TEUR_SUG_RASHI"],
@@ -63,7 +63,7 @@ class CooperativesScraper(object):
                 "path": resource_name+".csv",
                 "schema": {"fields": [{'name': 'id', 'type': 'string'},
                                       {'name': 'name', 'type': 'string'},
-                                      {'name': 'registration_date', 'type': 'datetime', 'format': '%d/%m/%Y %H:%M:%S'},
+                                      {'name': 'cooperative_registration_date', 'type': 'datetime', 'format': '%d/%m/%Y %H:%M:%S'},
                                       {'name': 'phone', 'type': 'string'},
                                       {'name': 'primary_type_id', 'type': 'integer'},
                                       {'name': 'primary_type', 'type': 'string'},
