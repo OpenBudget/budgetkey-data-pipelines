@@ -5,6 +5,9 @@ budget:
   key-fields:
     - code
     - year
+  extra-steps:
+    - run: make_nice_budget_categories
+    - run: make_nice_budget_breadcrumbs
 
 national-budget-changes:
   kind: indexer

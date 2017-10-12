@@ -35,14 +35,14 @@ class Generator(GeneratorBase):
                 pipeline_id = 'index_{}'.format(snake_doc_type)
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
 
-                pipeline_steps = [
+                pipeline_steps = steps(*[
                     ('add_metadata', {
                         'name': pipeline_id,
                     }),
                     ('load_resource', {
                         'url': source_datapackage,
                         'resource': doc_type,
-                    }),
+                    })]) + parameters.get('extra-steps', []) + steps(*[
                     ('manage-revisions', {
                         'resource-name': doc_type,
                         'db-table': db_table,
@@ -85,7 +85,7 @@ class Generator(GeneratorBase):
                             ]
                         }
                     })
-                ]
+                ])
 
                 if os.environ.get("ES_LIMIT_ROWS"):
                     dump_to_sql_index = [i for i, s in enumerate(pipeline_steps) if s[0] == "dump.to_sql"][0]
@@ -98,7 +98,7 @@ class Generator(GeneratorBase):
                     'dependencies': [
                         {'pipeline': dependent_pipeline_id}
                     ],
-                    'pipeline': steps(*pipeline_steps)
+                    'pipeline': pipeline_steps
                 }
                 if os.environ.get("ES_LOAD_FROM_URL") == "1":
                     del pipeline["dependencies"]
