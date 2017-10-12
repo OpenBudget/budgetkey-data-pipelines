@@ -8,6 +8,7 @@ budget:
   extra-steps:
     - run: make_nice_budget_categories
     - run: make_nice_budget_breadcrumbs
+    - run: make_nice_budget_code
 
 national-budget-changes:
   kind: indexer

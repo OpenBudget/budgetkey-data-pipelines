@@ -1,3 +1,5 @@
+import json
+
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -18,6 +20,13 @@ def process_resource(res_):
             row['nice-category'] = '{func_cls_title_1[0]} / {func_cls_title_2[0]}'.format(**row)
         else:
             row['nice-category'] = ''
+
+        if 'econ_cls_json' in row:
+            econ_cls_json = [json.loads(x) for x in row['econ_cls_json']]
+            row['nice-econ-category'] = ', '.join('{}-{}'.format(tup[1], tup[3]) for tup in econ_cls_json)
+        else:
+            row['nice-econ-category'] = ''
+
         yield row
 
 

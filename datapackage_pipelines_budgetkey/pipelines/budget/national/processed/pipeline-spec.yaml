@@ -86,6 +86,7 @@ aggregated-yearly:
           commitment_balance:
             - יתרת התחיבויות
     - run: join_phases
+    - run: join_categories
     - run: set_types
       parameters:
         types:
@@ -119,6 +120,10 @@ aggregated-yearly:
           econ_cls_title_1:
             aggregate: set
           econ_cls_title_2:
+            aggregate: set
+          func_cls_json:
+            aggregate: set
+          econ_cls_json:
             aggregate: set
           admin_cls_code_0:
             aggregate: set
