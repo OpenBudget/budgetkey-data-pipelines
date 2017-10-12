@@ -12,7 +12,7 @@ def process_resource(res_):
             # Make sure this is a valid row
             int(semel)
             for k, v in row.items():
-                if v in ['..']:
+                if v in ['..', '-']:
                     row[k] = ''
                 if isinstance(v, str) and len(v) > 1:
                     if v[0] == '(' and v[-1] == ')':
@@ -23,7 +23,7 @@ def process_resource(res_):
                         v = row[k] = ''
 
             yield row
-        except ValueError or TypeError:
+        except (ValueError, TypeError):
             continue
 
 

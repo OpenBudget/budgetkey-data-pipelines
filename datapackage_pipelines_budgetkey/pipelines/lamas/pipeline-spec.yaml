@@ -451,7 +451,7 @@ municipal-data:
         types:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
-          (symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
+          (symbol_municipality_2015|name_municipality).*:
             constraints:
               required: true
     - run: join
