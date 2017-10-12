@@ -1,5 +1,8 @@
+from datetime import date
+
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from decimal import Decimal
 
 parameters, dp, res_iter = ingest()
 
@@ -35,10 +38,18 @@ for res in dp['resources']:
         }
 
 
+def val(v):
+    if isinstance(v, Decimal):
+        v = float(v)
+    elif isinstance(v, date):
+        v = v.isoformat()
+    return v
+
+
 def process_resource(res):
     for row in res:
         inner = dict(
-            (k, v)
+            (k, val(v))
             for k, v in row.items()
             if k not in key
         )
