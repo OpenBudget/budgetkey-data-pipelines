@@ -268,3 +268,38 @@ by-request-year:
           supports_by_request_year:
             resource-name: supports
 
+supports-by-entity:
+  dependencies:
+    - pipeline: ./supports/by-request-year
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: supports-by-entity
+        title: Total supports, by entity id
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/by-request-year/datapackage.json
+        resource: supports
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - entity_id
+          delete: true
+        target:
+          name: supports-by-entity
+          key: null
+        fields:
+          id:
+            name: entity_id
+          name:
+            name: entity_name
+          kind:
+            name: entity_kind
+          amount:
+            name: amount_total
+            aggregate: sum
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/supports-by-entity

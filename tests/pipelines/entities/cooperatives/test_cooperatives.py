@@ -36,7 +36,7 @@ def test():
                            'phone': '',
                            'primary_type': 'שיכון',
                            'primary_type_id': '43',
-                           'registration_date': '06/02/1921 00:00:00',
+                           'cooperative_registration_date': '06/02/1921 00:00:00',
                            'secondary_type': 'שיכון',
                            'secondary_type_id': '61',
                            'type': 'התאחדות האיכרים'}

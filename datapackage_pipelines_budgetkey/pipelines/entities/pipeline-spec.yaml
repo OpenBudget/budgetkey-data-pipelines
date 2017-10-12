@@ -132,6 +132,7 @@ fingerprints:
 entities:
   dependencies:
     - pipeline: ./procurement/spending/spending-by-entity
+    - pipeline: ./supports/supports-by-entity
   pipeline:
     - run: add_metadata
       parameters:
@@ -144,7 +145,10 @@ entities:
       parameters:
         url: /var/datapackages/procurement/spending/spending-by-entity/datapackage.json
         resource: spending-by-entity
-    ## Here be supports, exemptions etc...
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/supports-by-entity/datapackage.json
+        resource: supports-by-entity
 
     # Concatenate all these amounts
     - run: concatenate
