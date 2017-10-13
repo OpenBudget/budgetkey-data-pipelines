@@ -74,6 +74,23 @@ all:
           name_en: []
           kind: []
           details: []
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: entities
+          key: null
+        fields:
+          id: null
+          name: null
+          name_en: null
+          kind: null
+          details:
+            aggregate: last
     - run: set_types
       parameters:
         types:
@@ -98,7 +115,6 @@ all:
         tables:
           entities:
             resource-name: entities
-            mode: update
 
 fingerprints:
   dependencies:

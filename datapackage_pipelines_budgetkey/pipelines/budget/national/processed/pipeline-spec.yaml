@@ -325,6 +325,8 @@ connected-national-budgets:
             es:itemType: string
           econ_cls_title_.*:
             es:itemType: string
+          .*_cls_json:
+            es:itemType: string
           func_cls_title_.*:
             es:itemType: string
           hierarchy:
