@@ -10,30 +10,31 @@ all:
       parameters:
         name: entities
         title: All Entities
+    # Load entities in order of precedence
     - run: load_resource
       parameters:
-        resource: company-details
-        url: /var/datapackages/entities/companies/registrar/details/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: guidestar
-        url: /var/datapackages/entities/associations/guidestar/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: special-entities
-        url: /var/datapackages/entities/special/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: ottoman-association-registry
-        url: /var/datapackages/entities/ottoman/datapackage.json
+        resource: lamas-municipal-data
+        url: /var/datapackages/lamas-municipal-data/datapackage.json
     - run: load_resource
       parameters:
         resource: cooperatives
         url: /var/datapackages/entities/cooperatives/datapackage.json
     - run: load_resource
       parameters:
-        resource: lamas-municipal-data
-        url: /var/datapackages/lamas-municipal-data/datapackage.json
+        resource: special-entities
+        url: /var/datapackages/entities/special/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: guidestar
+        url: /var/datapackages/entities/associations/guidestar/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: ottoman-association-registry
+        url: /var/datapackages/entities/ottoman/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: company-details
+        url: /var/datapackages/entities/companies/registrar/details/datapackage.json
     - run: compact_entities
       parameters:
         company-details:
@@ -74,23 +75,7 @@ all:
           name_en: []
           kind: []
           details: []
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - id
-          delete: true
-        target:
-          name: entities
-          key: null
-        fields:
-          id: null
-          name: null
-          name_en: null
-          kind: null
-          details:
-            aggregate: last
+    - run: dedup_entities
     - run: set_types
       parameters:
         types:
