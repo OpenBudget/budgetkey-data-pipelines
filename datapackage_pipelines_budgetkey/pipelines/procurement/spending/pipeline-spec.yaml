@@ -308,10 +308,13 @@ latest-contract-spending:
         fields:
           entity_name:
             name: name
+            aggregate: first
           entity_id:
             name: id
+            aggregate: first
           entity_kind:
             name: kind
+            aggregate: first
     - run: calc-spending-score
     - run: set_primary_key
       parameters:

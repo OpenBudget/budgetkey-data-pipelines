@@ -242,10 +242,13 @@ by-request-year:
         fields:
           entity_name:
             name: name
+            aggregate: first
           entity_id:
             name: id
+            aggregate: first
           entity_kind:
             name: kind
+            aggregate: first
 
     - run: fix_values_by_request_year
     - run: collate_schema
