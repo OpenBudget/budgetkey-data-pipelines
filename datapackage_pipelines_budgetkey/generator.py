@@ -64,7 +64,7 @@ class Generator(GeneratorBase):
                     }),
                     ('add_doc_id', {
                         'doc-id-pattern': key_pattern
-                    }),
+                    })]) + parameters.get('document-steps', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [

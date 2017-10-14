@@ -9,6 +9,8 @@ budget:
     - run: make_nice_budget_categories
     - run: make_nice_budget_breadcrumbs
     - run: make_nice_budget_code
+  document-steps:
+    - run: make_budget_charts
 
 national-budget-changes:
   kind: indexer
