@@ -66,7 +66,7 @@ def process_resource(res_):
                         'target': node,
                         'value': -child['net_allocated'],
                     })
-                else:
+                elif child['net_allocated'] > 0:
                     links.append({
                         'source': node,
                         'target': center_node,

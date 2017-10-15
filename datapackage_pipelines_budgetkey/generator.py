@@ -34,6 +34,7 @@ class Generator(GeneratorBase):
                 key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = 'index_{}'.format(snake_doc_type)
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
+                revision = parameters.get('revision', 0)
 
                 pipeline_steps = steps(*[
                     ('add_metadata', {
@@ -43,6 +44,7 @@ class Generator(GeneratorBase):
                         'url': source_datapackage,
                         'resource': doc_type,
                     })]) + parameters.get('extra-steps', []) + steps(*[
+                    ('set-revision', {'revision': revision}),
                     ('manage-revisions', {
                         'resource-name': doc_type,
                         'db-table': db_table,

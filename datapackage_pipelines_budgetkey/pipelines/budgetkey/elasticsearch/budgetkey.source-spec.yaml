@@ -1,5 +1,6 @@
 budget:
   kind: indexer
+  revision: 1
   dependent_pipeline: ./budget/national/processed/connected-national-budgets
   source_datapackage: /var/datapackages/budget/national/processed/connected-items/datapackage.json
   key-fields:
