@@ -13,6 +13,10 @@ all:
     # Load entities in order of precedence
     - run: load_resource
       parameters:
+        resource: universities
+        url: universities/datapackage.json
+    - run: load_resource
+      parameters:
         resource: lamas-municipal-data
         url: /var/datapackages/lamas-municipal-data/datapackage.json
     - run: load_resource
@@ -64,6 +68,10 @@ all:
           kind: municipality
           id-column: entity_id
           name-column: entity_name
+        universities:
+          kind: university
+          id-column: id
+          name-column: name
     - run: sample
     - run: concatenate
       parameters:

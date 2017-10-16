@@ -1,0 +1,21 @@
+{
+  "name": "universities",
+  "resources": [
+    {
+      "name": "universities",
+      "path": "universities.csv",
+      "schema": {
+        "fields": [
+          {
+            "name": "id",
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          }
+        ]
+      }
+    }
+  ]
+}
