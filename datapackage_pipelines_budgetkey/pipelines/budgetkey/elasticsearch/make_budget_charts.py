@@ -16,11 +16,14 @@ def sankey_chart(nodes, links):
         "orientation": "h",
         "valueformat": ".0f",
         "valuesuffix": "₪",
+        "arrangement": "fixed",
+        "hoverinfo": "none",
+        "customdata": [node['extra'] for node in nodes],
         "node": {
-            "pad": 15,
-            "thickness": 15,
+            "pad": 20,
+            "thickness": 60,
             "line": {
-                "color": "black",
+                "color": "FF5A5F",
                 "width": 0.5
             },
             "label": [node['label'] for node in nodes],
@@ -35,47 +38,68 @@ def sankey_chart(nodes, links):
     }
 
 
+def query_based_charts(row):
+    if False:
+        yield None
+
+
+def admin_hierarchy_chart(row):
+    if row.get('children'):
+        # Admin Hierarchy chart
+        center_node = {
+            'label': row['title'],
+            'extra': row['code']
+        }
+        links = []
+        nodes = [center_node]
+        if row.get('hierarchy'):
+            parent_node = {
+                'label': row['hierarchy'][-1][1],
+                'extra': row['hierarchy'][-1][0]
+            }
+            nodes.append(parent_node)
+            links.append({
+                'source': center_node,
+                'target': parent_node,
+                'value': row['net_allocated'],
+            })
+        for child in sorted(row.get('children'), key=lambda x: abs(x['net_allocated'])):
+            node = {
+                'label': child['title'],
+                'extra': child['code']
+            }
+            nodes.append(node)
+            if child['net_allocated'] < 0:
+                links.append({
+                    'source': center_node,
+                    'target': node,
+                    'value': -child['net_allocated'],
+                })
+            elif child['net_allocated'] > 0:
+                links.append({
+                    'source': node,
+                    'target': center_node,
+                    'value': child['net_allocated'],
+                })
+        return sankey_chart(nodes, links)
+
+
 def process_resource(res_):
     for row in res_:
         row['charts'] = []
-        if row.get('children'):
-            # Admin Hierarchy chart
-            center_node = {
-                'label': row['title']
-            }
-            links = []
-            nodes = [center_node]
-            if row.get('hierarchy'):
-                parent_node = {
-                    'label': row['hierarchy'][-1][1]
-                }
-                nodes.append(parent_node)
-                links.append({
-                    'source': center_node,
-                    'target': parent_node,
-                    'value': row['net_allocated'],
-                })
-            for child in sorted(row.get('children'), key=lambda x: abs(x['net_allocated'])):
-                node = {
-                    'label': child['title']
-                }
-                nodes.append(node)
-                if child['net_allocated'] < 0:
-                    links.append({
-                        'source': center_node,
-                        'target': node,
-                        'value': -child['net_allocated'],
-                    })
-                elif child['net_allocated'] > 0:
-                    links.append({
-                        'source': node,
-                        'target': center_node,
-                        'value': child['net_allocated'],
-                    })
+        chart = admin_hierarchy_chart(row)
+        if chart is not None:
             row['charts'].append(
                 {
-                    'chart': sankey_chart(nodes, links),
-                    'title': 'לאן הולך הכסף?'
+                    'title': 'לאן הולך הכסף?',
+                    'chart': chart,
+                }
+            )
+        for title, chart in query_based_charts(row):
+            row['charts'].append(
+                {
+                    'title': title,
+                    'chart': chart,
                 }
             )
         yield row
