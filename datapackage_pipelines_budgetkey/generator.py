@@ -61,7 +61,8 @@ class Generator(GeneratorBase):
                     ('filter', {
                         'resources': None,
                         'in': [
-                            {'__next_update_days': 1}
+                            {'__next_update_days': 1},
+                            {'__next_update_days': 2},
                         ]
                     }),
                     ('add_doc_id', {
