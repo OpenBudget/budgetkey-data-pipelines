@@ -29,6 +29,12 @@ municipal-data:
       parameters:
         url: /var/datapackages/entities/special/datapackage.json
         resource: special-entities
+    - run: filter
+      parameters:
+        resources: special-entities
+        in:
+          -
+            kind: municipality
     - run: add_resource
       parameters:
         name: lamas-municipal-data-1
