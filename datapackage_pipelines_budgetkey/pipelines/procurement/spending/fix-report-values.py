@@ -112,7 +112,8 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
             stats['good-lines'] += 1
         except Exception as e:
             stats['bad-lines'] += 1
-            logging.exception('ERROR in row %d: %r', row_index, row)
+            if stats['bad-lines'] % 50 == 1:
+                logging.exception('ERROR #%d in row %d: %r', stats['bad-lines'], row_index, row)
             bad_rows[row['report-url']] += 1
             return
     elif resource_index == 1: # the errors
