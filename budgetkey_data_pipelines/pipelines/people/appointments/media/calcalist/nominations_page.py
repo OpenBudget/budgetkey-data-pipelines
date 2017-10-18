@@ -2,7 +2,6 @@ import logging
 
 from pyquery import PyQuery as pq
 from urllib.parse import urljoin
-from collections import namedtuple
 
 
 class NominationsPage(object):
