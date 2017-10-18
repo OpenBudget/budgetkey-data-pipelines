@@ -19,6 +19,7 @@ registry:
       parameters:
         url: ./data/datapackage.json
         resource: 0
+    - run: fix_values
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/special/

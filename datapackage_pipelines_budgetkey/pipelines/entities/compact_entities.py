@@ -26,6 +26,7 @@ def process_datapackage(datapackage):
                         {'name': 'name', 'type': 'string'},
                         {'name': 'name_en', 'type': 'string'},
                         {'name': 'kind', 'type': 'string'},
+                        {'name': 'kind_he', 'type': 'string'},
                         {'name': 'details', 'type': 'object', 'es:schema': subschema},
                     ]
                 }
@@ -67,6 +68,8 @@ def process_resource(resource):
         kind = res_params.get('kind')
 
         kind_column = res_params.get('kind-column')
+        kind_he_column = res_params.get('kind-he-column')
+        kind_he = res_params.get('kind-he')
         id_column = res_params['id-column']
         name_column = res_params['name-column']
         name_en_column = res_params.get('name-en-column')
@@ -89,9 +92,10 @@ def process_resource(resource):
                         details[k] = v
                 new_row = {
                     'kind': kind if kind is not None else row[kind_column],
+                    'kind_he': kind_he if kind_he is not None else row[kind_he_column],
                     'id': row[id_column],
                     'name': row[name_column],
-                    'name-en': row.get(name_en_column),
+                    'name_en': row.get(name_en_column),
                     'details': details
                 }
                 yield new_row

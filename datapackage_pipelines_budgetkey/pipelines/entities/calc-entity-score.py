@@ -16,7 +16,7 @@ def modify_datapackage(dp, *_):
 def process_row(row, *_):
     amount = row.get('received_amount', 0)
     if amount is None:
-        logging.warning('received_amount is None: %r', row)
+        # logging.warning('received_amount is None: %r', row)
         amount = 0
     row['score'] = max(1, amount/1000)
     return row

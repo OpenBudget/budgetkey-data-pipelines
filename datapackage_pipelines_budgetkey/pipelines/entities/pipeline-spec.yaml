@@ -44,32 +44,39 @@ all:
         company-details:
           remove-prefix: company_
           kind: company
+          kind-he: חברה פרטית
           id-column: id
           name-column: company_name
           name-en-column: company_name_eng
         guidestar:
           remove-prefix: association_
           kind: association
+          kind-he: עמותה
           id-column: id
           name-column: association_title
         special-entities:
           kind-column: kind
+          kind-he-column: kind_he
           id-column: id
           name-column: name
         ottoman-association-registry:
           kind-column: kind
+          kind-he: אגודה עותמנית
           id-column: id
           name-column: name
         cooperatives:
           kind: cooperative
+          kind-he: אגודה שיתופית
           id-column: id
           name-column: name
         lamas-municipal-data:
           kind: municipality
+          kind-he: רשות מקומית
           id-column: entity_id
           name-column: entity_name
         universities:
           kind: university
+          kind-he: אוניברסיטה
           id-column: id
           name-column: name
     - run: sample
@@ -82,6 +89,7 @@ all:
           name: []
           name_en: []
           kind: []
+          kind_he: []
           details: []
     - run: dedup_entities
     - run: set_types
@@ -94,6 +102,9 @@ all:
             es:title: true
           name_en:
             es:title: true
+          kind_he:
+            constraints:
+              required: true
           id:
             constraints:
               pattern: "[0-9]+"
