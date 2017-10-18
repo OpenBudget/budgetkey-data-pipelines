@@ -171,7 +171,7 @@ by-payment-year:
         title: All support data, aggregated by payment year
     - run: load_resource
       parameters:
-        url: /var/datapackages/supports/all/datapackage.json
+        url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
 
     - run: join
@@ -237,7 +237,7 @@ by-request-year:
         title: All support data, aggregated by request year
     - run: load_resource
       parameters:
-        url: /var/datapackages/supports/all/datapackage.json
+        url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
 
     - run: collate
