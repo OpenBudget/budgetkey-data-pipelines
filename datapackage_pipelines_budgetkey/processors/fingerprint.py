@@ -70,6 +70,7 @@ for w in CLEAN_WORDS:
 
 
 def fingerprint(rows):
+    used = set()
     for row in rows:
         name = row[src_field]
         tgt = None
@@ -101,8 +102,10 @@ def fingerprint(rows):
             if len(tgt) == 0:
                 tgt = None
 
-        row[tgt_field] = tgt
-        yield row
+        if tgt not in used:
+            row[tgt_field] = tgt
+            yield row
+            used.add(tgt)
 
 
 def process_resources(res_iter_):
@@ -112,7 +115,6 @@ def process_resources(res_iter_):
         else:
             yield res
 
-import logging; logging.info(res_name)
 resource = next(iter(filter(
     lambda res: res['name'] == res_name,
     dp['resources']
