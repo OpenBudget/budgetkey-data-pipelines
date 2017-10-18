@@ -104,6 +104,57 @@ all:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/supports/all
+
+with-entities:
+  dependencies:
+    - pipeline: ./supports/all
+    - pipeline: ./entities/fingerprints
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data with entities
+    - run: load_resource
+      parameters:
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/all/datapackage.json
+        resource: supports
+
+    - run: fingerprint
+      parameters:
+        resource-name: supports
+        source-field: recipient
+        target-field: recipient_fingerprint
+
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+          delete: true
+        target:
+          name: supports
+          key:
+            - recipient_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+            aggregate: first
+          entity_id:
+            name: id
+            aggregate: first
+          entity_kind:
+            name: kind
+            aggregate: first
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/with-entities
     - run: dump.to_sql
       parameters:
         tables:
@@ -112,7 +163,7 @@ all:
 
 by-payment-year:
   dependencies:
-    - pipeline: ./supports/all
+    - pipeline: ./supports/with-entities
   pipeline:
     - run: add_metadata
       parameters:
@@ -140,6 +191,10 @@ by-payment-year:
           budget_code: null
           year_paid: null
           recipient: null
+          entity_id: null
+          entity_name: null
+          entity_kind: null
+
           request_type: null
 
           support_title:
@@ -174,17 +229,12 @@ by-payment-year:
 
 by-request-year:
   dependencies:
-    - pipeline: ./supports/all
-    - pipeline: ./entities/fingerprints
+    - pipeline: ./supports/with-entities
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: All support data, aggregated by request year
-    - run: load_resource
-      parameters:
-        resource: entities
-        url: /var/datapackages/entities/fingerprints/datapackage.json
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/all/datapackage.json
@@ -218,37 +268,11 @@ by-request-year:
           year_requested: null
           recipient: null
           request_type: null
+          entity_name: null
+          entity_id: null
+          entity_kind: null
           payments:
             aggregate: array
-
-    - run: fingerprint
-      parameters:
-        resource-name: supports
-        source-field: recipient
-        target-field: recipient_fingerprint
-
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - fingerprint
-          delete: true
-        target:
-          name: supports
-          key:
-            - recipient_fingerprint
-          full: true
-        fields:
-          entity_name:
-            name: name
-            aggregate: first
-          entity_id:
-            name: id
-            aggregate: first
-          entity_kind:
-            name: kind
-            aggregate: first
 
     - run: fix_values_by_request_year
     - run: collate_schema
@@ -273,7 +297,7 @@ by-request-year:
 
 supports-by-entity:
   dependencies:
-    - pipeline: ./supports/by-request-year
+    - pipeline: ./supports/with-entities
   pipeline:
     - run: add_metadata
       parameters:
@@ -281,7 +305,7 @@ supports-by-entity:
         title: Total supports, by entity id
     - run: load_resource
       parameters:
-        url: /var/datapackages/supports/by-request-year/datapackage.json
+        url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
     - run: join
       parameters:
@@ -301,7 +325,7 @@ supports-by-entity:
           kind:
             name: entity_kind
           amount:
-            name: amount_total
+            name: amount_approved
             aggregate: sum
     - run: dump.to_path
       parameters:
