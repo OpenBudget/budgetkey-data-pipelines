@@ -248,6 +248,9 @@ by-request-year:
           - year_requested
           - recipient
           - request_type
+          - entity_name
+          - entity_id
+          - entity_kind
         collated-field-name: payments
 
     - run: join
