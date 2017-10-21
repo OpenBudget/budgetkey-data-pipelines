@@ -7,7 +7,7 @@ scraper:
     - run: scraper
     - run: dump.to_path
       parameters:
-        out-path: ./data/
+        out-path: ./scraped-data/
 
 registry:
   pipeline:
