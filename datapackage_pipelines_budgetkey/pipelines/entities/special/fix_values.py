@@ -25,6 +25,7 @@ KINDS = {'conurbation': 'איגוד ערים',
          'religious_court_sacred_property': 'הקדש בית דין דתי',
          'west_bank_corporation': "תאגיד יו״ש"}
 
+
 def process_resource(res_):
     for row in res_:
         row['kind_he'] = KINDS[row['kind']]
