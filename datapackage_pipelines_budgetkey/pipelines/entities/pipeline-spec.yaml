@@ -136,6 +136,7 @@ fingerprints:
         source-field: name
         target-field: fingerprint
         resource-name: entities
+        unique-fingerprints: true
     - run: concatenate
       parameters:
         target:

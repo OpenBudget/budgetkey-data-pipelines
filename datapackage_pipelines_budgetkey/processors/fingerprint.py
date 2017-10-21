@@ -6,6 +6,7 @@ parameters, dp, res_iter = ingest()
 src_field = parameters['source-field']
 tgt_field = parameters['target-field']
 res_name = parameters['resource-name']
+unique_fingerprints = parameters.get('unique-fingerprints', False)
 
 DIGITS = re.compile('\d+')
 ENGLISH = re.compile('[a-zA-Z]+')
@@ -102,7 +103,7 @@ def fingerprint(rows):
             if len(tgt) == 0:
                 tgt = None
 
-        if tgt not in used:
+        if not unique_fingerprints or tgt not in used:
             row[tgt_field] = tgt
             yield row
             used.add(tgt)
