@@ -181,6 +181,8 @@ entities:
           name: []
           kind: []
           amount: []
+          min_year: []
+          max_year: []
 
     # Deduplicate amounts by summing on entity
     - run: join
@@ -200,6 +202,12 @@ entities:
           received_amount:
             name: amount
             aggregate: sum
+          min_year:
+            name: min_year
+            aggregate: min
+          max_year:
+            name: max_year
+            aggregate: max
 
     # Load entities
     - run: load_resource
@@ -222,6 +230,8 @@ entities:
           full: true
         fields:
           received_amount: null
+          min_year: null
+          max_year: null
 
     # Calculate score
     - run: calc-entity-score

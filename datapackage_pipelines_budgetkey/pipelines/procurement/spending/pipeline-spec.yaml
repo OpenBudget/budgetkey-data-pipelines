@@ -315,6 +315,7 @@ latest-contract-spending:
           entity_kind:
             name: kind
             aggregate: first
+    - run: calc-min-max-years
     - run: calc-spending-score
     - run: set_primary_key
       parameters:
@@ -341,7 +342,7 @@ spending-by-entity:
         title: Total contract spending, by entity id
     - run: load_resource
       parameters:
-        url: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+        url: dependency://./procurement/spending/latest-contract-spending
         resource: contract-spending
     - run: join
       parameters:
@@ -363,6 +364,12 @@ spending-by-entity:
           amount:
             name: executed
             aggregate: sum
+          min_year:
+            name: min_year
+            aggregate: min
+          max_year:
+            name: max_year
+            aggregate: max
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/spending-by-entity

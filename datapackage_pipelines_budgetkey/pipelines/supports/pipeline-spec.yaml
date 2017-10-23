@@ -330,6 +330,12 @@ supports-by-entity:
           amount:
             name: amount_approved
             aggregate: sum
+          min_year:
+            name: year_requested
+            aggregate: min
+          max_year:
+            name: year_paid
+            aggregate: max
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/supports/supports-by-entity

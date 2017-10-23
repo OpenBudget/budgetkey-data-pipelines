@@ -7,7 +7,7 @@ parameters, dp, res_iter = ingest()
 def sankey_chart(nodes, links):
     for i, node in enumerate(nodes):
         node['id'] = i
-    return {
+    return [{
         "type": "sankey",
         "domain": {
             "x": [0,1],
@@ -35,12 +35,32 @@ def sankey_chart(nodes, links):
             "value": [link['value'] for link in links],
             "label": [link.get('label', '') for link in links],
         }
-    }
+    }]
 
 
 def query_based_charts(row):
     if False:
         yield None
+
+
+def history_chart(row):
+    traces = []
+    history = row.get('history', [])
+    if history is not None and len(history) > 0:
+        years = sorted(history.keys())
+        for measure, name in (
+                ('net_allocated', 'מקורי'),
+                ('net_revised', 'מקורי'),
+                ('net_executed', 'מקורי')
+        ):
+            trace = {
+                'x': [int(y) for y in years] + [row['year']],
+                'y': [history[year].get(measure) for year in years] + [row.get(measure)],
+                'mode': 'lines',
+                'name': name
+            }
+            traces.append(trace)
+    return traces
 
 
 def admin_hierarchy_chart(row):
@@ -92,6 +112,14 @@ def process_resource(res_):
             row['charts'].append(
                 {
                     'title': 'לאן הולך הכסף?',
+                    'chart': chart,
+                }
+            )
+        chart = history_chart(row)
+        if chart is not None:
+            row['charts'].append(
+                {
+                    'title': 'איך השתנה התקציב?',
                     'chart': chart,
                 }
             )
