@@ -36,11 +36,11 @@ themarker:
     -
       run: set_types
       parameters:
-        resources: manning-data
+        resources: concat
         types:
           start_date:
             type: date
-            format: "fmt:%d/%m/%Y"
+            format: "%d.%m.%Y"
     -
       run: dump.to_path
       parameters:

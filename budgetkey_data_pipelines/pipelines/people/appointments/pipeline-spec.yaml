@@ -23,15 +23,12 @@ all-appointments:
     -
       run: concatenate
       parameters:
-        sources: ['cancat', 'nominations-list']
-        target:
-          name: appointments
         fields:
-          full_name: ['name', 'full_name']
-          company: []
-          date: []
-          position: ['title', 'description']
-          details: []
+          full_name: ['name']
+          company: ['organisation_name']
+          date: ['start_date']
+          position: []
+          details: ['description']
           gender: []
           proof_url: []
     -

@@ -16,7 +16,7 @@ calcalist:
         types:
           date:
             type: date
-            format: "fmt:%d.%m.%Y"
+            format: "%d.%m.%Y"
           full_name:
             type: string
           company:

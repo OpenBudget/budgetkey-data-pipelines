@@ -1,6 +1,7 @@
 import logging
 
 from selenium import webdriver
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -228,6 +229,7 @@ def test_html():
 datapackage['resources'].append({
             'path': 'data/nominations-list.csv',
             'name': 'nominations-list',
+            PROP_STREAMING: True,
             'schema': {
                 'fields': [
                     {'name': 'date', 'type': 'string'},
