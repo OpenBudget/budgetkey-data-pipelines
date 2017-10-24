@@ -15,7 +15,7 @@ def process_row(row, *_):
 
 
 def modify_datapackage(dp, *_):
-    dp['resources']['schema']['fields'].extend([
+    dp['resources'][0]['schema']['fields'].extend([
         {
             'name': 'min_year',
             'type': 'integer'

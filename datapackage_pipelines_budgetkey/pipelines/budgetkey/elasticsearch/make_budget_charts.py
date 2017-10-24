@@ -35,7 +35,7 @@ def sankey_chart(nodes, links):
             "value": [link['value'] for link in links],
             "label": [link.get('label', '') for link in links],
         }
-    }]
+    }], {}
 
 
 def query_based_charts(row):
@@ -49,18 +49,30 @@ def history_chart(row):
     if history is not None and len(history) > 0:
         years = sorted(history.keys())
         for measure, name in (
-                ('net_allocated', 'מקורי'),
-                ('net_revised', 'מקורי'),
-                ('net_executed', 'מקורי')
+                ('net_allocated', 'תקציב מקורי'),
+                ('net_revised', 'אחרי שינויים'),
+                ('net_executed', 'ביצוע בפועל')
         ):
             trace = {
                 'x': [int(y) for y in years] + [row['year']],
                 'y': [history[year].get(measure) for year in years] + [row.get(measure)],
-                'mode': 'lines',
+                'mode': 'lines+markers',
                 'name': name
             }
             traces.append(trace)
-    return traces
+        layout = {
+            'xaxis': {
+                'title': 'שנה',
+                'type': 'category'
+            },
+            'yaxis': {
+                'title': 'תקציב ב-₪',
+                'rangemode': 'tozero',
+                'separatethousands': True,
+            }
+        }
+        return traces, layout
+    return None, None
 
 
 def admin_hierarchy_chart(row):
@@ -102,32 +114,36 @@ def admin_hierarchy_chart(row):
                     'value': child['net_allocated'],
                 })
         return sankey_chart(nodes, links)
+    return None, None
 
 
 def process_resource(res_):
     for row in res_:
         row['charts'] = []
-        chart = admin_hierarchy_chart(row)
+        chart, layout = admin_hierarchy_chart(row)
         if chart is not None:
             row['charts'].append(
                 {
                     'title': 'לאן הולך הכסף?',
                     'chart': chart,
+                    'layout': layout
                 }
             )
-        chart = history_chart(row)
+        chart, layout = history_chart(row)
         if chart is not None:
             row['charts'].append(
                 {
                     'title': 'איך השתנה התקציב?',
                     'chart': chart,
+                    'layout': layout
                 }
             )
-        for title, chart in query_based_charts(row):
+        for title, chart, layout in query_based_charts(row):
             row['charts'].append(
                 {
                     'title': title,
                     'chart': chart,
+                    'layout': layout
                 }
             )
         yield row
