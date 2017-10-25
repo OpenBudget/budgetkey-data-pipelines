@@ -6,7 +6,7 @@ def nop(x):
     return x
 
 
-FIELDS = ['code', 'title', 'net_allocated']
+FIELDS = ['code', 'title', 'net_revised']
 
 
 params, dp, res_iter = ingest()
@@ -15,7 +15,7 @@ res_name = params['resource-name']
 
 def combine_immediate_children(rows):
     for row in rows:
-        row['children-net_allocated'] = map(int, row['children-net_allocated'])
+        row['children-net_revised'] = map(int, row['children-net_revised'])
         try:
             children = zip(*(row['children-'+x] for x in FIELDS))
         except TypeError:

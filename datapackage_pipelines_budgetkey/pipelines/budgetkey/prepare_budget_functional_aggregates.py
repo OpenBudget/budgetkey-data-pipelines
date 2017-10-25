@@ -11,7 +11,7 @@ def process_row(row, *_):
             'year': row['year'],
             'func_cls_title_1': row['func_cls_title_1'][0],
             'func_cls_title_2': row['func_cls_title_2'][0],
-            'net_allocated': int(row['net_allocated']),
+            'net_revised': int(row['net_revised']),
         }
         return ret
 
@@ -20,7 +20,7 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'] = [
         {'name': 'func_cls_title_1', 'type': 'string'},
         {'name': 'func_cls_title_2', 'type': 'string'},
-        {'name': 'net_allocated', 'type': 'integer'},
+        {'name': 'net_revised', 'type': 'integer'},
         {'name': 'year', 'type': 'integer'},
     ]
     return dp

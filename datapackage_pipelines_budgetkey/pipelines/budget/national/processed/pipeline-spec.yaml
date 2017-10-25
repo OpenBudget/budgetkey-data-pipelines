@@ -235,6 +235,8 @@ aggregated-yearly:
             name: "econ_cls_title_1_\u05e9\u05db\u05e8"
             aggregate: sum
 
+    - run: fill_in_revised
+
     - run: join
       parameters:
         source:
@@ -253,8 +255,8 @@ aggregated-yearly:
           children-title:
             name: title
             aggregate: array
-          children-net_allocated:
-            name: net_allocated
+          children-net_revised:
+            name: net_revised
             aggregate: array
     - run: combine-immediate-children
       parameters:
@@ -392,7 +394,7 @@ connected-national-budgets:
               fields:
                 - {name: code, type: string}
                 - {name: title, type: string}
-                - {name: net_allocated, type: number}
+                - {name: net_revised, type: number}
           history:
             es:index: false
     - run: sample

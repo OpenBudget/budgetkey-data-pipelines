@@ -30,7 +30,7 @@ budget-functional-aggregates:
         fields:
           func_cls_title_1: null
           func_cls_title_2: null
-          net_allocated:
+          net_revised:
             aggregate: sum
     - run: sample
     - run: dump.to_path

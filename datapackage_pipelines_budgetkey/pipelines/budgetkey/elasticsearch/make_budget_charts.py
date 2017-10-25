@@ -38,6 +38,58 @@ def sankey_chart(nodes, links):
     }], {}
 
 
+def budget_sankey(row, kids):
+    center_node = {
+        'label': row['title'],
+        'extra': row['code']
+    }
+    links = []
+    nodes = [center_node]
+    if row.get('hierarchy'):
+        parent_node = {
+            'label': row['hierarchy'][-1][1],
+            'extra': row['hierarchy'][-1][0]
+        }
+        nodes.append(parent_node)
+        links.append({
+            'source': center_node,
+            'target': parent_node,
+            'value': row['net_revised'],
+        })
+    for child in sorted(kids, key=lambda x: abs(x['amount'])):
+        node = {
+            'label': child['label'],
+            'extra': child['extra']
+        }
+        nodes.append(node)
+        amount = child['amount']
+        if amount < 0:
+            links.append({
+                'source': center_node,
+                'target': node,
+                'value': -amount,
+            })
+        elif amount > 0:
+            links.append({
+                'source': node,
+                'target': center_node,
+                'value': amount,
+            })
+    return sankey_chart(nodes, links)
+
+
+def category_sankey(row, prefix, translations={}):
+    kids = [
+        {
+            'label': translations.get(k[len(prefix):], k[len(prefix):]),
+            'amount': v,
+        }
+        for k, v in row.items()
+        if k.startswith(prefix) and v is not None
+    ]
+    return budget_sankey(row, kids)
+
+
 def query_based_charts(row):
     if False:
         yield None
@@ -78,42 +130,15 @@ def history_chart(row):
 def admin_hierarchy_chart(row):
     if row.get('children'):
         # Admin Hierarchy chart
-        center_node = {
-            'label': row['title'],
-            'extra': row['code']
-        }
-        links = []
-        nodes = [center_node]
-        if row.get('hierarchy'):
-            parent_node = {
-                'label': row['hierarchy'][-1][1],
-                'extra': row['hierarchy'][-1][0]
-            }
-            nodes.append(parent_node)
-            links.append({
-                'source': center_node,
-                'target': parent_node,
-                'value': row['net_allocated'],
-            })
-        for child in sorted(row.get('children'), key=lambda x: abs(x['net_allocated'])):
-            node = {
+        kids = [
+            {
                 'label': child['title'],
-                'extra': child['code']
+                'extra': child['code'],
+                'amount': child['net_revised'],
             }
-            nodes.append(node)
-            if child['net_allocated'] < 0:
-                links.append({
-                    'source': center_node,
-                    'target': node,
-                    'value': -child['net_allocated'],
-                })
-            elif child['net_allocated'] > 0:
-                links.append({
-                    'source': node,
-                    'target': center_node,
-                    'value': child['net_allocated'],
-                })
-        return sankey_chart(nodes, links)
+            for child in row.get('children')
+        ]
+        return budget_sankey(row, kids)
     return None, None
 
 
@@ -134,6 +159,15 @@ def process_resource(res_):
             row['charts'].append(
                 {
                     'title': 'איך השתנה התקציב?',
+                    'chart': chart,
+                    'layout': layout
+                }
+            )
+        chart, layout = category_sankey(row, 'total_econ_cls_', {})
+        if chart is not None:
+            row['charts'].append(
+                {
+                    'title': 'איך משתמשים בתקציב?',
                     'chart': chart,
                     'layout': layout
                 }

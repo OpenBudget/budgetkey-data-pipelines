@@ -15,9 +15,9 @@ def modify_datapackage(dp, *_):
 
 
 def process_row(row, *_):
-    amount = row.get('net_allocated', 0)
+    amount = row.get('net_revised', 0)
     if amount is None:
-        logging.warning('net_allocated is None: %r', row)
+        logging.warning('net_revised is None: %r', row)
         amount = 0
     # Account for relevance
     # year_score = 2**abs(curyear - row['year'])
