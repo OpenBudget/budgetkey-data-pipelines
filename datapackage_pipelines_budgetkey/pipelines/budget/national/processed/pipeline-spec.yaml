@@ -14,14 +14,13 @@ aggregated-yearly:
       parameters:
         title: National Budget (Processed)
         name: processed-national-budget-aggregated-yearly
-    - run: add_resource
+    - run: load_resource
       parameters:
-        name: source-budget
-        url: /var/datapackages/budget/national/original/data/national-budget.csv
-    - run: stream_remote_resources
+        resource: national-budget
+        url: dependency://./budget/national/original/national-budgets
     - run: concatenate
       parameters:
-        sources: source-budget
+        sources: national-budget
         target:
           name: national-budget
         fields:
@@ -86,6 +85,7 @@ aggregated-yearly:
           commitment_balance:
             - יתרת התחיבויות
     - run: join_phases
+    - run: topical_sums
     - run: join_categories
     - run: set_types
       parameters:
@@ -98,6 +98,7 @@ aggregated-yearly:
             type: number
           '.+_executed':
             type: number
+    - run: sample
     - run: join
       parameters:
         source:
@@ -179,6 +180,61 @@ aggregated-yearly:
             aggregate: sum
           commitment_balance_executed:
             aggregate: sum
+          total_direction_expense:
+            name: "direction_\u05d4\u05d5\u05e6\u05d0\u05d4"
+            aggregate: sum
+          total_direction_income:
+            name: "direction_\u05d4\u05db\u05e0\u05e1\u05d4"
+            aggregate: sum
+          total_econ_cls_capital_expenditure:
+            name: "econ_cls_title_1_\u05d4\u05d5\u05e6\u05d0\u05d5\u05ea \u05d4\u05d5\u05df"
+            aggregate: sum
+          total_econ_cls_debt_repayment_principal:
+            name: "econ_cls_title_1_\u05d4\u05d7\u05d6\u05e8 \u05d7\u05d5\u05d1 - \u05e7\u05e8\u05df"
+            aggregate: sum
+          total_econ_cls_debt_repayment_interest:
+            name: "econ_cls_title_1_\u05d4\u05d7\u05d6\u05e8 \u05d7\u05d5\u05d1 - \u05e8\u05d9\u05d1\u05d9\u05ea"
+            aggregate: sum
+          total_econ_cls_income_bank_of_israel:
+            name: "econ_cls_title_1_\u05d4\u05db\u05e0\u05e1\u05d5\u05ea \u05d4\u05de\u05d3\u05d9\u05e0\u05d4 - \u05d1\u05e0\u05e7 \u05d9\u05e9\u05e8\u05d0\u05dc"
+            aggregate: sum
+          total_econ_cls_income:
+            name: "econ_cls_title_1_\u05d4\u05db\u05e0\u05e1\u05d5\u05ea \u05d4\u05de\u05d3\u05d9\u05e0\u05d4 - \u05d4\u05db\u05e0\u05e1\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_income_loans:
+            name: "econ_cls_title_1_\u05d4\u05db\u05e0\u05e1\u05d5\u05ea \u05d4\u05de\u05d3\u05d9\u05e0\u05d4 - \u05de\u05d9\u05dc\u05d5\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_income_grants:
+            name: "econ_cls_title_1_\u05d4\u05db\u05e0\u05e1\u05d5\u05ea \u05d4\u05de\u05d3\u05d9\u05e0\u05d4 - \u05de\u05e2\u05e0\u05e7\u05d9\u05dd"
+            aggregate: sum
+          total_econ_cls_dedicated_income:
+            name: "econ_cls_title_1_\u05d4\u05db\u05e0\u05e1\u05d5\u05ea \u05de\u05d9\u05d5\u05e2\u05d3\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_transfers:
+            name: "econ_cls_title_1_\u05d4\u05e2\u05d1\u05e8\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_internal_transfers:
+            name: "econ_cls_title_1_\u05d4\u05e2\u05d1\u05e8\u05d5\u05ea \u05e4\u05e0\u05d9\u05dd \u05ea\u05e7\u05e6\u05d9\u05d1\u05d9\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_investment:
+            name: "econ_cls_title_1_\u05d4\u05e9\u05e7\u05e2\u05d4"
+            aggregate: sum
+          total_econ_cls_interim_accounts:
+            name: "econ_cls_title_1_\u05d7\u05e9\u05d1\u05d5\u05e0\u05d5\u05ea \u05de\u05e2\u05d1\u05e8"
+            aggregate: sum
+          total_econ_cls_credit:
+            name: "econ_cls_title_1_\u05de\u05ea\u05df \u05d0\u05e9\u05e8\u05d0\u05d9"
+            aggregate: sum
+          total_econ_cls_procurement:
+            name: "econ_cls_title_1_\u05e7\u05e0\u05d9\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_reserve:
+            name: "econ_cls_title_1_\u05e8\u05d6\u05e8\u05d1\u05d5\u05ea"
+            aggregate: sum
+          total_econ_cls_salaries:
+            name: "econ_cls_title_1_\u05e9\u05db\u05e8"
+            aggregate: sum
+
     - run: join
       parameters:
         source:
@@ -200,9 +256,6 @@ aggregated-yearly:
           children-net_allocated:
             name: net_allocated
             aggregate: array
-    - run: sample
-      parameters:
-        resource: immediate-children
     - run: combine-immediate-children
       parameters:
         resource-name: immediate-children
