@@ -103,6 +103,17 @@ def process_first(rows):
             yield row
             hierarchy.append([row['code'], row['title']])
 
+        row['hierarchy'] = None
+        row['parent'] = None
+
+        row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
+        row['title'] = '%s' % (row['func_cls_title_1'],)
+        yield row
+
+        row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
+        row['title'] = '%s/%s' % (row['func_cls_title_1'], row['func_cls_title_2'])
+        yield row
+
         if not row['code'].startswith('0000'):
             row['code'] = '00'
             row['title'] = 'המדינה'

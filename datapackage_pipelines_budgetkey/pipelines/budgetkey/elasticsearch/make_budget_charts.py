@@ -59,7 +59,7 @@ def budget_sankey(row, kids):
     for child in sorted(kids, key=lambda x: abs(x['amount'])):
         node = {
             'label': child['label'],
-            'extra': child['extra']
+            'extra': child.get('extra')
         }
         nodes.append(node)
         amount = child['amount']
