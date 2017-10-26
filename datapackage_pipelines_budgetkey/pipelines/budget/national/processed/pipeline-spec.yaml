@@ -85,6 +85,9 @@ aggregated-yearly:
           commitment_balance:
             - יתרת התחיבויות
     - run: join_phases
+      parameters:
+        last-completed-year: 2016
+
     - run: topical_sums
     - run: join_categories
     - run: set_types
@@ -235,8 +238,8 @@ aggregated-yearly:
             name: "econ_cls_title_1_\u05e9\u05db\u05e8"
             aggregate: sum
 
-    - run: fill_in_revised
-
+#    - run: fill_in_revised
+#
     - run: join
       parameters:
         source:
@@ -254,6 +257,9 @@ aggregated-yearly:
             aggregate: array
           children-title:
             name: title
+            aggregate: array
+          children-net_allocated:
+            name: net_allocated
             aggregate: array
           children-net_revised:
             name: net_revised

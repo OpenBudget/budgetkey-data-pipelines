@@ -6,7 +6,7 @@ def nop(x):
     return x
 
 
-FIELDS = ['code', 'title', 'net_revised']
+FIELDS = ['code', 'title', 'net_allocated', 'net_revised']
 
 
 params, dp, res_iter = ingest()
@@ -15,9 +15,13 @@ res_name = params['resource-name']
 
 def combine_immediate_children(rows):
     for row in rows:
-        row['children-net_revised'] = map(int, row['children-net_revised'])
+        if row['children-net_revised'] is None:
+            logging.warning('children-net_revised is undefined, %r', row)
+            row['children-net_revised'] = row['children-net_allocated']
+        for f in ('children-net_revised', 'children-net_allocated'):
+            row[f] = map(int, row[f])
         try:
-            children = zip(*(row['children-'+x] for x in FIELDS))
+            children = zip(*(row.get('children-'+x, []) for x in FIELDS))
         except TypeError:
             logging.error('Failed to process children for row %r', row)
             raise
