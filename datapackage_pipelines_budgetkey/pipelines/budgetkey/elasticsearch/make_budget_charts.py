@@ -3,6 +3,15 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
 
+ECON_TRANSLATIONS = {'capital_expenditure': 'הוצאות הון', 'debt_repayment_principal': 'החזר חוב - קרן',
+                     'debt_repayment_interest': 'החזר חוב - ריבית',
+                     'income_bank_of_israel': 'הכנסות המדינה - בנק ישראל', 'income': 'הכנסות המדינה - הכנסות',
+                     'income_loans': 'הכנסות המדינה - מילוות', 'income_grants': 'הכנסות המדינה - מענקים',
+                     'dedicated_income': 'הכנסות מיועדות', 'transfers': 'העברות ותמיכות',
+                     'internal_transfers': 'העברות פנים תקציביות', 'investment': 'השקעה',
+                     'interim_accounts': 'חשבונות מעבר', 'credit': 'מתן אשראי', 'procurement': 'קניות ורכש',
+                     'reserve': 'רזרבות', 'salaries': 'שכר'}
+
 
 def sankey_chart(nodes, links):
     for i, node in enumerate(nodes):
@@ -163,7 +172,7 @@ def process_resource(res_):
                     'layout': layout
                 }
             )
-        chart, layout = category_sankey(row, 'total_econ_cls_', {})
+        chart, layout = category_sankey(row, 'total_econ_cls_', ECON_TRANSLATIONS)
         if chart is not None:
             row['charts'].append(
                 {
