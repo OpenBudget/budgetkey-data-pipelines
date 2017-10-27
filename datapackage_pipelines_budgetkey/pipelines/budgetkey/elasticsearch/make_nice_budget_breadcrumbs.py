@@ -1,3 +1,4 @@
+import logging
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -6,14 +7,18 @@ parameters, dp, res_iter = ingest()
 
 def process_resource(res_):
     for row in res_:
-        levels = [x[1] for x in row.get('hierarchy', [])[1:]]
-        years = ''
-        history = row.get('history')
-        if history:
-            years = '{} - '.format(min(history.keys()))
-        years += '{}'.format(row.get('year'))
-        levels = [years] + levels
-        levels = ' / '.join(levels)
+        levels = ''
+        if row.get('hierarchy'):
+            levels = [x[1] for x in row.get('hierarchy', [])[1:]]
+            years = ''
+            history = row.get('history')
+            if history:
+                years = '{} - '.format(min(history.keys()))
+            years += '{}'.format(row.get('year'))
+            levels = [years] + levels
+            levels = ' / '.join(levels)
+        else:
+            logging.warning('No hierarchy for row %r', row)
         row['nice-breadcrumbs'] = levels
         yield row
 
