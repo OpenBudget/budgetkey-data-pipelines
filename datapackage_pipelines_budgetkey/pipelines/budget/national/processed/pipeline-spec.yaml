@@ -351,7 +351,6 @@ connected-national-budgets:
         format: json
         headers: 1
     - run: stream_remote_resources
-      cache: true
     - run: concatenate
       parameters:
         target:
@@ -363,6 +362,8 @@ connected-national-budgets:
       parameters:
         types:
           previous:
+            type: array
+          current:
             type: array
     - run: load_resource
       parameters:
@@ -403,7 +404,6 @@ connected-national-budgets:
                 - {name: net_revised, type: number}
           history:
             es:index: false
-    - run: sample
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items

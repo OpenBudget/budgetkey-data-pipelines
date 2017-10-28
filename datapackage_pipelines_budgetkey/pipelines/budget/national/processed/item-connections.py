@@ -40,7 +40,7 @@ def put(db, key, value):
 def get(db, key):
     v = db.get(key.encode('utf8'))
     if v is not None:
-        return json.loads(v)
+        return json.loads(v.decode('ascii'))
 
 
 def delete(db, key):
@@ -86,7 +86,7 @@ def update_equiv(e1, e2):
     e1['code_titles'] = sorted(set(e1['code_titles']))
 
 
-def calc_equivs(cur_year, rows, connected_items, new_connected_items):
+def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete):
 
     # rows = list(rows)
     # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
@@ -203,7 +203,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items):
                                 logging.warning('%s', json.dumps(nci, indent=2))
                 else:
                     s.add(len(row['code']))
-                delete(connected_items, equiv['code'])
+                to_delete.add(equiv['code'])
                 for year, hist_item in equiv['history'].items():
                     update_equiv(new_history.setdefault(year, {}), hist_item)
                 update_equiv(new_history.setdefault(equiv['year'], {}), equiv)
@@ -224,11 +224,15 @@ def process_budgets(rows_):
 
         connected_items = plyvel.DB(CURRENT_DB, create_if_missing=True)
         new_connected_items = plyvel.DB(NEW_CURRENT_DB, create_if_missing=True)
+        codes_to_delete = set()
 
         unmatched = calc_equivs(cur_year, rows,
-                                connected_items, new_connected_items)
+                                connected_items, new_connected_items, codes_to_delete)
         unmatched = calc_equivs(cur_year, reversed(unmatched),
-                                connected_items, new_connected_items)
+                                connected_items, new_connected_items, codes_to_delete)
+
+        for code in codes_to_delete:
+            delete(connected_items, code)
 
         for row in unmatched:
             row['history'] = {}
