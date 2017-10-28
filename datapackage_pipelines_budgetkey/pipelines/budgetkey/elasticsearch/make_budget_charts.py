@@ -1,7 +1,16 @@
+import datapackage
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, dp, res_iter = ingest()
+
+
+gdp = dict(datapackage.Package('./data/gdp/datapackage.json').resources[0].iter())
+totals = dict(
+    (int(row['year']), row['net_revised'])
+    for row in
+    datapackage.Package('/var/datapackages/budget/national/processed/totals/datapackage.json').resources[0].iter(keyed=True)
+)
 
 ECON_TRANSLATIONS = {'capital_expenditure': 'הוצאות הון', 'debt_repayment_principal': 'החזר חוב - קרן',
                      'debt_repayment_interest': 'החזר חוב - ריבית',
@@ -104,19 +113,36 @@ def query_based_charts(row):
         yield None
 
 
-def history_chart(row):
+def history_chart(row, normalisation=None):
     traces = []
     history = row.get('history', [])
+    history = dict(
+        (int(k), v)
+        for k, v in history.items()
+    )
     if history is not None and len(history) > 0:
+        history[row['year']] = row
         years = sorted(history.keys())
+        if normalisation is not None:
+            years = [year for year in years if year in normalisation]
+            normalisation = [normalisation[year] for year in years]
+        if len(years) < 2:
+            return None, None
         for measure, name in (
                 ('net_allocated', 'תקציב מקורי'),
                 ('net_revised', 'אחרי שינויים'),
                 ('net_executed', 'ביצוע בפועל')
         ):
+            if normalisation is not None:
+                values = [history[year].get(measure)/factor*100 for year, factor in zip(years, normalisation)]
+                unit = 'אחוזים'
+            else:
+                values = [history[year].get(measure) for year in years]
+                unit = 'תקציב ב-₪'
+
             trace = {
-                'x': [int(y) for y in years] + [row['year']],
-                'y': [history[year].get(measure) for year in years] + [row.get(measure)],
+                'x': [int(y) for y in years],
+                'y': values,
                 'mode': 'lines+markers',
                 'name': name
             }
@@ -127,7 +153,7 @@ def history_chart(row):
                 'type': 'category'
             },
             'yaxis': {
-                'title': 'תקציב ב-₪',
+                'title': unit,
                 'rangemode': 'tozero',
                 'separatethousands': True,
             }
@@ -172,6 +198,26 @@ def process_resource(res_):
                     'layout': layout
                 }
             )
+        if row['code'].startswith('C'):
+            chart, layout = history_chart(row, normalisation=gdp)
+            if chart is not None:
+                row['charts'].append(
+                    {
+                        'title': 'איך השתנה התקציב כאחוז מכלל התקציב?',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
+            chart, layout = history_chart(row, normalisation=totals)
+            if chart is not None:
+                row['charts'].append(
+                    {
+                        'title': 'איך השתנה התקציב לעומת התוצר המקומי הגולמי?',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
+
         chart, layout = category_sankey(row, 'total_econ_cls_', ECON_TRANSLATIONS)
         if chart is not None:
             row['charts'].append(

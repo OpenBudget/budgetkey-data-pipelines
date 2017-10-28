@@ -412,3 +412,30 @@ connected-national-budgets:
         tables:
           budget:
             resource-name: budget
+
+
+
+just-the-total:
+  title: National Yearly Budgets - Just the total (item 00)
+
+  dependencies:
+    - pipeline: ./budget/national/processed/with-extras
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget Totals
+        name: national-budget-totals
+    - run: load_resource
+      parameters:
+        url: dependency://./budget/national/processed/with-extras
+        resource: budget
+    - run: filter
+      parameters:
+        resources: budget
+        in:
+          -
+            code: '00'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/totals

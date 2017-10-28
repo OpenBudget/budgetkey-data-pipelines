@@ -105,6 +105,12 @@ def process_row(row, phase_key):
 
     row['hierarchy'] = None
     row['parent'] = None
+    row['hierarchy'] = []
+
+    if not row['code'].startswith('0000'):
+        row['code'] = '00'
+        row['title'] = 'המדינה'
+        yield row
 
     row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
     row['title'] = '%s' % (row['func_cls_title_1'],)
@@ -114,11 +120,6 @@ def process_row(row, phase_key):
     row['title'] = '%s/%s' % (row['func_cls_title_1'], row['func_cls_title_2'])
     yield row
 
-    if not row['code'].startswith('0000'):
-        row['code'] = '00'
-        row['title'] = 'המדינה'
-        row['hierarchy'] = []
-        yield row
 
 
 def process_first(rows):
