@@ -136,7 +136,7 @@ def history_chart(row, normalisation=None):
                 ('net_executed', 'ביצוע בפועל')
         ):
             if normalisation is not None:
-                values = [Decimal(history[year].get(measure))/Decimal(factor*100)
+                values = [Decimal(history[year].get(measure))/Decimal(factor)*100
                           if history[year].get(measure) is not None
                           else None
                           for year, factor
