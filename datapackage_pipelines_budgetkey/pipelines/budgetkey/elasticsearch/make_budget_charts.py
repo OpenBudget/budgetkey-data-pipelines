@@ -1,6 +1,7 @@
 import datapackage
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
+from decimal import Decimal
 
 parameters, dp, res_iter = ingest()
 
@@ -75,24 +76,25 @@ def budget_sankey(row, kids):
             'value': row['net_revised'],
         })
     for child in sorted(kids, key=lambda x: abs(x['amount'])):
-        node = {
-            'label': child['label'],
-            'extra': child.get('extra')
-        }
-        nodes.append(node)
         amount = child['amount']
-        if amount < 0:
-            links.append({
-                'source': center_node,
-                'target': node,
-                'value': -amount,
-            })
-        elif amount > 0:
-            links.append({
-                'source': node,
-                'target': center_node,
-                'value': amount,
-            })
+        if amount != 0:
+            node = {
+                'label': child['label'],
+                'extra': child.get('extra')
+            }
+            nodes.append(node)
+            if amount < 0:
+                links.append({
+                    'source': center_node,
+                    'target': node,
+                    'value': -amount,
+                })
+            elif amount > 0:
+                links.append({
+                    'source': node,
+                    'target': center_node,
+                    'value': amount,
+                })
     return sankey_chart(nodes, links)
 
 
@@ -134,7 +136,11 @@ def history_chart(row, normalisation=None):
                 ('net_executed', 'ביצוע בפועל')
         ):
             if normalisation is not None:
-                values = [history[year].get(measure)/factor*100 for year, factor in zip(years, normalisation)]
+                values = [Decimal(history[year].get(measure))/Decimal(factor*100)
+                          if history[year].get(measure) is not None
+                          else None
+                          for year, factor
+                          in zip(years, normalisation)]
                 unit = 'אחוזים'
             else:
                 values = [history[year].get(measure) for year in years]
@@ -203,7 +209,7 @@ def process_resource(res_):
             if chart is not None:
                 row['charts'].append(
                     {
-                        'title': 'איך השתנה התקציב כאחוז מכלל התקציב?',
+                        'title': 'איך השתנה התקציב (לעומת כלל התקציב)?',
                         'chart': chart,
                         'layout': layout
                     }
@@ -212,7 +218,7 @@ def process_resource(res_):
             if chart is not None:
                 row['charts'].append(
                     {
-                        'title': 'איך השתנה התקציב לעומת התוצר המקומי הגולמי?',
+                        'title': 'איך השתנה התקציב (לעומת התוצר המקומי הגולמי)?',
                         'chart': chart,
                         'layout': layout
                     }
