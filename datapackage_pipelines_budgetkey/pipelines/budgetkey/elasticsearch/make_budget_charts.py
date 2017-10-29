@@ -1,7 +1,11 @@
+import os
+
 import datapackage
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
+
+from sqlalchemy import create_engine
 
 parameters, dp, res_iter = ingest()
 
@@ -110,9 +114,49 @@ def category_sankey(row, prefix, translations={}):
     return budget_sankey(row, kids)
 
 
+CAT1_QUERY="""SELECT substring(code
+FROM 1
+FOR 4) AS extra,
+((hierarchy->>1)::json)->>1 as label,
+sum(net_revised) AS amount
+FROM raw_budget
+WHERE func_cls_title_1->>0='{}'
+AND length(code)=10
+AND YEAR={}
+GROUP BY 1, 2"""
+
+CAT2_QUERY="""SELECT substring(code
+FROM 1
+FOR 4) AS extra,
+((hierarchy->>1)::json)->>1 as label,
+sum(net_revised) AS amount
+FROM raw_budget
+WHERE func_cls_title_1->>0='{}'
+AND func_cls_title_2->>0='{}'
+AND length(code)=10
+AND YEAR={}
+GROUP BY 1, 2"""
+
+engine = create_engine(os.environ['DPP_DB_ENGINE'])
+
+
 def query_based_charts(row):
-    if False:
-        yield None
+    if row['code'].startswith('C'):
+        if len(row['func_cls_title_2']) == 1:
+            query = CAT2_QUERY.format(
+                row['func_cls_title_1'][0],
+                row['func_cls_title_2'][0],
+                row['year']
+            )
+        else:
+            query = CAT1_QUERY.format(
+                row['func_cls_title_1'][0],
+                row['year']
+            )
+        result = engine.execute(query)
+        result = list(dict(r) for r in result)
+        chart, layout = budget_sankey(row, result)
+        yield 'לאילו משרדים הולך הכסף?', chart, layout
 
 
 def history_chart(row, normalisation=None):
@@ -195,6 +239,14 @@ def process_resource(res_):
                     'layout': layout
                 }
             )
+        for title, chart, layout in query_based_charts(row):
+            row['charts'].append(
+                {
+                    'title': title,
+                    'chart': chart,
+                    'layout': layout
+                }
+            )
         chart, layout = history_chart(row)
         if chart is not None:
             row['charts'].append(
@@ -229,14 +281,6 @@ def process_resource(res_):
             row['charts'].append(
                 {
                     'title': 'איך משתמשים בתקציב?',
-                    'chart': chart,
-                    'layout': layout
-                }
-            )
-        for title, chart, layout in query_based_charts(row):
-            row['charts'].append(
-                {
-                    'title': title,
                     'chart': chart,
                     'layout': layout
                 }
