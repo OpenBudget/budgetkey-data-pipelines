@@ -1,5 +1,6 @@
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from datetime import date
 
 parameters, dp, res_iter = ingest()
 
@@ -35,10 +36,16 @@ for res in dp['resources']:
         }
 
 
+def treat(v):
+    if isinstance(v, date):
+        return v.isoformat()
+    return v
+
+
 def process_resource(res):
     for row in res:
         inner = dict(
-            (k, v)
+            (k, treat(v))
             for k, v in row.items()
             if k not in key
         )

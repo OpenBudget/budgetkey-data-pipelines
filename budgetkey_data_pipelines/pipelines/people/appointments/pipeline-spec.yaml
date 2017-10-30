@@ -34,6 +34,31 @@ all-appointments:
           proof_url: []
           source: []
     -
+      run: collate
+      parameters:
+        resource: concat
+        key:
+          - full_name
+          - company
+        collated-field-name: sources
+    -
+      run: sample
+    -
+      run: join
+      parameters:
+        source:
+          name: concat
+          key: "{full_name} {company}"
+          delete: true
+        target:
+          name: concat
+          key: null
+        fields:
+          full_name: null
+          company: null
+          sources:
+            aggregate: array
+    -
       run: dump.to_path
       parameters:
           out-path: /var/datapackages/people/appointments/all
