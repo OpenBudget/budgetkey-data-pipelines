@@ -19,6 +19,8 @@ themarker:
     -
       run: stream_remote_resources
     -
+      run: scraper
+    -
       run: concatenate
       parameters:
         fields:
@@ -30,7 +32,7 @@ themarker:
             - title
           organisation_name:
             - company
-          details:
+          details: # the typo is on purpose
             - detiles
           gender: []
     -
@@ -40,7 +42,7 @@ themarker:
         types:
           start_date:
             type: date
-            format: "%d.%m.%Y"
+            format: "%d.%m.%y"
     -
       run: dump.to_path
       parameters:
