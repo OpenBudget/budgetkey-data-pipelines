@@ -25,6 +25,9 @@ calcalist:
             type: string
           proof_url:
             type: string
+          source:
+            type: string
+
     -
       run: dump.to_path
       parameters:

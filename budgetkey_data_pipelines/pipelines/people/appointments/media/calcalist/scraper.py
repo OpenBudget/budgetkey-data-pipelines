@@ -38,8 +38,11 @@ def scrape():
         logging.info('iteration #%d with url: %s' % (i, url))
         driver.get(url)
         nominations_page = NominationsPage(url, CALCALIST_BASE_URL, driver.page_source)
+
         for nomination in nominations_page.nominations():
+            nomination['source'] = 'calcalist'
             yield nomination
+
         url = nominations_page.next_url()
         logging.info('next URL: %s' % url)
         i += 1
@@ -236,7 +239,8 @@ datapackage['resources'].append({
                     {'name': 'full_name', 'type': 'string'},
                     {'name': 'company', 'type': 'string'},
                     {'name': 'description', 'type': 'string'},
-                    {'name': 'proof_url', 'type': 'string'}
+                    {'name': 'proof_url', 'type': 'string'},
+                    {'name': 'source', 'type': 'string'}
                 ]
             }
 })
