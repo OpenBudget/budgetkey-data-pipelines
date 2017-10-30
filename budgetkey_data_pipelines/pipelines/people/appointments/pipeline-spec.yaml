@@ -1,6 +1,7 @@
 all-appointments:
   dependencies:
-    - pipeline: ./people/appointments/media/themarker
+    - pipeline: ./people/appointments/media/themarker/themarker
+    - pipeline: ./people/appointments/media/calcalist/calcalist
 
   pipeline:
     -
@@ -31,6 +32,7 @@ all-appointments:
           details: ['description']
           gender: []
           proof_url: []
+          source: []
     -
       run: dump.to_path
       parameters:
