@@ -5,10 +5,16 @@ from datapackage_pipelines.wrapper import process
 
 UNIFORM_FORMAT = '%d.%m.%y'
 DATE_COLUMN = 'date'
+SOURCE_COLUMN = 'source'
 
 
 def modify_datapackage(datapackage, parameters, stats):
     logging.info('datapackage: %s' % datapackage)
+    datapackage['resources'][0]['schema']['fields'].append({
+      'name': SOURCE_COLUMN,
+      'type': 'string'
+    })
+    logging.info('second datapackage: %s' % datapackage)
     return datapackage
 
 
@@ -26,6 +32,7 @@ def process_row(row, row_index,
         )
         del row[DATE_COLUMN]
 
+    row[SOURCE_COLUMN] = 'the-marker'
     return row
 
 

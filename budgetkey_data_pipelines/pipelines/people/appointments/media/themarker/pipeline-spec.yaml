@@ -35,6 +35,7 @@ themarker:
           details: # the typo is on purpose
             - detiles
           gender: []
+          source: []
     -
       run: set_types
       parameters:
