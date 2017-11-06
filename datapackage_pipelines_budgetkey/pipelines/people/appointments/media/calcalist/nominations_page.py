@@ -13,7 +13,10 @@ class NominationsPage(object):
 
     def next_url(self):
         next_relative_url = self._next_relative_url()
-        return urljoin(self.base_url, next_relative_url)
+        if next_relative_url:
+            return urljoin(self.base_url, next_relative_url)
+        else:
+            return None
 
     def _next_relative_url(self):
         iframe_links = self.page('.Comments_Pagging')('td')('a')

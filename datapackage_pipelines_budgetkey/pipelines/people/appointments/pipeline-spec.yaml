@@ -42,13 +42,19 @@ all-appointments:
           - company
         collated-field-name: sources
     -
+      run: fingerprint
+      parameters:
+        source-field: company
+        target-field: fingerprinted_company
+        resource-name: concat
+    -
       run: sample
     -
       run: join
       parameters:
         source:
           name: concat
-          key: "{full_name} {company}"
+          key: "{full_name} {fingerprinted_company}"
           delete: true
         target:
           name: concat
