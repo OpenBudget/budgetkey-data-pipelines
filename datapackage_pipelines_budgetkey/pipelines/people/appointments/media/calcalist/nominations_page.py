@@ -49,7 +49,6 @@ class NominationsPage(object):
             'company': table_element('.Nom_Comp').text(),
             'description': table_element('.Nom_SubTitle').text(),
             'proof_url': self.proof_url
-
         }
 
 
