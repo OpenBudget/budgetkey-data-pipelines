@@ -1,4 +1,6 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
+import json
+
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
 import datetime
@@ -30,7 +32,10 @@ def run_parse_processor(resource):
     return resources[0]
 
 
-def test():
+def docs(x):
+    return json.dumps(x, sort_keys=True, ensure_ascii=False)
+
+def test_parse_data():
     resource = run_parse_processor([
         {"pid": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
@@ -72,10 +77,10 @@ def test():
         "decision": "נרשם",
         "page_title": "דיווח פטור משרדי",
         "tender_type": "exemptions",
-        "tender_id": "",
-        "documents": [{"description": "חוות דעת מקצועית",
-                                       "link": "https://www.mr.gov.il/Files_Michrazim/234734.pdf",
-                                       "update_time": "2017-03-14"}]
+        "tender_id": "none",
+        "documents": docs([{"description": "חוות דעת מקצועית",
+                            "link": "https://www.mr.gov.il/Files_Michrazim/234734.pdf",
+                            "update_time": "2017-03-14"}])
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2] == {'publisher_id': 50,
@@ -90,45 +95,45 @@ def test():
                            "tender_id": "18/2017",
                            "tender_type": "office",
                            "decision": "עודכן",
-                           'documents': [{'description': ' מענה לשאלות הבהרה מכרז פומבי 18/2017',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/242223.pdf',
-                                          'update_time': '2017-07-09'},
-                                         {'description': ' מענה לשאלות הבהרה מכרז פומבי 18/2017',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/242222.pdf',
-                                          'update_time': '2017-07-09'},
-                                         {'description': 'מודעה לעיתונות בערבית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/242161.doc',
-                                          'update_time': '2017-07-06'},
-                                         {'description': 'מודעה לעיתונות בעברית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/242160.doc',
-                                          'update_time': '2017-07-06'},
-                                         {'description': ' נספח ד',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240174.pdf',
-                                          'update_time': '2017-06-12'},
-                                         {'description': ' נספח ד',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240173.pdf',
-                                          'update_time': '2017-06-12'},
-                                         {'description': ' נספח ד',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240172.docx',
-                                          'update_time': '2017-06-12'},
-                                         {'description': ' מכרז מס',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240171.docx',
-                                          'update_time': '2017-06-12'},
-                                         {'description': 'מודעה לעיתונות בערבית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240170.docx',
-                                          'update_time': '2017-06-12'},
-                                         {'description': 'מודעה לעיתונות בעברית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/240169.docx',
-                                          'update_time': '2017-06-12'},
-                                         {'description': 'מודעה לעיתונות בערבית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/239176.DOCX',
-                                          'update_time': '2017-05-28'},
-                                         {'description': ' מכרז ניהול אירועי ה70 לישראל',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/239149.docx',
-                                          'update_time': '2017-05-28'},
-                                         {'description': 'מודעה לעיתונות בעברית',
-                                          'link': 'https://www.mr.gov.il/Files_Michrazim/239148.docx',
-                                          'update_time': '2017-05-28'}],
+                           'documents': docs([{'description': ' מענה לשאלות הבהרה מכרז פומבי 18/2017',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/242223.pdf',
+                                               'update_time': '2017-07-09'},
+                                              {'description': ' מענה לשאלות הבהרה מכרז פומבי 18/2017',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/242222.pdf',
+                                               'update_time': '2017-07-09'},
+                                              {'description': 'מודעה לעיתונות בערבית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/242161.doc',
+                                               'update_time': '2017-07-06'},
+                                              {'description': 'מודעה לעיתונות בעברית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/242160.doc',
+                                               'update_time': '2017-07-06'},
+                                              {'description': ' נספח ד',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240174.pdf',
+                                               'update_time': '2017-06-12'},
+                                              {'description': ' נספח ד',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240173.pdf',
+                                               'update_time': '2017-06-12'},
+                                              {'description': ' נספח ד',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240172.docx',
+                                               'update_time': '2017-06-12'},
+                                              {'description': ' מכרז מס',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240171.docx',
+                                               'update_time': '2017-06-12'},
+                                              {'description': 'מודעה לעיתונות בערבית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240170.docx',
+                                               'update_time': '2017-06-12'},
+                                              {'description': 'מודעה לעיתונות בעברית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/240169.docx',
+                                               'update_time': '2017-06-12'},
+                                              {'description': 'מודעה לעיתונות בערבית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/239176.DOCX',
+                                               'update_time': '2017-05-28'},
+                                              {'description': ' מכרז ניהול אירועי ה70 לישראל',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/239149.docx',
+                                               'update_time': '2017-05-28'},
+                                              {'description': 'מודעה לעיתונות בעברית',
+                                               'link': 'https://www.mr.gov.il/Files_Michrazim/239148.docx',
+                                               'update_time': '2017-05-28'}]),
                            'contact': None,
                            'contact_email': None,
                            'end_date': None,
@@ -146,12 +151,12 @@ def test():
                            'decision': 'בתוקף',
                            'description': '\u200bמכרז מרכזי מממ-03-2013 נועד להסדיר רכישה של סולר ומזוט '
                                           'על ידי כל משרדי הממשלה ויחידות הסמך בכל רחבי הארץ.',
-                           'documents': [{'description': 'מסמכי המכרז',
-                                          'link': '/officestenders/Pages/officetender.aspx?pID=542781',
-                                          'update_time': None},
-                                         {'description': 'הוראת שעה בתוקף 16.8.0.2 - אספקת סולר ומזוט למשרדי הממשלה',
-                                          'link': 'http://www.mof.gov.il/takam/pages/horaot.aspx?k=16.8.0.2',
-                                          'update_time': None}],
+                           'documents': docs([{'description': 'מסמכי המכרז',
+                                               'link': '/officestenders/Pages/officetender.aspx?pID=542781',
+                                               'update_time': None},
+                                              {'description': 'הוראת שעה בתוקף 16.8.0.2 - אספקת סולר ומזוט למשרדי הממשלה',
+                                               'link': 'http://www.mof.gov.il/takam/pages/horaot.aspx?k=16.8.0.2',
+                                               'update_time': None}]),
                            'end_date': '2017-12-31',
                            'last_update_date': None,
                            'page_title': "מכרז 3-2013: אספקת סולר להסקה, סולר לתחבורה (עבור גנרטורים) ומזוט עבור משרדי הממשלה",
@@ -178,7 +183,7 @@ def test():
                            'subjects': 'מכשירי תקשורת ואביזרים ; ציוד תקשורת ומולטימדיה ; רכיבים לטכנולוגיות מידע ושידור',
                            'start_date': None, 'end_date': '2017-11-01', 'decision': 'עתידי',
                            'page_title': 'מכרז 15-2016: אספקת שירותי הקמה ואינטגרציה של חדרים חכמים',
-                           'tender_id': 'technology-15-2016', 'documents': []}
+                           'tender_id': 'technology-15-2016', 'documents': docs([])}
     assert resource[6] == {'publisher_id': None, 'publication_id': 598403, 'tender_type': 'central',
                            'page_url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx',
                            'description': '', 'supplier_id': None,
@@ -190,9 +195,9 @@ def test():
                            'start_date': None, 'end_date': None, 'decision': 'פורסם וממתין לתוצאות',
                            'page_title': 'מכרז 19-2017: מתן שירותי ייעוץ בתחום נגישות השירות למשרדי הממשלה ויחידות הסמך',
                            'tender_id': 'Goods-19-2017',
-                           'documents': [{'description': 'מסמכי המכרז',
-                                          'link': '/officestenders/Pages/officetender.aspx?pID=598403',
-                                          'update_time': None}]}
+                           'documents': docs([{'description': 'מסמכי המכרז',
+                                               'link': '/officestenders/Pages/officetender.aspx?pID=598403',
+                                               'update_time': None}])}
     assert resource[7] == {'publisher_id': None, 'publication_id': 537982, 'tender_type': 'central',
                            'page_url': 'https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx',
                            'description': 'מכרז מממ-8-2009 לאספקת שירותי תקשורת בינלאומיים.', 'supplier_id': None,
@@ -201,12 +206,12 @@ def test():
                            'source_currency': None, 'regulation': 'מכרז', 'volume': None, 'subjects': 'שירותי תקשורת',
                            'start_date': None, 'end_date': None, 'decision': 'לא בתוקף',
                            'page_title': 'מכרז 8-2009: שירותי תקשורת בינ"ל', 'tender_id': 'network-michraz3',
-                           'documents': [{'description': 'מסמכי המכרז',
-                                          'link': '/officestenders/Pages/officetender.aspx?pID=537982',
-                                          'update_time': None},
-                                         {'description': 'הוראת שעה בתוקף 16.3.2',
-                                          'link': 'http://hozrim.mof.gov.il/doc/hashkal/horaot.nsf/bynum/%d7%9e.16.3.2',
-                                          'update_time': None}]}
+                           'documents': docs([{'description': 'מסמכי המכרז',
+                                               'link': '/officestenders/Pages/officetender.aspx?pID=537982',
+                                               'update_time': None},
+                                               {'description': 'הוראת שעה בתוקף 16.3.2',
+                                               'link': 'http://hozrim.mof.gov.il/doc/hashkal/horaot.nsf/bynum/%d7%9e.16.3.2',
+                                               'update_time': None}])}
 
 
 def test_invalid_response():

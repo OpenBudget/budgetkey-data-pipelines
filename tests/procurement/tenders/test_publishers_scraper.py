@@ -1,5 +1,5 @@
 import os
-from budgetkey_data_pipelines.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.publishers_scraper import PublisherScraper
 
 
 class MockPublishersScraper(PublisherScraper):
@@ -9,9 +9,9 @@ class MockPublishersScraper(PublisherScraper):
         fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
         page_text_file = os.path.join(fixtures_dir, file_name)
         if not os.path.exists(page_text_file):
-            with open(page_text_file, "w") as f:
+            with open(page_text_file, "w", encoding="utf-8") as f:
                 f.write(super(MockPublishersScraper, self)._get_page_text(form_data))
-        with open(page_text_file) as f:
+        with open(page_text_file, encoding="utf-8") as f:
             return f.read()
 
 

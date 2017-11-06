@@ -1,0 +1,53 @@
+version: '3.2'
+
+services:
+
+  redis:
+    image: redis:alpine
+    # setting redis to a different port is not supported by pipelines
+    # so we can't expose it by default - to prevent port collisions with system redis
+    # if you need it, uncomment and set DPP_REDIS_HOST=localhost
+#    ports:
+#      - "6379:6379"
+
+  db:
+    image: postgres:9.6.3-alpine
+    environment:
+      - "POSTGRES_PASSWORD=123456"
+    volumes:
+      - "db:/var/lib/postgresql/data"
+    ports:
+      - "15432:5432"
+
+  pipelines:
+    image: budgetkey/budgetkey-data-pipelines
+    build: .
+    volumes:
+    - "data:/var/datapackages"
+    ports:
+    - "5000:5000"
+    environment:
+      DPP_DB_ENGINE: postgresql://postgres:123456@db:5432/postgres"
+      DPP_REDIS_HOST: redis
+      DPP_ELASTICSEARCH: elasticsearch:9200
+    # simple configuration which only runs serve and allows to run commands using docker-compose exec
+    # useful for local development - where you most likely want to run only a specific pipeline
+    entrypoint: ["sh", "-c", "dpp init && dpp serve"]
+
+  elasticsearch:
+    image: budgetkey/open-budget-elasticsearch
+    ports:
+    - "19200:9200"
+
+  kibana:
+    depends_on:
+    - elasticsearch
+    image: docker.elastic.co/kibana/kibana:5.3.0
+    environment:
+    - "ELASTICSEARCH_URL=http://elasticsearch:9200/"
+    ports:
+    - "15601:5601"
+
+volumes:
+  data:
+  db:

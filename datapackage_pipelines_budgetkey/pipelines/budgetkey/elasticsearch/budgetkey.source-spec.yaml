@@ -1,0 +1,64 @@
+budget:
+  kind: indexer
+  revision: 2
+  dependent_pipeline: ./budget/national/processed/connected-national-budgets
+  source_datapackage: /var/datapackages/budget/national/processed/connected-items/datapackage.json
+  key-fields:
+    - code
+    - year
+  extra-steps:
+    - run: make_nice_budget_categories
+    - run: make_nice_budget_breadcrumbs
+    - run: make_nice_budget_code
+  document-steps:
+    - run: make_budget_charts
+
+national-budget-changes:
+  kind: indexer
+  dependent_pipeline: ./budget/national/changes/national-budget-changes-aggregated
+  source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
+  key-fields:
+    - transaction_id
+
+entities:
+  kind: indexer
+  dependent_pipeline: ./entities/entities
+  source_datapackage: /var/datapackages/entities/scored/datapackage.json
+  key-fields:
+    - id
+  key-pattern: 'org/{kind}/{id}'
+
+contract-spending:
+  kind: indexer
+  dependent_pipeline: ./procurement/spending/latest-contract-spending
+  source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+  key-fields:
+    - order_id
+    - budget_code
+
+supports:
+  kind: indexer
+  dependent_pipeline: ./supports/by-request-year
+  source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
+  key-fields:
+    - budget_code
+    - year_requested
+    - recipient
+    - request_type
+
+tenders:
+  kind: indexer
+  dependent_pipeline: ./procurement/tenders/processed
+  source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
+  key-fields:
+    - tender_type
+    - publication_id
+    - tender_id
+
+people:
+  kind: indexer
+  dependent_pipeline: ./people/aggregated
+  source_datapackage: /var/datapackages/people/aggregated/datapackage.json
+  key-fields:
+    - key
+

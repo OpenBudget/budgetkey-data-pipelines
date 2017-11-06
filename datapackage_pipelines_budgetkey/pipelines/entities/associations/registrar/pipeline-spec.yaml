@@ -1,0 +1,30 @@
+registry:
+  title: עמותות פעילות מרשם העמותות
+  description: רשימת כלל העמותות הפעילות, מתעדכן שבועית.
+  schedule:
+    crontab: 15 15 * * 1
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: association-registry
+        title: עמותות פעילות מרשם העמותות
+    - run: m_of_justice_resource
+      runner: tzabar
+      parameters:
+        key: Association
+        url-key: Associations
+        resource-name: association-registry
+    - run: set_types
+      parameters:
+        types:
+          'Association_Registration_Date':
+            type: date
+            format: '%Y-%m-%d %H:%M:%S'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/associations/registrar/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          association_registry:
+            resource-name: association-registry

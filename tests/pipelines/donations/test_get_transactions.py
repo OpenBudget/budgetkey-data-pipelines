@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.donations.get_transactions import GetTransactions
+from datapackage_pipelines_budgetkey.pipelines.donations.get_transactions import GetTransactions
 import json, os
 
 

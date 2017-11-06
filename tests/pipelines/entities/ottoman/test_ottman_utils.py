@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.entities.ottoman.ottoman_utils import process_row
+from datapackage_pipelines_budgetkey.pipelines.entities.ottoman.ottoman_utils import process_row
 
 
 def test_process_row_short_id_return_none():

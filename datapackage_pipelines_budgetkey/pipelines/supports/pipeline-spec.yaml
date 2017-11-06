@@ -1,0 +1,341 @@
+all:
+  schedule:
+    crontab: "0 0 0 * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, in raw form (manually scraped)
+    - run: add_resource
+      parameters:
+        name: s2008
+        url: https://www.dropbox.com/s/fg4hqkhbr10qoq0/2008.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2009
+        url: https://www.dropbox.com/s/kqmd5zpcj4rrqyr/2009.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2010
+        url: https://www.dropbox.com/s/m76u9cgiu5o8qkl/2010.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2011
+        url: https://www.dropbox.com/s/nb8fqpluixct64t/2011.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2012
+        url: https://www.dropbox.com/s/dvoxtc4pquayt0g/2012.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2013
+        url: https://www.dropbox.com/s/mio4pr079fld5zy/2013.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2014
+        url: https://www.dropbox.com/s/j0k23vc4fwog0b4/2014.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2015
+        url: https://www.dropbox.com/s/w00a72ji87xc3sc/2015.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2016
+        url: https://www.dropbox.com/s/7ycroayic05226x/2016.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2017
+        url: https://www.dropbox.com/s/fh3oyg05oh25kjd/2017.csv?dl=1
+        format: csv
+
+
+    - run: stream_remote_resources
+    - run: concatenate
+      parameters:
+        target:
+          name: supports
+        fields:
+          support_title:
+            - ZZTXT40
+          recipient:
+            - מגיש
+          supporting_ministry:
+            - משרד
+          amount_total:
+            - 'סה"כ'
+          request_type:
+            - סוג בקשה
+          amount_approved:
+            - סכום מאושר
+          amount_advance:
+            - סכום מקדמות
+          amount_paid:
+            - סכום תשלום
+          year_requested:
+            - שנת בקשה
+          year_paid:
+            - שנת תשלום
+          budget_extra_data:
+            - תקנה
+          budget_code:
+            - "תקנה - מפתח"
+    - run: fix_values
+    - run: set_types
+      parameters:
+        types:
+          amount.+:
+            type: number
+          year.+:
+            type: integer
+          budget_code:
+            constraints:
+              required: true
+              pattern: '[0-9]{10}'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/all
+
+with-entities:
+  dependencies:
+    - pipeline: ./supports/all
+    - pipeline: ./entities/fingerprints
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data with entities
+    - run: load_resource
+      parameters:
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/all/datapackage.json
+        resource: supports
+
+    - run: fingerprint
+      parameters:
+        resource-name: supports
+        source-field: recipient
+        target-field: recipient_fingerprint
+
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+          delete: true
+        target:
+          name: supports
+          key:
+            - recipient_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+            aggregate: first
+          entity_id:
+            name: id
+            aggregate: first
+          entity_kind:
+            name: kind
+            aggregate: first
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/with-entities
+    - run: dump.to_sql
+      parameters:
+        tables:
+          raw_supports:
+            resource-name: supports
+
+by-payment-year:
+  dependencies:
+    - pipeline: ./supports/with-entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, aggregated by payment year
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/with-entities/datapackage.json
+        resource: supports
+
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - budget_code
+            - year_paid
+            - recipient
+            - request_type
+          delete: true
+        target:
+          name: supports
+          key: null
+        fields:
+          budget_code: null
+          year_paid: null
+          recipient: null
+          entity_id: null
+          entity_name: null
+          entity_kind: null
+
+          request_type: null
+
+          support_title:
+            aggregate: max
+          supporting_ministry:
+            aggregate: set
+
+          amount_total:
+            aggregate: sum
+          amount_approved:
+            aggregate: sum
+          amount_advance:
+            aggregate: sum
+          amount_paid:
+            aggregate: sum
+
+          years_requested:
+            name: year_requested
+            aggregate: set
+          budget_extra_data:
+            aggregate: max
+
+    - run: set_types
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/by-payment-year
+    - run: dump.to_sql
+      parameters:
+        tables:
+          supports_by_payment_year:
+            resource-name: supports
+
+by-request-year:
+  dependencies:
+    - pipeline: ./supports/with-entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports
+        title: All support data, aggregated by request year
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/with-entities/datapackage.json
+        resource: supports
+
+    - run: collate
+      parameters:
+        resource: supports
+        key:
+          - budget_code
+          - year_requested
+          - recipient
+          - request_type
+          - entity_name
+          - entity_id
+          - entity_kind
+        collated-field-name: payments
+
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - budget_code
+            - year_requested
+            - recipient
+            - request_type
+          delete: true
+        target:
+          name: supports
+          key: null
+        fields:
+          budget_code: null
+          year_requested: null
+          recipient: null
+          request_type: null
+          entity_name: null
+          entity_id: null
+          entity_kind: null
+          payments:
+            aggregate: array
+
+    - run: fix_values_by_request_year
+    - run: collate_schema
+    - run: calc-support-score
+    - run: set_types
+    - run: set_primary_key
+      parameters:
+        supports:
+          - budget_code
+          - year_requested
+          - recipient
+          - request_type
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/by-request-year
+    - run: dump.to_sql
+      parameters:
+        tables:
+          supports_by_request_year:
+            resource-name: supports
+
+supports-by-entity:
+  dependencies:
+    - pipeline: ./supports/with-entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: supports-by-entity
+        title: Total supports, by entity id
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/with-entities/datapackage.json
+        resource: supports
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - entity_id
+          delete: true
+        target:
+          name: supports-by-entity
+          key: null
+        fields:
+          id:
+            name: entity_id
+          name:
+            name: entity_name
+          kind:
+            name: entity_kind
+          amount:
+            name: amount_approved
+            aggregate: sum
+          min_year:
+            name: year_requested
+            aggregate: min
+          max_year:
+            name: year_paid
+            aggregate: max
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/supports-by-entity

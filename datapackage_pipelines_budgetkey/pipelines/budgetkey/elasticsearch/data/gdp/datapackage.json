@@ -1,0 +1,31 @@
+{
+    "profile": "tabular-data-package",
+    "resources": [
+        {
+            "path": "gdp.csv",
+            "profile": "tabular-data-resource",
+            "encoding": "utf-8",
+            "name": "gdp",
+            "format": "csv",
+            "mediatype": "text/csv",
+            "schema": {
+                "fields": [
+                    {
+                        "name": "year",
+                        "type": "integer",
+                        "format": "default"
+                    },
+                    {
+                        "name": "gdp",
+                        "type": "number",
+                        "format": "default",
+                        "groupChar": ","
+                    }
+                ],
+                "missingValues": [
+                    ""
+                ]
+            }
+        }
+    ]
+}

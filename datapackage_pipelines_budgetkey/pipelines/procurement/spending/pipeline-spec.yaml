@@ -1,0 +1,375 @@
+quarterly-contract-spending-report-uris:
+  schedule:
+    crontab: "0 */4 * * *"
+  pipeline:
+    - run: add_metadata
+      runner: tzabar
+      parameters:
+        name: quarterly-contract-spending-report-uris
+        title: Quarterly Contact Spending Report URIs
+    - run: collect_report_uris
+      runner: tzabar
+      parameters:
+        target-resource:
+          name: quarterly-contract-spending-report-uris
+          path: data/quarterly-contract-spending-report-uris.csv
+    - run: add-report-metadata
+    - run: collect_report_pages
+      parameters:
+        resource-name: quarterly-contract-spending-report-uris
+    - run: set_types
+    - run: sample
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris
+
+
+quarterly-contract-spending-reports:
+  title: דוחות רבעוניים מתוך מרכבה, לפי נוהל היחידה לחופש המידע.
+  description: >
+    כל משרדי הממשלה ויחידות הסמך (שמחוברות למערכת מרכבה) צריכים לפרסם אחת לרבעון (תוך 45 יום מסוף הרבעון)
+    דו״ח התקשרויות לפי פורמט מוגדר היטב הממומש כדו״ח מובנה במערכת המרכבה.
+    כל המשרדים מדווחים עצמאית והדו״חות עולים לאתר היחידה לחופש המידע, משם אנו אוספים אותם.
+    התוצר של השרשר הזה הוא פירוט כל הדיווחים של כל המשרדים.
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-contract-spending-report-uris
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: quarterly-contract-spending-reports
+        title: Quarterly Contract Spending Reports
+    - run: reports_to_resources
+      parameters:
+        input-file: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris/datapackage.json
+    - run: stream_remote_resources
+      runner: tzabar
+    - run: concatenate
+      parameters:
+        sources: "report_[0-9]+"
+        target:
+          name: quarterly-contract-spending-reports
+        fields:
+          executed:
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצמדות
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצ
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ והצ בש"ח
+            - ביצוע חשבוניות כולל מע"מ
+            - ביצוע חשבוניות במטבע מקומי כולל מע"מ
+            - ביצוע ערך קבלות הטובין במט"מ
+          manof_ref:
+            - מס' פנייה במנו"ף/מנור"
+          volume:
+            - ערך ההזמנה כולל מע"מ
+            - ערך ההזמנה כולל מע"מ בש"ח
+            - ערך הזמנה במ.ט.מ
+          purchase_method:
+            - אופן רכישה
+            - אופן רכישה מעודכן
+          sensitive_order:
+            - הזמנה רגישה
+          order_id:
+            - הזמנת רכש
+          currency:
+            - מטבע
+            - מטבע חשבונית
+          purpose:
+            - מטרת התקשרות
+            - מטרת התקשרות (חדש)
+            - תאור התחייבות (מרכבה)
+            - תאור ההזמנה
+            - מטרת התקשרות + תאור התחייבות
+          exemption_reason:
+            - סיבת פטור
+          end_date:
+            - סיום תקופת תוקף
+          purchasing_unit_code:
+            - קבוצה רוכשת
+          supplier_code:
+            - קוד ספק
+            - קוד חברה
+          purchasing_unit:
+            - שם אתר
+          supplier_name:
+            - שם הספק
+          publisher:
+            - שם חברה
+            - שם חברה/אתר
+          buyer_description:
+            - תאור של ארגון רכש
+          order_date:
+            - תאריך יצירת ההזמנה
+          start_date:
+            - התחלת תקופת תוקף
+          budget_title:
+            - תיאור תקנה תקציבית
+          budget_code:
+            - תקנה תקציבית
+            - תקנה
+            - פריט התחייבות
+          explanation:
+            - הבהרות
+          report_error:
+            - error
+          company_id:
+            - מספר ח"פ
+
+          report-date: []
+          report-title: []
+          report-publisher: []
+          report-url: []
+
+    - run: fix-report-values
+    - run: set_types
+      parameters:
+        resources: quarterly-contract-spending-reports
+        types:
+          executed:
+            type: number
+          volume:
+            type: number
+          end_date:
+            type: date
+          start_date:
+            type: date
+          order_date:
+            type: date
+          sensitive_order:
+            type: boolean
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
+    - run: dump.to_sql
+      parameters:
+        tables:
+          quarterly_contract_spending_reports:
+            resource-name: quarterly-contract-spending-reports
+          quarterly_contract_spending_reports_errors:
+            resource-name: report-loading-results
+
+latest-contract-spending:
+  title: התקשרויות רכש ממשלתיות
+  description: >
+    אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-contract-spending-reports
+    - pipeline: ./entities/fingerprints
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: latest-contract-spending
+        title: Latest Contract Spending
+    - run: load_resource
+      parameters:
+        resource: entities
+        url: /var/datapackages/entities/fingerprints/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: quarterly-contract-spending-reports
+        url: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
+    - run: stream_remote_resources
+    - run: join
+      parameters:
+        source:
+          name: quarterly-contract-spending-reports
+          key:
+            - order_id
+            - budget_code
+          delete: true
+        target:
+          name: contract-spending
+          key: null
+        fields:
+          executed:
+            aggregate: last
+          manof_ref:
+            aggregate: set
+          volume:
+            aggregate: last
+          purchase_method:
+            aggregate: set
+          sensitive_order:
+            aggregate: set
+          order_id: {}
+          currency:
+            aggregate: last
+          purpose:
+            aggregate: last
+          exemption_reason:
+            aggregate: set
+          end_date:
+            aggregate: last
+          purchasing_unit_code:
+            aggregate: set
+          supplier_code:
+            aggregate: set
+          purchasing_unit:
+            aggregate: set
+          supplier_name:
+            aggregate: set
+          publisher:
+            aggregate: set
+          buyer_description:
+            aggregate: set
+          order_date:
+            aggregate: last
+          start_date:
+            aggregate: last
+          budget_title:
+            aggregate: last
+          budget_code:
+            aggregate: last
+          explanation:
+            aggregate: set
+          company_id:
+            aggregate: last
+          supplier_name_fingerprint:
+            name: supplier_name
+            aggregate: max
+    - run: set_types
+      parameters:
+        resources: contract-spending
+        types:
+          executed:
+            type: number
+          volume:
+            type: number
+          end_date:
+            type: date
+          start_date:
+            type: date
+          order_date:
+            type: date
+    - run: set_types
+      parameters:
+        resources: contract-spending
+        types:
+          end_date:
+            es:time-range: to
+          order_date:
+            es:time-range: from
+          buyer_description:
+            es:itemType: string
+          exemption_reason:
+            es:itemType: string
+          explanation:
+            es:itemType: string
+          manof_ref:
+            es:itemType: string
+          publisher:
+            es:itemType: string
+          purchase_method:
+            es:itemType: string
+          purchasing_unit:
+            es:itemType: string
+          purchasing_unit_code:
+            es:itemType: string
+          sensitive_order:
+            es:itemType: boolean
+          supplier_code:
+            es:itemType: string
+          supplier_name:
+            es:itemType: string
+    - run: fingerprint
+      parameters:
+        resource-name: contract-spending
+        source-field: supplier_name_fingerprint
+        target-field: entity_fingerprint
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - fingerprint
+        target:
+          name: contract-spending
+          key:
+            - entity_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+          entity_id:
+            name: id
+          entity_kind:
+            name: kind
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: contract-spending
+          key:
+            - company_id
+          full: true
+        fields:
+          entity_name:
+            name: name
+            aggregate: first
+          entity_id:
+            name: id
+            aggregate: first
+          entity_kind:
+            name: kind
+            aggregate: first
+    - run: calc-min-max-years
+    - run: calc-spending-score
+    - run: set_primary_key
+      parameters:
+        contract-spending:
+          - order_id
+          - budget_code
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/latest-contract-spending
+    - run: dump.to_sql
+      parameters:
+        tables:
+          contract_spending:
+            resource-name: contract-spending
+
+
+spending-by-entity:
+  dependencies:
+    - pipeline: ./procurement/spending/latest-contract-spending
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: spending-by-entity
+        title: Total contract spending, by entity id
+    - run: load_resource
+      parameters:
+        url: dependency://./procurement/spending/latest-contract-spending
+        resource: contract-spending
+    - run: join
+      parameters:
+        source:
+          name: contract-spending
+          key:
+            - entity_id
+          delete: true
+        target:
+          name: spending-by-entity
+          key: null
+        fields:
+          id:
+            name: entity_id
+          name:
+            name: entity_name
+          kind:
+            name: entity_kind
+          amount:
+            name: executed
+            aggregate: sum
+          min_year:
+            name: min_year
+            aggregate: min
+          max_year:
+            name: max_year
+            aggregate: max
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/spending-by-entity

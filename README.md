@@ -12,11 +12,11 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
  
  The framework we're using to accomplish all of this is called `datapackage-pipelines`. This framework allows us to write simple 'pipelines', each consisting of a set of predefined processing steps. These pipelines are not coded, but rather defined in a set of YAML files. Most of the pipelines use of a set of common building-blocks, and some custom processors - mainly custom scrapers for exotic sources.
      
- To see what's the current processing status of each pipeline, just hop to the (dashboard)[https://next.obudget.org/pipelines/].
+ To see what's the current processing status of each pipeline, just hop to the [dashboard](https://next.obudget.org/pipelines/).
  
  ## The directory structure
  
- All the pipeline definitions can be found under `budgetkey_data_pipeline/pipelines`.
+ All the pipeline definitions can be found under `datapackage_pipelines_budgetkey_data_pipeline/pipelines`.
  
  There we can see the following directory structure (the most interesting parts of it, anyway):
  - `budget/`
@@ -37,12 +37,12 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
     - `tenders`: Pipelines for retrieving data on government tendering process (and the lack of it)
 - `supports/`: Pipelines for retrieving data on government supports and its relevant processes
 
-_note: To understand a bit more on the difference between the different types of government spending, please read this excellent (blog post)[https://blog.okfn.org/2017/05/18/what-is-the-difference-between-budget-spending-and-procurement-data/]._
+_note: To understand a bit more on the difference between the different types of government spending, please read this excellent [blog post](https://blog.okfn.org/2017/05/18/what-is-the-difference-between-budget-spending-and-procurement-data/)._
 
 ## Developing a new pipeline
 
-- Read about `datapackage-pipelines` (here)[https://github.com/frictionlessdata/datapackage.pipelines/]
-- Install this package (`budgetkey-data-pipelines`) using the instructions in the Quickstart section below
+- Read about `datapackage-pipelines` [here](https://github.com/frictionlessdata/datapackage-pipelines)
+- Install this package (`datapackage-pipelines-budgetkey`) using the instructions in the Quickstart section below
 - Try to understand where is the change that you want to make supposed to reside? 
     - Is it related to one of the existing pipelines?
     - Is it something new altogether?
@@ -108,8 +108,8 @@ $ budgetkey-dpp run ./entities/companies/registrar/registry
 
 The following files will be created:
 * `/var/datapackages` - data saved in datapackages
-* `budgetkey_data_pipelines/.data.db` - data saved in DB (to use a different DB, set DPP_DB_ENGINE env var using sqlalchemy connection url format)
-* `budgetkey_data_pipelines/pipelines/.dpp.db` - metadata about the pipelines themselves and run status
+* `datapackage_pipelines_budgetkey/.data.db` - data saved in DB (to use a different DB, set DPP_DB_ENGINE env var using sqlalchemy connection url format)
+* `datapackage_pipelines_budgetkey/pipelines/.dpp.db` - metadata about the pipelines themselves and run status
 
 
 ### Writing Tests
@@ -135,3 +135,52 @@ to run tests faster you can run py.test directly, but you will need to setup the
 $ pip install pytest
 $ py.test tests/tenders/test_fixtures.py -svk test_tenders_fixtures_publishers
 ```
+
+## Using Docker Compose
+
+Docker Compose can be used to run a full environment with all required services - similar to the production environment.
+
+### Installation
+
+* Install Docker and Docker Compose (Refer to Docker documentation)
+* (Optional) Build the image from current directory: `docker-compose build pipelines`
+* Run the minimal required environment services in the background:
+  * `docker-compose up -d redis db pipelines`
+* You should have the following endpoints available:
+  * Pipelines dashboard - `http://localhost:5000/` (doesn't run any workers by default)
+  * DB - `postgresql://postgres:123456@localhost:15432/postgres`
+* You can run budgetkey-dpp command from inside the docker container:
+  * `docker-compose exec pipelines sh -c "budgetkey-dpp"`
+* Elasticsearch and Kibana are also available, to start:
+  * `docker-compose up -d elasticsearch kibana`
+* To connect to the service in docker from local PC:
+  * `source .env.example`
+  * `dpp`
+
+## Loading datapackages to Elasticsearch
+
+This method allows to load the prepared datapackages to elasticsearch, the data is then available for exploration via Kibana
+
+This snippet will delete all local docker-compose volumes - so make sure you don't have anything important there beforehand..
+
+It loads the first 100 rows from each pipeline, you can modify ES_LIMIT_ROWS below or remove it to load all data
+
+```
+docker-compose down -v && docker-compose pull elasticsearch db && docker-compose up -d elasticsearch db
+export DPP_DB_ENGINE="postgresql://postgres:123456@localhost:15432/postgres"
+export DPP_ELASTICSEARCH="localhost:19200"
+for doctype in `budgetkey-dpp | grep .budgetkey/elasticsearch/index_ | cut -d"_" -f2 - | cut -d" " -f1 -`; do
+    echo " > Loading ${doctype}"
+    ES_LOAD_FROM_URL=1 ES_LIMIT_ROWS=100 budgetkey-dpp run ./budgetkey/elasticsearch/index_$doctype
+done
+```
+
+Now you can start Kibana to explore the data
+
+```
+docker-compose up -d kibana
+```
+
+Kibana should be available at http://localhost:15601/ (It might take some time to start up properly)
+
+Index name is `budgetkey`

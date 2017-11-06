@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.download_pages_data import (
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.download_pages_data import (
     DownloadPagesDataProcessor, TABLE_SCHEMA as DOWNLOAD_PAGES_DATA_TABLE_SCHEMA
 )
 from ...common import listify_resources, unlistify_resources
@@ -10,9 +10,9 @@ def get_mock_exemption_data(publication_id, url=None):
     filename = os.path.join(os.path.dirname(__file__), "fixtures", "publication_{}".format(publication_id))
     if url and not os.path.exists(filename):
         res = requests.get(url)
-        with open(filename, 'w') as f:
+        with open(filename, 'w', encoding="utf-8") as f:
             f.write(res.text)
-    with open(filename) as f:
+    with open(filename, encoding="utf-8") as f:
         return f.read()
 
 
@@ -51,6 +51,7 @@ def run_download_processor(resources):
     ingest_response = ({}, {"resources": [{"name": "tender-urls"}]}, unlistify_resources(resources))
     datapackage, resources, stats = MockDownloadExemptionPagesDataProcessor(ingest_response=ingest_response).spew()
     assert datapackage == {"resources": [{
+        'dpp:streaming': True,
         "name": "tender-urls-downloaded-data",
         "path": "data/tender-urls-downloaded-data.csv",
         "schema": DOWNLOAD_PAGES_DATA_TABLE_SCHEMA

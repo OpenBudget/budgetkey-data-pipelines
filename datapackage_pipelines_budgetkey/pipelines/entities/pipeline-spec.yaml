@@ -1,0 +1,270 @@
+all:
+  dependencies:
+    - pipeline: ./entities/companies/registrar/details
+    - pipeline: ./entities/associations/guidestar/guidestar
+    - pipeline: ./entities/special/registry
+    - pipeline: ./entities/cooperatives/cooperatives
+    - pipeline: ./entities/ottoman/ottoman-association-registry
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entities
+        title: All Entities
+    # Load entities in order of precedence
+    - run: load_resource
+      parameters:
+        resource: lamas-municipal-data
+        url: /var/datapackages/lamas-municipal-data/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: cooperatives
+        url: /var/datapackages/entities/cooperatives/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: special-entities
+        url: /var/datapackages/entities/special/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: universities
+        url: universities/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: guidestar
+        url: /var/datapackages/entities/associations/guidestar/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: ottoman-association-registry
+        url: /var/datapackages/entities/ottoman/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: company-details
+        url: /var/datapackages/entities/companies/registrar/details/datapackage.json
+    - run: compact_entities
+      parameters:
+        company-details:
+          remove-prefix: company_
+          kind: company
+          kind-he: חברה פרטית
+          id-column: id
+          name-column: company_name
+          name-en-column: company_name_eng
+        guidestar:
+          remove-prefix: association_
+          kind: association
+          kind-he: עמותה
+          id-column: id
+          name-column: association_title
+        special-entities:
+          kind-column: kind
+          kind-he-column: kind_he
+          id-column: id
+          name-column: name
+        ottoman-association-registry:
+          kind-column: kind
+          kind-he: אגודה עותמנית
+          id-column: id
+          name-column: name
+        cooperatives:
+          kind: cooperative
+          kind-he: אגודה שיתופית
+          id-column: id
+          name-column: name
+        lamas-municipal-data:
+          kind: municipality
+          kind-he: רשות מקומית
+          id-column: entity_id
+          name-column: entity_name
+        universities:
+          kind: university
+          kind-he: אוניברסיטה
+          id-column: id
+          name-column: name
+    - run: sample
+    - run: concatenate
+      parameters:
+        target:
+          name: entities
+        fields:
+          id: []
+          name: []
+          name_en: []
+          kind: []
+          kind_he: []
+          details: []
+    - run: dedup_entities
+    - run: set_types
+      parameters:
+        types:
+          kind:
+            constraints:
+              pattern: "[a-z-_]+"
+          name:
+            es:title: true
+          name_en:
+            es:title: true
+          kind_he:
+            constraints:
+              required: true
+          id:
+            constraints:
+              pattern: "[0-9]+"
+    - run: set_primary_key
+      parameters:
+        entities: ['id']
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities:
+            resource-name: entities
+
+fingerprints:
+  dependencies:
+    - pipeline: ./entities/all
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: entity_fingerprints
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+    - run: fingerprint
+      parameters:
+        source-field: name
+        target-field: fingerprint
+        resource-name: entities
+        unique-fingerprints: true
+    - run: concatenate
+      parameters:
+        target:
+          name: entities
+        fields:
+          id: null
+          name: null
+          kind: null
+          fingerprint: null
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/fingerprints
+
+entities:
+  dependencies:
+    - pipeline: ./procurement/spending/spending-by-entity
+    - pipeline: ./supports/supports-by-entity
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: scored-entities
+        title: Entities with scores
+
+    # Collect amounts from different spending routes
+    ## Contracts
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/spending/spending-by-entity/datapackage.json
+        resource: spending-by-entity
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/supports-by-entity/datapackage.json
+        resource: supports-by-entity
+
+    # Concatenate all these amounts
+    - run: concatenate
+      parameters:
+        target:
+          name: amounts
+        fields:
+          id: []
+          name: []
+          kind: []
+          amount: []
+          min_year: []
+          max_year: []
+
+    # Deduplicate amounts by summing on entity
+    - run: join
+      parameters:
+        source:
+          name: amounts
+          key:
+            - id
+          delete: true
+        target:
+          name: amounts
+          key: null
+        fields:
+          id: null
+          name: null
+          kind: null
+          received_amount:
+            name: amount
+            aggregate: sum
+          min_year:
+            name: min_year
+            aggregate: min
+          max_year:
+            name: max_year
+            aggregate: max
+
+    # Load entities
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
+
+    # Load scores into entity table
+    - run: join
+      parameters:
+        source:
+          name: amounts
+          key:
+            - id
+          delete: true
+        target:
+          name: entities
+          key:
+            - id
+          full: true
+        fields:
+          received_amount: null
+          min_year: null
+          max_year: null
+
+    # Calculate score
+    - run: calc-entity-score
+
+    - run: set_types
+      parameters:
+        types:
+          score:
+            es:score-column: true
+
+    # And dump it
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/scored
+
+geocode:
+  schedule:
+    crontab: "0 0 * * *"
+  pipeline:
+    - run: load_sql_table
+      parameters:
+        table: entities
+        columns:
+          id:
+          details:
+    - run: geocode_entities
+      parameters:
+        input-resource: entities
+        output-resource: entities-geo
+        geo-table: entities_geo
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities_geo:
+            resource-name: entities-geo
+            mode: update

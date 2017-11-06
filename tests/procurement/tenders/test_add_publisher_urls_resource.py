@@ -1,4 +1,4 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_publisher_urls_resource import resource_filter
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_publisher_urls_resource import resource_filter
 import os
 
 

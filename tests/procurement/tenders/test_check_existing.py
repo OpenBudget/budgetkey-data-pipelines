@@ -1,5 +1,5 @@
-from budgetkey_data_pipelines.pipelines.procurement.tenders.check_existing import CheckExistingProcessor
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_publisher_urls_resource import \
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import CheckExistingProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_publisher_urls_resource import \
     PUBLISHER_URLS_TABLE_SCHEMA
 from ...common import listify_resources, unlistify_resources
 

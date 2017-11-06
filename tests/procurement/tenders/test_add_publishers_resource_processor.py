@@ -1,14 +1,14 @@
 import os, requests
-from budgetkey_data_pipelines.pipelines.procurement.tenders.add_publishers_resource import resource_filter
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.add_publishers_resource import resource_filter
 
 
 def run_add_publishers_resource_processor(url, fixture_file_name, parameters):
     fixtures_dir = os.path.join(os.path.dirname(__file__), "fixtures")
     html_file = os.path.join(fixtures_dir, fixture_file_name)
     if not os.path.exists(html_file):
-        with open(html_file, "w") as f:
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(requests.get(url).text)
-    with open(html_file) as f:
+    with open(html_file, encoding="utf-8") as f:
         html = f.read()
     publishers = list(resource_filter([{"data": line} for line in html.split("\n")],
                                       parameters=parameters))
