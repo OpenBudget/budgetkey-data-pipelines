@@ -19,6 +19,12 @@ government_companies:
         tables:
           government_companies:
             resource-name: government-companies
+    - run: collate
+      parameters:
+        resource: government-companies
+        key:
+          - company_number
+        collated-field-name: government
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/government/registrar

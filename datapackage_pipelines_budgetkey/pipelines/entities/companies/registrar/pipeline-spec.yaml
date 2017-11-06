@@ -51,7 +51,7 @@ details-scraper:
     - run: load_resource
       parameters:
         resource: company-registry
-        url: /var/datapackages/entities/companies/registrar/registry/datapackage.json
+        url: dependency://./entities/companies/registrar/registry
     - run: manage-revisions
       parameters:
         resource-name: company-registry
@@ -93,17 +93,37 @@ details-scraper:
 details:
   dependencies:
     - pipeline: ./entities/companies/registrar/details-scraper
+    - pipeline: ./entities/companies/government/registrar/government_companies
   pipeline:
     - run: add_metadata
       parameters:
         name: company-details
         title: נתונים פומביים על חברות המופיעים באתר רשם החברות
+    - run: load_resource
+      parameters:
+        url: dependency://./entities/companies/government/registrar/government_companies
+        resource: government-companies
     - run: add_resource
       parameters:
         url: env://DPP_DB_ENGINE
         name: company-details
         table: company_details
     - run: stream_remote_resources
+    - run: join
+      parameters:
+        source:
+          name: government-companies
+          delete: true
+          key:
+            - company_number
+        target:
+          name: company-details
+          key:
+            - id
+        fields:
+          government: null
+    - run: sample
+    - run: fix_values
     - run: set_types
       parameters:
         types:
