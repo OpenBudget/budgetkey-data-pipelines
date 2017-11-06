@@ -35,7 +35,6 @@ def scrape():
 
     i = 0
     while url is not None:
-        # while url is not None and i < 100:
         logging.info('iteration #%d with url: %s' % (i, url))
         driver.get(url)
         nominations_page = NominationsPage(url, CALCALIST_BASE_URL, driver.page_source)

@@ -18,7 +18,6 @@ def modify_datapackage(datapackage, parameters, stats):
     return datapackage
 
 
-# TODO: there are many duplicates here make sure you solve this
 def process_row(row, row_index,
                 resource_descriptor, resource_index,
                 parameters, stats):

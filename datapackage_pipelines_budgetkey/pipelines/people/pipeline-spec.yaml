@@ -65,6 +65,8 @@ aggregated:
           - key
         collated-field-name: details
     -
+      run: sample
+    -
       run: join
       parameters:
         source:

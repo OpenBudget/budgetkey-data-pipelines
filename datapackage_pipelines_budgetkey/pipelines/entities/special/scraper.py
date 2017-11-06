@@ -57,10 +57,10 @@ def scrape():
     )
 
     # Prepare Driver
-    # driver = webdriver.Remote(
-    #     command_executor='http://tzabar.obudget.org:8910',
-    #     desired_capabilities=dcap
-    # )
+    driver = webdriver.Remote(
+        command_executor='http://tzabar.obudget.org:8910',
+        desired_capabilities=dcap
+    )
     driver = webdriver.Chrome()
 
     driver.set_window_size(1200, 1024)

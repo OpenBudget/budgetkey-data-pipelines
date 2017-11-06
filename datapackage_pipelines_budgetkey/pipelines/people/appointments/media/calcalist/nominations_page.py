@@ -20,7 +20,6 @@ class NominationsPage(object):
 
     def _next_relative_url(self):
         iframe_links = self.page('.Comments_Pagging')('td')('a')
-        logging.info('iframe_links: %s' % iframe_links)
         for iframe_link in iframe_links.items():
             link = IFrameLink(iframe_link)
             if link.has_element('הבא'):
