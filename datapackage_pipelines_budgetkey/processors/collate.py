@@ -24,7 +24,9 @@ for res in dp['resources']:
         outer_fields.append({
             'name': collated_field_name,
             'type': 'object',
-            'es:schema': inner_fields
+            'es:schema': {
+                'fields': inner_fields
+            }
         })
         schema = {
             'fields': outer_fields,
