@@ -12,7 +12,7 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
         return self._get_spew_params()
 
     def requests_get_content(self, url):
-        if url == "http://www.mr.gov.il/Files_Michrazim/201813.signed":
+        if url == "https://www.mr.gov.il/Files_Michrazim/201813.signed":
             filename = "Files_Michrazim_201813.signed"
         else:
             raise Exception("unknown url: {}".format(url))
@@ -109,9 +109,9 @@ def test_parse_data():
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2]["publication_id"] == 574896
-    assert resource[2]["documents"] == [{'description': 'חוות דעת מקצועית',
-                                         'link': unsigned_doc_link,
-                                         'update_time': '2015-12-31'}]
+    assert json.loads(resource[2]["documents"]) == [{"description": "חוות דעת מקצועית",
+                                                     "link": unsigned_doc_link,
+                                                     "update_time": "2015-12-31"}]
     assert os.path.exists(unsigned_doc_link)
     with open(unsigned_doc_link, "rb") as actual:
         with open(os.path.join(os.path.dirname(__file__), "fixtures", "Files_Michrazim_201813.pdf"), "rb") as expected:

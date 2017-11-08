@@ -94,9 +94,10 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
 
     def unsign_document_link(self, url):
         # page = pq(self.requests_get_content(url))
-        if not url.startswith("http://www.mr.gov.il/Files_Michrazim/"):
+        url = url.replace("http://", "https://")
+        if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
             raise Exception("invalid url: {}".format(url))
-        filename = url.replace("http://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
+        filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
         page = pq(self.requests_get_content(url))
         data_elt = page(page(page.children()[1]).children()[0]).children()[0]
         if data_elt.attrib["DataEncodingType"] != "base64":
