@@ -322,6 +322,12 @@ latest-contract-spending:
         contract-spending:
           - order_id
           - budget_code
+    - run: set_types
+      parameters:
+        resources: contract-spending
+        types:
+          entity_name:
+            es:title: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending

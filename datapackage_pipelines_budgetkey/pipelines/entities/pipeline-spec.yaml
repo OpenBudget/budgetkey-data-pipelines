@@ -98,10 +98,6 @@ all:
           kind:
             constraints:
               pattern: "[a-z-_]+"
-          name:
-            es:title: true
-          name_en:
-            es:title: true
           kind_he:
             constraints:
               required: true
@@ -241,6 +237,10 @@ entities:
         types:
           score:
             es:score-column: true
+          name:
+            es:title: true
+          name_en:
+            es:title: true
 
     # And dump it
     - run: dump.to_path
