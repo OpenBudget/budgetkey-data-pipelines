@@ -5,6 +5,7 @@ from datapackage_pipelines.utilities.extended_json import json
 
 from pyquery import PyQuery as pq
 from datetime import datetime
+import requests, os, base64, mimetypes
 
 TABLE_SCHEMA = {
     "primaryKey": ["publication_id", "tender_type", "tender_id"],
@@ -85,6 +86,37 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                                                      default_replace_resource=True,
                                                      table_schema=TABLE_SCHEMA,
                                                      **kwargs)
+        self.unsigned_path = os.path.join(self.parameters["out-path"], "Files_Michrazim")
+        os.makedirs(self.unsigned_path, exist_ok=True)
+
+    def requests_get_content(self, url):
+        return requests.get(url).content
+
+    def unsign_document_link(self, url):
+        # page = pq(self.requests_get_content(url))
+        url = url.replace("http://", "https://")
+        if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
+            raise Exception("invalid url: {}".format(url))
+        filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
+        page = pq(self.requests_get_content(url))
+        data_elt = page(page(page.children()[1]).children()[0]).children()[0]
+        if data_elt.attrib["DataEncodingType"] != "base64":
+            raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
+        ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
+        filename = os.path.join(self.unsigned_path, filename + ext)
+        if not os.path.exists(filename):
+            with open(filename, "wb") as f:
+                f.write(base64.decodebytes(data_elt.text.encode("ascii")))
+        return filename
+
+    def get_document_link(self, base_url, href):
+        source_url = "{}{}".format(base_url, href)
+        if source_url.endswith(".signed"):
+            # signed documents - decrypt and change path to local unsigned file
+            return self.unsign_document_link(source_url)
+        else:
+            # unsigned documents are returned with the source url as-is
+            return source_url
 
     def filter_resource_data(self, data, parameters):
         for row in data:
@@ -97,7 +129,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 if update_time is not None:
                     update_time = update_time
                 documents.append({"description": img_elt.attrib.get("alt", ""),
-                                  "link": "{}{}".format(BASE_URL, link_elt.attrib.get("href", "")),
+                                  "link": self.get_document_link(BASE_URL, link_elt.attrib.get("href", "")),
                                   "update_time": update_time})
             if row["tender_type"] == "exemptions":
                 yield self.get_exemptions_data(row, page, documents)
