@@ -24,10 +24,17 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
         with open(filename, "rb") as f:
             return f.read()
 
-def run_parse_processor(resource, temp_dir):
+    def write_to_object_storage(self, object_name, data):
+        pass
+
+def run_parse_processor(resource):
     parameters = {
-        "out-path": temp_dir
+        "bucket-name-env": "BUDGETKEY_S3_BUCKET",
+        "bucket-base-url-env": "BUDGETKEY_S3_BUCKET_BASEURL",
+        "base-object-name": "procurement/tenders/"
     }
+    os.environ[parameters["bucket-name-env"]] = "fake-bucket"
+    os.environ[parameters["bucket-base-url-env"]] = "http://fake-url/fake-bucket/"
     datapackage = {"resources": [{
         "name": "tender-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
@@ -51,12 +58,6 @@ def docs(x):
     return json.dumps(x, sort_keys=True, ensure_ascii=False)
 
 def test_parse_data():
-    temp_dir = tempfile.mkdtemp(prefix="budgetkey-data-pipelines-tests-procurement-tenders-")
-    unsigned_doc_link = os.path.join(temp_dir, 'Files_Michrazim', '201813.pdf')
-    if os.path.exists(unsigned_doc_link):
-        os.unlink(unsigned_doc_link)
-    else:
-        os.makedirs(os.path.dirname(unsigned_doc_link), exist_ok=True)
     resource = run_parse_processor([
         {"pid": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "data": get_mock_exemption_data("595431"), "tender_type": "exemptions"},
@@ -78,7 +79,7 @@ def test_parse_data():
          "data": get_mock_exemption_data("Goods-19-2017"), "tender_type": "central"},
         {"pid": None, "url": "https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx",
          "data": get_mock_exemption_data("network-michraz3"), "tender_type": "central"},
-    ], temp_dir)
+    ])
     assert len(resource) == 9
     assert resource[0] == {
         "publisher_id": 71,
@@ -109,14 +110,10 @@ def test_parse_data():
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2]["publication_id"] == 574896
+    unsigned_doc_link = "http://fake-url/fake-bucket/procurement/tenders/Files_Michrazim/201813.pdf"
     assert json.loads(resource[2]["documents"]) == [{"description": "חוות דעת מקצועית",
                                                      "link": unsigned_doc_link,
                                                      "update_time": "2015-12-31"}]
-    assert os.path.exists(unsigned_doc_link)
-    with open(unsigned_doc_link, "rb") as actual:
-        with open(os.path.join(os.path.dirname(__file__), "fixtures", "Files_Michrazim_201813.pdf"), "rb") as expected:
-            assert actual.read() == expected.read()
-    os.unlink(unsigned_doc_link)
     assert resource[3] == {'publisher_id': 50,
                            'publication_id': 598379,
                            'page_url': 'https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=598379',
@@ -246,7 +243,6 @@ def test_parse_data():
                                                {'description': 'הוראת שעה בתוקף 16.3.2',
                                                'link': 'http://hozrim.mof.gov.il/doc/hashkal/horaot.nsf/bynum/%d7%9e.16.3.2',
                                                'update_time': None}])}
-    shutil.rmtree(temp_dir)
 
 
 def test_invalid_response():
@@ -259,8 +255,7 @@ def test_invalid_response():
                 url = "https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx"
             try:
                 run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
-                                      "tender_type": tender_type},],
-                                    temp_dir)
+                                      "tender_type": tender_type},])
             except Exception as e:
                 if str(e) != "invalid or blocked response":
                     raise

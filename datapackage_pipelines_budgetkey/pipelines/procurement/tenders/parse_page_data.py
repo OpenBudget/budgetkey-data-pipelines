@@ -95,6 +95,11 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
     def requests_get_content(self, url):
         return requests.get(url).content
 
+    def write_to_object_storage(self, object_name, data):
+        if not object_storage.exists(self.s3, self.bucket_name, object_name):
+            object_storage.write(self.s3, self.bucket_name, object_name,
+                                 data=data, public_bucket=True, create_bucket=True)
+
     def unsign_document_link(self, url):
         url = url.replace("http://", "https://")
         if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
@@ -106,10 +111,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
         ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
         object_name = self.base_object_name + filename + (ext if ext else "")
-        if not object_storage.exists(self.s3, self.bucket_name, object_name):
-            object_storage.write(self.s3, self.bucket_name, object_name,
-                                 data=base64.decodebytes(data_elt.text.encode("ascii")),
-                                 public_bucket=True, create_bucket=True)
+        self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
         return self.bucket_base_url + object_name
 
     def get_document_link(self, base_url, href):
