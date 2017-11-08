@@ -125,8 +125,9 @@ scraper:
     - run: parse_page_data
       parameters:
         output_resource: tenders
-        # it writes parsed files to this directory
-        out-path: /var/datapackages/procurement/tenders/scraper
+        bucket-name-env: BUDGETKEY_S3_BUCKET
+        bucket-base-url-env: BUDGETKEY_S3_BUCKET_BASEURL
+        base-object-name: procurement/tenders/
     - run: set_types
       parameters:
         resources: tenders
