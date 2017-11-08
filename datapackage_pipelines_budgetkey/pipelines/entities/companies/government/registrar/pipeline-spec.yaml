@@ -24,7 +24,7 @@ government_companies:
         resource: government-companies
         key:
           - company_number
-        collated-field-name: government
+        collated-field-name: government_company_info
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/government/registrar

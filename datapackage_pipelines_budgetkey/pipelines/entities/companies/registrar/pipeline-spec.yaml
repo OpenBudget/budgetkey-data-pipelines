@@ -121,7 +121,7 @@ details:
           key:
             - id
         fields:
-          government: null
+          government_company_info: null
     - run: sample
     - run: fix_values
     - run: set_types
