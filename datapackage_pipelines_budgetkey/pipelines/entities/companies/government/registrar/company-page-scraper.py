@@ -296,7 +296,15 @@ for h in array_headers:
     resource['schema']['fields'].append({
         'name': h,
         'type': 'array',
-        'es:itemType': 'string'
+        'es:itemType': 'object',
+        'es:schema': {
+            'fields': [
+                {'name': 'first_name', 'type': 'string'},
+                {'name': 'last_name', 'type': 'string'},
+                {'name': 'role', 'type': 'string'},
+                {'name': 'href', 'type': 'string'},
+            ]
+        }
     })
 
 spew(datapackage, process_resources(res_iter))
