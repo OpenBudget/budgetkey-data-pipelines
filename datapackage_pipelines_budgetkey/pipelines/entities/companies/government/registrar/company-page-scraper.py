@@ -295,7 +295,8 @@ for h in string_headers:
 for h in array_headers:
     resource['schema']['fields'].append({
         'name': h,
-        'type': 'array'
+        'type': 'array',
+        'es:itemType': 'string'
     })
 
 spew(datapackage, process_resources(res_iter))
