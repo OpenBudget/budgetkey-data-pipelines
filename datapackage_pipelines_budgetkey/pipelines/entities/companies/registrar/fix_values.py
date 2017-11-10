@@ -3,10 +3,10 @@ from datapackage_pipelines.wrapper import process
 
 def process_row(row, *_):
     row['company_address_lines'] = []
-    if row.get('company_address_lines') and \
+    if row.get('company_street') and \
             row.get('company_street_number') and \
             row.get('company_city'):
-        row['company_address_lines'].append('{company_street} {company_street_number},'.format(**row))
+        row['company_address_lines'].append('{company_street} {company_street_number}, {company_city}'.format(**row))
     elif row.get('company_pob') and \
             row.get('company_pob_city') and \
             row.get('company_pob_postal_code'):
