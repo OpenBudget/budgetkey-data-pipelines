@@ -124,6 +124,7 @@ def get_director_of_state(directors_of_state_elem):
     director_of_state['href'] = get_href(director_of_state_href)
     director_of_state['first_name'] = director_of_state_first_name.strip()
     director_of_state['last_name'] = director_of_state_last_name.strip()
+    director_of_state['full_name'] = '{first_name} {last_name}'.format(**director_of_state)
     return director_of_state
 
 
@@ -138,6 +139,7 @@ def get_director_in_company(directors_in_company_href_wrapper):
     director_in_company['first_name'] = director_in_company_first_name.strip()
     director_in_company['last_name'] = director_in_company_last_name.strip()
     director_in_company['role'] = director_in_company_role.strip()
+    director_in_company['full_name'] = '{first_name} {last_name}'.format(**director_in_company)
     return director_in_company
 
 
@@ -148,6 +150,7 @@ def get_director_not_by_state(directors_not_by_state_elem):
     director_not_by_state_first_name = director_not_by_state_elem_children[1].text
     director_not_by_state['first_name'] = director_not_by_state_first_name.strip()
     director_not_by_state['last_name'] = director_not_by_state_last_name.strip()
+    director_not_by_state['full_name'] = '{first_name} {last_name}'.format(**director_not_by_state)
     return director_not_by_state
 
 
@@ -158,6 +161,7 @@ def get_director_candidate(directors_candidate_elem):
     director_candidate_first_name = director_candidate_elem_children[1].text
     director_candidate['first_name'] = director_candidate_first_name.strip()
     director_candidate['last_name'] = director_candidate_last_name.strip()
+    director_candidate['full_name'] = '{first_name} {last_name}'.format(**director_candidate)
     return director_candidate
 
 
@@ -299,6 +303,7 @@ for h in array_headers:
         'es:itemType': 'object',
         'es:schema': {
             'fields': [
+                {'name': 'full_name', 'type': 'string'},
                 {'name': 'first_name', 'type': 'string'},
                 {'name': 'last_name', 'type': 'string'},
                 {'name': 'role', 'type': 'string'},

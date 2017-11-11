@@ -153,6 +153,7 @@ latest-contract-spending:
   dependencies:
     - pipeline: ./procurement/spending/quarterly-contract-spending-reports
     - pipeline: ./entities/fingerprints
+    - pipeline: ./procurement/tenders/processed
 
   pipeline:
     - run: add_metadata
@@ -162,12 +163,16 @@ latest-contract-spending:
     - run: load_resource
       parameters:
         resource: entities
-        url: /var/datapackages/entities/fingerprints/datapackage.json
+        url: dependency://./entities/fingerprints
+    - run: load_resource
+      parameters:
+        resource: tenders
+        url: dependency://./procurement/tenders/processed
     - run: load_resource
       parameters:
         resource: quarterly-contract-spending-reports
-        url: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
-    - run: stream_remote_resources
+        url: dependency://./procurement/spending/quarterly-contract-spending-reports
+    - run: join_tenders_and_contracts
     - run: join
       parameters:
         source:
