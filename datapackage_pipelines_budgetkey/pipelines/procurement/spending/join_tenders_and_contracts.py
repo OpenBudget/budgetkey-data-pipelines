@@ -6,13 +6,15 @@ parameters, datapackage, res_iter = ingest()
 
 
 tenders = {}
-FIELDS = ('tender_type', 'tender_id', 'publication_id', 'regulation', 'description')
+FIELDS = (
+    'tender_type', 'tender_id', 'publication_id', 'regulation', 'description')
+
 
 def collect_tenders(res):
     for row in res:
-        pid = res['publication_id']
+        pid = row['publication_id']
         if not pid:
-            pid = res['tender_id']
+            pid = row['tender_id']
         tenders[pid] = dict(
             (k, v)
             for k, v in row.items()
@@ -24,13 +26,14 @@ def join_tenders(res):
     for row in res:
         manof_excerpts = []
         manof_refs = row['manof_ref']
-        for i in manof_refs:
-            t = tenders.get(i)
-            if t:
-                manof_excerpts.append(dict(
-                    (k, t[k])
-                    for k in FIELDS
-                ))
+        if isinstance(manof_refs, list):
+            for i in manof_refs:
+                t = tenders.get(i)
+                if t:
+                    manof_excerpts.append(dict(
+                        (k, t[k])
+                        for k in FIELDS
+                    ))
         row['manof_excerpts'] = manof_excerpts
         yield row
 
