@@ -15,6 +15,7 @@ def collect_tenders(res):
         pid = row['publication_id']
         if not pid:
             pid = row['tender_id']
+        pid = str(pid)
         tenders[pid] = dict(
             (k, v)
             for k, v in row.items()
