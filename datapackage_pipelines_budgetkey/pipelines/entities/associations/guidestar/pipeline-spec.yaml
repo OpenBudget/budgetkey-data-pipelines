@@ -71,6 +71,7 @@ guidestar:
           association_year_established: { type: integer }
           association_founders:
             es:itemType: string
+            type: array
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/guidestar
