@@ -67,6 +67,7 @@ def process_datapackage(dp):
         'name': 'criteria_docs',
         'type': 'array',
         'es:itemType': 'object',
+        'es:index': False,
         'es:schema': criteria_res['schema']
     })
     return dp

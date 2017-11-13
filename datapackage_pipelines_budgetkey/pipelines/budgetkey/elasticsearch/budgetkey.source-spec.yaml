@@ -1,8 +1,9 @@
 budget:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./budget/national/processed/connected-national-budgets
   source_datapackage: /var/datapackages/budget/national/processed/connected-items/datapackage.json
+  page-title-pattern: '{nice-code} - {title}'
   key-fields:
     - code
     - year
@@ -15,35 +16,39 @@ budget:
 
 national-budget-changes:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./budget/national/changes/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
+  page-title-pattern: '{title}'
   key-fields:
     - transaction_id
 
 entities:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
+  page-title-pattern: '{name} ({kind_he})'
   key-fields:
     - id
   key-pattern: 'org/{kind}/{id}'
 
 contract-spending:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+  page-title-pattern: '{purpose}'
   key-fields:
     - order_id
     - budget_code
 
 supports:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
+  page-title-pattern: 'תמיכה תקציבית ב{recipient}'
   key-fields:
     - budget_code
     - year_requested
@@ -52,19 +57,20 @@ supports:
 
 tenders:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
+  page-title-pattern: '{regulation} עם {supplier}'
   key-fields:
     - tender_type
     - publication_id
     - tender_id
 
-people:
-  kind: indexer
-  revision: 3
-  dependent_pipeline: ./people/aggregated
-  source_datapackage: /var/datapackages/people/aggregated/datapackage.json
-  key-fields:
-    - key
-
+#people:
+#  kind: indexer
+#  revision: 4
+#  dependent_pipeline: ./people/aggregated
+#  source_datapackage: /var/datapackages/people/aggregated/datapackage.json
+#  key-fields:
+#    - key
+#
