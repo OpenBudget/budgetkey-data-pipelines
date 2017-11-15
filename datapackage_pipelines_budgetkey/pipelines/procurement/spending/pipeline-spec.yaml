@@ -333,6 +333,8 @@ latest-contract-spending:
         types:
           entity_name:
             es:title: false
+          purpose:
+            es:title: true
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending

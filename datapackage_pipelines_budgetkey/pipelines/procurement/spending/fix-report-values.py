@@ -116,6 +116,8 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
                     row[k] = budget_code(v)
                 elif k in ['end_date', 'order_date', 'start_date']:
                     row[k] = date(v)
+                elif k in ['currency']:
+                    row[k] = v.upper() if isinstance(v, str) else v
                 elif k in ['volume']:
                     row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif k in ['executed']:

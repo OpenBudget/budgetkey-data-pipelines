@@ -242,6 +242,8 @@ processed:
             es:time-range: to
           start_date:
             es:time-range: from
+          description:
+            es:title: true
           documents:
             es:itemType: object
             es:schema:

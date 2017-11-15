@@ -245,6 +245,14 @@ by-request-year:
         url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
 
+    - run: set_types
+      parameters:
+        resources:
+          - supports
+        types:
+          support_title:
+            es:title: true
+
     - run: collate
       parameters:
         resource: supports
