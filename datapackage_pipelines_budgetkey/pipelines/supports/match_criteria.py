@@ -18,25 +18,25 @@ def id(x):
 
 def enrich_supports(rows):
     for row in rows:
-        payments = row['payments']
-        if payments and len(payments) > 0:
-            payment = payments[0]
-            key = (payment['support_title'], payment['supporting_ministry'])
-            if key in cache:
-                bests = cache[key]
-            else:
-                bests = process.extractBests(
-                    {
-                        'purpose': key[0],
-                        'office': key[1]
-                    },
-                    criteria,
-                    processor=id,
-                    scorer=criteria_scorer
-                )
-                cache[key] = bests
-        else:
-            bests = []
+        bests = []
+        if row['request_type'] == '3א':
+            payments = row['payments']
+            if payments and len(payments) > 0:
+                payment = payments[0]
+                key = (payment['support_title'], payment['supporting_ministry'])
+                if key in cache:
+                    bests = cache[key]
+                else:
+                    bests = process.extractBests(
+                        {
+                            'purpose': key[0],
+                            'office': key[1]
+                        },
+                        criteria,
+                        processor=id,
+                        scorer=criteria_scorer
+                    )
+                    cache[key] = bests
         row['criteria_docs'] = [x[0] for x in bests]
         yield row
 
