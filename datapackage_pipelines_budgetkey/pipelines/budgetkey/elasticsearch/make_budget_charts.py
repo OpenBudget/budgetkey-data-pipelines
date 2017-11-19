@@ -27,79 +27,74 @@ ECON_TRANSLATIONS = {'capital_expenditure': 'הוצאות הון', 'debt_repayme
                      'reserve': 'רזרבות', 'salaries': 'שכר'}
 
 
-def sankey_chart(nodes, links):
-    for i, node in enumerate(nodes):
-        node['id'] = i
-    return [{
-        "type": "sankey",
-        "domain": {
-            "x": [0,1],
-            "y": [0,1]
-        },
-        "orientation": "h",
-        "valueformat": ".0f",
-        "valuesuffix": "₪",
-        "arrangement": "fixed",
-        "hoverinfo": "none",
-        "customdata": [node['extra'] for node in nodes],
-        "node": {
-            "pad": 20,
-            "thickness": 60,
-            "line": {
-                "color": "FF5A5F",
-                "width": 0.5
-            },
-            "label": [node['label'] for node in nodes],
-            "color": [node.get('color', '#FF5A5F') for node in nodes]
-        },
-        "link": {
-            "source": [link['source']['id'] for link in links],
-            "target": [link['target']['id'] for link in links],
-            "value": [link['value'] for link in links],
-            "label": [link.get('label', '') for link in links],
-        }
-    }], {}
+def mushonkey_chart(title, groups):
+    return {
+        'type': 'mushonkey',
+        'width': '100%',
+        'height': '800px',
+        'centerWidth': 300,
+        'centerHeight': 100,
+        'centerTitle': title,
+        'directionLeft': True,
+        'groups': groups
+    }
+
+
+def mushonkey_group(offset, width, left, klass, flows):
+    return {
+        'offset': offset,
+        'class': klass,
+        'width': width,
+        'leftSide': left,
+        'slope': 1.2,
+        'roundness': 50,
+        'labelTextSize': 14,
+        'flows': flows
+    }
+
+
+def mushonkey_flow(size, label, id):
+    return {
+        'size': size,
+        'label': label,
+        'context': id
+    }
+
+def budget_id(code, row):
+    return 'budget/%s/%s' % (code, row['year'])
 
 
 def budget_sankey(row, kids):
-    center_node = {
-        'label': row['title'],
-        'extra': row['code']
-    }
-    links = []
-    nodes = [center_node]
+    groups = []
     if row.get('hierarchy'):
-        parent_node = {
-            'label': row['hierarchy'][-1][1],
-            'extra': row['hierarchy'][-1][0]
-        }
-        nodes.append(parent_node)
-        links.append({
-            'source': center_node,
-            'target': parent_node,
-            'value': row['net_revised'],
-        })
+        parent = mushonkey_flow(
+            row['net_revised'],
+            row['hierarchy'][-1][1],
+            budget_id(row['hierarchy'][-1][0], row)
+        )
+        groups.append(mushonkey_group(-100, 1.0, False, 'budget-parent', [parent]))
+    expenses = []
+    revenues = []
     for child in sorted(kids, key=lambda x: abs(x['amount'])):
         amount = child['amount']
         if amount != 0:
-            node = {
-                'label': child['label'],
-                'extra': child.get('extra')
-            }
-            nodes.append(node)
             if amount < 0:
-                links.append({
-                    'source': center_node,
-                    'target': node,
-                    'value': -amount,
-                })
+                revenues.append(mushonkey_flow(
+                    -amount,
+                    child['label'],
+                    budget_id(child.get('extra'), row)
+                ))
             elif amount > 0:
-                links.append({
-                    'source': node,
-                    'target': center_node,
-                    'value': amount,
-                })
-    return sankey_chart(nodes, links)
+                expenses.append(mushonkey_flow(
+                    amount,
+                    child['label'],
+                    budget_id(child.get('extra'), row)
+                ))
+    if expenses:
+        groups.append(mushonkey_group(150, 1.0, True, 'budget-expense', expenses))
+    if revenues:
+        groups.append(mushonkey_group(150, 0.8, False, 'budget-revenues', revenues))
+    return mushonkey_chart(row['title'], groups), {}
 
 
 def category_sankey(row, prefix, translations={}):
@@ -174,6 +169,7 @@ def history_chart(row, normalisation=None):
             normalisation = [normalisation[year] for year in years]
         if len(years) < 2:
             return None, None
+        unit = '?'
         for measure, name in (
                 ('net_allocated', 'תקציב מקורי'),
                 ('net_revised', 'אחרי שינויים'),
