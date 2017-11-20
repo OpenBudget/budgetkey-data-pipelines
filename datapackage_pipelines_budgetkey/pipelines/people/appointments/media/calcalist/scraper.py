@@ -23,7 +23,7 @@ def scrape():
     i = 0
     while url is not None:
         logging.info('iteration #%d with url: %s' % (i, url))
-        page_source = HttpClient.download_page_content(url)
+        page_source = HttpClient.download_page_source(url)
         nominations_page = NominationsPage(url, BASE_URL, page_source)
 
         for nomination in nominations_page.nominations():

@@ -4,7 +4,7 @@ import requests
 class HttpClient(object):
 
     @staticmethod
-    def download_page_content(url):
+    def download_page_source(url):
         response = requests.get(url)
         if HttpClient._is_successful_response(response):
             return response.text
