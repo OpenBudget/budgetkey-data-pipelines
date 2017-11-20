@@ -6,6 +6,17 @@ from decimal import Decimal
 from datapackage_pipelines.wrapper import process
 
 DATE_RE = re.compile('[0-9]+')
+ORDER_ID_RE = re.compile('[0-9]+')
+
+order_id_counter = 0
+
+
+def order_id(x):
+    global order_id_counter
+    if ORDER_ID_RE.fullmatch(x):
+        return x
+    order_id_counter += 1
+    return x+'-%04x' % order_id_counter
 
 
 def boolean(x):
@@ -95,20 +106,24 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
                     return
 
         try:
+            assert row['order_id']
             for k, v in row.items():
-                if k in ['sensitive_order']:
+                if k in ['order_id']:
+                    row[k] = order_id(v)
+                elif k in ['sensitive_order']:
                     row[k] = boolean(v)
                 elif k in ['budget_code']:
                     row[k] = budget_code(v)
                 elif k in ['end_date', 'order_date', 'start_date']:
                     row[k] = date(v)
+                elif k in ['currency']:
+                    row[k] = v.upper() if isinstance(v, str) else v
                 elif k in ['volume']:
                     row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif k in ['executed']:
                     row[k] = Decimal(v.replace(',', '') if v is not None and v != '' else 0)
                 elif isinstance(v, str):
                     row[k] = v.strip()
-                assert row['order_id']
             stats['good-lines'] += 1
         except Exception as e:
             stats['bad-lines'] += 1

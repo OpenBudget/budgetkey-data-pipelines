@@ -1,3 +1,4 @@
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 import requests, logging, datetime, os
 import geocoder
@@ -242,5 +243,6 @@ if __name__ == "__main__":
         if resource["name"] == parameters["input-resource"]:
             datapackage["resources"][i] = {"name": parameters["output-resource"],
                                            "path": parameters["output-resource"]+".csv",
-                                           "schema": GeoCodeEntities.get_schema()}
+                                           "schema": GeoCodeEntities.get_schema(),
+                                           PROP_STREAMING: True}
     spew(datapackage, GeoCodeEntities(parameters, datapackage, resources).filter_resources())

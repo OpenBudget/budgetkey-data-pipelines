@@ -30,6 +30,7 @@ class Generator(GeneratorBase):
                     # this allows to populate elasticsearch data without running dependant pipelines
                     source_datapackage = source_datapackage.replace("/var/datapackages", "http://next.obudget.org/datapackages")
                 key_fields = parameters.get('key-fields', [])
+                page_title_pattern = parameters.get('page-title-pattern')
                 key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
                 key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = 'index_{}'.format(snake_doc_type)
@@ -67,7 +68,11 @@ class Generator(GeneratorBase):
                     }),
                     ('add_doc_id', {
                         'doc-id-pattern': key_pattern
-                    })]) + parameters.get('document-steps', []) + steps(*[
+                    }),
+                    ('add_page_title', {
+                        'page-title-pattern': page_title_pattern
+                    }),
+                ]) + parameters.get('document-steps', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [
