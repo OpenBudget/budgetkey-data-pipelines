@@ -32,6 +32,8 @@ guidestar-scraper:
           association_year_established: { type: integer }
           association_founders:
             es:itemType: string
+          association_address_lines:
+            es:itemType: string
           association_num_volunteers:
             type: number
             bareNumber: false
@@ -78,6 +80,9 @@ guidestar:
         types:
           association_year_established: { type: integer }
           association_founders:
+            es:itemType: string
+            type: array
+          association_address_lines:
             es:itemType: string
             type: array
 
