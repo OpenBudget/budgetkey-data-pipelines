@@ -8,7 +8,7 @@ def test_support_criteria_parser():
         "resources": [{
             "name": "criteria",
             "dialect": {"delimiter": ",", "doubleQuote": True, "lineTerminator": "\r\n", "quoteChar": '"', "skipInitialSpace": False}, "encoding": "utf-8", "format": "csv",
-            "path": "tests/pipelines/support/criteria.csv",
+            "path": "tests/support/criteria.csv",
             "schema": {
                 "fields": [
                     # the original support-criteria fields

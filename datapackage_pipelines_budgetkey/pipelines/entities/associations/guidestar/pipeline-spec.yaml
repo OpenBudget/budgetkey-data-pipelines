@@ -1,6 +1,4 @@
 guidestar-scraper:
-  dependencies:
-    - pipeline: ./entities/associations/registrar/registry
   schedule:
     crontab: "0 * * * *"
   pipeline:
