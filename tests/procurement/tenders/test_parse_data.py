@@ -1,6 +1,6 @@
 import json
 
-from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor
+from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.parse_page_data import ParsePageDataProcessor, object_storage
 from ...common import listify_resources, unlistify_resources, assert_doc_conforms_to_schema
 from .test_download_pages_data import get_mock_exemption_data
 import os, tempfile, shutil
@@ -25,16 +25,10 @@ class MockParseExemptionDataProcessor(ParsePageDataProcessor):
             return f.read()
 
     def write_to_object_storage(self, object_name, data):
-        pass
+        return object_storage.urlfor(object_name)
+
 
 def run_parse_processor(resource):
-    parameters = {
-        "bucket-name-env": "BUDGETKEY_S3_BUCKET",
-        "bucket-base-url-env": "BUDGETKEY_S3_BUCKET_BASEURL",
-        "base-object-name": "procurement/tenders/"
-    }
-    os.environ[parameters["bucket-name-env"]] = "fake-bucket"
-    os.environ[parameters["bucket-base-url-env"]] = "http://fake-url/fake-bucket/"
     datapackage = {"resources": [{
         "name": "tender-urls-downloaded-data",
         "path": "data/publisher-urls-downloaded-data.csv",
@@ -47,7 +41,7 @@ def run_parse_processor(resource):
         }
     }]}
     resources = unlistify_resources([resource])
-    ingest_response = (parameters, datapackage, resources)
+    ingest_response = ({}, datapackage, resources)
     datapackage, resources, stats = MockParseExemptionDataProcessor(ingest_response=ingest_response).spew()
     resources = listify_resources(resources)
     assert len(resources) == 1
@@ -110,7 +104,7 @@ def test_parse_data():
     }
     assert resource[1]["publication_id"] == 594269
     assert resource[2]["publication_id"] == 574896
-    unsigned_doc_link = "http://fake-url/fake-bucket/procurement/tenders/Files_Michrazim/201813.pdf"
+    unsigned_doc_link = "https://s3.amazonaws.com/budgetkey-files/procurement/tenders/201813.pdf"
     assert json.loads(resource[2]["documents"]) == [{"description": "חוות דעת מקצועית",
                                                      "link": unsigned_doc_link,
                                                      "update_time": "2015-12-31"}]

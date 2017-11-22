@@ -1,5 +1,5 @@
 from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
-from datapackage_pipelines_budgetkey.common import object_storage
+from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
                                                                                           publication_id_from_url)
 from datapackage_pipelines.utilities.extended_json import json
@@ -87,18 +87,18 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                                                      default_replace_resource=True,
                                                      table_schema=TABLE_SCHEMA,
                                                      **kwargs)
-        self.s3 = object_storage.get_s3()
-        self.bucket_name = os.environ[self.parameters["bucket-name-env"]]
-        self.base_object_name = self.parameters["base-object-name"] + "Files_Michrazim/"
-        self.bucket_base_url = os.environ[self.parameters["bucket-base-url-env"]]
+        self.base_object_name = "procurement/tenders/"
 
     def requests_get_content(self, url):
         return requests.get(url).content
 
     def write_to_object_storage(self, object_name, data):
-        if not object_storage.exists(self.s3, self.bucket_name, object_name):
-            object_storage.write(self.s3, self.bucket_name, object_name,
-                                 data=data, public_bucket=True, create_bucket=True)
+        logging.error('write_to_object_storage %s', object_name)
+        if not object_storage.exists(object_name):
+            ret = object_storage.write(object_name, data=data, public_bucket=True, create_bucket=True)
+        else:
+            ret = object_storage.urlfor(object_name)
+        return ret
 
     def unsign_document_link(self, url):
         url = url.replace("http://", "https://")
@@ -111,8 +111,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
         ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
         object_name = self.base_object_name + filename + (ext if ext else "")
-        self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
-        return self.bucket_base_url + object_name
+        return self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
 
     def get_document_link(self, base_url, href):
         source_url = "{}{}".format(base_url, href)

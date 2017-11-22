@@ -3,7 +3,6 @@ quarterly-contract-spending-report-uris:
     crontab: "0 */4 * * *"
   pipeline:
     - run: add_metadata
-      runner: tzabar
       parameters:
         name: quarterly-contract-spending-report-uris
         title: Quarterly Contact Spending Report URIs
