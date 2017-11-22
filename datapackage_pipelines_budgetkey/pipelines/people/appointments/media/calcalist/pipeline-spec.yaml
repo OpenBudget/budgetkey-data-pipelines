@@ -1,0 +1,35 @@
+calcalist:
+  title: מינויים בכלכליסט
+  description: רשימת כל המינויים והחברות מאתר כלכליסט
+  pipeline:
+    -
+      run: add_metadata
+      parameters:
+        name: 'nominations'
+        title: 'companies nominations'
+        homepage: 'http://www.calcalist.co.il/local/home/0,7340,L-3789,00.html'
+    - run: scraper
+    - run: stream_remote_resources
+    -
+      run: set_types
+      parameters:
+        types:
+          date:
+            type: date
+            format: "%d.%m.%Y"
+          full_name:
+            type: string
+          company:
+            type: string
+          description:
+            type: string
+          proof_url:
+            type: string
+          source:
+            type: string
+
+    -
+      run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/media/calcalist
+

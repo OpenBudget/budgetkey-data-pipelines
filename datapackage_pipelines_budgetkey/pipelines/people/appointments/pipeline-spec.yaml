@@ -1,6 +1,7 @@
 all-appointments:
   dependencies:
-    - pipeline: ./people/appointments/media/themarker
+    - pipeline: ./people/appointments/media/themarker/themarker
+    - pipeline: ./people/appointments/media/calcalist/calcalist
 
   pipeline:
     -
@@ -16,18 +17,53 @@ all-appointments:
         resource: 0
 
     -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/media/calcalist/datapackage.json
+        resource: nominations-list
+    -
       run: concatenate
       parameters:
-        target:
-          name: appointments
         fields:
-          full_name: []
-          start_date: []
+          full_name: ['name']
+          company: ['organisation_name']
+          date: ['start_date']
           position: []
-          organisation_name: []
-          details: []
+          details: ['description']
           gender: []
-
+          proof_url: []
+          source: []
+    -
+      run: collate
+      parameters:
+        resource: concat
+        key:
+          - full_name
+          - company
+        collated-field-name: sources
+    -
+      run: fingerprint
+      parameters:
+        source-field: company
+        target-field: fingerprinted_company
+        resource-name: concat
+    -
+      run: sample
+    -
+      run: join
+      parameters:
+        source:
+          name: concat
+          key: "{full_name} {fingerprinted_company}"
+          delete: true
+        target:
+          name: concat
+          key: null
+        fields:
+          full_name: null
+          company: null
+          sources:
+            aggregate: array
     -
       run: dump.to_path
       parameters:
