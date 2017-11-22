@@ -26,12 +26,25 @@ ECON_TRANSLATIONS = {'capital_expenditure': 'הוצאות הון', 'debt_repayme
                      'interim_accounts': 'חשבונות מעבר', 'credit': 'מתן אשראי', 'procurement': 'קניות ורכש',
                      'reserve': 'רזרבות', 'salaries': 'שכר'}
 
+LEFT_OFFSET = 100
+RIGHT_OFFSET = -100
+HEIGHT = 100
+
 
 def mushonkey_chart(title, groups):
+    num_items = max(
+        sum(
+            len(group['flows'])
+            for group in groups
+            if group['leftSide'] == side
+        )
+        for side in [True, False]
+    )
+    height = LEFT_OFFSET - RIGHT_OFFSET + HEIGHT + num_items*30 + 100
     return {
         'type': 'mushonkey',
         'width': '100%',
-        'height': '800px',
+        'height': '%spx' % height,
         'centerWidth': 300,
         'centerHeight': 100,
         'centerTitle': title,
@@ -91,9 +104,9 @@ def budget_sankey(row, kids):
                     budget_id(child.get('extra'), row)
                 ))
     if expenses:
-        groups.append(mushonkey_group(150, 1.0, True, 'budget-expense', expenses))
+        groups.append(mushonkey_group(100, 1.0, True, 'budget-expense', expenses))
     if revenues:
-        groups.append(mushonkey_group(150, 0.8, False, 'budget-revenues', revenues))
+        groups.append(mushonkey_group(100, 0.8, False, 'budget-revenues', revenues))
     return mushonkey_chart(row['title'], groups), {}
 
 
