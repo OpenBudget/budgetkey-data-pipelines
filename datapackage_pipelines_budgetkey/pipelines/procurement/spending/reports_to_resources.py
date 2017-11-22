@@ -1,3 +1,4 @@
+import hashlib
 import os
 import shutil
 import tempfile
@@ -61,7 +62,9 @@ try:
             url_to_use = url_to_fixed_file[url_to_use]
             logging.info("Using fixed file: %s", url_to_use)
         if url_to_use.startswith('http'):
+            hash = hashlib.md5(report['report-title'].encode('utf8')).hexdigest()[:4]
             obj_name = "{report-year}-{report-period}-{report-publisher}-{report-subunit}-{report-date}".format(**report)
+            obj_name += '-' + hash
             _, ext = os.path.splitext(url_to_use)
             obj_name += ext
             obj_name = os.path.join('spending-reports', obj_name)
