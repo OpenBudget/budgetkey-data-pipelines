@@ -1,11 +1,12 @@
 from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
                                                                                           publication_id_from_url)
 from datapackage_pipelines.utilities.extended_json import json
 
 from pyquery import PyQuery as pq
 from datetime import datetime
-import requests, os, base64, mimetypes
+import requests, os, base64, mimetypes, logging
 
 TABLE_SCHEMA = {
     "primaryKey": ["publication_id", "tender_type", "tender_id"],
@@ -86,14 +87,20 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                                                      default_replace_resource=True,
                                                      table_schema=TABLE_SCHEMA,
                                                      **kwargs)
-        self.unsigned_path = os.path.join(self.parameters["out-path"], "Files_Michrazim")
-        os.makedirs(self.unsigned_path, exist_ok=True)
+        self.base_object_name = "procurement/tenders/"
 
     def requests_get_content(self, url):
         return requests.get(url).content
 
+    def write_to_object_storage(self, object_name, data):
+        logging.error('write_to_object_storage %s', object_name)
+        if not object_storage.exists(object_name):
+            ret = object_storage.write(object_name, data=data, public_bucket=True, create_bucket=True)
+        else:
+            ret = object_storage.urlfor(object_name)
+        return ret
+
     def unsign_document_link(self, url):
-        # page = pq(self.requests_get_content(url))
         url = url.replace("http://", "https://")
         if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
             raise Exception("invalid url: {}".format(url))
@@ -103,11 +110,8 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         if data_elt.attrib["DataEncodingType"] != "base64":
             raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
         ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
-        filename = os.path.join(self.unsigned_path, filename + ext)
-        if not os.path.exists(filename):
-            with open(filename, "wb") as f:
-                f.write(base64.decodebytes(data_elt.text.encode("ascii")))
-        return filename
+        object_name = self.base_object_name + filename + (ext if ext else "")
+        return self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
 
     def get_document_link(self, base_url, href):
         source_url = "{}{}".format(base_url, href)

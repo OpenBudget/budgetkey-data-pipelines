@@ -19,6 +19,28 @@ services:
     ports:
       - "15432:5432"
 
+  # object storage
+  minio:
+    # to use minio instead of the default S3, set the following environment variables:
+    # S3_SIGNATURE_VERSION=s3v4
+    # AWS_ACCESS_KEY_ID=admin
+    # AWS_SECRET_ACCESS_KEY=12345678
+    # S3_ENDPOINT_URL=http://localhost:19000
+    # S3_REGION=us-east-1
+    # BUDGETKEY_S3_BUCKET=budgetkey
+    # BUDGETKEY_S3_BUCKET_BASEURL=http://localhost:19000/budgetkey/
+    image: minio/minio
+    ports:
+      - "19000:9000"
+    command:
+      - server
+      - /data
+    environment:
+      - "MINIO_ACCESS_KEY=admin"
+      - "MINIO_SECRET_KEY=12345678"
+    volumes:
+      - minio:/data
+
   pipelines:
     image: budgetkey/budgetkey-data-pipelines
     build: .
@@ -51,3 +73,4 @@ services:
 volumes:
   data:
   db:
+  minio:

@@ -1,9 +1,15 @@
+import os
+import shutil
+import tempfile
 from itertools import chain
 from copy import deepcopy
 import datapackage
+import functools
+import requests
 import tabulator
 import logging
 
+from datapackage_pipelines_budgetkey.common.object_storage import temp_file, object_storage
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMING, PROP_STREAMED_FROM
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
@@ -53,12 +59,25 @@ try:
         if url_to_use in url_to_fixed_file:
             url_to_use = url_to_fixed_file[url_to_use]
             logging.info("Using fixed file: %s", url_to_use)
+        if url_to_use.startswith('http'):
+            obj_name = os.path.basename(url_to_use)
+            obj_name = os.path.join('spending-reports', obj_name)
+            if not object_storage.exists(obj_name):
+                tmp = tempfile.NamedTemporaryFile(delete=False)
+                stream = requests.get(url_to_use, stream=True).raw
+                stream.read = functools.partial(stream.read, decode_content=True)
+                shutil.copyfileobj(stream, tmp)
+                url_to_use = object_storage.write(obj_name, file_name=tmp.name, create_bucket=False)
+            else:
+                url_to_use = object_storage.urlfor(obj_name)
+            del tmp
         for sheet in range(1, 20):
             canary = None
             errd = True
             try:
                 try:
                     logging.info('Trying sheet %d in %s', sheet, report['report-url'])
+                    logging.info('Using url %s', url_to_use)
                     canary = tabulator.Stream(url_to_use, sheet=sheet)
                     canary.open()
                 except IndexError as e:
