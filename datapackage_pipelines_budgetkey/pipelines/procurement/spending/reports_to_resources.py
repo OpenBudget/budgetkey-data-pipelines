@@ -61,8 +61,9 @@ try:
             url_to_use = url_to_fixed_file[url_to_use]
             logging.info("Using fixed file: %s", url_to_use)
         if url_to_use.startswith('http'):
-            url_to_use = urllib.parse.unquote(url_to_use)
-            obj_name = os.path.basename(url_to_use)
+            obj_name = "{report-year}-{report-period}-{report-publisher}-{report-subunit}-{report-date}".format(**report)
+            _, ext = os.path.splitext(url_to_use)
+            obj_name += ext
             obj_name = os.path.join('spending-reports', obj_name)
             if not object_storage.exists(obj_name):
                 tmp = tempfile.NamedTemporaryFile(delete=False)
