@@ -71,6 +71,7 @@ try:
                 del tmp
             else:
                 url_to_use = object_storage.urlfor(obj_name)
+
         for sheet in range(1, 20):
             canary = None
             errd = True

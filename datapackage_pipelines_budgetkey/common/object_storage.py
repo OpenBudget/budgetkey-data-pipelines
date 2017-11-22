@@ -149,9 +149,9 @@ class ObjectStorage(FileBasedStorage):
                     "Statement": [{"Sid": "AddPerm", "Effect": "Allow", "Principal": "*",
                                    "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::{}/*".format(self.bucket_name)]}]}))
             if file_name is not None and data is None:
-                self.s3.put_object(Body=open(file_name, 'rb'), Bucket=self.bucket_name, Key=object_name)
+                self.s3.put_object(Body=open(file_name, 'rb'), Bucket=self.bucket_name, Key=object_name, ACL='public-read')
             elif data is not None and file_name is None:
-                self.s3.put_object(Body=self.get_write_object_data(data), Bucket=self.bucket_name, Key=object_name)
+                self.s3.put_object(Body=self.get_write_object_data(data), Bucket=self.bucket_name, Key=object_name, ACL='public-read')
             else:
                 raise AttributeError()
             return self.urlfor(object_name)
