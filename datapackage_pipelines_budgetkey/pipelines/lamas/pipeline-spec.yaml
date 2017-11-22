@@ -38,25 +38,26 @@ municipal-data:
     - run: add_resource
       parameters:
         name: lamas-municipal-data-1
-        url: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 2
         headers: 2
     - run: add_resource
       parameters:
         name: lamas-municipal-data-2
-        url: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 3
         headers: 2
     - run: add_resource
       parameters:
         name: lamas-municipal-data-3
-        url: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 4
         headers: 2
     - run: add_resource
       parameters:
         name: lamas-municipal-data-4
-        url: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 5
         headers: 2
     - run: stream_remote_resources
