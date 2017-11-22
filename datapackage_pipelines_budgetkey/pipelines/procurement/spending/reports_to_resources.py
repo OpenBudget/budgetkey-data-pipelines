@@ -68,9 +68,9 @@ try:
                 stream.read = functools.partial(stream.read, decode_content=True)
                 shutil.copyfileobj(stream, tmp)
                 url_to_use = object_storage.write(obj_name, file_name=tmp.name, create_bucket=False)
+                del tmp
             else:
                 url_to_use = object_storage.urlfor(obj_name)
-            del tmp
         for sheet in range(1, 20):
             canary = None
             errd = True
