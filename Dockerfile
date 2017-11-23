@@ -17,6 +17,7 @@ ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
+RUN pip install https://github.com/frictionlessdata/tabulator-py/archive/fix/222-excel-errors-on-stdout.zip
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/*
 
