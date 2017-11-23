@@ -41,7 +41,6 @@ quarterly-contract-spending-reports:
       parameters:
         input-file: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris/datapackage.json
     - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         sources: "report_[0-9]+"
