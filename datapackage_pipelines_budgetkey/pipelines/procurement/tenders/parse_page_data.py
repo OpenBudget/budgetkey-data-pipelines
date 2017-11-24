@@ -109,7 +109,8 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         data_elt = page(page(page.children()[1]).children()[0]).children()[0]
         if data_elt.attrib["DataEncodingType"] != "base64":
             raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
-        ext = mimetypes.guess_extension(data_elt.attrib["MimeType"])
+        ext = mimetypes.guess_extension(data_elt.attrib["MimeType"], strict=False)
+        assert ext is not None, "Unknown MIME type %s" % data_elt.attrib["MimeType"]
         object_name = self.base_object_name + filename + (ext if ext else "")
         return self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
 
