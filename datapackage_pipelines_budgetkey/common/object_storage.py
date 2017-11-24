@@ -143,11 +143,6 @@ class ObjectStorage(FileBasedStorage):
         if not self.s3:
             return super(ObjectStorage, self).write(object_name, data, file_name)
         try:
-            if public_bucket:
-                self.s3.put_bucket_policy(Bucket=self.bucket_name, Policy=json.dumps({
-                    "Version": str(datetime.datetime.now()).replace(" ", "-"),
-                    "Statement": [{"Sid": "AddPerm", "Effect": "Allow", "Principal": "*",
-                                   "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::{}/*".format(self.bucket_name)]}]}))
             if file_name is not None and data is None:
                 self.s3.put_object(Body=open(file_name, 'rb'), Bucket=self.bucket_name, Key=object_name, ACL='public-read')
             elif data is not None and file_name is None:
@@ -159,6 +154,15 @@ class ObjectStorage(FileBasedStorage):
             logging.exception('Error WRITING')
             if create_bucket:
                 self.s3.create_bucket(Bucket=self.bucket_name)
+                if public_bucket:
+                    try:
+                        self.s3.put_bucket_policy(Bucket=self.bucket_name, Policy=json.dumps({
+                            "Version": str(datetime.datetime.now()).replace(" ", "-"),
+                            "Statement": [{"Sid": "AddPerm", "Effect": "Allow", "Principal": "*",
+                                           "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::{}/*".format(self.bucket_name)]}]}))
+                    except ClientError as e2:
+                        logging.exception('Failed to put bucket policy', exc_info=e2)
+                        pass
                 return self.write(object_name, data=data, file_name=file_name, create_bucket=False, public_bucket=public_bucket)
             else:
                 raise
