@@ -107,13 +107,20 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             raise Exception("invalid url: {}".format(url))
         filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
         page = pq(self.requests_get_content(url))
-        data_elt = page(page(page.children()[1]).children()[0]).children()[0]
+        try:
+            data_elt = page(page(page.children()[1]).children()[0]).children()[0]
+        except:
+            return url
         try:
             if data_elt.attrib["DataEncodingType"] != "base64":
                 raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
         except KeyError:
             return None
-        buffer = base64.decodebytes(data_elt.text.encode("ascii"))
+        buffer = data_elt.text
+        if buffer:
+            buffer = base64.decodebytes(buffer.encode("ascii"))
+        else:
+            buffer = ''
         mime = data_elt.attrib["MimeType"]
         guessed_mime = None
         orig_filename = None
@@ -123,13 +130,14 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             _, ext = os.path.splitext(orig_filename)
         except:
             ext = mimetypes.guess_extension(mime, strict=False)
-        if ext is None:
-            with magic.Magic() as m:
+        if not ext:
+            with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
                 guessed_mime = m.id_buffer(buffer)
+                logging.info('Attempted to detect buffer type: %s', guessed_mime)
                 ext = mimetypes.guess_extension(guessed_mime)
-        assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s buffer:%r" % (mime, orig_filename, guessed_mime, buffer[:128]) 
+        assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s ext:%r buffer:%r" % (mime, orig_filename, guessed_mime, ext, buffer[:128])
         object_name = self.base_object_name + filename + (ext if ext else "")
-        return self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
+        return self.write_to_object_storage(object_name, buffer)
 
     def get_document_link(self, base_url, href):
         source_url = "{}{}".format(base_url, href)
