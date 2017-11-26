@@ -33,4 +33,4 @@ WORKDIR /datapackage_pipelines_budgetkey/pipelines/
 
 EXPOSE 5000
 
-CMD ["server"]
+ENTRYPOINT ["/startup.sh"]

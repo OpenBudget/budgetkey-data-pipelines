@@ -3,9 +3,7 @@ tzabar:
   parameters:
     wrapper: >
       ssh adam@tzabar.obudget.org 
-      "docker system prune -fa > /dev/null && 
-      docker pull budgetkey/budgetkey-data-pipelines > /dev/null && 
-      docker run 
+      "docker run 
       -i --entrypoint /bin/sh
       -e DPP_DB_ENGINE={env[DPP_DB_ENGINE]}
       -e AWS_ACCESS_KEY_ID={env[AWS_ACCESS_KEY_ID]}
