@@ -107,8 +107,11 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
         page = pq(self.requests_get_content(url))
         data_elt = page(page(page.children()[1]).children()[0]).children()[0]
-        if data_elt.attrib["DataEncodingType"] != "base64":
-            raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
+        try:
+            if data_elt.attrib["DataEncodingType"] != "base64":
+                raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
+        except KeyError:
+            return None
         try:
             page.remove_namespaces()
             orig_filename = next(page[0].iterdescendants('FileName')).text
@@ -132,15 +135,21 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         for row in data:
             page = pq(row["data"])
             documents = []
+            documents_valid = True
             for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
                                                           page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
                 update_time = parse_date(update_time_elt.text.split()[-1])
                 if update_time is not None:
                     update_time = update_time
+                link = self.get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
+                if link is None:
+                    documents_valid = False
                 documents.append({"description": img_elt.attrib.get("alt", ""),
-                                  "link": self.get_document_link(BASE_URL, link_elt.attrib.get("href", "")),
+                                  "link": link,
                                   "update_time": update_time})
+            if not documents_valid:
+                continue
             if row["tender_type"] == "exemptions":
                 yield self.get_exemptions_data(row, page, documents)
             elif row["tender_type"] == "office":
