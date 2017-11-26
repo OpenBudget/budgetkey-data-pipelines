@@ -1,6 +1,6 @@
 FROM frictionlessdata/datapackage-pipelines:latest
 
-RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic
+RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
@@ -18,12 +18,14 @@ ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN apk del build-dependencies && \
-    sudo rm -rf /var/cache/apk/*
+    sudo rm -rf /var/cache/apk/* && \
+    ln -s /usr/lib/libmagic.so.1 /usr/lib/libmagic.so
 
 USER dpp
 
 
 ENV PYTHONPATH=/
+ENV LD_LIBRARY_PATH=/usr/lib
 ENV DPP_PROCESSOR_PATH=/datapackage_pipelines_budgetkey/processors
 ENV DPP_REDIS_HOST=localhost
 ENV REDIS_USER=dpp
