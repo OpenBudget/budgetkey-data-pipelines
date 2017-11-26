@@ -5,6 +5,7 @@ from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existin
 from datapackage_pipelines.utilities.extended_json import json
 
 from pyquery import PyQuery as pq
+import magic
 from datetime import datetime
 import requests, os, base64, mimetypes, logging
 
@@ -112,13 +113,21 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
         except KeyError:
             return None
+        buffer = base64.decodebytes(data_elt.text.encode("ascii"))
+        mime = data_elt.attrib["MimeType"]
+        guessed_mime = None
+        orig_filename = None
         try:
             page.remove_namespaces()
             orig_filename = next(page[0].iterdescendants('FileName')).text
             _, ext = os.path.splitext(orig_filename)
         except:
-            ext = mimetypes.guess_extension(data_elt.attrib["MimeType"], strict=False)
-        assert ext, "Unknown MIME type %s" % data_elt.attrib["MimeType"]
+            ext = mimetypes.guess_extension(mime, strict=False)
+        if ext is None:
+            with magic.Magic() as m:
+                guessed_mime = m.id_buffer(buffer)
+                ext = mimetypes.guess_extension(guessed_mime)
+        assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s buffer:%r" % (mime, orig_filename, guessed_mime, buffer[:128]) 
         object_name = self.base_object_name + filename + (ext if ext else "")
         return self.write_to_object_storage(object_name, base64.decodebytes(data_elt.text.encode("ascii")))
 
