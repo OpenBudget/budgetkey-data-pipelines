@@ -67,6 +67,7 @@ quarterly-contract-spending-reports:
             - הזמנה רגישה
           order_id:
             - הזמנת רכש
+            - מספר הזמנה
           currency:
             - מטבע
             - מטבע חשבונית
@@ -96,6 +97,7 @@ quarterly-contract-spending-reports:
             - תאור של ארגון רכש
           order_date:
             - תאריך יצירת ההזמנה
+            - תאריך יצירת הזמנה
           start_date:
             - התחלת תקופת תוקף
           budget_title:
@@ -106,6 +108,7 @@ quarterly-contract-spending-reports:
             - פריט התחייבות
           explanation:
             - הבהרות
+            - תיאור חומר
           report_error:
             - error
           company_id:
