@@ -80,6 +80,12 @@ try:
             else:
                 url_to_use = object_storage.urlfor(obj_name)
 
+        report['report-sheets'] = 0
+        report['report-headers-row'] = None
+        report['report-rows'] = None
+        report['report-bad-rows'] = None
+        report['load-error'] = None
+
         for sheet in range(1, 20):
             canary = None
             errd = True
@@ -94,15 +100,18 @@ try:
                     break
                 canary_rows = canary.iter()
                 headers = None
+                headers_row = None
                 for j, row in enumerate(canary_rows):
                     if j > 20:
                         break
                     row = [str(x).strip() if x is not None else '' for x in row]
-                    if len(row) < 0 and row[0] == '':
+                    if len(row) == 0 or row[0] == '':
                         continue
                     row_fields = set(row)
                     if '' in row_fields:
                         row_fields.remove('')
+                    if None in row_fields:
+                        row_fields.remove(None)
                     if len(row_fields) <= 4:
                         continue
                     if not set.intersection(row_fields, order_id_headers):
@@ -143,9 +152,6 @@ try:
                 })
                 report['report-headers-row'] = headers
                 report['report-sheets'] = sheet
-                report['report-rows'] = None
-                report['report-bad-rows'] = None
-                report['load-error'] = None
                 errd = False
             except Exception as e:
                 if sheet == 1:
