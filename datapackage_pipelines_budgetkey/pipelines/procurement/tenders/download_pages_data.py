@@ -35,8 +35,8 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
             if exemption['is_new']:
                 if count < 500:
                     try:
-                        yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
                         count += 1
+                        yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
                     except HTTPError:
                         self.stats['failed-urls'] += 1
                         logging.exception('Failed to load %s', url)
@@ -53,7 +53,12 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
                 "tender_type": tender_type}
 
     def _get_url_response_text(self, url, timeout):
-        response = self.session.get(url, timeout=timeout)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) ' +
+                          'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                          'Chrome/54.0.2840.87 Safari/537.36'
+        }
+        response = self.session.get(url, timeout=timeout, headers=headers)
         response.raise_for_status()
         return response.text
 
