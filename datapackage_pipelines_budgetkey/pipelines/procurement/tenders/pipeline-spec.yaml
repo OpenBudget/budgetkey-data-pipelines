@@ -143,6 +143,9 @@ scraper:
 all:
   title: Load all tenders data from DB to flat file
 
+  schedule:
+    crontab: "0 * * * *"
+
   dependencies:
     - pipeline: ./procurement/tenders/scraper
 
