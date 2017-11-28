@@ -1,6 +1,7 @@
+import logging
 import requests
 from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
-
+from requests import HTTPError
 
 DEFAULT_INPUT_RESOURCE = "tender-urls"
 DEFAULT_OUTPUT_RESOURCE = "tender-urls-downloaded-data"
@@ -17,6 +18,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
         self._timeout = timeout
         self._url_prefix = url_prefix
         self.session = requests.session()
+        self.stats = {'failed-urls': 0}
         super(DownloadPagesDataProcessor, self).__init__(
             default_input_resource=DEFAULT_INPUT_RESOURCE,
             default_output_resource=DEFAULT_OUTPUT_RESOURCE,
@@ -32,8 +34,15 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
             url = exemption["url"]
             if exemption['is_new']:
                 if count < 500:
-                    count += 1
-                    yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
+                    try:
+                        yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
+                        count += 1
+                    except HTTPError:
+                        self.stats['failed-urls'] += 1
+                        logging.exception('Failed to load %s', url)
+
+    def get_stats(self):
+        return self.stats
 
     def _get_exemption_data(self, publisher_id, url, tender_type):
         if not url.startswith("http"):
