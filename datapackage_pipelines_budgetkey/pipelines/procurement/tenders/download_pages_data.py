@@ -26,11 +26,14 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
         )
 
     def filter_resource_data(self, data, parameters):
+        count = 0
         for exemption in data:
             publisher_id = exemption["id"]
             url = exemption["url"]
             if exemption['is_new']:
-                yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
+                if count < 500:
+                    count += 1
+                    yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
 
     def _get_exemption_data(self, publisher_id, url, tender_type):
         if not url.startswith("http"):

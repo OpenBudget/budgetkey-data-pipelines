@@ -89,7 +89,6 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                                                      table_schema=TABLE_SCHEMA,
                                                      **kwargs)
         self.base_object_name = "procurement/tenders/"
-        self.unsigned = 0
 
     def requests_get_content(self, url):
         return requests.get(url).content
@@ -145,11 +144,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         source_url = "{}{}".format(base_url, href)
         if source_url.endswith(".signed"):
             # signed documents - decrypt and change path to local unsigned file
-            self.unsigned += 1
-            if self.unsigned < 500:
-                return self.unsign_document_link(source_url)
-            else:
-                return None
+            return self.unsign_document_link(source_url)
         else:
             # unsigned documents are returned with the source url as-is
             return source_url
