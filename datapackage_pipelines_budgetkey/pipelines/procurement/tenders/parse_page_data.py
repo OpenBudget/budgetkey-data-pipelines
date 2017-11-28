@@ -106,8 +106,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
             raise Exception("invalid url: {}".format(url))
         filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
-        page = pq(self.requests_get_content(url))
+        content = self.requests_get_content(url)
         try:
+            page = pq(content)
             data_elt = page(page(page.children()[1]).children()[0]).children()[0]
         except:
             return url
