@@ -51,12 +51,12 @@ class GeoCodeEntities(object):
         # we could analyze the data later and decide which providers to use (we store the provider along with the lat / lng)
         {
             "provider": "google",
-            "limit": 2500
+            "limit": 1000
         },
         # free and unlimited, but seems to provide lower quality results
         {
             "provider": "osm",
-            "limit": 50000
+            "limit": 1000
         }
     ]
 
