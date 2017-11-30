@@ -56,7 +56,7 @@ def run_download_processor(resources):
         "path": "data/tender-urls-downloaded-data.csv",
         "schema": DOWNLOAD_PAGES_DATA_TABLE_SCHEMA
     }]}
-    assert stats == {}
+    assert stats == {'failed-urls': 0}
     resources = listify_resources(resources)
     assert len(resources) == 1
     return resources[0]
