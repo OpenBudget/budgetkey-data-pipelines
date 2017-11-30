@@ -32,7 +32,7 @@ def get_resource():
                 raise Exception("missing column in table: {} / {}".format(parameters["table"], column_name))
             else:
                 query_args.append(getattr(table.c, column_name))
-        for row in session.query(*query_args).all():
+        for row in session.query(*query_args).yield_per(1000):
             yield {column_name: getattr(row, column_name)
                    for column_name, column_params
                    in parameters["columns"].items()}
