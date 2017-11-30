@@ -203,8 +203,6 @@ class GeoCodeEntities(object):
                     row = self.get_row(entity_id, entity_location)
                     if row:
                         yield row
-                else:
-                    logging.info("no update needed: {}".format(entity_id))
         self.requests_session.close()
 
     def get_row(self, entity_id, entity_location):
