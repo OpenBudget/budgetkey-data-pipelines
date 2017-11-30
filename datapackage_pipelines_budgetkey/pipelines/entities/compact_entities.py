@@ -1,6 +1,7 @@
 import datetime
 import re
 
+import logging
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
@@ -77,7 +78,9 @@ def process_resource(resource):
         conds = [kind is not None, kind_column is not None]
         assert any(conds) and not all(conds)
 
-        for row in resource:
+        for i, row in enumerate(resource):
+            if i % 1000 == 0:
+                logging.info('%s loaded %d rows', spec['name'], i)
             if kind_column is not None and not row[kind_column]:
                 continue
             if row[id_column] and row[name_column]:

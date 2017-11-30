@@ -79,7 +79,6 @@ all:
           kind-he: אוניברסיטה
           id-column: id
           name-column: name
-    - run: sample
     - run: concatenate
       parameters:
         target:
