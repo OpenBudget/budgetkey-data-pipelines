@@ -247,15 +247,13 @@ entities:
         out-path: /var/datapackages/entities/scored
 
 geocode:
-  schedule:
-    crontab: "0 0 * * *"
+  dependencies:
+    - pipeline: ./entities/all
   pipeline:
-    - run: load_sql_table
+    - run: load_resource
       parameters:
-        table: entities
-        columns:
-          id:
-          details:
+        url: /var/datapackages/entities/all/datapackage.json
+        resource: entities
     - run: geocode_entities
       parameters:
         input-resource: entities
