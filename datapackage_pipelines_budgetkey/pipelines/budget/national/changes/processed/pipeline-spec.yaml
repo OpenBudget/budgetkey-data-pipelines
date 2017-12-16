@@ -60,13 +60,13 @@ national-budget-changes-aggregated:
             - year
             - leading_item
             - req_code
-          full: true
+          full: false
         fields:
           transaction_id: null
     # Aggregate changes into transactions based on transaction id
-    - run: sample
-      parameters:
-        resource: national-budget-changes
+#    - run: sample
+#      parameters:
+#        resource: national-budget-changes
     - run: set_types
       parameters:
         resources: national-budget-changes
