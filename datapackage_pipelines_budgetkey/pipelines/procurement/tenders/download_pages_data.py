@@ -33,7 +33,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
             publisher_id = exemption["id"]
             url = exemption["url"]
             if exemption['is_new']:
-                if count < 500:
+                if count < 5:
                     try:
                         count += 1
                         yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
@@ -58,7 +58,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
                           'AppleWebKit/537.36 (KHTML, like Gecko) ' +
                           'Chrome/54.0.2840.87 Safari/537.36'
         }
-        response = self.session.get(url, timeout=timeout, headers=headers)
+        response = requests.get(url, timeout=timeout, headers=headers)
         response.raise_for_status()
         return response.text
 
