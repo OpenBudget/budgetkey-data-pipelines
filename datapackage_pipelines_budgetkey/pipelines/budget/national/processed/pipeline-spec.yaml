@@ -326,6 +326,7 @@ connected-national-budgets:
 
   dependencies:
     - pipeline: ./budget/national/processed/with-extras
+    - pipeline: ./budget/national/processed/category-explanations
 
   pipeline:
     - run: add_metadata
@@ -439,3 +440,52 @@ just-the-total:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/totals
+
+
+category-explanations:
+  pipeline:
+    - run: parse-category-explanations
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/category-explanations
+
+
+connected-items-explained:
+  title: National Yearly Budgets - Joined with category-explanations
+  description: >
+    This pipeline joins budget items that span across years.
+
+  dependencies:
+    - pipeline: ./budget/national/processed/category-explanations
+    - pipeline: ./budget/national/processed/connected-national-budgets
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget (Joined with category-explanations)
+        name: connected-items-explained
+    - run: load_resource
+      parameters:
+        url: dependency://./budget/national/processed/category-explanations
+        resource: category-explanations
+    - run: load_resource
+      parameters:
+        url: dependency://./budget/national/processed/connected-national-budgets
+        resource: budget
+    - run: join
+      parameters:
+        source:
+          name: category-explanations
+          key: ['budget_code']
+          delete: true
+        target:
+          name: budget
+          key: ['code']
+          full: true
+        fields:
+          explanation: null
+          explanation_source:
+            name: source
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/connected-items-explained
