@@ -110,6 +110,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         try:
             page = pq(content)
             data_elt = page(page(page.children()[1]).children()[0]).children()[0]
+            assert 'The requested operation is not supported, and therefore can not be displayed' not in content
         except:
             return url
         try:
