@@ -115,13 +115,13 @@ scraper:
     - run: check_existing
       parameters:
         db-table: procurement_tenders
-    # download the data from pages which don't exist in DB (is_new == False)
-    - run: download_pages_data
-      runner: tzabar
     # parse the data for each exemption
     - run: throttle
       parameters:
-        sleep-seconds: 0.25
+        sleep-seconds: 5
+    # download the data from pages which don't exist in DB (is_new == False)
+    - run: download_pages_data
+      runner: tzabar
     - run: parse_page_data
       runner: tzabar
       parameters:

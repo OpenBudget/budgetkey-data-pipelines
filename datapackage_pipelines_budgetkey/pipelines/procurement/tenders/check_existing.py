@@ -82,7 +82,8 @@ class CheckExistingProcessor(ResourceFilterProcessor):
     def filter_resource_data(self, data, parameters):
         for row in data:
             row["is_new"] = self.is_new_exemption_url(row["url"], row["tender_type"])
-            yield row
+            if row["is_new"]:
+                yield row
 
     def is_new_exemption_url(self, url, tender_type):
         if tender_type == "office":
