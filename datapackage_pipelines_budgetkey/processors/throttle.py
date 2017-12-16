@@ -1,5 +1,5 @@
 from datapackage_pipelines.wrapper import spew, ingest
-import time, logging, datetime
+import time, logging, datetime, sys
 
 
 def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
@@ -7,6 +7,7 @@ def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
     num_processed_rows = 0
     for row in resource:
         yield row
+        sys.stdout.flush()
         num_processed_rows += 1
         elapsed_seconds = (datetime.datetime.now()-start_time).total_seconds()
         seconds_since_last_log = elapsed_seconds - last_log_seconds
