@@ -87,10 +87,15 @@ try:
         report['load-error'] = None
 
         with tempfile.NamedTemporaryFile(suffix=os.path.basename(url_to_use)) as tmp:
-            stream = requests.get(url_to_use, stream=True).raw
-            stream.read = functools.partial(stream.read, decode_content=True)
-            shutil.copyfileobj(stream, tmp)
-            tmp.close()
+            if url_to_use.startswith('http'):
+                stream = requests.get(url_to_use, stream=True).raw
+                stream.read = functools.partial(stream.read, decode_content=True)
+                shutil.copyfileobj(stream, tmp)
+                tmp.close()
+                filename = tmp.name
+            else:
+                filename = url_to_use
+
             for sheet in range(1, 20):
                 canary = None
                 errd = True
@@ -98,8 +103,8 @@ try:
                     try:
                         logging.info('Trying sheet %d in %s', sheet, report['report-url'])
                         logging.info('Using url %s', url_to_use)
-                        logging.info('Temp filename %s', tmp.name)
-                        canary = tabulator.Stream(tmp.name, sheet=sheet)
+                        logging.info('Temp filename %s', filename)
+                        canary = tabulator.Stream(filename, sheet=sheet)
                         canary.open()
                     except IndexError as e:
                         logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
