@@ -33,7 +33,7 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
             publisher_id = exemption["id"]
             url = exemption["url"]
             if exemption['is_new']:
-                if count < 5:
+                if count < 5000:
                     try:
                         count += 1
                         yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])

@@ -86,91 +86,97 @@ try:
         report['report-bad-rows'] = None
         report['load-error'] = None
 
-        for sheet in range(1, 20):
-            canary = None
-            errd = True
-            try:
+        with tempfile.NamedTemporaryFile(suffix=os.path.basename(url_to_use)) as tmp:
+            stream = requests.get(url_to_use, stream=True).raw
+            stream.read = functools.partial(stream.read, decode_content=True)
+            shutil.copyfileobj(stream, tmp)
+            tmp.close()
+            for sheet in range(1, 20):
+                canary = None
+                errd = True
                 try:
-                    logging.info('Trying sheet %d in %s', sheet, report['report-url'])
-                    logging.info('Using url %s', url_to_use)
-                    canary = tabulator.Stream(url_to_use, sheet=sheet)
-                    canary.open()
-                except IndexError as e:
-                    logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
-                    break
-                canary_rows = canary.iter()
-                headers = None
-                headers_row = None
-                for j, row in enumerate(canary_rows):
-                    if j > 20:
+                    try:
+                        logging.info('Trying sheet %d in %s', sheet, report['report-url'])
+                        logging.info('Using url %s', url_to_use)
+                        logging.info('Temp filename %s', tmp.name)
+                        canary = tabulator.Stream(tmp.name, sheet=sheet)
+                        canary.open()
+                    except IndexError as e:
+                        logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
                         break
-                    row = [str(x).strip() if x is not None else '' for x in row]
-                    if len(row) == 0 or row[0] == '':
-                        continue
-                    row_fields = set(row)
-                    if '' in row_fields:
-                        row_fields.remove('')
-                    if None in row_fields:
-                        row_fields.remove(None)
-                    if len(row_fields) <= 4:
-                        continue
-                    if not set.intersection(row_fields, order_id_headers):
-                        raise ValueError('Bad report format (order_id)')
-                    if not set.intersection(row_fields, budget_code_headers):
-                        raise ValueError('Bad report format (budget_code)')
-                    if not set.intersection(row_fields, volume_headers):
-                        raise ValueError('Bad report format (volume)')
-                    headers = j+1
-                    headers_row = row
+                    canary_rows = canary.iter()
+                    headers = None
+                    headers_row = None
+                    for j, row in enumerate(canary_rows):
+                        if j > 20:
+                            break
+                        row = [str(x).strip() if x is not None else '' for x in row]
+                        if len(row) == 0 or row[0] == '':
+                            continue
+                        row_fields = set(row)
+                        if '' in row_fields:
+                            row_fields.remove('')
+                        if None in row_fields:
+                            row_fields.remove(None)
+                        if len(row_fields) <= 4:
+                            continue
+                        if not set.intersection(row_fields, order_id_headers):
+                            raise ValueError('Bad report format (order_id)')
+                        if not set.intersection(row_fields, budget_code_headers):
+                            raise ValueError('Bad report format (budget_code)')
+                        if not set.intersection(row_fields, volume_headers):
+                            raise ValueError('Bad report format (volume)')
+                        headers = j+1
+                        headers_row = row
+                        break
+                    if headers is None:
+                        raise ValueError('Failed to find headers')
+                    sample_row = None
+                    try:
+                        for s in range(20):  # 20 sample rows
+                            sample_row = next(canary_rows)
+                            sample_row = dict(zip(headers_row, sample_row))
+                            # Test some things make sense
+                            try:
+                                v = [Decimal(sample_row[k]) if sample_row[k] is not None else 0
+                                     for k in headers_row
+                                     if k.startswith('ביצוע') or k.startswith('ערך')]
+                                assert all(sample_row[k] in ['כן', 'לא', '', 'ערך היסטורי', None]
+                                           for k in headers_row if k.startswith('הזמנה רגישה'))
+                            except Exception as e:
+                                logging.info('BAD SAMPLE ROW in %s:\n%r', report['report-url'], sample_row)
+                                raise ValueError('Bad value for column (%s)' % e) from e
+                    except StopIteration as e:
+                        pass
+                    dp['resources'].append({
+                        PROP_STREAMED_FROM: url_to_use,
+                        'path': PATH_PLACEHOLDER,
+                        'name': 'report_{}'.format(i),
+                        'headers': headers,
+                        'sheet': sheet,
+                        'constants': report
+                    })
+                    report['report-headers-row'] = headers
+                    report['report-sheets'] = sheet
+                    errd = False
+                except Exception as e:
+                    if sheet == 1:
+                        stats['bad-reports'] += 1
+                        logging.info("ERROR '%s' in %s", e, report['report-url'])
+                        report['report-sheets'] = 0
+                        report['report-headers-row'] = None
+                        report['load-error'] = str(e)
+                        report['report-rows'] = None
+                        report['report-bad-rows'] = None
+                    else:
+                        logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
+                finally:
+                    if canary is not None:
+                        canary.close()
+                if errd:
                     break
-                if headers is None:
-                    raise ValueError('Failed to find headers')
-                sample_row = None
-                try:
-                    for s in range(20):  # 20 sample rows
-                        sample_row = next(canary_rows)
-                        sample_row = dict(zip(headers_row, sample_row))
-                        # Test some things make sense
-                        try:
-                            v = [Decimal(sample_row[k]) if sample_row[k] is not None else 0
-                                 for k in headers_row
-                                 if k.startswith('ביצוע') or k.startswith('ערך')]
-                            assert all(sample_row[k] in ['כן', 'לא', '', 'ערך היסטורי', None]
-                                       for k in headers_row if k.startswith('הזמנה רגישה'))
-                        except Exception as e:
-                            logging.info('BAD SAMPLE ROW in %s:\n%r', report['report-url'], sample_row)
-                            raise ValueError('Bad value for column (%s)' % e) from e
-                except StopIteration as e:
-                    pass
-                dp['resources'].append({
-                    PROP_STREAMED_FROM: url_to_use,
-                    'path': PATH_PLACEHOLDER,
-                    'name': 'report_{}'.format(i),
-                    'headers': headers,
-                    'sheet': sheet,
-                    'constants': report
-                })
-                report['report-headers-row'] = headers
-                report['report-sheets'] = sheet
-                errd = False
-            except Exception as e:
-                if sheet == 1:
-                    stats['bad-reports'] += 1
-                    logging.info("ERROR '%s' in %s", e, report['report-url'])
-                    report['report-sheets'] = 0
-                    report['report-headers-row'] = None
-                    report['load-error'] = str(e)
-                    report['report-rows'] = None
-                    report['report-bad-rows'] = None
-                else:
-                    logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
-            finally:
-                if canary is not None:
-                    canary.close()
-            if errd:
-                break
 
-        loading_results.append(report)
+            loading_results.append(report)
 except CastError as e:
     for err in e:
         logging.error('Failed to cast value: %s', err)

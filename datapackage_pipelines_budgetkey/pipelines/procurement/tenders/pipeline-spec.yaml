@@ -118,7 +118,7 @@ scraper:
     # parse the data for each exemption
     - run: throttle
       parameters:
-        sleep-seconds: 5
+        sleep-seconds: 1
     # download the data from pages which don't exist in DB (is_new == False)
     - run: download_pages_data
       runner: tzabar
