@@ -17,7 +17,7 @@ budget:
 national-budget-changes:
   kind: indexer
   revision: 7
-  dependent_pipeline: ./budget/national/changes/national-budget-changes-aggregated
+  dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
   page-title-pattern: '{title}'
   key-fields:
