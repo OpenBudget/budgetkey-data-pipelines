@@ -19,7 +19,7 @@ national-budget-changes:
   revision: 7
   dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
-  page-title-pattern: '{title}'
+  page-title-pattern: '{req_title[0]}'
   key-fields:
     - transaction_id
 
