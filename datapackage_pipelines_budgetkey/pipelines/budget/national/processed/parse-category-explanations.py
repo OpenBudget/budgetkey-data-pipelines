@@ -36,10 +36,10 @@ def process_file():
             source = 'צוות מפתח התקציב'
         elif line.startswith('#### '):
             source = line[5:]
-        elif line.startswith('- '):
-            rows.append('<li>{}</li>'.format(line))
+        elif line.startswith('- ') or line.startswith('* '):
+            rows.append('<li>{}</li>'.format(line[2:]))
         else:
-            rows.append('{}<br/>'.format(line))
+            rows.append('<p>{}</p>'.format(line))
 
     yield from close(cats, rows, source)
 
