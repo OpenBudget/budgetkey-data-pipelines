@@ -11,15 +11,6 @@ from datapackage_pipelines.utilities.kvstore import DB
 from sqlalchemy import create_engine
 
 now = datetime.datetime.now()
-STATUS_FIELDS = [
-    {'name': '__last_updated_at',  'type': 'datetime'},
-    {'name': '__last_modified_at', 'type': 'datetime'},
-    {'name': '__is_new',           'type': 'boolean'},
-    {'name': '__is_stale',         'type': 'boolean'},
-    {'name': '__next_update_days', 'type': 'integer'},
-    {'name': '__hash',             'type': 'string'},
-]
-STATUS_FIELD_NAMES = list(f['name'] for f in STATUS_FIELDS)
 
 
 def get_connection_string():
@@ -45,7 +36,7 @@ def calc_hash(row, hash_fields):
     return hash
 
 
-def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, array_fields):
+def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, array_fields, STATUS_FIELD_NAMES):
     ret = DB()
     storage = Storage(create_engine(connection_string))
 
@@ -68,48 +59,48 @@ def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, a
     return ret
 
 
-def process_resource(res, key_fields, hash_fields, existing_ids):
+def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
     for row in res:
         key = calc_key(row, key_fields)
         hash = calc_hash(row, hash_fields)
 
         try:
             existing_id = existing_ids.get(key)
-            days_since_last_update = (now - existing_id['__last_updated_at']).days
-            is_stale = days_since_last_update > existing_id['__next_update_days']
+            days_since_last_update = (now - existing_id[prefix+'__last_updated_at']).days
+            is_stale = days_since_last_update > existing_id[prefix+'__next_update_days']
             row.update({
-                '__is_new': False,
-                '__is_stale': is_stale,
-                '__last_updated_at': now,
-                '__hash': hash,
+                prefix+'__is_new': False,
+                prefix+'__is_stale': is_stale,
+                prefix+'__last_updated_at': now,
+                prefix+'__hash': hash,
             })
-            if hash == existing_id['__hash']:
+            if hash == existing_id[prefix+'__hash']:
                 row.update({
-                    '__next_update_days': days_since_last_update + 2
+                    prefix+'__next_update_days': days_since_last_update + 2
                 })
             else:
                 row.update({
-                    '__last_modified_at': now,
-                    '__next_update_days': 1
+                    prefix+'__last_modified_at': now,
+                    prefix+'__next_update_days': 1
                 })
 
         except KeyError:
             row.update({
-                '__is_new': True,
-                '__is_stale': True,
-                '__last_updated_at': now,
-                '__last_modified_at': now,
-                '__next_update_days': 1,
-                '__hash': hash,
+                prefix+'__is_new': True,
+                prefix+'__is_stale': True,
+                prefix+'__last_updated_at': now,
+                prefix+'__last_modified_at': now,
+                prefix+'__next_update_days': 1,
+                prefix+'__hash': hash,
             })
 
         yield row
 
 
-def process_resources(res_iter, resource_name, key_fields, hash_fields, existing_ids):
+def process_resources(res_iter, resource_name, key_fields, hash_fields, existing_ids, prefix):
     for res in res_iter:
         if res.spec['name'] == resource_name:
-            yield process_resource(res, key_fields, hash_fields, existing_ids)
+            yield process_resource(res, key_fields, hash_fields, existing_ids, prefix)
             break
         else:
             yield res
@@ -126,6 +117,17 @@ def main():
     input_key_fields = parameters['key-fields']
     input_hash_fields = parameters.get('hash-fields')
     array_fields = parameters.get('array-fields', [])
+    prefix = parameters.get('prefix', '')
+
+    STATUS_FIELDS = [
+        {'name': prefix+'__last_updated_at',  'type': 'datetime'},
+        {'name': prefix+'__last_modified_at', 'type': 'datetime'},
+        {'name': prefix+'__is_new',           'type': 'boolean'},
+        {'name': prefix+'__is_stale',         'type': 'boolean'},
+        {'name': prefix+'__next_update_days', 'type': 'integer'},
+        {'name': prefix+'__hash',             'type': 'string'},
+    ]
+    STATUS_FIELD_NAMES = list(f['name'] for f in STATUS_FIELDS)
 
     for res in dp['resources']:
         if resource_name == res['name']:
@@ -150,7 +152,8 @@ def main():
                                      parameters['db-table'],
                                      db_key_fields,
                                      db_hash_fields,
-                                     array_fields + schema_array_fields)
+                                     array_fields + schema_array_fields,
+                                     STATUS_FIELD_NAMES)
             break
 
     assert existing_ids is not None
@@ -160,7 +163,8 @@ def main():
                                resource_name,
                                input_key_fields,
                                input_hash_fields,
-                               existing_ids))
+                               existing_ids,
+                               prefix))
 
 
 main()

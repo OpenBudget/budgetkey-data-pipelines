@@ -170,6 +170,7 @@ national-budget-changes-aggregated:
       parameters:
         resource-name: national-budget-changes
         db-table: budget_changes
+        prefix: chg
         key-fields:
           - transaction_id
     - run: set_primary_key
