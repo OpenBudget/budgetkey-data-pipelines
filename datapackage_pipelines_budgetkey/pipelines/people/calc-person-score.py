@@ -1,8 +1,7 @@
-import math
-
-import logging
+import datetime
 from datapackage_pipelines.wrapper import process
 
+old = datetime.datetime.fromtimestamp(0)
 
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
@@ -13,9 +12,16 @@ def modify_datapackage(dp, *_):
     return dp
 
 
+def start_date(x):
+    ret = x.get('start_date')
+    if not ret:
+        ret = old
+    return ret
+
+
 def process_row(row, *_):
     row['score'] = 1
-    row['details'] = sorted(row['details'], key=lambda i: i.get('start_date'))
+    row['details'] = sorted(row['details'], key=start_date)
     return row
 
 
