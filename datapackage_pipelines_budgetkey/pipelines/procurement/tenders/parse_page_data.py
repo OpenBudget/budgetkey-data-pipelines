@@ -137,7 +137,10 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
                 guessed_mime = m.id_buffer(buffer)
                 logging.info('Attempted to detect buffer type: %s', guessed_mime)
-                ext = mimetypes.guess_extension(guessed_mime)
+                if guessed_mime == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                    ext = '.docx'
+                else:
+                    ext = mimetypes.guess_extension(guessed_mime)
         assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s ext:%r buffer:%r" % (mime, orig_filename, guessed_mime, ext, buffer[:128])
         object_name = self.base_object_name + filename + (ext if ext else "")
         return self.write_to_object_storage(object_name, buffer)
