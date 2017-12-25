@@ -86,7 +86,7 @@ try:
         report['report-bad-rows'] = None
         report['load-error'] = None
 
-        with tempfile.NamedTemporaryFile(suffix=os.path.basename(url_to_use)) as tmp:
+        with tempfile.NamedTemporaryFile(suffix=os.path.splitext(url_to_use)[1]) as tmp:
             if url_to_use.startswith('http'):
                 stream = requests.get(url_to_use, stream=True).raw
                 stream.read = functools.partial(stream.read, decode_content=True)
@@ -167,7 +167,7 @@ try:
                 except Exception as e:
                     if sheet == 1:
                         stats['bad-reports'] += 1
-                        logging.info("ERROR '%s' in %s", e, report['report-url'])
+                        logging.info("ERROR %s in %s", e, report['report-url'])
                         report['report-sheets'] = 0
                         report['report-headers-row'] = None
                         report['load-error'] = str(e)
