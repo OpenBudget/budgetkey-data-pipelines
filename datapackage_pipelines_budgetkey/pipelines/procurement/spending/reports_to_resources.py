@@ -100,9 +100,10 @@ try:
             else:
                 filename = url_to_use
 
+            good_sheets = 0
+            errors = ''
             for sheet in range(1, 20):
                 canary = None
-                errd = True
                 try:
                     try:
                         logging.info('Trying sheet %d in %s', sheet, report['report-url'])
@@ -161,6 +162,7 @@ try:
                                 raise ValueError('Bad value for column (%s)' % e) from e
                     except StopIteration as e:
                         pass
+                    good_sheets += 1
                     dp['resources'].append({
                         PROP_STREAMED_FROM: url_to_use,
                         'path': PATH_PLACEHOLDER,
@@ -170,26 +172,27 @@ try:
                         'constants': report
                     })
                     report['report-headers-row'] = headers
-                    report['report-sheets'] = sheet
-                    errd = False
+                    report['report-sheets'] = good_sheets
                 except Exception as e:
-                    if sheet == 1:
-                        stats['bad-reports'] += 1
-                        logging.info("ERROR %s in %s", e, report['report-url'])
-                        report['report-sheets'] = 0
-                        report['report-headers-row'] = None
-                        report['load-error'] = str(e)
-                        report['report-rows'] = None
-                        report['report-bad-rows'] = None
-                    else:
-                        logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
+                    logging.info("ERROR %s in %s", e, report['report-url'])
+                    errors += str(e) + '\n'
+                    continue
                 finally:
                     if canary is not None:
                         canary.close()
-                if errd:
-                    break
 
-            loading_results.append(report)
+            if good_sheets == 0:
+                stats['bad-reports'] += 1
+                report['report-sheets'] = 0
+                report['report-headers-row'] = None
+                report['load-error'] = errors.strip()
+                report['report-rows'] = None
+                report['report-bad-rows'] = None
+            else:
+                logging.info("Detected %d sheets in %s", good_sheets, report['report-url'])
+
+
+    loading_results.append(report)
 except CastError as e:
     for err in e:
         logging.error('Failed to cast value: %s', err)
