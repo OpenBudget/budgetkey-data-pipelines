@@ -72,11 +72,13 @@ try:
             obj_name += ext
             obj_name = os.path.join('spending-reports', obj_name)
             if not object_storage.exists(obj_name):
-                tmp = tempfile.NamedTemporaryFile(delete=False)
+                tmp = tempfile.NamedTemporaryFile()
                 stream = requests.get(url_to_use, stream=True).raw
                 stream.read = functools.partial(stream.read, decode_content=True)
                 shutil.copyfileobj(stream, tmp)
+                tmp.flush()
                 url_to_use = object_storage.write(obj_name, file_name=tmp.name, create_bucket=False)
+                tmp.close()
                 del tmp
             else:
                 url_to_use = object_storage.urlfor(obj_name)
