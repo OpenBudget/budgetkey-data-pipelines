@@ -91,7 +91,7 @@ try:
                 stream = requests.get(url_to_use, stream=True).raw
                 stream.read = functools.partial(stream.read, decode_content=True)
                 shutil.copyfileobj(stream, tmp)
-                tmp.close()
+                tmp.flush()
                 filename = tmp.name
             else:
                 filename = url_to_use
