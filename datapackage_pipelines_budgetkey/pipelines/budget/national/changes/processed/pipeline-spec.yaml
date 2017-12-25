@@ -79,6 +79,26 @@ national-budget-changes-aggregated:
           transaction_id:
             constraints:
               required: true
+    - run: add_computed_field
+      parameters:
+        resources: national-budget-changes
+        fields:
+          -
+            operation: sum
+            target: amount
+            source:
+              - net_expense_diff
+              - gross_expense_diff
+              - allocated_income_diff
+              - commitment_limit_diff
+    - run: add_computed_field
+      parameters:
+        resources: national-budget-changes
+        fields:
+          -
+            operation: format
+            target: change_summary
+            with: '{budget_code_title}:{amount}'
     # Aggregate changes into transactions based on transaction id
     - run: join
       parameters:
@@ -119,6 +139,10 @@ national-budget-changes-aggregated:
             aggregate: sum
           personnel_max_diff:
             aggregate: sum
+          amount:
+            aggregate: sum
+          change_summary:
+            aggregate: set
           date:
             aggregate: set
           pending:
@@ -161,6 +185,8 @@ national-budget-changes-aggregated:
           committee_id:
             es:itemType: integer
           budget_code_title:
+            es:itemType: string
+          change_summary:
             es:itemType: string
           date:
             es:itemType: date
