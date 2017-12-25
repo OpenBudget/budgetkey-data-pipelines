@@ -111,6 +111,10 @@ try:
                     except IndexError as e:
                         logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
                         break
+                    except Exception:
+                        logging.info('Load file %s error, contents: %r',
+                                     filename, open(filename, 'rb').read(128))
+                        raise
                     canary_rows = canary.iter()
                     headers = None
                     headers_row = None
