@@ -192,7 +192,7 @@ try:
                 logging.info("Detected %d sheets in %s", good_sheets, report['report-url'])
 
 
-    loading_results.append(report)
+        loading_results.append(report)
 except CastError as e:
     for err in e:
         logging.error('Failed to cast value: %s', err)
