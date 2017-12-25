@@ -11,6 +11,7 @@ import requests
 import tabulator
 import logging
 
+import time
 from datapackage_pipelines_budgetkey.common.object_storage import temp_file, object_storage
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMING, PROP_STREAMED_FROM
 from datapackage_pipelines.wrapper import ingest, spew
@@ -88,6 +89,7 @@ try:
 
         with tempfile.NamedTemporaryFile(suffix=os.path.splitext(url_to_use)[1]) as tmp:
             if url_to_use.startswith('http'):
+                time.sleep(1)
                 stream = requests.get(url_to_use, stream=True).raw
                 stream.read = functools.partial(stream.read, decode_content=True)
                 shutil.copyfileobj(stream, tmp)
