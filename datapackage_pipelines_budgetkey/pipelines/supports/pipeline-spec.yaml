@@ -67,8 +67,11 @@ all:
         fields:
           support_title:
             - ZZTXT40
+            - תקנה (ZZTXT40)
           recipient:
             - מגיש
+          recipient_entity_id:
+            - מספר מזהה
           supporting_ministry:
             - משרד
           amount_total:
@@ -85,10 +88,9 @@ all:
             - שנת בקשה
           year_paid:
             - שנת תשלום
-          budget_extra_data:
-            - תקנה
           budget_code:
             - "תקנה - מפתח"
+            - "תקנה (ZCMMT_ITM) - מפתח"
     - run: fix_values
     - run: set_types
       parameters:
@@ -135,11 +137,34 @@ with-entities:
           name: entities
           key:
             - fingerprint
-          delete: true
+          delete: false
         target:
           name: supports
           key:
             - recipient_fingerprint
+          full: true
+        fields:
+          entity_name:
+            name: name
+            aggregate: first
+          entity_id:
+            name: id
+            aggregate: first
+          entity_kind:
+            name: kind
+            aggregate: first
+
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: supports
+          key:
+            - recipient_entity_id
           full: true
         fields:
           entity_name:
@@ -214,7 +239,7 @@ by-payment-year:
           years_requested:
             name: year_requested
             aggregate: set
-          budget_extra_data:
+          recipient_entity_id:
             aggregate: max
 
     - run: set_types
