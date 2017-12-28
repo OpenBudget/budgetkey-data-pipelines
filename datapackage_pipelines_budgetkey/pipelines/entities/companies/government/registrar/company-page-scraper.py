@@ -132,6 +132,8 @@ def get_director_of_state(directors_of_state_elem):
 
 def get_director_in_company(directors_in_company_href_wrapper):
     director_in_company = {}
+    if directors_in_company_href_wrapper.find('a') is None:
+        return None
     director_in_company_href_element = pq(directors_in_company_href_wrapper.find('a'))
     director_in_company_href = director_in_company_href_element.attr('href')
     director_in_company_role = director_in_company_href_element.find('.role').text()
@@ -190,7 +192,11 @@ def get_company_data(company_page_data_pq):
     if directors_in_company_next_sibling is not None:
         directors_in_company_elem_list = get_all_children(directors_in_company_next_sibling)
         for directors_in_company_href_wrapper in directors_in_company_elem_list:
-            directors_in_company.append(get_director_in_company(directors_in_company_href_wrapper))
+            d = get_director_in_company(directors_in_company_href_wrapper)
+            if d is not None:
+                directors_in_company.append(d)
+            else:
+                break
 
     element['directors_in_company'] = directors_in_company
 
