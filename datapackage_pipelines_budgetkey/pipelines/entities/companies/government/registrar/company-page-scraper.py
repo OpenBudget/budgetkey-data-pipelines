@@ -57,6 +57,8 @@ def get_key(key_text):
 
 
 def get_value(key, value):
+    if value is None or len(value) == 0:
+        return ''
     # Fix problem with websites that are duplicated with new line character between.
     if key == 'company_website' and '\n' in value:
         return value[0:value.index('\n')]
