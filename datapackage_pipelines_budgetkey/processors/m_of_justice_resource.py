@@ -36,6 +36,13 @@ def get_entities():
     repl3 = re.compile("[\r\n]+(?=[^5])")
 
     l = 0
+
+    def process_v(k, v):
+        ret = str(v).strip()
+        if k.endswith('Date'):
+            ret = ret.split('.')[0]
+        return ret
+
     while len(data) != l:
         l = len(data)
         data = repl1.sub(",", data)
@@ -45,7 +52,7 @@ def get_entities():
     reader = csv.DictReader(StringIO(data))
     for rec in reader:
         yield dict(
-            (k.strip(), str(v).strip()) for k, v in rec.items()
+            (k.strip(), process_v(k, v)) for k, v in rec.items()
         )
 
 resource = {
