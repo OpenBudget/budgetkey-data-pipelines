@@ -260,7 +260,8 @@ def scrape_company_details(cmp_recs):
         desired_capabilities=DesiredCapabilities.PHANTOMJS)
     driver.set_window_size(1200, 800)
     for i, cmp_rec in enumerate(cmp_recs):
-        logging.debug('GETTING DATA FOR COMPANY: ' + cmp_rec['name'])
+        logging.info('GETTING DATA FOR COMPANY: ' + cmp_rec['name'])
+        logging.info('href: ' + cmp_rec['href'])
         driver.get(cmp_rec['href'])
 
         company_page_data = []
