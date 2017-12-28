@@ -4,10 +4,10 @@ import requests
 cookie_re = re.compile("document.cookie='([^=]+)=([^;]+); path=/'")
 
 
-def cookie_monster_get(url):
+def cookie_monster_iter(url, chunk=1024*1024):
 
     session = requests.Session()
-    headers = {}
+    headers = {'range': 'bytes=0-400'}
     content_length = None
 
     while content_length is None:
@@ -27,19 +27,22 @@ def cookie_monster_get(url):
                 session.cookies.set(found_cookies[0], found_cookies[1], path='/')
                 continue
 
-            return None
+            return
         else:
-            return data
+            break
 
-    data = b''
-    for ofs in range(0, content_length, 1024*1024):
-        headers['range'] = 'bytes={}-{}'.format(ofs, ofs+1024*1024-1)
+    for ofs in range(0, 100*1024*1024, chunk):
+        headers['range'] = 'bytes={}-{}'.format(ofs, ofs+chunk-1)
         resp = session.get(url, headers=headers)
-        if resp.status_code not in (206) or resp.headers.get('content-length') == 0:
+        if resp.status_code not in (206,) or resp.headers.get('content-length') == 0:
             break
-        if len(resp.content) > 1024*1024:
+        yield resp.content
+        if len(resp.content) > chunk:
             break
-        data += resp.content
 
+
+def cookie_monster_get(url):
+    data = b''
+    for content in cookie_monster_iter(url):
+        data += content
     return data
-
