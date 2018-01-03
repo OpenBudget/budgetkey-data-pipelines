@@ -42,9 +42,6 @@ national-budget-changes-aggregated:
         resource: national-budget-changes
     - run: filter_reserve
     # Add transaction id to all changes
-    - run: sample
-      parameters:
-        resource: transactions
     - run: join
       parameters:
         source:
@@ -91,14 +88,17 @@ national-budget-changes-aggregated:
               - gross_expense_diff
               - allocated_income_diff
               - commitment_limit_diff
-    - run: add_computed_field
-      parameters:
-        resources: national-budget-changes
-        fields:
           -
-            operation: format
-            target: change_summary
-            with: '{budget_code_title}:{amount}'
+            operation: sum
+            target: transferred_amount
+            source:
+              - net_expense_diff
+              - gross_expense_diff
+              - allocated_income_diff
+              - commitment_limit_diff
+
+    - run: fix_values
+
     # Aggregate changes into transactions based on transaction id
     - run: join
       parameters:
@@ -141,8 +141,8 @@ national-budget-changes-aggregated:
             aggregate: sum
           amount:
             aggregate: sum
-          change_summary:
-            aggregate: set
+          change_list:
+            aggregate: array
           date:
             aggregate: set
           pending:
@@ -168,6 +168,8 @@ national-budget-changes-aggregated:
           explanation: null
     # Calculate score
     - run: calc-transaction-score
+    # Summarize
+    - run: summarize
     # Set types
     - run: set_types
       parameters:
@@ -186,12 +188,16 @@ national-budget-changes-aggregated:
             es:itemType: integer
           budget_code_title:
             es:itemType: string
-          change_summary:
-            es:itemType: string
+          change_list:
+            es:itemType: object
+            es:index: false
           date:
             es:itemType: date
           pending:
             es:itemType: boolean
+#    - run: sample
+#      parameters:
+#        resource: national-budget-changes
     - run: manage-revisions
       parameters:
         resource-name: national-budget-changes
