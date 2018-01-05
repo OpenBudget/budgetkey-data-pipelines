@@ -8,8 +8,9 @@ from datapackage_pipelines.wrapper import process
 
 def process_row(row, *_):
     start_date = row.get('start_date')
+    order_date = row.get('order_date')
     end_date = row.get('end_date')
-    row['min_year'] = start_date.year if start_date else None
+    row['min_year'] = start_date.year if start_date else (order_date.year if order_date else None)
     row['max_year'] = end_date.year if end_date else None
     return row
 
