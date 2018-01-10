@@ -131,7 +131,7 @@ def category_sankey(row, prefix, translations={}):
 CAT1_QUERY="""SELECT substring(code
 FROM 1
 FOR 4) AS extra,
-((hierarchy->>1)::json)->>1 as label,
+'‹ ' || ((hierarchy->>1)::json)->>1 as label,
 sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
@@ -142,7 +142,7 @@ GROUP BY 1, 2"""
 CAT2_QUERY="""SELECT substring(code
 FROM 1
 FOR 4) AS extra,
-((hierarchy->>1)::json)->>1 as label,
+'‹ ' || ((hierarchy->>1)::json)->>1 as label,
 sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
@@ -170,7 +170,7 @@ def query_based_charts(row):
         result = engine.execute(query)
         result = list(dict(r) for r in result)
         chart, layout = budget_sankey(row, result)
-        yield 'לאילו משרדים הולך הכסף?', chart, layout
+        yield 'אילו משרדים מטפלים בנושא זה?', chart, layout
 
 
 def history_chart(row, normalisation=None):
@@ -249,7 +249,7 @@ def process_resource(res_):
         if chart is not None:
             row['charts'].append(
                 {
-                    'title': 'לאן הולך הכסף?',
+                    'title': 'למה משתמשים בכסף?',
                     'chart': chart,
                     'layout': layout
                 }
@@ -295,7 +295,7 @@ def process_resource(res_):
         if chart is not None:
             row['charts'].append(
                 {
-                    'title': 'איך משתמשים בתקציב?',
+                    'title': 'איך מוציאים את התקציב?',
                     'chart': chart,
                     'layout': layout
                 }
