@@ -146,6 +146,10 @@ quarterly-contract-spending-reports:
             resource-name: quarterly-contract-spending-reports
           quarterly_contract_spending_reports_errors:
             resource-name: report-loading-results
+    - run: throttle
+      parameters:
+        sleep-seconds: 0.001
+
 
 latest-contract-spending:
   title: התקשרויות רכש ממשלתיות
