@@ -1,6 +1,7 @@
 import os
 
 import datapackage
+from copy import deepcopy
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
@@ -74,7 +75,10 @@ def mushonkey_flow(size, label, id):
     }
 
 def budget_id(code, row):
-    return 'budget/%s/%s' % (code, row['year'])
+    if code is not None:
+        return 'budget/%s/%s' % (code, row['year'])
+    else:
+        return None
 
 
 def budget_sankey(row, kids):
@@ -82,7 +86,7 @@ def budget_sankey(row, kids):
     if row.get('hierarchy'):
         parent = mushonkey_flow(
             row['net_revised'],
-            row['hierarchy'][-1][1],
+            row['hierarchy'][-1][1] + ' ›',
             budget_id(row['hierarchy'][-1][0], row)
         )
         groups.append(mushonkey_group(-100, 1.0, False, 'budget-parent', [parent]))
@@ -119,7 +123,9 @@ def category_sankey(row, prefix, translations={}):
         for k, v in row.items()
         if k.startswith(prefix) and v is not None
     ]
-    return budget_sankey(row, kids)
+    row_ = deepcopy(row)
+    del row_['hierarchy']
+    return budget_sankey(row_, kids)
 
 
 CAT1_QUERY="""SELECT substring(code
@@ -226,7 +232,7 @@ def admin_hierarchy_chart(row):
         # Admin Hierarchy chart
         kids = [
             {
-                'label': child['title'],
+                'label': '‹ ' + child['title'],
                 'extra': child['code'],
                 'amount': child['net_revised'],
             }
