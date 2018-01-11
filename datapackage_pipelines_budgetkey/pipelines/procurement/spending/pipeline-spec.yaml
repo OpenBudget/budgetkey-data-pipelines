@@ -41,6 +41,9 @@ quarterly-contract-spending-reports:
       parameters:
         input-file: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris/datapackage.json
     - run: stream_remote_resources
+    - run: throttle_resources
+      parameters:
+        sleep-seconds: 1
     - run: concatenate
       parameters:
         sources: "report_[0-9]+"
@@ -146,9 +149,6 @@ quarterly-contract-spending-reports:
             resource-name: quarterly-contract-spending-reports
           quarterly_contract_spending_reports_errors:
             resource-name: report-loading-results
-    - run: throttle
-      parameters:
-        sleep-seconds: 0.001
 
 
 latest-contract-spending:
