@@ -131,7 +131,7 @@ def category_sankey(row, prefix, translations={}):
 CAT1_QUERY="""SELECT substring(code
 FROM 1
 FOR 4) AS extra,
-'‹ ' || ((hierarchy->>1)::json)->>1 as label,
+'‹ ' || (((hierarchy->>1)::json)->>1) as label,
 sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
@@ -142,7 +142,7 @@ GROUP BY 1, 2"""
 CAT2_QUERY="""SELECT substring(code
 FROM 1
 FOR 4) AS extra,
-'‹ ' || ((hierarchy->>1)::json)->>1 as label,
+'‹ ' || (((hierarchy->>1)::json)->>1) as label,
 sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
