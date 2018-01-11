@@ -84,12 +84,14 @@ def budget_id(code, row):
 def budget_sankey(row, kids):
     groups = []
     if row.get('hierarchy'):
-        parent = mushonkey_flow(
-            row['net_revised'],
-            row['hierarchy'][-1][1] + ' ›',
-            budget_id(row['hierarchy'][-1][0], row)
-        )
-        groups.append(mushonkey_group(-100, 1.0, False, 'budget-parent', [parent]))
+        parent_code = row['hierarchy'][-1][0]
+        if parent_code != '00':
+            parent = mushonkey_flow(
+                row['net_revised'],
+                row['hierarchy'][-1][1] + ' ›',
+                budget_id(parent_code, row)
+            )
+            groups.append(mushonkey_group(-100, 1.0, False, 'budget-parent', [parent]))
     expenses = []
     revenues = []
     for child in sorted(kids, key=lambda x: abs(x['amount'])):
