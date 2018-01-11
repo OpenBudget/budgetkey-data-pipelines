@@ -46,8 +46,8 @@ def mushonkey_chart(title, groups):
         'type': 'mushonkey',
         'width': '100%',
         'height': '%spx' % height,
-        'centerWidth': 300,
-        'centerHeight': 100,
+        'centerWidth': 200,
+        'centerHeight': 75,
         'centerTitle': title,
         'directionLeft': True,
         'groups': groups
