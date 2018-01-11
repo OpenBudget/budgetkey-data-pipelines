@@ -272,7 +272,7 @@ def process_resource(res_):
                 }
             )
         if row['code'].startswith('C'):
-            chart, layout = history_chart(row, normalisation=gdp)
+            chart, layout = history_chart(row, normalisation=totals)
             if chart is not None:
                 row['charts'].append(
                     {
@@ -281,7 +281,7 @@ def process_resource(res_):
                         'layout': layout
                     }
                 )
-            chart, layout = history_chart(row, normalisation=totals)
+            chart, layout = history_chart(row, normalisation=gdp)
             if chart is not None:
                 row['charts'].append(
                     {
