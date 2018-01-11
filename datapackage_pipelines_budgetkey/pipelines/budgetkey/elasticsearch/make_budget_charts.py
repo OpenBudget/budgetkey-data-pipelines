@@ -251,7 +251,7 @@ def process_resource(res_):
         if chart is not None:
             row['charts'].append(
                 {
-                    'title': 'למה משתמשים בכסף?',
+                    'title': 'מבנה התקציב',
                     'chart': chart,
                     'layout': layout
                 }
