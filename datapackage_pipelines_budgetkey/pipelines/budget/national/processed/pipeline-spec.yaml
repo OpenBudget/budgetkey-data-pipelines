@@ -484,6 +484,7 @@ connected-items-explained:
           full: true
         fields:
           explanation: null
+          explanation_short: null
           explanation_source:
             name: source
     - run: dump.to_path

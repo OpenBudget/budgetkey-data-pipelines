@@ -1,4 +1,5 @@
 import re
+import itertools
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest
@@ -7,22 +8,22 @@ from datapackage_pipelines.wrapper import spew
 cat_re = re.compile('C[0-9]+')
 
 
-def close(cats, rows, source):
+def close(cats, rows, source, property):
     rows = ''.join(rows)
     for cat in cats:
-        yield dict(
-            budget_code=cat,
-            explanation=rows,
-            source=source
-        )
+        yield {
+            'budget_code': cat,
+            property: rows,
+            'source': source
+        }
 
 
-def process_file():
+def process_file(filename, property):
     cats = None
     rows = []
     source = None
 
-    for line in open('category-explanations.md'):
+    for line in open(filename):
 
         line = line.strip()
         if not line:
@@ -30,7 +31,7 @@ def process_file():
 
         if line.startswith('### '):
             if cats:
-                yield from close(cats, rows, source)
+                yield from close(cats, rows, source, property)
             cats = cat_re.findall(line)
             rows = []
             source = 'צוות מפתח התקציב'
@@ -41,7 +42,7 @@ def process_file():
         else:
             rows.append('<p>{}</p>'.format(line))
 
-    yield from close(cats, rows, source)
+    yield from close(cats, rows, source, property)
 
 
 def main():
@@ -56,12 +57,18 @@ def main():
             'fields': [
                 {'name': 'budget_code', 'type': 'string'},
                 {'name': 'explanation', 'type': 'string'},
+                {'name': 'explanation_short', 'type': 'string'},
                 {'name': 'source', 'type': 'string'},
             ]
         }
     }]
 
-    spew(dp, [process_file()])
+    spew(dp, [
+        itertools.chain(
+            process_file('category-explanations.md', 'explanation'),
+            process_file('category-explanations-short.md', 'explanation_short'),
+        )
+    ])
 
 if __name__=="__main__":
     main()
