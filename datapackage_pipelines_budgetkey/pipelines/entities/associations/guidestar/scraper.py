@@ -15,8 +15,12 @@ class Extractor:
         self.field = self.field.replace('[]', '')
         self.prefix = prefix
         self.subselector = subselector
+        self.calls = 0
+        self.matches = 0
 
     def __call__(self, page, rec):
+        self.calls += 1
+        assert self.calls < 9000 or self.matches > 0, "No mathces for {} with {}".format(self.field, repr(self.selector))
         if not self.array:
             for value in page.find(self.selector):
                 contents = pq(value).text().replace('\n', '')
@@ -32,6 +36,7 @@ class Extractor:
                 contents = contents.strip().replace('\n', '')
                 if len(contents) > 0:
                     rec[self.field] = contents
+                    self.matches += 1
                     break
         else:
             el = page
@@ -48,6 +53,8 @@ class Extractor:
                 values = el.find(selector)
                 values = [pq(value).text().strip().replace('\n', '') for value in values]
                 values = [value for value in values if len(value) > 0]
+                if len(values) > 0:
+                    self.matches += 1
                 rec[self.field] = values
         rec.setdefault(self.field, '')
 
