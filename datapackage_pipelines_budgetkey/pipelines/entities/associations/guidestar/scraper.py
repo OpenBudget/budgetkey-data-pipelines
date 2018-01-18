@@ -80,15 +80,11 @@ rules = [
     Extractor('.gov-field', 'salaries[]', prefix='חמשת מקבלי השכר הגבוה בעמותה', subselector='.subject'),
 ]
 
+
 def scrape_guidestar(ass_recs):
-    count = 0
     for i, ass_rec in enumerate(ass_recs):
 
         if not ass_rec['__is_stale']:
-            continue
-
-        count += 1
-        if count > 10000:
             continue
 
         assert 'Association_Number' in ass_rec
