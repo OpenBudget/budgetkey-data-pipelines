@@ -6,31 +6,72 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
-classes = {
-    '.views-field-title-field': 'guidestar_title',
-    '.views-field-field-vol-slogan': 'guidestar_slogan',
-    '#main .views-field-field-gov-objectives.has-text > .field-content': 'objective',
-    '.region-sidebar-second .views-field-field-gov-objectives.has-text > .field-content': 'field_of_activity',
-    '.views-field-php-1 > .field-content > p:not([title_removed])': 'address_lines[]',
-    '.views-field-php-1 > .field-content > p[title_removed]': 'activity_region',
-    '.views-field-php-1 > .field-content div:nth-of-type(2)': 'email',
-    '#block-views-organization-page-block-2 .views-field-php > .field-content': 'org_kind',
-    '#block-views-organization-page-block-2 .views-field-field-gov-status > .field-content': 'org_status',
-    '#block-views-organization-page-block-2 .views-field-field-gov-year-established > .field-content': 'year_established',
-    '[id="j_id0:GS_Template:j_id68"]': 'proper_management',
-    '[id="j_id0:GS_Template:j_id78"]': 'has_article_46',
-    '[id="j_id0:GS_Template:j_id620"] .field-content': 'gov_bits[]',
-    '.field-collection-item-field-gov-founder .content': 'founders[]',
-    '[id="j_id0:GS_Template:j_id291:j_id292:j_id294:salaryTable"] .office': 'roles[]',
-    '[id="j_id0:GS_Template:j_id291:j_id292:j_id294:salaryTable"] .subject': 'salaries[]',
-}
+class Extractor:
 
-bits = {
-    'מחזור שנתי': 'annual_turnover',
-    'מספר עובדים': 'num_employees',
-    'מספר מתנדבים': 'num_volunteers'
-}
+    def __init__(self, selector, field, prefix=None, subselector=None):
+        self.selector = selector
+        self.field = 'association_' + field
+        self.array = self.field.endswith('[]')
+        self.field = self.field.replace('[]', '')
+        self.prefix = prefix
+        self.subselector = subselector
 
+    def __call__(self, page, rec):
+        if not self.array:
+            for value in page.find(self.selector):
+                contents = pq(value).text().replace('\n', '')
+                if self.prefix is not None:
+                    if self.prefix in contents:
+                        if self.subselector is None:
+                            while self.prefix in contents:
+                                contents = contents[contents.find(self.prefix)+len(self.prefix):]
+                        else:
+                            contents = pq(value).find(self.subselector).text()
+                    else:
+                        continue
+                contents = contents.strip().replace('\n', '')
+                if len(contents) > 0:
+                    rec[self.field] = contents
+                    break
+        else:
+            el = page
+            selector = self.selector
+            if self.prefix is not None:
+                for value in page.find(self.selector):
+                    contents = pq(value).text()
+                    if self.prefix in contents:
+                        el = pq(value)
+                        selector = self.subselector
+                        break
+
+            if el is not None and selector is not None:
+                values = el.find(selector)
+                values = [pq(value).text().strip().replace('\n', '') for value in values]
+                values = [value for value in values if len(value) > 0]
+                rec[self.field] = values
+        rec.setdefault(self.field, '')
+
+
+rules = [
+    Extractor('.field-collection-item-field-gov-founder .content', 'founders[]'),
+    Extractor('.views-field-title-field', 'guidestar_title'),
+    Extractor('.views-field-field-vol-slogan', 'guidestar_slogan'),
+    Extractor('.views-field-php-1 > .field-content > p[title_removed]', 'activity_region'),
+    Extractor('.views-field-php-1 > .field-content div:nth-of-type(2)', 'email'),
+    Extractor('.views-field-field-gov-proper-management', 'proper_management', prefix='ניהול תקין'),
+    Extractor('.views-field-field-gov-proper-management', 'has_article_46', prefix='זיכוי ממס לתרומות'),
+    Extractor('.gov-field', 'field_of_activity', prefix='תחום פעילות הארגון', subselector='.field-content'),
+    Extractor('.gov-field', 'objective', prefix='מטרות ארגון רשמיות', subselector='.field-content'),
+    Extractor('.gov-field .field-content', 'annual_turnover', prefix='מחזור שנתי:'),
+    Extractor('.gov-field .field-content', 'num_employees', prefix='מספר עובדים:'),
+    Extractor('.gov-field .field-content', 'num_volunteers', prefix='מספר מתנדבים:'),
+    Extractor('.views-field-field-gov-year-established > .field-content', 'year_established'),
+    Extractor('.views-field-field-gov-status > .field-content', 'org_status'),
+    Extractor('.views-field-php', 'org_kind', prefix='סוג הארגון:'),
+    Extractor('.views-field-php-1 > .field-content > p:not([title_removed])', 'address_lines[]'),
+    Extractor('.gov-field', 'roles[]', prefix='חמשת מקבלי השכר הגבוה בעמותה', subselector='.office'),
+    Extractor('.gov-field', 'salaries[]', prefix='חמשת מקבלי השכר הגבוה בעמותה', subselector='.subject'),
+]
 
 def scrape_guidestar(ass_recs):
     count = 0
@@ -54,35 +95,9 @@ def scrape_guidestar(ass_recs):
                 time.sleep(60)
 
         rec = {}
-        for selector, field in classes.items():
-            field = 'association_' + field
-            if not field.endswith('[]'):
-                value = page.find(selector)
-                if len(value) > 0:
-                    value = pq(value[0]).text().strip().replace('\n', '')
-                if len(value) > 0:
-                    rec[field] = value
-            else:
-                field = field.replace('[]', '')
-                values = page.find(selector)
-                values = [pq(value).text().strip().replace('\n', '') for value in values]
-                values = [value for value in values if len(value) > 0]
-                if len(values) > 0:
-                    rec[field] = values
-                else:
-                    rec[field] = []
-            rec.setdefault(field, '')
+        for rule in rules:
+            rule(page, rec)
 
-        for bit in rec['association_gov_bits']:
-            found = False
-            for k, v in bits.items():
-                if bit.startswith(k+':'):
-                    bit = bit[len(k)+1:].strip()
-                    rec['association_'+v] = bit
-                    found = True
-                    break
-            assert found, "Failed to find bit mathcing %r" % bit
-        del rec['association_gov_bits']
         rec['id'] = ass_rec['Association_Number']
         rec['association_registration_date'] = ass_rec['Association_Registration_Date']
         rec['association_title'] = ass_rec['Association_Name']
@@ -109,16 +124,13 @@ def process_resources(res_iter_):
         yield res
 
 
-headers = sorted(classes.values())
-bits_headers = sorted(bits.values())
-
 resource = datapackage['resources'][0]
 resource.update(parameters)
 resource.setdefault('schema', {})['fields'] = [
-    {'name': 'association_' + header.replace('[]', ''),
-     'type': 'string' if not header.endswith('[]') else 'array'}
-    for header in headers + bits_headers
-    if header not in ('gov_bits[]', 'roles[]', 'salaries[]')
+    {'name': rule.field,
+     'type': 'string' if not rule.array else 'array'}
+    for rule in sorted(rules, key=lambda r:r.field)
+    if rule.field not in ('association_roles', 'association_salaries')
 ]
 resource['schema']['fields'].extend([
     {
