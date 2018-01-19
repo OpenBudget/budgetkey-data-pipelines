@@ -1,6 +1,6 @@
 guidestar-scraper:
   schedule:
-    crontab: "0 * * * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -10,6 +10,22 @@ guidestar-scraper:
       parameters:
         resource: association-registry
         url: /var/datapackages/entities/associations/registrar/datapackage.json
+    - run: load_resource
+      parameters:
+        resource: company-registry
+        url: /var/datapackages/entities/companies/registrar/registry/datapackage.json
+    - run: filter_heletz
+    - run: concatenate
+      parameters:
+        target:
+          name: association-registry
+        fields:
+          Association_Number:
+            - Company_Number
+          Association_Name:
+            - Company_Name
+          Association_Registration_Date:
+            - Company_Registration_Date
     - run: manage-revisions
       parameters:
         resource-name: association-registry

@@ -94,28 +94,38 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2017.csv
         resource:
           name: changes_2017
           path: data/changes_2017.csv
         tabulator:
           encoding: windows-1255
-          headers: 3
+          headers: 2
 #    - run: resource_without_excel_formulas
 #      runner: tzabar
 #      parameters:
-#        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/vaada_data.csv
+#        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
 #        resource:
-#          name: pending_changes_2017
-#          path: data/pending_changes.csv
+#          name: changes_2018
+#          path: data/changes_2018.csv
 #        tabulator:
 #          encoding: windows-1255
 #          headers: 3
+    - run: resource_without_excel_formulas
+      runner: tzabar
+      parameters:
+        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/vaada_data.csv
+        resource:
+          name: pending_changes_2018
+          path: data/pending_changes.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 3
     - run: stream_remote_resources
       cache: true
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2017
+        pending-resource-name: pending_changes_2018
     - run: concatenate
       parameters:
         target:
