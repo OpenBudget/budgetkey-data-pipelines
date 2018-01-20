@@ -51,6 +51,7 @@ all:
         guidestar:
           remove-prefix: association_
           kind: association
+          kind-he-column: association_org_kind
           kind-he: עמותה
           id-column: id
           name-column: association_title
@@ -90,6 +91,29 @@ all:
           kind: []
           kind_he: []
           details: []
+    - run: join
+      parameters:
+        source:
+          name: entities
+          key:
+            - id
+          delete: true
+        target:
+          name: entities
+          key: null
+          full: true
+        fields:
+          id: null
+          name:
+            aggregate: max
+          name_en:
+            aggregate: max
+          kind:
+            aggregate: first
+          kind_he:
+            aggregate: first
+          details:
+            aggregate: array
     - run: dedup_entities
     - run: set_types
       parameters:
@@ -103,6 +127,8 @@ all:
           id:
             constraints:
               pattern: "[0-9]+"
+          details:
+            type: object
     - run: set_primary_key
       parameters:
         entities: ['id']

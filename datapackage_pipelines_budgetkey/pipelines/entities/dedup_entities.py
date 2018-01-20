@@ -1,20 +1,16 @@
-import datetime
-import re
-
-from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
-from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
-
-all_entity_ids = set()
 
 
 def process_resource(resource):
     for row in resource:
-        if row['id'] not in all_entity_ids:
-            yield row
-            all_entity_ids.add(row['id'])
+        if row['details']:
+            details = row['details'][0]
+            for d in row['details'][1:]:
+                details.update(d)
+            row['details'] = details
+        yield row
 
 
 def process_resources(res_iter_):

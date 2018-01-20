@@ -95,7 +95,7 @@ def process_resource(resource):
                         details[k] = v
                 new_row = {
                     'kind': kind if kind is not None else row[kind_column],
-                    'kind_he': kind_he if kind_he is not None else row[kind_he_column],
+                    'kind_he': row[kind_he_column] if kind_he_column is not None and row[kind_he_column] is not None else kind_he,
                     'id': row[id_column],
                     'name': row[name_column],
                     'name_en': row.get(name_en_column),
