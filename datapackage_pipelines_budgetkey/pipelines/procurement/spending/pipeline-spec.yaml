@@ -43,7 +43,7 @@ quarterly-contract-spending-reports:
     - run: stream_remote_resources
     - run: throttle_resources
       parameters:
-        sleep-seconds: 1
+        sleep-seconds: 2
     - run: concatenate
       parameters:
         sources: "report_[0-9]+"
