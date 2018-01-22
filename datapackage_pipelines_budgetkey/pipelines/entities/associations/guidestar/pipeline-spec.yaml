@@ -56,6 +56,10 @@ guidestar-scraper:
             type: number
             bareNumber: false
             groupChar: ','
+          association_yearly_turnover:
+            type: number
+            bareNumber: false
+            groupChar: ','
     - run: manage-revisions
       parameters:
         resource-name: guidestar

@@ -69,7 +69,7 @@ rules = [
     Extractor('.views-field-field-gov-proper-management', 'has_article_46', prefix='זיכוי ממס לתרומות'),
     Extractor('.gov-field', 'field_of_activity', prefix='תחום פעילות הארגון', subselector='.field-content'),
     Extractor('.gov-field', 'objective', prefix='מטרות ארגון רשמיות', subselector='.field-content'),
-    Extractor('.gov-field .field-content', 'annual_turnover', prefix='מחזור שנתי:'),
+    Extractor('.gov-field .field-content', 'yearly_turnover', prefix='מחזור שנתי:'),
     Extractor('.gov-field .field-content', 'num_employees', prefix='מספר עובדים:'),
     Extractor('.gov-field .field-content', 'num_volunteers', prefix='מספר מתנדבים:'),
     Extractor('.views-field-field-gov-year-established > .field-content', 'year_established'),
