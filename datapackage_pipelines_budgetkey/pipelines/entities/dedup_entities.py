@@ -18,4 +18,16 @@ def process_resources(res_iter_):
         yield process_resource(resource)
 
 
-spew(datapackage, process_resources(res_iter))
+def modify_datapackage(datapackage):
+    for resource in datapackage['resources']:
+        if 'detailsSchema' in resource:
+            ds = resource.pop('detailsSchema')
+            for field in resource['schema']['fields']:
+                if field['name'] == 'details':
+                    field['es:schema'] = ds
+                    break
+    return datapackage
+
+
+spew(modify_datapackage(datapackage), 
+     process_resources(res_iter))

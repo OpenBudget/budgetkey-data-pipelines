@@ -21,6 +21,7 @@ def process_datapackage(datapackage):
                 'name': resource['name'],
                 PROP_STREAMING: True,
                 'path': resource['path'],
+                'detailsSchema': subschema,
                 'schema': {
                     'fields': [
                         {'name': 'id', 'type': 'string'},
@@ -28,7 +29,7 @@ def process_datapackage(datapackage):
                         {'name': 'name_en', 'type': 'string'},
                         {'name': 'kind', 'type': 'string'},
                         {'name': 'kind_he', 'type': 'string'},
-                        {'name': 'details', 'type': 'object', 'es:schema': subschema},
+                        {'name': 'details', 'type': 'object'},
                     ]
                 }
             }
