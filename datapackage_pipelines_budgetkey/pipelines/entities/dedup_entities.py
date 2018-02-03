@@ -19,9 +19,9 @@ def process_resources(res_iter_):
 
 
 def modify_datapackage(datapackage):
-    for resource in datapackage['resources']:
-        if 'detailsSchema' in resource:
-            ds = resource.pop('detailsSchema')
+    if 'detailsSchema' in datapackage:
+        ds = datapackage.pop('detailsSchema')
+        for resource in datapackage['resources']:
             for field in resource['schema']['fields']:
                 if field['name'] == 'details':
                     field['es:schema'] = ds

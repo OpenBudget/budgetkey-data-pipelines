@@ -14,6 +14,7 @@ subschema_field_names = set()
 
 def process_datapackage(datapackage):
     new_resources = []
+    datapackage['detailsSchema'] = subschema
     for resource in datapackage['resources']:
         if resource['name'] in parameters:
             res_params = parameters[resource['name']]
@@ -21,7 +22,6 @@ def process_datapackage(datapackage):
                 'name': resource['name'],
                 PROP_STREAMING: True,
                 'path': resource['path'],
-                'detailsSchema': subschema,
                 'schema': {
                     'fields': [
                         {'name': 'id', 'type': 'string'},
