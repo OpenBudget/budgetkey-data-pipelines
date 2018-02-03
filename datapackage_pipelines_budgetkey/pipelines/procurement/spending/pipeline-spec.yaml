@@ -264,6 +264,7 @@ latest-contract-spending:
             es:itemType: string
           explanation:
             es:itemType: string
+            es:hebrew: true
           manof_ref:
             es:itemType: string
           publisher:
@@ -280,6 +281,7 @@ latest-contract-spending:
             es:itemType: string
           supplier_name:
             es:itemType: string
+            es:hebrew: true
     - run: fingerprint
       parameters:
         resource-name: contract-spending
