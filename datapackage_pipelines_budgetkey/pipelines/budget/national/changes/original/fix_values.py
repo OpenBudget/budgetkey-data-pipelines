@@ -17,26 +17,23 @@ amounts = [
 ]
 
 def process_row(row, *_):
-    for k in list(row.keys()):
-        if k == 'date':
-            v = row[k]
-            if v is None or v.strip() == '':
-                row[k] = None
+    v = row.get('date')
+    if v is None or v.strip() == '':
+        row['date'] = None
+    else:
+        for fmt in formats:
+            try:
+                d = datetime.datetime.strptime(v, fmt).date()
+                row['date'] = d
+            except ValueError:
                 continue
-            for fmt in formats:
-                try:
-                    d = datetime.datetime.strptime(v, fmt).date()
-                    row[k] = d
-                except ValueError:
-                    continue
 
-    k = 'budget_code'
-    v = row[k].strip()
-    if len(v) == 0:
-        logging.error('BAD row')
+    bc = row['budget_code'].strip()
+    if len(bc) == 0:
+        logging.error('BAD row %r', row)
         return
-    v = '0' * (8-len(v)) + v
-    row[k] = v
+    bc = '0' * (8-len(bc)) + bc
+    row['budget_code'] = bc
 
     for amount in amounts:
         if isinstance(row[amount], str):

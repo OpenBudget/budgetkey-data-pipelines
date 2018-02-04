@@ -101,16 +101,16 @@ national-budget-changes:
         tabulator:
           encoding: windows-1255
           headers: 2
-#    - run: resource_without_excel_formulas
-#      runner: tzabar
-#      parameters:
-#        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
-#        resource:
-#          name: changes_2018
-#          path: data/changes_2018.csv
-#        tabulator:
-#          encoding: windows-1255
-#          headers: 3
+   - run: resource_without_excel_formulas
+     runner: tzabar
+     parameters:
+       url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
+       resource:
+         name: changes_2018
+         path: data/changes_2018.csv
+       tabulator:
+         encoding: windows-1255
+         headers: 3
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
