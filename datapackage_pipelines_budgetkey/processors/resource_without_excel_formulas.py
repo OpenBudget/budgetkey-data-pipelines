@@ -19,6 +19,7 @@ content = content.replace(b',="', b',"')
 
 out = tempfile.NamedTemporaryFile(suffix='.csv', delete=False)
 out.write(content)
+out.flush()
 
 logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:1000])
 
