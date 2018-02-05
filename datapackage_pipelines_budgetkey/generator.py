@@ -96,10 +96,11 @@ class Generator(GeneratorBase):
                 ])
 
                 if os.environ.get("ES_LIMIT_ROWS"):
-                    dump_to_sql_index = [i for i, s in enumerate(pipeline_steps) if s[0] == "dump.to_sql"][0]
+                    dump_to_sql_indices = [i for i, s in enumerate(pipeline_steps) if s.get("run") == "dump.to_sql"]
+                    assert len(dump_to_sql_indices) == 1
                     pipeline_steps.insert(
-                        dump_to_sql_index,
-                        ("limit_rows", {"stop-after-rows": int(os.environ.get("ES_LIMIT_ROWS"))})
+                        dump_to_sql_indices[0],
+                        {"run": "limit_rows", "parameters": {"stop-after-rows": int(os.environ.get("ES_LIMIT_ROWS"))}}
                     )
 
                 pipeline = {
