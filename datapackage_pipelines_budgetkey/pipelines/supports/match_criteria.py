@@ -1,3 +1,5 @@
+import logging
+
 from fuzzywuzzy import process,fuzz
 
 from datapackage_pipelines.wrapper import ingest, spew
