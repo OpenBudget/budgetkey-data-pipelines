@@ -17,9 +17,12 @@ def id(x):
     return x
 
 def enrich_supports(rows):
+    relevant_rows = 0
+    matched_rows = 0
     for row in rows:
         bests = []
-        if row['request_type'] == '3א':
+        if row['request_type'] == 'א3':
+            relevant_rows += 1
             payments = row['payments']
             if payments and len(payments) > 0:
                 payment = payments[0]
@@ -37,8 +40,12 @@ def enrich_supports(rows):
                         scorer=criteria_scorer
                     )
                     cache[key] = bests
+        if len(bests)>0:
+            matched_rows += 1
         row['criteria_docs'] = [x[0] for x in bests]
         yield row
+    
+    logging.info('MATCH STATS: rel: %d, matched: %d', relevant_rows, matched_rows)
 
 
 def process_resources(res_iter):
