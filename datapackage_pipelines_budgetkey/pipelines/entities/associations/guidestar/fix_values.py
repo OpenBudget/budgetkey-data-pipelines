@@ -32,6 +32,8 @@ def process_row(row, *_):
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 
     if row['association_field_of_activity']:
+        if row['association_field_of_activity'] == 'מחקר, מדע וטנכולוגיה':
+            row['association_field_of_activity'] = 'מחקר, מדע וטכנולוגיה'
         try:
             row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
         except:
