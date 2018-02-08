@@ -18,6 +18,15 @@ primary_categories = dict(
     for x in primary_categories[0]['result']
 )
 
+
+FIELD_FIXES = {
+    'מחקר, מדע וטנכולוגיה':
+        'מחקר, מדע וטכנולוגיה',
+    'מורשת או הנצחה':
+        'אחר - מורשת והנצחה',
+
+}
+
 def process_row(row, *_):
     association_activity_region = row.get('association_activity_region')
     if association_activity_region is not None:
@@ -32,8 +41,8 @@ def process_row(row, *_):
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 
     if row['association_field_of_activity']:
-        if row['association_field_of_activity'] == 'מחקר, מדע וטנכולוגיה':
-            row['association_field_of_activity'] = 'מחקר, מדע וטכנולוגיה'
+        foa = row['association_field_of_activity']
+        row['association_field_of_activity'] == FIELD_FIXES.get(foa, foa)
         try:
             row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
         except:
