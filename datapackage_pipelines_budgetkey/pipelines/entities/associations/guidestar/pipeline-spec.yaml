@@ -103,6 +103,7 @@ guidestar:
           association_address_lines:
             es:itemType: string
             type: array
+    - run: fix_values
 
     - run: dump.to_path
       parameters:
