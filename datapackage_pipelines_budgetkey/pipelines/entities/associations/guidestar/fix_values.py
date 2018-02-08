@@ -1,6 +1,7 @@
 from datapackage_pipelines.wrapper import process
 from datapackage import Package
 import json
+import logging
 
 from fuzzywuzzy import process as fw_process
 
@@ -31,7 +32,11 @@ def process_row(row, *_):
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 
     if row['association_field_of_activity']:
-        row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
+        try:
+            row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
+        except:
+            logging.error('offending row %r', row)
+            raise
     return row
 
 
