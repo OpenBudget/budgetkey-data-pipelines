@@ -174,7 +174,7 @@ def test_parse_data():
                            'contact': 'אביתר פרץ;מנהל תחום התקשרויות;02-6663424',
                            'contact_email': None,
                            'decision': 'בתוקף',
-                           'description': '\u200bמכרז מרכזי מממ-03-2013 נועד להסדיר רכישה של סולר ומזוט '
+                           'description': 'מכרז מרכזי מממ-03-2013 נועד להסדיר רכישה של סולר ומזוט '
                                           'על ידי כל משרדי הממשלה ויחידות הסמך בכל רחבי הארץ.',
                            'documents': docs([{'description': 'מסמכי המכרז',
                                                'link': '/officestenders/Pages/officetender.aspx?pID=542781',
