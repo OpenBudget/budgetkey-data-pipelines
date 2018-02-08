@@ -1,0 +1,4 @@
+.dpp.db
+.dpp/
+celerybeat-schedule
+schedule.db

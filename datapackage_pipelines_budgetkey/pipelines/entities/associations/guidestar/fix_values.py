@@ -1,5 +1,6 @@
 from datapackage_pipelines.wrapper import process
 from datapackage import Package
+import json
 
 from fuzzywuzzy import process as fw_process
 
@@ -10,6 +11,11 @@ districts = dict(
     for x in lamas_data.resources[0].iter(keyed=True)
 )
 
+primary_categories = json.load(open('activity_areas.json'))
+primary_categories = dict(
+    (x['Secondary_Text__c'], x['Primary_Text__c'])
+    for x in primary_categories[0]['result']
+)
 
 def process_row(row, *_):
     association_activity_region = row.get('association_activity_region')
@@ -23,6 +29,8 @@ def process_row(row, *_):
         association_activity_region_districts.add(best)
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 
+    if row['association_field_of_activity']:
+        row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
     return row
 
 
@@ -37,6 +45,10 @@ def modify_datapackage(dp, *_):
             'name': 'association_activity_region_districts',
             'type': 'array',
             'es:itemType': 'string'
+        },
+        {
+            'name': 'association_primary_field_of_activity,
+            'type': 'string',
         }
     ])
     return dp
