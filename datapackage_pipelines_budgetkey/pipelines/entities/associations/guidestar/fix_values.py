@@ -27,7 +27,7 @@ FIELD_FIXES = {
 
 }
 
-def process_row(row, *_):
+def process_row(row, row_index, *_):
     association_activity_region = row.get('association_activity_region')
     if association_activity_region is not None:
         row['association_activity_region_list'] = [x.strip() for x in association_activity_region.split(',')]
@@ -46,7 +46,7 @@ def process_row(row, *_):
         try:
             row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
         except:
-            logging.error('offending row %r', row)
+            logging.error('offending row %s %r', row_index, row)
             raise
     return row
 
