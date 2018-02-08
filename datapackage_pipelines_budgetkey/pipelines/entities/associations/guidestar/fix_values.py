@@ -47,7 +47,7 @@ def process_row(row, row_index, *_):
         try:
             row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
         except:
-            logging.error('offending row %s %r', row_index, row)            
+            logging.error('offending row "%s" %s %r', foa, row_index, row)            
     return row
 
 
