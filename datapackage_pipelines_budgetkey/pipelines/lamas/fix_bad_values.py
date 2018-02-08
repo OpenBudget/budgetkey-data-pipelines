@@ -1,8 +1,15 @@
 import re
+import csv
+import logging
 
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
+
+CITY_NAMES = dict(
+    (x['from'], x['to']) for x in 
+    csv.DictReader(open('city_names.csv'))
+)
 
 
 def process_resource(res_):
@@ -22,6 +29,9 @@ def process_resource(res_):
                     if len(re.findall('[.]', v)) > 1:
                         v = row[k] = ''
 
+            if row['name_municipality'] in CITY_NAMES:
+                logging.error('FOUND BAD CITY %s', row['name_municipality'])
+                row['name_municipality'] = CITY_NAMES[row['name_municipality']]
             yield row
         except (ValueError, TypeError):
             continue
