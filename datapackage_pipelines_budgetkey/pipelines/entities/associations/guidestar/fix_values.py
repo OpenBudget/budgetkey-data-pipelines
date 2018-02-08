@@ -48,7 +48,7 @@ def modify_datapackage(dp, *_):
             'es:itemType': 'string'
         },
         {
-            'name': 'association_primary_field_of_activity,
+            'name': 'association_primary_field_of_activity',
             'type': 'string',
         }
     ])
