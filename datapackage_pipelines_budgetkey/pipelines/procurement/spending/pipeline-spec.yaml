@@ -121,6 +121,8 @@ quarterly-contract-spending-reports:
           report-title: []
           report-publisher: []
           report-url: []
+          report-year: []
+          report-period: []
 
     - run: fix-report-values
     - run: set_types
@@ -177,6 +179,11 @@ latest-contract-spending:
       parameters:
         resource: quarterly-contract-spending-reports
         url: dependency://./procurement/spending/quarterly-contract-spending-reports
+    - run: collate_payments
+      parameters:
+        resource: quarterly-contract-spending-reports
+        field-name: payments
+
     - run: join
       parameters:
         source:
@@ -235,6 +242,9 @@ latest-contract-spending:
           supplier_name_fingerprint:
             name: supplier_name
             aggregate: max
+          payments:
+            name: payment
+            aggregate: array
     - run: join_tenders_and_contracts
     - run: set_types
       parameters:
@@ -282,6 +292,16 @@ latest-contract-spending:
           supplier_name:
             es:itemType: string
             es:hebrew: true
+          payments:
+            type: array
+            es:itemType: object
+            es:schema:
+              fields:
+                - { 'name': 'year', 'type': 'integer' }
+                - { 'name': 'period', 'type': 'integer' }
+                - { 'name': 'timestamp', 'type': 'string' }
+                - { 'name': 'executed', 'type': 'number' }
+                - { 'name': 'volumne', 'type': 'number' }
     - run: fingerprint
       parameters:
         resource-name: contract-spending
