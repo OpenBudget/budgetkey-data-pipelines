@@ -25,7 +25,17 @@ FIELD_FIXES = {
     'מורשת או הנצחה':
         'אחר - מורשת והנצחה',
     'ספורט':
-        'אחר - ספורט'
+        'אחר - ספורט',
+    'חינוך, השכלה והכשרה מקצועית':
+        'אחר - חינוך, השכלה והכשרה מקצועית',
+    'קהילה וחברה':
+        'אחר - קהילה וחברה',
+    'תרבות או אמנות':
+        'אחר - תרבות ואומנות',
+    'דת':
+        'אחר - דת',
+    'ארגוני סנגור, שינוי חברתי ופוליטי':
+        'אחר - ארגוני סנגור, שינוי חברתי ופוליטי',    
 }
 
 def process_row(row, row_index, *_):
@@ -43,11 +53,15 @@ def process_row(row, row_index, *_):
 
     if row['association_field_of_activity']:
         foa = row['association_field_of_activity']
-        row['association_field_of_activity'] == FIELD_FIXES.get(foa, foa)
+        foa = FIELD_FIXES.get(foa, foa)
         try:
-            row['association_primary_field_of_activity'] = primary_categories[row['association_field_of_activity']]
+            row['association_primary_field_of_activity'] = primary_categories[foa]
         except:
-            logging.error('offending row "%s" %s %r', foa, row_index, row)            
+            logging.error('offending row "%s" %s %r', foa, row_index, row)
+        prefix = 'אחר - '
+        if foa.startswith(prefix):
+            foa = foa[len(prefix):]
+        row['association_field_of_activity'] = foa     
     return row
 
 
