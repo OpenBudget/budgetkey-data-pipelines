@@ -48,7 +48,9 @@ def process_row(row, row_index, *_):
     for city in row['association_activity_region_list']:
         best = fw_process.extract(city, districts.keys())
         if len(best)>0:
-            association_activity_region_districts.add(best[0][0])
+            best = best[0][0]
+            district = districts[best]
+            association_activity_region_districts.add(district)
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 
     if row['association_field_of_activity']:
