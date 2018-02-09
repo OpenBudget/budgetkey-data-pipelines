@@ -8,8 +8,8 @@ def process_row(row, row_index,
             'year': row['report-year'],
             'period': row['report-period'],
             'timestamp': '{report-year}-{report-period}'.format(**row),
-            'executed': row['executed'],
-            'volume': row['volume'],
+            'executed': float(row['executed']) if row['executed'] is not None else None,
+            'volume': float(row['volume']) if row['volume'] is not None else None,
         }
     return row
 
