@@ -20,6 +20,44 @@ class Generator(GeneratorBase):
         return json.load(open(SCHEMA_FILE))
 
     @classmethod
+    def history_steps(cls, resource_name, primary_key, fields, history_key=None):
+        assert len(set(primary_key).intersection(set(fields))) == 0
+        if history_key is None:
+            history_key = '_'.join(sorted(fields))
+        db_table = 'history_{}_{}'.format(resource_name, history_key)
+        target_resource_name = db_table
+        return steps(*[
+            ('concatenate', {
+                'target': {
+                    'name': target_resource_name,
+                    'path': '.'
+                },
+                'sources': resource_name,
+                'fields': dict((f, []) for f in primary_key + fields) 
+            }),
+            ('add_timestamp', {
+                'resource': target_resource_name
+            }),
+            ('filter_updated_items', {
+                'db_table': db_table,
+                'resource': target_resource_name,
+                'key_fields': primary_key,
+                'value_fields': fields
+            }),
+            ('dump.to_sql', {
+                'tables': {
+                    db_table: {
+                        'resource-name': target_resource_name,
+                        'mode': 'appends'
+                    }
+                }
+            }),
+            ('drop_resource', {
+                'resource': target_resource_name
+            })
+        ])
+
+    @classmethod
     def generate_pipeline(cls, source):
         for doc_type, parameters in source.items():
             if parameters['kind'] == 'indexer':
@@ -36,6 +74,12 @@ class Generator(GeneratorBase):
                 pipeline_id = 'index_{}'.format(snake_doc_type)
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
                 revision = parameters.get('revision', 0)
+                keep_history = parameters.get('keep-history', [])
+                history_steps = []
+                for kh in keep_history:
+                    history_steps.extend(
+                        cls.history_steps(doc_type, key_fields, kh['fields'], kh.get('key'))
+                    )
 
                 pipeline_steps = steps(*[
                     ('add_metadata', {
@@ -66,6 +110,7 @@ class Generator(GeneratorBase):
                             {'__next_update_days': 2},
                         ]
                     }),
+                ]) + history_steps + steps(*[
                     ('add_doc_id', {
                         'doc-id-pattern': key_pattern
                     }),

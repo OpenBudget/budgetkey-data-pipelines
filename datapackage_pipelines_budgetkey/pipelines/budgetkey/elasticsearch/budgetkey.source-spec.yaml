@@ -60,11 +60,18 @@ tenders:
   revision: 7
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
-  page-title-pattern: '{regulation} עם {supplier}'
+  page-title-pattern: 'הליך רכש של {publisher}'
   key-fields:
     - tender_type
     - publication_id
     - tender_id
+  keep-history:
+    -
+      key: status
+      fields: 
+        - decision
+        - last_update_date
+
 
 #people:
 #  kind: indexer

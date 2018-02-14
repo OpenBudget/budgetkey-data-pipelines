@@ -109,3 +109,11 @@ aggregated:
       run: dump.to_path
       parameters:
           out-path: /var/datapackages/people/aggregated
+
+    -
+      run: dump.to_sql
+      parameters:
+          tables:
+            people:
+              resource-name: people
+              mode: rewrite

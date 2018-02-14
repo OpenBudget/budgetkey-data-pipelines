@@ -6,6 +6,7 @@ support-criteria:
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים
         homepage: http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx
     - run: scraper
+      runner: tzabar
       parameters:
         target-resource:
           name: criteria
