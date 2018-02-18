@@ -60,6 +60,7 @@ FOR_PURPOSE_STARTS_WITH = [
 # additional office names to try
 # to support mismatch between the original office field and the office name as it appears in the title
 OFFICE_ALIASES = [
+    'משרד העבודה הרווחה והשירותים החברתיים',
     'משרד הרווחה והשירותים החברתיים',
      'משרד התעשייה המסחר והתעסוקה',
     'משרד התעשייה, המסחר והתעסוקה',

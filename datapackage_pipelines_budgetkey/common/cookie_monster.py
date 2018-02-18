@@ -9,10 +9,12 @@ def cookie_monster_iter(url, chunk=1024*1024):
     session = requests.Session()
     headers = {'range': 'bytes=0-400'}
     content_length = None
+    accept_ranges = False
 
     while content_length is None:
         resp = session.get(url, headers=headers)
-        if 'accept-ranges' in resp.headers and not 'content-range' in resp.headers:
+        if 'accept-ranges' in resp.headers:
+            accept_ranges = True
             if 'content-length' in resp.headers:
                 content_length = max(100*1024*1024, int(resp.headers['content-length']))
             else:
@@ -31,14 +33,20 @@ def cookie_monster_iter(url, chunk=1024*1024):
         else:
             break
 
-    for ofs in range(0, 100*1024*1024, chunk):
-        headers['range'] = 'bytes={}-{}'.format(ofs, ofs+chunk-1)
+    if accept_ranges:
+        for ofs in range(0, 100*1024*1024, chunk):
+            headers['range'] = 'bytes={}-{}'.format(ofs, ofs+chunk-1)
+            resp = session.get(url, headers=headers)
+            if resp.status_code not in (206,) or resp.headers.get('content-length') == 0:
+                break
+            yield resp.content
+            if len(resp.content) > chunk:
+                break
+    else:
         resp = session.get(url, headers=headers)
-        if resp.status_code not in (206,) or resp.headers.get('content-length') == 0:
-            break
+        if resp.status_code not in (200,) or resp.headers.get('content-length') == 0:
+            return
         yield resp.content
-        if len(resp.content) > chunk:
-            break
 
 
 def cookie_monster_get(url):

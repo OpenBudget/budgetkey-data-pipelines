@@ -1,4 +1,6 @@
 support-criteria:
+  schedule:
+    crontab: "0 0 * * 1"
   pipeline:
     - run: add_metadata
       parameters:
