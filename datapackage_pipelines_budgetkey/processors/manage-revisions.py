@@ -65,9 +65,16 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
 
 def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
 
+    count_existing = 0
+    count_modified = 0
+    count_new = 0
+    count_total = 0
+    count_stale = 0
+
     for row in res:
         key = calc_key(row, key_fields)
         hash = calc_hash(row, hash_fields)
+        count_total += 1
 
         try:
             existing_id = existing_ids.get(key)
@@ -75,6 +82,8 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             next_update_days = existing_id[prefix+'__next_update_days']
             next_update_days = min(next_update_days, 45)
             is_stale = days_since_last_update > next_update_days
+            if is_stale:
+                count_stale += 1
             row.update({
                 prefix+'__is_new': False,
                 prefix+'__is_stale': is_stale,
@@ -85,11 +94,13 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
                 row.update({
                     prefix+'__next_update_days': days_since_last_update + 2
                 })
+                count_existing += 1
             else:
                 row.update({
                     prefix+'__last_modified_at': now,
                     prefix+'__next_update_days': 1
                 })
+                count_modified += 1
 
         except KeyError:
             row.update({
@@ -100,8 +111,16 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
                 prefix+'__next_update_days': 1,
                 prefix+'__hash': hash,
             })
+            count_new += 1
 
         yield row
+
+    logging.info('MANAGE REVISION STATS:')
+    logging.info('| TOTAL  : %7d', count_total)
+    logging.info('| NEW    : %7d', count_new)
+    logging.info('| CHANGED: %7d', count_modified)
+    logging.info('| SAME   : %7d', count_existing)
+    logging.info('| STALE  : %7d', count_stale)
 
 
 def process_resources(res_iter, resource_name, key_fields, hash_fields, existing_ids, prefix):
