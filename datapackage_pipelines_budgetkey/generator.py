@@ -27,12 +27,17 @@ class Generator(GeneratorBase):
         db_table = 'history_{}_{}'.format(resource_name, history_key)
         target_resource_name = db_table
         return steps(*[
+            ('duplicate', {
+                'source': resource_name,
+                'target-name': target_resource_name,
+                'target-path': '.'
+            }),
             ('concatenate', {
                 'target': {
                     'name': target_resource_name,
                     'path': '.'
                 },
-                'sources': resource_name,
+                'sources': target_resource_name,
                 'fields': dict((f, []) for f in primary_key + fields) 
             }),
             ('add_timestamp', {
