@@ -64,10 +64,10 @@ if __name__ == '__main__':
 
     stmt = text(' '.join([
         'select ',
-        ','.join(v_fields),
-        'from', db_table,
+        ','.join('"{}"'.format(v) for v in v_fields),
+        'from', '"' + db_table + '"',
         'where',
-        ' and '.join('({}=:{})'.format(k, k) for k in k_fields),
+        ' and '.join('("{}"=:{})'.format(k, k) for k in k_fields),
         'order by __updated_timestamp desc',
         'limit 1'
     ]))
