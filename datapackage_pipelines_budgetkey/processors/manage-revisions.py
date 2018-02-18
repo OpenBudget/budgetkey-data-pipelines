@@ -3,12 +3,11 @@ import logging
 import datetime
 import hashlib
 
-from tableschema_sql.storage import Storage
-
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.kvstore import DB
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
 
 now = datetime.datetime.now()
 
@@ -36,30 +35,36 @@ def calc_hash(row, hash_fields):
     return hash
 
 
-def get_all_existing_ids(connection_string, db_table, key_fields, hash_fields, array_fields, STATUS_FIELD_NAMES):
-    ret = DB()
-    storage = Storage(create_engine(connection_string))
+def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_NAMES):
+    db_fields = key_fields + STATUS_FIELD_NAMES
+    stmt = ' '.join([
+        'select',
+        ','.join(db_fields),
+        'from',
+        db_table
+    ])
 
-    if db_table in storage.buckets:
-        descriptor = storage.describe(db_table)
-        for field in descriptor['fields']:
-            if field['name'] in array_fields:
-                field['type'] = 'array'
-        storage.describe(db_table, descriptor)
-        db_fields = [f['name'] for f in descriptor['fields']]
-        for rec in storage.iter(db_table):
-            rec = dict(zip(db_fields, rec))
+    engine = create_engine(connection_string)
+    ret = DB()
+    
+    try:
+        rows = engine.execute(stmt)
+        for row in rows:
+            rec = dict(zip(db_fields, row))
             existing_id = dict(
                 (k, v) for k, v in rec.items()
                 if k in STATUS_FIELD_NAMES
             )
             key = calc_key(rec, key_fields)
             ret.set(key, existing_id)
+    except ProgrammingError as e:
+        logging.exception('Failed to fetch existing keys')
 
     return ret
 
 
 def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
+
     for row in res:
         key = calc_key(row, key_fields)
         hash = calc_hash(row, hash_fields)
@@ -118,7 +123,6 @@ def main():
     resource_name = parameters['resource-name']
     input_key_fields = parameters['key-fields']
     input_hash_fields = parameters.get('hash-fields')
-    array_fields = parameters.get('array-fields', [])
     prefix = parameters.get('prefix', '')
 
     STATUS_FIELDS = [
@@ -143,19 +147,16 @@ def main():
             db_key_fields = parameters.get('db-key-fields', input_key_fields)
             db_hash_fields = parameters.get('db-hash-fields', input_hash_fields)
 
-            schema_array_fields = [
-                field['name']
-                for field in res['schema']['fields']
-                if field['type'] == 'array'
-            ]
-
             existing_ids = \
                 get_all_existing_ids(connection_string,
                                      parameters['db-table'],
                                      db_key_fields,
-                                     db_hash_fields,
-                                     array_fields + schema_array_fields,
-                                     STATUS_FIELD_NAMES)
+                                     [
+                                         prefix + '__last_updated_at',
+                                         prefix + '__next_update_days',
+                                         prefix + '__hash',
+                                     ]
+                                    )
             break
 
     assert existing_ids is not None
