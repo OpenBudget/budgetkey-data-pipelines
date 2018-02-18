@@ -29,19 +29,23 @@ national-budgets:
         resource-name: 'תקציב וביצוע 2015-2013 כולל התחיבויות'
         resource:
           name: budget_2015_2013
-    - run: data_gov_il_resource
+    - run: add_resource
       parameters:
-        dataset-name: a2016
-        resource-name: 'תקציב מקורי ומאושר 2016'
-        resource:
-          name: budget_2016
-    - run: data_gov_il_resource
+        name: fd-2016
+        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2016.xlsx
+        sheet: 1
+    - run: add_resource
       parameters:
-        dataset-name: 2018-2017
-        resource-name: 'תקציב מקורי 2018-2017 ברמת תקנה'
-        resource:
-          name: budget_2017_2018
+        name: fd-2017
+        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2017.xlsx
+        sheet: 1
+    - run: add_resource
+      parameters:
+        name: fd-2018
+        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2018.xlsx
+        sheet: 1
     - run: stream_remote_resources
+      runner: tzabar
       cache: true
     - run: concatenate
       parameters:
