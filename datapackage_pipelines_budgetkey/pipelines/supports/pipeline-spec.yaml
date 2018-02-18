@@ -281,6 +281,43 @@ by-request-year:
           year_requested:
             es:time-range: year
 
+    - run: join
+      parameters:
+        source:
+          name: supports
+          key:
+            - budget_code
+            - year_requested
+            - recipient
+            - request_type
+          delete: true
+        target:
+          name: supports
+          key: null
+        fields:
+          budget_code: null
+          year_requested: null
+          recipient: null
+          request_type: null
+          entity_name: null
+          entity_id: null
+          entity_kind: null
+          supporting_ministry: null
+          year_paid: null
+          support_title: null
+          recipient_entity_id: null
+          amount_approved: null
+          amount_paid: null
+          amount_advance: null
+          amount_total: null
+          recipient_fingerprint: null
+          last_payment_year:
+            name: year_paid
+            aggregate: last
+          last_payment_amount:
+            name: amount_paid
+            aggregate: last
+
     - run: collate
       parameters:
         resource: supports

@@ -147,6 +147,10 @@ national-budget-changes-aggregated:
             aggregate: set
           pending:
             aggregate: set
+          is_pending:
+            name: pending
+            aggregate: max
+
     # Attach explanation to transaction
     - run: join
       parameters:

@@ -22,6 +22,11 @@ national-budget-changes:
   page-title-pattern: '{req_title[0]}'
   key-fields:
     - transaction_id
+  keep-history:
+    -
+      key: pending
+      fields: 
+        - is_pending
 
 entities:
   kind: indexer
@@ -54,6 +59,13 @@ supports:
     - year_requested
     - recipient
     - request_type
+  keep-history:
+    -
+      key: payments
+      fields: 
+        - amount_total
+        - last_payment_year
+        - last_payment_amount
 
 tenders:
   kind: indexer
