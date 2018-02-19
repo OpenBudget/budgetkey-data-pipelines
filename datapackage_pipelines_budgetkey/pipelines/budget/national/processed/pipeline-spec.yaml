@@ -84,6 +84,11 @@ aggregated-yearly:
             - כמות
           commitment_balance:
             - יתרת התחיבויות
+    - run: filter
+      parameters:
+        resources: national-budget
+        out:
+          - func_cls_title_2: גרעון
     - run: join_phases
       parameters:
         last-completed-year: 2017
