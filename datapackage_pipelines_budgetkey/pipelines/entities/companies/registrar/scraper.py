@@ -10,67 +10,92 @@ from datapackage_pipelines.wrapper import ingest, spew
 parameters, datapackage, res_iter = ingest()
 
 selectors = {
-    '#CPHCenter_lblCompanyNameHeb': 'company_name',
-    '#CPHCenter_lblCompanyNameEn': 'company_name_eng',
-    '#CPHCenter_lblStatus': 'company_status',
-    '#CPHCenter_lblCorporationType': 'company_type',
-    '#CPHCenter_lblGovCompanyType': 'company_government',
-    '#CPHCenter_lblLimitType': 'company_limit',
-    '#CPHCenter_lblZipCode': 'company_postal_code',
-    '#CPHCenter_lblStatusMafera1': 'company_mafera',
-    '#CPHCenter_lblStreet': 'company_street',
-    '#CPHCenter_lblStreetNumber': 'company_street_number',
-    '#CPHCenter_lblCountry': 'company_country',
-    '#CPHCenter_lblCity': 'company_city',
-    '#CPHCenter_lblPOB': 'company_pob',
-    '#CPHCenter_lblCityPB': 'company_pob_city',
-    '#CPHCenter_lblZipCodePB': 'company_pob_postal_code',
-    '#CPHCenter_lblLocatedAt': 'company_located_at',
-    '#CPHCenter_lblCompanyGoal': 'company_goal',
-    '#CPHCenter_lblCompanyDesc': 'company_description',
-    '#CPHCenter_lblDochShana': 'company_last_report_year'
+    'DisplayCompanyPurpose': 'company_goal',
+    'DisplayCompanyLimitType': 'company_limit',
+    'Company.Name': 'company_name',
+    'Company.NameEnglish': 'company_name_eng',
+    'Company.StatusString': 'company_status',
+    'DisplayCompanyType': 'company_type',
+    'Company.IsGovernmental': 'company_government',
+    'Company.IsMunicipal': 'company_municipal',
+    'Company.ActivityDescription': 'company_description',
+    'Company.Addresses.0.ZipCode': 'company_postal_code',
+    'Company.Addresses.0.StreetName': 'company_street',
+    'Company.Addresses.0.HouseNumber': 'company_street_number',
+    'Company.Addresses.0.FlatNumber': 'company_flat_number',
+    'Company.Addresses.0.CountryName': 'company_country',
+    'Company.Addresses.0.CityName': 'company_city',
+    'Company.Addresses.0.PostBox': 'company_pob',
+    'Company.Addresses.0.AtAddress': 'company_located_at',
+    'ContactValidations.LastYearlyReport': 'company_last_report_year',
+    'ContactValidations.IsViolatingCompany': 'company_mafera',
 }
 
 
-def retryer(session, method, *args, **kwargs):
-    kwargs['timeout'] = 60
-    retries = 5
-    exc = None
-    while retries > 0:
+def extract(rec, path):
+    path = path.split('.')
+    while len(path) > 0:
+        part = path.pop(0)
         try:
-            retries -= 1
-            return getattr(session, method)(*args, **kwargs)
-        except Exception as e:
-            logging.info('Got Exception %s, retrying', e)
-            time.sleep(60)
-            exc = e
-    raise exc
+            part = int(part)
+            if len(rec) > part:
+                rec = rec[part]
+            else:
+                return None
+        except:
+            rec = rec.get(part)
+        if rec is None:
+            break
+    return rec
 
 
-def init_session():
-    session = requests.Session()
-    status = None
-    response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesList.aspx')
-    assert response.status_code == 200, "Got status code %d" % response.status_code
-    page = pq(response.text)
-
-    form_data = {
-        '__EVENTTARGET': '',
-        '__EVENTARGUMENT': '',
-    }
-
-    for form_data_elem_ in page.find('#aspnetForm input'):
-        form_data_elem = pq(form_data_elem_)
-        form_data[form_data_elem.attr('name')] = pq(form_data_elem).attr('value')
-
-    return form_data, session
+def get_company_rec(company_id):
+    backoff = 3.0
+    for _ in range(60):
+        headers = {
+            'Origin': 'https://ica.justice.gov.il',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Language': 'en-US,en;q=0.9,he;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.140 Safari/537.36',
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'Accept': '*/*',
+            'Referer': 'https://ica.justice.gov.il/GenericCorporarionInfo/SearchCorporation?unit=8',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Connection': 'keep-alive',
+        }
+        params = {
+            'UnitsType': '8',
+            'CorporationType': '3',
+            'ContactType': '3',
+            'CorporationNameDisplayed': 'no',
+            'CorporationNumberDisplayed': '0',
+            'CorporationName': '',
+            'CorporationNumber': company_id,
+            'currentJSFunction': 'Process.SearchCorporation.Search()',
+            'RateExposeDocuments': '33.00',
+            'TollCodeExposeDocuments': '129',
+            'RateCompanyExtract': '10.00',
+            'RateYearlyToll': '1120.00',
+        }
+        resp = requests.post('https://ica.justice.gov.il/GenericCorporarionInfo/SearchGenericCorporation',
+                             headers=headers,
+                             data=params,
+                             allow_redirects=False)
+        logging.info('Company %s status_code %s', company_id, resp.status_code)
+        if resp.status_code != 200:
+            time.sleep(backoff)
+        else:
+            try:
+                return resp.json()
+            except Exception as e:
+                logging.exception('Company %s erred %s, %s', company_id, e, resp.content)
+                time.sleep(backoff)
+        # backoff *= 1.2
 
 
 def scrape_company_details(cmp_recs):
     count = 0
     erred = 0
-
-    form_data, session = init_session()
 
     for i, cmp_rec in enumerate(cmp_recs):
 
@@ -81,7 +106,6 @@ def scrape_company_details(cmp_recs):
         if count > 36000 or erred > 4:
             continue
 
-        time.sleep(1)
         company_id = cmp_rec['Company_Number']
 
         row = {
@@ -89,27 +113,14 @@ def scrape_company_details(cmp_recs):
             'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
-        if count == 1:
-            form_data['ctl00$CPHCenter$txtCompanyNumber'] = company_id
+        company_rec = get_company_rec(company_id)
 
-            response = retryer(session, 'post', 'http://havarot.justice.gov.il/CompaniesList.aspx', data=form_data)
-            _ = pq(response.text)
-
-            # if len(page.find('#CPHCenter_GridBlock').find('a')) == 0:
-
-        response = retryer(session, 'get', 'http://havarot.justice.gov.il/CompaniesDetails.aspx?id=%s' % company_id)
-        page = pq(response.text)
+        if company_id is None:
+            erred += 1
+            continue
 
         for k, v in selectors.items():
-            row[v] = page.find(k).text()
-        if row['company_name'].strip() == '':
-            if row['company_name_eng'].strip() != '':
-                row['company_name'] = row['company_name_eng']
-                erred = 0
-            else:
-                logging.error('Failed to get data for company %s: %r', company_id, row)
-                erred += 1
-                form_data, session = init_session()
+            row[v] = extract(company_rec, k)        
 
         yield row
 

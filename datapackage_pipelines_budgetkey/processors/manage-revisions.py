@@ -7,7 +7,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.kvstore import DB
 
 from sqlalchemy import create_engine
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import ProgrammingError, OperationalError
 
 now = datetime.datetime.now()
 
@@ -58,6 +58,8 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
             key = calc_key(rec, key_fields)
             ret.set(key, existing_id)
     except ProgrammingError as e:
+        logging.exception('Failed to fetch existing keys')
+    except OperationalError as e:
         logging.exception('Failed to fetch existing keys')
 
     return ret
