@@ -1,4 +1,5 @@
 import copy
+import logging
 
 from datapackage_pipelines.wrapper import spew, ingest
 from decimal import Decimal
@@ -130,11 +131,15 @@ def process_first(rows):
         phase_key = phases[row['phase']]
         del row['phase']
 
-        row_ = copy.deepcopy(row)
-        yield from process_row(row_, phase_key)
+        try:
+            row_ = copy.deepcopy(row)
+            yield from process_row(row_, phase_key)
 
-        if row['year'] > last_completed_year:
-            yield from process_row(row, 'revised')
+            if row['year'] > last_completed_year:
+                yield from process_row(row, 'revised')
+        except:
+            logging.exception('Offending row %r', row)
+            raise
 
 
 def process_resources(res_iter_):

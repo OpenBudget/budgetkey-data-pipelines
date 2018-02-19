@@ -86,7 +86,7 @@ aggregated-yearly:
             - יתרת התחיבויות
     - run: join_phases
       parameters:
-        last-completed-year: 2016
+        last-completed-year: 2017
 
     - run: topical_sums
     - run: join_categories

@@ -49,11 +49,14 @@ class Generator(GeneratorBase):
                 'key_fields': primary_key,
                 'value_fields': fields
             }),
+            ('set_primary_key', {
+                target_resource_name: primary_key + ['__updated_timestamp']
+            }),
             ('dump.to_sql', {
                 'tables': {
                     db_table: {
                         'resource-name': target_resource_name,
-                        'mode': 'appends'
+                        'mode': 'append'
                     }
                 }
             }),
