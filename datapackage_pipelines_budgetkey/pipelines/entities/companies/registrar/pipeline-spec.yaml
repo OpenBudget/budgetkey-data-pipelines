@@ -69,8 +69,14 @@ details-scraper:
     - run: set_types
       parameters:
         types:
-          'company_last_report_year':
+          company_last_report_year:
             type: integer
+          company_is_municipal:
+            type: boolean
+          company_is_government:
+            type: boolean
+          company_is_mafera:
+            type: boolean
     - run: manage-revisions
       parameters:
         resource-name: company-details

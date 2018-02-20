@@ -16,8 +16,8 @@ selectors = {
     'Company.NameEnglish': 'company_name_eng',
     'Company.StatusString': 'company_status',
     'DisplayCompanyType': 'company_type',
-    'Company.IsGovernmental': 'company_government',
-    'Company.IsMunicipal': 'company_municipal',
+    'Company.IsGovernmental': 'company_is_government',
+    'Company.IsMunicipal': 'company_is_municipal',
     'Company.ActivityDescription': 'company_description',
     'Company.Addresses.0.ZipCode': 'company_postal_code',
     'Company.Addresses.0.StreetName': 'company_street',
@@ -28,7 +28,7 @@ selectors = {
     'Company.Addresses.0.PostBox': 'company_pob',
     'Company.Addresses.0.AtAddress': 'company_located_at',
     'ContactValidations.LastYearlyReport': 'company_last_report_year',
-    'ContactValidations.IsViolatingCompany': 'company_mafera',
+    'ContactValidations.IsViolatingCompany': 'company_is_mafera',
 }
 
 
@@ -120,7 +120,9 @@ def scrape_company_details(cmp_recs):
             continue
 
         for k, v in selectors.items():
-            row[v] = extract(company_rec, k)        
+            row[v] = extract(company_rec, k)
+            if k == 'Company.Addresses.0.ZipCode' and row[v] is not None:
+                row[v] = str(row[v])
 
         yield row
 
