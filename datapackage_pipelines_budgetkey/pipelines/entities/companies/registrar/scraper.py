@@ -115,7 +115,7 @@ def scrape_company_details(cmp_recs):
 
         company_rec = get_company_rec(company_id)
 
-        if company_id is None:
+        if company_rec is None:
             erred += 1
             continue
 
