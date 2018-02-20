@@ -43,6 +43,23 @@ class Generator(GeneratorBase):
             ('add_timestamp', {
                 'resource': target_resource_name
             }),
+            ('join', {
+                'source': {
+                    'name': target_resource_name,
+                    'key': primary_key + ['__updated_timestamp'],
+                    'delete': True
+                },
+                'target': {
+                    'name': target_resource_name,
+                    'key': null
+                },
+                'fields': dict(
+                    (f, {
+                        'aggregate': 'last'
+                    } if f in fields else None)
+                    for f in primary_key + ['__updated_timestamp'] + fields
+                )
+            }) 
             ('filter_updated_items', {
                 'db_table': db_table,
                 'resource': target_resource_name,
