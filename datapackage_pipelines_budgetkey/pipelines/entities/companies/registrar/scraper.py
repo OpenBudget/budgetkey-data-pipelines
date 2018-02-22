@@ -118,6 +118,12 @@ def scrape_company_details(cmp_recs):
         if company_rec is None:
             erred += 1
             continue
+        
+        company_rec = extract(company_rec, 'Data.0')
+
+        if company_rec is None:
+            erred += 1
+            continue
 
         for k, v in selectors.items():
             row[v] = extract(company_rec, k)
