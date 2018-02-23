@@ -1,0 +1,62 @@
+entities.companies.registrar.scraper
+--
+{}
+--
+{
+    "name": "test",
+    "resources": [
+        {
+            "name": "input",
+            "dpp:streaming": true,
+            "path": "registry.csv",
+            "schema": { "fields": [
+                {"name": "__is_stale", "type": "boolean"},
+                {"name": "Company_Number", "type": "string"},
+                {"name": "Company_Registration_Date", "type": "date"},
+                {"name": "Company_Name", "type": "string"}
+            ]}
+        }
+    ]
+}
+--
+{"__is_stale":true, "Company_Number": "515585917", "Company_Registration_Date": "2010-02-03", "Company_Name": "קוד אזרחי"}
+--
+{
+    "name": "test",
+    "resources": [
+        {
+            "name": "input",
+            "dpp:streaming": true,
+            "path": "registry.csv",
+            "schema":
+                {"fields": [
+                    {"name": "company_city", "type": "string"},
+                    {"name": "company_country", "type": "string"},
+                    {"name": "company_description", "type": "string"},
+                    {"name": "company_flat_number", "type": "string"},
+                    {"name": "company_goal", "type": "string"},
+                    {"name": "company_is_government", "type": "string"},
+                    {"name": "company_is_mafera", "type": "string"},
+                    {"name": "company_is_municipal", "type": "string"},
+                    {"name": "company_last_report_year", "type": "string"},
+                    {"name": "company_limit", "type": "string"},
+                    {"name": "company_located_at", "type": "string"},
+                    {"name": "company_name", "type": "string"},
+                    {"name": "company_name_eng", "type": "string"},
+                    {"name": "company_pob", "type": "string"},
+                    {"name": "company_postal_code", "type": "string"},
+                    {"name": "company_status", "type": "string"},
+                    {"name": "company_street", "type": "string"},
+                    {"name": "company_street_number", "type": "string"},
+                    {"name": "company_type", "type": "string"},
+                    {"name": "id", "type": "string"},
+                    {"name": "company_registration_date", "type": "date"}
+                 ]
+            }
+        }
+    ]
+}
+--
+{"company_city": "תל אביב - יפו",  "company_country": "ישראל",  "company_description": "פיתוח מיזמים טכנולוגיים או טכנולוגיות מידע הקשורים להנגשת מידע או לשקיפות ציבורית",  "company_flat_number": null,  "company_goal": "לעסוק בסוגי עיסוק שפורטו בתקנון",  "company_is_government": false,  "company_is_mafera": false,  "company_is_municipal": false,  "company_last_report_year": null,  "company_limit": "מוגבלת",  "company_located_at": "הסדנא לידע ציבורי ע\"ר",  "company_name": "קוד אזרחי בע\"מ",  "company_name_eng": "CIVIC CODE  LTD",  "company_pob": null,  "company_postal_code": "6713521",  "company_registration_date": "2010-02-03",  "company_status": "פעילה",  "company_street": "סעדיה גאון",  "company_street_number": "26",  "company_type": "ישראלית",  "id": "515585917"}
+
+{}
