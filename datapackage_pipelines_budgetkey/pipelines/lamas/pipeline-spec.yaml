@@ -886,7 +886,7 @@ municipal-data:
             name: name
           entity_kind:
             name: kind
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/
     - run: dump.to_sql
