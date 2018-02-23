@@ -487,6 +487,7 @@ def process_datapackage(datapackage):
             new_name = '_'.join(parts)
             field_name_conversion[orig_name] = new_name
             field['name'] = new_name
+            field['description'] = orig_name
             new_fields.append(field)
             all_headers.add(new_name)
         resource['schema']['fields'] = new_fields

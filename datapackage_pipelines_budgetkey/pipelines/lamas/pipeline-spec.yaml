@@ -886,6 +886,16 @@ municipal-data:
             name: name
           entity_kind:
             name: kind
+    - run: add_metadata
+      parameters:
+        title: רשויות מקומיות 2015 - קובץ נתונים לעיבוד
+        readme: |-
+          ### Israel's Central Bureau of Statistics - Municipality Data File
+
+          ### הלשכה המרכזית לסטטיסטיקה - קובץ רשויות מקומיות (2015)
+
+          פרסום "הרשויות המקומיות בישראל" כולל נתונים כספיים של הרשויות המקומיות ונתונים פיזיים בתחומים: דמוגרפיה, חינוך, רווחה, תשתיות, תחבורה, בנייה, מים ועוד. בפרסום מוצגים נתונים כלל ארציים, נתונים מסכמים לפי מעמד מוניציפאלי (עיריות, מועצות מקומיות ומועצות אזוריות) , נתונים השוואתיים לכל רשות מקומית ונתונים ברמת הרשות המקומית המהווים את פרופיל הרשות.
+
     - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/

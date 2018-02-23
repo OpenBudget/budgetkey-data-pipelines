@@ -21,6 +21,9 @@ class BudgetKeyPathDumper(PathDumper):
 
     def finalize(self):
         super(BudgetKeyPathDumper, self).finalize()
+        if any(os.environ.get('DATAHUB_'+x) is None
+               for x in ('OWNER', 'OWNERID', 'ENDPOINT', 'TOKEN')):
+            return
         dp_path = self.datapackage_path()
         datapackage = json.load(open(dp_path))
         flowspec = {
