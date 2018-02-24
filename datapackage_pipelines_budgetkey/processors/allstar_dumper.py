@@ -59,6 +59,7 @@ class BudgetKeyPathDumper(PathDumper):
                                  'Auth-Token': token
                              }
                             ).json()
+        logging.info('UPLOAD response: %r', resp)
         assert resp['success'], json.dumps(resp, indent=2)
 
 
