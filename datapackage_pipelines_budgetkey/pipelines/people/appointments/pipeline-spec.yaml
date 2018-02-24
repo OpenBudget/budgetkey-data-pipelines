@@ -24,6 +24,8 @@ all-appointments:
     -
       run: concatenate
       parameters:
+        target:
+          name: people
         fields:
           full_name: ['name']
           company: ['organisation_name']
@@ -36,7 +38,7 @@ all-appointments:
     -
       run: collate
       parameters:
-        resource: concat
+        resource: people
         key:
           - full_name
           - company
@@ -46,16 +48,16 @@ all-appointments:
       parameters:
         source-field: company
         target-field: fingerprinted_company
-        resource-name: concat
+        resource-name: people
     -
       run: join
       parameters:
         source:
-          name: concat
+          name: people
           key: "{full_name} {fingerprinted_company}"
           delete: true
         target:
-          name: concat
+          name: people
           key: null
         fields:
           full_name: null

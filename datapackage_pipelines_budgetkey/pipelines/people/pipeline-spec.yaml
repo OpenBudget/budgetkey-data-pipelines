@@ -33,7 +33,7 @@ all:
       parameters:
         source-field: full_name
         target-field: key
-        resource-name: concat
+        resource-name: people
 
     -
       run: dump.to_path
@@ -55,12 +55,12 @@ aggregated:
       run: load_resource
       parameters:
         url: dependency://./people/all
-        resource: concat
+        resource: people
 
     -
       run: collate
       parameters:
-        resource: concat
+        resource: people
         key:
           - key
         collated-field-name: details
@@ -68,12 +68,12 @@ aggregated:
       run: join
       parameters:
         source:
-          name: concat
+          name: people
           key:
             - key
           delete: true
         target:
-          name: concat
+          name: people
           key: null
         fields:
           key: null

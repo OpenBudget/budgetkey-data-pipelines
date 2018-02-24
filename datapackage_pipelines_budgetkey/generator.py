@@ -51,7 +51,7 @@ class Generator(GeneratorBase):
                 },
                 'target': {
                     'name': target_resource_name,
-                    'key': null
+                    'key': None
                 },
                 'fields': dict(
                     (f, {
@@ -59,7 +59,7 @@ class Generator(GeneratorBase):
                     } if f in fields else None)
                     for f in primary_key + ['__updated_timestamp'] + fields
                 )
-            }) 
+            }), 
             ('filter_updated_items', {
                 'db_table': db_table,
                 'resource': target_resource_name,

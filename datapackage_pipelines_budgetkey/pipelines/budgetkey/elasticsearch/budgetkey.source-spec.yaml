@@ -84,12 +84,11 @@ tenders:
         - decision
         - last_update_date
 
-
-#people:
-#  kind: indexer
-#  revision: 4
-#  dependent_pipeline: ./people/aggregated
-#  source_datapackage: /var/datapackages/people/aggregated/datapackage.json
-#  key-fields:
-#    - key
-#
+people:
+  kind: indexer
+  revision: 4
+  dependent_pipeline: ./people/aggregated
+  source_datapackage: /var/datapackages/people/aggregated/datapackage.json
+  page-title-pattern: 'מידע על {key}'
+  key-fields:
+    - key
