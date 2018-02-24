@@ -53,15 +53,13 @@ class BudgetKeyPathDumper(PathDumper):
                              headers={
                                  'Auth-Token': os.environ['DATAHUB_TOKEN']
                              }).json()
-        logging.info('GOT response from DataHub %r', resp)
         token = resp['token']
         resp = requests.post(os.environ['DATAHUB_ENDPOINT']+'/source/upload', json=flowspec,
                              headers={
                                  'Auth-Token': token
                              }
                             ).json()
-        logging.info('GOT response from DataHub %r', resp)
-        assert resp['success']
+        assert resp['success'], json.dumps(resp, indent=2)
 
 
 if __name__ == '__main__':

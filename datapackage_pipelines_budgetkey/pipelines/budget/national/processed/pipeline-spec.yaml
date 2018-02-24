@@ -286,8 +286,9 @@ with-extras:
   pipeline:
     - run: add_metadata
       parameters:
-        title: National Budget (With Extras)
+        title: תקציב מדינת ישראל, 1997-2018
         name: processed-national-budget-with-extras
+        readme: התקציב השנתי של ממשלת ישראל, כפי שמפורסם על ידי אגף התקציבים - ועוד קצת עיבודים שלנו.
     - run: load_resource
       parameters:
         url: dependency://./budget/national/processed/aggregated-yearly
@@ -312,7 +313,7 @@ with-extras:
       parameters:
         resources: budget
         sort-by: "{year}{code}"
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/budget/national/processed/with-extras
     - run: set_primary_key
