@@ -105,6 +105,12 @@ guidestar:
             type: array
     - run: fix_values
 
+    - run: dump.to_sql
+      parameters:
+        tables:
+          guidestar_processed:
+            resource-name: guidestar
+
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/guidestar

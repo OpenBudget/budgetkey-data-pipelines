@@ -24,6 +24,8 @@ FIELD_FIXES = {
         'מחקר ומדע',
     'מחקר, מדע וטכנולוגיה':
         'מחקר ומדע',
+    'אחר - מחקר, מדע וטכנולוגיה':
+        'מחקר ומדע',
     'שירותי רווחה':
         'אחר - שירותי רווחה',
     'מורשת או הנצחה':
@@ -67,7 +69,9 @@ def process_row(row, row_index, *_):
         prefix = 'אחר - '
         if foa.startswith(prefix):
             foa = foa[len(prefix):]
-        row['association_field_of_activity'] = foa     
+        row['association_field_of_activity'] = foa
+    else:
+        row['association_primary_field_of_activity'] = ''
     return row
 
 
