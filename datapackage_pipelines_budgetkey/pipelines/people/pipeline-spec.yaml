@@ -12,28 +12,28 @@ all:
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/all/datapackage.json
+        url: dependency://./people/appointments/all-appointments
         resource: 0
 
-    -
-      run: concatenate
-      parameters:
-        target:
-          name: people
-        fields:
-          full_name: []
-          start_date: []
-          position: []
-          organisation_name: []
-          details: []
-          gender: []
+    # -
+    #   run: concatenate
+    #   parameters:
+    #     target:
+    #       name: people
+    #     fields:
+    #       event: []
+    #       when: []
+    #       full_name: []
+    #       company: []
+    #       title: []
+    #       sources: []
 
     -
       run: fingerprint
       parameters:
         source-field: full_name
         target-field: key
-        resource-name: people
+        resource-name: concat
 
     -
       run: dump.to_path
@@ -54,48 +54,50 @@ aggregated:
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/all/datapackage.json
-        resource: 0
+        url: dependency://./people/all
+        resource: concat
 
     -
       run: collate
       parameters:
-        resource: people
+        resource: concat
         key:
           - key
         collated-field-name: details
     -
-      run: sample
-    -
       run: join
       parameters:
         source:
-          name: people
+          name: concat
           key:
             - key
           delete: true
         target:
-          name: people
+          name: concat
           key: null
         fields:
           key: null
           details:
             aggregate: array
 
+    # -
+    #   run: set_types
+    #   parameters:
+    #     types:
+    #       details:
+    #         es:itemType: object
+    #         es:schema:
+    #           fields:
+    #             - {'name': 'event', 'type': 'string'}
+    #             - {'name': 'when', 'type': 'date'}
+    #             - {'name': 'title', 'type': 'string'}
+    #             - {'name': 'full_name', 'type': 'string'}
+    #             - {'name': 'sources', 'type': 'string'}
     -
-      run: set_types
-      parameters:
-        types:
-          details:
-            es:itemType: object
-            es:schema:
-              fields:
-                - {'name': 'full_name', 'type': 'string'}
-                - {'name': 'start_date', 'type': 'string'}
-                - {'name': 'position', 'type': 'string'}
-                - {'name': 'organisation_name', 'type': 'string'}
-                - {'name': 'details', 'type': 'string'}
-                - {'name': 'gender', 'type': 'string'}
+      run: sample
+
+    -
+      run: collate_schema
 
     -
       run: calc-person-score

@@ -48,8 +48,6 @@ all-appointments:
         target-field: fingerprinted_company
         resource-name: concat
     -
-      run: sample
-    -
       run: join
       parameters:
         source:
@@ -64,6 +62,12 @@ all-appointments:
           company: null
           sources:
             aggregate: array
+    -
+      run: fix_values
+    -
+      run: collate_schema
+    -
+      run: set_types
     -
       run: dump.to_path
       parameters:
