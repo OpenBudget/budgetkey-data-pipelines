@@ -13,7 +13,14 @@ def process_resource(rows):
                     full_name=founder,
                     event='founder',
                     title='{} מן המייסדים של {}'.format(founder, association_name),
-                    when=registration_date 
+                    when=registration_date,
+                    sources=[
+                        dict(
+                            source='guidestar',
+                            proof_url='http://www.guidestar.org.il/GS_Malkar?number={}'.format(id),
+                            doc_id='/org/association/{}'.format(id)
+                        )
+                    ]
                 )
                 yield rec
 
@@ -22,7 +29,7 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'] = [
         {'name': 'company', 'type': 'string'},
         {'name': 'full_name', 'type': 'string'},
-        {'name': 'sources', 'type': 'string'},
+        {'name': 'sources', 'type': 'array'},
         {'name': 'event', 'type': 'string'},
         {'name': 'title', 'type': 'string'},
         {'name': 'when', 'type': 'string'},

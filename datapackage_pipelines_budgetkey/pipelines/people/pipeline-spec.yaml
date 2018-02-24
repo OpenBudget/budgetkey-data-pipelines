@@ -1,6 +1,7 @@
 all:
   dependencies:
     - pipeline: ./people/appointments/all-appointments
+    - pipeline: ./people/association_founders/association-founders
 
   pipeline:
     -
@@ -15,18 +16,24 @@ all:
         url: dependency://./people/appointments/all-appointments
         resource: 0
 
-    # -
-    #   run: concatenate
-    #   parameters:
-    #     target:
-    #       name: people
-    #     fields:
-    #       event: []
-    #       when: []
-    #       full_name: []
-    #       company: []
-    #       title: []
-    #       sources: []
+    -
+      run: load_resource
+      parameters:
+        url: dependency://./people/association_founders/association-founders
+        resource: 0
+
+    -
+      run: concatenate
+      parameters:
+        target:
+          name: people
+        fields:
+          event: []
+          when: []
+          full_name: []
+          company: []
+          title: []
+          sources: []
 
     -
       run: fingerprint
@@ -34,7 +41,9 @@ all:
         source-field: full_name
         target-field: key
         resource-name: people
-
+    -
+      run: set_types
+      
     -
       run: dump.to_path
       parameters:
