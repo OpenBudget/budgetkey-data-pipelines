@@ -8,6 +8,8 @@ def process_row(row, row_index,
         if row['Company_Name']:
             if 'חל"צ' in row['Company_Name']:
                 return row
+            if 'חברה לתועלת הציבור' in row['Company_Name']:
+                return row
     else:
         return row
 
