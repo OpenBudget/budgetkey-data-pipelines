@@ -65,6 +65,7 @@ details-scraper:
       parameters:
         resources: company-registry
         sort-by: "{__staleness}"
+    - run: sample
     - run: scraper
       runner: tzabar
       parameters:
@@ -87,7 +88,6 @@ details-scraper:
         db-table: company_details
         key-fields:
           - id
-    - run: sample
     - run: set_primary_key
       parameters:
         company-details:

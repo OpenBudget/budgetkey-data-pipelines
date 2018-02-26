@@ -47,7 +47,15 @@ contract-spending:
   key-fields:
     - order_id
     - budget_code
-
+  extra-steps:
+    - run: add_semantic_tags
+      parameters:
+        resource: contract-spending
+        source-fields:
+          - purpose
+        target-field: semantic-tags
+          
+  
 supports:
   kind: indexer
   revision: 7
