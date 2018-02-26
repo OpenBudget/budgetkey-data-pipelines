@@ -64,7 +64,7 @@ details-scraper:
     - run: sort
       parameters:
         resources: company-registry
-        sort-by: "{__last_updated_at}"
+        sort-by: "{__staleness}"
     - run: scraper
       runner: tzabar
       parameters:

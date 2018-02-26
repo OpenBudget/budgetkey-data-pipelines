@@ -84,11 +84,14 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             next_update_days = existing_id[prefix+'__next_update_days']
             next_update_days = min(next_update_days, 45)
             is_stale = days_since_last_update > next_update_days
+            staleness = int(100000+100000/(1+days_since_last_update))
             if is_stale:
                 count_stale += 1
+                staleness = 300000
             row.update({
                 prefix+'__is_new': False,
                 prefix+'__is_stale': is_stale,
+                prefix+'__staleness': staleness,
                 prefix+'__last_updated_at': now,
                 prefix+'__hash': hash,
             })
@@ -108,6 +111,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             row.update({
                 prefix+'__is_new': True,
                 prefix+'__is_stale': True,
+                prefix+'__staleness': 200000,
                 prefix+'__last_updated_at': now,
                 prefix+'__last_modified_at': now,
                 prefix+'__next_update_days': 1,
@@ -151,6 +155,7 @@ def main():
         {'name': prefix+'__last_modified_at', 'type': 'datetime'},
         {'name': prefix+'__is_new',           'type': 'boolean'},
         {'name': prefix+'__is_stale',         'type': 'boolean'},
+        {'name': prefix+'__staleness',        'type': 'integer'},
         {'name': prefix+'__next_update_days', 'type': 'integer'},
         {'name': prefix+'__hash',             'type': 'string'},
     ]
