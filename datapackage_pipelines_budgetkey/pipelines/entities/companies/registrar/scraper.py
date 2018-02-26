@@ -96,14 +96,17 @@ def get_company_rec(company_id):
 def scrape_company_details(cmp_recs):
     count = 0
     erred = 0
+    start = time.time()
 
-    for i, cmp_rec in enumerate(cmp_recs):
+    for cmp_rec in cmp_recs:
 
         if not cmp_rec['__is_stale']:
             continue
 
+        now = time.time()
         count += 1
-        if count > 36000 or erred > 4:
+        if count > 36000 or erred > 4 or now - start > 3000:
+            # limit run time to 50 minutes
             continue
 
         company_id = cmp_rec['Company_Number']
