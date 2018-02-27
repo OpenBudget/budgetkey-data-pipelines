@@ -1,6 +1,6 @@
 quarterly-contract-spending-report-uris:
   schedule:
-    crontab: "0 */4 * * *"
+    crontab: "0 * * * *"
   pipeline:
     - run: add_metadata
       parameters:
