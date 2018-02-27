@@ -70,6 +70,7 @@ def fingerprint(rows, src_field, tgt_field, unique_fingerprints):
     used = set()
     for row in rows:
         name = row[src_field]
+        tgt = name
         options = []
         if name is not None:
             tgt = name.strip().lower()
@@ -112,10 +113,14 @@ def fingerprint(rows, src_field, tgt_field, unique_fingerprints):
             if tgt is not None:
                 tgt = ' '.join(sorted(tgt[:30].split()))
 
+        if not tgt:
+            tgt = '<empty>'
+            
         if not unique_fingerprints or tgt not in used:
             row[tgt_field] = tgt
             yield row
-            used.add(tgt)
+            if unique_fingerprints:
+                used.add(tgt)
 
 
 def process_resources(res_iter_, src_field, tgt_field, unique_fingerprints):
