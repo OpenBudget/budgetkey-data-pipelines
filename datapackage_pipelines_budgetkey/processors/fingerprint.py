@@ -70,9 +70,10 @@ def fingerprint(rows, src_field, tgt_field, unique_fingerprints):
     used = set()
     for row in rows:
         name = row[src_field]
-        tgt = None
+        options = []
         if name is not None:
             tgt = name.strip().lower()
+            options.append(tgt)
 
             done = False
             while not done:
@@ -81,27 +82,32 @@ def fingerprint(rows, src_field, tgt_field, unique_fingerprints):
                     for l in range(len(suffix), 0, -1):
                         if tgt.endswith(suffix[:l]):
                             tgt = tgt[:-l]
+                            options.append(tgt)
                             done = False
                             break
 
             for prefix in CLEAN_TITLES:
                 if tgt.startswith(prefix + ' '):
                     tgt = tgt[len(prefix)+1:]
+                    options.append(tgt)
 
             for f, t in SIMPLIFICATIONS:
                 tgt = tgt.replace(f, t)
 
-            tgt_with_digits = tgt.strip()
-            tgt_no_digits = DIGITS.sub('', tgt_with_digits).strip()
-            tgt_no_english = ENGLISH.sub('', tgt_no_digits).strip()
+            options.append(tgt)
 
-            tgt = tgt_no_english
-            if len(tgt) == 0:
-                tgt = tgt_no_digits
-                if len(tgt) == 0:
-                    tgt = tgt_with_digits
-                    if len(tgt) == 0:
-                        tgt = None
+            tgt = DIGITS.sub('', tgt)
+            options.append(tgt)
+
+            tgt = ENGLISH.sub('', tgt)
+            options.append(tgt)
+
+            if not tgt:
+                tgt = options[0]
+                for opt in reversed(options):
+                    if opt:
+                        tgt = opt.strip()
+                        break
             
             if tgt is not None:
                 tgt = ' '.join(sorted(tgt[:30].split()))

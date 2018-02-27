@@ -130,7 +130,7 @@ def scrape_company_details(cmp_recs):
 
         for k, v in selectors.items():
             row[v] = extract(company_rec, k)
-            if k == 'Company.Addresses.0.ZipCode' and row[v] is not None:
+            if k in ('Company.Addresses.0.ZipCode', 'Company.Addresses.0.PostBox') and row[v] is not None:
                 row[v] = str(row[v])
 
         yield row
