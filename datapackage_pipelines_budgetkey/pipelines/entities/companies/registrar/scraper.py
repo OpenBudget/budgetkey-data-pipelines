@@ -105,7 +105,7 @@ def scrape_company_details(cmp_recs):
 
         now = time.time()
         count += 1
-        if count > 36000 or erred > 4 or now - start > 3000:
+        if count > 36000 or erred > 4 or now - start > 7200:
             # limit run time to 50 minutes
             continue
 
