@@ -108,7 +108,9 @@ def process_row(row, phase_key):
     row['parent'] = None
     row['hierarchy'] = []
 
-    if not row['code'].startswith('0000'):
+    if ((not row['code'].startswith('0000')) and 
+        (not row['code'].startswith('0084'))) or \
+        (row['econ_cls_code_2'] == '266'):
         row['code'] = '00'
         row['title'] = 'המדינה'
         yield row
