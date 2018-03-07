@@ -39,7 +39,9 @@ quarterly-contract-spending-reports:
         title: Quarterly Contract Spending Reports
     - run: reports_to_resources
       parameters:
-        input-file: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris/datapackage.json
+        input-pipeline: ./procurement/spending/quarterly-contract-spending-report-uris
+        db-table: quarterly_contract_spending_reports
+        error-db-table: quarterly_contract_spending_reports_errors
     - run: stream_remote_resources
     - run: throttle_resources
       parameters:
@@ -141,6 +143,14 @@ quarterly-contract-spending-reports:
             type: date
           sensitive_order:
             type: boolean
+    - run: set_primary_key
+      parameters:
+        quarterly-contract-spending-reports:
+          - report-url
+          - order_id
+          - budget_code
+        quarterly_contract_spending_reports_errors:
+          - report-url
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
@@ -149,8 +159,28 @@ quarterly-contract-spending-reports:
         tables:
           quarterly_contract_spending_reports:
             resource-name: quarterly-contract-spending-reports
+            mode: update
           quarterly_contract_spending_reports_errors:
             resource-name: report-loading-results
+            mode: update
+
+quarterly-contract-spending-reports-data:
+  dependencies:
+    - pipeline: ./procurement/spending/quarterly-contract-spending-reports
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: "spending-raw"
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
+        resource: quarterly-contract-spending-reports
+        table: quarterly_contract_spending_reports
+    - run: stream_remote_resources
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data
 
 
 latest-contract-spending:
@@ -158,7 +188,7 @@ latest-contract-spending:
   description: >
     אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
   dependencies:
-    - pipeline: ./procurement/spending/quarterly-contract-spending-reports
+    - pipeline: ./procurement/spending/quarterly-contract-spending-reports-data
     - pipeline: ./entities/fingerprints
     - pipeline: ./procurement/tenders/processed
 
@@ -178,7 +208,7 @@ latest-contract-spending:
     - run: load_resource
       parameters:
         resource: quarterly-contract-spending-reports
-        url: dependency://./procurement/spending/quarterly-contract-spending-reports
+        url: dependency://./procurement/spending/quarterly-contract-spending-reports-data
     - run: collate_payments
       parameters:
         resource: quarterly-contract-spending-reports
@@ -191,6 +221,7 @@ latest-contract-spending:
           key:
             - order_id
             - budget_code
+            - publisher
           delete: true
         target:
           name: contract-spending

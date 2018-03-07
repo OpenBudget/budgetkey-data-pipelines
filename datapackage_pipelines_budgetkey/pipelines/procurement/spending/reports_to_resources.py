@@ -10,17 +10,33 @@ import functools
 import requests
 import tabulator
 import logging
-
 import time
+
+from sqlalchemy import create_engine
+
 from datapackage_pipelines_budgetkey.common.object_storage import temp_file, object_storage
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMING, PROP_STREAMED_FROM
-from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines.wrapper import ingest, spew, get_dependency_datapackage_url
 from decimal import Decimal
 
 from tableschema.exceptions import CastError
 
 parameters, dp, res_iter = ingest()
-input_file = parameters['input-file']
+input_file = get_dependency_datapackage_url(parameters['input-pipeline'])
+db_table = parameters['db-table']
+errors_db_table = parameters['error-db-table']
+
+REVISION = 0
+
+engine = create_engine(os.environ['DPP_DB_ENGINE'])
+rp = engine.execute("""SELECT "report-url" from {} 
+                       where "load-error" is not null
+                       and revision={}""".format(errors_db_table, REVISION))
+errd_urls = set(r[0] for r in rp)
+rp = engine.execute("""SELECT "report-url" from {}
+                       where revision != {} limit 10""".format(db_table, REVISION))
+need_scraping = set(r[0] for r in rp)
+need_scraping.update(errd_urls)
 
 order_id_headers = [
     'הזמנת רכש',
@@ -60,8 +76,13 @@ reports = datapackage.DataPackage(input_file).resources[0]
 try:
     for i, report in enumerate(reports.iter(keyed=True)):
         logging.info('#%r: %r', i, report)
+        report_url = report['report-url']
+        if report_url not in need_scraping:
+            logging.info('SKIPPING %s', report_url)
+            continue
+        report['revision'] = REVISION
         time.sleep(1)
-        url_to_use = report['report-url']
+        url_to_use = report_url
         if url_to_use in url_to_fixed_file:
             url_to_use = url_to_fixed_file[url_to_use]
             logging.info("Using fixed file: %s", url_to_use)
