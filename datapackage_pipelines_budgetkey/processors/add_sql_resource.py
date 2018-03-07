@@ -1,8 +1,10 @@
 import os
+import logging
 
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMED_FROM
 from datapackage_pipelines.wrapper import process
 import datapackage
+from sqlalchemy import create_engine
 
 
 def modify_datapackage(dp, parameters, *_):
@@ -11,10 +13,23 @@ def modify_datapackage(dp, parameters, *_):
     for resource in source_datapackage.resources:
         descriptor = resource.descriptor
         if descriptor['name'] == parameters['resource']:
+            e = create_engine(os.environ['DPP_DB_ENGINE'])
+            rp = e.execute("""SELECT column_name
+                              FROM information_schema.columns
+                              WHERE table_schema='public'
+                              AND table_name='{}'""".format(parameters['table']))
+            db_fields = [x[0] for x in rp.fetchall()]
+            logging.info('GOT DB fields: %s', db_fields)
+
             # override field attributes based on parameters and matching on field name
             override_fields = {field["name"]: field for field in parameters.get("fields", [])}
-            for field in descriptor["schema"]["fields"]:
+            schema = descriptor["schema"]
+            fields = schema["fields"]
+            for field in fields:
                 field.update(override_fields.get(field["name"], {}))
+            fields = {f['name']: f for f in fields}
+            fields = [fields[f] for f in db_fields]
+            descriptor['schema']['fields'] = fields
             resource = {
                 'name': descriptor['name'],
                 PROP_STREAMED_FROM: os.environ['DPP_DB_ENGINE'],

@@ -9,6 +9,7 @@ import datapackage
 import functools
 import requests
 import tabulator
+from tabulator.exceptions import SourceError
 import logging
 import time
 
@@ -29,14 +30,17 @@ errors_db_table = parameters['error-db-table']
 REVISION = 0
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
-rp = engine.execute("""SELECT "report-url" from {} 
-                       where "load-error" is not null
-                       and revision={}""".format(errors_db_table, REVISION))
-errd_urls = set(r[0] for r in rp)
-rp = engine.execute("""SELECT "report-url" from {}
-                       where revision != {} limit 10""".format(db_table, REVISION))
-need_scraping = set(r[0] for r in rp)
-need_scraping.update(errd_urls)
+try:
+    rp = engine.execute("""SELECT "report-url" from {} 
+                        where "load-error" is not null
+                        and revision={}""".format(errors_db_table, REVISION))
+    errd_urls = set(r[0] for r in rp)
+    rp = engine.execute("""SELECT distinct "report-url" from {}
+                        where revision={}""".format(db_table, REVISION))
+    all_good = set(r[0] for r in rp)
+except:
+    errd_urls = set()
+    all_good = set()
 
 order_id_headers = [
     'הזמנת רכש',
@@ -73,12 +77,16 @@ url_to_fixed_file = {
 stats = {'bad-reports': 0}
 loading_results = []
 reports = datapackage.DataPackage(input_file).resources[0]
+scraped = 0
 try:
     for i, report in enumerate(reports.iter(keyed=True)):
         logging.info('#%r: %r', i, report)
         report_url = report['report-url']
-        if report_url not in need_scraping:
-            logging.info('SKIPPING %s', report_url)
+        if report_url in all_good:
+            logging.info('SKIPPING ALL GOOD %s', report_url)
+            continue
+        if scraped > 10 and report_url not in errd_urls:
+            logging.info('SKIPPING DONE %s', report_url)
             continue
         report['revision'] = REVISION
         time.sleep(1)
@@ -136,12 +144,12 @@ try:
                         logging.info('Temp filename %s', filename)
                         canary = tabulator.Stream(filename, sheet=sheet)
                         canary.open()
-                    except IndexError as e:
+                    except SourceError as e:
                         logging.info("Detected %d sheets in %s", sheet-1, report['report-url'])
                         break
-                    except Exception:
-                        logging.info('Load file %s error, contents: %r',
-                                     filename, open(filename, 'rb').read(128))
+                    except Exception as e2:
+                        logging.info('%s: Load file %s error, contents: %r',
+                                     e2, filename, open(filename, 'rb').read(128))
                         raise
                     canary_rows = canary.iter()
                     headers = None
@@ -149,7 +157,7 @@ try:
                     for j, row in enumerate(canary_rows):
                         if j > 20:
                             break
-                        row = [str(x).strip() if x is not None else '' for x in row]
+                        row = [str(x).strip().replace('\xa0', ' ') if x is not None else '' for x in row]
                         if len(row) == 0 or row[0] == '':
                             continue
                         row_fields = set(row)
@@ -199,7 +207,7 @@ try:
                     report['report-headers-row'] = headers
                     report['report-sheets'] = good_sheets
                 except Exception as e:
-                    logging.info("ERROR %s in %s", e, report['report-url'])
+                    logging.info("ERROR %r in %s", e, report['report-url'])
                     errors += str(e) + '\n'
                     continue
                 finally:
@@ -214,6 +222,7 @@ try:
                 report['report-rows'] = None
                 report['report-bad-rows'] = None
             else:
+                scraped += 1
                 logging.info("Detected %d sheets in %s", good_sheets, report['report-url'])
 
 
@@ -248,6 +257,10 @@ schema['fields'].extend([
     },
     {
         'name': 'report-bad-rows',
+        'type': 'integer'
+    },
+    {
+        'name': 'revision',
         'type': 'integer'
     },
 ])

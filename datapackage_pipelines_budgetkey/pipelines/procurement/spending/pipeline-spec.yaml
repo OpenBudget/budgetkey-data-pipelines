@@ -42,7 +42,10 @@ quarterly-contract-spending-reports:
         input-pipeline: ./procurement/spending/quarterly-contract-spending-report-uris
         db-table: quarterly_contract_spending_reports
         error-db-table: quarterly_contract_spending_reports_errors
+    - run: sample
     - run: stream_remote_resources
+    - run: add_dummy_report
+    - run: fix_bad_spaces
     - run: throttle_resources
       parameters:
         sleep-seconds: 2
@@ -125,6 +128,7 @@ quarterly-contract-spending-reports:
           report-url: []
           report-year: []
           report-period: []
+          revision: []
 
     - run: fix-report-values
     - run: set_types
@@ -149,8 +153,12 @@ quarterly-contract-spending-reports:
           - report-url
           - order_id
           - budget_code
-        quarterly_contract_spending_reports_errors:
+        report-loading-results:
           - report-url
+    - run: sample
+    - run: sample
+      parameters:
+         resource: quarterly_contract_spending_reports_errors
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
