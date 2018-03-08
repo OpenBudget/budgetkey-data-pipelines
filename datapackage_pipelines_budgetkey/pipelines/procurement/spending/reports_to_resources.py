@@ -85,7 +85,7 @@ try:
         if report_url in all_good:
             logging.info('SKIPPING ALL GOOD %s', report_url)
             continue
-        if scraped > 10 and report_url not in errd_urls:
+        if scraped > 1000 and report_url not in errd_urls:
             logging.info('SKIPPING DONE %s', report_url)
             continue
         report['revision'] = REVISION

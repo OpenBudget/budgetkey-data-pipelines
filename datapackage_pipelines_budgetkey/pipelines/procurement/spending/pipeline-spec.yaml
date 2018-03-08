@@ -147,14 +147,6 @@ quarterly-contract-spending-reports:
             type: date
           sensitive_order:
             type: boolean
-    - run: set_primary_key
-      parameters:
-        quarterly-contract-spending-reports:
-          - report-url
-          - order_id
-          - budget_code
-        report-loading-results:
-          - report-url
     - run: sample
     - run: sample
       parameters:
@@ -168,9 +160,16 @@ quarterly-contract-spending-reports:
           quarterly_contract_spending_reports:
             resource-name: quarterly-contract-spending-reports
             mode: update
+            update_keys:
+              - report-url
+              - order_id
+              - budget_code
           quarterly_contract_spending_reports_errors:
             resource-name: report-loading-results
             mode: update
+            update_keys:
+              - report-url
+
 
 quarterly-contract-spending-reports-data:
   dependencies:
