@@ -199,7 +199,7 @@ try:
                     dp['resources'].append({
                         PROP_STREAMED_FROM: url_to_use,
                         'path': PATH_PLACEHOLDER,
-                        'name': 'report_{}'.format(i),
+                        'name': 'report_{}_{}'.format(i, sheet),
                         'headers': headers,
                         'sheet': sheet,
                         'constants': report

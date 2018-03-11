@@ -51,7 +51,7 @@ quarterly-contract-spending-reports:
         sleep-seconds: 2
     - run: concatenate
       parameters:
-        sources: "report_[0-9]+"
+        sources: "report_[0-9_]+"
         target:
           name: quarterly-contract-spending-reports
         fields:
@@ -151,24 +151,27 @@ quarterly-contract-spending-reports:
     - run: sample
       parameters:
          resource: quarterly_contract_spending_reports_errors
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
+        quarterly-contract-spending-reports:
+          - report-url
+          - order_id
+          - budget_code
+        report-loading-results:
+          - report-url        
     - run: dump.to_sql
       parameters:
         tables:
           quarterly_contract_spending_reports:
             resource-name: quarterly-contract-spending-reports
             mode: update
-            update_keys:
-              - report-url
-              - order_id
-              - budget_code
           quarterly_contract_spending_reports_errors:
             resource-name: report-loading-results
             mode: update
-            update_keys:
-              - report-url
+    - run: drop_all_rows
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports
 
 
 quarterly-contract-spending-reports-data:
