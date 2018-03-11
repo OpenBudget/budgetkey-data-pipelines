@@ -196,7 +196,6 @@ latest-contract-spending:
     אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
   dependencies:
     - pipeline: ./procurement/spending/quarterly-contract-spending-reports-data
-    - pipeline: ./entities/fingerprints
     - pipeline: ./procurement/tenders/processed
 
   pipeline:
@@ -204,10 +203,12 @@ latest-contract-spending:
       parameters:
         name: latest-contract-spending
         title: Latest Contract Spending
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
+        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
         resource: entities
-        url: dependency://./entities/fingerprints
+        table: entity_fingerprints
+    - run: stream_remote_resources
     - run: load_resource
       parameters:
         resource: tenders

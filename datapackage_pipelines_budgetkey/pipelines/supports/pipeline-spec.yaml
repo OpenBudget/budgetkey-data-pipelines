@@ -116,16 +116,17 @@ all:
 with-entities:
   dependencies:
     - pipeline: ./supports/all
-    - pipeline: ./entities/fingerprints
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: All support data with entities
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
+        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
         resource: entities
-        url: /var/datapackages/entities/fingerprints/datapackage.json
+        table: entity_fingerprints
+    - run: stream_remote_resources
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/all/datapackage.json

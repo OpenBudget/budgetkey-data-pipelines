@@ -175,17 +175,18 @@ all:
 processed:
   dependencies:
     - pipeline: ./procurement/tenders/all
-    - pipeline: ./entities/fingerprints
 
   pipeline:
     - run: add_metadata
       parameters:
         name: procurement-tenders-processed
     # Load entity fingerprints
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
+        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
         resource: entities
-        url: /var/datapackages/entities/fingerprints/datapackage.json
+        table: entity_fingerprints
+    - run: stream_remote_resources
     # Load scraped tenders
     - run: load_resource
       parameters:
