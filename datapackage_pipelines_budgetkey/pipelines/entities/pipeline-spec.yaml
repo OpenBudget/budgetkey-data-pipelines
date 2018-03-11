@@ -170,6 +170,14 @@ fingerprints:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/fingerprints
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entity_fingerprints:
+            resource-name: entities
+            mode: update
+            update_keys:
+              - id
 
 entities:
   dependencies:
