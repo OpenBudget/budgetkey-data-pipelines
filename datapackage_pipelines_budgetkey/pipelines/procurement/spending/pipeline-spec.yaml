@@ -147,10 +147,6 @@ quarterly-contract-spending-reports:
             type: date
           sensitive_order:
             type: boolean
-    - run: sample
-    - run: sample
-      parameters:
-         resource: quarterly_contract_spending_reports_errors
     - run: set_primary_key
       parameters:
         quarterly-contract-spending-reports:
@@ -396,6 +392,7 @@ latest-contract-spending:
         contract-spending:
           - order_id
           - budget_code
+          - publisher
     - run: set_types
       parameters:
         resources: contract-spending
