@@ -1,0 +1,21 @@
+bank_of_israel:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: bank_of_israel
+        title: Bank of Israel
+        homepage: https://www.boi.org.il/
+    - run: scraper
+      parameters:
+        target-resource:
+          name: bank_of_israel
+          path: data/bank_of_israel.csv
+    - run: set_types
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/bank_of_israel
+    - run: dump.to_sql
+      parameters:
+        tables:
+          bank_of_israels:
+            resource-name: bank_of_israel
