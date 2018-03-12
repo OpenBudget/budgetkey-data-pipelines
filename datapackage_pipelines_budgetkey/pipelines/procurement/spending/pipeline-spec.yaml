@@ -46,9 +46,9 @@ quarterly-contract-spending-reports:
     - run: stream_remote_resources
     - run: add_dummy_report
     - run: fix_bad_spaces
-    - run: throttle_resources
-      parameters:
-        sleep-seconds: 2
+    # - run: throttle_resources
+    #   parameters:
+    #     sleep-seconds: 2
     - run: concatenate
       parameters:
         sources: "report_[0-9_]+"
@@ -147,6 +147,8 @@ quarterly-contract-spending-reports:
             type: date
           sensitive_order:
             type: boolean
+          revision:
+            type: integer
     - run: set_primary_key
       parameters:
         quarterly-contract-spending-reports:

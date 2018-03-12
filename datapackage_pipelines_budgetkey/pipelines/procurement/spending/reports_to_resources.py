@@ -33,12 +33,14 @@ engine = create_engine(os.environ['DPP_DB_ENGINE'])
 try:
     rp = engine.execute("""SELECT "report-url" from {} 
                         where "load-error" is not null
-                        and revision={}""".format(errors_db_table, REVISION))
+                        and "revision"={}""".format(errors_db_table, REVISION))
     errd_urls = set(r[0] for r in rp)
     rp = engine.execute("""SELECT distinct "report-url" from {}
-                        where revision={}""".format(db_table, REVISION))
+                        where "revision"={}""".format(db_table, REVISION))
     all_good = set(r[0] for r in rp)
+    logging.info('Got %d good reports, %d failed ones', len(all_good), len(errd_urls))
 except:
+    logging.exception('Failed to fetch report status')
     errd_urls = set()
     all_good = set()
 
