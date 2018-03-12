@@ -27,7 +27,8 @@ setup(
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
 #                      'urllib3==1.21.1',
                       'geocoder',
-                      'boto3'],
+                      'boto3',
+		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}
 )

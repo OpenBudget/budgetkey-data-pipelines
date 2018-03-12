@@ -1,0 +1,2 @@
+https://github.com/frictionlessdata/tableschema-sql-py/archive/fix/update-with-long-keys.zip
+
