@@ -202,14 +202,12 @@ latest-contract-spending:
         title: Latest Contract Spending
     - run: add_sql_resource
       parameters:
-        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
-        resource: entities
-        table: entity_fingerprints
-    - run: add_sql_resource
-      parameters:
         datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
         resource: tenders
         table: procurement_tenders_processed
+        fields:
+          - name: claim_date
+            format: "%Y-%m-%dT%H:%M:%S"
     - run: stream_remote_resources
     - run: load_resource
       parameters:
@@ -300,10 +298,6 @@ latest-contract-spending:
             type: date
           order_date:
             type: date
-    - run: set_types
-      parameters:
-        resources: contract-spending
-        types:
           end_date:
             es:time-range: to
           order_date:
@@ -346,47 +340,7 @@ latest-contract-spending:
       parameters:
         resource-name: contract-spending
         source-field: supplier_name_fingerprint
-        target-field: entity_fingerprint
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - fingerprint
-        target:
-          name: contract-spending
-          key:
-            - entity_fingerprint
-          full: true
-        fields:
-          entity_name:
-            name: name
-          entity_id:
-            name: id
-          entity_kind:
-            name: kind
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - id
-          delete: true
-        target:
-          name: contract-spending
-          key:
-            - company_id
-          full: true
-        fields:
-          entity_name:
-            name: name
-            aggregate: first
-          entity_id:
-            name: id
-            aggregate: first
-          entity_kind:
-            name: kind
-            aggregate: first
+        source-id-field: company_id
     - run: calc-min-max-years
     - run: calc-spending-score
     - run: set_primary_key
