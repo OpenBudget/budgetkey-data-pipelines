@@ -210,6 +210,8 @@ entities:
           name: []
           kind: []
           amount: []
+          amount_contracts: []
+          amount_supports: []
           min_year: []
           max_year: []
 
@@ -230,6 +232,12 @@ entities:
           kind: null
           received_amount:
             name: amount
+            aggregate: sum
+          received_amount_contracts:
+            name: amount_contracts
+            aggregate: sum
+          received_amount_supports:
+            name: amount_supports
             aggregate: sum
           min_year:
             name: min_year

@@ -1,6 +1,6 @@
 quarterly-contract-spending-report-uris:
   schedule:
-    crontab: "0 * * * *"
+    crontab: "0 23 * * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -262,6 +262,8 @@ latest-contract-spending:
             aggregate: set
           publisher:
             aggregate: set
+          publisher_name:
+            aggregate: last
           buyer_description:
             aggregate: set
           order_date:
@@ -391,7 +393,7 @@ latest-contract-spending:
         contract-spending:
           - order_id
           - budget_code
-          - publisher
+          - publisher_name
     - run: set_types
       parameters:
         resources: contract-spending
@@ -440,6 +442,9 @@ spending-by-entity:
           kind:
             name: entity_kind
           amount:
+            name: executed
+            aggregate: sum
+          amount_contracts:
             name: executed
             aggregate: sum
           min_year:
