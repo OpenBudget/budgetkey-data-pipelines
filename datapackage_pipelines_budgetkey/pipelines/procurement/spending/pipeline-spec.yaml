@@ -263,7 +263,8 @@ latest-contract-spending:
           publisher:
             aggregate: set
           publisher_name:
-            aggregate: last
+            name: report-publisher
+            aggregate: max
           buyer_description:
             aggregate: set
           order_date:
