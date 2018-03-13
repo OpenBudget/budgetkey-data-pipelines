@@ -6,11 +6,19 @@ import logging
 from fuzzywuzzy import process as fw_process
 
 lamas_data = Package('/var/datapackages/lamas-municipal-data/datapackage.json')
-
 districts = dict(
     (x['entity_name'], x['district_2015'])
     for x in lamas_data.resources[0].iter(keyed=True)
 )
+
+regional_towns = Package('/var/datapackages/lamas-municipality-locality-map/datapackage.json')
+for town, municipality in regional_towns.resources[0].iter():
+    best = fw_process.extract(municipality, districts.keys())
+    if len(best)>0:
+        score = best[0][1]
+        best = best[0][0]
+        district = districts[best]
+        districts[town] = district
 
 primary_categories = json.load(open('activity_areas.json'))
 primary_categories = dict(

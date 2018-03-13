@@ -132,15 +132,14 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
         else:
             engine = create_engine(os.environ['DPP_DB_ENGINE'])
             query = "select id, name, kind from entity_fingerprints where {}='{}' limit 1"
+            res = None
+            results = []
             if src_id_field and row[src_id_field]:
                 results = engine.execute(query.format('id', row[src_id_field])).fetchall()
-            res = None
+            if len(results) == 0:
+                results = engine.execute(query.format('fingerprint', calc_fingerprint(row[src_field]))).fetchall()
             if len(results) > 0:
                 res = results[0]
-            else:
-                results = engine.execute(query.format('fingerprint', calc_fingerprint(row[src_field]))).fetchall()
-                if len(results) > 0:
-                    res = results[0]
             if res is not None:
                 row['entity_id'], row['entity_name'], row['entity_kind'] = res[0], res[1], res[2]
             yield row
