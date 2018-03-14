@@ -264,7 +264,6 @@ by-request-year:
           amount_paid: null
           amount_advance: null
           amount_total: null
-          recipient_fingerprint: null
           last_payment_year:
             name: year_paid
             aggregate: last

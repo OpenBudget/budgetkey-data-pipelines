@@ -36,8 +36,8 @@ def filter_resource(rows, stmt, k_fields, v_fields):
                 logging.info('GOT %r', db_values)
                 logging.info('INCOMING %r', v_values)
                 logging.info('NEW %r != %r', db_values, v_values)
-            yield row
-        except Exception as e:
+                yield row
+        except Exception:
             logging.exception('Failure!')
 
 

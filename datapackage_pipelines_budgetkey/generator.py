@@ -73,7 +73,7 @@ class Generator(GeneratorBase):
                 'tables': {
                     db_table: {
                         'resource-name': target_resource_name,
-                        'mode': 'append'
+                        'mode': 'update'
                     }
                 }
             }),
