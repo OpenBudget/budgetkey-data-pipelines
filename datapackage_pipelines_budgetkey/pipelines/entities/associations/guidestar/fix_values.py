@@ -2,6 +2,7 @@ from datapackage_pipelines.wrapper import process
 from datapackage import Package
 import json
 import logging
+import datetime
 
 from fuzzywuzzy import process as fw_process
 
@@ -26,6 +27,7 @@ primary_categories = dict(
     for x in primary_categories[0]['result']
 )
 
+min_activity_year = datetime.datetime.now().year
 
 FIELD_FIXES = {
     'מחקר, מדע וטנכולוגיה':
@@ -80,6 +82,9 @@ def process_row(row, row_index, *_):
         row['association_field_of_activity'] = foa
     else:
         row['association_primary_field_of_activity'] = ''
+
+    row['association_status_active'] = any(row.get('association_' + x) is not None and row.get('association_' + x) >= min_activity_year 
+                                           for x in ('last_report_year', 'online_data_update_year'))
     return row
 
 
@@ -98,6 +103,10 @@ def modify_datapackage(dp, *_):
         {
             'name': 'association_primary_field_of_activity',
             'type': 'string',
+        },
+        {
+            'name': 'association_status_active',
+            'type': 'boolean',
         }
     ])
     return dp
