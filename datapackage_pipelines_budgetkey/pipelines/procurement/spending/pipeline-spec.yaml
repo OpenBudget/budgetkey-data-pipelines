@@ -225,7 +225,7 @@ latest-contract-spending:
           key:
             - order_id
             - budget_code
-            - publisher
+            - report-publisher
           delete: true
         target:
           name: contract-spending
@@ -262,7 +262,6 @@ latest-contract-spending:
             aggregate: set
           publisher_name:
             name: report-publisher
-            aggregate: max
           buyer_description:
             aggregate: set
           order_date:
