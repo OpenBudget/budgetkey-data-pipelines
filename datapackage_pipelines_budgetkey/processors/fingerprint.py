@@ -166,9 +166,21 @@ if __name__ == "__main__":
         lambda res: res['name'] == res_name,
         dp['resources']
     )))
-    resource['schema']['fields'].append({
-        'name': tgt_field,
-        'type': 'string'
-    })
-
+    if tgt_field:
+        resource['schema']['fields'].append({
+            'name': tgt_field,
+            'type': 'string'
+        })
+    else:
+        resource['schema']['fields'].extend([{
+            'name': 'entity_id',
+            'type': 'string'
+        }, {
+            'name': 'entity_name',
+            'type': 'string'
+        }, {
+            'name': 'entity_kind',
+            'type': 'string'
+        }])
+        
     spew(dp, process_resources(res_iter, src_field, tgt_field, src_id_field, unique_fingerprints))
