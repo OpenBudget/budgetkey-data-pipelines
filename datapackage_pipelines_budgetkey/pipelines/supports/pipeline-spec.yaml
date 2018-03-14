@@ -361,10 +361,10 @@ supports-by-entity:
           kind:
             name: entity_kind
           amount:
-            name: amount_paid
+            name: amount_total
             aggregate: sum
           amount_supports:
-            name: amount_paid
+            name: amount_total
             aggregate: sum
           min_year:
             name: year_requested
