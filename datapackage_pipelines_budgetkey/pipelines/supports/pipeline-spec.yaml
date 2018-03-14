@@ -121,12 +121,6 @@ with-entities:
       parameters:
         name: all-supports
         title: All support data with entities
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
-        resource: entities
-        table: entity_fingerprints
-    - run: stream_remote_resources
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/all/datapackage.json
@@ -136,53 +130,7 @@ with-entities:
       parameters:
         resource-name: supports
         source-field: recipient
-        target-field: recipient_fingerprint
-
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - fingerprint
-          delete: false
-        target:
-          name: supports
-          key:
-            - recipient_fingerprint
-          full: true
-        fields:
-          entity_name:
-            name: name
-            aggregate: first
-          entity_id:
-            name: id
-            aggregate: first
-          entity_kind:
-            name: kind
-            aggregate: first
-
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - id
-          delete: true
-        target:
-          name: supports
-          key:
-            - recipient_entity_id
-          full: true
-        fields:
-          entity_name:
-            name: name
-            aggregate: first
-          entity_id:
-            name: id
-            aggregate: first
-          entity_kind:
-            name: kind
-            aggregate: first
+        source-id-field: recipient_entity_id
 
     - run: dump.to_path
       parameters:

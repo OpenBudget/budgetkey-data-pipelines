@@ -180,13 +180,6 @@ processed:
     - run: add_metadata
       parameters:
         name: procurement-tenders-processed
-    # Load entity fingerprints
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/entities/fingerprints/datapackage.json
-        resource: entities
-        table: entity_fingerprints
-    - run: stream_remote_resources
     # Load scraped tenders
     - run: load_resource
       parameters:
@@ -197,46 +190,7 @@ processed:
       parameters:
         resource-name: tenders
         source-field: supplier
-        target-field: entity_fingerprint
-    # Join with entities on entity name fingerprint
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - fingerprint
-        target:
-          name: tenders
-          key:
-            - entity_fingerprint
-          full: true
-        fields:
-          entity_name:
-            name: name
-          entity_id:
-            name: id
-          entity_kind:
-            name: kind
-    # Join with entities on supplier id
-    - run: join
-      parameters:
-        source:
-          name: entities
-          key:
-            - id
-          delete: true
-        target:
-          name: tenders
-          key:
-            - supplier_id
-          full: true
-        fields:
-          entity_name:
-            name: name
-          entity_id:
-            name: id
-          entity_kind:
-            name: kind
+        source-id-field: supplier_id
     # Set types for ES
     - run: set_types
       parameters:
