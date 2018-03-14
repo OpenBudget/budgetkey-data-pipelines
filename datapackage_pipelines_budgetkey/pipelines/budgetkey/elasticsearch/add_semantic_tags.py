@@ -42,6 +42,7 @@ def modify_datapackage(dp, params, *_):
                 'type': 'array',
                 'es:itemType': 'string',
             })
+    return dp
 
 
 if __name__ == '__main__':
