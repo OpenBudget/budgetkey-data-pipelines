@@ -120,6 +120,8 @@ def calc_fingerprint(name):
 
 def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
     used = set()
+    engine = None
+    conn = None
     for row in rows:
         name = row[src_field]
         if tgt_field:
@@ -130,14 +132,16 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                 if unique_fingerprints:
                     used.add(tgt)
         else:
-            engine = create_engine(os.environ['DPP_DB_ENGINE'])
+            if conn is None:
+                engine = create_engine(os.environ['DPP_DB_ENGINE'])
+                conn = engine.connect()
             query = "select id, name, kind from entity_fingerprints where {}='{}' limit 1"
             res = None
             results = []
             if src_id_field and row[src_id_field]:
-                results = engine.execute(query.format('id', row[src_id_field])).fetchall()
+                results = conn.execute(query.format('id', row[src_id_field])).fetchall()
             if len(results) == 0:
-                results = engine.execute(query.format('fingerprint', calc_fingerprint(row[src_field]))).fetchall()
+                results = conn.execute(query.format('fingerprint', calc_fingerprint(row[src_field]))).fetchall()
             if len(results) > 0:
                 res = results[0]
             if res is not None:
