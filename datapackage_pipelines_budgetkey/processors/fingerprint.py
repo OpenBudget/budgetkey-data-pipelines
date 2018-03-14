@@ -146,6 +146,8 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                 res = results[0]
             if res is not None:
                 row['entity_id'], row['entity_name'], row['entity_kind'] = res[0], res[1], res[2]
+            else:
+                row['entity_id'], row['entity_name'], row['entity_kind'] = None, None, None
             yield row
 
 
