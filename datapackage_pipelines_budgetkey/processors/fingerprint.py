@@ -156,6 +156,7 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                 if fp in fps:
                     res = fps[fp]
                 else:
+                    logging.info('FPFPFP %s', fp)
                     results = conn.execute(query.format('fingerprint', fp)).fetchall()
                     if len(results) > 0:
                         res = tuple(results[0])

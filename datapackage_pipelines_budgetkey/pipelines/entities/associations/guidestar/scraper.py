@@ -69,7 +69,6 @@ rules = [
     Extractor('.views-field-field-gov-proper-management', 'has_article_46', prefix='זיכוי ממס לתרומות'),
     Extractor('.gov-field', 'field_of_activity', prefix='תחום פעילות הארגון', subselector='.field-content'),
     Extractor('.gov-field', 'objective', prefix='מטרות ארגון רשמיות', subselector='.field-content'),
-    Extractor('.gov-field .comp-header', 'online_data_update_year', prefix='מידע מקוון לשנת '),
     Extractor('.gov-field .field-content', 'yearly_turnover', prefix='מחזור שנתי:'),
     Extractor('.gov-field .field-content', 'num_employees', prefix='מספר עובדים:'),
     Extractor('.gov-field .field-content', 'num_volunteers', prefix='מספר מתנדבים:'),
@@ -79,6 +78,7 @@ rules = [
     Extractor('.views-field-php-1 > .field-content > p:not([title_removed])', 'address_lines[]'),
     Extractor('.gov-field', 'roles[]', prefix='חמשת מקבלי השכר הגבוה בעמותה', subselector='.office'),
     Extractor('.gov-field', 'salaries[]', prefix='חמשת מקבלי השכר הגבוה בעמותה', subselector='.subject'),
+    Extractor('.gov-field .comp-header', 'online_data_update_year', prefix='מידע מקוון לשנת '),
     Extractor('#annual-reports:first .year:first .year-label', 'last_report_year'),
 ]
 
