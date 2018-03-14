@@ -216,6 +216,7 @@ entities:
           max_year: []
 
     # Deduplicate amounts by summing on entity
+    - run: sample
     - run: join
       parameters:
         source:
@@ -267,6 +268,8 @@ entities:
           full: true
         fields:
           received_amount: null
+          received_amount_contracts: null
+          received_amount_supports: null
           min_year: null
           max_year: null
 

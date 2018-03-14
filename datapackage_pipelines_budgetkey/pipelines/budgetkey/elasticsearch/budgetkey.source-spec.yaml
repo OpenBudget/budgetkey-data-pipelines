@@ -40,11 +40,12 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 7
+  revision: 8
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
   key-fields:
+    - publisher_name
     - order_id
     - budget_code
   extra-steps:
@@ -74,6 +75,7 @@ supports:
         - amount_total
         - last_payment_year
         - last_payment_amount
+
 
 tenders:
   kind: indexer
