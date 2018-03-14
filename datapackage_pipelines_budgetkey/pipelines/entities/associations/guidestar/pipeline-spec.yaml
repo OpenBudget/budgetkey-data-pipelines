@@ -48,7 +48,7 @@ guidestar-scraper:
             es:itemType: string
           association_address_lines:
             es:itemType: string
-          online_data_update_year:
+          association_online_data_update_year:
             type: integer
           last_report_year:
             type: integer
