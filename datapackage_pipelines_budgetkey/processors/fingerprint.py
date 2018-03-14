@@ -117,6 +117,9 @@ def calc_fingerprint(name):
         
     return tgt
 
+ids = {}
+fps = {}
+
 
 def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
     used = set()
@@ -138,12 +141,25 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
             query = "select id, name, kind from entity_fingerprints where {}='{}' limit 1"
             res = None
             results = []
-            if src_id_field and row[src_id_field]:
-                results = conn.execute(query.format('id', row[src_id_field])).fetchall()
+            if src_id_field:
+                id = row[src_id_field]
+                if id:
+                    if id in ids:
+                        res = ids[id]
+                    else:
+                        results = conn.execute(query.format('id', row[src_id_field])).fetchall()
+                        if len(results) > 0:
+                            res = tuple(results[0])
+                            ids[id] = res
             if len(results) == 0:
-                results = conn.execute(query.format('fingerprint', calc_fingerprint(row[src_field]))).fetchall()
-            if len(results) > 0:
-                res = results[0]
+                fp = calc_fingerprint(row[src_field])
+                if fp in fps:
+                    res = fps[fp]
+                else:
+                    results = conn.execute(query.format('fingerprint', fp)).fetchall()
+                    if len(results) > 0:
+                        res = tuple(results[0])
+                        fps[fp] = res
             if res is not None:
                 row['entity_id'], row['entity_name'], row['entity_kind'] = res[0], res[1], res[2]
             else:
