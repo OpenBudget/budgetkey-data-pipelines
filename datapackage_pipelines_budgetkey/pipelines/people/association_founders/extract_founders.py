@@ -6,6 +6,7 @@ def process_resource(rows):
         founders = row.get('association_founders')
         registration_date = row.get('association_registration_date')
         association_name = row.get('association_title')
+        id = row['id']
         if founders and registration_date:
             for founder in founders:
                 rec = dict(
