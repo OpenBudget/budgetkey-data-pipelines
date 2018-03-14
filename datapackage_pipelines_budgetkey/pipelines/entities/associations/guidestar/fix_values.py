@@ -6,6 +6,7 @@ import datetime
 
 from fuzzywuzzy import process as fw_process
 
+logging.info('LOADING LAMAS DATA')
 lamas_data = Package('/var/datapackages/lamas-municipal-data/datapackage.json')
 districts = dict(
     (x['entity_name'], x['district_2015'])
@@ -13,13 +14,21 @@ districts = dict(
 )
 
 regional_towns = Package('/var/datapackages/lamas-municipality-locality-map/datapackage.json')
+cache = {}
 for town, municipality in regional_towns.resources[0].iter():
-    best = fw_process.extract(municipality, districts.keys())
-    if len(best)>0:
-        score = best[0][1]
-        best = best[0][0]
-        district = districts[best]
+    district = None
+    if municipality in cache:
+        district = cache[municipality]
+    else:
+        best = fw_process.extract(municipality, districts.keys())
+        if len(best)>0:
+            score = best[0][1]
+            best = best[0][0]
+            district = districts[best]
+            cache[municipality] = district
+    if district is not None:
         districts[town] = district
+logging.info('LOADING LAMAS DONE')
 
 primary_categories = json.load(open('activity_areas.json'))
 primary_categories = dict(
@@ -27,7 +36,7 @@ primary_categories = dict(
     for x in primary_categories[0]['result']
 )
 
-min_activity_year = datetime.datetime.now().year
+min_activity_year = datetime.datetime.now().year - 3
 
 FIELD_FIXES = {
     'מחקר, מדע וטנכולוגיה':
@@ -62,10 +71,16 @@ def process_row(row, row_index, *_):
         row['association_activity_region_list'] = []
     association_activity_region_districts = set()
     for city in row['association_activity_region_list']:
-        best = fw_process.extract(city, districts.keys())
-        if len(best)>0:
-            best = best[0][0]
-            district = districts[best]
+        district = None
+        if city in cache:
+            district = cache[city]
+        else:
+            best = fw_process.extract(city, districts.keys())
+            if len(best)>0:
+                best = best[0][0]
+                district = districts[best]
+                cache[city] = district
+        if district is not None:
             association_activity_region_districts.add(district)
     row['association_activity_region_districts'] = list(association_activity_region_districts)
 

@@ -1,0 +1,169 @@
+ngo-district-report:
+  dependencies:
+    - pipeline: ./entities/associations/guidestar/guidestar
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ngo-district-report
+    
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/entities/associations/guidestar/datapackage.json
+        resource: guidestar
+        table: guidestar_processed
+    - run: stream_remote_resources
+
+    - run: filter
+      parameters:
+        resources: guidestar
+        in:
+          - association_status_active: true
+    - run: unwind_array
+      parameters:
+        array-field: association_activity_region_districts
+        unwound-field: association_activity_region_district
+
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: has_article_46
+        target-path: '.'
+    - run: filter
+      parameters:
+        resources: has_article_46
+        in:
+          - association_has_article_46: יש אישור
+
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: proper_management
+        target-path: '.'
+    - run: filter
+      parameters:
+        resources: proper_management
+        in:
+          - association_proper_management: יש אישור
+
+    - run: add_computed_field
+      parameters:
+        resources: guidestar
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: total
+    - run: join
+      parameters:
+        source: 
+          name: guidestar
+          key:
+            - association_activity_region_district
+          delete: true
+        target:
+          name: guidestar
+          key: null
+        fields:
+          subset: null
+          district: 
+            name: association_activity_region_district
+          count:
+            aggregate: count
+          activities:
+            name: association_field_of_activity
+            aggregate: counters
+
+    - run: add_computed_field
+      parameters:
+        resources: proper_management
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: proper_management
+    - run: join
+      parameters:
+        source: 
+          name: proper_management
+          key:
+            - association_activity_region_district
+          delete: true
+        target:
+          name: proper_management
+          key: null
+        fields:
+          subset: null
+          district: 
+            name: association_activity_region_district
+          count:
+            aggregate: count
+          activities:
+            name: association_field_of_activity
+            aggregate: counters
+
+    - run: add_computed_field
+      parameters:
+        resources: has_article_46
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: has_article_46
+    - run: join
+      parameters:
+        source: 
+          name: has_article_46
+          key:
+            - association_activity_region_district
+          delete: true
+        target:
+          name: has_article_46
+          key: null
+        fields:
+          subset: null
+          district: 
+            name: association_activity_region_district
+          count:
+            aggregate: count
+          activities:
+            name: association_field_of_activity
+            aggregate: counters
+          
+    - run: sample
+    - run: concatenate
+      parameters:
+        target:
+          name: ngo-district-report
+          path: data/ngo-district-report.csv
+        fields:
+          subset: []
+          district: []
+          count: []
+          activities: []
+    
+    - run: collate
+      parameters:
+        resource: ngo-district-report
+        key:
+          - district
+        collated-field-name: report
+    - run: join
+      parameters:
+        source:
+          name: ngo-district-report
+          key: 
+            - district
+          delete: true
+        target:
+          name: ngo-district-report
+          key: null
+        fields:
+          district: null
+          report:
+            aggregate: array
+
+
+    - run: dump.to_path
+      parameters:
+        out-path:
+          /var/datapackages/reposts/ngo-districts/
