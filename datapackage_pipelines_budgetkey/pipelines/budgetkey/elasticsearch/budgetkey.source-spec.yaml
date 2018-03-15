@@ -93,6 +93,15 @@ tenders:
       fields: 
         - decision
         - last_update_date
+  extra-steps:
+    - run: add_semantic_tags
+      parameters:
+        resource: tenders
+        source-fields:
+          - description
+          - page_title
+          - reason
+        target-field: semantic-tags
 
 people:
   kind: indexer

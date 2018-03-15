@@ -26,7 +26,7 @@ def process_row(row, _1, spec, _2, params, _3):
             if value:
                 for tag_re, tag_area in tag_areas:
                     if tag_re.search(value):
-                        tags.update(tag_area)
+                        tags.add('{} {}'.format(value, ' '.join(tag_area)))
                         break
         row[target_field] = list(sorted(tags))
     return row
