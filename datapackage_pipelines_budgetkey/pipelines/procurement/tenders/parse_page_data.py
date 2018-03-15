@@ -168,7 +168,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                 link = self.get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
                 if link is None:
                     documents_valid = False
-                documents.append({"description": img_elt.attrib.get("alt", ""),
+                documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
                                   "link": link,
                                   "update_time": update_time})
             if not documents_valid:
@@ -282,11 +282,11 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
         documents = []
         for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
-            documents.append({"description": elt.text,
+            documents.append({"description": ' '.join(elt.text.strip().split()),
                               "link": elt.attrib["href"],
                               "update_time": None})
         for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
-            documents.append({"description": pq(elt).text().strip(),
+            documents.append({"description": ' '.join(pq(elt).text().strip().split()),
                               "link": pq(elt).find("a")[0].attrib["href"],
                               "update_time": None})
         publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()

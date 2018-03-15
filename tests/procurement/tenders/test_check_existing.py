@@ -15,7 +15,7 @@ class MockCheckExistingProcessor(CheckExistingProcessor):
     def spew(self):
         return self._get_spew_params()
 
-def test():
+def test_check_existing():
     ingest = ({"db-table": "dummy-db-table"},
               {"resources": [{"name": "tender-urls",
                               "schema": PUBLISHER_URLS_TABLE_SCHEMA}]},
@@ -49,15 +49,15 @@ def test():
     assert len(resources) == 1
     assert resources[0] == [{"id": 71, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=5",
                              "tender_type": "office", "is_new": True},
-                            {"id": 71, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=66",
-                             "tender_type": "office", "is_new": False},
+                            # {"id": 71, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=66",
+                            #  "tender_type": "office", "is_new": False},
                             {"id": 71, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=777",
                              "tender_type": "office", "is_new": True},
                             {"id": 71, "url": "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=8888",
                              "tender_type": "office", "is_new": True},
-                            {"id": 71,
-                             "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=5",
-                             "tender_type": "exemptions", "is_new": False},
+                            # {"id": 71,
+                            #  "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=5",
+                            #  "tender_type": "exemptions", "is_new": False},
                             {"id": 71,
                              "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=66",
                              "tender_type": "exemptions", "is_new": True},
@@ -70,6 +70,7 @@ def test():
                             {'id': None, 'is_new': True,
                              'tender_type': 'central',
                              'url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx'},
-                            {'id': None, 'is_new': False,
-                             'tender_type': 'central',
-                             'url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx'}]
+                            # {'id': None, 'is_new': True,
+                            #  'tender_type': 'central',
+                            #  'url': 'https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx'}
+                             ]
