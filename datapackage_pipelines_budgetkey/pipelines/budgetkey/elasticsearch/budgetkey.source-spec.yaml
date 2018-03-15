@@ -102,3 +102,13 @@ people:
   page-title-pattern: 'מידע על {key}'
   key-fields:
     - key
+
+
+reports:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./reports/all
+  source_datapackage: /var/datapackages/reports/all/datapackage.json
+  page-title-pattern: '{title}'
+  key-fields:
+    - key
