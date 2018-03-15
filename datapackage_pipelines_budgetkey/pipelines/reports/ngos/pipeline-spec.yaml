@@ -23,17 +23,7 @@ ngo-district-report:
         array-field: association_activity_region_districts
         unwound-field: association_activity_region_district
 
-    - run: duplicate
-      parameters:
-        source: guidestar
-        target-name: has_article_46
-        target-path: '.'
-    - run: filter
-      parameters:
-        resources: has_article_46
-        in:
-          - association_has_article_46: יש אישור
-
+# proper management subset:
     - run: duplicate
       parameters:
         source: guidestar
@@ -44,27 +34,17 @@ ngo-district-report:
         resources: proper_management
         in:
           - association_proper_management: יש אישור
-
-    - run: add_computed_field
-      parameters:
-        resources: guidestar
-        fields:
-          -
-            operation: constant
-            target: subset
-            with: total
     - run: join
       parameters:
         source: 
-          name: guidestar
+          name: proper_management
           key:
             - association_activity_region_district
           delete: true
         target:
-          name: guidestar
+          name: proper_management
           key: null
         fields:
-          subset: null
           district: 
             name: association_activity_region_district
           count:
@@ -72,7 +52,6 @@ ngo-district-report:
           activities:
             name: association_field_of_activity
             aggregate: counters
-
     - run: add_computed_field
       parameters:
         resources: proper_management
@@ -81,18 +60,29 @@ ngo-district-report:
             operation: constant
             target: subset
             with: proper_management
+
+# article 46 subset:
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: has_article_46
+        target-path: '.'
+    - run: filter
+      parameters:
+        resources: has_article_46
+        in:
+          - association_has_article_46: יש אישור
     - run: join
       parameters:
         source: 
-          name: proper_management
+          name: has_article_46
           key:
             - association_activity_region_district
           delete: true
         target:
-          name: proper_management
+          name: has_article_46
           key: null
         fields:
-          subset: null
           district: 
             name: association_activity_region_district
           count:
@@ -100,7 +90,6 @@ ngo-district-report:
           activities:
             name: association_field_of_activity
             aggregate: counters
-
     - run: add_computed_field
       parameters:
         resources: has_article_46
@@ -109,18 +98,19 @@ ngo-district-report:
             operation: constant
             target: subset
             with: has_article_46
+
+# totals subset
     - run: join
       parameters:
         source: 
-          name: has_article_46
+          name: guidestar
           key:
             - association_activity_region_district
           delete: true
         target:
-          name: has_article_46
+          name: guidestar
           key: null
         fields:
-          subset: null
           district: 
             name: association_activity_region_district
           count:
@@ -128,7 +118,16 @@ ngo-district-report:
           activities:
             name: association_field_of_activity
             aggregate: counters
-          
+    - run: add_computed_field
+      parameters:
+        resources: guidestar
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: total
+
+# collecting all results          
     - run: sample
     - run: concatenate
       parameters:
@@ -161,9 +160,218 @@ ngo-district-report:
           district: null
           report:
             aggregate: array
-
+    - run: add_computed_field
+      parameters:
+        resources: ngo-district-report
+        fields:
+          -
+            operation: format
+            target: key
+            with:  ngo-district-report/{district}
+          -
+            operation: format
+            target: title
+            with: ארגונים הפעילים במחוז {district}
 
     - run: dump.to_path
       parameters:
         out-path:
-          /var/datapackages/reposts/ngo-districts/
+          /var/datapackages/reports/ngo-districts/
+
+##############################################################################################################################
+
+ngo-activity-report:
+  dependencies:
+    - pipeline: ./entities/associations/guidestar/guidestar
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ngo-activity-report
+    
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/entities/associations/guidestar/datapackage.json
+        resource: guidestar
+        table: guidestar_processed
+    - run: stream_remote_resources
+    - run: filter
+      parameters:
+        resources: guidestar
+        in:
+          - association_status_active: true
+
+# proper management
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: proper_management
+        target-path: '.'
+    - run: filter
+      parameters:
+        resources: proper_management
+        in:
+          - association_proper_management: יש אישור
+    - run: join
+      parameters:
+        source: 
+          name: proper_management
+          key:
+            - association_field_of_activity
+          delete: true
+        target:
+          name: proper_management
+          key: null
+        fields:
+          association_field_of_activity: null
+          total_amount:
+            aggregate: count
+          association_num_employees:
+            aggregate: sum
+          association_num_volunteers:
+            aggregate: sum
+          association_activity_region_list:
+            aggregate: counters
+    - run: add_computed_field
+      parameters:
+        resources: proper_management
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: proper_management
+
+
+# has_article_46
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: has_article_46
+        target-path: '.'
+    - run: filter
+      parameters:
+        resources: has_article_46
+        in:
+          - association_has_article_46: יש אישור
+    - run: join
+      parameters:
+        source: 
+          name: has_article_46
+          key:
+            - association_field_of_activity
+          delete: true
+        target:
+          name: has_article_46
+          key: null
+        fields:
+          association_field_of_activity: null
+          total_amount:
+            aggregate: count
+          association_num_employees:
+            aggregate: sum
+          association_num_volunteers:
+            aggregate: sum
+          association_activity_region_list:
+            aggregate: counters
+    - run: add_computed_field
+      parameters:
+        resources: has_article_46
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: has_article_46
+
+          
+# Calculate totals
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: total
+        target-path: '.'
+    - run: join
+      parameters:
+        source: 
+          name: total
+          key:
+            - association_field_of_activity
+          delete: true
+        target:
+          name: total
+          key: null
+        fields:
+          association_field_of_activity: null
+          total_amount:
+            aggregate: count
+          association_num_employees:
+            aggregate: sum
+          association_num_volunteers:
+            aggregate: sum
+          association_activity_region_list:
+            aggregate: counters
+    - run: add_computed_field
+      parameters:
+        resources: total
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: total
+
+# Collect results
+    - run: drop_resource
+      parameters:
+        resource: guidestar
+
+    - run: concatenate
+      parameters:
+        target:
+          name: ngo-activity-report
+          path: data/ngo-activity-report.csv
+        fields:
+          subset: []
+          field_of_activity:
+            - association_field_of_activity
+          total_amount: []
+          association_num_employees: []
+          association_num_volunteers: []
+          association_activity_region_list: []
+    
+    - run: collate
+      parameters:
+        resource: ngo-activity-report
+        key:
+          - field_of_activity
+        collated-field-name: report
+    - run: join
+      parameters:
+        source:
+          name: ngo-activity-report
+          key: 
+            - field_of_activity
+          delete: true
+        target:
+          name: ngo-activity-report
+          key: null
+        fields:
+          field_of_activity: null
+          report:
+            aggregate: array
+
+    - run: add_computed_field
+      parameters:
+        resources: ngo-activity-report
+        fields:
+          -
+            operation: format
+            target: key
+            with:  ngo-activity-report/{field_of_activity}
+          -
+            operation: format
+            target: title
+            with: ארגונים הפעילים בתחום {field_of_activity}
+
+    - run: dump.to_path
+      parameters:
+        out-path:
+          /var/datapackages/reports/ngo-activity/
+      
