@@ -11,6 +11,12 @@ budget:
     - run: make_nice_budget_categories
     - run: make_nice_budget_breadcrumbs
     - run: make_nice_budget_code
+    - run: add_semantic_tags
+      parameters:
+        resource: budget
+        source-fields:
+          - title
+        target-field: semantic-tags
   document-steps:
     - run: make_budget_charts
 
@@ -40,7 +46,7 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 8
+  revision: 9
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
