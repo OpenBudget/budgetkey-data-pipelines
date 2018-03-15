@@ -216,6 +216,7 @@ entities:
           max_year: []
 
     # Deduplicate amounts by summing on entity
+    - run: set_types
     - run: sample
     - run: join
       parameters:
