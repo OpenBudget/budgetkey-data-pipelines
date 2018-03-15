@@ -6,6 +6,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
+
 class Extractor:
 
     def __init__(self, selector, field, prefix=None, subselector=None):
