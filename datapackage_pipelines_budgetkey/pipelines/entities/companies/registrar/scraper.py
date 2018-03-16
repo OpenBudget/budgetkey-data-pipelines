@@ -85,16 +85,18 @@ def get_company_rec(company_id):
                              headers=headers,
                              data=params,
                              allow_redirects=False)
-        if resp.status_code != 200:
-            time.sleep(backoff)
-        else:
+        if resp.status_code == 200:
             try:
                 ret = resp.json()
-                logging.info('Company %s succeeded (%d attempts)', company_id, i+1)
-                return ret
+                if ret.get('Success'):
+                    logging.info('Company %s succeeded (%d attempts)', company_id, i+1)
+                    return ret
+                else:
+                    logging.error('Company %s got error response', company_id)
             except Exception:
                 logging.exception('Company %s erred %s', company_id, resp.content)
-                time.sleep(backoff)
+
+        time.sleep(backoff)
         # backoff *= 1.2
     logging.error('Company %s erred timeout', company_id)
 
