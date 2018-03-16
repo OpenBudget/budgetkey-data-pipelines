@@ -6,6 +6,8 @@ import requests
 
 from datapackage_pipelines.wrapper import ingest, spew
 
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
 
@@ -50,8 +52,9 @@ def extract(rec, path):
 
 
 def get_company_rec(company_id):
-    backoff = 3.0
-    for _ in range(60):
+    backoff = 1.2
+    logging.info('Company %s', company_id)
+    for i in range(60):
         headers = {
             'Origin': 'https://ica.justice.gov.il',
             'Accept-Encoding': 'gzip, deflate, br',
@@ -81,12 +84,13 @@ def get_company_rec(company_id):
                              headers=headers,
                              data=params,
                              allow_redirects=False)
-        logging.info('Company %s status_code %s', company_id, resp.status_code)
         if resp.status_code != 200:
             time.sleep(backoff)
         else:
             try:
-                return resp.json()
+                ret = resp.json()
+                logging.exception('Company %s succeeded (%d attempts)', company_id, i+1)
+                return ret
             except Exception as e:
                 logging.exception('Company %s erred %s, %s', company_id, e, resp.content)
                 time.sleep(backoff)
@@ -105,8 +109,8 @@ def scrape_company_details(cmp_recs):
 
         now = time.time()
         count += 1
-        if count > 36000 or erred > 4 or now - start > 7200:
-            # limit run time to 50 minutes
+        if count > 36000 or erred > 4 or (now - start > 3600*6 - 120):
+            # limit run time to 6 hours minutes
             continue
 
         company_id = cmp_rec['Company_Number']
