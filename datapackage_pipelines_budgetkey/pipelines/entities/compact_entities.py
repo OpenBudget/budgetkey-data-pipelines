@@ -15,6 +15,7 @@ subschema_field_names = set()
 def process_datapackage(datapackage):
     new_resources = []
     datapackage['detailsSchema'] = subschema
+    saved_params = {}
     for resource in datapackage['resources']:
         if resource['name'] in parameters:
             res_params = parameters[resource['name']]
@@ -53,7 +54,8 @@ def process_datapackage(datapackage):
                         existing = next(iter(filter(lambda f: f['name'] == field['name'],
                                                     subschema['fields'])))
                         assert existing['type'] == field['type'], \
-                            "Duplicate field name %r != %r (%r)" % (field, existing, res_params)
+                            "Duplicate field name %r != %r (%r -> %r)" % (field, existing, res_params, saved_params[field['name']])
+                    saved_params[field['name']]=res_params
         else:
             new_resources.append(resource)
     datapackage['resources'] = new_resources
