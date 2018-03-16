@@ -41,6 +41,11 @@ all:
           title:
             es:title: true
 
+    - run: set_primary_key
+      parameters:
+        reports:
+          - key
+
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/reports/all/
