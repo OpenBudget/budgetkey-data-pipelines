@@ -10,7 +10,8 @@ python:
 services:
 - docker
 before_install:
-- docker build -t budgetkey/budgetkey-data-pipelines:latest .
+- docker pull budgetkey/budgetkey-data-pipelines:latest
+- docker build --cache-from budgetkey/budgetkey-data-pipelines:latest -t budgetkey/budgetkey-data-pipelines:latest .
 install:
 - sudo apt-get install libleveldb-dev libleveldb1
 before_script:
