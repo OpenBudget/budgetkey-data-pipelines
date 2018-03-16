@@ -52,7 +52,7 @@ def extract(rec, path):
 
 
 def get_company_rec(company_id):
-    backoff = 1.2
+    backoff = 3
     logging.info('Company %s', company_id)
     for i in range(60):
         headers = {
@@ -95,6 +95,7 @@ def get_company_rec(company_id):
                 logging.exception('Company %s erred %s, %s', company_id, e, resp.content)
                 time.sleep(backoff)
         # backoff *= 1.2
+    logging.exception('Company %s erred timeout', company_id)
 
 
 def scrape_company_details(cmp_recs):
@@ -109,7 +110,7 @@ def scrape_company_details(cmp_recs):
 
         now = time.time()
         count += 1
-        if count > 36000 or erred > 4 or (now - start > 3600*6 - 120):
+        if count > 36000 or erred > 4 or ((now - start) > (3600*6 - 120)):
             # limit run time to 6 hours minutes
             continue
 
