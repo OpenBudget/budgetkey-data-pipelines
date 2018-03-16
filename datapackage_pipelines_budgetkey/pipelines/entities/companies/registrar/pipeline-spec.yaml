@@ -98,6 +98,9 @@ details-scraper:
           company_details:
             resource-name: company-details
             mode: update
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/scraper
 
 
 details:
@@ -113,10 +116,10 @@ details:
       parameters:
         url: dependency://./entities/companies/government/registrar/government_companies
         resource: government-companies
-    - run: add_resource
+    - run: add_sql_resource
       parameters:
-        url: env://DPP_DB_ENGINE
-        name: company-details
+        datapackage: /var/datapackages/entities/companies/scraper/datapackage.json
+        resource: company-details
         table: company_details
     - run: stream_remote_resources
     - run: join
@@ -137,7 +140,7 @@ details:
     - run: set_types
       parameters:
         types:
-          'company_last_report_year':
+          company_last_report_year:
             type: integer
     - run: dump.to_path
       parameters:

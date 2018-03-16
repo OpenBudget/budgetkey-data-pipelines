@@ -33,7 +33,7 @@ def modify_datapackage(dp, *_):
         {'name': 'sources', 'type': 'array'},
         {'name': 'event', 'type': 'string'},
         {'name': 'title', 'type': 'string'},
-        {'name': 'when', 'type': 'string'},
+        {'name': 'when', 'type': 'date'},
     ]
     return dp
 
