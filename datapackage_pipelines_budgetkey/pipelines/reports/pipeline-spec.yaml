@@ -25,6 +25,8 @@ all:
 
     - run: concatenate
       parameters:
+        target:
+          name: reports
         fields:
           key: []
           title: []
