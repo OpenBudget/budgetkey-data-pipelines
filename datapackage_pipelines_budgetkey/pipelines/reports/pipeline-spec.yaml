@@ -1,0 +1,45 @@
+all:
+  dependencies:
+    - pipeline: ./reports/ngos/ngo-district-report
+    - pipeline: ./reports/ngos/ngo-activity-report
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-reports
+    
+    - run: load_resource
+      parameters:
+        url: dependency://./reports/ngos/ngo-district-report
+        resource: 0
+    - run: load_resource
+      parameters:
+        url: dependency://./reports/ngos/ngo-activity-report
+        resource: 0
+
+    - run: collate
+      parameters:
+        key:
+          - key
+          - title
+        collated-field-name: details
+
+    - run: concatenate
+      parameters:
+        fields:
+          key: []
+          title: []
+          details: []
+
+    - run: set_types
+      parameters:
+        types:
+          details:
+            es:schema: {}
+            es:index: false
+          title:
+            es:title: true
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/reports/all/
+        pretty-descriptor: yes
