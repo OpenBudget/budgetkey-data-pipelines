@@ -61,6 +61,10 @@ details-scraper:
         db-key-fields:
           - id
         hash-fields: []
+    - run: filter
+      parameters:
+        in:
+          - __is_stale: true
     - run: sort
       parameters:
         resources: company-registry

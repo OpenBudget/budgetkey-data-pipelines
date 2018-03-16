@@ -1,5 +1,6 @@
 import time
 import logging
+import collections
 
 from pyquery import PyQuery as pq
 import requests
@@ -89,13 +90,13 @@ def get_company_rec(company_id):
         else:
             try:
                 ret = resp.json()
-                logging.exception('Company %s succeeded (%d attempts)', company_id, i+1)
+                logging.info('Company %s succeeded (%d attempts)', company_id, i+1)
                 return ret
-            except Exception as e:
-                logging.exception('Company %s erred %s, %s', company_id, e, resp.content)
+            except Exception:
+                logging.exception('Company %s erred %s', company_id, resp.content)
                 time.sleep(backoff)
         # backoff *= 1.2
-    logging.exception('Company %s erred timeout', company_id)
+    logging.error('Company %s erred timeout', company_id)
 
 
 def scrape_company_details(cmp_recs):
@@ -112,7 +113,9 @@ def scrape_company_details(cmp_recs):
         count += 1
         if count > 36000 or erred > 4 or ((now - start) > (3600*6 - 120)):
             # limit run time to 6 hours minutes
-            continue
+            logging.info('count=%d, erred=%d, elapsed=%d', count, erred, int(now - start))
+            collections.deque(cmp_recs, 0)
+            break
 
         company_id = cmp_rec['Company_Number']
 
@@ -121,15 +124,17 @@ def scrape_company_details(cmp_recs):
             'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
-        company_rec = get_company_rec(company_id)
+        company_rec_ = get_company_rec(company_id)
 
-        if company_rec is None:
+        if company_rec_ is None:
+            logging.error('COMPANY REC is NONE: %s', company_id)
             erred += 1
             continue
         
-        company_rec = extract(company_rec, 'Data.0')
+        company_rec = extract(company_rec_, 'Data.0')
 
         if company_rec is None:
+            logging.error('COMPANY DATA is NONE: %r', company_rec_)
             erred += 1
             continue
 
