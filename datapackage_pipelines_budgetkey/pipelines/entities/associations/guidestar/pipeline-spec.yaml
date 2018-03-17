@@ -52,11 +52,11 @@ guidestar-scraper:
             type: integer
           association_last_report_year:
             type: integer
-          association_num_volunteers:
+          association_num_of_volunteers:
             type: number
             bareNumber: false
             groupChar: ','
-          association_num_employees:
+          association_num_of_employees:
             type: number
             bareNumber: false
             groupChar: ','
@@ -109,8 +109,8 @@ guidestar:
       parameters:
         types:
           association_yearly_turnover: { type: number }
-          association_num_volunteers: { type: number }
-          association_num_employees: { type: number }
+          association_num_of_volunteers: { type: number }
+          association_num_of_employees: { type: number }
           association_year_established: { type: integer }
           association_last_report_year: { type: integer }
           association_online_data_update_year: { type: integer }

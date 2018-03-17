@@ -235,9 +235,9 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          association_num_employees:
+          association_num_of_employees:
             aggregate: sum
-          association_num_volunteers:
+          association_num_of_volunteers:
             aggregate: sum
           association_activity_region_list:
             aggregate: counters
@@ -276,9 +276,9 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          association_num_employees:
+          association_num_of_employees:
             aggregate: sum
-          association_num_volunteers:
+          association_num_of_volunteers:
             aggregate: sum
           association_activity_region_list:
             aggregate: counters
@@ -312,9 +312,9 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          association_num_employees:
+          association_num_of_employees:
             aggregate: sum
-          association_num_volunteers:
+          association_num_of_volunteers:
             aggregate: sum
           association_activity_region_list:
             aggregate: counters
@@ -342,8 +342,8 @@ ngo-activity-report:
           field_of_activity:
             - association_field_of_activity
           total_amount: []
-          association_num_employees: []
-          association_num_volunteers: []
+          association_num_of_employees: []
+          association_num_of_volunteers: []
           association_activity_region_list: []
     
     - run: collate

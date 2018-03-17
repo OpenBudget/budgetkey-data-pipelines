@@ -7,8 +7,8 @@ import requests
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-logging.getLogger("requests").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
+# logging.getLogger("requests").setLevel(logging.WARNING)
+# logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
 
