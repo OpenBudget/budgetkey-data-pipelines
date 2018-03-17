@@ -93,6 +93,7 @@ def get_company_rec(company_id):
                     return ret
                 else:
                     logging.error('Company %s got error response', company_id)
+                    return 'not-found'
             except Exception:
                 logging.exception('Company %s erred %s', company_id, resp.content)
 
@@ -133,17 +134,18 @@ def scrape_company_details(cmp_recs):
             erred += 1
             continue
         
-        company_rec = extract(company_rec_, 'Data.0')
+        if company_rec_ != 'not-found':
+            company_rec = extract(company_rec_, 'Data.0')
 
-        if company_rec is None:
-            logging.error('COMPANY DATA is NONE: %r', company_rec_)
-            erred += 1
-            continue
+            if company_rec is None:
+                logging.error('COMPANY DATA is NONE: %r', company_rec_)
+                erred += 1
+                continue
 
-        for k, v in selectors.items():
-            row[v] = extract(company_rec, k)
-            if k in ('Company.Addresses.0.ZipCode', 'Company.Addresses.0.PostBox') and row[v] is not None:
-                row[v] = str(row[v])
+            for k, v in selectors.items():
+                row[v] = extract(company_rec, k)
+                if k in ('Company.Addresses.0.ZipCode', 'Company.Addresses.0.PostBox') and row[v] is not None:
+                    row[v] = str(row[v])
 
         yield row
 
