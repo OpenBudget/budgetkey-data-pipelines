@@ -17,7 +17,7 @@ ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
-#RUN pip install -U -r /requirements-dev.txt
+RUN pip install -U -r /requirements-dev.txt
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/* && \
     ln -s /usr/lib/libmagic.so.1 /usr/lib/libmagic.so
