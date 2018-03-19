@@ -163,6 +163,7 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
+                    ('drop_all_rows', ),
                     ('dump.to_path', {
                         'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
                     }),                    
