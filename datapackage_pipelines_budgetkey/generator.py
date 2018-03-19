@@ -162,7 +162,10 @@ class Generator(GeneratorBase):
                                  'doc-type': 'document'}
                             ]
                         }
-                    })
+                    }),
+                    ('dump.to_path', {
+                        'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
+                    }),                    
                 ])
 
                 if os.environ.get("ES_LIMIT_ROWS"):
