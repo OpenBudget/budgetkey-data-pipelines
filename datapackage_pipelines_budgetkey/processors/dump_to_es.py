@@ -5,23 +5,7 @@ from tableschema_elasticsearch.mappers import MappingGenerator
 class BoostingMappingGenerator(MappingGenerator):
 
     def __init__(self):
-        super(BoostingMappingGenerator, self).__init__(base={
-            "settings": {
-                "index.mapping.coerce": True
-            },
-            # "dynamic_templates": [
-            #     {
-            #         "strings": {
-            #             "match": "*",
-            #             "match_mapping_type": "string",
-            #             "mapping": {
-            #                 "type": "text",
-            #                 "analyzer": "hebrew",
-            #              }
-            #         }
-            #     }
-            # ]
-        })
+        super(BoostingMappingGenerator, self).__init__(base={})
 
     @classmethod
     def _convert_type(cls, schema_type, field, prefix):
@@ -42,7 +26,12 @@ class BoostingMappingGenerator(MappingGenerator):
 class DumpToElasticSearch(ESDumper):
     
     def __init__(self):
-        super(DumpToElasticSearch, self).__init__(mapper_cls=BoostingMappingGenerator)
+        super(DumpToElasticSearch, self).__init__(
+            mapper_cls=BoostingMappingGenerator,
+            index_settings={
+                "index.mapping.coerce": True
+            }
+        )
 
 
 DumpToElasticSearch()()
