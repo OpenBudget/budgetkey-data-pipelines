@@ -1,3 +1,5 @@
+import os
+
 from datapackage_pipelines.wrapper import ingest, spew
 
 from sqlalchemy import create_engine
@@ -12,7 +14,7 @@ INCOME_LIST_QUERY = '''
 SELECT 'org/' || kind || '/' || id as doc_id, name, received_amount{suffix} 
 FROM _elasticsearch_mirror__entities
 JOIN guidestar_processed
-ON (entity_id=id)
+USING (id)
 WHERE association_field_of_activity='{foa}'
 ORDER BY 3 desc
 '''

@@ -151,9 +151,10 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
+                    ('dump.to_path', {
+                        'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
+                    }),                    
                     ('convert_to_key_value'
-                    ),
-                    ('sample'
                     ),
                     ('dump_to_es', {
                         'indexes': {
@@ -163,10 +164,6 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
-                    ('drop_all_rows', ),
-                    ('dump.to_path', {
-                        'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
-                    }),                    
                 ])
 
                 if os.environ.get("ES_LIMIT_ROWS"):

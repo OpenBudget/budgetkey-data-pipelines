@@ -7,11 +7,13 @@ def process_resource(res_):
         yield row
         for year, rec in row.get('history', {}).items():
             for code_title in rec.get('code_titles', []):
-                code, tite = code_title.split(':')
+                code, title = code_title.split(':', 1)
                 doc_id = 'budget/{}/{}'.format(code, year)
                 yield dict(
-                    code=code, 
+                    code=code,
+                    title=title,
                     year=int(year),
+                    doc_id='budget/{}/{}'.format(code, year),
                     __redirect=doc_id
                 )
 
