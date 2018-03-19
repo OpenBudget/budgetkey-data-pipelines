@@ -6,18 +6,21 @@ class BoostingMappingGenerator(MappingGenerator):
 
     def __init__(self):
         super(BoostingMappingGenerator, self).__init__(base={
-            "dynamic_templates": [
-                {
-                    "strings": {
-                        "match": "*",
-                        "match_mapping_type": "text",
-                        "mapping": {
-                            "type": "text",
-                            "analyzer": "hebrew",
-                        }
-                    }
-                }
-            ]
+            "settings": {
+                "index.mapping.coerce": True
+            },
+            # "dynamic_templates": [
+            #     {
+            #         "strings": {
+            #             "match": "*",
+            #             "match_mapping_type": "string",
+            #             "mapping": {
+            #                 "type": "text",
+            #                 "analyzer": "hebrew",
+            #              }
+            #         }
+            #     }
+            # ]
         })
 
     @classmethod
