@@ -17,7 +17,7 @@ class BoostingMappingGenerator(MappingGenerator):
                 prop['fields'] = {
                     "hebrew": { 
                     "type":     "text",
-                    "analyzer": "hebrew"
+                    "analyzer": 'hebrew'
                 }
           }
         return prop
