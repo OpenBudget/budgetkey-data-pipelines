@@ -19,6 +19,7 @@ budget:
         target-field: semantic-tags
   document-steps:
     - run: make_budget_charts
+    - run: add_redirects_for_connected_items
 
 national-budget-changes:
   kind: indexer
@@ -127,3 +128,5 @@ reports:
   page-title-pattern: '{title}'
   key-fields:
     - key
+  document-steps:
+    - run: make_ngo_report_income_lists

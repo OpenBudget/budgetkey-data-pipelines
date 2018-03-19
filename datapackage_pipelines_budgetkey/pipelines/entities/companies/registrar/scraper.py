@@ -124,6 +124,7 @@ def scrape_company_details(cmp_recs):
 
         row = {
             'id': company_id,
+            'company_name': cmp_rec['Company_Name'],
             'company_registration_date': cmp_rec['Company_Registration_Date']
         }
 
