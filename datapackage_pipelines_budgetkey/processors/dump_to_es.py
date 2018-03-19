@@ -29,7 +29,7 @@ class DumpToElasticSearch(ESDumper):
         super(DumpToElasticSearch, self).__init__(
             mapper_cls=BoostingMappingGenerator,
             index_settings={
-                "index.mapping.coerce": True
+                'index.mapping.coerce': True
             }
         )
 
