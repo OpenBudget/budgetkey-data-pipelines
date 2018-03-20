@@ -129,7 +129,7 @@ class Generator(GeneratorBase):
                         }
                     }),
                     ('filter', {
-                        'resources': None,
+                        'resources': doc_type,
                         'in': [
                             {'__next_update_days': 1},
                             {'__next_update_days': 2},
