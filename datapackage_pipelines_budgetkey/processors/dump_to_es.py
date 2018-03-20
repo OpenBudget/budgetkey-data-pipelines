@@ -16,8 +16,8 @@ class BoostingMappingGenerator(MappingGenerator):
             if field.get('es:title') or field.get('es:hebrew'):
                 prop['fields'] = {
                     "hebrew": { 
-                    "type":     "text",
-                    "analyzer": 'hebrew'
+                    "type": "text",
+                    'analyzer': 'hebrew'
                 }
           }
         return prop
