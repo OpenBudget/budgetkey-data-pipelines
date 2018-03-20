@@ -14,7 +14,7 @@ def process_resource(res_):
                     title=title,
                     year=int(year),
                     doc_id='budget/{}/{}'.format(code, year),
-                    __redirect=doc_id
+                    __redirect=row['doc_id']
                 )
 
 
