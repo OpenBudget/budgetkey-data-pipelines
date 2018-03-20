@@ -142,7 +142,6 @@ class Generator(GeneratorBase):
                     ('add_page_title', {
                         'page-title-pattern': page_title_pattern
                     }),
-                ]) + parameters.get('document-steps', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [
@@ -151,6 +150,7 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
+                ]) + parameters.get('document-steps', []) + steps(*[
                     ('dump.to_path', {
                         'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
                     }),                    
