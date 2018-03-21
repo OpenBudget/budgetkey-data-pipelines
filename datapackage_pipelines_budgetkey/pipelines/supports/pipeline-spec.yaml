@@ -343,6 +343,12 @@ supports-by-entity:
       parameters:
         url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
+    - run: limit_last_years
+      parameters:
+        year_column: year_paid
+        amount_column: amount_total
+        target_column: amount_supports
+          
     - run: join
       parameters:
         source:
@@ -360,11 +366,17 @@ supports-by-entity:
             name: entity_name
           kind:
             name: entity_kind
+          amount_alltime:
+            name: amount_total
+            aggregate: sum
           amount:
+            name: amount_supports
+            aggregate: sum
+          amount_supports_alltime:
             name: amount_total
             aggregate: sum
           amount_supports:
-            name: amount_total
+            name: amount_supports
             aggregate: sum
           min_year:
             name: year_requested

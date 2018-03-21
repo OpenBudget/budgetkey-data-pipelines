@@ -210,8 +210,11 @@ entities:
           name: []
           kind: []
           amount: []
+          amount_alltime: []
           amount_contracts: []
           amount_supports: []
+          amount_contracts_alltime: []
+          amount_supports_alltime: []
           min_year: []
           max_year: []
 
@@ -235,11 +238,20 @@ entities:
           received_amount:
             name: amount
             aggregate: sum
+          received_amount_alltime:
+            name: amount
+            aggregate: sum
           received_amount_contracts:
             name: amount_contracts
             aggregate: sum
           received_amount_supports:
             name: amount_supports
+            aggregate: sum
+          received_amount_contracts_alltime:
+            name: amount_contracts_alltime
+            aggregate: sum
+          received_amount_supports_alltime:
+            name: amount_supports_alltime
             aggregate: sum
           min_year:
             name: min_year
@@ -269,8 +281,11 @@ entities:
           full: true
         fields:
           received_amount: null
+          received_amount_alltime: null
           received_amount_contracts: null
           received_amount_supports: null
+          received_amount_contracts_alltime: null
+          received_amount_supports_alltime: null
           min_year: null
           max_year: null
 

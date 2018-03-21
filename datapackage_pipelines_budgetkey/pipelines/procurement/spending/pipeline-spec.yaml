@@ -380,6 +380,11 @@ spending-by-entity:
       parameters:
         url: dependency://./procurement/spending/latest-contract-spending
         resource: contract-spending
+    - run: limit_last_years
+      parameters:
+        year_column: max_year
+        amount_column: executed
+        target_column: amount_contracts
     - run: join
       parameters:
         source:
@@ -397,11 +402,17 @@ spending-by-entity:
             name: entity_name
           kind:
             name: entity_kind
+          amount_alltime:
+            name: executed
+            aggregate: sum
           amount:
+            name: amount_contracts
+            aggregate: sum
+          amount_contracts_alltime:
             name: executed
             aggregate: sum
           amount_contracts:
-            name: executed
+            name: amount_contracts
             aggregate: sum
           min_year:
             name: min_year
