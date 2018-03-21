@@ -1,8 +1,10 @@
 import os
+import logging
 
 from datapackage_pipelines.wrapper import ingest, spew
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
 
 parameters, dp, res_iter = ingest()
 
@@ -24,17 +26,24 @@ def make_income_list(foa, suffix):
     query = INCOME_LIST_QUERY.format(
         foa=foa, suffix=suffix
     )
-    result = engine.execute(query)
-    result = list(dict(r) for r in result)
+    result = []
+    try:
+        result = engine.execute(query)
+        result = list(dict(r) for r in result)
+    except ProgrammingError:
+        logging.error('Failed to query DB for incomes')
+    return result
 
 def process_resource(res_):
     for row in res_:
+        details = row['details']
         if row['key'].startswith('ngo-activity-report'):
-            foa = row['details']['field_of_activity']
+            foa = details['field_of_activity']
             for suffix in INCOME_SUFFIXES:
-                row['income_list{}'.format(suffix)] = make_income_list(
+                details['income_list{}'.format(suffix)] = make_income_list(
                     foa, suffix
                 )
+        row['details'] = details
         yield row
 
 

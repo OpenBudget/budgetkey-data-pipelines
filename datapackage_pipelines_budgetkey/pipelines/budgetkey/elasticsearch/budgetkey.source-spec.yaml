@@ -130,3 +130,4 @@ reports:
     - key
   document-steps:
     - run: make_ngo_report_income_lists
+    - run: enrich_ngo_reports
