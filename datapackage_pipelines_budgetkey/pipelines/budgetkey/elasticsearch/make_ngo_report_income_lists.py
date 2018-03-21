@@ -19,6 +19,7 @@ FROM _elasticsearch_mirror__entities
 JOIN guidestar_processed
 USING (id)
 WHERE association_field_of_activity='{foa}'
+and  received_amount{suffix}>0
 ORDER BY 3 desc
 '''
 
