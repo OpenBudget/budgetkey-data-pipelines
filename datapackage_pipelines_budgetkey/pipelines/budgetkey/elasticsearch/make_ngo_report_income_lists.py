@@ -2,6 +2,7 @@ import os
 import logging
 
 from datapackage_pipelines.wrapper import ingest, spew
+from decimal import Decimal
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError
@@ -30,6 +31,10 @@ def make_income_list(foa, suffix):
     try:
         result = engine.execute(query)
         result = list(dict(r) for r in result)
+        for r in result:
+            for k, v in r.items():
+                if isinstance(v, Decimal):
+                    r[k] = float(v)
     except ProgrammingError:
         logging.error('Failed to query DB for incomes')
     return result
