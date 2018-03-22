@@ -239,7 +239,7 @@ entities:
             name: amount
             aggregate: sum
           received_amount_alltime:
-            name: amount
+            name: amount_alltime
             aggregate: sum
           received_amount_contracts:
             name: amount_contracts
