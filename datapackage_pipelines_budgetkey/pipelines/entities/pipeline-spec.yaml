@@ -307,6 +307,12 @@ entities:
       parameters:
         out-path: /var/datapackages/entities/scored
 
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities_processed:
+            resource-name: entities
+
 geocode:
   dependencies:
     - pipeline: ./entities/all

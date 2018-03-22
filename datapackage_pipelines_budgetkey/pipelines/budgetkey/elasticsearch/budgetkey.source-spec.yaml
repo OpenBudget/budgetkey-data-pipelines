@@ -44,6 +44,15 @@ entities:
   key-fields:
     - id
   key-pattern: 'org/{kind}/{id}'
+  extra-steps:
+    - run: add_semantic_tags
+      parameters:
+        resource: entities
+        source-fields:
+          - name
+        target-field: semantic-tags
+  document-steps:
+    - run: enrich_entities
 
 contract-spending:
   kind: indexer
