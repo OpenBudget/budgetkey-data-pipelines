@@ -1,5 +1,6 @@
 import os
 import json
+from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
 
 from datapackage_pipelines.generators import (
     GeneratorBase, steps
@@ -30,12 +31,12 @@ class Generator(GeneratorBase):
             ('duplicate', {
                 'source': resource_name,
                 'target-name': target_resource_name,
-                'target-path': '.'
+                'target-path': PATH_PLACEHOLDER
             }),
             ('concatenate', {
                 'target': {
                     'name': target_resource_name,
-                    'path': '.'
+                    'path': PATH_PLACEHOLDER
                 },
                 'sources': target_resource_name,
                 'fields': dict((f, []) for f in primary_key + fields) 

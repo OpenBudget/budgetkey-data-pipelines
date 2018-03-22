@@ -33,7 +33,7 @@ ngo-district-report:
       parameters:
         source: guidestar
         target-name: proper_management
-        target-path: '.'
+        target-path: _
     - run: filter
       parameters:
         resources: proper_management
@@ -71,7 +71,7 @@ ngo-district-report:
       parameters:
         source: guidestar
         target-name: has_article_46
-        target-path: '.'
+        target-path: _
     - run: filter
       parameters:
         resources: has_article_46
@@ -215,7 +215,7 @@ ngo-activity-report:
       parameters:
         source: guidestar
         target-name: proper_management
-        target-path: '.'
+        target-path: _
     - run: filter
       parameters:
         resources: proper_management
@@ -258,7 +258,7 @@ ngo-activity-report:
       parameters:
         source: guidestar
         target-name: has_article_46
-        target-path: '.'
+        target-path: _
     - run: filter
       parameters:
         resources: has_article_46
@@ -301,7 +301,7 @@ ngo-activity-report:
       parameters:
         source: guidestar
         target-name: total
-        target-path: '.'
+        target-path: _
     - run: join
       parameters:
         source: 
