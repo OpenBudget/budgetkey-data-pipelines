@@ -233,6 +233,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
+          association_field_of_activity_display: null
+          association_primary_field_of_activity: null
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -274,6 +276,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
+          association_field_of_activity_display: null
+          association_primary_field_of_activity: null
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -310,6 +314,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
+          association_field_of_activity_display: null
+          association_primary_field_of_activity: null
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -341,6 +347,10 @@ ngo-activity-report:
           subset: []
           field_of_activity:
             - association_field_of_activity
+          field_of_activity_display:
+            - association_field_of_activity_display
+          primary_field_of_activity:
+            - association_primary_field_of_activity
           total_amount: []
           association_num_of_employees: []
           association_num_of_volunteers: []

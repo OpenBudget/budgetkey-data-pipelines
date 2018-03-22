@@ -132,7 +132,11 @@ def modify_datapackage(dp, *_):
         {
             'name': 'association_status_active',
             'type': 'boolean',
-        }
+        },
+        {
+            'name': 'association_field_of_activity_display',
+            'type': 'string',
+        },
     ])
     return dp
 
