@@ -3,6 +3,7 @@ from datapackage import Package
 import json
 import logging
 import datetime
+import tabulator
 
 from fuzzywuzzy import process as fw_process
 
@@ -12,6 +13,12 @@ districts = dict(
     (x['entity_name'], x['district_2015'])
     for x in lamas_data.resources[0].iter(keyed=True)
 )
+
+logging.info('LOADING FOA IMPROVEMENT')
+foa_improvement = tabulator.Stream('https://docs.google.com/spreadsheets/d/17kX25p_M59h6VoDB90BeNVSmrel_9ipxUyko8SD6eKY/edit?usp=sharing', headers=1)
+foa_improvement = foa_improvement.open().iter(keyed=True)
+foa_improvement = dict((x.pop('original'), x) for x in foa_improvement)
+
 
 regional_towns = Package('/var/datapackages/lamas-municipality-locality-map/datapackage.json')
 cache = {}
@@ -94,9 +101,12 @@ def process_row(row, row_index, *_):
         prefix = 'אחר - '
         if foa.startswith(prefix):
             foa = foa[len(prefix):]
-        row['association_field_of_activity'] = foa
+        foa = foa_improvement[foa]
+        row['association_field_of_activity'] = foa['improved']
+        row['association_field_of_activity_display'] = foa['display']
     else:
         row['association_primary_field_of_activity'] = ''
+        row['association_field_of_activity_display'] = 'לא ידוע'
 
     row['association_status_active'] = any(row.get('association_' + x) is not None and row.get('association_' + x) >= min_activity_year 
                                            for x in ('last_report_year', 'online_data_update_year'))
