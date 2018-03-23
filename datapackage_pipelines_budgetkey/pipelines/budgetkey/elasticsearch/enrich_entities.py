@@ -15,12 +15,14 @@ class Enricher:
         self.key_fields = key_fields
         self.target_fields = target_fields
         self.kind_filter = kind_filter
+        self.descriprtion = descriprtion
         result = engine.execute(query)
         data = list(dict(r) for r in result)
         self.data = dict(
             (tuple(x.pop(k) for k in self.key_fields), self.normalize(x)) for x in data
         )
         logging.info('Get %d results', len(self.data))
+        self.seen = self.filtered = self.modified = 0
 
     def normalize(self, r):
         for k, v in r.items():
@@ -38,13 +40,19 @@ class Enricher:
             return r.get('details', {}).get(f)
 
     def process_row(self, row):
+        self.seen += 1
         if self.kind_filter is None or row['kind'] == self.kind_filter:
+            self.filtered += 1
             details = row.get('details', {})
             key = tuple(self.get(row, f) for f in self.key_fields)
             enrich = self.data.get(key)
             if enrich is not None:
+                self.modified += 1
                 details.update(enrich)
             row['details'] = details
+
+    def stats(self):
+        return '{}: {} seen, {} filtered, {} modified'.format(self.descriprtion, self.seen, self.filtered, self.modified)
 
 
 ENRICHERS = [
@@ -184,3 +192,5 @@ def modify_datapackage(dp, *_):
 if __name__ == "__main__":
     process(modify_datapackage=modify_datapackage,
             process_row=process_row)
+    for e in ENRICHERS:
+        logging.info('%r', e.stats())
