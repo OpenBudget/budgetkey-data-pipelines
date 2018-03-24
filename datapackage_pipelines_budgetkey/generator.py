@@ -151,10 +151,10 @@ class Generator(GeneratorBase):
                             ]
                         }
                     }),
-                ]) + parameters.get('document-steps', []) + steps(*[
-                    ('dump.to_path', {
+                    ('dpdumper', {
                         'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
-                    }),                    
+                    })                    
+                ]) + parameters.get('document-steps', []) + steps(*[                   
                     ('convert_to_key_value'
                     ),
                     ('dump_to_es', {
