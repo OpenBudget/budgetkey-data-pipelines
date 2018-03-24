@@ -3,8 +3,8 @@ import json
 
 from datapackage_pipelines.wrapper import process
 
-def modify_datapackage(dp, parameters):
-    json.dump(dp, open(os.path.join(parameters['out-path'], 'datapackage.json')))
+def modify_datapackage(dp, parameters, _):
+    json.dump(dp, open(os.path.join(parameters['out-path'], 'datapackage.json'), 'w'))
     return dp
 
 
