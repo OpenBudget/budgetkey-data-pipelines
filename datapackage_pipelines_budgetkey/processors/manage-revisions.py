@@ -80,7 +80,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
 
         try:
             existing_id = existing_ids.get(key)
-            days_since_last_update = (now - existing_id[prefix+'__last_modified_date']).days
+            days_since_last_update = (now - existing_id[prefix+'__last_updated_at']).days
             next_update_days = existing_id[prefix+'__next_update_days']
             next_update_days = min(next_update_days, 90)
             is_stale = days_since_last_update > next_update_days

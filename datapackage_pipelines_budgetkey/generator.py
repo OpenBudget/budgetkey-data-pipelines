@@ -133,7 +133,7 @@ class Generator(GeneratorBase):
                         'resources': doc_type,
                         'in': [
                             {'__next_update_days': 1},
-                            {'__next_update_days': 2},
+                            # {'__next_update_days': 2},
                         ]
                     }),
                 ]) + history_steps + steps(*[
