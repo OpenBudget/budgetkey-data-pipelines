@@ -3,6 +3,7 @@ from sqlalchemy import create_engine
 import os
 import logging
 from decimal import Decimal
+from collections import Counter
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
@@ -436,6 +437,10 @@ def modify_datapackage(dp, *_):
 
 
 if __name__ == "__main__":
+    c = Counter()
+    for e in ENRICHERS:
+        c.update(e.data.keys())
+    logging.info('Most common keys: %r', c.most_common(20))
     process(modify_datapackage=modify_datapackage,
             process_row=process_row)
     for e in ENRICHERS:
