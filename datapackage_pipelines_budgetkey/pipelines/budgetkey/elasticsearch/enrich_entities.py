@@ -174,6 +174,253 @@ SELECT foa as field_of_activity,
 FROM b
 """
     ),
+    Enricher('81170: Association Rank of employees per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'rank_of_employees_in_field_of_activity',
+            'type': 'integer'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_field_of_activity,
+          association_num_of_employees
+   FROM guidestar_processed
+   WHERE association_status_active
+     AND association_num_of_employees>0)
+SELECT id,
+       rank as rank_of_employees_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY association_num_of_employees DESC) AS rank
+   FROM a) r
+WHERE rank<=3
+"""),
+    Enricher('81161: Association Rank of volunteers per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'rank_of_volunteers_in_field_of_activity',
+            'type': 'integer'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_field_of_activity,
+          association_num_of_volunteers
+   FROM guidestar_processed
+   WHERE association_status_active
+     AND association_num_of_volunteers>0)
+SELECT id,
+       rank as rank_of_volunteers_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY association_num_of_volunteers DESC) AS rank
+   FROM a) r
+WHERE rank<=3
+"""),
+    Enricher('81171: Association Rank of registration_date per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'is_oldest_org_in_field_of_activity',
+            'type': 'boolean'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_title AS title,
+          association_field_of_activity,
+          association_registration_date
+   FROM guidestar_processed
+   WHERE association_status_active)
+SELECT id,
+       TRUE AS is_oldest_org_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY association_registration_date ASC) AS rank
+   FROM a) r
+WHERE rank=1
+"""),
+    Enricher('81173: Association Rank of registration_date per activity field and district',
+    'association', ('id', ),
+    [
+        {
+            'name': 'districts_where_oldest_org_in_field_of_activity',
+            'type': 'array',
+            'es:itemType': 'string'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_title AS title,
+          association_field_of_activity,
+          jsonb_array_elements(association_activity_region_districts) as district,
+          association_registration_date
+   FROM guidestar_processed
+   WHERE association_status_active)
+SELECT id,
+       array_agg(district) as districts_where_oldest_org_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity, district
+                       ORDER BY association_registration_date ASC) AS rank
+   FROM a) r
+WHERE rank=1
+group by id
+"""),
+    Enricher('81262: Association Rank of received moneys per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'rank_of_overall_recipient_in_field_of_activity',
+            'type': 'integer'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_field_of_activity,
+          received_amount AS amount
+   FROM guidestar_processed
+   JOIN entities_processed USING (id)
+   WHERE association_status_active
+     AND received_amount>0)
+SELECT id,
+       rank as rank_of_overall_recipient_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY amount DESC) AS rank
+   FROM a) r
+WHERE rank<=10
+"""),
+    Enricher('81257: Association Rank of received contracts per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'rank_of_contract_recipient_in_field_of_activity',
+            'type': 'integer'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_field_of_activity,
+          received_amount_contracts AS amount
+   FROM guidestar_processed
+   JOIN entities_processed USING (id)
+   WHERE association_status_active
+     AND received_amount_contracts>0)
+SELECT id,
+       rank as rank_of_contract_recipient_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY amount DESC) AS rank
+   FROM a) r
+WHERE rank<=10
+"""),
+    Enricher('81254: Association Rank of received supports per activity field',
+    'association', ('id', ),
+    [
+        {
+            'name': 'rank_of_supports_recipient_in_field_of_activity',
+            'type': 'integer'
+        }
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          association_field_of_activity,
+          received_amount_supports AS amount
+   FROM guidestar_processed
+   JOIN entities_processed USING (id)
+   WHERE association_status_active
+     AND received_amount_supports>0)
+SELECT id,
+       rank as rank_of_supports_recipient_in_field_of_activity
+FROM
+  (SELECT a.*,
+          rank() OVER (PARTITION BY association_field_of_activity
+                       ORDER BY amount DESC) AS rank
+   FROM a) r
+WHERE rank<=10
+"""),
+    Enricher('81277: Unique contracts for entities',
+    None, ('id', ),
+    [
+        {
+            'name': 'sole_government_procurer_contract_count',
+            'type': 'integer'
+        },
+        {
+            'name': 'sole_government_procurer_name',
+            'type': 'string'
+        },
+        {
+            'name': 'sole_government_procurer_executed',
+            'type': 'number'
+        },
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          count(1) AS contract_count,
+          array_agg(DISTINCT publisher_name) AS publishers,
+          sum(executed) AS executed
+   FROM entities
+   JOIN contract_spending ON (id=entity_id)
+   WHERE executed>0
+   GROUP BY 1)
+SELECT id,
+       contract_count as sole_government_procurer_contract_count,
+       publishers[1] as sole_government_procurer_name,
+       executed as sole_government_procurer_executed
+FROM a
+WHERE array_length(publishers, 1)=1
+"""),
+    Enricher('81278: Unique supports for entities',
+    None, ('id', ),
+    [
+        {
+            'name': 'sole_government_supporter_contract_count',
+            'type': 'integer'
+        },
+        {
+            'name': 'sole_government_supporter_name',
+            'type': 'string'
+        },
+        {
+            'name': 'sole_government_supporter_paid',
+            'type': 'number'
+        },
+    ],
+    """
+WITH a AS
+  (SELECT id,
+          count(DISTINCT (year_requested, budget_code)) AS support_count,
+          array_agg(DISTINCT supporting_ministry) AS ministries,
+          sum(amount_total) AS amount
+   FROM entities
+   JOIN raw_supports ON (id=entity_id)
+   WHERE amount_total>0
+   GROUP BY 1)
+SELECT id,
+       support_count as sole_government_supporter_contract_count,
+       ministries[1] as sole_government_supporter_name,
+       amount as sole_government_supporter_paid
+FROM a
+WHERE array_length(ministries, 1)=1
+"""),
 ]
 
 

@@ -100,6 +100,8 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
                     prefix+'__next_update_days': days_since_last_update + 2
                 })
                 count_existing += 1
+                if not is_stale and days_since_last_update < 7:
+                    continue
             else:
                 row.update({
                     prefix+'__last_modified_at': now,
