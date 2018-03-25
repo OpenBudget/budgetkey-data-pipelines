@@ -4,7 +4,6 @@ import os
 import logging
 from decimal import Decimal
 
-
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
 
@@ -392,7 +391,7 @@ WHERE array_length(publishers, 1)=1
     None, ('id', ),
     [
         {
-            'name': 'sole_government_supporter_contract_count',
+            'name': 'sole_government_supporter_support_count',
             'type': 'integer'
         },
         {
@@ -415,7 +414,7 @@ WITH a AS
    WHERE amount_total>0
    GROUP BY 1)
 SELECT id,
-       support_count as sole_government_supporter_contract_count,
+       support_count as sole_government_supporter_support_count,
        ministries[1] as sole_government_supporter_name,
        amount as sole_government_supporter_paid
 FROM a
