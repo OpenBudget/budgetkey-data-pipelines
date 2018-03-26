@@ -195,8 +195,6 @@ processed:
     - run: set_types
       parameters:
         types:
-          end_date:
-          start_date:
           description:
             es:title: true
           documents:
