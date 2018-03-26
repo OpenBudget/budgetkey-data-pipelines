@@ -7,6 +7,7 @@ parameters, dp, res_iter = ingest()
 def process_resource(res_):
     for row in res_:
         code = row['code'][2:]
+        row['simple-code'] = code
         nice_code = code[:2]
         code = code[2:]
         while len(code) > 0:
@@ -25,6 +26,10 @@ def process_resources(res_iter_):
 dp['resources'][0]['schema']['fields'].append(
     {
         'name': 'nice-code',
+        'type': 'string'
+    },
+    {
+        'name': 'simple-code',
         'type': 'string'
     }
 )
