@@ -384,8 +384,6 @@ connected-national-budgets:
     - run: set_types
       parameters:
         types:
-          year:
-            es:time-range: year
           title:
             es:title: true
           admin_cls_code_0:

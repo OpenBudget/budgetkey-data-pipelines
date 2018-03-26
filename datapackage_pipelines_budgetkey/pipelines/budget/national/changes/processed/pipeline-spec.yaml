@@ -199,8 +199,6 @@ national-budget-changes-aggregated:
             es:itemType: date
           pending:
             es:itemType: boolean
-          year:
-            es:time-range: year
 #    - run: sample
 #      parameters:
 #        resource: national-budget-changes

@@ -195,10 +195,6 @@ processed:
     - run: set_types
       parameters:
         types:
-          end_date:
-            es:time-range: to
-          start_date:
-            es:time-range: from
           description:
             es:title: true
           documents:

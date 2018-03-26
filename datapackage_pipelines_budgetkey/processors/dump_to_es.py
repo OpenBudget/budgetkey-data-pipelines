@@ -13,18 +13,18 @@ class BoostingMappingGenerator(MappingGenerator):
     @classmethod
     def _convert_type(cls, schema_type, field, prefix):
         prop = super(BoostingMappingGenerator, cls)._convert_type(schema_type, field, prefix)
-        if schema_type == 'string':
+        if field.get('es:keyword'):
+            prop['type'] = 'keyword'
+        elif schema_type == 'string':
             if field.get('es:title'):
                 prop['boost'] = 100
             if field.get('es:title') or field.get('es:hebrew'):
                 prop['fields'] = {
-                    "hebrew": { 
+                    "hebrew": {
                     "type": "text",
                     'analyzer': 'hebrew'
                 }
-          }
-        elif field.get('es:time-range'):
-            prop['index'] = True
+            }
         return prop
 
 
