@@ -11,6 +11,7 @@ budget:
     - run: make_nice_budget_categories
     - run: make_nice_budget_breadcrumbs
     - run: make_nice_budget_code
+    - run: filter_out_empty_budgets
     - run: add_semantic_tags
       parameters:
         resource: budget
