@@ -298,8 +298,6 @@ latest-contract-spending:
             type: date
           order_date:
             type: date
-          end_date:
-          order_date:
           buyer_description:
             es:itemType: string
           exemption_reason:
