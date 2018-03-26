@@ -299,9 +299,7 @@ latest-contract-spending:
           order_date:
             type: date
           end_date:
-            es:time-range: to
           order_date:
-            es:time-range: from
           buyer_description:
             es:itemType: string
           exemption_reason:

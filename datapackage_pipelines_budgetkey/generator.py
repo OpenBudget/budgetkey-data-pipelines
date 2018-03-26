@@ -106,6 +106,7 @@ class Generator(GeneratorBase):
                     history_steps.extend(
                         cls.history_steps(doc_type, key_fields, kh['fields'], kh.get('key'))
                     )
+                date_range_parameters = parameters.get('date-range', {})
 
                 pipeline_steps = steps(*[
                     ('add_metadata', {
@@ -143,6 +144,7 @@ class Generator(GeneratorBase):
                     ('add_page_title', {
                         'page-title-pattern': page_title_pattern
                     }),
+                    ('add_date_range', date_range_parameters),
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [

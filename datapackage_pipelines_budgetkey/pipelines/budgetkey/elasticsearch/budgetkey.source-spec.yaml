@@ -20,6 +20,9 @@ budget:
   document-steps:
     - run: make_budget_charts
     - run: add_redirects_for_connected_items
+  date-range:
+    type: year
+    field: year
 
 national-budget-changes:
   kind: indexer
@@ -34,6 +37,9 @@ national-budget-changes:
       key: pending
       fields: 
         - is_pending
+  date-range:
+    type: year
+    field: year
 
 entities:
   kind: indexer
@@ -71,8 +77,12 @@ contract-spending:
         source-fields:
           - purpose
         target-field: semantic-tags
-          
-  
+  date-range:
+    type: date-range
+    from-field: order_date
+    to-field: end_date
+
+
 supports:
   kind: indexer
   revision: 7
@@ -91,6 +101,9 @@ supports:
         - amount_total
         - last_payment_year
         - last_payment_amount
+  date-range:
+    type: year
+    field: year_requested
 
 
 tenders:
@@ -118,6 +131,10 @@ tenders:
           - page_title
           - reason
         target-field: semantic-tags
+  date-range:
+    type: date-range
+    from-field: start_date
+    to-field: end_date
 
 people:
   kind: indexer

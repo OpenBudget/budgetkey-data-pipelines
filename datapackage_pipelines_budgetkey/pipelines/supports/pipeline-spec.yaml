@@ -233,7 +233,6 @@ by-request-year:
           support_title:
             es:title: true
           year_requested:
-            es:time-range: year
 
     - run: join
       parameters:
