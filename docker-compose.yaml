@@ -64,11 +64,18 @@ services:
   kibana:
     depends_on:
     - elasticsearch
-    image: docker.elastic.co/kibana/kibana:5.3.0
+    image: kibana:5.3
     environment:
     - "ELASTICSEARCH_URL=http://elasticsearch:9200/"
     ports:
     - "15601:5601"
+
+  adminer:
+    depends_on:
+    - db
+    image: adminer
+    ports:
+    - "18080:8080"
 
 volumes:
   data:
