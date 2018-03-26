@@ -23,6 +23,8 @@ class BoostingMappingGenerator(MappingGenerator):
                     'analyzer': 'hebrew'
                 }
           }
+        elif field.get('es:time-range'):
+            prop['index'] = True
         return prop
 
 
