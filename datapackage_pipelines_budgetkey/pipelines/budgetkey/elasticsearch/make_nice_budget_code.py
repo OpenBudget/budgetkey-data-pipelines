@@ -23,7 +23,7 @@ def process_resources(res_iter_):
     yield from res_iter_
 
 
-dp['resources'][0]['schema']['fields'].append(
+dp['resources'][0]['schema']['fields'].extend([
     {
         'name': 'nice-code',
         'type': 'string'
@@ -32,6 +32,6 @@ dp['resources'][0]['schema']['fields'].append(
         'name': 'simple-code',
         'type': 'string'
     }
-)
+])
 
 spew(dp, process_resources(res_iter))
