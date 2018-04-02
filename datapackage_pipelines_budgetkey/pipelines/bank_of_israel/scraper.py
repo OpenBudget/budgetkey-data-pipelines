@@ -53,6 +53,8 @@ def get_all_reports():
             continue
         resource = {
             PROP_STREAMING: True,
+            'name': report['metadata'][u'תיאור'],
+            'path': 'data/bank_of_israel/' + str(hash(report['metadata'][u'תיאור'])) + '.csv',
             'schema': {
                 'fields': [
 
