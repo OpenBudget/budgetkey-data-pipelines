@@ -44,6 +44,43 @@ def get_all_reports():
     serie_codes = get_serie_codes()
     for serie_code in serie_codes:
         report = get_report(serie_code)
+        if report['metadata'][u'תדירות'] == u'חודשית (M)':
+            date_format = '%m/%Y'
+        elif report['metadata'][u'תדירות'] == u'רבעונית (Q)':
+            date_format = '%d/%m/%Y'
+        else:
+            # TODO: log the frequency so it can be fixed
+            continue
+        resource = {
+            PROP_STREAMING: True,
+            'schema': {
+                'fields': [
+
+                    {
+                        'name': 'description',
+                        'type': 'string'
+                    },
+                    {
+                        'name': 'units',
+                        'type': 'string'
+                    },
+                    {
+                        'name': 'season_adjusted',
+                        'type': 'string'
+                    },
+                    {
+                        'name': 'date',
+                        'type': 'date',
+                        'format': date_format
+                    },
+                    {
+                        'name': 'value',
+                        'type': 'string'
+                    },
+                ]
+            }
+        }
+        datapackage['resources'].append(resource)
         for value in report['values']:
             rec = {
                 "description": report['metadata'][u'תיאור'],
@@ -55,35 +92,35 @@ def get_all_reports():
             yield rec
 
 
-resource = parameters['target-resource']
-resource[PROP_STREAMING] = True
-resource['schema'] = {
-    'fields': [
-
-        {
-            'name': 'description',
-            'type': 'string'
-        },
-        {
-            'name': 'units',
-            'type': 'string'
-        },
-        {
-            'name': 'season_adjusted',
-            'type': 'string'
-        },
-        {
-            'name': 'date',
-            'type': 'string',
-            # 'type': 'date',
-            # 'format': '%d-%m-%Y' TODO
-        },
-        {
-            'name': 'value',
-            'type': 'string'
-        },
-    ]
-}
-datapackage['resources'].append(resource)
+# resource = parameters['target-resource']
+# resource[PROP_STREAMING] = True
+# resource['schema'] = {
+#     'fields': [
+#
+#         {
+#             'name': 'description',
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'units',
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'season_adjusted',
+#             'type': 'string'
+#         },
+#         {
+#             'name': 'date',
+#             # 'type': 'string',
+#             'type': 'date',
+#             'format': '%d-%m-%Y'
+#         },
+#         {
+#             'name': 'value',
+#             'type': 'string'
+#         },
+#     ]
+# }
+# datapackage['resources'].append(resource)
 
 spew(datapackage, chain(res_iter, [get_all_reports()]))
