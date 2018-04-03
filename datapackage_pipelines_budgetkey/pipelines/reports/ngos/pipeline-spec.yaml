@@ -235,6 +235,12 @@ ngo-activity-report:
           association_field_of_activity: null
           association_field_of_activity_display: null
           association_primary_field_of_activity: null
+          yearly_turnover_median_in_field:
+            name: association_yearly_turnover
+            aggregate: median
+          yearly_turnover_total_in_field:
+            name: association_yearly_turnover
+            aggregate: sum
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -278,6 +284,12 @@ ngo-activity-report:
           association_field_of_activity: null
           association_field_of_activity_display: null
           association_primary_field_of_activity: null
+          yearly_turnover_median_in_field:
+            name: association_yearly_turnover
+            aggregate: median
+          yearly_turnover_total_in_field:
+            name: association_yearly_turnover
+            aggregate: sum
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -316,6 +328,12 @@ ngo-activity-report:
           association_field_of_activity: null
           association_field_of_activity_display: null
           association_primary_field_of_activity: null
+          yearly_turnover_median_in_field:
+            name: association_yearly_turnover
+            aggregate: median
+          yearly_turnover_total_in_field:
+            name: association_yearly_turnover
+            aggregate: sum
           total_amount:
             aggregate: count
           association_num_of_employees:
@@ -351,6 +369,8 @@ ngo-activity-report:
             - association_field_of_activity_display
           primary_field_of_activity:
             - association_primary_field_of_activity
+          yearly_turnover_median_in_field: []
+          yearly_turnover_total_in_field: []
           total_amount: []
           association_num_of_employees: []
           association_num_of_volunteers: []
@@ -361,6 +381,8 @@ ngo-activity-report:
         resource: ngo-activity-report
         key:
           - field_of_activity
+          - field_of_activity_display
+          - primary_field_of_activity
         collated-field-name: report
     - run: join
       parameters:
@@ -374,6 +396,8 @@ ngo-activity-report:
           key: null
         fields:
           field_of_activity: null
+          field_of_activity_display: null
+          primary_field_of_activity: null
           report:
             aggregate: array
 
@@ -388,7 +412,7 @@ ngo-activity-report:
           -
             operation: format
             target: title
-            with: ארגונים הפעילים בתחום {field_of_activity}
+            with: ארגונים הפעילים בתחום {field_of_activity_display}
 
     - run: dump.to_path
       parameters:

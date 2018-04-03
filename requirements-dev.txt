@@ -1,2 +1,0 @@
-https://github.com/frictionlessdata/tableschema-elasticsearch-py/archive/feature/reindex.zip
-https://github.com/frictionlessdata/datapackage-pipelines-elasticsearch/archive/feature/add-reindexing.zip
