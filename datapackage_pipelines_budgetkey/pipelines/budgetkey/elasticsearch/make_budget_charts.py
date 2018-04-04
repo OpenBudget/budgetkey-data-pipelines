@@ -254,6 +254,7 @@ def process_resource(res_):
                     'title': 'מבנה התקציב',
                     'long_title': 'מהם תתי הסעיפים של סעיף זה?',
                     'description': None,
+                    'type': 'mushonkey',
                     'chart': chart,
                 }
             )
@@ -263,6 +264,7 @@ def process_resource(res_):
                     'title': title,
                     'long_title': long_title,
                     'description': description,
+                    'type': 'mushonkey',
                     'chart': chart,
                 }
             )
@@ -271,6 +273,7 @@ def process_resource(res_):
             row['charts'].append(
                 {
                     'title': 'איך השתנה התקציב?',
+                    'type': 'plotly',
                     'chart': chart,
                     'layout': layout
                 }
@@ -281,6 +284,7 @@ def process_resource(res_):
                 row['charts'].append(
                     {
                         'title': 'איך השתנה התקציב (לעומת כלל התקציב)?',
+                        'type': 'plotly',
                         'chart': chart,
                         'layout': layout
                     }
@@ -290,6 +294,7 @@ def process_resource(res_):
                 row['charts'].append(
                     {
                         'title': 'איך השתנה התקציב (לעומת התוצר המקומי הגולמי)?',
+                        'type': 'plotly',
                         'chart': chart,
                         'layout': layout
                     }
@@ -300,6 +305,7 @@ def process_resource(res_):
             row['charts'].append(
                 {
                     'title': 'איך מוציאים את התקציב?',
+                    'type': 'mushonkey',
                     'chart': chart
                 }
             )
