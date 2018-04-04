@@ -53,7 +53,8 @@ def get_field_of_activity_info():
     result = engine.execute(query)
     result = list(dict(r) for r in result)
     result = dict((x.pop('association_field_of_activity'), x) for x in result)
-    result['avg_field_received'] = avg_field_received
+    for x in result.values():
+        x['avg_field_received'] = avg_field_received
     return result
     
 
