@@ -18,6 +18,24 @@ FROM lamas_muni
 GROUP BY district_2015
 '''
 
+ACTIVITY_FIELD_INFO = '''
+SELECT association_field_of_activity,
+       sum(received_amount) as total_received_in_field
+FROM entities_processed
+JOIN guidestar_processed USING (id)
+GROUP BY 1
+'''
+
+ACTIVITY_FIELD_AVG = '''
+WITH a AS
+  (SELECT association_field_of_activity,
+          sum(received_amount) AS total_for_field
+   FROM entities_processed
+   JOIN guidestar_processed USING (id)
+   GROUP BY 1)
+SELECT avg(total_for_field) AS avg_field_received
+FROM a'''
+
 
 def get_district_info():
     query = DISTRICT_INFO
@@ -26,13 +44,33 @@ def get_district_info():
     result = dict((x.pop('district'), x) for x in result)
     return result
 
+
+def get_field_of_activity_info():
+    query = ACTIVITY_FIELD_AVG
+    result = engine.execute(query)
+    avg_field_received = dict(next(iter(result)))['avg_field_received']
+    query = ACTIVITY_FIELD_INFO
+    result = engine.execute(query)
+    result = list(dict(r) for r in result)
+    result = dict((x.pop('association_field_of_activity'), x) for x in result)
+    result['avg_field_received'] = avg_field_received
+    return result
+    
+
 def process_resource(res_):
     di = get_district_info()
+    foai = get_field_of_activity_info()
     for row in res_:
         if row['key'].startswith('ngo-district-report'):
             district = row['details']['district']
             details = row['details']
             for k, v in di[district].items():
+                details[k] = float(v)
+            row['details'] = details
+        elif row['key'].startswith('ngo-activity-report'):
+            foa = row['details']['field_of_activity']
+            details = row['details']
+            for k, v in foai[foa].items():
                 details[k] = float(v)
             row['details'] = details
         yield row
