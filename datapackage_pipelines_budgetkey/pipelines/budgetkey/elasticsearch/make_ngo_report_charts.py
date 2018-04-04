@@ -12,7 +12,7 @@ def process_row(row, *_):
                     {
                         'title': 'ארגונים: <span class="figure">{}</span>'.format(details['report'].get('total', {}).get('total_amount', 0)),
                         'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
-                        'data': {
+                        'chart': {
                             'values': [
                                 dict(
                                     label=x[0],
@@ -25,7 +25,7 @@ def process_row(row, *_):
                     {
                         'title': 'בעלי אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('total_amount', 0)),
                         'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
-                        'data': {
+                        'chart': {
                             'values': [
                                 dict(
                                     label=x[0],
@@ -38,7 +38,7 @@ def process_row(row, *_):
                     {
                         'title': 'בעלי סעיף 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('total_amount', 0)),
                         'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
-                        'data': {
+                        'chart': {
                             'values': [
                                 dict(
                                     label=x[0],
