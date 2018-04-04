@@ -149,7 +149,7 @@ people:
 
 reports:
   kind: indexer
-  revision: 2
+  revision: 3
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
