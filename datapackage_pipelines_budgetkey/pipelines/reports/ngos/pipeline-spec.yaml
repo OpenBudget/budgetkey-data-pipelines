@@ -165,6 +165,8 @@ ngo-district-report:
           district: null
           report:
             aggregate: array
+
+    - run: fix_values
     - run: add_computed_field
       parameters:
         resources: ngo-district-report
@@ -233,20 +235,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
-          association_field_of_activity_display: null
-          association_primary_field_of_activity: null
-          yearly_turnover_median_in_field:
-            name: association_yearly_turnover
-            aggregate: median
-          yearly_turnover_total_in_field:
-            name: association_yearly_turnover
-            aggregate: sum
           total_amount:
             aggregate: count
-          association_num_of_employees:
-            aggregate: sum
-          association_num_of_volunteers:
-            aggregate: sum
           association_activity_region_list:
             aggregate: counters
     - run: add_computed_field
@@ -282,20 +272,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
-          association_field_of_activity_display: null
-          association_primary_field_of_activity: null
-          yearly_turnover_median_in_field:
-            name: association_yearly_turnover
-            aggregate: median
-          yearly_turnover_total_in_field:
-            name: association_yearly_turnover
-            aggregate: sum
           total_amount:
             aggregate: count
-          association_num_of_employees:
-            aggregate: sum
-          association_num_of_volunteers:
-            aggregate: sum
           association_activity_region_list:
             aggregate: counters
     - run: add_computed_field
@@ -306,6 +284,42 @@ ngo-activity-report:
             operation: constant
             target: subset
             with: has_article_46
+
+# is_new_org
+    - run: duplicate
+      parameters:
+        source: guidestar
+        target-name: is_new_org
+        target-path: _
+    - run: filter
+      parameters:
+        resources: is_new_org
+        in:
+          - association_is_new_org: true
+    - run: join
+      parameters:
+        source: 
+          name: is_new_org
+          key:
+            - association_field_of_activity
+          delete: true
+        target:
+          name: is_new_org
+          key: null
+        fields:
+          association_field_of_activity: null
+          total_amount:
+            aggregate: count
+          association_activity_region_list:
+            aggregate: counters
+    - run: add_computed_field
+      parameters:
+        resources: is_new_org
+        fields:
+          -
+            operation: constant
+            target: subset
+            with: is_new_org
 
           
 # Calculate totals
@@ -401,6 +415,7 @@ ngo-activity-report:
           report:
             aggregate: array
 
+    - run: fix_values
     - run: add_computed_field
       parameters:
         resources: ngo-activity-report

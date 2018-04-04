@@ -133,6 +133,11 @@ guidestar:
                   type: number
             type: array
     - run: fix_values
+    - run: limit_last_years
+      parameters:
+        as_bool: true
+        target_column: association_is_new_org
+        year_column: association_year_established
 
     - run: dump.to_sql
       parameters:

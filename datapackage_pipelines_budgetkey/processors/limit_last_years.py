@@ -10,16 +10,22 @@ def process_row(row, row_index,
     year = row[parameters['year_column']]
     target_col = parameters['target_column']
     if year is not None and year >= min_year:
-        row[target_col] = row[parameters['amount_column']]
+        if parameters.get('as_bool'):
+            row[target_col] = True
+        else:
+            row[target_col] = row[parameters['amount_column']]
     else:
-        row[target_col] = 0
+        if parameters.get('as_bool'):
+            row[target_col] = False
+        else:
+            row[target_col] = 0
     return row
 
 
 def modify_datapackage(datapackage, parameters, _):
     datapackage['resources'][0]['schema']['fields'].append({
         'name': parameters['target_column'],
-        'type': 'number'
+        'type': 'boolean' if parameters.get('as_bool') else 'number' 
     })
     return datapackage
 
