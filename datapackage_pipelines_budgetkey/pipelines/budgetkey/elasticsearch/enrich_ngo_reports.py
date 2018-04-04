@@ -12,7 +12,7 @@ engine = create_engine(os.environ['DPP_DB_ENGINE'])
 DISTRICT_INFO = '''
 SELECT district_2015 AS district,
        sum(index_socioeconomic_2013_cluster_from_1_to_10_1_lowest_most*population_end_2013_number_all_1000s)/sum(population_end_2013_number_all_1000s) AS socioeconomic,
-       sum(population_end_2013_number_all_1000s*100) AS population,
+       sum(population_end_2013_number_all_1000s*1000) AS population,
        sum(uses_land_commerce_offices_area_km2_2013 + uses_land_culture_leisure_recreation_sport_area_km2_2013 + uses_land_education_education_area_km2_2013 + uses_land_gardening_decoration_park_public_area_km2_2013 + uses_land_health_welfare_area_km2_2013 + uses_land_industry_area_km2_2013 + uses_land_infrastructure_transporation_area_km2_2013 + uses_land_residential_area_km2_2013 + uses_land_services_public_area_km2_2013) AS built_area
 FROM lamas_muni
 GROUP BY district_2015
