@@ -59,6 +59,7 @@ def process_row(row, *_):
                 'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים'
             }
         ]
+    return row
 
 
 def modify_datapackage(dp, *_):
