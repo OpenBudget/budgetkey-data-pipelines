@@ -71,7 +71,7 @@ def process_resource(res_):
             foa = row['details']['field_of_activity']
             details = row['details']
             for k, v in foai[foa].items():
-                details[k] = float(v)
+                details[k] = float(v) if v is not None else None
             row['details'] = details
         yield row
 
