@@ -113,7 +113,7 @@ def budget_sankey(row, kids):
         groups.append(mushonkey_group(100, 1.0, True, 'budget-expense', expenses))
     if revenues:
         groups.append(mushonkey_group(100, 0.8, False, 'budget-revenues', revenues))
-    return mushonkey_chart(row['title'], groups), {}
+    return mushonkey_chart(row['title'], groups)
 
 
 def category_sankey(row, prefix, translations={}):
@@ -171,8 +171,8 @@ def query_based_charts(row):
             )
         result = engine.execute(query)
         result = list(dict(r) for r in result)
-        chart, layout = budget_sankey(row, result)
-        yield 'אילו משרדים מטפלים בנושא זה?', chart, layout
+        chart = budget_sankey(row, result)
+        yield 'חלוקה למשרדים', 'אילו משרדים ממשלתיים מטפלים בנושא זה?', 'פירוט הסעיפים התקציביים הראשיים הקשורים לנושא זה ', chart
 
 
 def history_chart(row, normalisation=None):
@@ -241,27 +241,29 @@ def admin_hierarchy_chart(row):
             for child in row.get('children')
         ]
         return budget_sankey(row, kids)
-    return None, None
+    return None
 
 
 def process_resource(res_):
     for row in res_:
         row['charts'] = []
-        chart, layout = admin_hierarchy_chart(row)
+        chart = admin_hierarchy_chart(row)
         if chart is not None:
             row['charts'].append(
                 {
                     'title': 'מבנה התקציב',
+                    'long_title': 'מהם תתי הסעיפים של סעיף זה?',
+                    'description': None,
                     'chart': chart,
-                    'layout': layout
                 }
             )
-        for title, chart, layout in query_based_charts(row):
+        for title, long_title, description, chart in query_based_charts(row):
             row['charts'].append(
                 {
                     'title': title,
+                    'long_title': long_title,
+                    'description': description,
                     'chart': chart,
-                    'layout': layout
                 }
             )
         chart, layout = history_chart(row)
@@ -293,13 +295,12 @@ def process_resource(res_):
                     }
                 )
 
-        chart, layout = category_sankey(row, 'total_econ_cls_', ECON_TRANSLATIONS)
+        chart = category_sankey(row, 'total_econ_cls_', ECON_TRANSLATIONS)
         if chart is not None:
             row['charts'].append(
                 {
                     'title': 'איך מוציאים את התקציב?',
-                    'chart': chart,
-                    'layout': layout
+                    'chart': chart
                 }
             )
         yield row
