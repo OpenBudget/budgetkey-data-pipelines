@@ -340,10 +340,8 @@ ngo-activity-report:
           key: null
         fields:
           association_field_of_activity: null
-          association_field_of_activity_display: 
-            aggregate: max
-          association_primary_field_of_activity:
-            aggregate: max
+          association_field_of_activity_display: null
+          association_primary_field_of_activity: null
           yearly_turnover_median_in_field:
             name: association_yearly_turnover
             aggregate: median
@@ -412,8 +410,10 @@ ngo-activity-report:
           key: null
         fields:
           field_of_activity: null
-          field_of_activity_display: null
-          primary_field_of_activity: null
+          field_of_activity_display:
+            aggregate: max
+          primary_field_of_activity:
+            aggregate: max
           report:
             aggregate: array
 
