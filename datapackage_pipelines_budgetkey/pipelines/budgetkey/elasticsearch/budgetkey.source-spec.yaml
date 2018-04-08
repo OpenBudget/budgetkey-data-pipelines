@@ -1,6 +1,6 @@
 budget:
   kind: indexer
-  revision: 11
+  revision: 12
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: '{nice-code} - {title}'
