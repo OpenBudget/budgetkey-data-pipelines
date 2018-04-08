@@ -56,6 +56,50 @@ def process_row(row, *_):
             {
                 'title': 'מי מקבל/ת כספי ממשלה, וכמה?',
                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
+                'subcharts': [
+                    {
+                        'title': 'סה״כ העברות כספי מדינה' + '<br/>{:,} ₪'.format(details['income_total']),
+                        'type': 'adamkey',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    amount=x['amount'],
+                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                )
+                                for x in details['income_list']
+                            ]
+                        }
+                    },
+                    {
+                        'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/>{:,} ₪'.format(details['income_total_contracts']),
+                        'type': 'adamkey',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    amount=x['amount'],
+                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                )
+                                for x in details['income_list_contracts']
+                            ]
+                        }
+                    },
+                    {
+                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/>{:,} ₪'.format(details['income_total_supports']),
+                        'type': 'adamkey',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    amount=x['amount'],
+                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                )
+                                for x in details['income_list_supports']
+                            ]
+                        }
+                    },
+                ]
             },
             {
                 'title': 'במה מושקע הכסף הממשלתי?',
