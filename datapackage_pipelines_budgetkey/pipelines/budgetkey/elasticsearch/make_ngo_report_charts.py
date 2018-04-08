@@ -3,6 +3,7 @@ from datapackage_pipelines.wrapper import process
 def process_row(row, *_):
     if row['key'].startswith('ngo-activity-report'):
         details = row['details']
+        foa = details['field_of_activity_display']
         row['charts'] = [ 
             {
                 'title': 'מי פעיל/ה ואיפה',
@@ -10,7 +11,7 @@ def process_row(row, *_):
                 'subcharts': [
                     {
                         'title': 'ארגונים: <span class="figure">{}</span>'.format(details['report'].get('total', {}).get('total_amount', 0)),
-                        'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
+                        'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foa),
                         'type': 'horizontal-barchart',
                         'chart': {
                             'values': [
@@ -24,7 +25,7 @@ def process_row(row, *_):
                     },
                     {
                         'title': 'בעלי אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('total_amount', 0)),
-                        'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
+                        'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foa),
                         'type': 'horizontal-barchart',
                         'chart': {
                             'values': [
@@ -38,7 +39,7 @@ def process_row(row, *_):
                     },
                     {
                         'title': 'בעלי סעיף 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('total_amount', 0)),
-                        'long_title': 'מספר הארגונים הפעילים בתחום הבריאות לפי מחוז',
+                        'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foa),
                         'type': 'horizontal-barchart',
                         'chart': {
                             'values': [
@@ -61,6 +62,58 @@ def process_row(row, *_):
                 'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים'
             }
         ]
+
+    elif row['key'].startswith('ngo-district-report'):
+        details = row['details']
+        district = details['district']
+        row['charts'] = [ 
+            {
+                'title': 'מספר הארגונים הפעילים במחוז {} לפי תחום'.format(district),
+                'subcharts': [
+                    {
+                        'title': 'סה״כ ארגונים באזור: <span class="figure">{}</span>'.format(details['report'].get('total', {}).get('count', 0)),
+                        'type': 'horizontal-barchart',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label=x[0],
+                                    value=x[1]
+                                )
+                                for x in details['report'].get('total', {}).get('activities', [])
+                            ]
+                        }
+                    },
+                    {
+                        'title': 'סה״כ ארגונים עם אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('count', 0)),
+                        'type': 'horizontal-barchart',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label=x[0],
+                                    value=x[1]
+                                )
+                                for x in details['report'].get('proper_management', {}).get('activities', [])
+                            ]
+                        }
+                    },
+                    {
+                        'title': 'סה״כ ארגונים עם אישור 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('count', 0)),
+                        'type': 'horizontal-barchart',
+                        'chart': {
+                            'values': [
+                                dict(
+                                    label=x[0],
+                                    value=x[1]
+                                )
+                                for x in details['report'].get('has_article_46', {}).get('activities', [])
+                            ]
+                        }
+                    },
+
+                ]
+            },
+        ]
+
     return row
 
 
