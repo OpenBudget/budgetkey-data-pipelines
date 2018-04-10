@@ -41,6 +41,7 @@ primary_categories = json.load(open('activity_areas.json'))
 primary_categories = dict(
     (x['Secondary_Text__c'], x['Primary_Text__c'])
     for x in primary_categories[0]['result']
+    if 'Secondary_Text__c' in x
 )
 
 min_activity_year = datetime.datetime.now().year - 3
