@@ -63,7 +63,7 @@ def process_row(row, *_):
             top_salary = salaries[0]['salary']
         else:
             top_salary = None
-        median_turnover_in_field_of_activity = row['details']['median_turnover_in_field_of_activity']
+        median_turnover_in_field_of_activity = row['details'].get('median_turnover_in_field_of_activity')
         charts = []
         charts.append({
                 'title': 'מיהו הארגון?',
