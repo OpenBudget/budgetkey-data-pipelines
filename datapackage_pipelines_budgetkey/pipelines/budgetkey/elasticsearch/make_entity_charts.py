@@ -64,13 +64,41 @@ def process_row(row, *_):
         else:
             top_salary = None
         median_turnover_in_field_of_activity = row['details'].get('median_turnover_in_field_of_activity')
+        median_top_salary = row['details'].get('median_top_salary')
+        yearly_turnover = row['details'].get('yearly_turnover')
         charts = []
         charts.append({
                 'title': 'מיהו הארגון?',
                 'long_title': 'מיהו הארגון',
-                'type': 'template',
-                'template_id': 'org_status'
+                'type': 'vertical',
+                'chart': {
+                    'parts': [
+                        {
+                            'type': 'template',
+                            'template_id': 'org_status'                            
+                        },
+                    ]
+                }
         })
+        if None not in (median_turnover_in_field_of_activity, yearly_turnover, last_report_year):
+            charts[-1]['chart']['parts'].append(
+                {
+                    'type': 'comparatron',
+                    'title': 'המחזור הכספי המדווח לארגון בשנת {}: {:,} ₪'.format(last_report_year, yearly_turnover),
+                    'chart': {
+                        'main': {
+                            'amount': yearly_turnover,
+                            'amount_fmt': '{:,} ₪'.format(yearly_turnover),
+                            'label': str(last_report_year)
+                        },
+                        'compare': {
+                            'amount': median_turnover_in_field_of_activity,
+                            'amount_fmt': '{:,} ₪'.format(median_turnover_in_field_of_activity),
+                            'label': 'חציון בתחום {}'.format(foad)
+                        },
+                    }
+                }
+            )
         charts.append({
                 'title': 'מקבל כספי ממשלה?',
                 'long_title': 'האם הארגון מקבל כספי ממשלה?',
@@ -86,7 +114,7 @@ def process_row(row, *_):
                         num_of_employees, 
                         num_of_volunteers, 
                         top_salary, 
-                        median_turnover_in_field_of_activity, 
+                        median_top_salary, 
                         foad):
             charts.append({
                 'title': 'כמה עובדים ומתנדבים?',
@@ -123,11 +151,10 @@ def process_row(row, *_):
                                     'label': 'מקבל השכר הגבוה בארגון'
                                 },
                                 'compare': {
-                                    'amount': median_turnover_in_field_of_activity,
-                                    'amount_fmt': '{:,} ₪'.format(median_turnover_in_field_of_activity),
+                                    'amount': median_top_salary,
+                                    'amount_fmt': '{:,} ₪'.format(median_top_salary),
                                     'label': 'חציון בתחום {}'.format(foad)
                                 },
-
                             }
                         }
                     ]
