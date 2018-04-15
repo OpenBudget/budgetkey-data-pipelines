@@ -49,6 +49,14 @@ united:
           payer:
             - supporting_ministry
             - publisher_name
+    - run: filter
+      parameters:
+        out:
+          - amount: 0
+    - run: filter
+      parameters:
+        out:
+          - entity_kind: null  
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budgetkey/analysis/spending/united
@@ -57,7 +65,79 @@ united:
         tables:
           united_spending:
             resource-name: united_spending
-            
 
+publisher_entity_analysis:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: united_spending
+        title: All Spending data
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budgetkey/analysis/spending/united/datapackage.json
+        resource: united_spending
+    - run: duplicate
+      parameters:
+        source: united_spending
+        target-name: united_spending_dummy_publisher
+        target-path: _
+    - run: delete_fields
+      parameters:
+        resources: united_spending_dummy_publisher
+        fields:
+          - payer
+    - run: add_computed_field
+      parameters:
+        resources: united_spending_dummy_publisher
+        fields:
+          -
+            operation: constant
+            target: payer
+            with: all
+    - run: concatenate
+      parameters:
+        target:
+          name: united_spending
+        fields:
+          entity_id: []
+          entity_name: []
+          entity_kind: []
+          spending_type: []
+          amount: []
+          title: []
+          payer: []
+    - run: collate
+      parameters:
+        resource: united_spending
+        key:
+          - entity_id
+          - entity_name
+          - entity_kind
+          - payer
+        collated-field-name: spending
+    - run: join
+      parameters:
+        source:
+          name: united_spending
+          key:
+            - entity_id
+            - entity_name
+            - entity_kind
+            - payer
+          delete: true
+        target:
+          name: united_spending
+          key: null
+        fields:
+          entity_id: null
+          entity_name: null
+          entity_kind: null
+          payer: null
+          spending:
+            aggregate: array
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budgetkey/analysis/spending/publisher_entity_analysis
+
+          
         
-
