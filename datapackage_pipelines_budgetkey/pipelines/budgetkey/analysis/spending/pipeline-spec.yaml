@@ -1,0 +1,63 @@
+united:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: united_spending
+        title: All Spending data
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/supports/with-entities/datapackage.json
+        resource: supports
+        table: raw_supports
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+        resource: contract-spending
+        table: contract_spending
+    - run: stream_remote_resources
+    - run: add_computed_field
+      parameters:
+        resources: supports
+        fields:
+          -
+            operation: constant
+            target: spending_type
+            with: support
+    - run: add_computed_field
+      parameters:
+        resources: contract-spending
+        fields:
+          -
+            operation: constant
+            target: spending_type
+            with: contract
+    - run: concatenate
+      parameters:
+        target:
+          name: united_spending
+        fields:
+          entity_id: []
+          entity_name: []
+          entity_kind: []
+          spending_type: []
+          amount:
+            - amount_total
+            - executed
+          title:
+            - support_title
+            - purpose
+          payer:
+            - supporting_ministry
+            - publisher_name
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budgetkey/analysis/spending/united
+    - run: dump.to_sql
+      parameters:
+        tables:
+          united_spending:
+            resource-name: united_spending
+            
+
+        
+

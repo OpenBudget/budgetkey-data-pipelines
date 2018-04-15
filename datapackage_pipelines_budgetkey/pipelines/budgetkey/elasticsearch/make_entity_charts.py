@@ -89,7 +89,8 @@ def process_row(row, *_):
                         'main': {
                             'amount': yearly_turnover,
                             'amount_fmt': '{:,} ₪'.format(yearly_turnover),
-                            'label': str(last_report_year)
+                            'label': str(last_report_year),
+                            'color': '#D7EEC5'
                         },
                         'compare': {
                             'amount': median_turnover_in_field_of_activity,
@@ -148,7 +149,8 @@ def process_row(row, *_):
                                 'main': {
                                     'amount': top_salary,
                                     'amount_fmt': '{:,} ₪'.format(top_salary),
-                                    'label': 'מקבל השכר הגבוה בארגון'
+                                    'label': 'מקבל השכר הגבוה בארגון',
+                                    'color': '#D7EEC5'
                                 },
                                 'compare': {
                                     'amount': median_top_salary,
