@@ -52,11 +52,16 @@ united:
     - run: filter
       parameters:
         out:
-          - amount: 0
+          - amount: 0.0
+          - amount: null
     - run: filter
       parameters:
         out:
           - entity_kind: null  
+    - run: filter
+      parameters:
+        out:
+          - title: null  
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budgetkey/analysis/spending/united
@@ -67,6 +72,8 @@ united:
             resource-name: united_spending
 
 publisher_entity_analysis:
+  dependencies:
+    - pipeline: ./budgetkey/analysis/spending/united
   pipeline:
     - run: add_metadata
       parameters:
@@ -135,6 +142,7 @@ publisher_entity_analysis:
           payer: null
           spending:
             aggregate: array
+    - run: cluster_similar_spending     
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budgetkey/analysis/spending/publisher_entity_analysis
