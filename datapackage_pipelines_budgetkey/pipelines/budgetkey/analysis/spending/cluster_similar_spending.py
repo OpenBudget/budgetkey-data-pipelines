@@ -1,5 +1,6 @@
 from collections import Counter
 from Levenshtein import distance
+import itertools
 
 from datapackage_pipelines.wrapper import process
 
@@ -31,9 +32,12 @@ def best_terms(items):
 
 def cluster(items):
     ret = {}
+    items = [
+        i for i in items 
+        if i['amount']
+    ]
     for i in items:
         i['title'] = ' '.join(i['title'].split())
-        i['amount'] = i['amount'] if i['amount'] else 0
     while len(items) > 0:
         terms = best_terms(items)
         term_items = []
@@ -60,6 +64,17 @@ def cluster(items):
         for tag, items in ret.items()
     ]
     ret = sorted(ret, key=lambda x: -x['amount'])
+    if len(ret) > 20:
+        rest = ret[20:]
+        ret = ret[:20]
+        ret.append(
+            dict(
+                tag='אחרים',
+                amount=sum(i['amount'] for x in rest for i in x['items']),
+                spending_types=sorted(set(i['spending_type'] for x in rest for i in x['items'])),
+                items=list(itertools.chain(*(i['items'] for i in rest))),                
+            )
+        )
     return ret
 
 

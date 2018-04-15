@@ -53,6 +53,7 @@ united:
       parameters:
         out:
           - amount: 0.0
+          - amount: 0
           - amount: null
     - run: filter
       parameters:
