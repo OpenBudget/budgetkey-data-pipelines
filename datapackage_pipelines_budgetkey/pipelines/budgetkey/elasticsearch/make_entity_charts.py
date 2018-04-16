@@ -23,6 +23,12 @@ WHERE association_field_of_activity='{foa}'
 ORDER BY 3 DESC
 """
 
+SPENDING_ANALYSIS_FOR_ID = """
+SELECT payer, spending
+FROM publisher_entity_analysis
+WHERE entity_id='{id}'
+"""
+
 unreported_turnover_associations_ = {}
 def unreported_turnover_associations(foa):
     if unreported_turnover_associations_.get(foa) is None:
@@ -41,6 +47,13 @@ def reported_turnover_associations(foa):
         reported_turnover_associations_[foa] = [dict(r) for r in results]
 
     return reported_turnover_associations_[foa]
+
+
+def get_spending_analysis(id):
+    query = SPENDING_ANALYSIS_FOR_ID.format(id=id)
+    results = engine.execute(query)
+    ret = dict((r['payer'], r['spending']) for r in results)
+    return ret
     
 
 def process_row(row, *_):
@@ -53,6 +66,7 @@ def process_row(row, *_):
         last_report_year = row['details']['last_report_year']
         num_unreported = unreported_turnover_associations(foa)
         reported_list = reported_turnover_associations(foa)
+        spending_analysis = get_spending_analysis(row['id'])
         selected_index = [i for i, x in enumerate(reported_list) if x['id'] == row['id']]
         if len(selected_index) > 0:
             selected_index = selected_index[0]
@@ -100,11 +114,16 @@ def process_row(row, *_):
                     }
                 }
             )
-        charts.append({
-                'title': 'מקבל כספי ממשלה?',
-                'long_title': 'האם הארגון מקבל כספי ממשלה?',
-                'description': 'התקשרויות ותמיכות לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.',
-        })
+        if spending_analysis is not None:            
+            charts.append({
+                    'title': 'מקבל כספי ממשלה?',
+                    'long_title': 'האם הארגון מקבל כספי ממשלה?',
+                    'description': 'התקשרויות ותמיכות לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.',
+                    'type': 'spendomat',
+                    'chart': {
+                        'data': spending_analysis
+                    }
+            })
         charts.append({
                 'title': 'אילו אישורים?',
                 'long_title': 'אישורים והכרה בארגון',

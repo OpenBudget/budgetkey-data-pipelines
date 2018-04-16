@@ -191,6 +191,7 @@ publisher_foa_analysis:
           name: united_spending
           key:
             - entity_id
+        full: false
         fields:
           field_of_activity: 
             name: association_field_of_activity
