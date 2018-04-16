@@ -62,6 +62,10 @@ def cluster(items):
     ]
     for i in items:
         i['title'] = normalize(i['title'])
+    items = [
+        i for i in items 
+        if i['title']
+    ]
     while len(items) > 0:
         terms = best_terms(items)
         term_items = []
