@@ -52,8 +52,15 @@ def reported_turnover_associations(foa):
 def get_spending_analysis(id):
     query = SPENDING_ANALYSIS_FOR_ID.format(id=id)
     results = engine.execute(query)
-    ret = dict((r['payer'], r['spending']) for r in results)
-    return ret
+    results = [dict(r) for r in results]
+    for r in results:
+        r['amount'] = sum(x['amount'] for x in r['spending'])
+    detailed = [x for x in results if x['payer'] != 'all']
+    aggregated = [x for x in results if x['payer'] == 'all']
+    return dict(
+        detailed: detailed,
+        aggregated: aggregated
+    )
     
 
 def process_row(row, *_):
