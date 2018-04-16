@@ -34,6 +34,10 @@ def best_terms(items):
             for k in set(get_terms(item['title']))
         ))
     term_stats = [(x, y*log(len(x))) for x,y in term_stats.most_common()]
+    term_stats = [(x[0], 
+                   sum(y[1] for y in term_stats
+                       if distance(y[0], x[0]) <= 1)
+                  ) for x in term_stats]
     term_stats = sorted(term_stats, key=lambda x: -x[1])
     return [ts[0] for ts in term_stats if 
             distance(term_stats[0][0], ts[0]) <= 1]
