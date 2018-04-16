@@ -25,8 +25,14 @@ def get_terms(s):
     terms = [' '.join(x) for x in terms]
     return terms
 
+def cdistance(s1, s2, cache):
+    key = (s1, s2)
+    if key not in cache:
+        cache[key] = distance(s1, s2)
+    return cache[key]
 
-def best_terms(items):
+
+def best_terms(items, distances):
     term_stats = Counter()
     term_counts = Counter()
     for item in items:
@@ -37,14 +43,14 @@ def best_terms(items):
         ))
         term_counts.update(terms)
     term_counts = dict((k, log(len(items) / v)) for k, v in term_stats.most_common())
-    term_stats = [(x, y*term_counts[x]) for x,y in term_stats.most_common()]
+    term_stats = [(x, y*term_counts[x] + len(x)) for x,y in term_stats.most_common()]
     agg_term_stats = [(x[0], 
                        sum(y[1] for y in term_stats
-                           if distance(y[0], x[0]) <= 1)
+                           if cdistance(y[0], x[0], distances) <= 1)
                       ) for x in term_stats]
     term_stats = sorted(agg_term_stats, key=lambda x: -x[1])
     return [ts[0] for ts in term_stats if 
-            distance(term_stats[0][0], ts[0]) <= 1]
+            cdistance(term_stats[0][0], ts[0], distances) <= 1]
 
 
 def group_same_items(items):
@@ -65,6 +71,7 @@ NUM_TAGS = 4
 
 def cluster(items):
     ret = {}
+    distances = {}
     items = [
         i for i in items 
         if i['amount']
@@ -74,7 +81,7 @@ def cluster(items):
         if normalize(i['title'])
     ]
     while len(items) > 0 and len(ret) < NUM_TAGS:
-        terms = best_terms(items)
+        terms = best_terms(items, distances)
         term_items = []
         ret[terms[0]] = term_items
         new_items = []
