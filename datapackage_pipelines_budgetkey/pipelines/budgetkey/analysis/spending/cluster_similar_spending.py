@@ -29,6 +29,7 @@ def best_terms(items):
     return [ts[0] for ts in term_stats if 
             distance(term_stats[0][0], ts[0]) <= 1]
 
+NUM_TAGS = 4
 
 def cluster(items):
     ret = {}
@@ -64,9 +65,9 @@ def cluster(items):
         for tag, items in ret.items()
     ]
     ret = sorted(ret, key=lambda x: -x['amount'])
-    if len(ret) > 20:
-        rest = ret[20:]
-        ret = ret[:20]
+    if len(ret) > NUM_TAGS:
+        rest = ret[NUM_TAGS:]
+        ret = ret[:NUM_TAGS]
         ret.append(
             dict(
                 tag='אחרים',

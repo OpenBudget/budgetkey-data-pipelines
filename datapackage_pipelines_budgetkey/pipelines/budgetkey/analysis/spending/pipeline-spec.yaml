@@ -72,14 +72,16 @@ united:
           united_spending:
             resource-name: united_spending
 
+#### ==========================================================================================
+
 publisher_entity_analysis:
   dependencies:
     - pipeline: ./budgetkey/analysis/spending/united
   pipeline:
     - run: add_metadata
       parameters:
-        name: united_spending
-        title: All Spending data
+        name: publisher_entity_analysis
+        title: Publisher-Entity spending analysis
     - run: load_resource
       parameters:
         url: /var/datapackages/budgetkey/analysis/spending/united/datapackage.json
@@ -147,6 +149,119 @@ publisher_entity_analysis:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budgetkey/analysis/spending/publisher_entity_analysis
+    - run: dump.to_sql
+      parameters:
+        tables:
+          publisher_entity_analysis:
+            resource-name: united_spending
+
+#### ==========================================================================================
+
+publisher_foa_analysis:
+  dependencies:
+    - pipeline: ./budgetkey/analysis/spending/united
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: publisher_foa_analysis
+        title: Publisher-Field od Activity Analysis
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/entities/associations/guidestar/datapackage.json
+        resource: guidestar
+        table: guidestar_processed
+        fields:
+            - name: __last_updated_at
+              format: '%Y-%m-%dT%H:%M:%S'
+            - name: __last_modified_at
+              format: '%Y-%m-%dT%H:%M:%S'
+    - run: stream_remote_resources
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/budgetkey/analysis/spending/united/datapackage.json
+        resource: united_spending
+    - run: join
+      parameters:
+        source:
+          name: guidestar
+          key: 
+            - id
+          delete: true
+        target:
+          name: united_spending
+          key:
+            - entity_id
+        fields:
+          field_of_activity: 
+            name: association_field_of_activity
+    - run: delete_fields
+      parameters:
+        resources: united_spending
+        fields:
+          - entity_id
+          - entity_name
+          - entity_kind
+    - run: duplicate
+      parameters:
+        source: united_spending
+        target-name: united_spending_dummy_publisher
+        target-path: _
+    - run: delete_fields
+      parameters:
+        resources: united_spending_dummy_publisher
+        fields:
+          - payer
+    - run: add_computed_field
+      parameters:
+        resources: united_spending_dummy_publisher
+        fields:
+          -
+            operation: constant
+            target: payer
+            with: all
+    - run: concatenate
+      parameters:
+        target:
+          name: united_spending
+        fields:
+          field_of_activity: []
+          spending_type: []
+          amount: []
+          title: []
+          payer: []
+    - run: collate
+      parameters:
+        resource: united_spending
+        key:
+          - field_of_activity
+          - payer
+        collated-field-name: spending
+    - run: join
+      parameters:
+        source:
+          name: united_spending
+          key:
+            - field_of_activity
+            - payer
+          delete: true
+        target:
+          name: united_spending
+          key: null
+        fields:
+          field_of_activity: null
+          payer: null
+          spending:
+            aggregate: array
+    - run: cluster_similar_spending     
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budgetkey/analysis/spending/publisher_foa_analysis
+    - run: dump.to_sql
+      parameters:
+        tables:
+          publisher_foa_analysis:
+            resource-name: united_spending
 
           
+
         
