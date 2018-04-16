@@ -3,6 +3,7 @@ from Levenshtein import distance
 import itertools
 import re
 from math import log
+import logging
 
 from datapackage_pipelines.wrapper import process
 
@@ -114,6 +115,7 @@ def cluster(items):
 
 
 def process_row(row, *_):
+    logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
     row['spending'] = cluster(row['spending'])
     return row
 
