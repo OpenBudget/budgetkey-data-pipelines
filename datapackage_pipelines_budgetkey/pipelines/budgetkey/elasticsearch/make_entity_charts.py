@@ -58,8 +58,8 @@ def get_spending_analysis(id):
     detailed = [x for x in results if x['payer'] != 'all']
     aggregated = [x for x in results if x['payer'] == 'all']
     return dict(
-        detailed: detailed,
-        aggregated: aggregated
+        detailed=detailed,
+        aggregated=aggregated
     )
     
 
