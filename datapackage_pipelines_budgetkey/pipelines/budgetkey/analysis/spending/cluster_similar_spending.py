@@ -1,10 +1,18 @@
 from collections import Counter
 from Levenshtein import distance
 import itertools
+import re
 
 from datapackage_pipelines.wrapper import process
 
+WORDS = re.compile('[א-ת]+')
+
+def normalize(s):
+    return ' '.join(WORDS.findall(s))
+
+
 def get_terms(s):
+    s = normalize(s)
     s = s.split()
     assert len(s) > 0
     n = len(s)
@@ -29,7 +37,22 @@ def best_terms(items):
     return [ts[0] for ts in term_stats if 
             distance(term_stats[0][0], ts[0]) <= 1]
 
+
+def group_same_items(items):
+    titles = {}
+    for item in items:
+        titles.setdefault((item['title'], item['spending_type']), []).append(item)
+    ret = []
+    for (t, st), itms in titles.items():
+        ret.append(dict(
+            title=t,
+            amount=sum(i['amount'] for i in itms),
+            spending_type=st,
+        ))
+    return ret
+
 NUM_TAGS = 4
+
 
 def cluster(items):
     ret = {}
@@ -38,7 +61,7 @@ def cluster(items):
         if i['amount']
     ]
     for i in items:
-        i['title'] = ' '.join(i['title'].split())
+        i['title'] = normalize(i['title'])
     while len(items) > 0:
         terms = best_terms(items)
         term_items = []
@@ -60,7 +83,7 @@ def cluster(items):
             tag=tag,
             amount=sum(i['amount'] for i in items),
             spending_types=sorted(set(i['spending_type'] for i in items)),
-            items=items,
+            items=group_same_items(items),
         ) 
         for tag, items in ret.items()
     ]
