@@ -28,12 +28,16 @@ def get_terms(s):
 
 def best_terms(items):
     term_stats = Counter()
+    term_counts = Counter()
     for item in items:
+        terms = set(get_terms(item['title']))
         term_stats.update(dict(
             (k, item['amount'])
-            for k in set(get_terms(item['title']))
+            for k in terms
         ))
-    term_stats = [(x, y*log(len(x))) for x,y in term_stats.most_common()]
+        term_counts.update(terms)
+    term_counts = dict((k, log(len(items) / v)) for k, v in term_stats.most_common())
+    term_stats = [(x, y*term_counts[x]) for x,y in term_stats.most_common()]
     term_stats = [(x[0], 
                    sum(y[1] for y in term_stats
                        if distance(y[0], x[0]) <= 1)
@@ -46,11 +50,11 @@ def best_terms(items):
 def group_same_items(items):
     titles = {}
     for item in items:
-        titles.setdefault((item['title'], item['spending_type']), []).append(item)
+        titles.setdefault((normalize(item['title']), item['spending_type']), []).append(item)
     ret = []
-    for (t, st), itms in titles.items():
+    for (_, st), itms in titles.items():
         ret.append(dict(
-            title=t,
+            title=itms[0]['title'],
             amount=sum(i['amount'] for i in itms),
             spending_type=st,
         ))
@@ -65,11 +69,9 @@ def cluster(items):
         i for i in items 
         if i['amount']
     ]
-    for i in items:
-        i['title'] = normalize(i['title'])
     items = [
         i for i in items 
-        if i['title']
+        if normalize(i['title'])
     ]
     while len(items) > 0:
         terms = best_terms(items)
@@ -79,7 +81,7 @@ def cluster(items):
         for item in items:
             added = False
             for term in terms:
-                if term in item['title']:
+                if term in normalize(item['title']):
                     term_items.append(item)
                     added = True
                     break
