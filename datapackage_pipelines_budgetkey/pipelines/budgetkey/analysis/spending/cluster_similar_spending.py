@@ -3,7 +3,6 @@ from Levenshtein import distance
 import itertools
 import re
 from math import log
-import logging
 
 from datapackage_pipelines.wrapper import process
 
@@ -39,11 +38,11 @@ def best_terms(items):
         term_counts.update(terms)
     term_counts = dict((k, log(len(items) / v)) for k, v in term_stats.most_common())
     term_stats = [(x, y*term_counts[x]) for x,y in term_stats.most_common()]
-    term_stats = [(x[0], 
-                   sum(y[1] for y in term_stats
-                       if distance(y[0], x[0]) <= 1)
-                  ) for x in term_stats]
-    term_stats = sorted(term_stats, key=lambda x: -x[1])
+    agg_term_stats = [(x[0], 
+                       sum(y[1] for y in term_stats
+                           if distance(y[0], x[0]) <= 1)
+                      ) for x in term_stats]
+    term_stats = sorted(agg_term_stats, key=lambda x: -x[1])
     return [ts[0] for ts in term_stats if 
             distance(term_stats[0][0], ts[0]) <= 1]
 
@@ -74,7 +73,7 @@ def cluster(items):
         i for i in items 
         if normalize(i['title'])
     ]
-    while len(items) > 0:
+    while len(items) > 0 and len(ret) < NUM_TAGS:
         terms = best_terms(items)
         term_items = []
         ret[terms[0]] = term_items
@@ -100,22 +99,20 @@ def cluster(items):
         for tag, items in ret.items()
     ]
     ret = sorted(ret, key=lambda x: -x['amount'])
-    if len(ret) > NUM_TAGS:
-        rest = ret[NUM_TAGS:]
-        ret = ret[:NUM_TAGS]
+    if len(items) > 0:
         ret.append(
             dict(
                 tag='אחרים',
-                amount=sum(i['amount'] for x in rest for i in x['items']),
-                spending_types=sorted(set(i['spending_type'] for x in rest for i in x['items'])),
-                items=list(itertools.chain(*(i['items'] for i in rest))),                
+                amount=sum(i['amount'] for i in items),
+                spending_types=sorted(set(i['spending_type'] for i in items)),
+                items=items,                
             )
         )
     return ret
 
 
 def process_row(row, *_):
-    logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
+    # logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
     row['spending'] = cluster(row['spending'])
     return row
 
