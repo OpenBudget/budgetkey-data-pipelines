@@ -117,7 +117,7 @@ def cluster(items):
         if normalize(i['title'])
     ]
     bterms = best_terms(items)
-    while len(items) > 0 and len(ret) < NUM_TAGS:
+    while len(items) > 0 and len(ret) < NUM_TAGS and len(bterms) > 0:
         terms = bterms.pop(0)
         rep = max(terms)
         term_items = []
@@ -134,7 +134,7 @@ def cluster(items):
                 new_items.append(item)
         if len(term_items) == 0:
             del ret[rep]
-        assert len(new_items) < len(items)
+        assert len(new_items) <= len(items)
         items = new_items
     ret = [
         dict(
