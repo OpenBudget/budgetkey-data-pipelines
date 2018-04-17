@@ -38,22 +38,20 @@ def cdistance(s1, s2, cache):
 
 def cluster_terms(terms):
     cterms = [[t] for t in terms]
-    added = True
-    while added:
+    ret = []
+    while len(cterms)>0:
         added = False
-        for cl1 in cterms:
-            for cl2 in cterms:
-                if cl1 == cl2:
-                    continue
-                if min(distance(x, y) for x in cl1 for y in cl2) <= 1:
-                    cterms.remove(cl1)
-                    cterms.remove(cl2)
-                    cterms.append(cl1 + cl2)
-                    added = True
-                    break
-            if added:
+        cl1 = cterms.pop()
+        for cl2 in cterms:
+            if any(distance(x, y) <= 1 for x in cl1 for y in cl2):
+                cterms.remove(cl2)
+                cterms.append(cl1 + cl2)
+                added = True
                 break
-    return [tuple(x) for x in cterms]
+        if not added:
+            ret.append(tuple(cl1))
+    assert len(cterms) == 0, 'Len of cterms==%d' % len(cterms)
+    return ret
 
 
 def best_terms(items):
@@ -69,7 +67,10 @@ def best_terms(items):
         ))
         term_counts.update(terms)
 
+    logging.info('all_terms %d', len(all_terms))
     all_terms = cluster_terms(all_terms)
+    logging.info('all_terms clusters %d', len(all_terms))
+    logging.info('.')
 
     term_stats = dict(term_stats.most_common())
     term_stats = [

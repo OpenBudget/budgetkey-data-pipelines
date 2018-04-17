@@ -86,36 +86,37 @@ publisher_entity_analysis:
       parameters:
         url: /var/datapackages/budgetkey/analysis/spending/united/datapackage.json
         resource: united_spending
-    - run: duplicate
-      parameters:
-        source: united_spending
-        target-name: united_spending_dummy_publisher
-        target-path: _
-    - run: delete_fields
-      parameters:
-        resources: united_spending_dummy_publisher
-        fields:
-          - payer
-    - run: add_computed_field
-      parameters:
-        resources: united_spending_dummy_publisher
-        fields:
-          -
-            operation: constant
-            target: payer
-            with: all
-    - run: concatenate
-      parameters:
-        target:
-          name: united_spending
-        fields:
-          entity_id: []
-          entity_name: []
-          entity_kind: []
-          spending_type: []
-          amount: []
-          title: []
-          payer: []
+      cache: true
+    # - run: duplicate
+    #   parameters:
+    #     source: united_spending
+    #     target-name: united_spending_dummy_publisher
+    #     target-path: _
+    # - run: delete_fields
+    #   parameters:
+    #     resources: united_spending_dummy_publisher
+    #     fields:
+    #       - payer
+    # - run: add_computed_field
+    #   parameters:
+    #     resources: united_spending_dummy_publisher
+    #     fields:
+    #       -
+    #         operation: constant
+    #         target: payer
+    #         with: all
+    # - run: concatenate
+    #   parameters:
+    #     target:
+    #       name: united_spending
+    #     fields:
+    #       entity_id: []
+    #       entity_name: []
+    #       entity_kind: []
+    #       spending_type: []
+    #       amount: []
+    #       title: []
+    #       payer: []
     - run: collate
       parameters:
         resource: united_spending
@@ -202,34 +203,34 @@ publisher_foa_analysis:
           - entity_id
           - entity_name
           - entity_kind
-    - run: duplicate
-      parameters:
-        source: united_spending
-        target-name: united_spending_dummy_publisher
-        target-path: _
-    - run: delete_fields
-      parameters:
-        resources: united_spending_dummy_publisher
-        fields:
-          - payer
-    - run: add_computed_field
-      parameters:
-        resources: united_spending_dummy_publisher
-        fields:
-          -
-            operation: constant
-            target: payer
-            with: all
-    - run: concatenate
-      parameters:
-        target:
-          name: united_spending
-        fields:
-          field_of_activity: []
-          spending_type: []
-          amount: []
-          title: []
-          payer: []
+    # - run: duplicate
+    #   parameters:
+    #     source: united_spending
+    #     target-name: united_spending_dummy_publisher
+    #     target-path: _
+    # - run: delete_fields
+    #   parameters:
+    #     resources: united_spending_dummy_publisher
+    #     fields:
+    #       - payer
+    # - run: add_computed_field
+    #   parameters:
+    #     resources: united_spending_dummy_publisher
+    #     fields:
+    #       -
+    #         operation: constant
+    #         target: payer
+    #         with: all
+    # - run: concatenate
+    #   parameters:
+    #     target:
+    #       name: united_spending
+    #     fields:
+    #       field_of_activity: []
+    #       spending_type: []
+    #       amount: []
+    #       title: []
+    #       payer: []
     - run: collate
       parameters:
         resource: united_spending
