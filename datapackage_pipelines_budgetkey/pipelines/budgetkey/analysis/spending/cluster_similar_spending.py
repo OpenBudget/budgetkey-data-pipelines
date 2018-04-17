@@ -86,7 +86,8 @@ def best_terms(items):
     term_stats = [(k, v*term_counts[k] + sum(len(x) for x in k)) for k, v in term_stats]
 
     term_stats = sorted(term_stats, key=lambda x: -x[1])
-    return term_stats[0][0]
+    term_stats = [x[0] for x in term_stats]
+    return term_stats
 
 
 def group_same_items(items):
@@ -115,10 +116,12 @@ def cluster(items):
         i for i in items 
         if normalize(i['title'])
     ]
+    bterms = best_terms(items)
     while len(items) > 0 and len(ret) < NUM_TAGS:
-        terms = best_terms(items)
+        terms = bterms.pop(0)
+        rep = max(terms)
         term_items = []
-        ret[terms[0]] = term_items
+        ret[rep] = term_items
         new_items = []
         for item in items:
             added = False
@@ -129,6 +132,8 @@ def cluster(items):
                     break
             if not added:
                 new_items.append(item)
+        if len(term_items) == 0:
+            del ret[rep]
         assert len(new_items) < len(items)
         items = new_items
     ret = [
