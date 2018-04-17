@@ -3,6 +3,7 @@ from Levenshtein import distance
 import itertools
 import re
 from math import log
+import logging
 
 from datapackage_pipelines.wrapper import process
 
@@ -35,25 +36,56 @@ def cdistance(s1, s2, cache):
     return cache[key]
 
 
-def best_terms(items, distances):
+def cluster_terms(terms):
+    cterms = [[t] for t in terms]
+    added = True
+    while added:
+        added = False
+        for cl1 in cterms:
+            for cl2 in cterms:
+                if cl1 == cl2:
+                    continue
+                if min(distance(x, y) for x in cl1 for y in cl2) <= 1:
+                    cterms.remove(cl1)
+                    cterms.remove(cl2)
+                    cterms.append(cl1 + cl2)
+                    added = True
+                    break
+            if added:
+                break
+    return [tuple(x) for x in cterms]
+
+
+def best_terms(items):
     term_stats = Counter()
     term_counts = Counter()
+    all_terms = set()
     for item in items:
         terms = set(get_terms(item['title']))
+        all_terms.update(terms)
         term_stats.update(dict(
             (k, item['amount'])
             for k in terms
         ))
         term_counts.update(terms)
-    term_counts = dict((k, log(len(items) / v)) for k, v in term_counts.most_common())
-    term_stats = [(x, y*term_counts[x] + len(x)) for x,y in term_stats.most_common()]
-    agg_term_stats = [(x[0], 
-                       sum(y[1] for y in term_stats
-                           if cdistance(x[0], y[0], distances) <= 1)
-                      ) for x in term_stats]
-    term_stats = sorted(agg_term_stats, key=lambda x: -x[1])
-    return [ts[0] for ts in term_stats if 
-            cdistance(ts[0], term_stats[0][0], distances) <= 1]
+
+    all_terms = cluster_terms(all_terms)
+
+    term_stats = dict(term_stats.most_common())
+    term_stats = [
+        (k, sum(term_stats[kk] for kk in k)) for k in all_terms
+    ]
+
+    term_counts = dict(term_counts.most_common())
+    term_counts = [
+        (k, sum(term_counts[kk] for kk in k)) for k in all_terms
+    ]
+
+    term_counts = dict((k, log(len(items) / v)) for k, v in term_counts)
+    term_stats = [(k, v*term_counts[k] + sum(len(x) for x in k)) for k, v in term_stats]
+
+    term_stats = sorted(term_stats, key=lambda x: -x[1])
+    return term_stats[0][0]
 
 
 def group_same_items(items):
@@ -74,7 +106,6 @@ NUM_TAGS = 4
 
 def cluster(items):
     ret = {}
-    distances = {}
     items = [
         i for i in items 
         if i['amount']
@@ -84,7 +115,7 @@ def cluster(items):
         if normalize(i['title'])
     ]
     while len(items) > 0 and len(ret) < NUM_TAGS:
-        terms = best_terms(items, distances)
+        terms = best_terms(items)
         term_items = []
         ret[terms[0]] = term_items
         new_items = []
@@ -122,7 +153,9 @@ def cluster(items):
 
 
 def process_row(row, *_):
-    # logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
+    logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
+    logging.info('Num items %s', len(row['spending']))
+    logging.info('.')
     row['spending'] = cluster(row['spending'])
     return row
 
