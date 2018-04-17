@@ -9,6 +9,8 @@ from datapackage_pipelines.wrapper import process
 WORDS = re.compile('[א-ת]+')
 
 def normalize(s):
+    for x in """,'".:;()""":
+        s = s.replace(x, '')
     return ' '.join(WORDS.findall(s))
 
 
@@ -16,7 +18,7 @@ def get_terms(s):
     s = normalize(s)
     s = s.split()
     assert len(s) > 0
-    n = len(s)
+    n = min([7, len(s)])
     terms = [] if len(s) > 1 else [tuple([x]) for x in s]
     for j in range(2, n+1):
         subs =[s[i:-j+i+1] for i in range(j-1)]
@@ -26,7 +28,8 @@ def get_terms(s):
     return terms
 
 def cdistance(s1, s2, cache):
-    key = (s1, s2)
+    if s1 in s2: return 0
+    key = (s1, s2) if s1 > s2 else (s2, s1)
     if key not in cache:
         cache[key] = distance(s1, s2)
     return cache[key]
@@ -46,11 +49,11 @@ def best_terms(items, distances):
     term_stats = [(x, y*term_counts[x] + len(x)) for x,y in term_stats.most_common()]
     agg_term_stats = [(x[0], 
                        sum(y[1] for y in term_stats
-                           if cdistance(y[0], x[0], distances) <= 1)
+                           if cdistance(x[0], y[0], distances) <= 1)
                       ) for x in term_stats]
     term_stats = sorted(agg_term_stats, key=lambda x: -x[1])
     return [ts[0] for ts in term_stats if 
-            cdistance(term_stats[0][0], ts[0], distances) <= 1]
+            cdistance(ts[0], term_stats[0][0], distances) <= 1]
 
 
 def group_same_items(items):
