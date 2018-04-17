@@ -42,7 +42,7 @@ def best_terms(items, distances):
             for k in terms
         ))
         term_counts.update(terms)
-    term_counts = dict((k, log(len(items) / v)) for k, v in term_stats.most_common())
+    term_counts = dict((k, log(len(items) / v)) for k, v in term_counts.most_common())
     term_stats = [(x, y*term_counts[x] + len(x)) for x,y in term_stats.most_common()]
     agg_term_stats = [(x[0], 
                        sum(y[1] for y in term_stats
