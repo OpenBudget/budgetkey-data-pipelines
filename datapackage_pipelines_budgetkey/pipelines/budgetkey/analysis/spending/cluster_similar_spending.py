@@ -67,10 +67,10 @@ def best_terms(items):
         ))
         term_counts.update(terms)
 
-    logging.info('all_terms %d', len(all_terms))
+    # logging.info('all_terms %d', len(all_terms))
     all_terms = cluster_terms(all_terms)
-    logging.info('all_terms clusters %d', len(all_terms))
-    logging.info('.')
+    # logging.info('all_terms clusters %d', len(all_terms))
+    # logging.info('.')
 
     term_stats = dict(term_stats.most_common())
     term_stats = [
@@ -159,9 +159,9 @@ def cluster(items):
 
 
 def process_row(row, *_):
-    logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
-    logging.info('Num items %s', len(row['spending']))
-    logging.info('.')
+    # logging.info('Clustering row %s', ' '.join(str(v) for k, v in row.items() if k != 'spending'))
+    # logging.info('Num items %s', len(row['spending']))
+    # logging.info('.')
     row['spending'] = cluster(row['spending'])
     return row
 
