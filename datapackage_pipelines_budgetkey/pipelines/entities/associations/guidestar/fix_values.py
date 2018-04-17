@@ -102,6 +102,9 @@ def process_row(row, row_index, *_):
         prefix = 'אחר - '
         if foa.startswith(prefix):
             foa = foa[len(prefix):]
+        prefix = 'תחום אחר - '
+        if foa.startswith(prefix):
+            foa = foa[len(prefix):]
         foa = foa_improvement[foa]
         row['association_field_of_activity'] = foa['improved']
         row['association_field_of_activity_display'] = foa['display']
