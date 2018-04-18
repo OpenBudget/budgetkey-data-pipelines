@@ -99,6 +99,7 @@ def process_row(row, row_index, *_):
             row['association_primary_field_of_activity'] = primary_categories[foa]
         except:
             logging.error('offending row "%s" %s %r', foa, row_index, row)
+            row['association_primary_field_of_activity'] = 'unknown'
         prefix = 'אחר - '
         if foa.startswith(prefix):
             foa = foa[len(prefix):]
