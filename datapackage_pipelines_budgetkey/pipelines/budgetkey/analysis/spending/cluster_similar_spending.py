@@ -42,6 +42,10 @@ def cluster_terms(terms):
 
 
 def cluster(items):
+    items = [
+        item for item in items
+        if item['title'] and item['amount']
+    ]
     title_clusters = cluster_terms(list(set([
         x['title'] for x in items if x['title']
     ])))
@@ -78,7 +82,7 @@ def cluster(items):
         clusters = cluster[:NUM_TAGS] + [others]
     for c in clusters:
         del c['titles']
-        c['amounts'] = reversed(sorted(c['amounts']))
+        c['amounts'] = list(reversed(sorted(c['amounts'])))
         c['spending_types'] = sorted(c['spending_types'])
     return clusters
 
