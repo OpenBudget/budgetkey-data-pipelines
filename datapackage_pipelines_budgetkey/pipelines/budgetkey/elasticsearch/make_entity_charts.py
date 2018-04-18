@@ -55,12 +55,9 @@ def get_spending_analysis(id):
     results = [dict(r) for r in results]
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
-    detailed = [x for x in results if x['payer'] != 'all']
-    aggregated = [x for x in results if x['payer'] == 'all']
-    return dict(
-        detailed=detailed,
-        aggregated=aggregated
-    )
+    # detailed = [x for x in results if x['payer'] != 'all']
+    # aggregated = [x for x in results if x['payer'] == 'all']
+    return results
     
 
 def process_row(row, *_):
