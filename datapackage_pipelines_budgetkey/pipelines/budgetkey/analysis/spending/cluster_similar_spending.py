@@ -79,7 +79,7 @@ def cluster(items):
             amount=sum(x['amount'] for x in others),
             count=sum(x['count'] for x in others),
         )
-        clusters = cluster[:NUM_TAGS] + [others]
+        clusters = clusters[:NUM_TAGS] + [others]
     for c in clusters:
         del c['titles']
         c['amounts'] = list(reversed(sorted(c['amounts'])))
