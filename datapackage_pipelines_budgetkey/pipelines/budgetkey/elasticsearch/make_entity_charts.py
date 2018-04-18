@@ -53,8 +53,7 @@ def get_spending_analysis(id):
     query = SPENDING_ANALYSIS_FOR_ID.format(id=id)
     results = engine.execute(query)
     results = [dict(r) for r in results]
-    for r in results:
-        r['amount'] = sum(x['amount'] for x in r['spending'])
+    results = sorted(results, key=lambda x: -x['amount'])
     # detailed = [x for x in results if x['payer'] != 'all']
     # aggregated = [x for x in results if x['payer'] == 'all']
     return results
