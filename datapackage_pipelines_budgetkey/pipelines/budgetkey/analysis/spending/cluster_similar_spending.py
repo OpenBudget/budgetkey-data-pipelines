@@ -15,7 +15,6 @@ def cluster_terms(terms):
     clusters = []
     while len(cterms)>0:
         added = False
-        print(len(cterms))
         cl1 = cterms.pop()
         for cl2 in cterms:
             if any(fuzz.partial_ratio(x, y) >= 90  for x in cl1 for y in cl2):
