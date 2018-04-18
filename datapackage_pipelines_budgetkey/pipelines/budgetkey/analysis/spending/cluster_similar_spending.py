@@ -88,6 +88,8 @@ def cluster(items):
 
 def process_row(row, *_):
     row['spending'] = cluster(row['spending'])
+    if len(row['spending']) == 0:
+        return None
     return row
 
 def modify_datapackage(dp, *_):
