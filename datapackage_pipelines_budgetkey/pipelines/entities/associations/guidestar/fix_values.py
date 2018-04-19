@@ -98,7 +98,7 @@ def process_row(row, row_index, *_):
         try:
             row['association_primary_field_of_activity'] = primary_categories[foa]
         except:
-            logging.error('offending row "%s" %s %r', foa, row_index, row)
+            logging.error('unknown primary field of activity for foa "%s" %s', foa, row_index)
             row['association_primary_field_of_activity'] = 'unknown'
         prefix = 'אחר - '
         if foa.startswith(prefix):
