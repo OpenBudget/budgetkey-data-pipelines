@@ -26,16 +26,24 @@ def cluster_terms(terms):
         else:
             cterms.append(cl1)
     assert len(cterms) == 0, 'Len of cterms==%d' % len(cterms)
+
     ret = []
     for cl in clusters:
-        rep = max((len(x), x) for x in cl)[1]
-        rep = rep.split()
+        r = max((len(x), x) for x in cl)[1]
+        rep = r.split()
         final = []
+        s = False
         for word in rep:
             matches = len([x for x in cl if fuzz.partial_ratio(word, x) >= 90])
-            if matches > len(cl)/2:
+            if matches > 1:
                 final.append(word)
+                s = True
+            else:
+                if s:
+                    break
         rep = ' '.join(final)
+        if not rep:
+            rep = r
         ret.append((rep, cl))
     return ret
 
