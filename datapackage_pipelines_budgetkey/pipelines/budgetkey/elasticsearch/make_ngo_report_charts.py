@@ -44,7 +44,7 @@ def process_row(row, *_):
                                     label=x[0],
                                     value=x[1]
                                 )
-                                for x in details['report'].get('total', {}).get('association_activity_region_list', [])
+                                for x in details['report'].get('total', {}).get('activity_region_districts', [])
                             ]
                         }
                     },
