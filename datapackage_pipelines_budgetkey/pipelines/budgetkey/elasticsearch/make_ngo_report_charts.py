@@ -1,9 +1,33 @@
+import os
+from sqlalchemy import create_engine
+
 from datapackage_pipelines.wrapper import process
+
+engine = create_engine(os.environ['DPP_DB_ENGINE'])
+
+
+SPENDING_ANALYSIS_FOR_FOA = """
+SELECT payer, spending
+FROM publisher_foa_analysis
+WHERE field_of_activity='{foa}'
+"""
+
+
+def get_spending_analysis(foa):
+    query = SPENDING_ANALYSIS_FOR_FOA.format(foa=foa)
+    results = engine.execute(query)
+    results = [dict(r) for r in results]
+    for r in results:
+        r['amount'] = sum(x['amount'] for x in r['spending'])
+    results = sorted(results, key=lambda x: -x['amount'])
+    return results
+
 
 def process_row(row, *_):
     if row['key'].startswith('ngo-activity-report'):
         details = row['details']
         foa = details['field_of_activity_display']
+        spending_analysis = get_spending_analysis(foa)
         row['charts'] = [ 
             {
                 'title': 'מי פעיל/ה ואיפה',
@@ -103,7 +127,11 @@ def process_row(row, *_):
             },
             {
                 'title': 'במה מושקע הכסף הממשלתי?',
-                'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים'
+                'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים',
+                'type': 'spendomat',
+                'chart': {
+                    'data': spending_analysis
+                }                
             }
         ]
 
