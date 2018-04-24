@@ -58,7 +58,7 @@ def process_row(row, *_):
                                     label=x[0],
                                     value=x[1]
                                 )
-                                for x in details['report'].get('proper_management', {}).get('association_activity_region_list', [])
+                                for x in details['report'].get('proper_management', {}).get('association_activity_region_districts', [])
                             ]
                         }
                     },
@@ -72,7 +72,7 @@ def process_row(row, *_):
                                     label=x[0],
                                     value=x[1]
                                 )
-                                for x in details['report'].get('has_article_46', {}).get('association_activity_region_list', [])
+                                for x in details['report'].get('has_article_46', {}).get('association_activity_region_districts', [])
                             ]
                         }
                     },
