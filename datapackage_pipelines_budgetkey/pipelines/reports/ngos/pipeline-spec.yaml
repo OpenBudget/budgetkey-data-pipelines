@@ -237,7 +237,7 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          activity_region_districts:
+          association_activity_region_districts:
             aggregate: counters
     - run: add_computed_field
       parameters:
@@ -274,7 +274,7 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          activity_region_districts:
+          association_activity_region_districts:
             aggregate: counters
     - run: add_computed_field
       parameters:
@@ -310,7 +310,7 @@ ngo-activity-report:
           association_field_of_activity: null
           total_amount:
             aggregate: count
-          activity_region_districts:
+          association_activity_region_districts:
             aggregate: counters
     - run: add_computed_field
       parameters:
@@ -354,7 +354,7 @@ ngo-activity-report:
             aggregate: sum
           association_num_of_volunteers:
             aggregate: sum
-          activity_region_districts:
+          association_activity_region_districts:
             aggregate: counters
     - run: add_computed_field
       parameters:
@@ -388,7 +388,7 @@ ngo-activity-report:
           total_amount: []
           association_num_of_employees: []
           association_num_of_volunteers: []
-          activity_region_districts: []
+          association_activity_region_districts: []
     
     - run: collate
       parameters:
