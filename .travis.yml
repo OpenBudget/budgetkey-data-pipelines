@@ -29,6 +29,7 @@ before_script:
 script:
 - make test
 deploy:
+  skip_cleanup: true
   provider: script
   script: bash .travis.sh deploy
   on:
