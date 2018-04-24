@@ -12,6 +12,20 @@ FROM publisher_foa_analysis
 WHERE field_of_activity='{foa}'
 """
 
+ALL_DISTRICTS = """
+WITH a AS
+  (SELECT jsonb_array_elements(association_activity_region_districts) AS x,
+          count(1)
+   FROM guidestar_processed
+   GROUP BY 1
+   ORDER BY 2 DESC)
+SELECT x
+FROM a"""
+
+ALL_FOAS = """
+select distinct(association_field_of_activity) as x from guidestar_processed order by 1
+"""
+
 
 def get_spending_analysis(foa):
     query = SPENDING_ANALYSIS_FOR_FOA.format(foa=foa)
@@ -21,6 +35,16 @@ def get_spending_analysis(foa):
         r['amount'] = sum(x['amount'] for x in r['spending'])
     results = sorted(results, key=lambda x: -x['amount'])
     return results
+
+
+def get_distinct_list(query):
+    results = engine.execute(query)
+    results = [dict(r)['x'] for r in results]
+    return results
+
+
+all_districts = get_distinct_list(ALL_DISTRICTS)
+all_foas = get_distinct_list(ALL_FOAS)
 
 
 def process_row(row, *_):
@@ -135,6 +159,7 @@ def process_row(row, *_):
                 }                
             }
         ]
+        row['others'] = [x for x in all_foas if x != foa]
 
     elif row['key'].startswith('ngo-district-report'):
         details = row['details']
@@ -186,19 +211,26 @@ def process_row(row, *_):
                 ]
             },
         ]
+        row['others'] = [x for x in all_districts if x != district]
 
     return row
 
 
 def modify_datapackage(dp, *_):
-    dp['resources'][0]['schema']['fields'].append(
+    dp['resources'][0]['schema']['fields'].extend([
         {
             'name': 'charts',
             'type': 'array',
             'es:itemType': 'object',
             'es:index': False
+        },
+        {
+            'name': 'others',
+            'type': 'array',
+            'es:index': False,
+            'es:itemType': 'string',
         }
-    )
+    ])
     return dp
 
 
