@@ -41,7 +41,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('total', {}).get('association_activity_region_districts', [])
@@ -55,7 +55,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('proper_management', {}).get('association_activity_region_districts', [])
@@ -69,7 +69,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('has_article_46', {}).get('association_activity_region_districts', [])
@@ -149,7 +149,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('total', {}).get('activities', [])
@@ -162,7 +162,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('proper_management', {}).get('activities', [])
@@ -175,7 +175,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label=x[0],
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('has_article_46', {}).get('activities', [])
