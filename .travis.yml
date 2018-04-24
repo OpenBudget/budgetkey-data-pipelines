@@ -19,7 +19,7 @@ python:
 - 3.6
 services:
 - docker
-before_install:
+install:
 - curl -s https://raw.githubusercontent.com/OpenBudget/budgetkey-k8s/master/apps_travis_script.sh > .travis.sh
 - bash .travis.sh script
 script:
