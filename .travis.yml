@@ -22,15 +22,12 @@ services:
 before_install:
 - curl -s https://raw.githubusercontent.com/OpenBudget/budgetkey-k8s/master/apps_travis_script.sh > .travis.sh
 - bash .travis.sh script
-install:
-- sudo apt-get install libleveldb-dev libleveldb1
-before_script:
-- make install
 script:
-- make test
+- docker build -t budgetkey-data-pipelines-tests tests
+- docker run -v `pwd`/tests:/testenv/tests budgetkey-data-pipelines-tests
 deploy:
   skip_cleanup: true
   provider: script
   script: bash .travis.sh deploy
   on:
-    branch: master
+    branch: budgetkey-k8s
