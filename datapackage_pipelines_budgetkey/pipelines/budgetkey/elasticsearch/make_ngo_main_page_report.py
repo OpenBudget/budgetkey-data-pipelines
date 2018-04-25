@@ -314,6 +314,7 @@ def get_total_payer_amounts():
 def add_main_page_report(res):
     yield from res
     row = dict(
+        doc_id='reports/ngos-main-page',
         key='ngos-main-page',
         details=dict(
             total_active_cities=get_total_cities(),
