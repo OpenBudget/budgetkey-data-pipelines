@@ -339,6 +339,11 @@ latest-contract-spending:
         source-id-field: company_id
     - run: calc-min-max-years
     - run: calc-spending-score
+    - run: limit_last_years
+      parameters:
+        year_column: max_year
+        amount_column: executed
+        target_column: amount_contracts
     - run: set_primary_key
       parameters:
         contract-spending:
@@ -376,11 +381,6 @@ spending-by-entity:
       parameters:
         url: dependency://./procurement/spending/latest-contract-spending
         resource: contract-spending
-    - run: limit_last_years
-      parameters:
-        year_column: max_year
-        amount_column: executed
-        target_column: amount_contracts
     - run: join
       parameters:
         source:

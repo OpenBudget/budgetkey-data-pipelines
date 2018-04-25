@@ -131,6 +131,11 @@ with-entities:
         resource-name: supports
         source-field: recipient
         source-id-field: recipient_entity_id
+    - run: limit_last_years
+      parameters:
+        year_column: year_paid
+        amount_column: amount_total
+        target_column: amount_supports
 
     - run: dump.to_path
       parameters:
@@ -341,11 +346,6 @@ supports-by-entity:
       parameters:
         url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
-    - run: limit_last_years
-      parameters:
-        year_column: year_paid
-        amount_column: amount_total
-        target_column: amount_supports
           
     - run: join
       parameters:
