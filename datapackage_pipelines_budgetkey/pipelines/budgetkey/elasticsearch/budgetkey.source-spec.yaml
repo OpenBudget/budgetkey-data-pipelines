@@ -150,7 +150,7 @@ people:
 
 reports:
   kind: indexer
-  revision: 26
+  revision: 27
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
@@ -160,3 +160,4 @@ reports:
     - run: make_ngo_report_income_lists
     - run: make_ngo_report_charts
     - run: enrich_ngo_reports
+    - run: make_ngo_main_page_report
