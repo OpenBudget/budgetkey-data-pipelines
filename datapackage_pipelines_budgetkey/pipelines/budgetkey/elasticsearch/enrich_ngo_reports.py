@@ -61,6 +61,7 @@ def get_field_of_activity_info():
 def process_resource(res_):
     di = get_district_info()
     foai = get_field_of_activity_info()
+    missing_foas = []
     for row in res_:
         if row['key'].startswith('ngo-district-report'):
             district = row['details']['district']
@@ -71,10 +72,15 @@ def process_resource(res_):
         elif row['key'].startswith('ngo-activity-report'):
             foa = row['details']['field_of_activity']
             details = row['details']
-            for k, v in foai[foa].items():
+            foa_deets = foai.get(foa)
+            if foa_deets is None:
+                foa_deets = {}
+                missing_foas.append(foa)
+            for k, v in foa_deets.items():
                 details[k] = float(v) if v is not None else None
             row['details'] = details
         yield row
+    assert len(missing_foas) == 0, 'Missing foas:\n%s' % '\n'.join(missing_foas)
 
 
 def process_resources(res_iter_):
