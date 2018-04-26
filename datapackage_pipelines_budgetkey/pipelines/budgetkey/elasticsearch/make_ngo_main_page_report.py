@@ -264,27 +264,28 @@ JOIN guidestar_processed USING (id)
 
 def get_district_totals():
     foas_q = """
-WITH a AS
-  (SELECT jsonb_array_elements(association_activity_region_districts) AS district,
-          association_field_of_activity,
-          count(1) as cnt
-   FROM guidestar_processed
-   WHERE association_status_active
-   group by 1, 2)
+with a as (SELECT association_field_of_activity as foa, jsonb_array_elements(association_activity_region_districts) as district, count(1) as cnt
+FROM guidestar_processed
+GROUP BY 1, 2),
+b as (select district, sum(cnt) as district_total from a group by 1),
+c as (select foa, district, cnt/district_total as foa_district_pct from a join b using (district)),
+d as (select foa, sum(foa_district_pct)/7 as foa_pct_avg from c group by 1),
+e as (select foa, district, (foa_district_pct - foa_pct_avg) * log(cnt) as score from a join c using(foa, district) join d using (foa))
 SELECT district,
-       association_field_of_activity AS field_of_activity,
+       foa,
        rank
 FROM
-  (SELECT a.*,
+  (SELECT e.*,
           rank() OVER (PARTITION BY district
-                       ORDER BY cnt DESC) AS rank
-   FROM a) r
-WHERE rank<=3"""
+                       ORDER BY score DESC) AS rank
+   FROM e) r
+where rank<=3
+order by district, rank"""
     results = engine.execute(foas_q)
     results = [dict(r) for r in results]
     ret = {}
     for r in results:
-        ret.setdefault(r['district'], dict(totals=0, foas=[]))['foas'].append(r['field_of_activity'])
+        ret.setdefault(r['district'], dict(totals=0, foas=[]))['foas'].append(r['foa'])
     
     totals_q="""
 SELECT jsonb_array_elements(association_activity_region_districts) as district,
