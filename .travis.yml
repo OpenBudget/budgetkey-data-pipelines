@@ -30,4 +30,4 @@ deploy:
   provider: script
   script: bash .travis.sh deploy
   on:
-    branch: budgetkey-k8s
+    branch: master
