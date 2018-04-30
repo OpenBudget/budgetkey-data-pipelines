@@ -11,12 +11,28 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
  In order to get that data, we have an extensive set of downloaders and scrapers which get the data from government publications and other web-sites. The fetched data is then processed and combined, and eventually saved to disk (so that people can download the raw data without hassle), loaded to a relational database (so that analysts can do in-depths queries of the data) and pushed to a key-store value (elasticsearch) which serves our main website (obudget.org).
  
  The framework we're using to accomplish all of this is called `datapackage-pipelines`. This framework allows us to write simple 'pipelines', each consisting of a set of predefined processing steps. These pipelines are not coded, but rather defined in a set of YAML files. Most of the pipelines use of a set of common building-blocks, and some custom processors - mainly custom scrapers for exotic sources.
+ 
+ ## Quickstart on `datapackage-pipelines`
+ 
+ The most recommended way to start is by reading the README of `datapackage-pipelines`[here](https://github.com/frictionlessdata/datapackage-pipelines)- it's a bit long, so at least read the beginning and skim the rest.
+ 
+ Then, try to write a very simple pipeline - just to test your understanding. A good task for that would be:
+ - Load the first page of google (or youtube)
+ - Scrape the list of results from that page
+ - Set proper datatypes for the fields (e.g. for dates, numbers etc)
+ - Dump the results into a csv file or an sqlite file
+ 
+ ## I want to help - how?
+ 
+ - Make sure you've completed the `datapackage-pipelines` quickstart above - you need to know how it works to start contributing
+ - We have a few issues for newcomers - these are marked using the 'help-wanted' label. Just take a peek in the [issues](https://github.com/OpenBudget/budgetkey-data-pipelines/issues) section.
+   - If unsure, just consult on Slack in the #obudget-chat channel or with @adam.kariv
+ - Either way, make sure you assign yourself to an issue when you start working on it (or even leave a comment that you're considering it). 
+   - (If you stop working on an issue, un-assigning yourself would be highly appreciated :smile: )
      
- To see what's the current processing status of each pipeline, just hop to the [dashboard](https://next.obudget.org/pipelines/).
+ ## What's currently implemented (the directory structure)
  
- ## The directory structure
- 
- All the pipeline definitions can be found under `datapackage_pipelines_budgetkey_data_pipeline/pipelines`.
+ All the pipeline definitions can be found under `datapackage_pipelines_budgetkey/pipelines`.
  
  There we can see the following directory structure (the most interesting parts of it, anyway):
  - `budget/`
@@ -37,8 +53,16 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
     - `tenders`: Pipelines for retrieving data on government tendering process (and the lack of it)
 - `supports/`: Pipelines for retrieving data on government supports and its relevant processes
 
+As you can see, pipelines are sorted by domain and data source.
+
+Higher up the tree, we find pipelines that aggregate different sources (e.g. companies + associations + ... -> all-entities). Finally, under the `budgetkey` directory we have pipelines that process and store the data for displaying on the website.
+
 _note: To understand a bit more on the difference between the different types of government spending, please read this excellent [blog post](https://blog.okfn.org/2017/05/18/what-is-the-difference-between-budget-spending-and-procurement-data/)._
 
+## What's currenty running?
+
+ To see what's the current processing status of each pipeline, just hop to the [dashboard](https://next.obudget.org/pipelines/).
+ 
 ## Developing a new pipeline
 
 - Read about `datapackage-pipelines` [here](https://github.com/frictionlessdata/datapackage-pipelines)
