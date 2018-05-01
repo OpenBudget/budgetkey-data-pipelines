@@ -104,10 +104,11 @@ def calc_fingerprint(name):
         tgt = ENGLISH.sub('', tgt)
         options.append(tgt)
 
+        tgt = tgt.strip()
         if not tgt:
             tgt = options[0]
             for opt in reversed(options):
-                if opt:
+                if opt and opt.strip():
                     tgt = opt.strip()
                     break
         
