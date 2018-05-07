@@ -44,6 +44,11 @@ national-budgets:
         name: fd-2018
         url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2018.xlsx
         sheet: 1
+    - run: add_resource
+      parameters:
+        name: fd-2019
+        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2019.xlsx
+        sheet: 1
     - run: stream_remote_resources
       runner: tzabar
       cache: true
