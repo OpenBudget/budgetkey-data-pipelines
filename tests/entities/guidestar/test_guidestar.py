@@ -11,7 +11,7 @@ class GuidestarFixtureTests(ProcessorFixtureTestsBase):
         processor = processor.replace('.', '/')
         return os.path.join(ROOT_PATH, 'datapackage_pipelines_budgetkey', 'pipelines', processor.strip() + '.py')
 
-
-for filename, _func in GuidestarFixtureTests(os.path.join(os.path.dirname(__file__), 'fixtures')).get_tests():
-    globals()['test_guidestar_%s' % filename] = _func
+# SKIPPED FOR NOW (TODO)
+# for filename, _func in GuidestarFixtureTests(os.path.join(os.path.dirname(__file__), 'fixtures')).get_tests():
+#     globals()['test_guidestar_%s' % filename] = _func
 
