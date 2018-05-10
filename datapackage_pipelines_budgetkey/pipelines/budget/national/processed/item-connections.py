@@ -114,9 +114,10 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
             non_repeating = row.get('non_repeating', [])
             non_repeating = '1' in non_repeating and len(non_repeating) == 1
             if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
-                unmatched.append(row)
-                row = None
-                break
+                if not row.get('code').startswith('C'):
+                    unmatched.append(row)
+                    row = None
+                    break
 
             # Find curated record for id
             curated_items = curated.get((cur_year, id['code']))
