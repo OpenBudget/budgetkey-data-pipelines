@@ -187,7 +187,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('proper_management', {}).get('activities', [])
