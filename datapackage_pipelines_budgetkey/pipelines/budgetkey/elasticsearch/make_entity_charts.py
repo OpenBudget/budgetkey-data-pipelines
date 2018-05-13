@@ -195,7 +195,7 @@ def process_row(row, *_):
                     'type': 'adamkey',
                     'chart': {
                         'values': [dict(
-                            label='<a href="/i/org/association/{}">{}</a>'.format(x['id'], x['name']),
+                            label='<a href="/i/org/association/{}?theme=budgetkey">{}</a>'.format(x['id'], x['name']),
                             amount=x['amount'],
                             amount_fmt='{:,} ₪'.format(x['amount']),
                         )
