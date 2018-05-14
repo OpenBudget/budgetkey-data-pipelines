@@ -10,6 +10,7 @@ def process_row(row, *_):
     return row
 
 
+
 def modify_datapackage(dp, *_):
     for x in dp['resources'][0]['schema']['fields']:
         if x['name'] == 'report':
