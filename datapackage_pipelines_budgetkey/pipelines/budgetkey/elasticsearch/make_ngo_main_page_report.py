@@ -3,6 +3,7 @@ import json
 from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_budgetkey.common.format_number import format_number
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
@@ -115,7 +116,7 @@ engine = create_engine(os.environ['DPP_DB_ENGINE'])
 #                                 dict(
 #                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
 #                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
+#                                     amount_fmt=format_number(x['amount']) + ' ₪',
 #                                 )
 #                                 for x in details['income_list']
 #                             ]
@@ -129,7 +130,7 @@ engine = create_engine(os.environ['DPP_DB_ENGINE'])
 #                                 dict(
 #                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
 #                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
+#                                     amount_fmt=format_number(x['amount']) + ' ₪',
 #                                 )
 #                                 for x in details['income_list_contracts']
 #                             ]
@@ -143,7 +144,7 @@ engine = create_engine(os.environ['DPP_DB_ENGINE'])
 #                                 dict(
 #                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
 #                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
+#                                     amount_fmt=format_number(x['amount']) + ' ₪',
 #                                 )
 #                                 for x in details['income_list_supports']
 #                             ]
@@ -333,7 +334,7 @@ def add_main_page_report(res):
                         dict(
                             label=x['payer'],
                             amount=x['amount'],
-                            amount_fmt='{:,} ₪'.format(x['amount']),
+                            amount_fmt=format_number(x['amount']) + ' ₪',
                         )
                         for x in get_total_payer_amounts()
                     ]

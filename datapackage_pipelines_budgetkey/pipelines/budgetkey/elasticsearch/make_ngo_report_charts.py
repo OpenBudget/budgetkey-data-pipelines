@@ -2,6 +2,7 @@ import os
 from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import process
+from datapackage_pipelines_budgetkey.common.format_number import format_number
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
@@ -114,7 +115,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']) + ' ₪',
                                 )
                                 for x in details['income_list']
                             ]
@@ -128,7 +129,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']) + ' ₪',
                                 )
                                 for x in details['income_list_contracts']
                             ]
@@ -142,7 +143,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']) + ' ₪',
                                 )
                                 for x in details['income_list_supports']
                             ]
