@@ -107,7 +107,7 @@ def process_row(row, *_):
                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
                 'subcharts': [
                     {
-                        'title': 'סה״כ העברות כספי מדינה' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total']),
+                        'title': 'סה״כ כספי ממשלה' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total']),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
