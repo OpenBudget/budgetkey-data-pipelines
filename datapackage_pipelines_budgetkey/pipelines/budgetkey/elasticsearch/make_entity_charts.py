@@ -108,13 +108,13 @@ def process_row(row, *_):
                     'chart': {
                         'main': {
                             'amount': yearly_turnover,
-                            'amount_fmt': format_number(yearly_turnover) + ' ₪',
+                            'amount_fmt': format_number(yearly_turnover),
                             'label': str(last_report_year),
                             'color': '#D7EEC5'
                         },
                         'compare': {
                             'amount': median_turnover_in_field_of_activity,
-                            'amount_fmt': format_number(median_turnover_in_field_of_activity) + ' ₪',
+                            'amount_fmt': format_number(median_turnover_in_field_of_activity),
                             'label': 'חציון בתחום {}'.format(foad)
                         },
                     }
@@ -173,13 +173,13 @@ def process_row(row, *_):
                             'chart': {
                                 'main': {
                                     'amount': top_salary,
-                                    'amount_fmt': format_number(top_salary) + ' ₪',
+                                    'amount_fmt': format_number(top_salary),
                                     'label': 'מקבל השכר הגבוה בארגון',
                                     'color': '#D7EEC5'
                                 },
                                 'compare': {
                                     'amount': median_top_salary,
-                                    'amount_fmt': format_number(median_top_salary) + ' ₪',
+                                    'amount_fmt': format_number(median_top_salary),
                                     'label': 'חציון בתחום {}'.format(foad)
                                 },
                             }
@@ -198,7 +198,7 @@ def process_row(row, *_):
                         'values': [dict(
                             label='<a href="/i/org/association/{}?theme=budgetkey">{}</a>'.format(x['id'], x['name']),
                             amount=x['amount'],
-                            amount_fmt=format_number(x['amount']) + ' ₪',
+                            amount_fmt=format_number(x['amount']),
                         )
                         for x in reported_list],
                         'selected': selected_index

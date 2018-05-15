@@ -115,7 +115,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt=format_number(x['amount']) + ' ₪',
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list']
                             ]
@@ -129,7 +129,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt=format_number(x['amount']) + ' ₪',
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list_contracts']
                             ]
@@ -143,7 +143,7 @@ def process_row(row, *_):
                                 dict(
                                     label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt=format_number(x['amount']) + ' ₪',
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list_supports']
                             ]

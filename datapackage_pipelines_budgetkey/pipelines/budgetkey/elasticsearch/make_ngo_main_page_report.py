@@ -334,7 +334,7 @@ def add_main_page_report(res):
                         dict(
                             label=x['payer'],
                             amount=x['amount'],
-                            amount_fmt=format_number(x['amount']) + ' ₪',
+                            amount_fmt=format_number(x['amount']),
                         )
                         for x in get_total_payer_amounts()
                     ]
