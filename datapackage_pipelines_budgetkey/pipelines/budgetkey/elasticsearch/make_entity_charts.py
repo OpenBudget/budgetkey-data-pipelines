@@ -189,7 +189,7 @@ def process_row(row, *_):
             })
         if foad is not None:
             charts.append({
-                    'title': 'מי הארגונים הדומים?',
+                    'title': 'ארגונים נוספים בתחום',
                     'long_title': 'ארגונים הפועלים בתחום {}, לפי גובה המחזור הכספי השנתי'.format(foad),
                     'description': '{} ארגונים נוספים הפועלים בתחום לא דיווחו על על גובה המחזור הכספי השנתי'
                                         .format(num_unreported),
