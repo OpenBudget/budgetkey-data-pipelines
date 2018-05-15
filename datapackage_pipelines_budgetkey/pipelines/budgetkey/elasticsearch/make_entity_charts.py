@@ -104,7 +104,7 @@ def process_row(row, *_):
             charts[-1]['chart']['parts'].append(
                 {
                     'type': 'comparatron',
-                    'title': 'המחזור הכספי המדווח לארגון בשנת {}: {:,} ₪'.format(last_report_year, yearly_turnover),
+                    'title': 'המחזור הכספי המדווח לארגון בשנת {}: {}'.format(last_report_year, format_number(yearly_turnover)),
                     'chart': {
                         'main': {
                             'amount': yearly_turnover,

@@ -108,7 +108,7 @@ def process_row(row, *_):
                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
                 'subcharts': [
                     {
-                        'title': 'סה״כ כספי ממשלה' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total']),
+                        'title': 'סה״כ כספי ממשלה' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
@@ -122,7 +122,7 @@ def process_row(row, *_):
                         }
                     },
                     {
-                        'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_contracts']),
+                        'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total_contracts'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
@@ -136,7 +136,7 @@ def process_row(row, *_):
                         }
                     },
                     {
-                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_supports']),
+                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{} ₪</span>'.format(format_number(details['income_total_supports'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
