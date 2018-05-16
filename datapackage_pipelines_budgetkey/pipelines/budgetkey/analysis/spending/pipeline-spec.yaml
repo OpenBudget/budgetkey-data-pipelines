@@ -49,6 +49,10 @@ united:
           payer:
             - supporting_ministry
             - publisher_name
+          min_year:
+            - year_requested
+          max_year:
+            - year_paid
     - run: filter
       parameters:
         out:

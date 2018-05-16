@@ -20,6 +20,7 @@ JOIN guidestar_processed
 USING (id)
 WHERE association_field_of_activity='{foa}'
 AND received_amount{suffix}>0
+AND association_status_active
 ORDER BY 3 desc
 '''
 
@@ -30,6 +31,7 @@ JOIN guidestar_processed
 USING (id)
 WHERE association_field_of_activity='{foa}'
 AND received_amount{suffix}>0
+AND association_status_active
 '''
 
 

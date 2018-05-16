@@ -106,6 +106,7 @@ def process_row(row, *_):
             {
                 'title': 'מי מקבל/ת כספי ממשלה, וכמה?',
                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
+                'description': 'כספי ממשלה שהועברו לארגונים הפעילים בתחום בשלוש השנים האחרונות',
                 'subcharts': [
                     {
                         'title': 'סה״כ כספי ממשלה' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total'])),
@@ -153,7 +154,7 @@ def process_row(row, *_):
             },
             {
                 'title': 'במה מושקע הכסף הממשלתי?',
-                'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים',
+                'description': 'הנתונים המוצגים כוללים את העברות הכספים המתועדות במקורות המידע שלנו בכל השנים',
                 'type': 'spendomat',
                 'chart': {
                     'data': spending_analysis
