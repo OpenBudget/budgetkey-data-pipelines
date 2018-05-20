@@ -116,7 +116,7 @@ def process_row(row, *_):
                             'amount': median_turnover_in_field_of_activity,
                             'amount_fmt': format_number(median_turnover_in_field_of_activity),
                             'label': '''
-                            <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-toolip'>
+                            <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-tooltip'>
                             מבוסס על נתוני כל הארגונים הפעילים בתחום {foad} אשר דיווחו על גובה המחזור הכספי באחת, או יותר, משלוש השנים האחרונות.
                             </span></span>'''.format(foad=foad)
                         },
@@ -186,7 +186,7 @@ def process_row(row, *_):
                                     'amount': median_top_salary,
                                     'amount_fmt': format_number(median_top_salary),
                                     'label': '''
-                                    <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-toolip'>
+                                    <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-tooltip'>
                                     מבוסס על נתוני כל הארגונים הפעילים בתחום {foad} אשר דיווחו על גובה השכר באחת, או יותר, משלוש השנים האחרונות.
                                     </span></span>'''.format(foad=foad)
                                 },
