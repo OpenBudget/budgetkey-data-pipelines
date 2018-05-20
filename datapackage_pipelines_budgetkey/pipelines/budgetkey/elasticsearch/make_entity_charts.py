@@ -120,7 +120,7 @@ def process_row(row, *_):
                     }
                 }
             )
-        if spending_analysis is not None:            
+        if spending_analysis:
             charts.append({
                     'title': 'מקבל כספי ממשלה?',
                     'long_title': 'האם הארגון מקבל כספי ממשלה?',
@@ -153,7 +153,7 @@ def process_row(row, *_):
                                     {
                                         'title': 'מספר מתנדבים',
                                         'amount': num_of_volunteers,
-                                        'color': '#838383'
+                                        'color': '#FE8255'
                                     },
                                 ]
                             }
