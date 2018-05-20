@@ -136,19 +136,11 @@ def process_row(row, *_):
                 'type': 'template',
                 'template_id': 'org_credentials'
         })
-        if None not in (last_report_year, 
-                        num_of_employees, 
-                        num_of_volunteers, 
-                        top_salary, 
-                        median_top_salary, 
-                        foad):
-            charts.append({
-                'title': 'כמה עובדים ומתנדבים?',
-                'long_title': 'כמה עובדים ומתנדבים בארגון',
-                'type': 'vertical',
-                'chart': {
-                    'parts': [
-                        {
+        parts = []
+        if None not in (num_of_employees, 
+                        num_of_volunteers,
+                        last_report_year):
+            parts.append({
                             'type': 'pointatron',
                             'title': 'מספר העובדים והמתנדבים בארגון בשנת {}'.format(last_report_year),
                             'chart': {
@@ -165,8 +157,9 @@ def process_row(row, *_):
                                     },
                                 ]
                             }
-                        },
-                        {
+                        })
+        if None not in (last_report_year, top_salary, median_top_salary, foad):
+            parts.append({
                             'type': 'comparatron',
                             'title': 'שכר השנתי הגבוה בארגון בשנת {}'.format(last_report_year),
                             'description': '*הנתונים מבוססים ומחושבים על בסיס המידע הזמין ומוצג ב<a href="http://www.guidestar.org.il/he/organization/{}" target="_blank">אתר גיידסטאר</a>'.format(id),
@@ -183,8 +176,14 @@ def process_row(row, *_):
                                     'label': 'חציון בתחום {}'.format(foad)
                                 },
                             }
-                        }
-                    ]
+                        })
+        if len(parts) > 0:
+            charts.append({
+                'title': 'כמה עובדים ומתנדבים?',
+                'long_title': 'כמה עובדים ומתנדבים בארגון',
+                'type': 'vertical',
+                'chart': {
+                    'parts': parts
                 }
             })
         if foad is not None:
