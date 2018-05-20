@@ -110,7 +110,7 @@ def process_row(row, *_):
                             'amount': yearly_turnover,
                             'amount_fmt': format_number(yearly_turnover),
                             'label': str(last_report_year),
-                            'color': '#D7EEC5'
+                            'color': '#FFAE90'
                         },
                         'compare': {
                             'amount': median_turnover_in_field_of_activity,
@@ -148,12 +148,12 @@ def process_row(row, *_):
                                     {
                                         'title': 'מספר עובדים',
                                         'amount': num_of_employees,
-                                        'color': '#406025'
+                                        'color': '#6F46E0'
                                     },
                                     {
                                         'title': 'מספר מתנדבים',
                                         'amount': num_of_volunteers,
-                                        'color': '#7FAA5E'
+                                        'color': '#838383'
                                     },
                                 ]
                             }
@@ -168,7 +168,7 @@ def process_row(row, *_):
                                     'amount': top_salary,
                                     'amount_fmt': format_number(top_salary),
                                     'label': 'מקבל השכר הגבוה בארגון',
-                                    'color': '#D7EEC5'
+                                    'color': '#FFAE90'
                                 },
                                 'compare': {
                                     'amount': median_top_salary,
