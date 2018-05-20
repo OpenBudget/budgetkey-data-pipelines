@@ -3,218 +3,9 @@ import json
 from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_budgetkey.common.format_number import format_number
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
-
-
-# SPENDING_ANALYSIS_FOR_FOA = """
-# SELECT payer, spending
-# FROM publisher_foa_analysis
-# WHERE field_of_activity='{foa}'
-# """
-
-# ALL_DISTRICTS = """
-# WITH a AS
-#   (SELECT jsonb_array_elements(association_activity_region_districts) AS x,
-#           count(1)
-#    FROM guidestar_processed
-#    GROUP BY 1
-#    ORDER BY 2 DESC)
-# SELECT x
-# FROM a"""
-
-# ALL_FOAS = """
-# select distinct(association_field_of_activity) as x from guidestar_processed order by 1
-# """
-
-
-# def get_spending_analysis(foa):
-#     query = SPENDING_ANALYSIS_FOR_FOA.format(foa=foa)
-#     results = engine.execute(query)
-#     results = [dict(r) for r in results]
-#     for r in results:
-#         r['amount'] = sum(x['amount'] for x in r['spending'])
-#     results = sorted(results, key=lambda x: -x['amount'])
-#     return results
-
-
-# def get_distinct_list(query):
-#     results = engine.execute(query)
-#     results = [dict(r)['x'] for r in results]
-#     return results
-
-
-# all_districts = get_distinct_list(ALL_DISTRICTS)
-# all_foas = get_distinct_list(ALL_FOAS)
-
-
-# def process_row(row, *_):
-#     if row['key'].startswith('ngo-activity-report'):
-#         details = row['details']
-#         foa = details['field_of_activity']
-#         foad = details['field_of_activity_display']
-#         spending_analysis = get_spending_analysis(foa)
-#         row['charts'] = [ 
-#             {
-#                 'title': 'מי פעיל/ה ואיפה',
-#                 'description': '*ארגונים שדיווחו על כמה אזורי פעילות נספרים במחוזות השונים',
-#                 'subcharts': [
-#                     {
-#                         'title': 'ארגונים: <span class="figure">{}</span>'.format(details['report'].get('total', {}).get('total_amount', 0)),
-#                         'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foad),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('total', {}).get('association_activity_region_districts', [])
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'בעלי אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('total_amount', 0)),
-#                         'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foad),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('proper_management', {}).get('association_activity_region_districts', [])
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'בעלי סעיף 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('total_amount', 0)),
-#                         'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foad),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('has_article_46', {}).get('association_activity_region_districts', [])
-#                             ]
-#                         }
-#                     },
-#                 ]
-#             },
-#             {
-#                 'title': 'מי מקבל/ת כספי ממשלה, וכמה?',
-#                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
-#                 'subcharts': [
-#                     {
-#                         'title': 'סה״כ העברות כספי מדינה' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total']),
-#                         'type': 'adamkey',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
-#                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
-#                                 )
-#                                 for x in details['income_list']
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_contracts']),
-#                         'type': 'adamkey',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
-#                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
-#                                 )
-#                                 for x in details['income_list_contracts']
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_supports']),
-#                         'type': 'adamkey',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
-#                                     amount=x['amount'],
-#                                     amount_fmt='{:,} ₪'.format(x['amount']),
-#                                 )
-#                                 for x in details['income_list_supports']
-#                             ]
-#                         }
-#                     },
-#                 ]
-#             },
-#             {
-#                 'title': 'במה מושקע הכסף הממשלתי?',
-#                 'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים',
-#                 'type': 'spendomat',
-#                 'chart': {
-#                     'data': spending_analysis
-#                 }                
-#             }
-#         ]
-#         row['others'] = [x for x in all_foas if x != foa]
-
-#     elif row['key'].startswith('ngo-district-report'):
-#         details = row['details']
-#         district = details['district']
-#         row['charts'] = [ 
-#             {
-#                 'title': 'מספר הארגונים הפעילים במחוז {} לפי תחום'.format(district),
-#                 'subcharts': [
-#                     {
-#                         'title': 'סה״כ ארגונים באזור: <span class="figure">{}</span>'.format(details['report'].get('total', {}).get('count', 0)),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('total', {}).get('activities', [])
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'סה״כ ארגונים עם אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('count', 0)),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('proper_management', {}).get('activities', [])
-#                             ]
-#                         }
-#                     },
-#                     {
-#                         'title': 'סה״כ ארגונים עם אישור 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('count', 0)),
-#                         'type': 'horizontal-barchart',
-#                         'chart': {
-#                             'values': [
-#                                 dict(
-#                                     label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
-#                                     value=x[1]
-#                                 )
-#                                 for x in details['report'].get('has_article_46', {}).get('activities', [])
-#                             ]
-#                         }
-#                     },
-
-#                 ]
-#             },
-#         ]
-#         row['others'] = [x for x in all_districts if x != district]
-#
-#    return row
 
 
 def get_single_result(query):
@@ -303,7 +94,8 @@ def get_total_payer_amounts():
     q = """
     select payer, sum(amount) as amount
     from united_spending
-    where amount > 0
+    join guidestar_processed on (id=entity_id)
+    where amount > 0 and association_status_active
     group by 1
     order by 2 desc
     """
@@ -333,7 +125,7 @@ def add_main_page_report(res):
                         dict(
                             label=x['payer'],
                             amount=x['amount'],
-                            amount_fmt='{:,} ₪'.format(x['amount']),
+                            amount_fmt=format_number(x['amount']),
                         )
                         for x in get_total_payer_amounts()
                     ]

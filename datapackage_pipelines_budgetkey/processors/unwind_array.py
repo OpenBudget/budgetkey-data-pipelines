@@ -41,6 +41,7 @@ def modify_datapackage(dp, resource_matcher, afield, tfield):
         res['schema']['fields'] = fields
     return dp
 
+
 if __name__ == '__main__':
     parameters, dp, res_iter = ingest()
     resource_matcher = ResourceMatcher(parameters.get('resource'))

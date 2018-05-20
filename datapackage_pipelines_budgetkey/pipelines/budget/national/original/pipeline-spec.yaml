@@ -32,17 +32,22 @@ national-budgets:
     - run: add_resource
       parameters:
         name: fd-2016
-        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2016.xlsx
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2016.xlsx 
         sheet: 1
     - run: add_resource
       parameters:
         name: fd-2017
-        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2017.xlsx
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2017.xlsx
         sheet: 1
     - run: add_resource
       parameters:
         name: fd-2018
-        url: http://mof.gov.il/BudgetSite/statebudget/tableau/BudgetData2018.xlsx
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2018.xlsx
+        sheet: 1
+    - run: add_resource
+      parameters:
+        name: fd-2019
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2019.xlsx
         sheet: 1
     - run: stream_remote_resources
       runner: tzabar

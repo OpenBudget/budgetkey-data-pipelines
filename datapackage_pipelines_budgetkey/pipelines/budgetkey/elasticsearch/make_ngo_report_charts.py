@@ -2,6 +2,7 @@ import os
 from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import process
+from datapackage_pipelines_budgetkey.common.format_number import format_number
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
@@ -65,7 +66,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('total', {}).get('association_activity_region_districts', [])
@@ -79,7 +80,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('proper_management', {}).get('association_activity_region_districts', [])
@@ -93,7 +94,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-district-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('has_article_46', {}).get('association_activity_region_districts', [])
@@ -105,44 +106,45 @@ def process_row(row, *_):
             {
                 'title': 'מי מקבל/ת כספי ממשלה, וכמה?',
                 'long_title': 'אילו ארגונים בתחום {} מקבלים כספי ממשלה, וכמה?'.format(details['field_of_activity_display']),
+                'description': 'כספי ממשלה שהועברו לארגונים הפעילים בתחום בשלוש השנים האחרונות',
                 'subcharts': [
                     {
-                        'title': 'סה״כ העברות כספי מדינה' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total']),
+                        'title': 'סה״כ כספי ממשלה' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list']
                             ]
                         }
                     },
                     {
-                        'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_contracts']),
+                        'title': 'סך התקשרויות ממשלתיות מדווחות' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total_contracts'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list_contracts']
                             ]
                         }
                     },
                     {
-                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{:,} ₪</span>'.format(details['income_total_supports']),
+                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{} ₪</span>'.format(format_number(details['income_total_supports'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="/i/{}">{}</a>'.format(x['doc_id'], x['name']),
+                                    label='<a href="/i/{}?theme=budgetkey">{}</a>'.format(x['doc_id'], x['name']),
                                     amount=x['amount'],
-                                    amount_fmt='{:,} ₪'.format(x['amount']),
+                                    amount_fmt=format_number(x['amount']),
                                 )
                                 for x in details['income_list_supports']
                             ]
@@ -152,7 +154,7 @@ def process_row(row, *_):
             },
             {
                 'title': 'במה מושקע הכסף הממשלתי?',
-                'description': 'הנתונים המוצגים כוללים את העברות הכספי המתועדות במקורות המידע שלנו בכל השנים',
+                'description': 'הנתונים המוצגים כוללים את העברות הכספים המתועדות במקורות המידע שלנו בשלוש השנים האחרונות',
                 'type': 'spendomat',
                 'chart': {
                     'data': spending_analysis
@@ -174,7 +176,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('total', {}).get('activities', [])
@@ -187,7 +189,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('proper_management', {}).get('activities', [])
@@ -200,7 +202,7 @@ def process_row(row, *_):
                         'chart': {
                             'values': [
                                 dict(
-                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}">{0}</a>'.format(x[0]),
+                                    label='<a href="//next.obudget.org/i/reports/ngo-activity-report/{0}?theme=budgetkey">{0}</a>'.format(x[0]),
                                     value=x[1]
                                 )
                                 for x in details['report'].get('has_article_46', {}).get('activities', [])

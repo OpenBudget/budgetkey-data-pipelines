@@ -1,94 +1,94 @@
-guidestar-scraper:
-  schedule:
-    crontab: "0 0 * * *"
-  pipeline:
-    - run: add_metadata
-      parameters:
-        name: guidestar
-        title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
-    - run: load_resource
-      parameters:
-        resource: association-registry
-        url: /var/datapackages/entities/associations/registrar/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: company-registry
-        url: /var/datapackages/entities/companies/registrar/registry/datapackage.json
-    - run: filter_heletz
-    - run: concatenate
-      parameters:
-        target:
-          name: association-registry
-        fields:
-          Association_Number:
-            - Company_Number
-          Association_Name:
-            - Company_Name
-          Association_Registration_Date:
-            - Company_Registration_Date
-    - run: manage-revisions
-      parameters:
-        resource-name: association-registry
-        db-table: guidestar
-        key-fields:
-          - Association_Number
-        db-key-fields:
-          - id
-        hash-fields: []
-    - run: scraper
-      runner: tzabar
-      parameters:
-        name: guidestar
-        path: data/guidestar.csv
-    - run: set_types
-      parameters:
-        types:
-          association_year_established: { type: integer }
-          association_founders:
-            es:itemType: string
-          association_address_lines:
-            es:itemType: string
-          association_online_data_update_year:
-            type: integer
-          association_last_report_year:
-            type: integer
-          association_num_of_volunteers:
-            type: number
-            bareNumber: false
-            groupChar: ','
-          association_num_of_employees:
-            type: number
-            bareNumber: false
-            groupChar: ','
-          association_yearly_turnover:
-            type: number
-            bareNumber: false
-            groupChar: ','
-    - run: manage-revisions
-      parameters:
-        resource-name: guidestar
-        db-table: guidestar
-        key-fields:
-          - id
-    - run: set_primary_key
-      parameters:
-        guidestar:
-          - id
-    - run: dump.to_sql
-      parameters:
-        tables:
-          guidestar:
-            resource-name: guidestar
-            mode: update
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/entities/associations/scraper
+# guidestar-scraper:
+#   schedule:
+#     crontab: "0 0 * * *"
+#   pipeline:
+#     - run: add_metadata
+#       parameters:
+#         name: guidestar
+#         title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
+#     - run: load_resource
+#       parameters:
+#         resource: association-registry
+#         url: /var/datapackages/entities/associations/registrar/datapackage.json
+#     - run: load_resource
+#       parameters:
+#         resource: company-registry
+#         url: /var/datapackages/entities/companies/registrar/registry/datapackage.json
+#     - run: filter_heletz
+#     - run: concatenate
+#       parameters:
+#         target:
+#           name: association-registry
+#         fields:
+#           Association_Number:
+#             - Company_Number
+#           Association_Name:
+#             - Company_Name
+#           Association_Registration_Date:
+#             - Company_Registration_Date
+#     - run: manage-revisions
+#       parameters:
+#         resource-name: association-registry
+#         db-table: guidestar
+#         key-fields:
+#           - Association_Number
+#         db-key-fields:
+#           - id
+#         hash-fields: []
+#     - run: scraper
+#       runner: tzabar
+#       parameters:
+#         name: guidestar
+#         path: data/guidestar.csv
+#     - run: set_types
+#       parameters:
+#         types:
+#           association_year_established: { type: integer }
+#           association_founders:
+#             es:itemType: string
+#           association_address_lines:
+#             es:itemType: string
+#           association_online_data_update_year:
+#             type: integer
+#           association_last_report_year:
+#             type: integer
+#           association_num_of_volunteers:
+#             type: number
+#             bareNumber: false
+#             groupChar: ','
+#           association_num_of_employees:
+#             type: number
+#             bareNumber: false
+#             groupChar: ','
+#           association_yearly_turnover:
+#             type: number
+#             bareNumber: false
+#             groupChar: ','
+#     - run: manage-revisions
+#       parameters:
+#         resource-name: guidestar
+#         db-table: guidestar
+#         key-fields:
+#           - id
+#     - run: set_primary_key
+#       parameters:
+#         guidestar:
+#           - id
+#     - run: dump.to_sql
+#       parameters:
+#         tables:
+#           guidestar:
+#             resource-name: guidestar
+#             mode: update
+#     - run: dump.to_path
+#       parameters:
+#         out-path: /var/datapackages/entities/associations/scraper
 
 
 
 guidestar:
-  dependencies:
-    - pipeline: ./entities/associations/guidestar/guidestar-scraper
+  # dependencies:
+  #   - pipeline: ./entities/associations/guidestar/guidestar-scraper
   pipeline:
     - run: add_metadata
       parameters:

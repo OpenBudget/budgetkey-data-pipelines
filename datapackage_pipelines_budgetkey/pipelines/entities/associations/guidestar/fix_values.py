@@ -91,7 +91,7 @@ def process_row(row, row_index, *_):
         if district is not None:
             association_activity_region_districts.add(district)
     row['association_activity_region_districts'] = list(association_activity_region_districts)
-
+    row['association_activity_region_all_country'] = len(row['association_activity_region_districts']) >= 6
     if row['association_field_of_activity']:
         foa = row['association_field_of_activity']
         foa = FIELD_FIXES.get(foa, foa)
@@ -141,6 +141,10 @@ def modify_datapackage(dp, *_):
         {
             'name': 'association_field_of_activity_display',
             'type': 'string',
+        },
+        {
+            'name': 'association_activity_region_all_country',
+            'type': 'boolean',
         },
     ])
     return dp

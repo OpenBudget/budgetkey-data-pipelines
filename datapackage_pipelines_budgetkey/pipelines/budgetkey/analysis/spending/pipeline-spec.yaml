@@ -49,6 +49,10 @@ united:
           payer:
             - supporting_ministry
             - publisher_name
+          min_year:
+            - year_requested
+          max_year:
+            - year_paid
     - run: filter
       parameters:
         out:
@@ -165,7 +169,7 @@ publisher_foa_analysis:
     - run: add_metadata
       parameters:
         name: publisher_foa_analysis
-        title: Publisher-Field od Activity Analysis
+        title: Publisher-Field of Activity Analysis
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/entities/associations/guidestar/datapackage.json
@@ -196,6 +200,15 @@ publisher_foa_analysis:
         fields:
           field_of_activity: 
             name: association_field_of_activity
+    - run: limit_last_years
+      parameters:
+        year_column: max_year
+        target_column: is_new
+        as_bool: true
+    - run: filter
+      parameters:
+        in:
+          - is_new: true        
     - run: delete_fields
       parameters:
         resources: united_spending
@@ -203,6 +216,7 @@ publisher_foa_analysis:
           - entity_id
           - entity_name
           - entity_kind
+          - is_new
     # - run: duplicate
     #   parameters:
     #     source: united_spending

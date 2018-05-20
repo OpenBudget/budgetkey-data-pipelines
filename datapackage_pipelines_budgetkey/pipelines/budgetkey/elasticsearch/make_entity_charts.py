@@ -2,6 +2,7 @@ import os
 from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import process
+from datapackage_pipelines_budgetkey.common.format_number import format_number
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 
@@ -103,23 +104,23 @@ def process_row(row, *_):
             charts[-1]['chart']['parts'].append(
                 {
                     'type': 'comparatron',
-                    'title': 'המחזור הכספי המדווח לארגון בשנת {}: {:,} ₪'.format(last_report_year, yearly_turnover),
+                    'title': 'המחזור הכספי המדווח לארגון בשנת {}: {}'.format(last_report_year, format_number(yearly_turnover)),
                     'chart': {
                         'main': {
                             'amount': yearly_turnover,
-                            'amount_fmt': '{:,} ₪'.format(yearly_turnover),
+                            'amount_fmt': format_number(yearly_turnover),
                             'label': str(last_report_year),
-                            'color': '#D7EEC5'
+                            'color': '#FFAE90'
                         },
                         'compare': {
                             'amount': median_turnover_in_field_of_activity,
-                            'amount_fmt': '{:,} ₪'.format(median_turnover_in_field_of_activity),
+                            'amount_fmt': format_number(median_turnover_in_field_of_activity),
                             'label': 'חציון בתחום {}'.format(foad)
                         },
                     }
                 }
             )
-        if spending_analysis is not None:            
+        if spending_analysis:
             charts.append({
                     'title': 'מקבל כספי ממשלה?',
                     'long_title': 'האם הארגון מקבל כספי ממשלה?',
@@ -135,19 +136,11 @@ def process_row(row, *_):
                 'type': 'template',
                 'template_id': 'org_credentials'
         })
-        if None not in (last_report_year, 
-                        num_of_employees, 
-                        num_of_volunteers, 
-                        top_salary, 
-                        median_top_salary, 
-                        foad):
-            charts.append({
-                'title': 'כמה עובדים ומתנדבים?',
-                'long_title': 'כמה עובדים ומתנדבים בארגון',
-                'type': 'vertical',
-                'chart': {
-                    'parts': [
-                        {
+        parts = []
+        if None not in (num_of_employees, 
+                        num_of_volunteers,
+                        last_report_year):
+            parts.append({
                             'type': 'pointatron',
                             'title': 'מספר העובדים והמתנדבים בארגון בשנת {}'.format(last_report_year),
                             'chart': {
@@ -155,49 +148,56 @@ def process_row(row, *_):
                                     {
                                         'title': 'מספר עובדים',
                                         'amount': num_of_employees,
-                                        'color': '#406025'
+                                        'color': '#6F46E0'
                                     },
                                     {
                                         'title': 'מספר מתנדבים',
                                         'amount': num_of_volunteers,
-                                        'color': '#7FAA5E'
+                                        'color': '#FE8255'
                                     },
                                 ]
                             }
-                        },
-                        {
+                        })
+        if None not in (last_report_year, top_salary, median_top_salary, foad):
+            parts.append({
                             'type': 'comparatron',
                             'title': 'שכר השנתי הגבוה בארגון בשנת {}'.format(last_report_year),
                             'description': '*הנתונים מבוססים ומחושבים על בסיס המידע הזמין ומוצג ב<a href="http://www.guidestar.org.il/he/organization/{}" target="_blank">אתר גיידסטאר</a>'.format(id),
                             'chart': {
                                 'main': {
                                     'amount': top_salary,
-                                    'amount_fmt': '{:,} ₪'.format(top_salary),
+                                    'amount_fmt': format_number(top_salary),
                                     'label': 'מקבל השכר הגבוה בארגון',
-                                    'color': '#D7EEC5'
+                                    'color': '#FFAE90'
                                 },
                                 'compare': {
                                     'amount': median_top_salary,
-                                    'amount_fmt': '{:,} ₪'.format(median_top_salary),
+                                    'amount_fmt': format_number(median_top_salary),
                                     'label': 'חציון בתחום {}'.format(foad)
                                 },
                             }
-                        }
-                    ]
+                        })
+        if len(parts) > 0:
+            charts.append({
+                'title': 'כמה עובדים ומתנדבים?',
+                'long_title': 'כמה עובדים ומתנדבים בארגון',
+                'type': 'vertical',
+                'chart': {
+                    'parts': parts
                 }
             })
         if foad is not None:
             charts.append({
-                    'title': 'מי הארגונים הדומים?',
+                    'title': 'ארגונים נוספים בתחום',
                     'long_title': 'ארגונים הפועלים בתחום {}, לפי גובה המחזור הכספי השנתי'.format(foad),
                     'description': '{} ארגונים נוספים הפועלים בתחום לא דיווחו על על גובה המחזור הכספי השנתי'
                                         .format(num_unreported),
                     'type': 'adamkey',
                     'chart': {
                         'values': [dict(
-                            label='<a href="/i/org/association/{}">{}</a>'.format(x['id'], x['name']),
+                            label='<a href="/i/org/association/{}?theme=budgetkey">{}</a>'.format(x['id'], x['name']),
                             amount=x['amount'],
-                            amount_fmt='{:,} ₪'.format(x['amount']),
+                            amount_fmt=format_number(x['amount']),
                         )
                         for x in reported_list],
                         'selected': selected_index
