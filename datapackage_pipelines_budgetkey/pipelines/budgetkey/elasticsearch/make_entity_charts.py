@@ -115,7 +115,10 @@ def process_row(row, *_):
                         'compare': {
                             'amount': median_turnover_in_field_of_activity,
                             'amount_fmt': format_number(median_turnover_in_field_of_activity),
-                            'label': 'חציון בתחום {}'.format(foad)
+                            'label': '''
+                            <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-toolip'>
+                            מבוסס על נתוני כל הארגונים הפעילים בתחום {foad} אשר דיווחו על גובה המחזור הכספי באחת, או יותר, משלוש השנים האחרונות.
+                            </span></span>'''.format(foad=foad)
                         },
                     }
                 }
@@ -124,7 +127,16 @@ def process_row(row, *_):
             charts.append({
                     'title': 'מקבל כספי ממשלה?',
                     'long_title': 'האם הארגון מקבל כספי ממשלה?',
-                    'description': 'התקשרויות ותמיכות לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.',
+                    'description': '''
+                    <span class='bk-tooltip-anchor'>
+                    התקשרויות ותמיכות<span class='bk-tooltip'>
+                    התקשרות היא הסכם בין המשרד הממשלתי לגורם אחר,
+                     במסגרתו מתחייב הגורם האחר לספק למשרד הממשלתי שירותים או מוצרים בתמורה לתשלום.
+                     <br/>
+                    תמיכה ממשלתית היא סיוע, בכסף ובשווה כסף, שממשלת ישראל מעבירה לגורמים חוץ ממשלתיים 
+                    במטרה לסייע במימון פעילות אשר היא מעוניינת לעודד את קיומה ואשר משרתת את אוכלוסייתה.
+                    </span></span>
+                     לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.''',
                     'type': 'spendomat',
                     'chart': {
                         'data': spending_analysis
@@ -173,7 +185,10 @@ def process_row(row, *_):
                                 'compare': {
                                     'amount': median_top_salary,
                                     'amount_fmt': format_number(median_top_salary),
-                                    'label': 'חציון בתחום {}'.format(foad)
+                                    'label': '''
+                                    <span class='bk-tooltip-anchor'>חציון בתחום {foad}<span class='bk-toolip'>
+                                    מבוסס על נתוני כל הארגונים הפעילים בתחום {foad} אשר דיווחו על גובה השכר באחת, או יותר, משלוש השנים האחרונות.
+                                    </span></span>'''.format(foad=foad)
                                 },
                             }
                         })
