@@ -183,7 +183,6 @@ entities:
   dependencies:
     - pipeline: ./procurement/spending/spending-by-entity
     - pipeline: ./supports/supports-by-entity
-    - pipeline: ./entities/safety-orders/safety-orders-by-entity
 
   pipeline:
     - run: add_metadata
@@ -262,11 +261,6 @@ entities:
             name: max_year
             aggregate: max
 
-    - run: load_resource
-      parameters:
-        url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
-        resource: safety-orders-by-entity
-
 
     # Load entities
     - run: load_resource
@@ -296,22 +290,6 @@ entities:
           received_amount_supports_alltime: null
           min_year: null
           max_year: null
-
-    # Load safety violations for every company
-    - run: join
-      parameters:
-        source:
-          name: safety-orders-by-entity
-          key:
-            - entity_id
-          delete: true
-        target:
-          name: entities
-          key:
-            - id
-          full: true
-        fields:
-          violations: null
 
 
     # Calculate score
