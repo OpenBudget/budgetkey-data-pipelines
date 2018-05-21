@@ -17,5 +17,5 @@ bank_of_israel:
     - run: dump.to_sql
       parameters:
         tables:
-          bank_of_israels:
+          bank_of_israel:
             resource-name: bank_of_israel
