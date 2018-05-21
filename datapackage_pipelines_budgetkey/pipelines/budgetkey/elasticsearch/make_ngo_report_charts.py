@@ -74,7 +74,12 @@ def process_row(row, *_):
                         }
                     },
                     {
-                        'title': 'בעלי אישור ניהול תקין: <span class="figure">{}</span>'.format(details['report'].get('proper_management', {}).get('total_amount', 0)),
+                        'title': '''בעלי
+                        <span class='bk-tooltip-anchor'>אישור ניהול תקין<span class='bk-tooltip'>
+אישור ניהול תקין מרשם העמותות הוא תנאי לקבלת תמיכה מהמדינה.
+ על מנת לקבל אישור ניהול תקין נדרש הארגון לעמוד בדרישות מחמירות יותר מאשר הדרישות הקיימות בחוק העמותות.                        
+                        </span></span>: 
+                         <span class="figure">{}</span>'''.format(details['report'].get('proper_management', {}).get('total_amount', 0)),
                         'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foad),
                         'type': 'horizontal-barchart',
                         'chart': {
@@ -88,7 +93,13 @@ def process_row(row, *_):
                         }
                     },
                     {
-                        'title': 'בעלי סעיף 46: <span class="figure">{}</span>'.format(details['report'].get('has_article_46', {}).get('total_amount', 0)),
+                        'title': '''בעלי
+                        <span class='bk-tooltip-anchor'>סעיף 46<span class='bk-tooltip'>
+סעיף 46 לפקודת מס ההכנסה מגדיר כי תרומה לארגונים
+ המוכרים כארגונים לתועלת הציבור, מעניקה זיכוי בסך 35% מסכום התרומה.
+                        </span></span>: 
+                         
+                         <span class="figure">{}</span>'''.format(details['report'].get('has_article_46', {}).get('total_amount', 0)),
                         'long_title': 'מספר הארגונים הפעילים בתחום {} לפי מחוז'.format(foad),
                         'type': 'horizontal-barchart',
                         'chart': {
@@ -154,7 +165,15 @@ def process_row(row, *_):
             },
             {
                 'title': 'במה מושקע הכסף הממשלתי?',
-                'description': 'הנתונים המוצגים כוללים את העברות הכספים המתועדות במקורות המידע שלנו בשלוש השנים האחרונות',
+                'description': '''
+                <span class='bk-tooltip-anchor'>
+                הנתונים המוצגים כוללים את העברות הכספים המתועדות במקורות המידע שלנו בשלוש השנים האחרונות
+                <span class='bk-tooltip'>
+העברות הכספים הממשלתיות מבוססות על דו"חות ההתקשרויות הרבעוניים של גופי הממשלה.
+ למידע מעודכן בנוגע לגופים שעמדו והפרו את חובת הפרסום, ראו אתר היחידה לחופש המידע במשרד המשפטים.
+                </span>
+                </span>
+                ''',
                 'type': 'spendomat',
                 'chart': {
                     'data': spending_analysis
