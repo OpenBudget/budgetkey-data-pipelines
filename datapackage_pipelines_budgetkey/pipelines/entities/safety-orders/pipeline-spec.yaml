@@ -1,0 +1,94 @@
+safety-orders:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: safety-orders
+        title: All Safety Orders
+    - run: add_resource
+      parameters:
+        url: http://employment.molsa.gov.il/Employment/SafetyAndHealth/Enforcement/Documents/צווי בטיחות.xlsx
+        name: safety-orders-recent
+    - run: add_resource
+      parameters:
+        url: http://employment.molsa.gov.il/Employment/SafetyAndHealth/Enforcement/Documents/orders.xlsx
+        name: safety-orders-old
+    - run: stream_remote_resources
+      parameters:
+        resources: "safety-orders-.+"
+    - run: concatenate
+      parameters:
+        target:
+          name: safety-orders
+        sources:  "safety-orders-.+"
+        fields:
+          date: ["ת. אישור צו"]
+          site: ["שם מפעל/אתר", "שם אתר"]
+          company_name: ["מבצע"]
+          violation: ["עבירה"]
+    - run: set_types
+      parameters:
+        resources: safety-orders
+        types:
+          date:
+            type: date
+            format: "%d/%m/%Y"
+    - run: fingerprint
+      parameters:
+        source-field: company_name
+        resource-name: safety-orders
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/safety-orders/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          safety_orders:
+            resource-name: safety-orders
+
+safety-orders-by-entity:
+  dependencies:
+   - pipeline: ./entities/safety-orders/safety-orders
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: safety-orders-by-entity
+        title: A list of all safety orders issued to each company
+    - run: load_resource
+      parameters:
+        url: dependency://./entities/safety-orders/safety-orders
+        resource: safety-orders
+    - run: concatenate
+      parameters:
+        target:
+          name: safety-orders-by-entity
+        sources:  safety-orders
+        fields:
+          entity_id: []
+          date: []
+          site: []
+          violation: []
+    - run: collate
+      parameters:
+        resource: safety-orders-by-entity
+        collated-field-name: violation-object
+        key:
+          - entity_id
+    - run: join
+      parameters:
+          source:
+            name: safety-orders-by-entity
+            key: ['entity_id']
+            delete: true
+          target:
+            name: safety-orders-by-entity
+            key: null
+          fields:
+            entity_id: null
+            violations:
+              name: violation-object
+              aggregate: array
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/safety-orders/by-entity
