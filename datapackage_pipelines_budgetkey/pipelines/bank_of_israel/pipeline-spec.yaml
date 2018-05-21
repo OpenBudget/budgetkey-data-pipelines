@@ -6,6 +6,7 @@ bank_of_israel:
         title: Bank of Israel
         homepage: https://www.boi.org.il/
     - run: scraper
+      runner: tzabar
       parameters:
         target-resource:
           name: bank_of_israel
