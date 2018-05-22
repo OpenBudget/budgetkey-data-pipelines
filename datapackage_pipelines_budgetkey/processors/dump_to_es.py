@@ -30,6 +30,7 @@ class BoostingMappingGenerator(MappingGenerator):
         return prop
 
 
+
 class DumpToElasticSearch(ESDumper):
     
     def __init__(self):
