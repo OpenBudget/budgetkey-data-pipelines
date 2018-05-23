@@ -149,7 +149,7 @@ def scrape_guidestar(ass_recs):
         assert 'Association_Number' in ass_rec
         anum = ass_rec['Association_Number']
 
-        guidestar_url = 'http://www.guidestar.org.il/he/organization/{}'.format(anum)
+        guidestar_url = 'https://www.guidestar.org.il/he/organization/{}'.format(anum)
         page = None
         while page is None:
             try:
