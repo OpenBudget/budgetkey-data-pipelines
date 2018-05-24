@@ -153,9 +153,14 @@ def scrape_guidestar(ass_recs):
         page = None
         while page is None:
             try:
-                page = requests.get(guidestar_url).text
+                response = requests.get(guidestar_url)
+                if response.status_code == 200:
+                    page = response.text
             except:
                 time.sleep(60)
+        
+        if page is None:
+            continue
 
         csrf = CSRF_RE.findall(page)[0]
         vid = VID_RE.findall(page)[0]
