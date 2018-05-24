@@ -75,6 +75,7 @@ details-scraper:
       parameters:
         name: company-details
         path: data/details.csv
+        db-table: company_details
     - run: set_types
       parameters:
         types:
