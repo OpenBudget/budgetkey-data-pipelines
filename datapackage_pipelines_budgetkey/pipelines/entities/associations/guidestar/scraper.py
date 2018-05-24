@@ -159,8 +159,8 @@ def scrape_guidestar(ass_recs):
             except:
                 time.sleep(60)
         
-        if page is None:
-            continue
+            if page is None:
+               continue
 
         csrf = CSRF_RE.findall(page)[0]
         vid = VID_RE.findall(page)[0]
@@ -192,6 +192,12 @@ def scrape_guidestar(ass_recs):
             except Exception as e:
                 logging.exception('Failed to fetch data for %s: %r', anum, e)
                 time.sleep(60)
+        if data is None:
+            continue
+        for entry in data:
+            if 'result' not in entry:
+                data = None
+                break            
         if data is None:
             continue
 
