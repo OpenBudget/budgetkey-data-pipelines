@@ -37,12 +37,6 @@ for town, municipality in regional_towns.resources[0].iter():
         districts[town] = district
 logging.info('LOADING LAMAS DONE')
 
-primary_categories = json.load(open('activity_areas.json'))
-primary_categories = dict(
-    (x['Secondary_Text__c'], x['Primary_Text__c'])
-    for x in primary_categories[0]['result']
-    if 'Secondary_Text__c' in x
-)
 
 min_activity_year = datetime.datetime.now().year - 3
 
@@ -72,11 +66,6 @@ FIELD_FIXES = {
 }
 
 def process_row(row, row_index, *_):
-    association_activity_region = row.get('association_activity_region')
-    if association_activity_region is not None:
-        row['association_activity_region_list'] = [x.strip() for x in association_activity_region.split(',')]
-    else:
-        row['association_activity_region_list'] = []
     association_activity_region_districts = set()
     for city in row['association_activity_region_list']:
         district = None
@@ -95,11 +84,6 @@ def process_row(row, row_index, *_):
     if row['association_field_of_activity']:
         foa = row['association_field_of_activity']
         foa = FIELD_FIXES.get(foa, foa)
-        try:
-            row['association_primary_field_of_activity'] = primary_categories[foa]
-        except:
-            logging.error('unknown primary field of activity for foa "%s" %s', foa, row_index)
-            row['association_primary_field_of_activity'] = 'unknown'
         prefix = 'אחר - '
         if foa.startswith(prefix):
             foa = foa[len(prefix):]
@@ -110,7 +94,6 @@ def process_row(row, row_index, *_):
         row['association_field_of_activity'] = foa['improved']
         row['association_field_of_activity_display'] = foa['display']
     else:
-        row['association_primary_field_of_activity'] = ''
         row['association_field_of_activity_display'] = 'לא ידוע'
 
     row['association_status_active'] = any(row.get('association_' + x) is not None and row.get('association_' + x) >= min_activity_year 
@@ -121,18 +104,9 @@ def process_row(row, row_index, *_):
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].extend([
         {
-            'name': 'association_activity_region_list',
-            'type': 'array',
-            'es:itemType': 'string'
-        },
-        {
             'name': 'association_activity_region_districts',
             'type': 'array',
             'es:itemType': 'string'
-        },
-        {
-            'name': 'association_primary_field_of_activity',
-            'type': 'string',
         },
         {
             'name': 'association_status_active',
