@@ -98,6 +98,8 @@ def process_row(row, row_index, *_):
 
     row['association_status_active'] = any(row.get('association_' + x) is not None and row.get('association_' + x) >= min_activity_year 
                                            for x in ('last_report_year', 'online_data_update_year'))
+
+    row['association_resolved_title'] = row['association_guidestar_title'] or row['association_title']
     return row
 
 
@@ -119,6 +121,10 @@ def modify_datapackage(dp, *_):
         {
             'name': 'association_activity_region_all_country',
             'type': 'boolean',
+        },
+        {
+            'name': 'association_resolved_title',
+            'type': 'string',
         },
     ])
     return dp

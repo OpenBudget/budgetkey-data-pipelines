@@ -54,7 +54,7 @@ all:
           kind-he-column: association_org_kind
           kind-he: עמותה
           id-column: id
-          name-column: association_title
+          name-column: association_resolved_title
         special-entities:
           kind-column: kind
           kind-he-column: kind_he
