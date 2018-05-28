@@ -15,15 +15,19 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
 
-db_table = parameters.pop('db-table')
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+if 'db-table' in parameters:
+    db_table = parameters.pop('db-table')
+    engine = create_engine(os.environ['DPP_DB_ENGINE'])
+else:
+    db_table = None
+    engine = None
 
 def skip_entry(id):
-    query = 'update {} set (__last_updated_at,__next_update_days)=(current_timestamp,60) where id={}'
-                        .format(db_table, id)
-    logging.info('Skipping company %s', id)
-    logging.info('Query: %r', query)
-    engine.execute(query)
+    if None not in (db_table, engine):
+        query = 'update {} set (__last_updated_at,__next_update_days)=(current_timestamp,60) where id={}'.format(db_table, id)
+        logging.info('Skipping company %s', id)
+        logging.info('Query: %r', query)
+        engine.execute(query)
 
 selectors = {
     'DisplayCompanyPurpose': 'company_goal',
