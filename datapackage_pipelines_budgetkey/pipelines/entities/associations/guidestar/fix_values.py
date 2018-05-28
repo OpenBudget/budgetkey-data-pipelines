@@ -96,8 +96,7 @@ def process_row(row, row_index, *_):
     else:
         row['association_field_of_activity_display'] = 'לא ידוע'
 
-    row['association_status_active'] = any(row.get('association_' + x) is not None and row.get('association_' + x) >= min_activity_year 
-                                           for x in ('last_report_year', 'online_data_update_year'))
+    row['association_status_active'] = row.get('association_last_report_year') is not None and row.get('association_last_report_year') >= min_activity_year
 
     row['association_resolved_title'] = row['association_guidestar_title'] or row['association_title']
     return row

@@ -131,7 +131,7 @@ def scrape_company_details(cmp_recs):
 
         now = time.time()
         count += 1
-        if count > 36000 or erred > 4 or ((now - start) > (3600*6 - 120)):
+        if count > 36000 or erred > 4 or ((now - start) > (1800*5)):
             # limit run time to 6 hours minutes
             logging.info('count=%d, erred=%d, elapsed=%d', count, erred, int(now - start))
             collections.deque(cmp_recs, 0)
