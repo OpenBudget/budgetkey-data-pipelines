@@ -41,7 +41,7 @@ def timestampParser(x):
 
 
 def timestampYearParser(x):
-    return timestampParser(x).year
+    return 1 if x else 0
 
 def newlineRemover(x):
     return x.replace('\n', '')
@@ -134,7 +134,7 @@ rules = [
 
     getter('last_report_year', 0, 'result.lastAddDataYear', [int],
             dict(type='integer')),
-    getter('online_data_update_year', 0, 'result.lastModifiedDate', [timestampYearParser],
+    getter('online_data_update_year', 0, 'result.InactiveMenu.people', [timestampYearParser],
             dict(type='integer')),
 ]
 # TODO:
