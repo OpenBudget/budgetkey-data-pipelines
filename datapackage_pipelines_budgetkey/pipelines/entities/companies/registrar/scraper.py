@@ -17,7 +17,8 @@ parameters, datapackage, res_iter = ingest()
 
 if 'db-table' in parameters:
     db_table = parameters.pop('db-table')
-    engine = create_engine(os.environ['DPP_DB_ENGINE'])
+    connection_string = os.environ['DPP_DB_ENGINE'].replace('@postgres', '@data-next.obudget.org')
+    engine = create_engine(connection_string)
 else:
     db_table = None
     engine = None
