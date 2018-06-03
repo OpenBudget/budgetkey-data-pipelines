@@ -15,7 +15,7 @@ support-criteria:
           path: data/criteria.csv
     - run: parser
     - run: set_types
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/supports/criteria
     - run: dump.to_sql

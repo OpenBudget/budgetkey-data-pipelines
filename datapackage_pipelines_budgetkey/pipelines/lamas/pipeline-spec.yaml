@@ -1,5 +1,5 @@
 municipality-to-city:
-  title: Match Area Municipalities with the list of localities inside them
+  title: קובץ התאמת רשויות אזוריות לישובים בשטחן
   pipeline:
     - run: add_metadata
       parameters:
@@ -9,7 +9,7 @@ municipality-to-city:
         name: municipality-locality-map
         url: "file://municipality-to-city.csv"
     - run: stream_remote_resources
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/lamas-municipality-locality-map/
     - run: dump.to_sql

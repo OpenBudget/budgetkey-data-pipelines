@@ -25,7 +25,7 @@ else:
 
 def skip_entry(id):
     if None not in (db_table, engine):
-        query = 'update {} set (__last_updated_at,__next_update_days)=(current_timestamp,60) where id={}'.format(db_table, id)
+        query = "update {} set (__last_updated_at,__next_update_days)=(current_timestamp,60) where id='{}'".format(db_table, id)
         logging.info('Skipping company %s', id)
         logging.info('Query: %r', query)
         engine.execute(query)

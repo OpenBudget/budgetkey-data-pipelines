@@ -180,6 +180,7 @@ processed:
     - run: add_metadata
       parameters:
         name: procurement-tenders-processed
+        title: כל המכרזים ובקשות הפטור ממכרז
     # Load scraped tenders
     - run: load_resource
       parameters:
@@ -218,7 +219,7 @@ processed:
           procurement_tenders_processed:
             mode: update
             resource-name: tenders
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/procurement/tenders/processed
 
