@@ -28,6 +28,10 @@ def lineSplitter(x):
     return [xx.strip() for xx in x.split('\n')]
 
 
+def pickFirst(x):
+    return x[0] if len(x)>0 else None
+
+
 def commaJoiner(x):
     return ','.join(x)
 
@@ -117,7 +121,9 @@ rules = [
     getter('proper_management', 0, 'result.hasProperManagement', [boolToCred]),
     getter('has_article_46', 0, 'result.approval46', [boolToCred]),
 
-    getter('field_of_activity', 0, 'result.tchumPeilutSecondary', []),
+    getter('field_of_activity', 0, 'result.tchumPeilutSecondary', [pickFirst]),
+    getter('fields_of_activity', 0, 'result.tchumPeilutSecondary', [],
+            {'type':'array', 'es:itemType': 'string'}),
     getter('primary_field_of_activity', 0, 'result.tchumPeilutMain', []),
 
     getter('objective', 0, 'result.orgGoal', [newlineRemover]),
