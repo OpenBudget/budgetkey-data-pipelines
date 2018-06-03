@@ -199,7 +199,9 @@ latest-contract-spending:
     - run: add_metadata
       parameters:
         name: latest-contract-spending
-        title: Latest Contract Spending
+        title: התקשרויות רכש ממשלתיות
+        description: >
+          אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
