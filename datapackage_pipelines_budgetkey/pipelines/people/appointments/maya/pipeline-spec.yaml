@@ -1,0 +1,101 @@
+maya-list:
+  title: List all notifications from maya system
+  description: id, date, company, notification_type, s3_object_name, url
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: scrape-notification-list
+      parameters:
+        name: maya-list-with-fixes
+        from: 2016-01-01
+    - run: store-nomination-to-s3
+    - run: duplicate
+      parameters:
+        source: maya-list-with-fixes
+        target-name: maya-full-list
+        target-path: maya-full-list
+    - run: filter
+      parameters:
+        resources: maya-list-with-fixes
+        out:
+          - fix_for: null
+    - run: join
+      parameters:
+        source:
+          name: maya-list-with-fixes
+          key: ['fix_for']
+          delete: true
+        target:
+          name: maya-full-list
+          key: ['id']
+        fields:
+          fixed_by:
+            name: 'id'
+            aggregate: 'last'
+    - run: filter
+      parameters:
+        resources: maya-full-list
+        in:
+          - fixed_by: null
+    - run: concatenate
+      parameters:
+        target:
+          name: maya-list
+        fields:
+          id: []
+          date: []
+          notification_type: []
+          company: []
+          s3_object_name: []
+          url: []
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/appointments/maya/maya-list
+
+maya-nominations:
+  dependencies:
+   - pipeline: ./people/appointments/maya/maya-list
+  title: Appointment notices from Maya
+  description: Name, job and company description.
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: maya-nominations
+        title: maya nominations (name, title, company, nomination date, document)
+    - run: load_resource
+      parameters:
+        url: dependency://./people/appointments/maya/maya-list
+        resource: maya-list
+    - run: concatenate
+      parameters:
+        target:
+          name: maya-nominations
+        sources: maya-list
+        fields:
+          id: []
+          date: []
+          notification_type: []
+          s3_object_name: []
+          proof_url: ['url']
+    - run: filter
+      parameters:
+        resources: maya-nominations
+        in:
+          - notification_type: ת090
+          - notification_type: ת091
+          - notification_type: ת093
+    - run: scrape-individual-nomination
+    - run: unwind_array
+      parameters:
+        array-field: positions
+        unwound-field: position
+    - run: add_computed_field
+      parameters:
+        resources: maya-nominations
+        fields:
+          - target: details
+            operation: format
+            with: "{name} מונה ל {position}"
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/maya/maya-nominations
