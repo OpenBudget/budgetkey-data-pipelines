@@ -7,6 +7,9 @@ import itertools
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
+from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster_get
+
+
 parameters, datapackage, res_iter = ingest()
 
 url = parameters.get('url')
@@ -14,6 +17,9 @@ resource = parameters.get('resource')
 resource[PROP_STREAMING] = True
 
 content = requests.get(url).content
+if len(content) < 1024:
+    content = cookie_monster_get(url)
+
 content = content.replace(b'\n="', b'\n"')
 content = content.replace(b',="', b',"')
 

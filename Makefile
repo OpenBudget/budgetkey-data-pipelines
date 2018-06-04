@@ -4,7 +4,7 @@ install:
 	pip install --upgrade -e .[develop]
 
 test:
-	tox -r
+	tox
 
 clean:
 	find . -type f -name "*.py[co]" -delete

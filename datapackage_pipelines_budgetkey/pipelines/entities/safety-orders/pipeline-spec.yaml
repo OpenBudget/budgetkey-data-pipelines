@@ -86,7 +86,7 @@ safety-orders-by-entity:
             key: null
           fields:
             entity_id: null
-            violations:
+            safety_violations:
               name: violation-object
               aggregate: array
     - run: dump.to_path

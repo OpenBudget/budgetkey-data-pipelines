@@ -6,7 +6,7 @@ all:
     - run: add_metadata
       parameters:
         name: all-supports
-        title: All support data, in raw form (manually scraped)
+        title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
     - run: add_resource
       parameters:
         name: s2008
@@ -109,7 +109,7 @@ all:
             constraints:
               required: true
               pattern: '[0-9]{10}'
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/supports/all
 

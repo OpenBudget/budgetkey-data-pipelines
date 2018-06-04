@@ -1,9 +1,12 @@
 import time
 import logging
 import collections
+import os
 
 from pyquery import PyQuery as pq
 import requests
+from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError, OperationalError
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -11,6 +14,21 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 parameters, datapackage, res_iter = ingest()
+
+if 'db-table' in parameters:
+    db_table = parameters.pop('db-table')
+    connection_string = os.environ['DPP_DB_ENGINE'].replace('@postgres', '@data-next.obudget.org')
+    engine = create_engine(connection_string)
+else:
+    db_table = None
+    engine = None
+
+def skip_entry(id):
+    if None not in (db_table, engine):
+        query = "update {} set (__last_updated_at,__next_update_days)=(current_timestamp,60) where id='{}'".format(db_table, id)
+        logging.info('Skipping company %s', id)
+        logging.info('Query: %r', query)
+        engine.execute(query)
 
 selectors = {
     'DisplayCompanyPurpose': 'company_goal',
@@ -114,7 +132,7 @@ def scrape_company_details(cmp_recs):
 
         now = time.time()
         count += 1
-        if count > 36000 or erred > 4 or ((now - start) > (3600*6 - 120)):
+        if count > 36000 or erred > 4 or ((now - start) > (1800*5)):
             # limit run time to 6 hours minutes
             logging.info('count=%d, erred=%d, elapsed=%d', count, erred, int(now - start))
             collections.deque(cmp_recs, 0)
@@ -147,6 +165,9 @@ def scrape_company_details(cmp_recs):
                 row[v] = extract(company_rec, k)
                 if k in ('Company.Addresses.0.ZipCode', 'Company.Addresses.0.PostBox') and row[v] is not None:
                     row[v] = str(row[v])
+        else:
+            skip_entry(company_id)
+            continue
 
         yield row
 
