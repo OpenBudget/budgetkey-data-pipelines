@@ -139,14 +139,18 @@ class ObjectStorage(FileBasedStorage):
         else:
             return bool(res)
 
-    def write(self, object_name, data=None, file_name=None, create_bucket=True, public_bucket=False):
+    def write(self, object_name, data=None, file_name=None, create_bucket=True, public_bucket=False, content_type=None):
+        addtional_attrs = {}
+        if content_type is not None:
+            addtional_attrs['ContentType'] = content_type
+        logging.info("Uploading with {}".format(addtional_attrs))
         if not self.s3:
             return super(ObjectStorage, self).write(object_name, data, file_name)
         try:
             if file_name is not None and data is None:
-                self.s3.put_object(Body=open(file_name, 'rb'), Bucket=self.bucket_name, Key=object_name, ACL='public-read')
+                self.s3.put_object(Body=open(file_name, 'rb'), Bucket=self.bucket_name, Key=object_name, ACL='public-read', **addtional_attrs)
             elif data is not None and file_name is None:
-                self.s3.put_object(Body=self.get_write_object_data(data), Bucket=self.bucket_name, Key=object_name, ACL='public-read')
+                self.s3.put_object(Body=self.get_write_object_data(data), Bucket=self.bucket_name, Key=object_name, ACL='public-read', **addtional_attrs)
             else:
                 raise AttributeError()
             return self.urlfor(object_name)
