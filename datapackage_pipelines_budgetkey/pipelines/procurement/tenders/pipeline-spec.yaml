@@ -187,6 +187,7 @@ processed:
         url: /var/datapackages/procurement/tenders/all/datapackage.json
         resource: tenders
     - run: locate_payments      
+    - run: calc_from_payments      
     # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:

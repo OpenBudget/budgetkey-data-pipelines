@@ -40,10 +40,12 @@ def process_row(row, *_):
                     (t[2] and len(t[2]) > 3 and t[2] != 'non' and t[2] in mf)):
                     row[TK] = json.dumps(list(t))
                     break
-        if TK not in row:
+            if TK not in row:
+                row[TK] = None
+                logging.info('Failed to find reference for "%s"', mf)
+                failed.add(mf)
+        else:
             row[TK] = None
-            logging.info('Failed to find reference for "%s"', mf)
-            failed.add(mf)
     else:
         row[TK] = None
     return row
