@@ -35,7 +35,7 @@ def modify_datapackage(dp, *_):
 
 def process_row(row, *_):
     key_fields = ('publication_id', 'tender_type', 'tender_id')
-    key = json.dumps(str(row[k]) for k in key_fields)
+    key = json.dumps([str(row[k]) for k in key_fields])
     row['contracts'] = get_all_contracts(key)
     return row
 
