@@ -6,21 +6,22 @@ from datapackage_pipelines.wrapper import process
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
+from sqlalchemy.sql import text
 
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
 
-query = """
+query = text("""
 with a as (
 select publisher_name, purchasing_unit, purpose, budget_code, budget_title, entity_name, entity_id, entity_kind,
        executed, volume, currency, explanation, payments, start_date, end_date, 
        jsonb_array_elements_text(tender_key) as tender_key
 )
-select * from a where tender_key='%'
-"""
+select * from a where tender_key=:tk
+""")
 
 def get_all_contracts(key):
-    return [dict(r) for r in engine.execute(query % key)]
+    return [dict(r) for r in engine.execute(query, tk=key)]
 
 
 def modify_datapackage(dp, *_):
