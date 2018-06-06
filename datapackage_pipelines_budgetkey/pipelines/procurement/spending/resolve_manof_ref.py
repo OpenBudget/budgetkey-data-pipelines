@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
 
 TK = 'tender_key'
+DISALLOWED = {'9999', '99999', '999999', '000000', '00000', '0000', '1111', 'TEST'}
 db_table = 'procurement_tenders'
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
@@ -35,11 +36,12 @@ def process_row(row, *_):
         mf = mf.strip()
     if mf and len(mf)>3:
         if mf not in failed:
-            for t in all_tenders:
-                if ((t[0] and t[0] in mf) or 
-                    (t[2] and len(t[2]) > 3 and t[2] != 'non' and t[2] in mf)):
-                    row[TK] = json.dumps(list(t))
-                    break
+            if mf not in DISALLOWED:
+                for t in all_tenders:
+                    if ((t[0] and t[0] in mf) or 
+                        (t[2] and len(t[2]) > 3 and t[2] != 'none' and t[2] in mf)):
+                        row[TK] = json.dumps(list(t))
+                        break
             if TK not in row:
                 row[TK] = None
                 logging.info('Failed to find reference for "%s"', mf)
