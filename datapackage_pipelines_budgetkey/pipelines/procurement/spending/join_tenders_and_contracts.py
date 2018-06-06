@@ -14,7 +14,7 @@ key_fields = ('publication_id', 'tender_type', 'tender_id')
 
 def collect_tenders(res):
     for row in res:
-        key = tuple(str(row(k)) for k in key_fields)
+        key = tuple(str(row[k]) for k in key_fields)
         tenders[key] = dict(
             (k, v)
             for k, v in row.items()
