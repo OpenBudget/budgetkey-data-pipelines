@@ -23,13 +23,12 @@ else:
     db_table = None
     engine = None
 
-query = """
+def skip_entry(id):
+    query = """
 update {} 
 set (__last_updated_at,__next_update_days)=(date_trunc('second',current_timestamp),60) 
 where id='{}'
-"""
-
-def skip_entry(id):
+    """
     if None not in (db_table, engine):
         query = query.format(db_table, id)
         logging.info('Skipping company %s', id)
