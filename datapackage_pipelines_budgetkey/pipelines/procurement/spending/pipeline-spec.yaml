@@ -183,6 +183,7 @@ quarterly-contract-spending-reports-data:
         resource: quarterly-contract-spending-reports
         table: quarterly_contract_spending_reports
     - run: stream_remote_resources
+    - run: resolve_manof_ref
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data
@@ -236,6 +237,8 @@ latest-contract-spending:
           executed:
             aggregate: last
           manof_ref:
+            aggregate: set
+          tender_key:
             aggregate: set
           volume:
             aggregate: last
@@ -308,6 +311,8 @@ latest-contract-spending:
             es:itemType: string
             es:hebrew: true
           manof_ref:
+            es:itemType: string
+          tender_key:
             es:itemType: string
           publisher:
             es:itemType: string
