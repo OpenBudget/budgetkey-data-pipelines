@@ -15,7 +15,7 @@ query = text("""
 with a as (
 select publisher_name, purchasing_unit, purpose, budget_code, budget_title, entity_name, entity_id, entity_kind,
        executed, volume, currency, explanation, payments, start_date, end_date, 
-       jsonb_array_elements_text(tender_key) as tender_key
+       jsonb_array_elements_text(tender_key) as tender_key from contract_spending
 )
 select * from a where tender_key=:tk
 """)
