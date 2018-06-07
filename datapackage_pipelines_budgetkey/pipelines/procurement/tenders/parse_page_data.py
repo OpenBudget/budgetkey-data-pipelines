@@ -91,7 +91,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         self.base_object_name = "procurement/tenders/"
 
     def requests_get_content(self, url):
-        return requests.get(url).content
+        return requests.get(url, timeout=60).content
 
     def write_to_object_storage(self, object_name, data):
         logging.error('write_to_object_storage %s', object_name)
@@ -106,8 +106,8 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
             raise Exception("invalid url: {}".format(url))
         filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
-        content = self.requests_get_content(url)
         try:
+            content = self.requests_get_content(url)
             page = pq(content)
             data_elt = page(page(page.children()[1]).children()[0]).children()[0]
             assert b'The requested operation is not supported, and therefore can not be displayed' not in content
