@@ -117,6 +117,8 @@ scraper:
         resource-name: tender-urls
         db-table: procurement_tenders
         key-fields: ['url']
+        db-key-fields:
+          - page_url
         hash-fields: []
     # download the data from pages which don't exist in DB (is_new == True)
     - run: download_pages_data
