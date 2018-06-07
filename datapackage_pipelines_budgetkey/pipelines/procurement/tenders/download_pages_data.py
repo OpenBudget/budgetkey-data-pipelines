@@ -30,6 +30,8 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
     def filter_resource_data(self, data, parameters):
         count = 0
         for exemption in data:
+            if not exemption['__is_stale']:
+                continue
             publisher_id = exemption["id"]
             url = exemption["url"]
             if count < 50000:

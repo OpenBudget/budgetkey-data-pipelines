@@ -115,28 +115,9 @@ scraper:
     - run: manage-revisions
       parameters:
         resource-name: tender-urls
-        db-table: procurement_tender_urls
+        db-table: procurement_tenders
         key-fields: ['url']
-    - run: set_primary_key
-      parameters:
-        tender-urls:
-          - url
-    - run: dump.to_sql
-      parameters:
-        tables:
-          procurement_tender_urls:
-            resource-name: tender-urls
-            mode: update
-    - run: filter
-      parameters:
-        resources: tender-urls
-        in:
-           - 
-            __next_update_days: 1
-    # parse the data for each exemption
-    - run: throttle
-      parameters:
-        sleep-seconds: 1
+        hash-fields: []
     # download the data from pages which don't exist in DB (is_new == True)
     - run: download_pages_data
       runner: tzabar
@@ -144,9 +125,19 @@ scraper:
       runner: tzabar
       parameters:
         output_resource: tenders
+    # parse the data for each exemption
+    - run: throttle
+      parameters:
+        sleep-seconds: 1
     - run: set_types
       parameters:
         resources: tenders
+    - run: manage-revisions
+      parameters:
+        resource-name: tenders
+        db-table: procurement_tenders
+        key-fields:
+          - page_url
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
