@@ -70,30 +70,24 @@ def assert_downloaded_resource(resource, expected_resource):
         assert item["tender_type"] == expected_item["tender_type"]
 
 
-def test():
+def test_download_exemption_pages_data():
     resource = run_download_processor([[
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431", "is_new": True,
+        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
          "tender_type": "exemptions"},
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269", "is_new": True,
+        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=594269",
          "tender_type": "exemptions"},
-        {"id": 71, "url": "/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=666666", "is_new": False,
-         "tender_type": "exemptions"},
-        {"id": 50, "url": "/officestenders/Pages/officetender.aspx?pID=598379", "is_new": True,
+        {"id": 50, "url": "/officestenders/Pages/officetender.aspx?pID=598379",
          "tender_type": "office"},
-        {"id": 21, "url": "/officestenders/Pages/officetender.aspx?pID=596915", "is_new": True,
-         "tender_type": "office"},
-        {"id": 71, "url": "/officestenders/Pages/officetender.aspx?pID=666666", "is_new": False,
+        {"id": 21, "url": "/officestenders/Pages/officetender.aspx?pID=596915",
          "tender_type": "office"},
         {"id": None, "url": "https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2013.aspx",
-         "tender_type": "central", "is_new": True},
-        {"id": None, "url": "https://www.mr.gov.il/CentralTenders/Goods/Pages/3-2014.aspx",
-         "tender_type": "central", "is_new": False},
+         "tender_type": "central"},
         {"id": None, "url": "https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx",
-         "tender_type": "central", "is_new": True},
+         "tender_type": "central"},
         {"id": None, "url": "https://www.mr.gov.il/CentralTenders/Goods/Pages/19-2017.aspx",
-         "tender_type": "central", "is_new": True},
+         "tender_type": "central"},
         {"id": None, "url": "https://www.mr.gov.il/CentralTenders/network/Pages/michraz3.aspx",
-         "tender_type": "central", "is_new": True},
+         "tender_type": "central"},
     ]])
     assert_downloaded_resource(resource, [
         {"pid": 71, "url": "https://www.mr.gov.il/ExemptionMessage/Pages/ExemptionMessage.aspx?pID=595431",
