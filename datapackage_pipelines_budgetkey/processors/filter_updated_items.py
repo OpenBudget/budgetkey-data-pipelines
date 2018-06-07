@@ -37,18 +37,24 @@ def filter_resource(rows, stmt, k_fields, v_fields):
                 logging.info('INCOMING %r', v_values)
                 logging.info('NEW %r != %r', db_values, v_values)
                 yield row
+            else:
+                logging.info('NEW ROW %r', v_values)
+                yield row
         except Exception:
             logging.exception('Failure!')
 
 
 def process_resources(res_iter, resource_name, stmt, k_fields, v_fields):
+    processed = False
     for res in res_iter:
         if res.spec['name'] == resource_name:
             logging.info('processing %s', res.spec['name'])
+            processed = True
             yield filter_resource(res, stmt, k_fields, v_fields)
         else:
             logging.info('skipping %s', res.spec['name'])
             yield res
+    assert processed
 
 
 if __name__ == '__main__':
@@ -62,14 +68,12 @@ if __name__ == '__main__':
     k_fields = params['key_fields']
     v_fields = params['value_fields']
 
+    stmt_fields = ','.join('"{}"'.format(v) for v in v_fields)
+    stmt_condition = ' and '.join('("{}"=:{})'.format(k, k) for k in k_fields)
     stmt = text(' '.join([
-        'select ',
-        ','.join('"{}"'.format(v) for v in v_fields),
-        'from', '"' + db_table + '"',
-        'where',
-        ' and '.join('("{}"=:{})'.format(k, k) for k in k_fields),
-        'order by __updated_timestamp desc',
-        'limit 1'
+        f'select {stmt_fields} from "{db_table}"',
+        f'where {stmt_condition}',
+        f'order by __updated_timestamp desc limit 1'
     ]))
 
     logging.info('statement %s', stmt)

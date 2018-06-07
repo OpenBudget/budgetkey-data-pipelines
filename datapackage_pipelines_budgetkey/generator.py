@@ -25,7 +25,7 @@ class Generator(GeneratorBase):
         assert len(set(primary_key).intersection(set(fields))) == 0
         if history_key is None:
             history_key = '_'.join(sorted(fields))
-        db_table = 'history_{}_{}'.format(resource_name, history_key)
+        db_table = 'history_{}_{}'.format(resource_name, history_key).replace('-', '_')
         target_resource_name = db_table
         return steps(*[
             ('duplicate', {
