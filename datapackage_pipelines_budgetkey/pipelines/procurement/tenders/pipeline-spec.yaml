@@ -219,7 +219,6 @@ processed:
       parameters:
         tables:
           procurement_tenders_processed:
-            mode: update
             resource-name: tenders
     - run: allstar_dumper
       parameters:
