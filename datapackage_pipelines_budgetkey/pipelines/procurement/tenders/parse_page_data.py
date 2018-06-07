@@ -156,31 +156,34 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
 
     def filter_resource_data(self, data, parameters):
         for row in data:
-            page = pq(row["data"])
-            documents = []
-            documents_valid = True
-            for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
-                                                          page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
-                                                          page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
-                update_time = parse_date(update_time_elt.text.split()[-1])
-                if update_time is not None:
-                    update_time = update_time
-                link = self.get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
-                if link is None:
-                    documents_valid = False
-                documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
-                                  "link": link,
-                                  "update_time": update_time})
-            if not documents_valid:
-                continue
-            if row["tender_type"] == "exemptions":
-                yield self.get_exemptions_data(row, page, documents)
-            elif row["tender_type"] == "office":
-                yield self.get_office_data(row, page, documents)
-            elif row["tender_type"] == "central":
-                yield self.get_central_data(row, page, documents)
-            else:
-                raise Exception("invalid tender_type: {}".format(row["tender_type"]))
+            try:
+                page = pq(row["data"])
+                documents = []
+                documents_valid = True
+                for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
+                                                            page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
+                                                            page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
+                    update_time = parse_date(update_time_elt.text.split()[-1])
+                    if update_time is not None:
+                        update_time = update_time
+                    link = self.get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
+                    if link is None:
+                        documents_valid = False
+                    documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
+                                    "link": link,
+                                    "update_time": update_time})
+                if not documents_valid:
+                    continue
+                if row["tender_type"] == "exemptions":
+                    yield self.get_exemptions_data(row, page, documents)
+                elif row["tender_type"] == "office":
+                    yield self.get_office_data(row, page, documents)
+                elif row["tender_type"] == "central":
+                    yield self.get_central_data(row, page, documents)
+                else:
+                    raise Exception("invalid tender_type: {}".format(row["tender_type"]))
+            except:
+                logging.exception('Failed to parse data from %s', row.get('url'))
 
     def get_exemptions_data(self, row, page, documents):
         input_fields_text_map = {
@@ -207,7 +210,7 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
             k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
         publication_id = publication_id_from_url(row["url"])
         if str(publication_id) != str(source_data["publication_id"]):
-            raise Exception("invalid or blocked response")
+            raise Exception("invalid or blocked response (%s != %s)" % (publication_id, source_data["publication_id"]))
         return {
             "publisher_id": int(row["pid"]),
             "publication_id": publication_id,
