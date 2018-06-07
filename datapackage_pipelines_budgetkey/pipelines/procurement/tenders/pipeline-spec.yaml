@@ -117,6 +117,10 @@ scraper:
         resource-name: tender-urls
         db-table: procurement_tender_urls
         key-fields: ['url']
+    - run: set_primary_key
+      parameters:
+        tender-urls:
+          - url
     - run: dump.to_sql
       parameters:
         tables:
