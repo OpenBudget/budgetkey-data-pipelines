@@ -32,14 +32,13 @@ class DownloadPagesDataProcessor(ResourceFilterProcessor):
         for exemption in data:
             publisher_id = exemption["id"]
             url = exemption["url"]
-            if exemption['is_new']:
-                if count < 50000:
-                    try:
-                        count += 1
-                        yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
-                    except HTTPError:
-                        self.stats['failed-urls'] += 1
-                        logging.exception('Failed to load %s', url)
+            if count < 50000:
+                try:
+                    count += 1
+                    yield self._get_exemption_data(publisher_id, url, exemption["tender_type"])
+                except HTTPError:
+                    self.stats['failed-urls'] += 1
+                    logging.exception('Failed to load %s', url)
 
     def get_stats(self):
         return self.stats

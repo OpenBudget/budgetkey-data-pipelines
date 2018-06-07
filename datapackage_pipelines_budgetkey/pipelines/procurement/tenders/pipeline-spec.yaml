@@ -112,14 +112,28 @@ scraper:
           url: []
           tender_type: []
     # adds is_new column which indicates whether item already exists in DB or not (based on publication id and tender_type)
-    - run: check_existing
+    - run: manage-revisions
       parameters:
-        db-table: procurement_tenders
+        resource-name: tender-urls
+        db-table: procurement_tender_urls
+        key-fields: ['url']
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: tender-urls
+            mode: update
+    - run: filter
+      parameters:
+        resources: tender-urls
+        in:
+           - 
+            __next_update_days: 1
     # parse the data for each exemption
     - run: throttle
       parameters:
         sleep-seconds: 1
-    # download the data from pages which don't exist in DB (is_new == False)
+    # download the data from pages which don't exist in DB (is_new == True)
     - run: download_pages_data
       runner: tzabar
     - run: parse_page_data
