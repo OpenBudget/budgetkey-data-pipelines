@@ -11,6 +11,16 @@ from sqlalchemy.sql import text
 
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
+conn = engine.connect()
+
+distinct_tender_keys = set([
+    dict(r)['tender_key'] 
+    for r in conn.execute('''
+        select jsonb_array_elements_text(tender_key) as tender_key 
+        from contract_spending
+        group by 1
+    ''')
+])
 
 query = text("""
 with a as (
@@ -21,7 +31,10 @@ select * from a where tender_key=:tk
 """)
 
 def get_all_contracts(key):
-    return [dict(r) for r in engine.execute(query, tk=key)]
+    if key in distinct_tender_keys:
+        return [dict(r) for r in conn.execute(query, tk=key)]
+    else:
+        return []
 
 
 def modify_datapackage(dp, *_):
