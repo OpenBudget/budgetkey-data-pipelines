@@ -14,7 +14,7 @@ engine = create_engine(connection_string)
 
 query = text("""
 with a as (
-select entity_name, entity_id, entity_kind, executed, volume
+select entity_name, entity_id, entity_kind, executed, volume,
        jsonb_array_elements_text(tender_key) as tender_key from contract_spending
 )
 select * from a where tender_key=:tk
