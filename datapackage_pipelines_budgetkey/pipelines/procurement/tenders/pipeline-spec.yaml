@@ -198,6 +198,16 @@ processed:
       parameters:
         url: /var/datapackages/procurement/tenders/all/datapackage.json
         resource: tenders
+    - run: delete_fields
+      parameters:
+        fields:
+          -  __last_updated_at
+          -  __last_modified_at
+          -  __is_new
+          -  __is_stale
+          -  __staleness
+          -  __next_update_days
+          -  __hash
     - run: process_contracts      
     # Fingerprint exemption suppliers
     - run: fingerprint

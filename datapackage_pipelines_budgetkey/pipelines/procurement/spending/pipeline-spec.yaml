@@ -211,6 +211,10 @@ latest-contract-spending:
         fields:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
+          - name: __last_updated_at
+            format: '%Y-%m-%dT%H:%M:%S'
+          - name: __last_modified_at
+            format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: load_resource
       parameters:
