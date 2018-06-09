@@ -24,7 +24,7 @@ distinct_tender_keys = set([
 
 query = text("""
 with a as (
-select entity_name, entity_id, entity_kind, executed, volume,
+select entity_name, entity_id, entity_kind, executed, volume, supplier_name,
        jsonb_array_elements_text(tender_key) as tender_key from contract_spending
 )
 select * from a where tender_key=:tk
@@ -72,11 +72,16 @@ def process_row(row, *_):
     row['contract_executed'] = sum(c.get('executed', 0) for c in contracts)
     ents = {}
     for contract in contracts:
+        supplier = contract['entity_name']
+        if not supplier and len(contract['supplier_name'])>0:
+            supplier = max(contract['supplier_name'])
+        else:
+            supplier = 'לא ידוע'
         erec = ents.setdefault(
             contract['entity_id'],
             dict(
                 entity_id=contract['entity_id'],
-                entity_name=contract['entity_name'],
+                entity_name=supplier,
                 entity_kind=contract['entity_kind'],
                 volume=Decimal(0),
                 executed=Decimal(0),
