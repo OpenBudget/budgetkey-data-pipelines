@@ -73,12 +73,13 @@ def process_row(row, *_):
     ents = {}
     for contract in contracts:
         supplier = contract['entity_name']
-        if not supplier and len(contract['supplier_name'])>0:
-            supplier = max(contract['supplier_name'])
-        else:
-            supplier = 'לא ידוע'
+        if not supplier:
+            if len(contract['supplier_name'])>0:
+                supplier = max(contract['supplier_name'])
+            else:
+                supplier = 'לא ידוע'
         erec = ents.setdefault(
-            contract['entity_id'],
+            supplier,
             dict(
                 entity_id=contract['entity_id'],
                 entity_name=supplier,
@@ -89,7 +90,7 @@ def process_row(row, *_):
         )
         erec['volume'] += contract.get('volume', 0)
         erec['executed'] += contract.get('executed', 0)
-    ents = list(sorted(ents.values(), key=lambda x: x['volume'], reverse=True))
+    ents = list(sorted(ents.values(), key=lambda x: (x['executed'], x['volume']), reverse=True))
     row['awardees'] = ents
     return row
 
