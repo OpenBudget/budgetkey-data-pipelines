@@ -133,6 +133,7 @@ tenders:
           - page_title
           - reason
         target-field: semantic-tags
+    - run: add_tender_timeline      
   date-range:
     type: date-range
     from-field: start_date
