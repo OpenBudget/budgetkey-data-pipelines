@@ -30,6 +30,11 @@ def process_row(row, *_):
             ))
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
     row['timeline'] = timeline
+
+    if row.get('subjects'):
+        row['subject_list'] = [x.strip() for x in row['subjects'].split(';')]
+    else:
+        row['subject_list'] = []
     return row
 
 
@@ -40,6 +45,11 @@ def modify_datapackage(dp, *_):
             'type': 'array',
             'es:itemType': 'object',
             'es:index': False
+        },
+        {
+            'name': 'subject_list',
+            'type': 'array',
+            'es:itemType': 'string',
         }
     )
     return dp
