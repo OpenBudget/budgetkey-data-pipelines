@@ -21,12 +21,13 @@ def process_row(row, *_):
                     title = title
                 ))
     for document in row.get('documents', []):
-        timeline.append(dict(
-            timestamp = document['update_time'],
-            url = document['link'],
-            title = document['description'],
-            major = False
-        ))
+        if document['update_time']:
+            timeline.append(dict(
+                timestamp = document['update_time'],
+                url = document['link'],
+                title = 'צירוף קובץ: {}'.format(document['description']),
+                major = False
+            ))
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
     row['timeline'] = timeline
     return row
