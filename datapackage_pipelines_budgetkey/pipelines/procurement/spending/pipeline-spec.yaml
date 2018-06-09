@@ -207,7 +207,7 @@ latest-contract-spending:
       parameters:
         datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
         resource: tenders
-        table: procurement_tenders
+        table: procurement_tenders_processed
         fields:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
