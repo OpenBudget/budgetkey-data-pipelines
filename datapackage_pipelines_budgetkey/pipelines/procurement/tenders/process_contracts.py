@@ -72,12 +72,14 @@ def process_row(row, *_):
     row['contract_executed'] = sum(c.get('executed', 0) for c in contracts)
     ents = {}
     for contract in contracts:
+
         supplier = contract['entity_name']
         if not supplier:
             if len(contract['supplier_name'])>0:
                 supplier = max(contract['supplier_name'])
             else:
                 supplier = 'לא ידוע'
+
         erec = ents.setdefault(
             supplier,
             dict(

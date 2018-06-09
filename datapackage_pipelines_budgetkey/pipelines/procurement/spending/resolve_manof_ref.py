@@ -38,7 +38,7 @@ def process_row(row, *_):
         if mf not in failed:
             if mf not in DISALLOWED:
                 for t in all_tenders:
-                    if ((t[0] and len(t[0]) > 3 and t[0] in mf) or 
+                    if ((t[0] and len(t[0]) > 3 and t[0]} in mf) or 
                         (t[2] and len(t[2]) > 3 and t[2] != 'none' and t[2] in mf)):
                         row[TK] = json.dumps(list(t))
                         break
