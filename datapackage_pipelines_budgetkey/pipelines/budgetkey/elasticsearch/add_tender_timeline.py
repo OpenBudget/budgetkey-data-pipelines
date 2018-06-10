@@ -1,4 +1,10 @@
+import itertools
+
 from datapackage_pipelines.wrapper import process
+
+def date_for_period(x):
+    return x
+
 
 def process_row(row, *_):
     majors = [
@@ -27,6 +33,17 @@ def process_row(row, *_):
                 url = document['link'],
                 title = 'צירוף קובץ: {}'.format(document['description']),
                 major = False
+            ))
+    payments = sorted(set(p for a in row.get('awardees', []) for p in a.get('payments', [])))
+    for period, payments in itertools.groupby(payments, lambda t: t[0]):
+        paid = sum(t[1] for t in payments)
+        if paid > 0:
+            percent = 100*paid/row['contract_executed']
+            timeline.append(dict(
+                timestamp = date_for_period(period),
+                title = 'תשלום של {:,}₪, {}% מהסכום'.format(paid, percent),
+                major = True,
+                percent = percent
             ))
     
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
