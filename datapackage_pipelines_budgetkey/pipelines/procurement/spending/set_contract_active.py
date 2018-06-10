@@ -22,7 +22,7 @@ def convert(year, period):
 def process_row(row, *_):
     active = True
     if row['end_date']:
-        active = now < row['end_date'].date()
+        active = now < row['end_date']
     else:
         last_activity = [
             convert(p['year'], p['period'])
