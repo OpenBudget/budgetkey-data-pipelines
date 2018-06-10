@@ -28,6 +28,7 @@ def process_row(row, *_):
                 title = 'צירוף קובץ: {}'.format(document['description']),
                 major = False
             ))
+    
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
     row['timeline'] = timeline
 

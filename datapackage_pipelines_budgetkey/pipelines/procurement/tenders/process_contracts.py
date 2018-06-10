@@ -24,7 +24,7 @@ distinct_tender_keys = set([
 
 query = text("""
 with a as (
-select entity_name, entity_id, entity_kind, executed, volume, supplier_name,
+select entity_name, entity_id, entity_kind, executed, volume, supplier_name, payments,
        jsonb_array_elements_text(tender_key) as tender_key from contract_spending
 )
 select * from a where tender_key=:tk
@@ -70,15 +70,26 @@ def process_row(row, *_):
     contracts = get_all_contracts(key)
     row['contract_volume'] = sum(c.get('volume', 0) for c in contracts)
     row['contract_executed'] = sum(c.get('executed', 0) for c in contracts)
+    timestamps = sorted(set(p['timestamp'] for c in contracts for p in c['payments']))
     ents = {}
     for contract in contracts:
-
         supplier = contract['entity_name']
         if not supplier:
             if len(contract['supplier_name'])>0:
                 supplier = max(contract['supplier_name'])
             else:
                 supplier = 'לא ידוע'
+
+        executed = 0
+        payments = {}
+        for t in timestamps:
+            for p in contract['payments']:
+                if p['timestamp'] == t:
+                    executed = p['executed']
+                    payments[t] = executed
+                    break
+            if t not in payments:
+                payments[t] = executed
 
         erec = ents.setdefault(
             supplier,
@@ -88,11 +99,16 @@ def process_row(row, *_):
                 entity_kind=contract['entity_kind'],
                 volume=Decimal(0),
                 executed=Decimal(0),
+                payments=dict((t, (t, 0)) for t in timestamps)
             )
         )
+        for t in timestamps:
+            erec['payments'][t] += payments[t]
         erec['volume'] += contract.get('volume', 0)
         erec['executed'] += contract.get('executed', 0)
     ents = list(sorted(ents.values(), key=lambda x: (x['executed'], x['volume']), reverse=True))
+    for e in ents:
+        e['payments'] = sorted(e['payments'].values())
     row['awardees'] = ents
     return row
 
