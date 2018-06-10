@@ -24,7 +24,7 @@ distinct_tender_keys = set([
 
 query = text("""
 with a as (
-select entity_name, entity_id, entity_kind, executed, volume, supplier_name, payments,
+select entity_name, entity_id, entity_kind, executed, volume, supplier_name, payments, contract_is_active,
        jsonb_array_elements_text(tender_key) as tender_key from contract_spending
 )
 select * from a where tender_key=:tk
@@ -56,8 +56,11 @@ def modify_datapackage(dp, *_):
                     {'name': 'entity_id', 'type': 'string'},
                     {'name': 'entity_name', 'type': 'string'},
                     {'name': 'entity_kind', 'type': 'string'},
+                    {'name': 'active', 'type': 'boolean'},
                     {'name': 'volume', 'type': 'number'},
                     {'name': 'executed', 'type': 'number'},
+                    {'name': 'payments', 'type': 'array', 
+                     'es:itemType': 'object', 'es:index': False},
                 ]
             }
         }
@@ -97,6 +100,7 @@ def process_row(row, *_):
                 entity_id=contract['entity_id'],
                 entity_name=supplier,
                 entity_kind=contract['entity_kind'],
+                active=contract['contract_is_active'],
                 volume=Decimal(0),
                 executed=Decimal(0),
                 payments=dict((t, [t, 0]) for t in timestamps)
