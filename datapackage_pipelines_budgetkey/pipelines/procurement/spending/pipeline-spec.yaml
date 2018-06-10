@@ -184,6 +184,10 @@ quarterly-contract-spending-reports-data:
         table: quarterly_contract_spending_reports
     - run: stream_remote_resources
     - run: resolve_manof_ref
+    - run: sort
+      parameters:
+        resources: quarterly-contract-spending-reports
+        sort-by: "{report-date}"
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data
