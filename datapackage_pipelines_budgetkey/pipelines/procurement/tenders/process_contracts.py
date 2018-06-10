@@ -99,11 +99,11 @@ def process_row(row, *_):
                 entity_kind=contract['entity_kind'],
                 volume=Decimal(0),
                 executed=Decimal(0),
-                payments=dict((t, (t, 0)) for t in timestamps)
+                payments=dict((t, [t, 0]) for t in timestamps)
             )
         )
         for t in timestamps:
-            erec['payments'][t] += payments[t]
+            erec['payments'][t][1] += payments[t]
         erec['volume'] += contract.get('volume', 0)
         erec['executed'] += contract.get('executed', 0)
     ents = list(sorted(ents.values(), key=lambda x: (x['executed'], x['volume']), reverse=True))
