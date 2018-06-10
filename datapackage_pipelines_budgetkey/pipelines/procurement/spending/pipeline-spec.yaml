@@ -336,6 +336,9 @@ latest-contract-spending:
               fields:
                 - { 'name': 'year', 'type': 'integer' }
                 - { 'name': 'period', 'type': 'integer' }
+                - { 'name': 'date', 'type': 'string' }
+                - { 'name': 'title', 'type': 'string' }
+                - { 'name': 'url', 'type': 'string' }
                 - { 'name': 'timestamp', 'type': 'string' }
                 - { 'name': 'executed', 'type': 'number' }
                 - { 'name': 'volumne', 'type': 'number' }

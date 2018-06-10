@@ -39,7 +39,7 @@ def process_row(row, *_):
 
 
 def modify_datapackage(dp, *_):
-    dp['resources'][0]['schema']['fields'].append(
+    dp['resources'][0]['schema']['fields'].extend([
         {
             'name': 'timeline',
             'type': 'array',
@@ -51,7 +51,7 @@ def modify_datapackage(dp, *_):
             'type': 'array',
             'es:itemType': 'string',
         }
-    )
+    ])
     return dp
 
 
