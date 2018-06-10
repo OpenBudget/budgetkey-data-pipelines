@@ -18,7 +18,11 @@ to_select = ','.join(key_fields)
 
 all_tenders = set()
 for result in engine.execute(f'select {to_select} from {db_table}'):
-    all_tenders.add(tuple(str(result[k]) for k in key_fields))
+    all_tenders.add(tuple(str(result[k]).strip() for k in key_fields))
+all_tenders_dict = dict(
+    [(t[0], t) for t in all_tenders if t[0] and len(t[0]) > 3] +
+    [(t[2], t) for t in all_tenders if t[2] and len(t[2]) > 3 and t[2] != 'none']
+)
 
 logging.info('Collected %d tenders and exemptions', len(all_tenders))
 
@@ -37,11 +41,14 @@ def process_row(row, *_):
     if mf and len(mf)>3:
         if mf not in failed:
             if mf not in DISALLOWED:
-                for t in all_tenders:
-                    if ((t[0] and len(t[0]) > 3 and t[0] in mf) or
-                        (t[2] and len(t[2]) > 3 and t[2] != 'none' and t[2] in mf)):
-                        row[TK] = json.dumps(list(t))
-                        break
+                if mf in all_tenders_dict:
+                    row[TK] = json.dumps(list(all_tenders_dict[mf]))
+                else:
+                    for t in all_tenders:
+                        if ((t[0] and len(t[0]) > 3 and t[0] in mf) or
+                            (t[2] and len(t[2]) > 3 and t[2] != 'none' and t[2] in mf)):
+                            row[TK] = json.dumps(list(t))
+                            break
             if TK not in row:
                 row[TK] = None
                 logging.info('Failed to find reference for "%s"', mf)
