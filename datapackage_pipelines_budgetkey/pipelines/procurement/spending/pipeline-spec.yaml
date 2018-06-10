@@ -288,6 +288,7 @@ latest-contract-spending:
             name: payment
             aggregate: array
     - run: join_tenders_and_contracts
+    - run: set_contract_active
     - run: sample
     - run: set_types
       parameters:
