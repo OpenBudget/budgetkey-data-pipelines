@@ -21,6 +21,8 @@ distinct_tender_keys = set([
         group by 1
     ''')
 ])
+logging.info('Found %d distinct tender keys (in contracts)', 
+             len(distinct_tender_keys))
 
 query = text("""
 with a as (
