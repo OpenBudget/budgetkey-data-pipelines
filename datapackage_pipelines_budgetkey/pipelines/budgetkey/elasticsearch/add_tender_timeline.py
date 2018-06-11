@@ -1,4 +1,5 @@
 import itertools
+import logging
 
 from datapackage_pipelines.wrapper import process
 
@@ -38,13 +39,19 @@ def process_row(row, *_):
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
         paid = sum(t[1] for t in payments)
         if paid > 0:
-            percent = 100*paid/float(row['contract_executed'])
-            timeline.append(dict(
-                timestamp = date_for_period(period),
-                title = 'תשלום של {:,}₪, {}% מהסכום'.format(paid, percent),
-                major = True,
-                percent = percent
-            ))
+            executed = float(row['contract_executed'])
+            if executed == 0:
+                logging.error('Paid > 0 while Executed == 0 for row %s/%s/%s', 
+                              row['publication_id'], row['tender_type'], row['tender_id'])
+                break
+            else: 
+                percent = 100*paid/executed
+                timeline.append(dict(
+                    timestamp = date_for_period(period),
+                    title = 'תשלום של {:,}₪, {}% מהסכום'.format(paid, percent),
+                    major = True,
+                    percent = percent
+                ))
     
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
     row['timeline'] = timeline
