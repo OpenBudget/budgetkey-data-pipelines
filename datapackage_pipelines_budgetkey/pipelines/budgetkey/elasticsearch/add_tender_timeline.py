@@ -1,10 +1,9 @@
 import itertools
 import logging
 
-from datapackage_pipelines.wrapper import process
+from datapackage_pipelines_budgetkey.common.periods import convert_period
 
-def date_for_period(x):
-    return x
+from datapackage_pipelines.wrapper import process
 
 
 def process_row(row, *_):
@@ -37,18 +36,26 @@ def process_row(row, *_):
             ))
     payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
+        period = convert_period(period)
+        if period is None:
+            continue
         paid = sum(t[1] for t in payments)
         if paid > 0:
             executed = float(row['contract_executed'])
+            volume = float(row['contract_volume'])
             if executed == 0:
                 logging.error('Paid > 0 while Executed == 0 for row %s/%s/%s', 
                               row['publication_id'], row['tender_type'], row['tender_id'])
                 break
+            elif volume == 0:
+                logging.error('Paid > 0 while Volume == 0 for row %s/%s/%s', 
+                              row['publication_id'], row['tender_type'], row['tender_id'])
+                break
             else: 
-                percent = 100*paid/executed
+                percent = 100 * paid / volume
                 timeline.append(dict(
-                    timestamp = date_for_period(period),
-                    title = 'תשלום של {:,}₪, {}% מהסכום'.format(paid, percent),
+                    timestamp = str(period),
+                    title = 'תשלום של ₪{:,.0f}, {:.0f}% מהסכום'.format(paid, percent),
                     major = True,
                     percent = percent
                 ))

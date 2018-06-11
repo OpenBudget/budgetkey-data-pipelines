@@ -1,4 +1,7 @@
+import datetime
+
 from datapackage_pipelines.wrapper import process
+
 
 def process_row(row, row_index,
                 spec, resource_index,

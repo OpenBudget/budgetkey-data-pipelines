@@ -2,21 +2,9 @@ import datetime
 
 from datapackage_pipelines.wrapper import process
 
+from datapackage_pipelines_budgetkey.common.periods import convert_period
+
 now = datetime.datetime.now().date()
-quarters_to_dates = {
-    '1': (0, 5),
-    '2': (0, 8),
-    '3': (0, 11),
-    '4': (1, 2),
-}
-def convert(year, period):
-    period = str(period)
-    qtd = quarters_to_dates.get(period)
-    if qtd is None:
-        return None
-    overflow, month = qtd
-    year = int(year) + overflow
-    return datetime.date(year=year, month=month, day=15)
     
 
 def process_row(row, *_):
@@ -25,7 +13,7 @@ def process_row(row, *_):
         active = now < row['end_date']
     else:
         last_activity = [
-            convert(p['year'], p['period'])
+            convert_period(p['timestamp'])
             for p in row['payments']
         ]
         last_activity = [x for x in last_activity if x is not None]
