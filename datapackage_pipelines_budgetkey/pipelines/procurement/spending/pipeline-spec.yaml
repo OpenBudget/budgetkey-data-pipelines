@@ -187,7 +187,7 @@ quarterly-contract-spending-reports-data:
     - run: sort
       parameters:
         resources: quarterly-contract-spending-reports
-        sort-by: "{report-date}"
+        sort-by: "{report-year}-{report-period}"
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data
