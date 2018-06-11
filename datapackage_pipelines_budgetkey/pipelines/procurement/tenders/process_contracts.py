@@ -4,6 +4,7 @@ import json
 from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
+from datapackage_pipelines.utilities.kvstore import KVStore
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
@@ -12,6 +13,7 @@ from sqlalchemy.sql import text
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
 conn = engine.connect()
+contracts = KVStore()
 
 distinct_tender_keys = set([
     dict(r)['tender_key'] 
@@ -25,16 +27,22 @@ logging.info('Found %d distinct tender keys (in contracts)',
              len(distinct_tender_keys))
 
 query = text("""
-with a as (
 select entity_name, entity_id, entity_kind, executed, volume, supplier_name, payments, contract_is_active,
        jsonb_array_elements_text(tender_key) as tender_key from contract_spending
-)
-select * from a where tender_key=:tk
 """)
+for r in conn.execute(query):
+    r = dict(r)
+    key = r['tender_key']
+    try:
+        data = contracts[key]
+    except KeyError:
+        data = []
+    data.append(r)
+    contracts[key] = data
 
 def get_all_contracts(key):
     if key in distinct_tender_keys:
-        return [dict(r) for r in conn.execute(query, tk=key)]
+        return contracts[key]
     else:
         return []
 
