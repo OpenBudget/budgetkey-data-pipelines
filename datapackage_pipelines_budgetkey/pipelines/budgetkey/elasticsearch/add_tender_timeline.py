@@ -38,7 +38,7 @@ def process_row(row, *_):
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
         paid = sum(t[1] for t in payments)
         if paid > 0:
-            percent = 100*paid/row['contract_executed']
+            percent = 100*paid/float(row['contract_executed'])
             timeline.append(dict(
                 timestamp = date_for_period(period),
                 title = 'תשלום של {:,}₪, {}% מהסכום'.format(paid, percent),
