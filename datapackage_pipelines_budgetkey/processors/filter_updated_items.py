@@ -26,8 +26,8 @@ def filter_resource(rows, stmt, k_fields, v_fields):
         try:
             params = dict((k, row[k]) for k in k_fields)
             db_values = conn.execute(stmt, **params).first()
+            v_values = [row[v] for v in v_fields]
             if db_values:
-                v_values = [row[v] for v in v_fields]
                 if all((db_value == v_value)
                        for db_value, v_value
                        in zip(db_values, v_values)):

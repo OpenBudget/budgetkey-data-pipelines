@@ -36,7 +36,7 @@ def process_row(row, *_):
             ))
     payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
-        period = convert_period(period)
+        period = convert_period(period, False)
         if period is None:
             continue
         paid = sum(t[1] for t in payments)
