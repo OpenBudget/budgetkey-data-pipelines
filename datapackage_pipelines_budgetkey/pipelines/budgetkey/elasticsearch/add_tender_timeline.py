@@ -34,7 +34,7 @@ def process_row(row, *_):
                 title = 'צירוף קובץ: {}'.format(document['description']),
                 major = False
             ))
-    payments = sorted(set(p for a in row.get('awardees', []) for p in a.get('payments', [])))
+    payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
         paid = sum(t[1] for t in payments)
         if paid > 0:
