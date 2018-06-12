@@ -219,6 +219,8 @@ latest-contract-spending:
             format: "%Y-%m-%dT%H:%M:%S"
           - name: __last_modified_at
             format: "%Y-%m-%dT%H:%M:%S"
+          - name: __created_at
+            format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: load_resource
       parameters:

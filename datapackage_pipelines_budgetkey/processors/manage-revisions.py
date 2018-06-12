@@ -116,6 +116,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
                 prefix+'__staleness': 200000,
                 prefix+'__last_updated_at': now,
                 prefix+'__last_modified_at': now,
+                prefix+'__created_at': now,
                 prefix+'__next_update_days': 1,
                 prefix+'__hash': hash,
             })
@@ -155,6 +156,7 @@ def main():
     STATUS_FIELDS = [
         {'name': prefix+'__last_updated_at',  'type': 'datetime'},
         {'name': prefix+'__last_modified_at', 'type': 'datetime'},
+        {'name': prefix+'__created_at',       'type': 'datetime'},
         {'name': prefix+'__is_new',           'type': 'boolean'},
         {'name': prefix+'__is_stale',         'type': 'boolean'},
         {'name': prefix+'__staleness',        'type': 'integer'},
