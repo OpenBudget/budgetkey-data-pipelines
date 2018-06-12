@@ -209,6 +209,7 @@ processed:
           -  __next_update_days
           -  __hash
     - run: process_contracts      
+    - run: set_snippet      
     # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:

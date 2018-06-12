@@ -113,7 +113,7 @@ tenders:
   revision: 7
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
-  page-title-pattern: 'הליך רכש של {publisher}'
+  page-title-pattern: '{snippet}'
   key-fields:
     - tender_type
     - publication_id
