@@ -30,10 +30,18 @@ scraper-exemptions:
       parameters:
         tender_type: exemptions
         output_resource: exemptions
+        db-table: procurement_tender_urls
       runner: tzabar
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/tenders/scraper-exemptions
+        exemptions:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: exemptions
+            mode: update
 
 scraper-office:
   schedule:
@@ -64,10 +72,18 @@ scraper-office:
       parameters:
         tender_type: office
         output_resource: office
+        db-table: procurement_tender_urls
       runner: tzabar
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/tenders/scraper-office
+        office:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: office
+            mode: update
 
 scraper-central:
   schedule:
@@ -79,9 +95,16 @@ scraper-central:
     - run: throttle
     - run: add_central_urls_resource
       runner: tzabar
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/tenders/scraper-central
+        central:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: central
+            mode: update
 
 scraper:
   dependencies:
@@ -90,18 +113,11 @@ scraper:
     - pipeline: ./procurement/tenders/scraper-central
 
   pipeline:
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
+        datapackage: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
         resource: exemptions
-        url: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: office
-        url: /var/datapackages/procurement/tenders/scraper-office/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: central
-        url: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
+        table: procurement_tender_urls
     - run: stream_remote_resources
     - run: concatenate
       parameters:
