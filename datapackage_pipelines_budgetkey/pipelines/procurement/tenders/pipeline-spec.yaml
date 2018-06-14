@@ -105,6 +105,9 @@ scraper-central:
           procurement_tender_urls:
             resource-name: central
             mode: update
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/scraper-central
 
 scraper:
   dependencies:
@@ -115,8 +118,8 @@ scraper:
   pipeline:
     - run: add_sql_resource
       parameters:
-        datapackage: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
-        resource: exemptions
+        datapackage: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
+        resource: central
         table: procurement_tender_urls
     - run: stream_remote_resources
     - run: concatenate
