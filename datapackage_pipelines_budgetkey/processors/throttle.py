@@ -5,6 +5,7 @@ import time, logging, datetime, sys
 def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
     last_log_seconds = 0
     num_processed_rows = 0
+    slept = 0
     for row in resource:
         yield row
         sys.stdout.flush()
@@ -13,12 +14,13 @@ def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
         seconds_since_last_log = elapsed_seconds - last_log_seconds
         if seconds_since_last_log > log_interval_seconds:
             last_log_seconds = elapsed_seconds
-            logging.info("processed {} rows, elapsed time (seconds)={}".format(num_processed_rows,
-                                                                               elapsed_seconds))
+            logging.info("processed {} rows, elapsed time (seconds)={}, sleep={}, slept={}"
+                         .format(num_processed_rows, elapsed_seconds, sleep_seconds, slept))
         to_sleep = (num_processed_rows * sleep_seconds) - elapsed_seconds
         if to_sleep > 10:
             logging.info('Going too fast, will sleep now for %d seconds', to_sleep)
             time.sleep(to_sleep)
+            slept += to_sleep
 
 
 def filter_resources(datapackage, resources, parameters):

@@ -115,6 +115,9 @@ scraper:
     - pipeline: ./procurement/tenders/scraper-office
     - pipeline: ./procurement/tenders/scraper-central
 
+  schedule:
+    crontab: "0 4 * * *"
+
   pipeline:
     - run: add_sql_resource
       parameters:
@@ -231,7 +234,7 @@ processed:
           -  __next_update_days
           -  __hash
     - run: process_contracts      
-    - run: set_snippet      
+    - run: extra_values      
     # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:
