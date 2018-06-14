@@ -15,7 +15,10 @@ def filter_resource(resource, sleep_seconds, start_time, log_interval_seconds):
             last_log_seconds = elapsed_seconds
             logging.info("processed {} rows, elapsed time (seconds)={}".format(num_processed_rows,
                                                                                elapsed_seconds))
-        time.sleep(sleep_seconds)
+        to_sleep = (num_processed_rows * sleep_seconds) - elapsed_seconds
+        if to_sleep > 10:
+            logging.info('Going too fast, will sleep now for %d seconds', to_sleep)
+            time.sleep(to_sleep)
 
 
 def filter_resources(datapackage, resources, parameters):
