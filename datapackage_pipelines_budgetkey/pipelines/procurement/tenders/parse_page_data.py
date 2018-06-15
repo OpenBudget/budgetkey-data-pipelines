@@ -106,6 +106,11 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
         if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
             raise Exception("invalid url: {}".format(url))
         filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
+        decoded_indicator = self.base_object_name + filename + '.decoded'
+        if object_storage.exists(decoded_indicator):
+            decoded_indicator_url = object_storage.urlfor(decoded_indicator)
+            ret = requests.get(decoded_indicator_url).text
+            return ret
         try:
             content = self.requests_get_content(url)
             page = pq(content)
@@ -143,7 +148,9 @@ class ParsePageDataProcessor(ResourceFilterProcessor):
                     ext = mimetypes.guess_extension(guessed_mime)
         assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s ext:%r buffer:%r" % (mime, orig_filename, guessed_mime, ext, buffer[:128])
         object_name = self.base_object_name + filename + (ext if ext else "")
-        return self.write_to_object_storage(object_name, buffer)
+        ret = self.write_to_object_storage(object_name, buffer)
+        self.write_to_object_storage(decoded_indicator, ret)
+        return ret
 
     def get_document_link(self, base_url, href):
         source_url = "{}{}".format(base_url, href)
