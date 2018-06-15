@@ -51,7 +51,7 @@ def process_row(row, *_):
         if not awardees:
             extended_status = 'הושלם תהליך הרכש - לא החלה התקשרות'
         elif len(awardees) > 0:
-            if any(awardee['acrive'] for awardee in awardees):
+            if any(awardee['active'] for awardee in awardees):
                 extended_status = 'הושלם תהליך הרכש - החלה התקשרות'
             else:
                 extended_status = 'הושלם תהליך הרכש והושלמה ההתקשרות'
