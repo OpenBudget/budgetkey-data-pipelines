@@ -25,8 +25,10 @@ def filter_resource(rows, stmt, k_fields, v_fields):
             logging.info('connected to db')            
         try:
             params = dict((k, row[k]) for k in k_fields)
-            db_values = conn.execute(stmt, **params).first()
             v_values = [row[v] for v in v_fields]
+            if any(v in (None, '') for v in v_values):
+                continue
+            db_values = conn.execute(stmt, **params).first()
             if db_values:
                 if all((db_value == v_value)
                        for db_value, v_value
