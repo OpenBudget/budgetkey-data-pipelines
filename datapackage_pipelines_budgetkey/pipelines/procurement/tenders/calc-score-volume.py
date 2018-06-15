@@ -3,6 +3,23 @@ import datetime
 import logging
 from datapackage_pipelines.wrapper import process
 
+decision_boosters = {
+    'מכרז פתוח': 10,
+    'בתהליך': 2
+}
+
+tender_type_boosters = {
+    'central': 4,
+    'office': 2,
+    'exemptions': 1
+}
+
+base = {
+    'central': 100000,
+    'office': 10000,
+    'exemptions': 50
+}
+
 
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
@@ -14,11 +31,14 @@ def modify_datapackage(dp, *_):
 
 
 def process_row(row, *_):
-    amount = row.get('volume', 0)
-    if amount is None:
-        # logging.warning('volume is None: %r', row)
-        amount = 0
-    row['score'] = max(1, amount / 1000)
+    amount = row.get('volume') or row.get('contract_volume')
+    if not amount:
+        amount = base.get(row['tender_type'], 1)
+    else:
+        amount = amount / 1000
+    amount *= decision_boosters.get(row['simple_decision'], 1)
+    amount *= tender_type_boosters.get(row['tender_type'], 1)
+    row['score'] = amount
     return row
 
 

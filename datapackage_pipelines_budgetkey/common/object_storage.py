@@ -11,6 +11,8 @@ import datetime
 from contextlib import contextmanager
 from tempfile import mkdtemp
 
+logging.getLogger('botocore').setLevel(logging.INFO)
+
 
 @contextmanager
 def temp_dir(*args, **kwargs):

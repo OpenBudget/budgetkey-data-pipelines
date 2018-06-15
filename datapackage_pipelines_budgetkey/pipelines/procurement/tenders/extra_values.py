@@ -21,16 +21,14 @@ def process_row(row, *_):
     # Simplify Decision
     decision = row['decision']
     simple_decision = decision
-    if decision == 'חדש' or decision == 'עודכן':
+    if decision in ('חדש', 'עודכן', 'פורסם וממתין לתוצאות'):
       simple_decision = 'מכרז פתוח'
-    elif decision == 'הסתיים' or decision == 'בתוקף':
+    elif decision in ('הסתיים', 'בתוקף'):
       simple_decision = 'מכרז שנסגר'
     elif decision == 'בוטל':
       simple_decision = 'מכרז שבוטל'
     elif decision == 'עתידי':
-      simple_decision = 'עתידי'
-    elif decision == 'פורסם וממתין לתוצאות':
-      simple_decision = 'פתוח'
+      simple_decision = 'מכרז עתידי'
     elif decision == 'לא בתוקף':
       simple_decision = 'הושלם תהליך הרכש'
     elif not decision:
