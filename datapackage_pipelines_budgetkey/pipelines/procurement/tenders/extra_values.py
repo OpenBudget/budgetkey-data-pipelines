@@ -21,21 +21,21 @@ def process_row(row, *_):
     # Simplify Decision
     decision = row['decision']
     simple_decision = decision
-    if decision == 'חדש' or decision === 'עודכן':
+    if decision == 'חדש' or decision == 'עודכן':
       simple_decision = 'מכרז פתוח'
-    elif decision == 'הסתיים' or decision === 'בתוקף':
+    elif decision == 'הסתיים' or decision == 'בתוקף':
       simple_decision = 'מכרז שנסגר'
-    elif decision === 'בוטל':
+    elif decision == 'בוטל':
       simple_decision = 'מכרז שבוטל'
-    elif decision === 'עתידי':
+    elif decision == 'עתידי':
       simple_decision = 'עתידי'
-    elif decision === 'פורסם וממתין לתוצאות':
+    elif decision == 'פורסם וממתין לתוצאות':
       simple_decision = 'פתוח'
-    elif decision === 'לא בתוקף':
+    elif decision == 'לא בתוקף':
       simple_decision = 'הושלם תהליך הרכש'
     elif not decision:
       simple_decision = None
-    elif decision.startswith('אושר ')
+    elif decision.startswith('אושר '):
       simple_decision = 'הושלם תהליך הרכש'
     elif decision.startswith('לא אושר '):
       simple_decision = 'לא אושר'
@@ -49,7 +49,7 @@ def process_row(row, *_):
     # Extended Status
     extended_status = simple_decision
     awardees = row['awardees']
-    if decision == 'הסתיים' or decision === 'בתוקף':
+    if decision == 'הסתיים' or decision == 'בתוקף':
         if not awardees:
             extended_status = 'הושלם תהליך הרכש - לא החלה התקשרות'
         elif len(awardees) > 0:
@@ -61,7 +61,7 @@ def process_row(row, *_):
 
     # Awardees text
     awardees_text = None
-    if decision === 'בוטל':
+    if decision == 'בוטל':
         awardees_text = 'המכרז בוטל'
     else:
         if not awardees:
@@ -74,7 +74,7 @@ def process_row(row, *_):
     row['awardees_text'] = awardees_text
 
     # Hebrew tender type
-    row['tender_type_he'] ] {
+    row['tender_type_he'] = {
       'office': 'מכרז משרדי',
       'central': 'מכרז מרכזי',
       'exemptions': 'בקשת פטור ממכרז',

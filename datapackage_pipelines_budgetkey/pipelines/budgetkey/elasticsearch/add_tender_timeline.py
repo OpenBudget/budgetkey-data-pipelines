@@ -60,7 +60,14 @@ def process_row(row, *_):
                     percent = percent
                 ))
     
+    percent = None
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
+    for event in timeline:
+        if 'percent' not in event:
+            if percent is not None:
+                event['percent'] = percent
+        else:
+            percent = event['percent']
     row['timeline'] = timeline
 
     if row.get('subjects'):
