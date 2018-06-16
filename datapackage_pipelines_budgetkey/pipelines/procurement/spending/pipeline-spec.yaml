@@ -176,7 +176,8 @@ quarterly-contract-spending-reports-data:
   pipeline:
     - run: add_metadata
       parameters:
-        name: "spending-raw"
+        name: spending-raw
+        title: Data from published reports with some processing
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
@@ -388,6 +389,7 @@ latest-contract-spending:
         tables:
           contract_spending:
             resource-name: contract-spending
+            mode: update
 
 
 spending-by-entity:

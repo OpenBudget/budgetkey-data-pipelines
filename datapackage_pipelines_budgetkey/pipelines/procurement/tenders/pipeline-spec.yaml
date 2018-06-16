@@ -133,7 +133,6 @@ scraper:
           id: []
           url: []
           tender_type: []
-    # adds is_new column which indicates whether item already exists in DB or not (based on publication id and tender_type)
     - run: manage-revisions
       parameters:
         resource-name: tender-urls
@@ -142,7 +141,6 @@ scraper:
         db-key-fields:
           - page_url
         hash-fields: []
-    # download the data from pages which don't exist in DB (is_new == True)
     - run: download_pages_data
       runner: tzabar
     - run: parse_page_data
@@ -267,6 +265,7 @@ processed:
         tables:
           procurement_tenders_processed:
             resource-name: tenders
+            mode: update
     - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/procurement/tenders/processed
