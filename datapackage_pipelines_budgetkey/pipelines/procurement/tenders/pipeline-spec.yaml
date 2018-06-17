@@ -145,8 +145,7 @@ scraper:
       runner: tzabar
     - run: parse_page_data
       runner: tzabar
-      parameters:
-        output_resource: tenders
+    - run: sample
     # parse the data for each exemption
     - run: throttle
       parameters:

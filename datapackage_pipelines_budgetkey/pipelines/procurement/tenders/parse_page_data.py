@@ -1,4 +1,5 @@
-from datapackage_pipelines_budgetkey.common.resource_filter_processor import ResourceFilterProcessor
+from datapackage_pipelines.wrapper import process
+
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.check_existing import (tender_id_from_url,
                                                                                           publication_id_from_url)
@@ -8,6 +9,7 @@ from pyquery import PyQuery as pq
 import magic
 from datetime import datetime
 import requests, os, base64, mimetypes, logging
+
 
 TABLE_SCHEMA = {
     "primaryKey": ["publication_id", "tender_type", "tender_id"],
@@ -80,254 +82,257 @@ def parse_datetime(s):
         return datetime.strptime(s, "%d/%m/%Y").strftime("%Y-%m-%dT%H:%M:0Z")
 
 
-class ParsePageDataProcessor(ResourceFilterProcessor):
+base_object_name = "procurement/tenders/"
 
-    def __init__(self, **kwargs):
-        self._base_url = kwargs.pop("base_url", BASE_URL)
-        super(ParsePageDataProcessor, self).__init__(default_input_resource="tender-urls-downloaded-data",
-                                                     default_replace_resource=True,
-                                                     table_schema=TABLE_SCHEMA,
-                                                     **kwargs)
-        self.base_object_name = "procurement/tenders/"
+def requests_get_content(url):
+    return requests.get(url, timeout=60).content
 
-    def requests_get_content(self, url):
-        return requests.get(url, timeout=60).content
+def write_to_object_storage(object_name, data):
+    logging.error('write_to_object_storage %s', object_name)
+    if not object_storage.exists(object_name):
+        ret = object_storage.write(object_name, data=data, public_bucket=True, create_bucket=True)
+    else:
+        ret = object_storage.urlfor(object_name)
+    return ret
 
-    def write_to_object_storage(self, object_name, data):
-        logging.error('write_to_object_storage %s', object_name)
-        if not object_storage.exists(object_name):
-            ret = object_storage.write(object_name, data=data, public_bucket=True, create_bucket=True)
-        else:
-            ret = object_storage.urlfor(object_name)
+def unsign_document_link(url):
+    url = url.replace("http://", "https://")
+    if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
+        raise Exception("invalid url: {}".format(url))
+    filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
+    decoded_indicator = base_object_name + filename + '.decoded'
+    if object_storage.exists(decoded_indicator):
+        decoded_indicator_url = object_storage.urlfor(decoded_indicator)
+        ret = requests.get(decoded_indicator_url).text
         return ret
+    try:
+        content = requests_get_content(url)
+        page = pq(content)
+        data_elt = page(page(page.children()[1]).children()[0]).children()[0]
+        assert b'The requested operation is not supported, and therefore can not be displayed' not in content
+    except Exception as e:
+        logging.error('Failed to download from %s (%s), returning original url', url, e)
+        return url
+    try:
+        if data_elt.attrib["DataEncodingType"] != "base64":
+            raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
+    except KeyError:
+        return None
+    buffer = data_elt.text
+    if buffer:
+        buffer = base64.decodebytes(buffer.encode("ascii"))
+    else:
+        buffer = ''
+    mime = data_elt.attrib["MimeType"]
+    guessed_mime = None
+    orig_filename = None
+    try:
+        page.remove_namespaces()
+        orig_filename = next(page[0].iterdescendants('FileName')).text
+        _, ext = os.path.splitext(orig_filename)
+    except:
+        ext = mimetypes.guess_extension(mime, strict=False)
+    if not ext:
+        with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
+            guessed_mime = m.id_buffer(buffer)
+            logging.info('Attempted to detect buffer type: %s', guessed_mime)
+            if guessed_mime == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+                ext = '.docx'
+            else:
+                ext = mimetypes.guess_extension(guessed_mime)
+    assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s ext:%r buffer:%r" % (mime, orig_filename, guessed_mime, ext, buffer[:128])
+    object_name = base_object_name + filename + (ext if ext else "")
+    ret = write_to_object_storage(object_name, buffer)
+    write_to_object_storage(decoded_indicator, ret)
+    return ret
 
-    def unsign_document_link(self, url):
-        url = url.replace("http://", "https://")
-        if not url.startswith("https://www.mr.gov.il/Files_Michrazim/"):
-            raise Exception("invalid url: {}".format(url))
-        filename = url.replace("https://www.mr.gov.il/Files_Michrazim/", "").replace(".signed", "")
-        decoded_indicator = self.base_object_name + filename + '.decoded'
-        if object_storage.exists(decoded_indicator):
-            decoded_indicator_url = object_storage.urlfor(decoded_indicator)
-            ret = requests.get(decoded_indicator_url).text
-            return ret
-        try:
-            content = self.requests_get_content(url)
-            page = pq(content)
-            data_elt = page(page(page.children()[1]).children()[0]).children()[0]
-            assert b'The requested operation is not supported, and therefore can not be displayed' not in content
-        except Exception as e:
-            logging.error('Failed to download from %s (%s), returning original url', url, e)
-            return url
-        try:
-            if data_elt.attrib["DataEncodingType"] != "base64":
-                raise Exception("unknown DataEncodingType: {}".format(data_elt.attrib["DataEncodingType"]))
-        except KeyError:
-            return None
-        buffer = data_elt.text
-        if buffer:
-            buffer = base64.decodebytes(buffer.encode("ascii"))
-        else:
-            buffer = ''
-        mime = data_elt.attrib["MimeType"]
-        guessed_mime = None
-        orig_filename = None
-        try:
-            page.remove_namespaces()
-            orig_filename = next(page[0].iterdescendants('FileName')).text
-            _, ext = os.path.splitext(orig_filename)
-        except:
-            ext = mimetypes.guess_extension(mime, strict=False)
-        if not ext:
-            with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
-                guessed_mime = m.id_buffer(buffer)
-                logging.info('Attempted to detect buffer type: %s', guessed_mime)
-                if guessed_mime == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-                    ext = '.docx'
-                else:
-                    ext = mimetypes.guess_extension(guessed_mime)
-        assert ext, "Unknown file type mime:%s filename:%s guessed_mime:%s ext:%r buffer:%r" % (mime, orig_filename, guessed_mime, ext, buffer[:128])
-        object_name = self.base_object_name + filename + (ext if ext else "")
-        ret = self.write_to_object_storage(object_name, buffer)
-        self.write_to_object_storage(decoded_indicator, ret)
-        return ret
+def get_document_link(base_url, href):
+    source_url = "{}{}".format(base_url, href)
+    if source_url.endswith(".signed"):
+        # signed documents - decrypt and change path to local unsigned file
+        return unsign_document_link(source_url)
+    else:
+        # unsigned documents are returned with the source url as-is
+        return source_url
 
-    def get_document_link(self, base_url, href):
-        source_url = "{}{}".format(base_url, href)
-        if source_url.endswith(".signed"):
-            # signed documents - decrypt and change path to local unsigned file
-            return self.unsign_document_link(source_url)
-        else:
-            # unsigned documents are returned with the source url as-is
-            return source_url
+def get_exemptions_data(row, page, documents):
+    input_fields_text_map = {
+        "publication_id": "SERIAL_NUMBER",
+        "description": "PublicationName",
+        "supplier_id": "SupplierNum",
+        "supplier": "SupplierName",
+        "contact": "ContactPersonName",
+        "publisher": "PUBLISHER",
+        "contact_email": "ContactPersonEmail",
+        "claim_date": "ClaimDate",
+        "last_update_date": "UpdateDate",
+        "reason": "PtorReason",
+        "source_currency": "Currency",
+        "regulation": "Regulation",
+        "volume": "TotalAmount",
+        "subjects": "PublicationSUBJECT",
+        "start_date": "StartDate",
+        "end_date": "EndDate",
+        "decision": "Decision",
+        "page_title": "PublicationType",
+    }
+    source_data = {
+        k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
+    publication_id = publication_id_from_url(row["url"])
+    if str(publication_id) != str(source_data["publication_id"]):
+        raise Exception("invalid or blocked response (%s != %s)" % (publication_id, source_data["publication_id"]))
+    return {
+        "publisher_id": int(row["id"]),
+        "publication_id": publication_id,
+        "tender_type": "exemptions",
+        "page_url": row["url"],
+        "description": source_data["description"],
+        "supplier_id": source_data["supplier_id"],
+        "supplier": source_data["supplier"],
+        "contact": source_data["contact"],
+        "publisher": source_data["publisher"],
+        "contact_email": source_data["contact_email"],
+        "claim_date": parse_datetime(source_data["claim_date"]),
+        "last_update_date": parse_date(source_data["last_update_date"]),
+        "reason": source_data["reason"],
+        "source_currency": source_data["source_currency"],
+        "regulation": source_data["regulation"],
+        "volume": source_data["volume"],
+        "subjects": source_data["subjects"],
+        "start_date": parse_date(source_data["start_date"]),
+        "end_date": parse_date(source_data["end_date"]),
+        "decision": source_data["decision"],
+        "page_title": source_data["page_title"],
+        "tender_id": "none",
+        "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False)
+    }
 
-    def filter_resource_data(self, data, parameters):
-        for row in data:
-            try:
-                page = pq(row["data"])
-                documents = []
-                documents_valid = True
-                for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
-                                                            page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
-                                                            page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
-                    update_time = parse_date(update_time_elt.text.split()[-1])
-                    if update_time is not None:
-                        update_time = update_time
-                    link = self.get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
-                    if link is None:
-                        documents_valid = False
-                    documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
-                                    "link": link,
-                                    "update_time": update_time})
-                if not documents_valid:
-                    continue
-                if row["tender_type"] == "exemptions":
-                    yield self.get_exemptions_data(row, page, documents)
-                elif row["tender_type"] == "office":
-                    yield self.get_office_data(row, page, documents)
-                elif row["tender_type"] == "central":
-                    yield self.get_central_data(row, page, documents)
-                else:
-                    raise Exception("invalid tender_type: {}".format(row["tender_type"]))
-            except:
-                logging.exception('Failed to parse data from %s', row.get('url'))
+def get_office_data(row, page, documents):
+    input_fields_text_map = {
+        "publication_id": "SERIAL_NUMBER",
+        "publishnum": "PublishNum",
+        "description": "PublicationName",
+        "publisher": "Publisher",
+        "claim_date": "ClaimDate",
+        "last_update_date": "UpdateDate",
+        "subjects": "PublicationSUBJECT",
+        "publish_date": "PublishDate",
+        "status": "PublicationSTATUS"
+    }
+    source_data = {
+        k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
+    publication_id = publication_id_from_url(row["url"])
+    if str(publication_id) != str(source_data["publication_id"]):
+        raise Exception("invalid or blocked response")
+    return {
+        "publisher_id": int(row["id"]),
+        "publication_id": publication_id,
+        "tender_type": "office",
+        "page_url": row["url"],
+        "description": source_data["description"],
+        "supplier_id": None,
+        "supplier": None,
+        "contact": None,
+        "publisher": source_data["publisher"],
+        "contact_email": None,
+        "claim_date": parse_datetime(source_data["claim_date"]),
+        "last_update_date": parse_date(source_data["last_update_date"]),
+        "reason": None,
+        "source_currency": None,
+        "regulation": None,
+        "volume": None,
+        "subjects": source_data["subjects"],
+        "start_date": parse_date(source_data["publish_date"]),
+        "end_date": None,
+        "decision": source_data["status"],
+        "page_title": None,
+        "tender_id": source_data["publishnum"] or 'none',
+        "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
+    }
 
-    def get_exemptions_data(self, row, page, documents):
-        input_fields_text_map = {
-            "publication_id": "SERIAL_NUMBER",
-            "description": "PublicationName",
-            "supplier_id": "SupplierNum",
-            "supplier": "SupplierName",
-            "contact": "ContactPersonName",
-            "publisher": "PUBLISHER",
-            "contact_email": "ContactPersonEmail",
-            "claim_date": "ClaimDate",
-            "last_update_date": "UpdateDate",
-            "reason": "PtorReason",
-            "source_currency": "Currency",
-            "regulation": "Regulation",
-            "volume": "TotalAmount",
-            "subjects": "PublicationSUBJECT",
-            "start_date": "StartDate",
-            "end_date": "EndDate",
-            "decision": "Decision",
-            "page_title": "PublicationType",
-        }
-        source_data = {
-            k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
-        publication_id = publication_id_from_url(row["url"])
-        if str(publication_id) != str(source_data["publication_id"]):
-            raise Exception("invalid or blocked response (%s != %s)" % (publication_id, source_data["publication_id"]))
-        return {
-            "publisher_id": int(row["pid"]),
-            "publication_id": publication_id,
-            "tender_type": "exemptions",
-            "page_url": row["url"],
-            "description": source_data["description"],
-            "supplier_id": source_data["supplier_id"],
-            "supplier": source_data["supplier"],
-            "contact": source_data["contact"],
-            "publisher": source_data["publisher"],
-            "contact_email": source_data["contact_email"],
-            "claim_date": parse_datetime(source_data["claim_date"]),
-            "last_update_date": parse_date(source_data["last_update_date"]),
-            "reason": source_data["reason"],
-            "source_currency": source_data["source_currency"],
-            "regulation": source_data["regulation"],
-            "volume": source_data["volume"],
-            "subjects": source_data["subjects"],
-            "start_date": parse_date(source_data["start_date"]),
-            "end_date": parse_date(source_data["end_date"]),
-            "decision": source_data["decision"],
-            "page_title": source_data["page_title"],
-            "tender_id": "none",
-            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False)
+def get_central_data(row, page, documents):
+    # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
+    documents = []
+    for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
+        documents.append({"description": ' '.join(elt.text.strip().split()),
+                            "link": elt.attrib["href"],
+                            "update_time": None})
+    for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
+        documents.append({"description": ' '.join(pq(elt).text().strip().split()),
+                            "link": pq(elt).find("a")[0].attrib["href"],
+                            "update_time": None})
+    publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
+    outrow = {
+        "publisher_id": None,
+        "publication_id": int(publication_id) if publication_id else 0,
+        "tender_type": "central",
+        "page_url": row["url"],
+        "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
+        "supplier_id": None,
+        "supplier": page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip(),
+        "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
+        "publisher": None,
+        "contact_email": None,
+        "claim_date": None,
+        "last_update_date": None,
+        "reason": None,
+        "source_currency": None,
+        "regulation": page("#ctl00_PlaceHolderMain_MIchrazTypePanel div.value").text().strip(),
+        "volume": None,
+        "subjects": page("#ctl00_PlaceHolderMain_MMDCategoryPanel div.value").text().strip(),
+        "start_date": None,
+        "end_date": parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()),
+        "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
+        "page_title": page("h1.MainTitle").text().strip(),
+        "tender_id": tender_id_from_url(row["url"]),
+        "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
+    }
+    if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
+        raise Exception("invalid or blocked response")
+    return outrow
 
-        }
-
-    def get_office_data(self, row, page, documents):
-        input_fields_text_map = {
-            "publication_id": "SERIAL_NUMBER",
-            "publishnum": "PublishNum",
-            "description": "PublicationName",
-            "publisher": "Publisher",
-            "claim_date": "ClaimDate",
-            "last_update_date": "UpdateDate",
-            "subjects": "PublicationSUBJECT",
-            "publish_date": "PublishDate",
-            "status": "PublicationSTATUS"
-        }
-        source_data = {
-            k: page("#ctl00_PlaceHolderMain_lbl_{}".format(v)).text() for k, v in input_fields_text_map.items()}
-        publication_id = publication_id_from_url(row["url"])
-        if str(publication_id) != str(source_data["publication_id"]):
-            raise Exception("invalid or blocked response")
-        return {
-            "publisher_id": int(row["pid"]),
-            "publication_id": publication_id,
-            "tender_type": "office",
-            "page_url": row["url"],
-            "description": source_data["description"],
-            "supplier_id": None,
-            "supplier": None,
-            "contact": None,
-            "publisher": source_data["publisher"],
-            "contact_email": None,
-            "claim_date": parse_datetime(source_data["claim_date"]),
-            "last_update_date": parse_date(source_data["last_update_date"]),
-            "reason": None,
-            "source_currency": None,
-            "regulation": None,
-            "volume": None,
-            "subjects": source_data["subjects"],
-            "start_date": parse_date(source_data["publish_date"]),
-            "end_date": None,
-            "decision": source_data["status"],
-            "page_title": None,
-            "tender_id": source_data["publishnum"] or 'none',
-            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
-        }
-
-    def get_central_data(self, row, page, documents):
-        # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
+def process_row(row, *_):
+    try:
+        page = pq(row["data"])
         documents = []
-        for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
-            documents.append({"description": ' '.join(elt.text.strip().split()),
-                              "link": elt.attrib["href"],
-                              "update_time": None})
-        for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
-            documents.append({"description": ' '.join(pq(elt).text().strip().split()),
-                              "link": pq(elt).find("a")[0].attrib["href"],
-                              "update_time": None})
-        publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
-        outrow = {
-            "publisher_id": None,
-            "publication_id": int(publication_id) if publication_id else 0,
-            "tender_type": "central",
-            "page_url": row["url"],
-            "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
-            "supplier_id": None,
-            "supplier": page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip(),
-            "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
-            "publisher": None,
-            "contact_email": None,
-            "claim_date": None,
-            "last_update_date": None,
-            "reason": None,
-            "source_currency": None,
-            "regulation": page("#ctl00_PlaceHolderMain_MIchrazTypePanel div.value").text().strip(),
-            "volume": None,
-            "subjects": page("#ctl00_PlaceHolderMain_MMDCategoryPanel div.value").text().strip(),
-            "start_date": None,
-            "end_date": parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()),
-            "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
-            "page_title": page("h1.MainTitle").text().strip(),
-            "tender_id": tender_id_from_url(row["url"]),
-            "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
-        }
-        if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
-            raise Exception("invalid or blocked response")
-        return outrow
+        documents_valid = True
+        for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
+                                                      page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
+                                                      page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
+            update_time = parse_date(update_time_elt.text.split()[-1])
+            if update_time is not None:
+                update_time = update_time
+            link = get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
+            if link is None:
+                documents_valid = False
+            documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
+                              "link": link,
+                              "update_time": update_time})
+        if not documents_valid:
+            return
+        if row["tender_type"] == "exemptions":
+            row.update(get_exemptions_data(row, page, documents))
+        elif row["tender_type"] == "office":
+            row.update(get_office_data(row, page, documents))
+        elif row["tender_type"] == "central":
+            row.update(get_central_data(row, page, documents))
+        else:
+            raise Exception("invalid tender_type: {}".format(row["tender_type"]))
+        return row
+    except:
+        logging.exception('Failed to parse data from %s', row.get('url'))
 
-if __name__ == "__main__":
-    ParsePageDataProcessor.main()
+
+
+def modify_datapackage(dp, *_):
+    dp['resources'][0]['name'] = 'tenders'
+    dp['resources'][0]['schema']['primaryKey'] = TABLE_SCHEMA['primaryKey']
+    fields = dp['resources'][0]['schema']['fields']
+    fields = list(filter(lambda x: not x['name'].startswith('_'), fields))
+    fields = fields.extend(TABLE_SCHEMA['fields'])
+    dp['resources'][0]['schema']['fields'] = fields
+    return dp
+
+if __name__ == '__main__':
+    process(modify_datapackage=modify_datapackage,
+            process_row=process_row)
