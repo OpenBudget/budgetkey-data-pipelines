@@ -9,6 +9,9 @@ from pyquery import PyQuery as pq
 import magic
 from datetime import datetime
 import requests, os, base64, mimetypes, logging
+from requests import HTTPError
+
+url_prefix="https://www.mr.gov.il"
 
 
 TABLE_SCHEMA = {
@@ -291,9 +294,43 @@ def get_central_data(row, page, documents):
         raise Exception("invalid or blocked response")
     return outrow
 
-def process_row(row, *_):
+
+def _get_url_response_text(url, timeout=180):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) ' +
+                        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                        'Chrome/54.0.2840.87 Safari/537.36'
+    }
+    response = requests.get(url, timeout=timeout, headers=headers)
+    response.raise_for_status()
+    return response.text
+
+
+def process_row(row, row_index,
+                spec, resource_index,
+                parameters, stats):
+    if not row['__is_stale']:
+        return 
+
+    stats.setdefault('handled-urls', 0)
+    if stats['handled-urls'] >= 1500:
+        return
+
     try:
-        page = pq(row["data"])
+        stats['handled-urls'] += 1
+        url = row['url']
+        if not url.startswith("http"):
+            url = '{}{}'.format(url_prefix, url)
+        row['url'] = url
+        data=_get_url_response_text(url),
+    except HTTPError:
+        stats.setdefault('failed-urls', 0)
+        stats['failed-urls'] += 1
+        logging.exception('Failed to load %s', url)
+        return
+
+    try:
+        page = pq(data)
         documents = []
         documents_valid = True
         for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
@@ -318,6 +355,8 @@ def process_row(row, *_):
             row.update(get_central_data(row, page, documents))
         else:
             raise Exception("invalid tender_type: {}".format(row["tender_type"]))
+        del row['id']
+        del row['url']
         return row
     except:
         logging.exception('Failed to parse data from %s', row.get('url'))

@@ -141,8 +141,8 @@ scraper:
         db-key-fields:
           - page_url
         hash-fields: []
-    - run: download_pages_data
-      runner: tzabar
+    # - run: download_pages_data
+    #   runner: tzabar
     - run: parse_page_data
       runner: tzabar
     - run: sample
