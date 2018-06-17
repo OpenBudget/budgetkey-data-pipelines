@@ -317,13 +317,15 @@ entities:
             resource-name: entities
 
 geocode:
-  dependencies:
-    - pipeline: ./entities/all
+  schedule:
+    crontab: "0 0 fri * *"
   pipeline:
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
-        url: /var/datapackages/entities/all/datapackage.json
+        datapackage: /var/datapackages/entities/scored/datapackage.json
         resource: entities
+        table: entities_processed
+    - run: stream_remote_resources
     - run: geocode_entities
       parameters:
         input-resource: entities
