@@ -367,8 +367,8 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['name'] = 'tenders'
     dp['resources'][0]['schema']['primaryKey'] = TABLE_SCHEMA['primaryKey']
     fields = dp['resources'][0]['schema']['fields']
-    fields = list(filter(lambda x: not x['name'].startswith('_'), fields))
-    fields = fields.extend(TABLE_SCHEMA['fields'])
+    fields = list(filter(lambda x: x['name'].startswith('_'), fields))
+    fields.extend(TABLE_SCHEMA['fields'])
     dp['resources'][0]['schema']['fields'] = fields
     return dp
 
