@@ -313,7 +313,7 @@ def process_row(row, row_index,
         return 
 
     stats.setdefault('handled-urls', 0)
-    if stats['handled-urls'] >= 50:
+    if stats['handled-urls'] >= 5000:
         return
 
     try:
