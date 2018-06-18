@@ -62,7 +62,7 @@ def process_row(row, *_):
     
     percent = None
     timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
-    for event in timeline:
+    for event in reversed(timeline):
         if 'percent' not in event:
             if percent is not None:
                 event['percent'] = percent
