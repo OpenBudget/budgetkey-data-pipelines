@@ -323,7 +323,7 @@ def process_row(row, row_index,
             url = '{}{}'.format(url_prefix, url)
         row['url'] = url
         data=_get_url_response_text(url)
-    except HTTPError:
+    except IOError:
         stats.setdefault('failed-urls', 0)
         stats['failed-urls'] += 1
         logging.exception('Failed to load %s', url)
