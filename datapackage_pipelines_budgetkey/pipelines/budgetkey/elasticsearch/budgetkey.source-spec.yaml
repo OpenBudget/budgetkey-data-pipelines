@@ -1,6 +1,6 @@
 budget:
   kind: indexer
-  revision: 12
+  revision: 14
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: '{nice-code} - {title}'
@@ -113,7 +113,7 @@ tenders:
   revision: 7
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
-  page-title-pattern: 'הליך רכש של {publisher}'
+  page-title-pattern: '{snippet}'
   key-fields:
     - tender_type
     - publication_id
@@ -133,6 +133,7 @@ tenders:
           - page_title
           - reason
         target-field: semantic-tags
+    - run: add_tender_timeline      
   date-range:
     type: date-range
     from-field: start_date

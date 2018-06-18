@@ -30,7 +30,7 @@ class MockAddCentralUrls(AddCentralUrlsResource):
             return f.read()
 
 
-def test():
+def test_add_central_urls():
     parameters = {}
     datapackage = {"resources": []}
     resources = unlistify_resources([])

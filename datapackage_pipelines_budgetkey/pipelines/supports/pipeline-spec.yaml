@@ -6,7 +6,7 @@ all:
     - run: add_metadata
       parameters:
         name: all-supports
-        title: All support data, in raw form (manually scraped)
+        title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
     - run: add_resource
       parameters:
         name: s2008
@@ -109,7 +109,7 @@ all:
             constraints:
               required: true
               pattern: '[0-9]{10}'
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/supports/all
 
@@ -285,6 +285,8 @@ by-request-year:
           - entity_name
           - entity_id
           - entity_kind
+          - last_payment_year
+          - last_payment_amount
         collated-field-name: payments
 
     - run: join
@@ -296,6 +298,11 @@ by-request-year:
             - year_requested
             - recipient
             - request_type
+            - entity_name
+            - entity_id
+            - entity_kind
+            - last_payment_year
+            - last_payment_amount
           delete: true
         target:
           name: supports
@@ -308,6 +315,8 @@ by-request-year:
           entity_name: null
           entity_id: null
           entity_kind: null
+          last_payment_year: null
+          last_payment_amount: null
           payments:
             aggregate: array
 

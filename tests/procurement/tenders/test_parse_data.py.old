@@ -247,12 +247,7 @@ def test_invalid_response():
                 url = "https://www.mr.gov.il/officestenders/Pages/officetender.aspx?pID=11111"
             elif tender_type == "central":
                 url = "https://www.mr.gov.il/CentralTenders/technology/Pages/15-2016.aspx"
-            try:
-                run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
-                                      "tender_type": tender_type},])
-            except Exception as e:
-                if str(e) != "invalid or blocked response":
-                    raise
-            else:
-                assert False, "should raise an exception"
+            ret = run_parse_processor([{"pid": 21, "url": url, "data": get_mock_exemption_data(mock_data),
+                                        "tender_type": tender_type},])
+            assert len(ret) == 0
     shutil.rmtree(temp_dir)

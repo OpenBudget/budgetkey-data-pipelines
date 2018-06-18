@@ -19,7 +19,7 @@ class MockCooperativesScraper(CooperativesScraper):
             return json.load(f)
 
 
-def test():
+def test_cooperatives():
     scraper = MockCooperativesScraper()
     resource_descriptor = scraper.get_resource_descriptor("cooperatives")
     cooperative = next(scraper.get_cooperatives())

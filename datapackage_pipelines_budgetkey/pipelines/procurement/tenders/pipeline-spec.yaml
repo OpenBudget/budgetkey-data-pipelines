@@ -1,6 +1,6 @@
 scraper-exemptions:
   schedule:
-    crontab: "0 */4 * * *"
+    crontab: "0 16 * * *"
 
   pipeline:
     - run: add_metadata
@@ -30,14 +30,22 @@ scraper-exemptions:
       parameters:
         tender_type: exemptions
         output_resource: exemptions
+        db-table: procurement_tender_urls
       runner: tzabar
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/tenders/scraper-exemptions
+        exemptions:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: exemptions
+            mode: update
 
 scraper-office:
   schedule:
-    crontab: "0 */4 * * *"
+    crontab: "0 16 * * *"
 
   pipeline:
     - run: add_metadata
@@ -64,14 +72,22 @@ scraper-office:
       parameters:
         tender_type: office
         output_resource: office
+        db-table: procurement_tender_urls
       runner: tzabar
-    - run: dump.to_path
+    - run: set_primary_key
       parameters:
-        out-path: /var/datapackages/procurement/tenders/scraper-office
+        office:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: office
+            mode: update
 
 scraper-central:
   schedule:
-    crontab: "0 */4 * * *"
+    crontab: "0 16 * * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -79,6 +95,16 @@ scraper-central:
     - run: throttle
     - run: add_central_urls_resource
       runner: tzabar
+    - run: set_primary_key
+      parameters:
+        central:
+          - url
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tender_urls:
+            resource-name: central
+            mode: update
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/scraper-central
@@ -89,19 +115,15 @@ scraper:
     - pipeline: ./procurement/tenders/scraper-office
     - pipeline: ./procurement/tenders/scraper-central
 
+  schedule:
+    crontab: "0 */4 * * *"
+
   pipeline:
-    - run: load_resource
+    - run: add_sql_resource
       parameters:
-        resource: exemptions
-        url: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
-    - run: load_resource
-      parameters:
-        resource: office
-        url: /var/datapackages/procurement/tenders/scraper-office/datapackage.json
-    - run: load_resource
-      parameters:
+        datapackage: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
         resource: central
-        url: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
+        table: procurement_tender_urls
     - run: stream_remote_resources
     - run: concatenate
       parameters:
@@ -111,24 +133,28 @@ scraper:
           id: []
           url: []
           tender_type: []
-    # adds is_new column which indicates whether item already exists in DB or not (based on publication id and tender_type)
-    - run: check_existing
+    - run: manage-revisions
       parameters:
+        resource-name: tender-urls
         db-table: procurement_tenders
-    # parse the data for each exemption
-    - run: throttle
-      parameters:
-        sleep-seconds: 1
-    # download the data from pages which don't exist in DB (is_new == False)
-    - run: download_pages_data
-      runner: tzabar
+        key-fields: ['url']
+        db-key-fields:
+          - page_url
+        hash-fields: []
+    # - run: sample
     - run: parse_page_data
       runner: tzabar
-      parameters:
-        output_resource: tenders
+    # - run: sample
     - run: set_types
       parameters:
         resources: tenders
+    - run: manage-revisions
+      parameters:
+        resource-name: tenders
+        db-table: procurement_tenders
+        key-fields:
+          - page_url
+    # - run: sample
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
@@ -143,9 +169,6 @@ scraper:
 all:
   title: Load all tenders data from DB to flat file
 
-  schedule:
-    crontab: "0 * * * *"
-
   dependencies:
     - pipeline: ./procurement/tenders/scraper
 
@@ -159,6 +182,12 @@ all:
         fields:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
+          - name: __last_updated_at
+            format: "%Y-%m-%dT%H:%M:%S"
+          - name: __last_modified_at
+            format: "%Y-%m-%dT%H:%M:%S"
+          - name: __created_at
+            format: '%Y-%m-%dT%H:%M:%S'
         resource: tenders
         table: procurement_tenders
     - run: stream_remote_resources
@@ -180,11 +209,25 @@ processed:
     - run: add_metadata
       parameters:
         name: procurement-tenders-processed
+        title: כל המכרזים ובקשות הפטור ממכרז
     # Load scraped tenders
     - run: load_resource
       parameters:
         url: /var/datapackages/procurement/tenders/all/datapackage.json
         resource: tenders
+    - run: delete_fields
+      parameters:
+        fields:
+          -  __last_updated_at
+          -  __last_modified_at
+          -  __created_at
+          -  __is_new
+          -  __is_stale
+          -  __staleness
+          -  __next_update_days
+          -  __hash
+    - run: process_contracts      
+    - run: extra_values      
     # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:
@@ -216,9 +259,9 @@ processed:
       parameters:
         tables:
           procurement_tenders_processed:
-            mode: update
             resource-name: tenders
-    - run: dump.to_path
+            mode: update
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/procurement/tenders/processed
 

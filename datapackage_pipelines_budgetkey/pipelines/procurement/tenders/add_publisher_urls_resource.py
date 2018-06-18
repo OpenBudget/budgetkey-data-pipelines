@@ -3,6 +3,8 @@ from datapackage_pipelines_budgetkey.pipelines.procurement.tenders.publishers_sc
 import os
 import logging
 
+from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError, OperationalError
 
 PUBLISHER_URLS_TABLE_SCHEMA = {"fields": [{"name": "id", "type": "integer", "title": "Publisher Id"},
                                           {"name": "url", "type": "string", "title": "Page Url"},
@@ -10,13 +12,28 @@ PUBLISHER_URLS_TABLE_SCHEMA = {"fields": [{"name": "id", "type": "integer", "tit
 
 
 def resource_filter(resource_data, parameters):
+    existing_ids = set()
+    if 'db-table' in parameters:
+        db_table = parameters.pop('db-table')
+        connection_string = os.environ['DPP_DB_ENGINE'].replace('@postgres', '@data-next.obudget.org')
+        engine = create_engine(connection_string)
+        try:
+            existing_ids = set([
+                r[0] for r in 
+                engine.execute('select distinct url from %s' % db_table)
+            ])
+            logging.info('GOT %d existing URLs', len(existing_ids))
+        except:
+            logging.exception('Failed to fetch existing ids')
+
     if os.environ.get("OVERRIDE_PUBLISHER_URLS_MAX_PAGES", "") != "":
         max_pages = os.environ["OVERRIDE_PUBLISHER_URLS_MAX_PAGES"]
     else:
         max_pages = parameters.get("max_pages", "-1")
     publisher_scraper_kwargs = {
         "max_pages": int(max_pages),
-        "tender_type": parameters["tender_type"]
+        "tender_type": parameters["tender_type"],
+        "max_retries": 1
     }
     if os.environ.get("OVERRIDE_PUBLISHER_URLS_LIMIT_PUBLISHER_IDS", "") != "":
         limit_publisher_ids = map(int, os.environ["OVERRIDE_PUBLISHER_URLS_LIMIT_PUBLISHER_IDS"].split(","))
@@ -29,8 +46,17 @@ def resource_filter(resource_data, parameters):
             logging.info("processing publisher {}".format(publisher_id))
             scraper = publisher_scraper_class(publisher_id, **publisher_scraper_kwargs)
             urls = scraper.get_urls()
+            existing_count = 0
             for url in urls:
-                yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
+                if url in existing_ids:
+                    existing_count += 1
+                    logging.info('EXISTING (%d) %s', existing_count, url)
+                else:
+                    logging.info('NEW %s', url)
+                    existing_count = 0
+                    yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
+                if existing_count == 10:
+                    break
 
 
 if __name__ == "__main__":

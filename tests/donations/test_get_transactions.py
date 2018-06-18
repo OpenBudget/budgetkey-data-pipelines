@@ -1,5 +1,6 @@
 from datapackage_pipelines_budgetkey.pipelines.donations.get_transactions import GetTransactions
 import json, os
+import pytest
 
 
 class MockGetTransactions(GetTransactions):
@@ -24,6 +25,7 @@ class MockGetTransactions(GetTransactions):
             return json.load(f)
 
 
+@pytest.mark.skip
 def test_donations_get_transactions():
     resource = list(MockGetTransactions().get_transactions([{"ID": 20,  # candidate id
                                                              "Party": "מפלגת העבודה הישראלית"},

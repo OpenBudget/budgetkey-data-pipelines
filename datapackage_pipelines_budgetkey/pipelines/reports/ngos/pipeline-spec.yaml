@@ -16,6 +16,8 @@ ngo-district-report:
               format: '%Y-%m-%dT%H:%M:%S'
             - name: __last_modified_at
               format: '%Y-%m-%dT%H:%M:%S'
+            - name: __created_at
+              format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
 
     - run: filter
@@ -204,6 +206,8 @@ ngo-activity-report:
             - name: __last_updated_at
               format: '%Y-%m-%dT%H:%M:%S'
             - name: __last_modified_at
+              format: '%Y-%m-%dT%H:%M:%S'
+            - name: __created_at
               format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: filter

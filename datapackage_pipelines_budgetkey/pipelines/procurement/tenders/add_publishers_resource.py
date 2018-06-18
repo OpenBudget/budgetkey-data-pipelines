@@ -8,8 +8,9 @@ def resource_filter(resource_data, parameters):
     else:
         ddlPublisher_element_id = "#ctl00_m_g_cf609c81_a070_46f2_9543_e90c7ce5195b_ctl00_ddlPublisher"
     options = pq(html_text)(ddlPublisher_element_id).find("option")
-    for option in options:
-        publisher = {"id": int(option.attrib["value"]), "name": option.attrib["title"]}
+    for option_ in options:
+        option = pq(option_)
+        publisher = {"id": int(option.attr["value"]), "name": option.text()}
         if publisher["id"] != 0:
             yield publisher
 

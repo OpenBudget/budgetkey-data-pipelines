@@ -176,13 +176,19 @@ quarterly-contract-spending-reports-data:
   pipeline:
     - run: add_metadata
       parameters:
-        name: "spending-raw"
+        name: spending-raw
+        title: Data from published reports with some processing
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/procurement/spending/quarterly-contract-spending-reports/datapackage.json
         resource: quarterly-contract-spending-reports
         table: quarterly_contract_spending_reports
     - run: stream_remote_resources
+    - run: resolve_manof_ref
+    - run: sort
+      parameters:
+        resources: quarterly-contract-spending-reports
+        sort-by: "{report-year}-{report-period}"
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data
@@ -199,15 +205,23 @@ latest-contract-spending:
     - run: add_metadata
       parameters:
         name: latest-contract-spending
-        title: Latest Contract Spending
+        title: התקשרויות רכש ממשלתיות
+        description: >
+          אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
     - run: add_sql_resource
       parameters:
-        datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
+        datapackage: /var/datapackages/procurement/tenders/scraper/datapackage.json
         resource: tenders
-        table: procurement_tenders_processed
+        table: procurement_tenders
         fields:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
+          - name: __last_updated_at
+            format: "%Y-%m-%dT%H:%M:%S"
+          - name: __last_modified_at
+            format: "%Y-%m-%dT%H:%M:%S"
+          - name: __created_at
+            format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: load_resource
       parameters:
@@ -234,6 +248,8 @@ latest-contract-spending:
           executed:
             aggregate: last
           manof_ref:
+            aggregate: set
+          tender_key:
             aggregate: set
           volume:
             aggregate: last
@@ -283,6 +299,7 @@ latest-contract-spending:
             name: payment
             aggregate: array
     - run: join_tenders_and_contracts
+    - run: set_contract_active
     - run: sample
     - run: set_types
       parameters:
@@ -307,6 +324,8 @@ latest-contract-spending:
             es:hebrew: true
           manof_ref:
             es:itemType: string
+          tender_key:
+            es:itemType: string
           publisher:
             es:itemType: string
           purchase_method:
@@ -329,6 +348,9 @@ latest-contract-spending:
               fields:
                 - { 'name': 'year', 'type': 'integer' }
                 - { 'name': 'period', 'type': 'integer' }
+                - { 'name': 'date', 'type': 'string' }
+                - { 'name': 'title', 'type': 'string' }
+                - { 'name': 'url', 'type': 'string' }
                 - { 'name': 'timestamp', 'type': 'string' }
                 - { 'name': 'executed', 'type': 'number' }
                 - { 'name': 'volumne', 'type': 'number' }
@@ -359,7 +381,7 @@ latest-contract-spending:
             es:title: false
           purpose:
             es:title: true
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending
     - run: dump.to_sql
@@ -367,6 +389,7 @@ latest-contract-spending:
         tables:
           contract_spending:
             resource-name: contract-spending
+            mode: update
 
 
 spending-by-entity:
