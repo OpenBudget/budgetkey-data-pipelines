@@ -141,17 +141,10 @@ scraper:
         db-key-fields:
           - page_url
         hash-fields: []
-
-    # - run: download_pages_data
-    #   runner: tzabar
-    
+    - run: sample
     - run: parse_page_data
       runner: tzabar
     - run: sample
-    # parse the data for each exemption
-    - run: throttle
-      parameters:
-        sleep-seconds: 1
     - run: set_types
       parameters:
         resources: tenders
@@ -161,6 +154,7 @@ scraper:
         db-table: procurement_tenders
         key-fields:
           - page_url
+    - run: sample
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
