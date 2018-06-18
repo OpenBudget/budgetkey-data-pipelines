@@ -8,7 +8,13 @@ parameters, datapackage, res_iter = ingest()
 
 tenders = {}
 FIELDS = (
-    'tender_type', 'tender_id', 'publication_id', 'regulation', 'description')
+    'tender_type', 
+    'tender_id', 
+    'publication_id', 
+    'regulation', 
+    'description',
+    'subject_list'
+)
 key_fields = ('publication_id', 'tender_type', 'tender_id')
 
 
