@@ -322,7 +322,7 @@ def process_row(row, row_index,
         if not url.startswith("http"):
             url = '{}{}'.format(url_prefix, url)
         row['url'] = url
-        data=_get_url_response_text(url),
+        data=_get_url_response_text(url)
     except HTTPError:
         stats.setdefault('failed-urls', 0)
         stats['failed-urls'] += 1
