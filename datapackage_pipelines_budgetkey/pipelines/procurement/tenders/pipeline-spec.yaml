@@ -116,7 +116,7 @@ scraper:
     - pipeline: ./procurement/tenders/scraper-central
 
   schedule:
-    crontab: "0 */4 * * *"
+    crontab: "*/4 * * * *"
 
   pipeline:
     - run: add_sql_resource

@@ -78,6 +78,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
         hash = calc_hash(row, hash_fields)
         count_total += 1
 
+        logging.info('KEY: %r HASH: %r', key, hash)
         try:
             existing_id = existing_ids.get(key)
             days_since_last_update = (now - existing_id[prefix+'__last_updated_at']).days
@@ -85,6 +86,12 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             next_update_days = min(next_update_days, 90)
             is_stale = days_since_last_update > next_update_days
             staleness = int(100000+100000/(1+days_since_last_update))
+            logging.info('PROPS: %r', dict(
+                (k, v) for k, v in row.items()
+                if k.startswith(prefix + '__')
+            ))
+            logging.info('>> is_stale: %r, staleness: %r, next_update_days: %r',
+                         is_stale, staleness, next_update_days)
             if is_stale:
                 count_stale += 1
                 staleness = 300000
@@ -121,7 +128,11 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
                 prefix+'__hash': hash,
             })
             count_new += 1
-
+        if row[prefix+'__is_stale']:
+            logging.info('>> %r', dict(
+                (k, v) for k, v in row.items()
+                if k.startswith(prefix + '__')
+            ))
         yield row
 
     logging.info('MANAGE REVISION STATS:')
