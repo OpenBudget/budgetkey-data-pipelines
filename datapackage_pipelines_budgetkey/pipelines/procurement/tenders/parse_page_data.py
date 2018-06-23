@@ -11,8 +11,6 @@ from datetime import datetime
 import requests, os, base64, mimetypes, logging
 from requests import HTTPError
 
-url_prefix="https://www.mr.gov.il"
-
 
 TABLE_SCHEMA = {
     "primaryKey": ["publication_id", "tender_type", "tender_id"],
@@ -319,9 +317,6 @@ def process_row(row, row_index,
     try:
         stats['handled-urls'] += 1
         url = row['url']
-        if not url.startswith("http"):
-            url = '{}{}'.format(url_prefix, url)
-        row['url'] = url
         data=_get_url_response_text(url)
     except IOError:
         stats.setdefault('failed-urls', 0)

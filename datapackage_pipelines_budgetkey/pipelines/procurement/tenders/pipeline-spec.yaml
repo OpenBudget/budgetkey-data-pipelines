@@ -133,6 +133,7 @@ scraper:
           id: []
           url: []
           tender_type: []
+    - run: fix_page_urls
     - run: manage-revisions
       parameters:
         resource-name: tender-urls
