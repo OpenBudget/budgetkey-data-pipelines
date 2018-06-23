@@ -86,10 +86,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             next_update_days = min(next_update_days, 90)
             is_stale = days_since_last_update > next_update_days
             staleness = int(100000+100000/(1+days_since_last_update))
-            logging.info('PROPS: %r', dict(
-                (k, v) for k, v in row.items()
-                if k.startswith(prefix + '__')
-            ))
+            logging.info('PROPS: %r', existing_id)
             logging.info('>> is_stale: %r, staleness: %r, next_update_days: %r',
                          is_stale, staleness, next_update_days)
             if is_stale:
