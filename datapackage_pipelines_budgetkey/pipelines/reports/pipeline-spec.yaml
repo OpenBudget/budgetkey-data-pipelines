@@ -42,6 +42,8 @@ all:
             es:index: false
           title:
             es:title: true
+          kind:
+            type: string
 
     - run: set_primary_key
       parameters:
