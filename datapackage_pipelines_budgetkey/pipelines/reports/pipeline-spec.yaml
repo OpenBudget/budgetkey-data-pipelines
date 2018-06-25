@@ -20,6 +20,7 @@ all:
       parameters:
         key:
           - key
+          - kind
           - title
         collated-field-name: details
 
@@ -29,6 +30,7 @@ all:
           name: reports
         fields:
           key: []
+          kind: []
           title: []
           details: []
 

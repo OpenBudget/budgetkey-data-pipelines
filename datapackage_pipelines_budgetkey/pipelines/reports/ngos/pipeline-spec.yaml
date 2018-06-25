@@ -181,6 +181,10 @@ ngo-district-report:
             operation: format
             target: title
             with: ארגונים הפעילים במחוז {district}
+          -
+            operation: constant
+            target: kind
+            with: district
 
     - run: dump.to_path
       parameters:
@@ -434,6 +438,10 @@ ngo-activity-report:
             operation: format
             target: title
             with: ארגונים הפעילים בתחום {field_of_activity_display}
+          -
+            operation: constant
+            target: kind
+            with: field-of-activity
 
     - run: dump.to_path
       parameters:
