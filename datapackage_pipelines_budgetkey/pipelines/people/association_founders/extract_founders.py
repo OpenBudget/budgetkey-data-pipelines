@@ -18,7 +18,7 @@ def process_resource(rows):
                     sources=[
                         dict(
                             source='guidestar',
-                            proof_url='http://www.guidestar.org.il/GS_Malkar?number={}'.format(id),
+                            proof_url='https://www.guidestar.org.il/he/organization/{}/people'.format(id),
                             doc_id='/org/association/{}'.format(id)
                         )
                     ]
