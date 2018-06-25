@@ -1,39 +1,40 @@
 import logging
-
-import requests
+import time
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from urllib.parse import urljoin
 from nominations_page import NominationsPage
-from http_client import HttpClient
 
 from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, _ = ingest()
 
 INIT_RELATIVE_URL = '/Ext/Comp/NominationList/CdaNominationList_Iframe/1,15014,L-0-1,00.html?parms=5543'
-BASE_URL = 'http://www.calcalist.co.il'
-CALCALIST_INIT_URL = urljoin(BASE_URL, INIT_RELATIVE_URL)
+BASE_URL = 'https://www.calcalist.co.il'
 
-
+#TODO: Use Last seen as External
 def scrape():
     logging.info('Scraping calcalist')
-
-    url = CALCALIST_INIT_URL
-    logging.info('Initial URL: %s' % url)
+    url = INIT_RELATIVE_URL
     i = 0
     while url is not None:
-        logging.info('iteration #%d with url: %s' % (i, url))
-        page_source = HttpClient.download_page_source(url)
-        nominations_page = NominationsPage(url, BASE_URL, page_source)
-
+        nominations_page = NominationsPage(urljoin(BASE_URL,url))
+        time.sleep(1)
         for nomination in nominations_page.nominations():
             nomination['source'] = 'calcalist'
             yield nomination
 
         url = nominations_page.next_url()
-        logging.info('next URL: %s' % url)
         i += 1
 
+def fix_dates(scraper):
+    last_seen_date = None
+    for nomination in scraper:
+        if nomination['date']:
+            last_seen_date = nomination['date']
+        else:
+            nomination['date'] = last_seen_date
+
+        yield nomination
 
 datapackage['resources'].append({
             'path': 'data/nominations-list.csv',
@@ -51,6 +52,6 @@ datapackage['resources'].append({
             }
 })
 
-spew(datapackage, [scrape()])
+spew(datapackage, [fix_dates(scrape())])
 
 
