@@ -27,7 +27,7 @@ def get_date_range(from_field, to_field, row):
             from_month = row[from_field].month if year == row[from_field].year else 1
             to_month = row[to_field].month if year == row[to_field].year else 12
             for month in range(from_month, to_month+1):
-                months.append('{}-{}'.format(year, month))
+                months.append('{}-{:0>2}'.format(year, month))
         return row[from_field], row[to_field], months
 
 
