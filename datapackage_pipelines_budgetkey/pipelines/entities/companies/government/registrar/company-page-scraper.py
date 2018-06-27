@@ -244,12 +244,17 @@ def get_company_number_title_index(text):
 def get_last_activity_report_data(last_activity_report_href):
     data = {}
     logging.info('Fetching activity report from url: %s', last_activity_report_href)
-    for i in range(10):
-        response = requests.get(last_activity_report_href)
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) ' +
+                        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                        'Chrome/54.0.2840.87 Safari/537.36'
+    }
+    for i in range(100):
+        response = requests.get(last_activity_report_href, headers=headers)
         logging.info('(%s) Got data: %r', i+1, response.content[:256])
         if len(response.content) > 1024:
             break
-        sleep(60)
+        sleep(5)
     temp_file = tempfile.NamedTemporaryFile(suffix='.pdf')
     temp_file.write(response.content)
     temp_file.flush()
