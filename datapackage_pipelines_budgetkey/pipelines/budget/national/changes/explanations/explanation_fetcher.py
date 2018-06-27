@@ -11,6 +11,7 @@ import base64
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.doc_parser import Parser
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_budgetkey.common import cookie_monster
 
 parameters, dp, res_iter = ingest()
 
@@ -28,10 +29,9 @@ class DocParser(Parser):
 def get_explanations(url):
     with tempfile.NamedTemporaryFile(mode='wb', delete=False) as archive:
         logging.info('Connecting to %r', url)
-        resp = requests.get(url, stream=True)
-        stream = resp.raw
-        shutil.copyfileobj(stream, archive)
-        archive.flush()
+        for chunk in cookie_monster.cookie_monster_iter(url):
+            archive.write(chunk)
+        archive.close()
         archive = open(archive.name, 'rb')
 
         if '.tar.gz' in url:
