@@ -13,7 +13,6 @@ FIELDS = (
     'publication_id', 
     'regulation', 
     'description',
-    'subject_list'
 )
 key_fields = ('publication_id', 'tender_type', 'tender_id')
 
@@ -26,6 +25,8 @@ def collect_tenders(res):
             for k, v in row.items()
             if k in FIELDS
         )
+        if row.get('subjects') and isinstance(row['subjects'], str):
+            tenders[key]['subject_list'] = [x.strip() for x in row['subjects'].split(';')]
 
 
 def join_tenders(res):

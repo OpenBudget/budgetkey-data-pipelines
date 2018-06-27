@@ -244,10 +244,15 @@ def get_company_number_title_index(text):
 def get_last_activity_report_data(last_activity_report_href):
     data = {}
     logging.info('Fetching activity report from url: %s', last_activity_report_href)
-    response = requests.get(last_activity_report_href)
+    for i in range(10):
+        response = requests.get(last_activity_report_href)
+        logging.info('(%s) Got data: %r', i+1, response.content[:256])
+        if len(response.content) > 1024:
+            break
+        sleep(60)
     temp_file = tempfile.NamedTemporaryFile(suffix='.pdf')
-    logging.info('Got data: %r', response.content[:256])
     temp_file.write(response.content)
+    temp_file.flush()
     text = textract.process(temp_file.name).decode('utf-8')
     temp_file.close()
 
