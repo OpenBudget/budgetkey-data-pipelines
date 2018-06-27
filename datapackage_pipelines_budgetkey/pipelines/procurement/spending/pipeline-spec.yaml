@@ -210,18 +210,12 @@ latest-contract-spending:
           אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
     - run: add_sql_resource
       parameters:
-        datapackage: /var/datapackages/procurement/tenders/scraper/datapackage.json
+        datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
         resource: tenders
-        table: procurement_tenders
+        table: procurement_tenders_processed
         fields:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
-          - name: __last_updated_at
-            format: "%Y-%m-%dT%H:%M:%S"
-          - name: __last_modified_at
-            format: "%Y-%m-%dT%H:%M:%S"
-          - name: __created_at
-            format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: load_resource
       parameters:
