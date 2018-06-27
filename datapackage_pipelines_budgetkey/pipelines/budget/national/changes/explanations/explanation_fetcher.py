@@ -29,9 +29,15 @@ class DocParser(Parser):
 def get_explanations(url):
     with tempfile.NamedTemporaryFile(mode='wb', delete=False) as archive:
         logging.info('Connecting to %r', url)
-        for chunk in cookie_monster.cookie_monster_iter(url):
-            archive.write(chunk)
-        archive.close()
+        if '.gov.il' in url:
+            for chunk in cookie_monster.cookie_monster_iter(url):
+                archive.write(chunk)
+            archive.close()
+        else:
+            resp = requests.get(url, stream=True)
+            stream = resp.raw
+            shutil.copyfileobj(stream, archive)
+            archive.flush()            
         archive = open(archive.name, 'rb')
 
         if '.tar.gz' in url:
