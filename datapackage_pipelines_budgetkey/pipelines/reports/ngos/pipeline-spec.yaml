@@ -441,7 +441,7 @@ ngo-activity-report:
           -
             operation: constant
             target: kind
-            with: field-of-activity
+            with: fieldofactivity
 
     - run: dump.to_path
       parameters:
