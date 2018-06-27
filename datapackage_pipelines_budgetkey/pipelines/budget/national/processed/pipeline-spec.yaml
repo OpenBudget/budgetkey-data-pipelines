@@ -354,8 +354,8 @@ connected-national-budgets:
     - run: add_resource
       parameters:
         name: curated1
-        url: https://api.fieldbook.com/v1/591d7c0794771a0300cd3bd5/curated
-        format: json
+        url: budget_conversions.xlsx
+        sheet: Curated
         headers: 1
     - run: stream_remote_resources
     - run: concatenate
