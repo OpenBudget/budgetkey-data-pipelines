@@ -12,7 +12,9 @@ government_companies:
           - title: אתר רשות החברות הממשלתיות
             path: http://mof.gov.il/GCA/CompaniesInformation/Pages/default.aspx
     - run: all-companies-scraper
+      runner: tzabar
     - run: company-page-scraper
+      runner: tzabar
     - run: set_types
     - run: dump.to_sql
       parameters:
