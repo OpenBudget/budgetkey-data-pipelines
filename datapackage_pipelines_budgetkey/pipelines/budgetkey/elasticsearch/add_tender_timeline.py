@@ -8,23 +8,24 @@ from datapackage_pipelines.wrapper import process
 
 def process_row(row, *_):
     majors = [
-        ('office', 'claim_date', 'מועד אחרון להגשה'),
-        ('exemptions', 'claim_date', 'תאריך אחרון להגשת השגות'),
+        ('office', 'claim_date', 'מועד אחרון להגשה', 2),
+        ('exemptions', 'claim_date', 'תאריך אחרון להגשת השגות', 2),
 
-        ('office', 'start_date', 'תאריך פרסום המכרז'),
-        ('exemptions', 'start_date', 'תחילת תקופת התקשרות'),
+        ('office', 'start_date', 'תאריך פרסום המכרז', 0),
+        ('exemptions', 'start_date', 'תחילת תקופת התקשרות', 0),
 
-        ('exemptions', 'end_date', 'תום תקופת ההתקשרות'),
-        ('central', 'end_date', 'תאריך סיום תוקף מכרז'),
+        ('exemptions', 'end_date', 'תום תקופת ההתקשרות', 2),
+        ('central', 'end_date', 'תאריך סיום תוקף מכרז', 2),
     ]
     timeline = []
-    for tender_type, field, title in majors:
+    for tender_type, field, title, priority in majors:
         if row['tender_type'] == tender_type:
             if row[field]:
                 timeline.append(dict(
                     timestamp = str(row[field]),
                     major = True,
-                    title = title
+                    title = title,
+                    priority = priority
                 ))
     for document in row.get('documents', []):
         if document['update_time']:
@@ -32,7 +33,8 @@ def process_row(row, *_):
                 timestamp = document['update_time'],
                 url = document['link'],
                 title = 'צירוף קובץ: {}'.format(document['description']),
-                major = False
+                major = False,
+                priority = 1
             ))
     payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
@@ -57,11 +59,12 @@ def process_row(row, *_):
                     timestamp = str(period),
                     title = 'תשלום של ₪{:,.0f}, {:.0f}% מהסכום'.format(paid, percent),
                     major = True,
-                    percent = percent
+                    percent = percent,
+                    priority = 3
                 ))
     
     percent = None
-    timeline = sorted(timeline, key = lambda x: x['timestamp'], reverse=True)
+    timeline = sorted(timeline, key = lambda x: (x['timestamp'], x['priority']), reverse=True)
     for event in reversed(timeline):
         if 'percent' not in event:
             if percent is not None:
