@@ -253,45 +253,43 @@ def get_office_data(row, page, documents):
 
 def get_central_data(row, page, documents):
     # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
-    documents = []
-    for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
-        documents.append({"description": ' '.join(elt.text.strip().split()),
-                            "link": elt.attrib["href"],
-                            "update_time": None})
-    for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
-        documents.append({"description": ' '.join(pq(elt).text().strip().split()),
-                            "link": pq(elt).find("a")[0].attrib["href"],
-                            "update_time": None})
     publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
+    ot_url = BASE_URL + '/officestenders/Pages/officetender.aspx?pID={}'.format(publication_id) 
+    ot_page = pq(_get_url_response_text(ot_url))
+    documents = extract_documents(ot_page)
+    outrow = get_office_data(row, ot_page, documents)
+    dd = []
+    for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
+        link = elt.attrib(["href"])
+        if 'officestenders/Pages/officetender.aspx?pID=' not in link:
+            dd.append((' '.join(elt.text.strip().split()), link))
+    for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
+        link = pq(elt).find("a")[0].attrib["href"]
+        if 'officestenders/Pages/officetender.aspx?pID=' not in link:
+            dd.append((' '.join(pq(elt).text().strip().split()), link))
+    documents.extend(dict(
+        description=d[0],
+        link=d[1],
+        update_time=None
+    ) for d in dd)
     description = ' '.join([
         page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
         page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip()
     ]).strip()
-    outrow = {
-        "publisher_id": None,
+    outrow.update({
         "publication_id": int(publication_id) if publication_id else 0,
         "tender_type": "central",
         "page_url": row["url"],
         "description": description,
-        "supplier_id": None,
-        "supplier": None,
         "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
-        "publisher": None,
-        "contact_email": None,
-        "claim_date": None,
-        "last_update_date": None,
-        "reason": None,
-        "source_currency": None,
         "regulation": page("#ctl00_PlaceHolderMain_MIchrazTypePanel div.value").text().strip(),
-        "volume": None,
         "subjects": page("#ctl00_PlaceHolderMain_MMDCategoryPanel div.value").text().strip(),
-        "start_date": None,
         "end_date": parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()),
         "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
         "page_title": page("h1.MainTitle").text().strip(),
         "tender_id": tender_id_from_url(row["url"]),
         "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
-    }
+    })
     if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
         raise Exception("invalid or blocked response")
     return outrow
@@ -306,6 +304,23 @@ def _get_url_response_text(url, timeout=180):
     response = requests.get(url, timeout=timeout, headers=headers)
     response.raise_for_status()
     return response.text
+
+
+def extract_documents(page):
+    documents = []
+    for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
+                                                    page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
+                                                    page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
+        update_time = parse_date(update_time_elt.text.split()[-1])
+        if update_time is not None:
+            update_time = update_time
+        link = get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
+        if link is None:
+            return None
+        documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
+                            "link": link,
+                            "update_time": update_time})
+    return documents
 
 
 def process_row(row, row_index,
@@ -330,21 +345,8 @@ def process_row(row, row_index,
 
     try:
         page = pq(data)
-        documents = []
-        documents_valid = True
-        for update_time_elt, link_elt, img_elt in zip(page("#ctl00_PlaceHolderMain_pnl_Files .DLFUpdateDate"),
-                                                      page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData a"),
-                                                      page("#ctl00_PlaceHolderMain_pnl_Files .MrDLFFileData img")):
-            update_time = parse_date(update_time_elt.text.split()[-1])
-            if update_time is not None:
-                update_time = update_time
-            link = get_document_link(BASE_URL, link_elt.attrib.get("href", ""))
-            if link is None:
-                documents_valid = False
-            documents.append({"description": ' '.join(img_elt.attrib.get("alt", "").replace(r'\n', ' ').split()),
-                              "link": link,
-                              "update_time": update_time})
-        if not documents_valid:
+        documents = extract_documents(page)
+        if documents is None:
             return
         if row["tender_type"] == "exemptions":
             row.update(get_exemptions_data(row, page, documents))
