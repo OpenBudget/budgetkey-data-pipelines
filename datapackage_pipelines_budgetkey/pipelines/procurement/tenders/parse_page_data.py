@@ -263,14 +263,18 @@ def get_central_data(row, page, documents):
                             "link": pq(elt).find("a")[0].attrib["href"],
                             "update_time": None})
     publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
+    description = ' '.join([
+        page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
+        page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip()
+    ]).strip()
     outrow = {
         "publisher_id": None,
         "publication_id": int(publication_id) if publication_id else 0,
         "tender_type": "central",
         "page_url": row["url"],
-        "description": page("#ctl00_PlaceHolderMain_GovXContentSectionPanel_Richhtmlfield1__ControlWrapper_RichHtmlField").text().strip(),
+        "description": description,
         "supplier_id": None,
-        "supplier": page("#ctl00_PlaceHolderMain_GovXParagraph1Panel_ctl00__ControlWrapper_RichHtmlField div").text().strip(),
+        "supplier": None,
         "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
         "publisher": None,
         "contact_email": None,
