@@ -1,0 +1,7 @@
+emails:
+  title: Send periodic emails
+
+  pipeline:
+    - run: fetch_subscriptions
+    - run: sample
+    - run: send_emails
