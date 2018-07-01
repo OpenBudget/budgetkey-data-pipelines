@@ -3,6 +3,7 @@ from tableschema_elasticsearch.mappers import MappingGenerator
 
 import logging
 import collections
+import datetime
 
 
 class BoostingMappingGenerator(MappingGenerator):
@@ -39,10 +40,25 @@ class DumpToElasticSearch(ESDumper):
             index_settings={
                 'index.mapping.coerce': True
             }
-        )
+          )
+    
+    def format_date(self, v):
+        DATE_FORMAT = '%Y-%m-%d'
+        DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+        if isinstance(v, datetime.datetime):
+            return v.strftime(DATETIME_FORMAT)
+        if isinstance(v, datetime.date):
+            return v.strftime(DATE_FORMAT)
+        return v
+
+    def format_date_rows(self, rows):
+        for row in rows:
+            yield dict((k, self.format_date(v)) for k, v in row.items())
 
     def handle_resource(self, resource, spec, parameters, datapackage):        
-        return super(DumpToElasticSearch, self).handle_resource(resource, spec, parameters, datapackage)
+        return super(DumpToElasticSearch, self)\
+                .handle_resource(self.format_date_rows(resource), 
+                                 spec, parameters, datapackage)
 
 
 DumpToElasticSearch()()
