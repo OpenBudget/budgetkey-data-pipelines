@@ -46,10 +46,19 @@ class DumpToElasticSearch(ESDumper):
         formatters = {}
         for f in spec['schema']['fields']:
             if f['type'] == 'datetime':
+                logging.info('FIELD datetime: %r', f)
                 if f.get('format', 'default') in ('any', 'default'):
-                    formatters[f['name']] = lambda x: x.strftime('%Y-%m-%dT%H:%M:%SZ')
+                    formatters[f['name']] = lambda x: None if x is None else x.strftime('%Y-%m-%dT%H:%M:%SZ')
                 else:
-                    formatters[f['name']] = lambda x: x.strftime(f['format'])
+                    def formatter(f):
+                        fmt = f['format']
+                        def func(x):
+                            if x is None:
+                                return None
+                            else:
+                                return x.strftime(fmt)    
+                        return func                
+                    formatters[f['name']] = formatter(f)
         id = lambda x: x
 
         for row in rows:
