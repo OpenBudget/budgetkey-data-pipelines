@@ -42,22 +42,22 @@ class DumpToElasticSearch(ESDumper):
             }
           )
     
-    def format_date(self, v):
-        DATE_FORMAT = '%Y-%m-%d'
-        DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-        if isinstance(v, datetime.datetime):
-            return v.strftime(DATETIME_FORMAT)
-        if isinstance(v, datetime.date):
-            return v.strftime(DATE_FORMAT)
-        return v
+    def format_datetime_rows(self, spec, rows):
+        formatters = {}
+        for f in spec['schema']['fields']:
+            if f['type'] == 'datetime':
+                if f.get('format', 'default') in ('any', 'default'):
+                    formatters[f['name']] = lambda x: x.strftime('%Y-%m-%dT%H:%M:%SZ')
+                else:
+                    formatters[f['name']] = lambda x: x.strftime(f['format'])
+        id = lambda x: x
 
-    def format_date_rows(self, rows):
         for row in rows:
-            yield dict((k, self.format_date(v)) for k, v in row.items())
+            yield dict((k, formatters.get(k, id)(v)) for k, v in row.items())
 
     def handle_resource(self, resource, spec, parameters, datapackage):        
         return super(DumpToElasticSearch, self)\
-                .handle_resource(self.format_date_rows(resource), 
+                .handle_resource(self.format_datetime_rows(spec, resource), 
                                  spec, parameters, datapackage)
 
 

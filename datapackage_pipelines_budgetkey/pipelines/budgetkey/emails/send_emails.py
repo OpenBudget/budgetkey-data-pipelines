@@ -14,8 +14,8 @@ next_week = (now + datetime.timedelta(days=7)).isoformat()
 SECTIONS = [
     ('מכרזים שנסגרים השבוע', 
      'הזדמנות אחרונה להגיש הצעות!',
-     dict(claim_date__gte=today,
-          claim_date__lte=next_week,
+     dict(claim_date__gte=today + ' 00:00:00',
+          claim_date__lte=next_week + ' 00:00:00',
           tender_type=['central', 'office']
      )
     ),
