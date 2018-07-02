@@ -65,8 +65,13 @@ def process_row(row, *_):
             terms=terms
         )
         for item in items:
-            props = item['properties']
-            if 'displayDocsTypes' in props:
+            try:
+                props = item['properties']
+                props = json.loads(props)
+            except Exception as e:
+                logging.error('Failed to parse properties %s', e)
+                continue
+            if props and 'displayDocsTypes' in props:
                 if 'tenders' in props['displayDocsTypes']:
                   terms.append(dict(
                       term=item['term'],
