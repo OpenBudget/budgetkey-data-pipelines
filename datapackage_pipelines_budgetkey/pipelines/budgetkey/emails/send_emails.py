@@ -10,26 +10,37 @@ now = datetime.datetime.now().date()
 today = now.isoformat()
 last_week = (now - datetime.timedelta(days=7)).isoformat()
 next_week = (now + datetime.timedelta(days=7)).isoformat()
+suff1 = ' 00:00:00'
+suff2 = 'T00:00:00Z'
 
 SECTIONS = [
     ('מכרזים שנסגרים השבוע', 
      'הזדמנות אחרונה להגיש הצעות!',
-     dict(claim_date__gte=today + ' 00:00:00',
-          claim_date__lte=next_week + ' 00:00:00',
+     dict(claim_date__gte=today + suff1,
+          claim_date__lte=next_week + suff1,
           tender_type=['central', 'office']
      )
     ),
     ('מכרזים חדשים',
      'מכרזים חדשים שעשויים לעניין אותך',
      dict(
-        __created_at__gte=last_week,
+        __created_at__gte=last_week + suff2,
         tender_type=['central', 'office']
      )
     ),
     ('עדכונים נוספים',
+     'מכרזים מעניינים נוספים שהתעדכנו בשבוע האחרון',
+     dict(
+        claim_date__gte=next_week + suff1,
+        last_update_date__lte=last_week,
+        __created_at__lte=last_week + suff2,
+        tender_type=['central', 'office']
+     )
+    ),
+    ('בקשות חדשות לפטור ממכרז',
      'בקשות פטור ממכרז בנושאים אלו',
      dict(
-        __created_at__gte=last_week,
+        __created_at__gte=last_week + suff2,
         tender_type=['exemptions']
      )
     ),
