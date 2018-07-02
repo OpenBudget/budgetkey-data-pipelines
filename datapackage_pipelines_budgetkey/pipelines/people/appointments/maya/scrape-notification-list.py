@@ -118,9 +118,22 @@ def _scrape_date_range(date_from, date_to):
 
 def scrape():
     logging.info('Scraping Maya')
+<<<<<<< Updated upstream
     date_from = parameters.get('from', date(2001, 1, 1))
     date_to = parameters.get('to', date.today())
     logging.info('******* %r %r', date_from, date_to)
+=======
+
+    date_from = date(2011, 1, 1)
+    if 'from' in parameters:
+        date_from = datetime.strptime(parameters.get('from'), "%Y-%m-%d").date()
+
+    date_to = date.today()
+    if 'to' in parameters:
+        date_to = datetime.strptime(parameters.get('to'), "%Y-%m-%d").date()
+
+
+>>>>>>> Stashed changes
     for year_start, year_end in _split_period(date_from, date_to):
         yield from _scrape_date_range(year_start, year_end)
 
