@@ -57,7 +57,7 @@ def process_row(row, *_):
     logging.info('ROW: %r', row)
     items = row['items']
     sections = []
-    for header, subheader, filters in sections:
+    for header, subheader, filters in SECTIONS:
         terms = []
         section = dict(
             header=header,
