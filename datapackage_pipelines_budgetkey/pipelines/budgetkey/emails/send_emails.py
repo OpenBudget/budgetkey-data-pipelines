@@ -74,8 +74,8 @@ def process_row(row, *_):
             if props and 'displayDocsTypes' in props:
                 if 'tenders' in props['displayDocsTypes']:
                   terms.append(dict(
-                      term=item['term'],
-                      query_url=query_url(item['term'], ['tenders'], filters)
+                      term=props['term'],
+                      query_url=query_url(props['term'], ['tenders'], filters)
                   ))
         sections.append(section)
     ret = dict(
