@@ -49,7 +49,7 @@ SECTIONS = [
 def query_url(term, types, filters):
     term = urllib.parse.quote_plus(term)
     types = ','.join(types)
-    filters = json.dumps(filters)
+    filters = urllib.parse.quote_plus(json.dumps(filters))
     return f'https://next.obudget.org/s/?q={term}&dd={types}&filters={filters}'
 
 
