@@ -61,7 +61,7 @@ def _get_total_page_count(page):
 def _get_maya_page(driver, date_from, date_to, current_page, attempts=0):
     try:
         driver.get(_build_maya_url(date_from, date_to, current_page))
-        time.sleep(1)
+        time.sleep(3)
         WebDriverWait(driver, 5).until(
             EC.visibility_of_element_located((By.CLASS_NAME, "totalReports"))
         )

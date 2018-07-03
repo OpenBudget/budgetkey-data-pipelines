@@ -52,7 +52,7 @@ def process_row(row, *_):
     url = row['url']
     if not object_storage.exists(s3_object_name):
         conn = requests.get(url)
-        time.sleep(1)
+        time.sleep(3)
         if not conn.status_code == requests.codes.ok:
             return None
 
