@@ -7,7 +7,7 @@ maya-list:
     - run: scrape-notification-list
       parameters:
         name: maya-list-with-fixes
-        from: '2016-01-01'
+        from: '2018-01-01'
     - run: store-nomination-to-s3
     - run: duplicate
       parameters:
