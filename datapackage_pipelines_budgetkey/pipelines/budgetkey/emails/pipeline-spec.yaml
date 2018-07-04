@@ -1,4 +1,7 @@
 emails:
+  schedule:
+    crontab: "0 13 * * *"
+
   title: Send periodic emails
 
   pipeline:
