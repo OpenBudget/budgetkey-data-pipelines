@@ -23,6 +23,7 @@ def _findByTextAlias(e, aliaes):
 
 class MayaForm(object):
     def __init__(self, url):
+
         self._page = pq(url, parser='html')
 
     @property
@@ -81,6 +82,9 @@ class MayaForm(object):
         aliases = ['Tapkid', 'Tafkid', 'HaTafkidLoMuna']
         desc_aliases = ['TeurTafkid', 'LeloTeur', 'TeurHaTafkidLoMuna']
         elems = _findByTextAlias(self._page, aliases)
+
+        if len(elems)==0 and self.type == APPOINTMENT_ACCOUNTANT:
+            return ["רואה חשבון"]
         if len(elems)==0:
             raise ValueError("Could not find position in form")
 
@@ -104,7 +108,7 @@ class MayaForm(object):
         aliases = ['Gender', 'Min', 'gender']
         elem = _findByTextAlias(self._page, aliases)
         if len(elem)==0:
-            raise ValueError("Could not find gender in form")
+            return ""
         elif len(elem)>1:
             raise ValueError("Found multiple gender in form")
         gender = pq(elem[0]).text().strip()
@@ -114,6 +118,9 @@ class MayaForm(object):
 
     @property
     def full_name(self):
+        elem = _findByTextAlias(self._page, ['Accountant'])
+        if len(elem)==1:
+            return pq(elem[0]).text().strip()
         aliases = ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha', 'ShemMishpahaVePrati',
                    'ShemRoeCheshbon', 'ShemRoehHeshbon']
         elem = _findByTextAlias(self._page, aliases)
