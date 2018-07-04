@@ -75,7 +75,7 @@ def _get_maya_page(driver, date_from, date_to, current_page, attempts=0):
 
 def _scrape_date_range(date_from, date_to):
     # Prepare Driver
-    #driver = webdriver.Chrome()
+    # driver = webdriver.Chrome()
 
     driver = webdriver.Remote(
         command_executor='http://tzabar.obudget.org:8910',

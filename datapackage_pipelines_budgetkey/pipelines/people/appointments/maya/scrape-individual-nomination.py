@@ -20,7 +20,9 @@ def modify_datapackage(datapackage, parameters, stats):
 
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
-    maya_form = MayaForm(object_storage.urlfor(s3_object_name))
+    url = object_storage.urlfor(s3_object_name)
+    conn = requests.get(url)
+    maya_form = MayaForm(conn.text)
     try:
         row.update({
             'source': 'maya.tase.co.il',
