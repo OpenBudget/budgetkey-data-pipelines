@@ -1,6 +1,6 @@
 budget:
   kind: indexer
-  revision: 15
+  revision: 16
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: '{nice-code} - {title}'
@@ -27,7 +27,7 @@ budget:
 
 national-budget-changes:
   kind: indexer
-  revision: 8
+  revision: 9
   dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
   page-title-pattern: '{req_title[0]}'
@@ -44,7 +44,7 @@ national-budget-changes:
 
 entities:
   kind: indexer
-  revision: 30
+  revision: 31
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   page-title-pattern: '{name} ({kind_he})'
@@ -64,7 +64,7 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 10
+  revision: 11
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
@@ -87,7 +87,7 @@ contract-spending:
 
 supports:
   kind: indexer
-  revision: 8
+  revision: 9
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
   page-title-pattern: 'תמיכה תקציבית ב{recipient}'
@@ -110,7 +110,7 @@ supports:
 
 tenders:
   kind: indexer
-  revision: 12
+  revision: 13
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'
@@ -141,7 +141,7 @@ tenders:
 
 people:
   kind: indexer
-  revision: 4
+  revision: 5
   dependent_pipeline: ./people/aggregated
   source_datapackage: /var/datapackages/people/aggregated/datapackage.json
   page-title-pattern: 'מידע על {key}'
@@ -151,7 +151,7 @@ people:
 
 reports:
   kind: indexer
-  revision: 41
+  revision: 42
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
