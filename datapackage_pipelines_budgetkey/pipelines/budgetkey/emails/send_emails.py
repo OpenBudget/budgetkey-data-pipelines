@@ -6,51 +6,29 @@ import urllib.parse
 import json
 import datetime
 
-now = datetime.datetime.now().date()
-today = now.isoformat()
-last_week = (now - datetime.timedelta(days=7)).isoformat()
-next_week = (now + datetime.timedelta(days=7)).isoformat()
-suff1 = ' 00:00:00'
-suff2 = 'T00:00:00Z'
 
 SECTIONS = [
     ('מכרזים שנסגרים השבוע', 
      'הזדמנות אחרונה להגיש הצעות!',
-     dict(claim_date__gte=today + suff1,
-          claim_date__lte=next_week + suff1,
-          tender_type=['central', 'office']
-     )
+     'dd=tenders&theme=govbuy&focused=closing'
     ),
     ('מכרזים חדשים',
      'מכרזים חדשים שעשויים לעניין אותך',
-     dict(
-        __created_at__gte=last_week + suff2,
-        tender_type=['central', 'office']
-     )
+     'dd=tenders&theme=govbuy&focused=new'
     ),
     ('עדכונים נוספים',
      'מכרזים מעניינים נוספים שהתעדכנו בשבוע האחרון',
-     dict(
-        claim_date__gte=next_week + suff1,
-        last_update_date__lte=last_week,
-        __created_at__lte=last_week + suff2,
-        tender_type=['central', 'office']
-     )
+     'dd=tenders&theme=govbuy&focused=updated'
     ),
     ('בקשות חדשות לפטור ממכרז',
      'בקשות פטור ממכרז בנושאים אלו',
-     dict(
-        __created_at__gte=last_week + suff2,
-        tender_type=['exemptions']
-     )
+     'dd=tenders&theme=govbuy&focused=new'
     ),
 ]
 
-def query_url(term, types, filters):
+def query_url(term, filters):
     term = urllib.parse.quote_plus(term)
-    types = ','.join(types)
-    filters = urllib.parse.quote_plus(json.dumps(filters))
-    return f'https://next.obudget.org/s/?q={term}&dd={types}&filters={filters}'
+    return f'https://next.obudget.org/s/?q={term}&{filters}'
 
 
 def process_row(row, *_):
@@ -75,7 +53,7 @@ def process_row(row, *_):
                 if 'tenders' in props['displayDocsTypes']:
                   terms.append(dict(
                       term=props['term'],
-                      query_url=query_url(props['term'], ['tenders'], filters)
+                      query_url=query_url(props['term'], filters)
                   ))
         sections.append(section)
     ret = dict(
