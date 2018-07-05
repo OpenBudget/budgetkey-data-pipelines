@@ -80,12 +80,12 @@ def modify_datapackage(dp, *_):
 def process_row(row, *_):
     key_fields = ('publication_id', 'tender_type', 'tender_id')
     key = json.dumps([str(row[k]) for k in key_fields])
-    contracts = get_all_contracts(key)
-    row['contract_volume'] = sum(c.get('volume', 0) for c in contracts)
-    row['contract_executed'] = sum(c.get('executed', 0) for c in contracts)
-    timestamps = sorted(set(p['timestamp'] for c in contracts for p in c['payments']))
+    all_contracts = get_all_contracts(key)
+    row['contract_volume'] = sum(c.get('volume', 0) for c in all_contracts)
+    row['contract_executed'] = sum(c.get('executed', 0) for c in all_contracts)
+    timestamps = sorted(set(p['timestamp'] for c in all_contracts for p in c['payments']))
     ents = {}
-    for contract in contracts:
+    for contract in all_contracts:
         supplier = contract['entity_name']
         if not supplier:
             if len(contract['supplier_name'])>0:
