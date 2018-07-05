@@ -26,7 +26,7 @@ class BoostingMappingGenerator(MappingGenerator):
                     'analyzer': 'hebrew'
                 }
             }
-        elif schema_type == 'integer':
+        elif schema_type in ('number', 'integer'):
             prop['index'] = True
         return prop
 
