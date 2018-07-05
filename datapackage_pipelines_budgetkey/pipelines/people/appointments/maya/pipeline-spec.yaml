@@ -5,6 +5,7 @@ maya-list:
     crontab: 0 0 * * *
   pipeline:
     - run: scrape-notification-list
+      runner: tzabar
       parameters:
         name: maya-list-with-fixes
         from: '2018-01-01'
