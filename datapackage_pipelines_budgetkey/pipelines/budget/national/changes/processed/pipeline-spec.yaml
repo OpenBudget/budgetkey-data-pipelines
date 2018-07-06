@@ -14,7 +14,7 @@ transactions:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/transactions
-    - run: dump.to_s3
+    - run: aws.dump.to_s3
       parameters:
         bucket: budgetkey-files
         path: 'national-budget-transactions/cheat-sheet'
