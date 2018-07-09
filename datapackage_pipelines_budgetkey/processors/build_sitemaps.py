@@ -36,7 +36,7 @@ def process_rows(res_iter):
         first = next(res_iter)
     except:
         first = []
-    yield from itertools.chain([first, generate_sitemap(kind, db_table, doc_id)])
+    yield from itertools.chain(first, generate_sitemap(kind, db_table, doc_id))
 
 if __name__ == '__main__':
     params, dp, res_iter = ingest()
