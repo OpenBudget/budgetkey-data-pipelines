@@ -64,4 +64,4 @@ if __name__ == '__main__':
             }
         ]
 
-    spew(dp, process_rows(res_iter))
+    spew(dp, [process_rows(res_iter)])
