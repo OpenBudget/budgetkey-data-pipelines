@@ -1,4 +1,5 @@
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 import os
 import logging
@@ -51,6 +52,7 @@ if __name__ == '__main__':
             {
                 'name': 'sitemaps',
                 'path': 'sitemaps.csv',
+                PROP_STREAMING: True,
                 'schema': {
                     'fields': [
                         {
