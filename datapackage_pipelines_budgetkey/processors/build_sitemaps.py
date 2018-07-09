@@ -1,6 +1,7 @@
 from datapackage_pipelines.wrapper import ingest, spew
 
 import os
+import logging
 import itertools
 from sqlalchemy import create_engine
 
