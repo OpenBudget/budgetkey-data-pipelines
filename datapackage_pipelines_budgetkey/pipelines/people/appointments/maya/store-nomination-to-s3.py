@@ -7,6 +7,7 @@ from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.people.appointments.maya.maya_nomination_form import MayaForm
 
+session = requests.Session()
 
 def modify_datapackage(datapackage, parameters, stats):
     datapackage['resources'][0]['schema']['fields'].extend(
@@ -51,7 +52,7 @@ def process_row(row, *_):
     s3_object_name = row['s3_object_name']
     url = row['url']
     if not object_storage.exists(s3_object_name):
-        conn = requests.get(url)
+        conn = session.get(url)
         time.sleep(3)
         if not conn.status_code == requests.codes.ok:
             return None
@@ -65,7 +66,7 @@ def process_row(row, *_):
                              content_type="text/html; charset={}".format(charset))
 
     else:
-        conn = requests.get(object_storage.urlfor(s3_object_name))
+        conn = session.get(object_storage.urlfor(s3_object_name))
 
     maya_form = MayaForm(conn.text)
     try:

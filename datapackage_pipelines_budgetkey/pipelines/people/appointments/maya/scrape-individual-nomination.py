@@ -5,6 +5,7 @@ from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.people.appointments.maya.maya_nomination_form import MayaForm
 
+session = requests.Session()
 
 def modify_datapackage(datapackage, parameters, stats):
     datapackage['resources'][0]['schema']['fields'].extend([
@@ -21,7 +22,7 @@ def modify_datapackage(datapackage, parameters, stats):
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
     url = object_storage.urlfor(s3_object_name)
-    conn = requests.get(url)
+    conn = session.get(url)
     maya_form = MayaForm(conn.text)
     try:
         row.update({
