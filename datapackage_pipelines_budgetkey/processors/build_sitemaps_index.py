@@ -15,7 +15,7 @@ def generate_sitemap_index(rows):
             out.write('''<sitemap>
       <loc>https://next.obudget.org/{}</loc>
    </sitemap>
-''').format(row['filename'].replace('/var/', ''))
+'''.format(row['filename'].replace('/var/', '')))
         
         out.write('''</sitemapindex>''')
 
