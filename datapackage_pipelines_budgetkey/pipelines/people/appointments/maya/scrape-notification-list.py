@@ -22,6 +22,8 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, _ = ingest()
 
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger('selenium.webdriver').setLevel(logging.WARNING)
 
 def _build_maya_url(date_from, date_to, page_num):
     scheme = "https"

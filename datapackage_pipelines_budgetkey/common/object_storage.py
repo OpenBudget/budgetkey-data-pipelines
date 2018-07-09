@@ -145,7 +145,6 @@ class ObjectStorage(FileBasedStorage):
         addtional_attrs = {}
         if content_type is not None:
             addtional_attrs['ContentType'] = content_type
-        logging.info("Uploading with {}".format(addtional_attrs))
         if not self.s3:
             return super(ObjectStorage, self).write(object_name, data, file_name)
         try:
