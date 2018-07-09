@@ -23,7 +23,15 @@ def generate_sitemap(kind, db_table, doc_id):
    </url>
 '''.format(doc_id, last_modified.isoformat()))
             out.write('''</urlset>''')
+        logging.info('WRITTEN -> %s', filename)
+        yield {'filename': filename}
 
+def process_rows(res_iter):
+    try:
+        first = next(res_iter)
+    except:
+        first = []
+    yield from itertools.chain([first, generate_sitemap(kind, db_table, doc_id)])
 
 if __name__ == '__main__':
     params, dp, res_iter = ingest()
@@ -34,6 +42,20 @@ if __name__ == '__main__':
     db_table = params['db-table']
     doc_id = params['doc-id']
 
-    generate_sitemap(kind, db_table, doc_id)
+    if not dp.get('resources'):
+        dp['resources'] = [
+            {
+                'name': 'sitemaps',
+                'path': 'sitemaps.csv',
+                'schema': {
+                    'fields': [
+                        {
+                            'name': 'filename',
+                            'type': 'string'
+                        }
+                    ]
+                }
+            }
+        ]
 
-    spew(dp, res_iter)
+    spew(dp, process_rows(res_iter))
