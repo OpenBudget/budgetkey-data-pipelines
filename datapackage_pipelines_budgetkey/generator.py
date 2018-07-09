@@ -206,6 +206,8 @@ class Generator(GeneratorBase):
             'pipeline': steps(*[
                 ('build_sitemaps', params)
                 for params in sitemap_params
+            ] + [
+                ('build_sitemaps_index', {})
             ])
         }
         yield os.path.join(base, 'sitemaps'), sitemaps_pipeline
