@@ -65,14 +65,6 @@ all-appointments:
             with: '{date:%Y-%m}'
 
     -
-      run: fingerprint
-      parameters:
-        source-field: company
-        resource-name: people
-
-    - run: compute_doc_id
-
-    -
       run: collate
       parameters:
         resource: people
@@ -102,16 +94,36 @@ all-appointments:
       run: collate_schema
 
     -
-      run: select_from_sources
+      run: fingerprint
+      parameters:
+        source-field: fingerprinted_company
+        resource-name: people
+
+    - run: compute_doc_id
+
+    - run: select_from_sources
 
     -
-      run: set_types
+      run: concatenate
       parameters:
-        resources: safety-orders
+        target:
+          name: people
+        fields:
+          full_name: []
+          company: ['fingerprinted_company']
+          when: []
+          title: []
+          event: []
+          doc_id: []
+          sources: []
+
+    - run: set_types
+      parameters:
         types:
-          date:
+          when:
             type: date
             format: "%Y-%m-%d"
+
     -
       run: dump.to_path
       parameters:

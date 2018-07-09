@@ -29,7 +29,8 @@ all:
           name: people
         fields:
           event: []
-          when: []
+          when: ['date']
+          doc_id: []
           full_name: []
           company: []
           title: []
@@ -41,9 +42,9 @@ all:
         source-field: full_name
         target-field: key
         resource-name: people
-    -
-      run: set_types
-      
+#    -
+#      run: set_types
+
     -
       run: dump.to_path
       parameters:
@@ -65,6 +66,12 @@ aggregated:
       parameters:
         url: dependency://./people/all
         resource: people
+
+    -
+      run: sort
+      parameters:
+        resources: people
+        sort-by: "{when}"
 
     -
       run: collate
@@ -89,19 +96,6 @@ aggregated:
           details:
             aggregate: array
 
-    # -
-    #   run: set_types
-    #   parameters:
-    #     types:
-    #       details:
-    #         es:itemType: object
-    #         es:schema:
-    #           fields:
-    #             - {'name': 'event', 'type': 'string'}
-    #             - {'name': 'when', 'type': 'date'}
-    #             - {'name': 'title', 'type': 'string'}
-    #             - {'name': 'full_name', 'type': 'string'}
-    #             - {'name': 'sources', 'type': 'string'}
     -
       run: sample
 
@@ -110,6 +104,12 @@ aggregated:
 
     -
       run: calc-person-score
+
+    - run: set_types
+      parameters:
+        types:
+          key:
+            es:title: true
 
     -
       run: set_primary_key

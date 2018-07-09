@@ -14,7 +14,7 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].extend([
         {'name': 'event', 'type': 'string'},
         {'name': 'title', 'type': 'string'},
-        {'name': 'when', 'type': 'string', "format": "%Y-%m-%d",}
+        {'name': 'when', 'type': 'string'}
     ])
     return dp
 
