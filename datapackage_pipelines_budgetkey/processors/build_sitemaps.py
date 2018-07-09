@@ -26,6 +26,7 @@ def generate_sitemap(kind, db_table, doc_id):
             out.write('''</urlset>''')
         logging.info('WRITTEN -> %s', filename)
         yield {'filename': filename}
+        index += 1
 
 def process_rows(res_iter):
     try:
