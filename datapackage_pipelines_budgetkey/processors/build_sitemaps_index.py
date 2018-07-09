@@ -27,4 +27,4 @@ if __name__ == '__main__':
 
     generate_sitemap_index(res_iter)
 
-    spew(dp, [[]]])
+    spew(dp, [[]])
