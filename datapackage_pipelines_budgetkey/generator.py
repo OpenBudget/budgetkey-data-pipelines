@@ -85,6 +85,8 @@ class Generator(GeneratorBase):
 
     @classmethod
     def generate_pipeline(cls, source, base):
+        all_pipelines = []
+        sitemap_params = []
         for doc_type, parameters in source.items():
             if parameters['kind'] == 'indexer':
                 snake_doc_type = doc_type.replace('-', '_')
@@ -100,6 +102,15 @@ class Generator(GeneratorBase):
                 pipeline_id = os.path.join(base, 'index_{}'.format(snake_doc_type))
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
                 revision = parameters.get('revision', 0)
+
+                if doc_type != 'people':
+                    all_pipelines.append(pipeline_id)
+                    sitemap_params.append({
+                        'kind': doc_type,
+                        'db-table': db_table,
+                        'doc-id': key_pattern
+                    })
+
                 keep_history = parameters.get('keep-history', [])
                 history_steps = []
                 for kh in keep_history:
@@ -186,3 +197,15 @@ class Generator(GeneratorBase):
                 if os.environ.get("ES_LOAD_FROM_URL") == "1":
                     del pipeline["dependencies"]
                 yield pipeline_id, pipeline
+        
+        sitemaps_pipeline = {
+            'dependencies': [
+                {'pipeline': pipeline_id}
+                for pipeline_id in all_pipelines
+            ],
+            'pipeline': steps(*[
+                ('build_sitemaps', params)
+                for params in sitemap_params
+            ])
+        }
+        yield os.path.join(base, 'sitemaps'), sitemaps_pipeline
