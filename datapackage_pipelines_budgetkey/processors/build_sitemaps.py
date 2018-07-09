@@ -25,7 +25,7 @@ def generate_sitemap(kind, db_table, doc_id):
       <loc>https://next.obudget.org/i/{}</loc>
       <lastmod>{}</lastmod>
    </url>
-'''.format(doc_id, last_modified.isoformat()))
+'''.format(doc_id, last_modified.isoformat()[:10]))
             out.write('''</urlset>''')
         logging.info('WRITTEN -> %s', filename)
         yield {'filename': filename}
