@@ -28,6 +28,8 @@ def generate_sitemap(kind, db_table, doc_id):
 if __name__ == '__main__':
     params, dp, res_iter = ingest()
 
+    os.makedirs('/var/datapackages/sitemaps', exist_ok=True)
+
     kind = params['kind']
     db_table = params['db-table']
     doc_id = params['doc-id']
