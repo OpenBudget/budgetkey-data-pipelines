@@ -9,17 +9,17 @@ from sqlalchemy import create_engine
 def generate_sitemap(kind, db_table, doc_id):
     engine = create_engine(os.environ['DPP_DB_ENGINE'])
     rows = (dict(r) for r in engine.execute('select * from {}'.format(db_table)))
-    doc_ids = ((doc_id.format(**r), r['__last_modified_at']) for r in rows)
+    doc_ids = [(doc_id.format(**r), r['__last_modified_at']) for r in rows]
     index = 0
-    while True:
+    while len(doc_ids) > 0:
+        batch = doc_ids[:10000]
+        doc_ids = doc_ids[10000:]
+
         filename = '/var/datapackages/sitemaps/{}.{:04d}.xml'.format(kind, index)
         with open(filename, 'w') as out:
             out.write('''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ''')
-            batch = list(itertools.islice(doc_ids, 10000))
-            if len(batch) == 0:
-                break
             for doc_id, last_modified in batch:
                 out.write('''   <url>
       <loc>https://next.obudget.org/i/{}</loc>
@@ -27,6 +27,7 @@ def generate_sitemap(kind, db_table, doc_id):
    </url>
 '''.format(doc_id, last_modified.isoformat()[:10]))
             out.write('''</urlset>''')
+
         logging.info('WRITTEN -> %s', filename)
         yield {'filename': filename}
         index += 1
