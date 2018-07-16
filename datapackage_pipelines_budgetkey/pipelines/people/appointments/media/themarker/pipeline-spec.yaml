@@ -20,6 +20,7 @@ themarker:
       run: stream_remote_resources
     -
       run: scraper
+
     -
       run: concatenate
       parameters:
@@ -36,6 +37,15 @@ themarker:
             - detiles
           gender: []
           source: []
+          proof_url: []
+
+    -
+      run: filter
+      parameters:
+        resources: concat
+        out:
+          - organisation_name: null
+
     -
       run: set_types
       parameters:

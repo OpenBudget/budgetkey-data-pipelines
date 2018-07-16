@@ -43,14 +43,11 @@ all-appointments:
           gender: []
           proof_url: []
           source: []
-    -
-      run: collate
+
+    - run: sort
       parameters:
-        resource: people
-        key:
-          - full_name
-          - company
-        collated-field-name: sources
+        resources: people
+        sort-by: "{date}"
     -
       run: fingerprint
       parameters:
@@ -58,26 +55,75 @@ all-appointments:
         target-field: fingerprinted_company
         resource-name: people
     -
+      run: add_computed_field
+      parameters:
+        resources: people
+        fields:
+          -
+            operation: format
+            target: year_month
+            with: '{date:%Y-%m}'
+
+    -
+      run: collate
+      parameters:
+        resource: people
+        key:
+          - full_name
+          - fingerprinted_company
+          - year_month
+        collated-field-name: sources
+
+    -
       run: join
       parameters:
         source:
           name: people
-          key: "{full_name} {fingerprinted_company}"
+          key: "{full_name} {fingerprinted_company} {year_month}"
           delete: true
         target:
           name: people
           key: null
         fields:
           full_name: null
-          company: null
+          fingerprinted_company: null
           sources:
             aggregate: array
-    -
-      run: fix_values
+
     -
       run: collate_schema
+
     -
-      run: set_types
+      run: fingerprint
+      parameters:
+        source-field: fingerprinted_company
+        resource-name: people
+
+    - run: compute_doc_id
+
+    - run: select_from_sources
+
+    -
+      run: concatenate
+      parameters:
+        target:
+          name: people
+        fields:
+          full_name: []
+          company: ['fingerprinted_company']
+          when: []
+          title: []
+          event: []
+          doc_id: []
+          sources: []
+
+    - run: set_types
+      parameters:
+        types:
+          when:
+            type: date
+            format: "%Y-%m-%d"
+
     -
       run: dump.to_path
       parameters:
