@@ -112,7 +112,7 @@ details:
   dependencies:
     - pipeline: ./entities/companies/registrar/details-scraper
     - pipeline: ./entities/companies/government/registrar/government_companies
-    - pipeline: ./entities/safety-orders/safety-orders-by-entity
+#    - pipeline: ./entities/safety-orders/safety-orders-by-entity
 
   pipeline:
     - run: add_metadata
@@ -124,10 +124,10 @@ details:
         url: dependency://./entities/companies/government/registrar/government_companies
         resource: government-companies
 
-    - run: load_resource
-      parameters:
-        url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
-        resource: safety-orders-by-entity
+#    - run: load_resource
+#      parameters:
+#        url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
+#        resource: safety-orders-by-entity
 
     - run: add_sql_resource
       parameters:
@@ -158,20 +158,20 @@ details:
           government_company_info: null
 
     # Load safety violations for every company
-    - run: join
-      parameters:
-        source:
-          name: safety-orders-by-entity
-          key:
-            - entity_id
-          delete: true
-        target:
-          name: company-details
-          key:
-            - id
-          full: true
-        fields:
-          safety_violations: null
+#    - run: join
+#      parameters:
+#        source:
+#          name: safety-orders-by-entity
+#          key:
+#            - entity_id
+#          delete: true
+#        target:
+#          name: company-details
+#          key:
+#            - id
+#          full: true
+#        fields:
+#          safety_violations: null
     - run: sample
     - run: fix_values
     - run: set_types
@@ -179,9 +179,9 @@ details:
         types:
           company_last_report_year:
             type: integer
-          safety_violations:
-            es:itemType: object
-            es:index: false
+#          safety_violations:
+#            es:itemType: object
+#            es:index: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/registrar/details
