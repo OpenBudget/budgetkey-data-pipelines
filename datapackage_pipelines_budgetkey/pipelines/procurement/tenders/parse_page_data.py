@@ -7,6 +7,7 @@ from datapackage_pipelines.utilities.extended_json import json
 
 from pyquery import PyQuery as pq
 import magic
+import copy
 from datetime import datetime
 import requests, os, base64, mimetypes, logging
 from requests import HTTPError
@@ -257,10 +258,12 @@ def get_central_data(row, page, documents):
     ot_url = BASE_URL + '/officestenders/Pages/officetender.aspx?pID={}'.format(publication_id) 
     ot_page = pq(_get_url_response_text(ot_url))
     documents = extract_documents(ot_page)
-    outrow = get_office_data(row, ot_page, documents)
+    outrow = copy.deepcopy(row)
+    outrow['url'] = ot_url
+    outrow = get_office_data(outrow, ot_page, documents)
     dd = []
     for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
-        link = elt.attrib(["href"])
+        link = elt.attrib["href"]
         if 'officestenders/Pages/officetender.aspx?pID=' not in link:
             dd.append((' '.join(elt.text.strip().split()), link))
     for elt in page("#ctl00_PlaceHolderMain_SummaryLinks2Panel"):
