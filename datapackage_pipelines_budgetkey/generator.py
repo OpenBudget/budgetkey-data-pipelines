@@ -87,7 +87,12 @@ class Generator(GeneratorBase):
     def generate_pipeline(cls, source, base):
         all_pipelines = []
         sitemap_params = []
+        bumper = source.get('bumper', 0)
         for doc_type, parameters in source.items():
+            if not isinstance(parameters, dict):
+                continue
+            if not 'kind' in parameters:
+                continue
             if parameters['kind'] == 'indexer':
                 snake_doc_type = doc_type.replace('-', '_')
                 dependent_pipeline_id = parameters['dependent_pipeline']
@@ -101,7 +106,7 @@ class Generator(GeneratorBase):
                 key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = os.path.join(base, 'index_{}'.format(snake_doc_type))
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
-                revision = parameters.get('revision', 0)
+                revision = parameters.get('revision', 0) + bumper
 
                 if doc_type != 'people':
                     all_pipelines.append(pipeline_id)

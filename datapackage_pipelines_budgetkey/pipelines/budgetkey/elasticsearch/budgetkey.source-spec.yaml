@@ -1,3 +1,5 @@
+bumper: 1
+
 budget:
   kind: indexer
   revision: 16
