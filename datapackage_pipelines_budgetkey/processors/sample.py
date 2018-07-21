@@ -5,14 +5,17 @@ from datapackage_pipelines.utilities.extended_json import json
 
 from datapackage_pipelines.wrapper import spew, ingest
 
+from datapackage_pipelines_budgetkey.common.line_selector import LineSelector
+
 parameters, datapackage, res_iter = ingest()
 res_name = parameters.get('resource', datapackage['resources'][0]['name'])
 
 
 def show_sample(res):
+    ls = LineSelector()
     logging.info('SAMPLE OF LINES from %s', res.spec['name'])
     for i, row in enumerate(res):
-        if i < 10:
+        if ls(i):
             if isinstance(row, LazyJsonLine):
                 logging.info('#%s: %s', i, row._evaluate())
             else:

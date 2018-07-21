@@ -5,6 +5,7 @@ import hashlib
 
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines.utilities.kvstore import DB
+from datapackage_pipelines_budgetkey.common.line_selector import LineSelector
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
@@ -73,7 +74,9 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
     count_total = 0
     count_stale = 0
 
-    for row in res:
+    ls = LineSelector()
+
+    for i, row in enumerate(res):
         key = calc_key(row, key_fields)
         hash = calc_hash(row, hash_fields)
         count_total += 1
@@ -88,9 +91,10 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             is_stale = days_since_last_update > next_update_days
             overdue = max(1, days_since_last_update - next_update_days)
             staleness = int(100000+100000/(1+overdue))
-            logging.info('PROPS: %r', existing_id)
-            logging.info('>> is_stale: %r, staleness: %r, next_update_days: %r',
-                         is_stale, staleness, next_update_days)
+            if ls(i):
+                logging.info('#%d: PROPS: %r', i, existing_id)
+                logging.info('#%d: >> is_stale: %r, staleness: %r, next_update_days: %r',
+                             i, is_stale, staleness, next_update_days)
             if is_stale:
                 count_stale += 1
             row.update({
@@ -127,7 +131,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             })
             count_new += 1
         if row[prefix+'__is_stale']:
-            logging.info('>> %r', dict(
+            logging.info('#%d>> %r', i, dict(
                 (k, v) for k, v in row.items()
                 if k.startswith(prefix + '__')
             ))
