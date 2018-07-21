@@ -64,7 +64,11 @@ class DumpToElasticSearch(ESDumper):
         for row in rows:
             yield dict((k, formatters.get(k, id)(v)) for k, v in row.items())
 
-    def handle_resource(self, resource, spec, parameters, datapackage):        
+    def initialize(self, parameters):
+        parameters['reindex'] = False
+        return super(DumpToElasticSearch, self).initialize(parameters)
+
+    def handle_resource(self, resource, spec, parameters, datapackage):
         return super(DumpToElasticSearch, self)\
                 .handle_resource(self.format_datetime_rows(spec, resource), 
                                  spec, parameters, datapackage)

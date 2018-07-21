@@ -22,7 +22,7 @@ setup(
                       'fuzzywuzzy[speedup]',
                       'plyvel',
                       'filemagic',
-                      'datapackage-pipelines-elasticsearch>=0.0.8',
+                      'datapackage-pipelines-elasticsearch>=0.0.9',
                       'datapackage-pipelines-aws',
                       'textract==1.5.0',  # later versions of textract introduce unnecesary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
