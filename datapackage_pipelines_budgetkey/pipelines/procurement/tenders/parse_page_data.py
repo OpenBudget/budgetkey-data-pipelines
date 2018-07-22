@@ -254,14 +254,17 @@ def get_office_data(row, page, documents):
 
 def get_central_data(row, page, documents):
     # michraz_number = page("#ctl00_PlaceHolderMain_MichraznumberPanel div.value").text().strip()
-    publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
-    ot_url = BASE_URL + '/officestenders/Pages/officetender.aspx?pID={}'.format(publication_id) 
-    ot_page = pq(_get_url_response_text(ot_url))
-    documents = extract_documents(ot_page)
     outrow = copy.deepcopy(row)
-    outrow['url'] = ot_url
-    outrow['id'] = -1
-    outrow = get_office_data(outrow, ot_page, documents)
+    publication_id = page("#ctl00_PlaceHolderMain_ManofSerialNumberPanel div.value").text().strip()
+    if publication_id:
+        ot_url = BASE_URL + '/officestenders/Pages/officetender.aspx?pID={}'.format(publication_id) 
+        ot_page = pq(_get_url_response_text(ot_url))
+        documents = extract_documents(ot_page)
+        outrow['url'] = ot_url
+        outrow['id'] = -1
+        outrow = get_office_data(outrow, ot_page, documents)
+    else:
+        logging.info('no publication id, continuing')
     dd = []
     for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
         link = elt.attrib["href"]
@@ -288,7 +291,14 @@ def get_central_data(row, page, documents):
         "contact": page("#ctl00_PlaceHolderMain_WorkerPanel_WorkerPanel1 div.worker").text().strip(),
         "regulation": page("#ctl00_PlaceHolderMain_MIchrazTypePanel div.value").text().strip(),
         "subjects": page("#ctl00_PlaceHolderMain_MMDCategoryPanel div.value").text().strip(),
-        "end_date": parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()),
+        "end_date": (
+            parse_date(page("#ctl00_PlaceHolderMain_TokefEndDatePanel div.Datevalue").text().strip()) or
+            parse_date(page("#ctl00_PlaceHolderMain_HoraatShaaEndDatePanel div.Datevalue").text().strip())            
+        ),
+        "start_date": (
+            outrow.get('start_date') or
+            parse_date(page("#ctl00_PlaceHolderMain_HoraatShaaStartDatePanel div.Datevalue").text().strip())            
+        ),
         "decision": page("#ctl00_PlaceHolderMain_MichrazStatusPanel div.value").text().strip(),
         "page_title": page("h1.MainTitle").text().strip(),
         "tender_id": tender_id_from_url(row["url"]),
