@@ -24,7 +24,7 @@ setup(
                       'filemagic',
                       'datapackage-pipelines-elasticsearch>=0.0.9',
                       'datapackage-pipelines-aws',
-                      'textract==1.5.0',  # later versions of textract introduce unnecesary dependency on swig
+                      'textract==1.5.0',  # later versions of textract introduce unnecessary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
 #                      'urllib3==1.21.1',
                       'geocoder',
