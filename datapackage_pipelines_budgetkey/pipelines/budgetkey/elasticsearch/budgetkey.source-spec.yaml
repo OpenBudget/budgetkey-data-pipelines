@@ -164,3 +164,4 @@ reports:
     - run: make_ngo_report_charts
     - run: enrich_ngo_reports
     - run: make_ngo_main_page_report
+    - run: make_open_procure_main_page_report
