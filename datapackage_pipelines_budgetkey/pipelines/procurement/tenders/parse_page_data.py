@@ -260,6 +260,7 @@ def get_central_data(row, page, documents):
     documents = extract_documents(ot_page)
     outrow = copy.deepcopy(row)
     outrow['url'] = ot_url
+    outrow['id'] = -1
     outrow = get_office_data(outrow, ot_page, documents)
     dd = []
     for elt in page("#ctl00_PlaceHolderMain_SummaryLinksPanel_SummaryLinkFieldControl1__ControlWrapper_SummaryLinkFieldControl a"):
