@@ -142,6 +142,10 @@ scraper:
         db-key-fields:
           - page_url
         hash-fields: []
+    - run: sort
+      parameters:
+        resources: tender-urls
+        sort-by: "{tender_type}:{__staleness}"
     # - run: sample
     - run: parse_page_data
       runner: tzabar
