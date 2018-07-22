@@ -342,7 +342,7 @@ connected-national-budgets:
     - run: add_resource
       parameters:
         name: curated2
-        url: http://www.obudget.org/api/budget-matches
+        url: http://old.obudget.org/api/budget-matches
         format: json
         headers: ['current', 'previous']
         schema:
