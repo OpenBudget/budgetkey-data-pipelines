@@ -15,6 +15,7 @@ safety-orders:
         url: http://employment.molsa.gov.il/Employment/SafetyAndHealth/Enforcement/Documents/orders.xlsx
         name: safety-orders-old
     - run: stream_remote_resources
+      runner: tzabar
       parameters:
         resources: "safety-orders-.+"
     - run: concatenate
