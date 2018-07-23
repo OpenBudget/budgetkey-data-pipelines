@@ -1,26 +1,23 @@
 import logging
 import requests
 
-ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
+# ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
+SEARCH_RESOURCE_URL = 'https://data.gov.il/api/action/resource_search'
 
 
-def get_all_packages():
-    return requests.get(ALL_PACKAGES_URL).json()['result']['results']
+# def get_all_packages():
+#     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
+
+
+def search_resource(name):
+    results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()['result']['results']
+    results = [
+        r for r in results
+        if r['name'] == name
+    ]
+    assert len(results) == 1, 'Failed to find result for name %s: %r' % (name, results)
+    return results[0]
 
 
 def get_resource(dataset_name, resource_name):
-    try:
-        dataset = next(filter(lambda ds: ds['name'] == dataset_name, get_all_packages()))
-    except:
-        logging.error('Failed to find data set with name %s', dataset_name)
-        raise
-    try:
-        resource = next(filter(lambda res: res['name'] == resource_name, dataset['resources']))
-    except:
-        logging.error('Failed to find resource with name %s in dataset %s', resource_name, dataset_name)
-        raise
-    if 'e.data.gov.il' in resource['url']:
-        resource['url'] = resource['url'].replace('e.data.gov.il', 'data.gov.il')
-    if 'e.new.data.gov.il' in resource['url']:
-        resource['url'] = resource['url'].replace('e.new.data.gov.il', 'data.gov.il')
-    return resource
+    return search_resource(resource_name)
