@@ -1,6 +1,7 @@
 from pyquery import PyQuery as pq
 from datetime import datetime
 
+
 APPOINTMENT_DIRECTOR = "ת093" # דוח מיידי על מינוי דירקטור (שאינו תאגיד) או יחיד המכהן מטעם תאגיד שהוא דירקטור בחברה פרטית
 APPOINTMENT_VIP = "ת091" #דוח מיידי על מינוי נושא משרה בכירה (למעט מינוי דירקטור/ יו"ר דירקטוריון ולמעט יחיד שמונה מטעם תאגיד שהוא דירקטור)
 APPOINTMENT_ACCOUNTANT = "ת090" #דוח מיידי על מינוי רואה חשבון
