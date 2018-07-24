@@ -105,12 +105,6 @@ aggregated:
     -
       run: calc-person-score
 
-    - run: set_types
-      parameters:
-        types:
-          key:
-            es:title: true
-
     -
       run: set_primary_key
       parameters:
