@@ -4,7 +4,7 @@ import json
 from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
-from datapackage_pipelines.utilities.kvstore import KVStore
+from datapackage_pipelines.utilities.kvstore import DB
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
@@ -13,7 +13,7 @@ from sqlalchemy.sql import text
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
 conn = engine.connect()
-contracts = KVStore()
+contracts = DB()
 
 distinct_tender_keys = set([
     dict(r)['tender_key'] 
@@ -34,15 +34,19 @@ for r in conn.execute(query):
     r = dict(r)
     key = r['tender_key']
     try:
-        data = contracts[key]
+        data = contracts.get(key)
     except KeyError:
         data = []
     data.append(r)
-    contracts[key] = data
+    contracts.set(key, data)
 
 def get_all_contracts(key):
     if key in distinct_tender_keys:
-        return contracts[key]
+        try:
+            return contracts.get(key)
+        except KeyError:
+            logging.exception('Missing key in contracts: %r', key)
+            return []
     else:
         return []
 
