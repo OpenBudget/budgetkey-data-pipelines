@@ -146,6 +146,7 @@ class Generator(GeneratorBase):
                             }
                         }
                     }),
+                    ('set-revisions', {}),
                     ('filter', {
                         'resources': doc_type,
                         'in': [
