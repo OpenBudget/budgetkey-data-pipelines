@@ -10,9 +10,11 @@ def process_row(row, *_):
     majors = [
         ('office', 'claim_date', 'מועד אחרון להגשה', 2),
         ('exemptions', 'claim_date', 'תאריך אחרון להגשת השגות', 2),
+        ('central', 'claim_date', 'מועד אחרון להגשה', 2),
 
         ('office', 'start_date', 'תאריך פרסום המכרז', 0),
         ('exemptions', 'start_date', 'תחילת תקופת התקשרות', 0),
+        ('central', 'start_date', 'תאריך פרסום המכרז', 0),
 
         ('exemptions', 'end_date', 'תום תקופת ההתקשרות', 2),
         ('central', 'end_date', 'תאריך סיום תוקף מכרז', 2),
@@ -27,6 +29,14 @@ def process_row(row, *_):
                     title = title,
                     priority = priority
                 ))
+    if row['decision'] == 'בוטל':
+        timeline.append(dict(
+            timestamp = str(row['last_update_date']),
+            major = True,
+            title = 'המכרז בוטל',
+            priority = 2
+        ))
+
     for document in row.get('documents', []):
         if document['update_time']:
             timeline.append(dict(
