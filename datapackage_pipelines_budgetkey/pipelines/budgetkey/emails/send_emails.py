@@ -55,14 +55,18 @@ def process_row(row, *_):
                       term=props['term'],
                       query_url=query_url(props['term'], filters)
                   ))
-        sections.append(section)
-    ret = dict(
-        sections=sections,
-        email=row['email']
-    )
-    logging.info('DATAS: %r', ret)
-    result = requests.post('http://budgetkey-emails:8000/', json=ret).json()
-    logging.info('RESULT: %r', result)
+        if len(terms) > 0:
+            sections.append(section)
+    if len(sections) > 0:
+        ret = dict(
+            sections=sections,
+            email=row['email']
+        )
+        logging.info('DATAS: %r', ret)
+        result = requests.post('http://budgetkey-emails:8000/', json=ret).json()
+        logging.info('RESULT: %r', result)
+    else:
+        logging.info('SKIPPING %s as has no relevant subscriptions', row['email'])
 
 
 if __name__ == '__main__':
