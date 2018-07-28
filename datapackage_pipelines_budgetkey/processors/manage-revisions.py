@@ -203,6 +203,7 @@ def main():
                                          prefix + '__last_updated_at',
                                          prefix + '__next_update_days',
                                          prefix + '__hash',
+                                         prefix + '__created_at',
                                      ]
                                     )
             break
