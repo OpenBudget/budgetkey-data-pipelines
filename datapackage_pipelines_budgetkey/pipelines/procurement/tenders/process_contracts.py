@@ -35,6 +35,9 @@ for r in conn.execute(query):
     key = r['tender_key']
     contracts.setdefault(key, []).append(r)
 
+logging.info('Loaded %d contract records', 
+             len(contracts))
+
 def get_all_contracts(key):
     return contracts.get(key, [])
 
