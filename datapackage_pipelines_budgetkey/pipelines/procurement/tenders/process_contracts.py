@@ -13,7 +13,7 @@ from sqlalchemy.sql import text
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
 conn = engine.connect()
-contracts = DB()
+contracts = {}
 
 distinct_tender_keys = set([
     dict(r)['tender_key'] 
@@ -33,22 +33,10 @@ select entity_name, entity_id, entity_kind, executed, volume, supplier_name, pay
 for r in conn.execute(query):
     r = dict(r)
     key = r['tender_key']
-    try:
-        data = contracts.get(key)
-    except KeyError:
-        data = []
-    data.append(r)
-    contracts.set(key, data)
+    contracts.setdefault(key, []).append(r)
 
 def get_all_contracts(key):
-    if key in distinct_tender_keys:
-        try:
-            return contracts.get(key)
-        except KeyError:
-            logging.exception('Missing key in contracts: %r', key)
-            return []
-    else:
-        return []
+    return contracts.get(key, [])
 
 
 def modify_datapackage(dp, *_):
