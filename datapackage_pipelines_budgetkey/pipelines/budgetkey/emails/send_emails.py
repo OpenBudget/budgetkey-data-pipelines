@@ -16,13 +16,17 @@ SECTIONS = [
      'מכרזים חדשים שעשויים לעניין אותך',
      'dd=tenders&theme=govbuy&focused=new'
     ),
-    ('עדכונים נוספים',
-     'מכרזים מעניינים נוספים שהתעדכנו בשבוע האחרון',
-     'dd=tenders&theme=govbuy&focused=updated'
-    ),
     ('בקשות חדשות לפטור ממכרז',
-     'בקשות פטור ממכרז בנושאים אלו',
-     'dd=tenders&theme=govbuy&focused=new'
+     'משרדי ממשלה ויחידות פרסמו השבוע תהליכי רכש בפטור ממכרז בנושאים אלו',
+     'dd=exemptions&theme=govbuy&focused=new'
+    ),
+    ('התקשרויות חדשות',
+     'התקשרויות חדשות בנושאים שמעניינים אותך',
+     'dd=contracts&theme=govbuy&focused=new'
+    ),
+    ('ומה חוץ מזה?',
+     'עוד כמה עדכונים שקשורים בחיפושים השמורים שלך',
+     'dd=tenders&theme=govbuy&focused=updated'
     ),
 ]
 
