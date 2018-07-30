@@ -30,6 +30,7 @@ SECTIONS = [
     ),
 ]
 
+
 def query_url(term, filters):
     term = urllib.parse.quote_plus(term)
     return f'https://next.obudget.org/s/?q={term}&{filters}'
