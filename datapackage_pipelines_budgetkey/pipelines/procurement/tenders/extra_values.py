@@ -33,6 +33,7 @@ exemption_conversion_table = dict(
     for x in exemption_conversion_table 
 )
 
+match_errors = []
 
 def process_row(row, *_):
     # Fix description, publisher, snippet
@@ -73,7 +74,8 @@ def process_row(row, *_):
             tips.append((update['tip2'], update['tip2_link']))
         row['actionable_tips'] = tips
     except:
-        logging.error('%r: Failed to find lookup match for row %r', key, row)
+        global match_errors
+        match_errors.append('%r: Failed to find lookup match for row %r' % (key, row))
 
     # # Simplify Decision
     decision = row['decision']
@@ -169,3 +171,5 @@ def modify_datapackage(dp, *_):
 if __name__ == '__main__':
     process(modify_datapackage=modify_datapackage,
             process_row=process_row)
+    for msg in match_errors:
+        logging.error(msg)
