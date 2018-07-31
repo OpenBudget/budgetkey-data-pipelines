@@ -56,26 +56,24 @@ def process_row(row, *_):
         key = 'tender_type'
         lookup = tender_conversion_table
     key = (
-        row[key],
-        row['decision'],
+        row[key] if row[key] else '',
+        row['decision'] if row['decision'] else '',
         has_awardees,
         has_active_awardees
     )
     try:
         update = lookup[key]
+        row['simple_decision'] = update['simple_decision']
+        row['simple_decision_long'] = update['simple_decision_long']
+        row['extended_status'] = update['extended_status']
+        tips = []
+        if update['tip1']:
+            tips.append((update['tip1'], update['tip1_link']))
+        if update['tip2']:
+            tips.append((update['tip2'], update['tip2_link']))
+        row['actionable_tips'] = tips
     except:
-        logging.exception('Failed to find lookup match for row %r', row)
-        raise
-
-    row['simple_decision'] = update['simple_decision']
-    row['simple_decision_long'] = update['simple_decision_long']
-    row['extended_status'] = update['extended_status']
-    tips = []
-    if update['tip1']:
-        tips.append((update['tip1'], update['tip1_link']))
-    if update['tip2']:
-        tips.append((update['tip2'], update['tip2_link']))
-    row['actionable_tips'] = tips
+        logging.error('%r: Failed to find lookup match for row %r', key, row)
 
     # # Simplify Decision
     decision = row['decision']
