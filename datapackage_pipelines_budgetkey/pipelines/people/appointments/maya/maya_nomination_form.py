@@ -67,6 +67,10 @@ class MayaForm(object):
         return pq(link[0]).text().strip()
 
     @property
+    def is_nomination(self):
+        return self.type in [APPOINTMENT_DIRECTOR, APPOINTMENT_VIP, APPOINTMENT_VIP]
+
+    @property
     def position_start_date(self):
         aliases = ['TaarichTchilatHaCehuna', 'TaarichTchilatCehuna', 'TaarichTehilatCehuna',
                           'TaarichTchilatHaKehuna', 'TaarichTchilatKehuna', 'TaarichTehilatKehuna']

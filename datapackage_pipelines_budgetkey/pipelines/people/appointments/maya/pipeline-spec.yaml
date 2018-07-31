@@ -1,29 +1,59 @@
-maya-list:
+maya-notification-updates:
   title: List all notifications from maya system
   description: id, date, company, notification_type, s3_object_name, url
   schedule:
     crontab: 0 0 * * *
   pipeline:
+    - run: add_metadata
+      parameters:
+        name: maya-notification-updates
+        title: List all notifications from maya system
     - run: scrape-notification-list
       runner: tzabar
       parameters:
-        name: maya-list-with-fixes
-        from: '2018-01-01'
+        name: maya-notification-updates
+        from: '2016-01-01'
+    - run: keep-only-updates
     - run: store-nomination-to-s3
+    - run: scrape-individual-nomination
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/maya/maya-notification-updates
+    - run: dump.to_sql
+      parameters:
+        tables:
+          maya_notification_list:
+            resource-name: maya-notification-updates
+            mode: update
+            update_keys:
+              - s3_object_name
+
+
+maya-list:
+  dependencies:
+    - pipeline: ./people/appointments/maya/maya-notification-updates
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/people/appointments/maya/maya-notification-updates/datapackage.json
+        resource: maya-notification-updates
+        table: maya_notification_list
+
+    - run: stream_remote_resources
     - run: duplicate
       parameters:
-        source: maya-list-with-fixes
+        source: _
         target-name: maya-full-list
         target-path: maya-full-list
     - run: filter
       parameters:
-        resources: maya-list-with-fixes
+        resources: _
         out:
           - fix_for: null
     - run: join
       parameters:
         source:
-          name: maya-list-with-fixes
+          name: _
           key: ['fix_for']
           delete: true
         target:
@@ -40,18 +70,28 @@ maya-list:
           - fixed_by: null
     - run: concatenate
       parameters:
-        target:
-          name: maya-list
         fields:
+          source: []
           id: []
           date: []
           notification_type: []
-          company: []
           s3_object_name: []
           url: []
+          fix_for: []
+          organisation_name: []
+          is_nomination: []
+          positions: []
+          gender: []
+          name: []
+        target:
+          name: maya-list
+    - run: add_metadata
+      parameters:
+        name: maya-list
     - run: dump.to_path
       parameters:
           out-path: /var/datapackages/people/appointments/maya/maya-list
+
 
 maya-nominations:
   dependencies:
@@ -62,30 +102,31 @@ maya-nominations:
     - run: add_metadata
       parameters:
         name: maya-nominations
-        title: maya nominations (name, title, company, nomination date, document)
     - run: load_resource
       parameters:
         url: dependency://./people/appointments/maya/maya-list
         resource: maya-list
+    - run: filter
+      parameters:
+        resources: maya-list
+        in:
+          - is_nomination: true
     - run: concatenate
       parameters:
         target:
           name: maya-nominations
         sources: maya-list
         fields:
+          source: []
           id: []
           date: []
           notification_type: []
           s3_object_name: []
           proof_url: ['url']
-    - run: filter
-      parameters:
-        resources: maya-nominations
-        in:
-          - notification_type: ת090
-          - notification_type: ת091
-          - notification_type: ת093
-    - run: scrape-individual-nomination
+          organisation_name: []
+          positions: []
+          gender: []
+          name: []
     - run: unwind_array
       parameters:
         array-field: positions
@@ -96,7 +137,7 @@ maya-nominations:
         fields:
           - target: details
             operation: format
-            with: "{name} מונה ל {position}"
+            with: "{name} מונה ל{position} ב{organisation_name}"
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/people/appointments/maya/maya-nominations

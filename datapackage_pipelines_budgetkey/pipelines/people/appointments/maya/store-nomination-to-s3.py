@@ -12,15 +12,6 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 session = requests.Session()
 
-def modify_datapackage(datapackage, parameters, stats):
-    datapackage['resources'][0]['schema']['fields'].extend(
-        [
-            {'name': 'company','type': 'string'},
-            {'name': 'id', 'type':'string'},
-            {'name': 'notification_type', 'type':'string'},
-            {'name': 'fix_for', 'type':'string'}
-        ])
-    return datapackage
 
 
 ###
@@ -67,23 +58,10 @@ def process_row(row, *_):
                              public_bucket=True,
                              create_bucket=True,
                              content_type="text/html; charset={}".format(charset))
-
-    else:
-        conn = session.get(object_storage.urlfor(s3_object_name))
-
-    maya_form = MayaForm(conn.text)
-    try:
-        row.update({
-            'company': maya_form.company,
-            'id': maya_form.id,
-            'notification_type': maya_form.type,
-            'fix_for': maya_form.fix_for
-        })
-    except ValueError as err:
-        raise ValueError("Failed to parse object {} - {}".format(s3_object_name, url)) from err
     return row
 
 
-process(process_row=process_row, modify_datapackage=modify_datapackage)
+
+process(process_row=process_row)
 
 

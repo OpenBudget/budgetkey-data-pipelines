@@ -5,16 +5,29 @@ from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.pipelines.people.appointments.maya.maya_nomination_form import MayaForm
 
+logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 session = requests.Session()
 
 def modify_datapackage(datapackage, parameters, stats):
     datapackage['resources'][0]['schema']['fields'].extend([
-        {'name': 'name','type': 'string'},
-        {'name': 'start_date', 'type': 'date'},
-        {'name': 'organisation_name','type': 'string'},
-        {'name': 'gender', 'type': 'string'},
         {'name': 'source', 'type': 'string'},
-        {'name': 'positions', 'type': 'array'}
+
+        #common fields
+        {'name': 'organisation_name','type': 'string'},
+        {'name': 'id', 'type':'string'},
+        {'name': 'notification_type', 'type':'string'},
+        {'name': 'fix_for', 'type':'string'},
+        {'name': 'is_nomination', 'type': 'boolean' },
+
+        #Specific to nominations
+        {'name': 'start_date', 'type': 'date'},
+        {'name': 'positions', 'type': 'array'},
+        {'name': 'gender', 'type': 'string'},
+        {'name': 'name','type': 'string'},
+
+
     ])
     return datapackage
 
@@ -27,12 +40,26 @@ def process_row(row, *_):
     try:
         row.update({
             'source': 'maya.tase.co.il',
+
             'organisation_name': maya_form.company,
-            'start_date' : maya_form.position_start_date,
-            'positions': maya_form.positions,
-            'gender': maya_form.gender,
-            'name': maya_form.full_name,
+            'id': maya_form.id,
+            'notification_type': maya_form.type,
+            'fix_for': maya_form.fix_for,
+            'is_nomination': False,
+            'start_date': None,
+            'positions':"",
+            'gender':"",
+            'name':""
         })
+
+        if maya_form.is_nomination:
+            row.update({
+                'is_nomination': True,
+                'start_date' : maya_form.position_start_date,
+                'positions': maya_form.positions,
+                'gender': maya_form.gender,
+                'name': maya_form.full_name
+            })
     except ValueError as err:
         raise ValueError("Failed to parse object {}".format(url)) from err
     return row
