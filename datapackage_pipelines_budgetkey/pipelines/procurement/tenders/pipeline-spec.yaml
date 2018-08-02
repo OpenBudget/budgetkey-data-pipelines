@@ -146,10 +146,8 @@ scraper:
       parameters:
         resources: tender-urls
         sort-by: "{tender_type}:{__staleness}"
-    # - run: sample
     - run: parse_page_data
       runner: tzabar
-    # - run: sample
     - run: set_types
       parameters:
         resources: tenders
@@ -159,7 +157,7 @@ scraper:
         db-table: procurement_tenders
         key-fields:
           - page_url
-    # - run: sample
+    - run: sample
     # update the SQL table (based on the primary keys defined in the schemas)
     - run: dump.to_sql
       parameters:
