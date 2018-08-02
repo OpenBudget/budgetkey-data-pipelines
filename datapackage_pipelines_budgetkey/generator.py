@@ -166,7 +166,8 @@ class Generator(GeneratorBase):
                         'indexes': {
                             'budgetkey': [
                                 {'resource-name': doc_type,
-                                 'doc-type': doc_type}
+                                 'doc-type': doc_type,
+                                 'revision': revision}
                             ]
                         }
                     }),

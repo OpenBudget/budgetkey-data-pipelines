@@ -73,5 +73,33 @@ class DumpToElasticSearch(ESDumper):
                 .handle_resource(self.format_datetime_rows(spec, resource), 
                                  spec, parameters, datapackage)
 
+    # def __call__(self):
+    #     super(DumpToElasticSearch, self).__call__()
+    #     self.finalize()
 
-DumpToElasticSearch()()
+    def finalize(self):
+        for index_name, configs in self.index_to_resource.items():
+            for config in configs:
+                if 'revision' in config:
+                    revision = config['revision']
+                    doc_type = config['doc-type']
+                    logging.info('DELETING from "%s", "%s" items with revision < %d',
+                                index_name, doc_type, revision)
+                    ret = self.engine.delete_by_query(
+                        index_name, 
+                        {
+                            "query": {
+                                "range": {
+                                    "__revision": {
+                                        "lt": revision
+                                    }
+                                }
+                            }
+                        },
+                        doc_type=doc_type
+                    )
+                    logging.info('GOT %r', ret)
+
+
+if __name__ == '__main__':
+    DumpToElasticSearch()()
