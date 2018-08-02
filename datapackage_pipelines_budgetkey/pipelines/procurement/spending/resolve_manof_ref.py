@@ -20,8 +20,8 @@ all_tenders = set()
 for result in engine.execute(f'select {to_select} from {db_table}'):
     all_tenders.add(tuple(str(result[k]).strip() for k in key_fields))
 all_tenders_dict = dict(
-    [(t[0], t) for t in all_tenders if t[0] and len(t[0]) > 3] +
-    [(t[2], t) for t in all_tenders if t[2] and len(t[2]) > 3 and t[2] != 'none']
+    [(t[0], t) for t in all_tenders if t[0] and len(t[0]) > 4] +
+    [(t[2], t) for t in all_tenders if t[2] and len(t[2]) > 4 and t[2] != 'none']
 )
 
 logging.info('Collected %d tenders and exemptions', len(all_tenders))
