@@ -304,7 +304,7 @@ def get_central_data(row, page, documents):
         "tender_id": tender_id_from_url(row["url"]),
         "documents": json.dumps(documents, sort_keys=True, ensure_ascii=False),
     })
-    if outrow["description"] == "" and outrow["supplier"] == "" and outrow["subjects"] == "":
+    if not any(outrow.get(x) for x in ("description", "supplier", "subjects")):
         raise Exception("invalid or blocked response")
     return outrow
 
