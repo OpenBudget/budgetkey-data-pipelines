@@ -87,7 +87,9 @@ def parse_datetime(s):
 base_object_name = "procurement/tenders/"
 
 def requests_get_content(url):
-    return requests.get(url, timeout=60).content
+    ret = requests.get(url, timeout=60)
+    ret.raise_for_status()
+    return ret.content
 
 def write_to_object_storage(object_name, data):
     logging.error('write_to_object_storage %s', object_name)
@@ -105,8 +107,9 @@ def unsign_document_link(url):
     decoded_indicator = base_object_name + filename + '.decoded'
     if object_storage.exists(decoded_indicator):
         decoded_indicator_url = object_storage.urlfor(decoded_indicator)
-        ret = requests.get(decoded_indicator_url).text
-        return ret
+        ret = requests.get(decoded_indicator_url)
+        if ret.status_code == 200:
+            return ret.text
     try:
         content = requests_get_content(url)
         page = pq(content)
