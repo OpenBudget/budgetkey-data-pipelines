@@ -258,7 +258,7 @@ processed:
           - publication_id
           - tender_type
           - tender_id
-    - run: sample
+    # - run: sample
     - run: dump.to_sql
       parameters:
         tables:
