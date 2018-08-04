@@ -96,8 +96,8 @@ all:
           budget_code:
             - "תקנה - מפתח"
             - "תקנה (ZCMMT_ITM) - מפתח"
-    - run: sample
     - run: fix_values
+    - run: sample
     - run: set_types
       parameters:
         types:
