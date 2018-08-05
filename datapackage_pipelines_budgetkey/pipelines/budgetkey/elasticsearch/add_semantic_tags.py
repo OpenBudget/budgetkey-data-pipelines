@@ -45,6 +45,7 @@ def modify_datapackage(dp, params, *_):
                 'name': target_field,
                 'type': 'array',
                 'es:itemType': 'string',
+                'es:title': True
             })
     return dp
 
