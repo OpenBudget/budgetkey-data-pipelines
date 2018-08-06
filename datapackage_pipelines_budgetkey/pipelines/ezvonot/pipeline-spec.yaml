@@ -419,10 +419,4 @@ ezvonot_decisions_join:
 
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/ezvonot/original
-#    - run: dump.to_sql
-#      parameters:
-#        tables:
-#          ezvonot:
-#            resource-name: ezvonot_decisions
-#            mode: update
+        out-path: /var/datapackages/ezvonot/decisions_joined
