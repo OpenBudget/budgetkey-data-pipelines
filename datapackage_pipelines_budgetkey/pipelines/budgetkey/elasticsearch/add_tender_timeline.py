@@ -23,12 +23,20 @@ def process_row(row, *_):
     for tender_type, field, title, priority in majors:
         if row['tender_type'] == tender_type:
             if row[field]:
-                timeline.append(dict(
-                    timestamp = str(row[field]),
-                    major = True,
-                    title = title,
-                    priority = priority
-                ))
+                if tender_type == 'central' and field == 'end_date' and row['decision'] == 'עתידי':
+                    timeline.append(dict(
+                        timestamp = str(row[field]),
+                        major = True,
+                        title = 'תאריך פרסום צפוי',
+                        priority = 0
+                    ))
+                else:
+                    timeline.append(dict(
+                        timestamp = str(row[field]),
+                        major = True,
+                        title = title,
+                        priority = priority
+                    ))
     if row['decision'] == 'בוטל':
         timeline.append(dict(
             timestamp = str(row['last_update_date']),
