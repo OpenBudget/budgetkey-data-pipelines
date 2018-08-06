@@ -1,6 +1,4 @@
 ezvonot_deposits:
-  schedule:
-    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -66,8 +64,6 @@ ezvonot_deposits:
 
 
 ezvonot_accounts:
-  schedule:
-    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -122,8 +118,6 @@ ezvonot_accounts:
         out-path: /var/datapackages/ezvonot/accounts
 
 ezvonot_cases:
-  schedule:
-    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -184,8 +178,6 @@ ezvonot_cases:
         out-path: /var/datapackages/ezvonot/cases
 
 ezvonot_purposes:
-  schedule:
-    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -240,8 +232,6 @@ ezvonot_purposes:
         out-path: /var/datapackages/ezvonot/purposes
 
 ezvonot_decisions:
-  schedule:
-    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -319,3 +309,120 @@ ezvonot_decisions:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/decisions
+
+
+ezvonot_decisions_join:
+  schedule:
+    crontab: "0 0 fri * *"
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_accounts
+    - pipeline: ./ezvonot/ezvonot_cases
+    - pipeline: ./ezvonot/ezvonot_purposes
+    - pipeline: ./ezvonot/ezvonot_decisions
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot
+        title: Post mortem donations
+
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/accounts/datapackage.json
+        resource: ezvonot_accounts
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/cases/datapackage.json
+        resource: ezvonot_cases
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/purposes/datapackage.json
+        resource: ezvonot_purposes
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/decisions/datapackage.json
+        resource: ezvonot_decisions
+
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_accounts'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          internal_account_id: null
+          internal_protocol_id: null
+          case_id: null
+          account_paid_sum:
+            aggregate: sum
+            name: paid_sum
+          account_canceled_sum:
+            aggregate: sum
+            name: canceled_sum
+          account_designated_sum:
+            aggregate: sum
+            name: designated_sum
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_cases'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          country: null
+          has_specific_purpose: null
+          main_status: null
+          closing_reason: null
+          closing_date: null
+          opening_date: null
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_purposes'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          payment_method: null
+          primary_subject: null
+          case_id: null
+          memorialization_required: null
+          subject: null
+          sub_subject: null
+
+    - run: fingerprint
+      parameters:
+        source-field: receiving_institute_name
+        target-field: institute_fingerprint
+        resource-name: ezvonot_decisions
+    - run: fingerprint
+      parameters:
+        source-field: receiving_ministry_name
+        target-field: ministry_fingerprint
+        resource-name: ezvonot_decisions
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/original
+#    - run: dump.to_sql
+#      parameters:
+#        tables:
+#          ezvonot:
+#            resource-name: ezvonot_decisions
+#            mode: update
