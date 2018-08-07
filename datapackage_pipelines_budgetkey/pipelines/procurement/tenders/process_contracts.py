@@ -66,6 +66,7 @@ def modify_datapackage(dp, *_):
                     {'name': 'executed', 'type': 'number'},
                     {'name': 'payments', 'type': 'array', 
                      'es:itemType': 'object', 'es:index': False},
+                    {'name': 'count', 'type': 'integer'},
                 ]
             }
         }
@@ -108,13 +109,15 @@ def process_row(row, *_):
                 active=contract['contract_is_active'],
                 volume=Decimal(0),
                 executed=Decimal(0),
-                payments=dict((t, [t, 0]) for t in timestamps)
+                payments=dict((t, [t, 0]) for t in timestamps),
+                count=0
             )
         )
         for t in timestamps:
             erec['payments'][t][1] += payments[t]
         erec['volume'] += contract.get('volume', 0)
         erec['executed'] += contract.get('executed', 0)
+        erec['count'] += 1
     ents = list(sorted(ents.values(), key=lambda x: (x['executed'], x['volume']), reverse=True))
     for e in ents:
         e['payments'] = sorted(e['payments'].values())
