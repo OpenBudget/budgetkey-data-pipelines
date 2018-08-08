@@ -417,6 +417,6 @@ ezvonot_decisions_join:
 
     - run: dump.to_sql
       parameters:
-      tables:
-        ezvonot:
-          resource-name: ezvonot_decisions
+        tables:
+          ezvonot:
+            resource-name: ezvonot_decisions
