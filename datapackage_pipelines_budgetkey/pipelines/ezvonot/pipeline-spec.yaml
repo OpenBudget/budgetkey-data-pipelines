@@ -1,0 +1,422 @@
+ezvonot_deposits:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot_deposits
+        title: Post mortem donations
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: ezvonot2018
+        resource-name: 'קובץ הפקדות'
+        resource:
+          name: deposits
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: ezvonot_deposits
+        fields:
+          internal_id:
+            - _id
+          deposit_type:
+            - 'ארץ'
+          state:
+            - 'מדינה'
+          deposit_in_original_currency:
+            - 'מטבע מקור של ההפקדה'
+          deposit_id:
+            - 'מספר הפקדה'
+          original_currency:
+            - 'סוג מטבע מקור'
+          deposit_in_nis:
+            - 'סכום לאחר המרה לשקלים'
+          deposit_date:
+            - 'תאריך הפקדה'
+          received_date:
+            - 'תאריך קבלה'
+    - run: set_types
+      parameters:
+        types:
+          internal_id:
+            type: integer
+          deposit_type:
+            type: string
+          state:
+            type: string
+          deposit_in_original_currency:
+            type: number
+          deposit_id:
+            type: integer
+          original_currency:
+            type: string
+          deposit_in_nis:
+            type: number
+          deposit_date:
+            type: date
+            format: '%d/%m/%Y'
+          received_date:
+            type: date
+            format: '%d/%m/%Y'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/deposits
+
+
+ezvonot_accounts:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot_accounts
+        title: Post mortem donations
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: ezvonot2018
+        resource-name: 'קובץ חשבונות המרכיבים את החלטות הועדה'
+        resource:
+          name: accounts
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: ezvonot_accounts
+        fields:
+          internal_id:
+            - _id
+          internal_account_id:
+            - 'מספר חשבון פנימי'
+          internal_protocol_id:
+            - 'מספר פנימי של הפרוטוקול'
+          case_id:
+            - 'מספר תיק'
+          paid_sum:
+            - 'סה~כ שולם'
+          canceled_sum:
+            - 'סכום שבוטל ע~י הוועדה'
+          designated_sum:
+            - 'סכום שהוקצה ע~י וועדת העזבונות'
+    - run: set_types
+      parameters:
+        types:
+          internal_id:
+            type: integer
+          internal_account_id:
+            type: integer
+          internal_protocol_id:
+            type: integer
+          case_id:
+            type: integer
+          paid_sum:
+            type: integer
+          canceled_sum:
+            type: integer
+          designated_sum:
+            type: integer
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/accounts
+
+ezvonot_cases:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot_cases
+        title: Post mortem donations
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: ezvonot2018
+        resource-name: 'קובץ תיקים'
+        resource:
+          name: cases
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: ezvonot_cases
+        fields:
+          internal_id:
+            - _id
+          country:
+            - 'ארץ התיק'
+          has_specific_purpose:
+            - 'האם קיים הקדש'
+          case_id:
+            - 'מספר תיק'
+          main_status:
+            - 'סטטוס ראשי של התיק'
+          closing_reason:
+            - 'סיבת סגירה של התיק'
+          closing_date:
+            - 'תאריך סגירה של התיק'
+          opening_date:
+            - 'תאריך פתיחת התיק'
+    - run: set_types
+      parameters:
+        types:
+          internal_id:
+            type: integer
+          country:
+            type: string
+          has_specific_purpose:
+            type: string  # 'לא קיים  הקדש', 'אחרת קיים הקדש'
+          case_id:
+            type: integer
+          main_status:
+            type: string  # 'טרום תיק', 'בתהליך סגירה', 'סגור', 'פתוח', ''
+          closing_reason:
+            type: string  # 'תרומה', 'צוואה', 'קרן', ''
+          closing_date:
+            type: date
+            format: '%d/%m/%Y'
+          opening_date:
+            type: date
+            format: '%d/%m/%Y'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/cases
+
+ezvonot_purposes:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot_purposes
+        title: Post mortem donations
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: ezvonot2018
+        resource-name: 'קובץ ייעודים'
+        resource:
+          name: purposes
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: ezvonot_purposes
+        fields:
+          internal_id:
+            - _id
+          payment_method:
+            - 'אופן ביצוע התשלום'
+          primary_subject:
+            - 'הנושא העיקרי של הייעוד'
+          case_id:
+            - 'מספר תיק'
+          memorialization_required:
+            - 'נדרשת הנצחה'
+          subject:
+            - 'נושא'
+          sub_subject:
+            - 'תת נושא של הייעוד'
+    - run: set_types
+      parameters:
+        types:
+          internal_id:
+            type: integer
+          payment_method:
+            type: string  # '', 'ישירות מהמחלקה', 'נדרשת הנצחה', 'וועדה ציבורית', 'למרכז (וועדה)'
+          primary_subject:
+            type: string
+          case_id:
+            type: integer
+          memorialization_required:
+            type: string  # 'נדרשת הנצחה', ' אלמנות ויתומי צה"ל"', 'לא נדרשת הנצחה'
+          subject:
+            type: string
+          sub_subject:
+            type: string
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/purposes
+
+ezvonot_decisions:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot_decisions
+        title: Post mortem donations
+    - run: data_gov_il_resource
+      parameters:
+        dataset-name: ezvonot2018
+        resource-name: 'קובץ החלטות וועדה '
+        resource:
+          name: decisions
+    - run: stream_remote_resources
+      cache: true
+    - run: concatenate
+      parameters:
+        target:
+          name: ezvonot_decisions
+        fields:
+          internal_id:
+            - _id
+          request_reason:
+            - 'מטרת הבקשה'
+          request_id:
+            - 'מספר החלטה'
+          protocol_id:
+            - 'מספר פרוטוקול'
+          internal_protocol_id:
+            - 'מספר פרוטוקול פנימי'
+          case_id:
+            - 'מספר תיק'
+          decided_sum:
+            - 'סה~כ סכום עליו החליטה הוועדה'
+          canceled_sum:
+            - 'סה~כ סכום שבוטל ע~י הוועדה'
+          paid_sum:
+            - 'סה~כ סכום ששולם'
+          calculated_paid_sum:
+            - 'סה~כ שולם מחושב'
+          receiving_institute_name:
+            - 'שם המוסד אליו יועבר התשלום'
+          receiving_ministry_name:
+            - 'שם המשרד אליו יועבר התשלום'
+          decision_date:
+            - 'תאריך ההחלטה של הועד'
+    - run: set_types
+      parameters:
+        types:
+          internal_id:
+            type: integer
+          request_reason:
+            type: string
+          request_id:
+            type: integer
+          protocol_id:
+            type: integer
+          internal_protocol_id:
+            type: integer
+          case_id:
+            type: integer
+          decided_sum:
+            type: integer
+          canceled_sum:
+            type: integer
+          paid_sum:
+            type: integer
+          calculated_paid_sum:
+            type: integer
+          receiving_institute_name:
+            type: string
+          receiving_ministry_name:
+            type: string
+          decision_date:
+            type: date
+            format: '%d/%m/%Y'
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/decisions
+
+
+ezvonot_decisions_join:
+  schedule:
+    crontab: "0 0 fri * *"
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_accounts
+    - pipeline: ./ezvonot/ezvonot_cases
+    - pipeline: ./ezvonot/ezvonot_purposes
+    - pipeline: ./ezvonot/ezvonot_decisions
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot
+        title: Post mortem donations
+
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/accounts/datapackage.json
+        resource: ezvonot_accounts
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/cases/datapackage.json
+        resource: ezvonot_cases
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/purposes/datapackage.json
+        resource: ezvonot_purposes
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/ezvonot/decisions/datapackage.json
+        resource: ezvonot_decisions
+
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_accounts'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          internal_account_id: null
+          internal_protocol_id: null
+          case_id: null
+          account_paid_sum:
+            aggregate: sum
+            name: paid_sum
+          account_canceled_sum:
+            aggregate: sum
+            name: canceled_sum
+          account_designated_sum:
+            aggregate: sum
+            name: designated_sum
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_cases'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          country: null
+          has_specific_purpose: null
+          main_status: null
+          closing_reason: null
+          closing_date: null
+          opening_date: null
+    - run: join
+      parameters:
+        source:
+          name: 'ezvonot_purposes'
+          key:
+            - case_id
+          delete: true
+        target:
+          name: 'ezvonot_decisions'
+          key:
+            - case_id
+          full: true
+        fields:
+          payment_method: null
+          primary_subject: null
+          case_id: null
+          memorialization_required: null
+          subject: null
+          sub_subject: null
+
+    - run: fingerprint
+      parameters:
+        source-field: receiving_institute_name
+        target-field: institute_fingerprint
+        resource-name: ezvonot_decisions
+    - run: fingerprint
+      parameters:
+        source-field: receiving_ministry_name
+        target-field: ministry_fingerprint
+        resource-name: ezvonot_decisions
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/ezvonot/decisions_joined
