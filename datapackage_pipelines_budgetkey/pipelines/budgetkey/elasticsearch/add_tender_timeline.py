@@ -90,11 +90,6 @@ def process_row(row, *_):
         else:
             percent = event['percent']
     row['timeline'] = timeline
-
-    if row.get('subjects'):
-        row['subject_list_keywords'] = [x.strip() for x in row['subjects'].split(';')]
-    else:
-        row['subject_list_keywords'] = []
     return row
 
 
@@ -106,13 +101,6 @@ def modify_datapackage(dp, *_):
             'es:itemType': 'object',
             'es:index': False
         },
-        {
-            'name': 'subject_list_keywords',
-            'type': 'array',
-            'es:itemType': 'string',
-            'es:title': True,
-            'es:keyword': True,
-        }
     ])
     return dp
 

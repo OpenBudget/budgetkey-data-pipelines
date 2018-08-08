@@ -135,6 +135,7 @@ tenders:
           - page_title
           - reason
         target-field: semantic_tags
+    - run: split_subject_list      
   document-steps:
     - run: add_tender_timeline      
   date-range:
