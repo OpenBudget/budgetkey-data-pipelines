@@ -11,7 +11,7 @@ ezvonot_deposits:
         resource:
           name: deposits
     - run: stream_remote_resources
-      cache: true
+      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -76,7 +76,7 @@ ezvonot_accounts:
         resource:
           name: accounts
     - run: stream_remote_resources
-      cache: true
+      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -130,7 +130,7 @@ ezvonot_cases:
         resource:
           name: cases
     - run: stream_remote_resources
-      cache: true
+      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -190,7 +190,7 @@ ezvonot_purposes:
         resource:
           name: purposes
     - run: stream_remote_resources
-      cache: true
+      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -244,7 +244,7 @@ ezvonot_decisions:
         resource:
           name: decisions
     - run: stream_remote_resources
-      cache: true
+      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -409,14 +409,14 @@ ezvonot_decisions_join:
     - run: fingerprint
       parameters:
         source-field: receiving_institute_name
-        target-field: institute_fingerprint
-        resource-name: ezvonot_decisions
-    - run: fingerprint
-      parameters:
-        source-field: receiving_ministry_name
-        target-field: ministry_fingerprint
         resource-name: ezvonot_decisions
 
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/decisions_joined
+
+    - run: dump.to_sql
+      parameters:
+      tables:
+        ezvonot:
+          resource-name: ezvonot_decisions
