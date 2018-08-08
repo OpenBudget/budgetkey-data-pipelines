@@ -17,7 +17,7 @@ class BoostingMappingGenerator(MappingGenerator):
         if field.get('es:keyword'):
             prop['type'] = 'keyword'
             if field.get('es:title'):
-                prop['boost'] = 40
+                prop['boost'] = 100
         elif schema_type == 'string':
             if field.get('es:title'):
                 prop['boost'] = 100
