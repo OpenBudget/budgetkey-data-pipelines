@@ -112,7 +112,7 @@ supports:
 
 tenders:
   kind: indexer
-  revision: 21
+  revision: 22
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'

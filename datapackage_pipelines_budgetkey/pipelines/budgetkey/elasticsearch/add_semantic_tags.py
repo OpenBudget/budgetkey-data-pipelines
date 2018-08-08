@@ -26,11 +26,13 @@ def process_row(row, _1, spec, _2, params, _3):
             if value:
                 for tag_re, tag_area in tag_areas:
                     if tag_re.search(value):
-                        tags.add('{} {}'.format(value, ' '.join(tag_area)))
-                        for tag in tag_area:
-                            repl = tag_re.sub(tag, value)
-                            if repl != value:
-                                tags.add(repl)
+                        repl = tag_re.sub(' '.join(tag_area), value)
+                        tags.add(repl)
+                        # tags.add('{} {}'.format(value, ' '.join(tag_area)))
+                        # for tag in tag_area:
+                        #     repl = tag_re.sub(tag, value)
+                        #     if repl != value:
+                        #         tags.add(repl)
                         break
         row[target_field] = list(sorted(tags))
     return row
