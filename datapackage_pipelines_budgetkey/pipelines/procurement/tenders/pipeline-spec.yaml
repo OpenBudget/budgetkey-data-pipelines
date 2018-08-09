@@ -243,6 +243,8 @@ processed:
         types:
           description:
             es:title: true
+          subjects:
+            es:title: true
           documents:
             es:itemType: object
             es:schema:
