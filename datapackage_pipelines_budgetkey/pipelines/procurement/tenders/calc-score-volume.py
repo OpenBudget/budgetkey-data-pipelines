@@ -5,9 +5,9 @@ from datapackage_pipelines.wrapper import process
 
 decision_boosters = {
     'סגור': 2,
-    'הסתיים': 2,
-    'עתידי': 6,
-    'פתוח': 8,
+    'הסתיים': 1,
+    'עתידי': 10,
+    'פתוח': 15,
     'אושר פטור ממכרז': 8,
     'בתהליך': 8,
     'לא אושר': 4,	
