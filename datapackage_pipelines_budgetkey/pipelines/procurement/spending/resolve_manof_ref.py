@@ -35,6 +35,8 @@ def modify_datapackage(dp, *_):
 
 failed = set()
 def process_row(row, *_):
+    if TK in row:
+        del row[TK]
     mf = row['manof_ref']
     if mf:
         mf = mf.strip()
