@@ -63,30 +63,9 @@ def get_spending_analysis(id):
     
 
 def process_row(row, *_):
-    if row['kind'] == 'association':
-        id = row['id']
-        foa = row['details']['field_of_activity']
-        foad = row['details']['field_of_activity_display']
-        num_of_employees = row['details']['num_of_employees']
-        num_of_volunteers = row['details']['num_of_volunteers']
-        last_report_year = row['details']['last_report_year']
-        num_unreported = unreported_turnover_associations(foa)
-        reported_list = reported_turnover_associations(foa)
-        spending_analysis = get_spending_analysis(row['id'])
-        selected_index = [i for i, x in enumerate(reported_list) if x['id'] == row['id']]
-        if len(selected_index) > 0:
-            selected_index = selected_index[0]
-        else:
-            selected_index = None
-        salaries = row['details']['top_salaries']
-        if salaries:
-            top_salary = salaries[0]['salary']
-        else:
-            top_salary = None
-        median_turnover_in_field_of_activity = row['details'].get('median_turnover_in_field_of_activity')
-        median_top_salary = row['details'].get('median_top_salary')
-        yearly_turnover = row['details'].get('yearly_turnover')
-        charts = []
+    id = row['id']
+    charts = []
+    if row['kind'] in ('company', 'association'):
         charts.append({
                 'title': 'מיהו הארגון?',
                 'long_title': 'מיהו הארגון',
@@ -100,6 +79,28 @@ def process_row(row, *_):
                     ]
                 }
         })
+
+    if row['kind'] == 'association':
+        foa = row['details']['field_of_activity']
+        foad = row['details']['field_of_activity_display']
+        num_of_employees = row['details']['num_of_employees']
+        num_of_volunteers = row['details']['num_of_volunteers']
+        last_report_year = row['details']['last_report_year']
+        num_unreported = unreported_turnover_associations(foa)
+        reported_list = reported_turnover_associations(foa)
+        selected_index = [i for i, x in enumerate(reported_list) if x['id'] == row['id']]
+        if len(selected_index) > 0:
+            selected_index = selected_index[0]
+        else:
+            selected_index = None
+        salaries = row['details']['top_salaries']
+        if salaries:
+            top_salary = salaries[0]['salary']
+        else:
+            top_salary = None
+        median_turnover_in_field_of_activity = row['details'].get('median_turnover_in_field_of_activity')
+        median_top_salary = row['details'].get('median_top_salary')
+        yearly_turnover = row['details'].get('yearly_turnover')
         if None not in (median_turnover_in_field_of_activity, yearly_turnover, last_report_year):
             charts[-1]['chart']['parts'].append(
                 {
@@ -123,25 +124,28 @@ def process_row(row, *_):
                     }
                 }
             )
-        if spending_analysis:
-            charts.append({
-                    'title': 'מקבל כספי ממשלה?',
-                    'long_title': 'האם הארגון מקבל כספי ממשלה?',
-                    'description': '''
-                    <span class='bk-tooltip-anchor'>
-                    התקשרויות ותמיכות<span class='bk-tooltip'>
-                    התקשרות היא הסכם בין המשרד הממשלתי לגורם אחר,
-                     במסגרתו מתחייב הגורם האחר לספק למשרד הממשלתי שירותים או מוצרים בתמורה לתשלום.
-                     <br/>
-                    תמיכה ממשלתית היא סיוע, בכסף ובשווה כסף, שממשלת ישראל מעבירה לגורמים חוץ ממשלתיים 
-                    במטרה לסייע במימון פעילות אשר היא מעוניינת לעודד את קיומה ואשר משרתת את אוכלוסייתה.
-                    </span></span>
-                     לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.''',
-                    'type': 'spendomat',
-                    'chart': {
-                        'data': spending_analysis
-                    }
-            })
+    spending_analysis = get_spending_analysis(row['id'])
+    if spending_analysis:
+        charts.append({
+                'title': 'מקבל כספי ממשלה?',
+                'long_title': 'האם הארגון מקבל כספי ממשלה?',
+                'description': '''
+                <span class='bk-tooltip-anchor'>
+                התקשרויות ותמיכות<span class='bk-tooltip'>
+                התקשרות היא הסכם בין המשרד הממשלתי לגורם אחר,
+                    במסגרתו מתחייב הגורם האחר לספק למשרד הממשלתי שירותים או מוצרים בתמורה לתשלום.
+                    <br/>
+                תמיכה ממשלתית היא סיוע, בכסף ובשווה כסף, שממשלת ישראל מעבירה לגורמים חוץ ממשלתיים 
+                במטרה לסייע במימון פעילות אשר היא מעוניינת לעודד את קיומה ואשר משרתת את אוכלוסייתה.
+                </span></span>
+                    לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.''',
+                'type': 'spendomat',
+                'chart': {
+                    'data': spending_analysis
+                }
+        })
+
+    if row['kind'] == 'association':
         charts.append({
                 'title': 'אילו אישורים?',
                 'long_title': 'אישורים והכרה בארגון',
