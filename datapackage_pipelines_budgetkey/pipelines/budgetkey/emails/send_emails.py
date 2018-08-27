@@ -70,17 +70,20 @@ def process_row(row, *_):
         )
         logging.info('DATAS: %r', ret)
         for retry in range(2):
-            result = requests.post('http://budgetkey-emails:8000/', 
-                                   json=ret,
-                                   timeout=630)
-            if result.status_code == 200:
-                result = result.json()
-                logging.info('RESULT #%d: %r', retry, result)
-                break
-            else:
-                result = '%s: %s' % (result.status_code, result)
-                logging.info('RESULT #%d: %r', retry, result)
-                time.sleep(60)
+            try:
+                result = requests.post('http://budgetkey-emails:8000/', 
+                                    json=ret,
+                                    timeout=630)
+                if result.status_code == 200:
+                    result = result.json()
+                    logging.info('RESULT #%d: %r', retry, result)
+                    break
+                else:
+                    result = '%s: %s' % (result.status_code, result)
+            except Exception as e:
+                result = str(e)
+            logging.info('RESULT #%d: %r', retry, result)
+            time.sleep(60)
     else:
         logging.info('SKIPPING %s as has no relevant subscriptions', row['email'])
 
