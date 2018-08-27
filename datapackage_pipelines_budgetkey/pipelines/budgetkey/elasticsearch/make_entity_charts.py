@@ -222,7 +222,7 @@ def process_row(row, *_):
                         'selected': selected_index
                     }
             })
-        row['charts'] = charts
+    row['charts'] = charts
 
     return row
 
