@@ -65,7 +65,7 @@ def get_spending_analysis(id):
 def process_row(row, *_):
     id = row['id']
     charts = []
-    if row['kind'] in ('company', 'association'):
+    if row['kind'] in ('association'):
         charts.append({
                 'title': 'מיהו הארגון?',
                 'long_title': 'מיהו הארגון',
