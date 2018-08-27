@@ -5,6 +5,7 @@ import requests
 import urllib.parse
 import json
 import datetime
+import time
 
 
 SECTIONS = [
@@ -68,8 +69,18 @@ def process_row(row, *_):
             email=row['email']
         )
         logging.info('DATAS: %r', ret)
-        result = requests.post('http://budgetkey-emails:8000/', json=ret).json()
-        logging.info('RESULT: %r', result)
+        for retry in range(2):
+            result = requests.post('http://budgetkey-emails:8000/', 
+                                   json=ret,
+                                   timeout=630)
+            if result.status_code == 200:
+                result = result.json()
+                logging.info('RESULT #%d: %r', retry, result)
+                break
+            else:
+                result = '%s: %s' % (result.status_code, result)
+                logging.info('RESULT #%d: %r', retry, result)
+                time.sleep(60)
     else:
         logging.info('SKIPPING %s as has no relevant subscriptions', row['email'])
 
