@@ -127,10 +127,10 @@ details:
         url: dependency://./entities/companies/government/registrar/government_companies
         resource: government-companies
 
-   - run: load_resource
-     parameters:
-       url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
-       resource: safety-orders-by-entity
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
+        resource: safety-orders-by-entity
 
     - run: add_sql_resource
       parameters:
