@@ -54,33 +54,32 @@ def process_row(row, *_):
                 major = False,
                 priority = 1
             ))
+    executed = float(row['contract_executed'])
+    volume = float(row['contract_volume'])
     payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
+    paid = 0
     for period, payments in itertools.groupby(payments, lambda t: t[0]):
         period = convert_period(period, False)
         if period is None:
             continue
         paid = sum(t[1] for t in payments)
-        if paid > 0:
-            executed = float(row['contract_executed'])
-            volume = float(row['contract_volume'])
-            if executed == 0:
-                logging.error('Paid > 0 while Executed == 0 for row %s/%s/%s', 
-                              row['publication_id'], row['tender_type'], row['tender_id'])
-                break
-            elif volume == 0:
-                logging.error('Paid > 0 while Volume == 0 for row %s/%s/%s', 
-                              row['publication_id'], row['tender_type'], row['tender_id'])
-                break
-            else: 
-                percent = 100 * paid / volume
-                timeline.append(dict(
-                    timestamp = str(period),
-                    title = 'תשלום של ₪{:,.0f}, {:.0f}% מהסכום'.format(paid, percent),
-                    major = True,
-                    percent = percent,
-                    priority = 3
-                ))
-    
+        percent = 100 * paid / volume
+        timeline.append(dict(
+            timestamp = str(period),
+            title = 'תשלום של ₪{:,.0f}, {:.0f}% מהסכום'.format(paid, percent),
+            major = True,
+            percent = percent,
+            priority = 3
+        ))
+    if paid > 0:
+        if executed == 0:
+            logging.error('Paid > 0 while Executed == 0 for row %s/%s/%s', 
+                            row['publication_id'], row['tender_type'], row['tender_id'])
+        elif volume == 0:
+            logging.error('Paid > 0 while Volume == 0 for row %s/%s/%s', 
+                            row['publication_id'], row['tender_type'], row['tender_id'])
+
+
     percent = None
     timeline = sorted(timeline, key = lambda x: (x['timestamp'], x['priority']), reverse=True)
     for event in reversed(timeline):
