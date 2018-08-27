@@ -64,8 +64,9 @@ def get_spending_analysis(id):
 
 def process_row(row, *_):
     id = row['id']
+    kind = row['kind']
     charts = []
-    if row['kind'] in ('association'):
+    if kind in ('association'):
         charts.append({
                 'title': 'מיהו הארגון?',
                 'long_title': 'מיהו הארגון',
@@ -80,7 +81,7 @@ def process_row(row, *_):
                 }
         })
 
-    if row['kind'] == 'association':
+    if kind == 'association':
         foa = row['details']['field_of_activity']
         foad = row['details']['field_of_activity_display']
         num_of_employees = row['details']['num_of_employees']
@@ -126,8 +127,9 @@ def process_row(row, *_):
             )
     spending_analysis = get_spending_analysis(row['id'])
     if spending_analysis:
+        title = 'מהן ההכנסות מהממשלה?' if kind =='company' else 'מקבל כספי ממשלה?'
         charts.append({
-                'title': 'מקבל כספי ממשלה?',
+                'title': title,
                 'long_title': 'האם הארגון מקבל כספי ממשלה?',
                 'description': '''
                 <span class='bk-tooltip-anchor'>
