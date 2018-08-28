@@ -143,7 +143,8 @@ def process_row(row, *_):
                     לפי משרדים, הנתונים כוללים העברות המתועדות במקורות המידע הזמינים מכל השנים.''',
                 'type': 'spendomat',
                 'chart': {
-                    'data': spending_analysis
+                    'data': spending_analysis,
+                    'theme': 'theme-1' if kind=='association' else 'theme-2'
                 }
         })
 
