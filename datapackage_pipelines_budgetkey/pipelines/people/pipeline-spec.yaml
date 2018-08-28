@@ -2,6 +2,8 @@ all:
   dependencies:
     - pipeline: ./people/appointments/all-appointments
     - pipeline: ./people/association_founders/association-founders
+    - pipeline: ./people/procurement/procurement-individuals
+
 
   pipeline:
     -
@@ -13,13 +15,20 @@ all:
     -
       run: load_resource
       parameters:
+#        url: /var/datapackages/people/appointments/all/datapackage.json
         url: dependency://./people/appointments/all-appointments
         resource: 0
 
     -
       run: load_resource
       parameters:
+#        url: /var/datapackages/people/association_founders/datapackage.json
         url: dependency://./people/association_founders/association-founders
+        resource: 0
+
+      run: load_resource
+      parameters:
+        url: dependency://./people/procurement/procurement-individuals
         resource: 0
 
     -
