@@ -1,0 +1,46 @@
+procurement-individuals:
+  dependencies:
+    - pipeline: ./procurement/spending/latest-contract-spending
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: people-procurement
+        title: Payments made to individual people
+
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+        resource: contract-spending
+
+    - run: filter_only_individuals
+
+    - run: filter
+      parameters:
+        resources: contract-spending
+        out:
+          - executed: 0
+
+    - run: convert_to_user_event
+
+    - run: concatenate
+      parameters:
+        target:
+          name: procurement-individuals
+        sources: contract-spending
+        fields:
+            event: []
+            when: []
+            doc_id: []
+            full_name: []
+            company: []
+            title: []
+            sources: []
+
+    - run: set_types
+
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/procurement/procurement-individuals
+
+
