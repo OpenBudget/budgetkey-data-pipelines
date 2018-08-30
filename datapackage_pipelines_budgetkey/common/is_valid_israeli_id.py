@@ -8,7 +8,7 @@ def is_valid_israeli_id(id):
 
     if len(id) > 9:
         return False
-    if len(id) < 4:
+    if len(id) < 7:
         return False
 
     if len(id) == 9 and id[0] == '5':
