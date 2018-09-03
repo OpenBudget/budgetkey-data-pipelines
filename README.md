@@ -17,9 +17,9 @@ The heart of the BudgetKey project is its rich, up-to-date quality data collecti
  The most recommended way to start is by reading the README of `datapackage-pipelines`[here](https://github.com/frictionlessdata/datapackage-pipelines)- it's a bit long, so at least read the beginning and skim the rest.
  
  Then, try to write a very simple pipeline - just to test your understanding. A good task for that would be:
- - Load the first page of google (or youtube)
+ - Load the first page of youtube
  - Scrape the list of results from that page
- - Set proper datatypes for the fields (e.g. for dates, numbers etc)
+ - Set proper datatypes for the fields (e.g. for title, dates etc)
  - Dump the results into a csv file or an sqlite file
  
  ## I want to help - how?
