@@ -7,7 +7,7 @@ registry:
     - run: add_metadata
       parameters:
         name: company-registry
-        title: חברות פעילות מרשם החברות
+        title: חברות פעילות מתוך רשם החברות
     - run: m_of_justice_resource
       runner: tzabar
       parameters:
