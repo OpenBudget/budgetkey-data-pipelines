@@ -7,6 +7,7 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     chown dpp.dpp /var/log/redis -R && \
     chown dpp.dpp /var/lib/redis -R && \
     chown dpp.dpp /var/run/redis -R && \
+    chown dpp.dpp /var/run/dpp -R && \
     chmod 700 /home/dpp/.ssh && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev
