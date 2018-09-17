@@ -14,29 +14,52 @@ BOARD_MEETING_RESULTS = "ת049" # דוח מיידי על תוצאות אסיפה
 OTHER_IMMEDIATE_REPORT = "C002" #an Immediate report
 IMMEDIATE_REPORT = "ת121" #דוח מיידי
 
-
 OTHER = "C003" # Other Report or Announcement
+
+
+class ParseError(Exception):
+    def __init__(self):
+        super(ParseError, self).__init__("Failed to parse document")
+
+
+def _wrap_parse_error(f):
+    def wrapped(*args):
+        try:
+            return f(*args)
+        except ParseError as err:
+            raise err
+        except Exception as err:
+            raise ParseError() from err
+    return wrapped
 
 
 def _findByTextAlias(e, aliaes):
     selector = ",".join(["[fieldalias={}]".format(a) for a in aliaes])
     return e.find(selector)
 
-class MayaForm(object):
-    def __init__(self, url):
 
+class MayaForm(object):
+
+    def __init__(self, url):
         self._page = pq(url, parser='html')
 
     @property
+    @_wrap_parse_error
     def id(self):
         elem = self._page.find('#HeaderProofValue')
         if len(elem)==0:
-            raise ValueError("Could not find אסמכתא in form")
+            #Old documents do not have a proofValue. The content is in the first span
+            #after the HeaderProof element
+            elem = self._page.find('#HeaderProof ~ span:first')
+            if not len(elem)==1:
+                raise ValueError("Could not find אסמכתא in form")
         elif len(elem)>1:
             raise ValueError("Found multiple אסמכתאs in form")
         return pq(elem[0]).text().strip()
 
+
     @property
+    @_wrap_parse_error
     def company(self):
         elem = self._page.find('#HeaderEntityNameEB')
         if len(elem)==0:
@@ -46,6 +69,7 @@ class MayaForm(object):
         return pq(elem[0]).text().strip()
 
     @property
+    @_wrap_parse_error
     def type(self):
         elem = self._page.find('#HeaderFormNumber')
         if len(elem)==0:
@@ -55,6 +79,7 @@ class MayaForm(object):
         return pq(elem[0]).text().strip()
 
     @property
+    @_wrap_parse_error
     def fix_for(self):
         elem = self._page.find('#HeaderFixtReport')
         if len(elem)==0:
@@ -67,10 +92,12 @@ class MayaForm(object):
         return pq(link[0]).text().strip()
 
     @property
+    @_wrap_parse_error
     def is_nomination(self):
         return self.type in [APPOINTMENT_DIRECTOR, APPOINTMENT_VIP, APPOINTMENT_VIP]
 
     @property
+    @_wrap_parse_error
     def position_start_date(self):
         aliases = ['TaarichTchilatHaCehuna', 'TaarichTchilatCehuna', 'TaarichTehilatCehuna',
                           'TaarichTchilatHaKehuna', 'TaarichTchilatKehuna', 'TaarichTehilatKehuna']
@@ -81,8 +108,8 @@ class MayaForm(object):
             raise ValueError("Found multiple  position start date in form")
         return datetime.strptime(pq(elem[0]).text().strip(), '%d/%m/%Y')
 
-
     @property
+    @_wrap_parse_error
     def positions(self):
         aliases = ['Tapkid', 'Tafkid', 'HaTafkidLoMuna']
         desc_aliases = ['TeurTafkid', 'LeloTeur', 'TeurHaTafkidLoMuna']
@@ -107,8 +134,8 @@ class MayaForm(object):
 
         return [extract_title(pq(it)) for it in elems]
 
-
     @property
+    @_wrap_parse_error
     def gender(self):
         aliases = ['Gender', 'Min', 'gender']
         elem = _findByTextAlias(self._page, aliases)
@@ -122,6 +149,7 @@ class MayaForm(object):
         return "woman"
 
     @property
+    @_wrap_parse_error
     def full_name(self):
         elem = _findByTextAlias(self._page, ['Accountant'])
         if len(elem)==1:
@@ -134,5 +162,4 @@ class MayaForm(object):
         elif len(elem)>1:
             raise ValueError("Found multiple full names in form")
         return pq(elem[0]).text().strip()
-
 

@@ -18,7 +18,7 @@ def get_all_existing_ids():
     engine = create_engine(get_connection_string())
     ret = set()
     try:
-        rows = engine.execute("SELECT s3_object_name FROM maya_notification_list")
+        rows = engine.execute("SELECT s3_object_name FROM maya_notification_list where is_parse_error is not TRUE")
         ret = set([row['s3_object_name'] for row in rows])
     except (OperationalError, ProgrammingError):
         #ProgrammingError is for postgres and OperationError is on sqlite
