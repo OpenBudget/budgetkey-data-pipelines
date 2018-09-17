@@ -15,29 +15,22 @@ session = requests.Session()
 
 
 ###
-#  The tase web site encodes the files in the single byte hebrew code page cp1255
-#  however it stores this information inside the html file. in a meta tag, the web server
-#  will return ISO-8859-1 as the code page (the Latin1 single byte code page)
-#
-#  this will cause tools such as pyQuery problems with parsing the data. In the best case
-#  scenario all the hebrew text gets mangled in the worst case some of the tags can't be accessed.
-#
-#  to do that we need to decode the content from the existing code page
+#  The tase web site may encode files either in utf-8 or in windows-1255
+#  however it never returns ContentEncoding header in the response. And although the page includes
+#  a meta tag in the header with a content Type the value there is always windows-1255 regardless
+#  of the actualy encoding in the file
+
+#  The ugly solution is simply to try
 ###
-def get_charset(bytes, default="windows-1255"):
-
-    # fortunately pq can parse the header ok.. even if the code page is all wrong
-    page = pq(bytes)
-    elem = page.find('meta[http-equiv="Content-Type"]')
-    if len(elem) == 0:
-        return default
-
-    content = pq(elem[0]).attr('content')
-
-    for str in content.split(';'):
-        str = str.strip()
-        if (str.startswith('charset')):
-            return str.split('=')[-1]
+def get_charset(conn, default="windows-1255"):
+    try:
+        #If utf-8 file then parsing will find the element and it should contain the an aleph.
+        #in case of windows-1255 the content will be junk or impossible to find
+        conn.encoding = "utf-8"
+        if 'א' in pq(pq(conn.text).find("#HeaderProof")[0]).text():
+            return "utf-8"
+    except:
+        pass
     return default
 
 
@@ -45,19 +38,18 @@ def get_charset(bytes, default="windows-1255"):
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
     url = row['url']
-    if not object_storage.exists(s3_object_name):
-        conn = session.get(url)
-        time.sleep(3)
-        if not conn.status_code == requests.codes.ok:
-            return None
+    conn = session.get(url)
+    time.sleep(3)
+    if not conn.status_code == requests.codes.ok:
+        return None
 
-        charset = get_charset(conn.content)
-        conn.encode = charset
-        object_storage.write(s3_object_name,
-                             data=conn.content,
-                             public_bucket=True,
-                             create_bucket=True,
-                             content_type="text/html; charset={}".format(charset))
+    charset = get_charset(conn)
+    conn.encode = charset
+    object_storage.write(s3_object_name,
+                         data=conn.content,
+                         public_bucket=True,
+                         create_bucket=True,
+                         content_type="text/html; charset={}".format(charset))
     return row
 
 

@@ -12,7 +12,7 @@ maya-notification-updates:
       runner: tzabar
       parameters:
         name: maya-notification-updates
-        from: '2016-01-01'
+        from: '2006-01-01'
     - run: keep-only-updates
     - run: store-nomination-to-s3
     - run: scrape-individual-nomination
