@@ -148,7 +148,7 @@ def process_row(row, *_):
                         }
                     },
                     {
-                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{} ₪</span>'.format(format_number(details['income_total_supports'])),
+                        'title': 'סך התמיכות הממשלתיות המדווחות' + '<br/><span class="figure">{}</span>'.format(format_number(details['income_total_supports'])),
                         'type': 'adamkey',
                         'chart': {
                             'values': [
