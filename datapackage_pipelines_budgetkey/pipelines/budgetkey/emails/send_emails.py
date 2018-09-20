@@ -56,7 +56,7 @@ def process_row(row, *_):
                 logging.error('Failed to parse properties %s', e)
                 continue
             if props and 'displayDocsTypes' in props:
-                if 'tenders' in props['displayDocsTypes']:
+                if any(x in props['displayDocsTypes'] for x in ('tenders', 'all'):
                   terms.append(dict(
                       term=props['term'],
                       query_url=query_url(props['term'], filters)

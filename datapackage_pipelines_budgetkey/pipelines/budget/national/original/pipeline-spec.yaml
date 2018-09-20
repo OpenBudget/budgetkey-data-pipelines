@@ -11,6 +11,7 @@ national-budgets:
       parameters:
         name: national-budget
         title: National Budget
+        revision: '2018-09'
     - run: data_gov_il_resource
       parameters:
         dataset-name: 2004-1997
