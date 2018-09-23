@@ -187,7 +187,12 @@ def modify_datapackage(datapackage, parameters, stats):
 
 
 def process_row(row, row_index, spec, resource_index, parameters, stats):
-    return dict(parse_row(row), **row)
+    parsed = parse_row(row)
+    warning = parsed.get('warning')
+    if warning is not None and len(warning) > 0:
+        logging.error('BAD LINE %r => %r', row, parsed)
+    else:
+        return dict(parsed, **row)
 
 
 if __name__ == "__main__":

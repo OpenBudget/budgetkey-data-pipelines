@@ -41,8 +41,11 @@ united:
           entity_kind: []
           spending_type: []
           amount:
-            - amount_total
+            - amount_paid
             - executed
+          amount_committed:
+            - amount_approved
+            - volume
           title:
             - support_title
             - purpose
