@@ -3,9 +3,10 @@ import logging
 
 
 IS_FIX_STARTS_WITH = [
+     "יקון ל",
     "תיקון ל",
      "תיקון ",
-     "תיקונים ל",
+  "תיקונים ל",
 ]
 
 # matches and populates "what" and "office" fields
@@ -28,6 +29,7 @@ WHAT_OFFICE_STARTS_WITH = [
                                 "מבחנים לתמיכה של ",
                                    'מבחן תמיכה של ',
                                   "מבחני תמיכה של ",
+                                   "בחני תמיכה של ",
                                     "מתן תמיכה של ",
                                        "מבחנים של ",
 ]
