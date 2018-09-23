@@ -11,8 +11,15 @@ cache = {}
 
 
 def criteria_scorer(supp, crit):
-    return sum(fuzz.UWRatio(supp[k], crit[k])
-               for k in ('purpose', 'office'))
+    scores = [
+        fuzz.UWRatio(supp[k], crit[k])
+        for k in ('purpose', 'office')
+        if None not in (supp[k], crit[k])
+    ]
+    if len(scores) > 0:
+        return sum(scores) / len(scores)
+    else:
+        return 0
 
 
 def id(x):
