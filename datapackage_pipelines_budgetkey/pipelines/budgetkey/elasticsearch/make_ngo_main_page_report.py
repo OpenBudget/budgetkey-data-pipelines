@@ -95,10 +95,13 @@ def get_total_payer_amounts():
     select payer, sum(amount) as amount
     from united_spending
     join guidestar_processed on (id=entity_id)
-    where amount > 0 and association_status_active
+    where amount > 0 
     group by 1
     order by 2 desc
     """
+    # removed:
+    # and association_status_active
+
     results = engine.execute(q)
     results = [dict(r) for r in results]
     return results    
