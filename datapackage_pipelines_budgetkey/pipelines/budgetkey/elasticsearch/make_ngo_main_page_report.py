@@ -46,9 +46,17 @@ WHERE association_status_active
 
 def get_total_received():
     q = """
-SELECT sum(received_amount) AS x
-FROM entities_processed
-JOIN guidestar_processed USING (id)
+with a as (
+select year_paid as year, supporting_ministry as payer, amount_paid as amount, entity_id as id from raw_supports
+union
+select min_year as year, publisher_name as payer, executed as amount, entity_id as id from contract_spending
+),
+b as (
+select * from a inner join guidestar_processed using (id)
+where year > 1970 - 4.5 + extract(epoch from now())/31557600
+and amount > 0
+)
+select sum(amount) as x from b 
 """
     return get_single_result(q)
 
@@ -92,12 +100,17 @@ GROUP BY 1"""
 
 def get_total_payer_amounts():
     q = """
-    select payer, sum(amount) as amount
-    from united_spending
-    join guidestar_processed on (id=entity_id)
-    where amount > 0 
-    group by 1
-    order by 2 desc
+with a as (
+select year_paid as year, supporting_ministry as payer, amount_paid as amount, entity_id as id from raw_supports
+union
+select min_year as year, publisher_name as payer, executed as amount, entity_id as id from contract_spending
+),
+b as (
+select * from a inner join guidestar_processed using (id)
+where year > 1970 - 4.5 + extract(epoch from now())/31557600
+and amount > 0
+)
+select payer, sum(amount) from b group by 1 order by 2 desc
     """
     # removed:
     # and association_status_active
