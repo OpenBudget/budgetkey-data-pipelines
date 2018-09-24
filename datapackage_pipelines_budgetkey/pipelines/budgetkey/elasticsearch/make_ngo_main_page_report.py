@@ -110,7 +110,7 @@ select * from a inner join guidestar_processed using (id)
 where year > 1970 - 4.5 + extract(epoch from now())/31557600
 and amount > 0
 )
-select payer, sum(amount) from b group by 1 order by 2 desc
+select payer, sum(amount) as amount from b group by 1 order by 2 desc
     """
     # removed:
     # and association_status_active
