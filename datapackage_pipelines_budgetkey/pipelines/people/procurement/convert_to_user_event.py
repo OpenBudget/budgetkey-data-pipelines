@@ -25,7 +25,7 @@ def process_row(row, *_):
                     'full_name':full_name,
                     'details': details,
                     'proof_url':proof_url,
-                    'amount': amount,
+                    'amount': float(amount),
                     'publisher_name': publisher_name,
                     'purpose': purpose,
                     'company':None
