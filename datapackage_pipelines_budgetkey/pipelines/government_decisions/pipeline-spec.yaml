@@ -1,0 +1,59 @@
+government_decisions:
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: government_decisions
+        title: Government Decisions
+        homepage: https://www.gov.il/he/Departments/policies
+    - run: scraper
+      runner: tzabar
+      parameters:
+        resource:
+          name: government_decisions
+          path: data/government_decisions.csv
+    - run: set_types
+#      parameters:
+#        types:
+#          text:
+#            type: string
+#          document:
+#            type: string
+#          doc_published_date:
+#            type: date
+#            format: '%Y-%m-%dT%H:%M:%sZ'
+#          doc_update_date:
+#            type: date
+#            format: '%Y-%m-%dT%H:%M:%sZ'
+#          id:
+#            type: string
+#          office:
+#            type: string
+#          government:
+#            type: string
+#          policy_type:
+#            type: string
+#          procedure_number:
+#            type: integer
+#          publish_date:
+#            type: date
+#            format: '%Y-%m-%dT%H:%M:%sZ'
+#          publish_date_prod:
+#            type: date
+#            format: '%Y-%m-%dT%H:%M:%sZ'
+#          title:
+#            type: string
+#          unit:
+#            type: string
+#          update_date:
+#            type: date
+#            format: '%Y-%m-%dT%H:%M:%sZ'
+#          url_id:
+#            type: string
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/government_decisions
+#    - run: dump.to_sql
+#      parameters:
+#        tables:
+#          bank_of_israel:
+#            resource-name: government_decisions
