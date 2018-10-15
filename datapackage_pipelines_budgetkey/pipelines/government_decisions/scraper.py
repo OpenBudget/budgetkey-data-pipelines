@@ -1,6 +1,7 @@
 # coding=utf-8
 import requests
 from itertools import chain
+from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from pyquery import PyQuery as pq
@@ -11,6 +12,35 @@ parameters, datapackage, res_iter = ingest()
 
 SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=100000"
 
+SITE_URL = 'https://www.gov.il'
+
+
+def get_links(content, session):
+    links = []
+    if '<a' in content:
+        for link in pq(content)('a'):
+            if 'href' not in link.attrib:
+                continue
+            href = link.attrib['href']
+            if href.startswith('/'):
+                href = SITE_URL + href
+            if not href.startswith('http'):
+                continue
+            if href in links:
+                continue
+            filename = href.rpartition('/')[2]
+            if filename == '' or filename.endswith('.html') or filename.endswith('.aspx'):
+                continue
+
+            s3_object_name = 'government_decisions/' + filename
+            if not object_storage.exists(s3_object_name):
+                conn = session.get(href)
+                if not conn.status_code == requests.codes.ok:
+                    return None
+                object_storage.write(s3_object_name, data=conn.content, public_bucket=True, create_bucket=True)
+            links.append(href)
+    return links
+
 
 def get_decision_list():
     session = requests.Session()
@@ -20,9 +50,10 @@ def get_decision_list():
     while True:
         for result in results:
             content_pq = pq(result['Content']) if result['Content'] else None
+            links = get_links(result['Content'], session)
             yield {
                 'text': content_pq.text() if content_pq else '',
-                'document': content_pq.find('a').attr['href'] if '<a href=' in result['Content'] else '',
+                'documents': links,
                 'doc_published_date': result['DocPublishedDate'],
                 'doc_update_date': result['DocUpdateDate'],
                 'id': result['ItemUniqueId'],
@@ -49,7 +80,12 @@ resource[PROP_STREAMING] = True
 schema = {
     'fields': [
         {'name': 'text', 'type': 'string'},
-        {'name': 'document', 'type': 'string'},
+        {
+            "name": "documents",
+            "type": "array",
+            "es:itemType": "string",
+            "es:index": False
+        },
         {'name': 'doc_published_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'doc_update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'id', 'type': 'string'},
