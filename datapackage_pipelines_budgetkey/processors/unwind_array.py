@@ -44,7 +44,7 @@ def modify_datapackage(dp, resource_matcher, afield, tfield):
 
 if __name__ == '__main__':
     parameters, dp, res_iter = ingest()
-    resource_matcher = ResourceMatcher(parameters.get('resource'))
+    resource_matcher = ResourceMatcher(parameters.get('resource'), dp)
     afield, tfield = parameters['array-field'], parameters['unwound-field']
     spew(modify_datapackage(dp, resource_matcher, afield, tfield),
          process_resources(res_iter, resource_matcher,
