@@ -34,10 +34,15 @@ def get_links(content, session):
 
             s3_object_name = 'government_decisions/' + filename
             if not object_storage.exists(s3_object_name):
-                conn = session.get(href)
-                if not conn.status_code == requests.codes.ok:
-                    return None
-                object_storage.write(s3_object_name, data=conn.content, public_bucket=True, create_bucket=True)
+                try:
+                    conn = session.get(href)
+                    if not conn.status_code == requests.codes.ok:
+                        continue
+                    href = object_storage.write(s3_object_name, data=conn.content, public_bucket=True, create_bucket=True)
+                except:
+                    continue
+            else:
+                href = object_storage.urlfor(s3_object_name)
             links.append(href)
     return links
 
