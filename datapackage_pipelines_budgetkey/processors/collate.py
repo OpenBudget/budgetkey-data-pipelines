@@ -1,7 +1,7 @@
 from datetime import date
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from dataflows.helpers.resource_matcher import ResourceMatcher
 from decimal import Decimal
 
 parameters, dp, res_iter = ingest()

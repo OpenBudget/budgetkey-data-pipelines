@@ -1,6 +1,6 @@
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from dataflows.helpers.resource_matcher import ResourceMatcher
 
 
 class ResourceFilterProcessor(object):
