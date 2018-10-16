@@ -2,9 +2,9 @@ import os
 import logging
 import datetime
 import hashlib
+from kvfile import KVFile
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.kvstore import DB
 from datapackage_pipelines_budgetkey.common.line_selector import LineSelector
 
 from sqlalchemy import create_engine
@@ -46,7 +46,7 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
     ])
 
     engine = create_engine(connection_string)
-    ret = DB()
+    ret = KVFile()
     
     try:
         rows = engine.execute(stmt)
@@ -58,9 +58,9 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
             )
             key = calc_key(rec, key_fields)
             ret.set(key, existing_id)
-    except ProgrammingError as e:
+    except ProgrammingError:
         logging.exception('Failed to fetch existing keys')
-    except OperationalError as e:
+    except OperationalError:
         logging.exception('Failed to fetch existing keys')
 
     return ret

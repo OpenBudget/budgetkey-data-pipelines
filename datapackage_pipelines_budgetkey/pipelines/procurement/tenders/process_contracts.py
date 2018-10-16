@@ -4,7 +4,6 @@ import json
 from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
-from datapackage_pipelines.utilities.kvstore import DB
 
 from sqlalchemy import create_engine
 from sqlalchemy.exc import ProgrammingError, OperationalError
