@@ -19,12 +19,12 @@ def process_resource(res_):
             # Make sure this is a valid row
             int(semel)
             for k, v in row.items():
-                if v in ['..', '-']:
-                    row[k] = ''
                 if isinstance(v, str) and len(v) > 1:
-                    if v[0] == '(' and v[-1] == ')':
+                    if v.strip() in ['..', '-']:
                         v = row[k] = ''
-                    if '.000' in v:
+                    elif v[0] == '(' and v[-1] == ')':
+                        v = row[k] = ''
+                    elif '.000' in v:
                         v = row[k] = v.replace('.000', '')
                     if len(re.findall('[.]', v)) > 1:
                         v = row[k] = ''
