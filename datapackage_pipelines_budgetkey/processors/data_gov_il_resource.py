@@ -11,6 +11,8 @@ def add_source(title, path):
             'title': title,
             'path': path
         })
+        yield package.pkg
+        yield from package
     return func
         
 
