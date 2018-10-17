@@ -11,8 +11,11 @@ resource = parameters.get('resource', {})
 
 data_gov_il_resource = get_resource(dataset_name, resource_name)
 
-resource[PROP_STREAMED_FROM] = data_gov_il_resource['url']
+url = data_gov_il_resource['url']
+resource[PROP_STREAMED_FROM] = url
 resource['path'] = PATH_PLACEHOLDER
+if '.xls' in url:
+    resource['force_strings'] = True
 
 datapackage['resources'].append(resource)
 datapackage.setdefault('sources', []).append({
