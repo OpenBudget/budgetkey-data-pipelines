@@ -1,4 +1,5 @@
-from datapackage_pipelines.wrapper import ingest, spew_flow
+from datapackage_pipelines.wrapper import ingest
+from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from dataflows import Flow, add_computed_field
 

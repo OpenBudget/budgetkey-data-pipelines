@@ -1,5 +1,6 @@
 from dataflows import Flow, load, update_resource
-from datapackage_pipelines.wrapper import ingest, spew_flow
+from datapackage_pipelines.wrapper import ingest
+from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
 
