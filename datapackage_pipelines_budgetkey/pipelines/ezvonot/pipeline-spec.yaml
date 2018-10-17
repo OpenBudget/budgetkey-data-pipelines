@@ -5,13 +5,12 @@ ezvonot_deposits:
         name: ezvonot_deposits
         title: Post mortem donations
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: ezvonot2018
         resource-name: 'קובץ הפקדות'
         resource:
           name: deposits
-    - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -70,13 +69,12 @@ ezvonot_accounts:
         name: ezvonot_accounts
         title: Post mortem donations
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: ezvonot2018
         resource-name: 'קובץ חשבונות המרכיבים את החלטות הועדה'
         resource:
           name: accounts
-    - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -124,13 +122,12 @@ ezvonot_cases:
         name: ezvonot_cases
         title: Post mortem donations
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: ezvonot2018
         resource-name: 'קובץ תיקים'
         resource:
           name: cases
-    - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -184,13 +181,12 @@ ezvonot_purposes:
         name: ezvonot_purposes
         title: Post mortem donations
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: ezvonot2018
         resource-name: 'קובץ ייעודים'
         resource:
           name: purposes
-    - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         target:
@@ -238,13 +234,12 @@ ezvonot_decisions:
         name: ezvonot_decisions
         title: Post mortem donations
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: ezvonot2018
         resource-name: 'קובץ החלטות וועדה '
         resource:
           name: decisions
-    - run: stream_remote_resources
-      runner: tzabar
     - run: concatenate
       parameters:
         target:
