@@ -1,25 +1,27 @@
-from datapackage_pipelines.utilities.resources import PROP_STREAMING
-from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines.wrapper import ingest, spew_flow
 
-parameters, dp, res_iter = ingest()
-
-key_pattern = parameters['doc-id-pattern']
+from dataflows import Flow, add_computed_field
 
 
-def process_resource(res):
-    for row in res:
+def update_row(key_pattern):
+    def func(row):
         row['doc_id'] = key_pattern.format(**row)
-        yield row
+    return func
 
 
-def process_resources(res_iter_):
-    first = next(res_iter_)
-    yield process_resource(first)
-    yield from res_iter_
+def flow(parameters):
+    key_pattern = parameters['doc-id-pattern']
+
+    return Flow(
+        add_computed_field({
+            'target': 'doc_id',
+            'operation': 'constant',
+            'with': ''
+        }),
+        update_row(key_pattern)
+    )
 
 
-dp['resources'][0]['schema']['fields'].append(
-    {'name': 'doc_id', 'type': 'string'}
-)
-
-spew(dp, process_resources(res_iter))
+if __name__ == '__main__':
+    with ingest() as ctx:
+        spew_flow(flow(ctx.parameters), ctx)
