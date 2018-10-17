@@ -1,26 +1,39 @@
+from dataflows import Flow, load, update_resource
+from datapackage_pipelines.wrapper import ingest, spew_flow
+
 from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
-from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER, PROP_STREAMED_FROM
 
-from datapackage_pipelines.wrapper import ingest, spew
 
-parameters, datapackage, res_iter = ingest()
+def add_source(title, path):
+    def func(package):
+        package.pkg.descriptor.setdefault('sources', []).append({
+            'title': title,
+            'path': path
+        })
+    return func
+        
 
-dataset_name = str(parameters['dataset-name'])
-resource_name = str(parameters['resource-name'])
-resource = parameters.get('resource', {})
+def flow(parameters):
+    dataset_name = str(parameters['dataset-name'])
+    resource_name = str(parameters['resource-name'])
+    resource = parameters.get('resource', {})
 
-data_gov_il_resource = get_resource(dataset_name, resource_name)
+    data_gov_il_resource = get_resource(dataset_name, resource_name)
 
-url = data_gov_il_resource['url']
-resource[PROP_STREAMED_FROM] = url
-resource['path'] = PATH_PLACEHOLDER
-if '.xls' in url:
-    resource['force_strings'] = True
+    url = data_gov_il_resource['url']
+    args = {
+        'name': resource_name
+    }
+    if '.xls' in url:
+        args['force_strings'] = True
 
-datapackage['resources'].append(resource)
-datapackage.setdefault('sources', []).append({
-    'title': '{}/{}'.format(dataset_name, resource_name),
-    'path': data_gov_il_resource['url']
-})
+    return Flow(
+        add_source('{}/{}'.format(dataset_name, resource_name), url),
+        load(url, **args),
+        update_resource(resource_name, **resource)
+    )
 
-spew(datapackage, res_iter)
+
+if __name__ == '__main__':
+    with ingest() as ctx:
+        spew_flow(flow(ctx.parameters), ctx)
