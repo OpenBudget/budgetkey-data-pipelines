@@ -14,11 +14,11 @@ def flow(parameters):
     key_pattern = parameters['doc-id-pattern']
 
     return Flow(
-        add_computed_field({
+        add_computed_field([{
             'target': 'doc_id',
             'operation': 'constant',
             'with': ''
-        }),
+        }]),
         update_row(key_pattern)
     )
 
