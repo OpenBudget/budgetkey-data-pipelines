@@ -96,6 +96,10 @@ national-budgets:
           עבצ: []
           כמות: []
           יתרת התחיבויות:  []
+    - run: filter
+      parameters:
+        out:
+          - קוד מיון רמה 1: ZZZ
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/original
