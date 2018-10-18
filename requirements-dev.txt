@@ -1,0 +1,2 @@
+https://github.com/frictionlessdata/tableschema-py/archive/fix/handle-empty-files.zip
+https://github.com/frictionlessdata/datapackage-py/archive/fix/handle-empty-files.zip
