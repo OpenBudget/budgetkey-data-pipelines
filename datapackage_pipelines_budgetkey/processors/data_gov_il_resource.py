@@ -20,12 +20,15 @@ def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
     resource_name = str(parameters['resource-name'])
     resource = parameters.get('resource', {})
+    resource.update({
+        'dpp:streaming': True,
+    })
 
     data_gov_il_resource = get_resource(dataset_name, resource_name)
 
     url = data_gov_il_resource['url']
     args = {
-        'name': resource_name
+        'name': resource_name,
     }
     if '.xls' in url:
         args['force_strings'] = True

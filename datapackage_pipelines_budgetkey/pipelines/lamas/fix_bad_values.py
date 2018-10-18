@@ -19,7 +19,7 @@ def process_resource(res_):
             # Make sure this is a valid row
             int(semel)
             for k, v in row.items():
-                if isinstance(v, str) and len(v) > 1:
+                if isinstance(v, str) and len(v) > 0:
                     if v.strip() in ['..', '-']:
                         v = row[k] = ''
                     elif v[0] == '(' and v[-1] == ')':
