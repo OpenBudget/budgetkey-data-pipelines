@@ -7,10 +7,7 @@ from datapackage_pipelines_budgetkey.processors.data_gov_il_resource import flow
 
 def batch_flow(parameters):
     return Flow(
-        *[
-            flow(parameters)
-            for p in parameters['batch']
-        ]
+        *[flow(p) for p in parameters['batch']]
     )
 
 
