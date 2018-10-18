@@ -7,52 +7,52 @@ national-budgets:
     In this pipeline we create from each triplet a single row that has all the data.
 
   pipeline:
-    - run: add_metadata
+    - run: update_package
       parameters:
         name: national-budget
         title: National Budget
         revision: '2018-09'
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: 2004-1997
         resource-name: 'תקציב וביצוע 2004-1997 כולל התחיבויות'
         resource:
           name: budget_2004_1997
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: 2012-2005
         resource-name: 'תקציב וביצוע 2012-2005 כולל התחיבויות'
         resource:
           name: budget_2012_2005
     - run: data_gov_il_resource
+      runner: tzabar
       parameters:
         dataset-name: 2015-2013
         resource-name: 'תקציב וביצוע 2015-2013 כולל התחיבויות'
         resource:
           name: budget_2015_2013
-    - run: add_resource
+    - run: load
       parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2016.xlsx 
         name: fd-2016
-        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2016.xlsx 
         sheet: 1
-    - run: add_resource
+    - run: load
       parameters:
+        load: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2017.xlsx
         name: fd-2017
-        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2017.xlsx
         sheet: 1
-    - run: add_resource
+    - run: load
       parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2018.xlsx
         name: fd-2018
-        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2018.xlsx
         sheet: 1
-    - run: add_resource
+    - run: load
       parameters:
+        load: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2019.xlsx
         name: fd-2019
-        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2019.xlsx
         sheet: 1
-    - run: stream_remote_resources
-      runner: tzabar
-      cache: true
     - run: concatenate
       parameters:
         target:

@@ -2,7 +2,7 @@ quarterly-contract-spending-report-uris:
   schedule:
     crontab: "0 23 * * *"
   pipeline:
-    - run: add_metadata
+    - run: update_package
       parameters:
         name: quarterly-contract-spending-report-uris
         title: Quarterly Contact Spending Report URIs
@@ -14,6 +14,7 @@ quarterly-contract-spending-report-uris:
           path: data/quarterly-contract-spending-report-uris.csv
     - run: add-report-metadata
     - run: collect_report_pages
+      runner: tzabar
       parameters:
         resource-name: quarterly-contract-spending-report-uris
     - run: set_types
