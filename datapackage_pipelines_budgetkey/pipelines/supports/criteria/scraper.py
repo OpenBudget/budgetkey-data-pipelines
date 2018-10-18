@@ -13,6 +13,8 @@ URL = "http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&P
 
 
 def extract_url(href):
+    if href is None:
+        return None
     marker = "OpenWindow(this,'"
     start = href.find(marker)
     assert start > 0
