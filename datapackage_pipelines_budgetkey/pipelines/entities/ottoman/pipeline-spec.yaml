@@ -19,6 +19,7 @@ ottoman-association-registry:
           - name
           - address
         skip_rows: [1]
+        force_strings: true
     - run: add_computed_field
       parameters:
         fields:
