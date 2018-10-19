@@ -41,5 +41,4 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
                 for h in stream.headers
             ]
         }
-
         ctx.resource_iterator = itertools.chain(res_iter, [stream.iter(keyed=True)])

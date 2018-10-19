@@ -99,6 +99,8 @@ national-budgets:
         types:
           עבצ:
             type: number
+          כמות:
+            type: number
     - run: filter
       parameters:
         out:
