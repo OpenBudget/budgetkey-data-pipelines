@@ -125,6 +125,7 @@ all:
             constraints:
               required: true
           id:
+            type: string
             constraints:
               pattern: "[0-9]+"
           details:

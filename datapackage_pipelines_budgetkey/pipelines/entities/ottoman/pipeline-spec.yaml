@@ -36,6 +36,11 @@ ottoman-association-registry:
           name: ['שם הישות (שם האגודה)']
           address: ['כתובת']
           kind: []
+    - run: set_types
+      parameters:
+        types:
+          id:
+            type: string
     - run: fix_values
     - run: dump.to_path
       parameters:
