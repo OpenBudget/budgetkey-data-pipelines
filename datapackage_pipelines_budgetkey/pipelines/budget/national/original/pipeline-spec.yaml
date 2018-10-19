@@ -94,6 +94,11 @@ national-budgets:
           עבצ: []
           כמות: []
           יתרת התחיבויות:  []
+    - run: set_types
+      parameters:
+        types:
+          עבצ:
+            type: number
     - run: filter
       parameters:
         out:
