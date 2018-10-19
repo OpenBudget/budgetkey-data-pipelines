@@ -163,6 +163,10 @@ national-budget-changes:
     - run: set_types
       parameters:
         types:
+          budget_code:
+            type: string
+            constraints:
+              required: yes
           year:
             type: integer
             constraints:
