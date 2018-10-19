@@ -6,7 +6,7 @@ from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
 
-last_completed_year = str(parameters['last-completed-year'])
+last_completed_year = parameters['last-completed-year']
 
 amounts = [
     'net',
