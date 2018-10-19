@@ -77,8 +77,13 @@ resource['schema']['fields'] = new_fields
 def process_row(row, phase_key):
     for amount, factor in zip(amounts, factors):
         value = row[amount]
-        if value is not None and value.strip() != '':
-            value = Decimal(row[amount]) * factor
+        if isinstance(value, str):
+            if value.strip() != '':
+                value = Decimal(value)
+            else:
+                value = Decimal(0)
+        if isinstance(value, Decimal):
+            value *= factor
         row[amount + '_' + phase_key] = value
         del row[amount]
 
