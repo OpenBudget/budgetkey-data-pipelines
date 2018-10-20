@@ -11,6 +11,7 @@ def generate_sitemap(kind, db_table, doc_id):
     rows = (dict(r) for r in engine.execute('select * from {}'.format(db_table)))
     doc_ids = [(doc_id.format(**r), r['__last_modified_at']) for r in rows]
     index = 0
+    logging.info('Kind %s', kind)
     while len(doc_ids) > 0:
         batch = doc_ids[:10000]
         doc_ids = doc_ids[10000:]
