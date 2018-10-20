@@ -128,8 +128,8 @@ class Generator(GeneratorBase):
                     ('update_package', {
                         'name': pipeline_id,
                     }),
-                    ('load_resource', {
-                        'url': source_datapackage,
+                    ('load_big', {
+                        'from': source_datapackage,
                         'resource': doc_type,
                     })]) + parameters.get('extra-steps', []) + steps(*[
                     ('set-revision', {'revision': revision}),
