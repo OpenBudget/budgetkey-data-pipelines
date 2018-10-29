@@ -1,2 +1,1 @@
-https://github.com/frictionlessdata/tabulator-py/archive/fix/stringify-none-as-empty-string.zip
 kvfile>=0.0.6
