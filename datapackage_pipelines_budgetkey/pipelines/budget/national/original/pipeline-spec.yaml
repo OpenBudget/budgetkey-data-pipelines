@@ -2,8 +2,7 @@ national-budgets:
   title: National Yearly Budgets 
   description: >
     We get the data the *Ministry of Finance* publishes in data.gov.il every year.
-    It comes in XLS format, with one row per *TAKANA* and phase (original, approved, executed).
-    
+    It comes in XLS format, with one row per *TAKANA* and phase (original, approved, executed).    
     In this pipeline we create from each triplet a single row that has all the data.
 
   pipeline:
