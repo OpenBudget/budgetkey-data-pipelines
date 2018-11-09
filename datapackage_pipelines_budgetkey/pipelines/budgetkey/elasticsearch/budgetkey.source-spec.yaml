@@ -155,7 +155,7 @@ people:
 
 reports:
   kind: indexer
-  revision: 49
+  revision: 50
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
