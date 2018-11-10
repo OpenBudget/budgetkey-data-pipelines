@@ -114,14 +114,15 @@ def process_row(row, phase_key):
     row['hierarchy'] = []
 
     if (
-        (
-            (not row['code'].startswith('0000')) and 
-            (not row['code'].startswith('0089')) and 
-            (not row['code'].startswith('0091')) and 
-            (not row['code'].startswith('0094')) and 
-            (not row['code'].startswith('0095')) and 
-            (not row['code'].startswith('0098')) and 
-            (not row['code'].startswith('0084'))
+        (not
+            (row['code'].startswith('0000') or
+             row['code'].startswith('0089') or
+             row['code'].startswith('0091') or 
+             row['code'].startswith('0094') or 
+             row['code'].startswith('0095') or
+             row['code'].startswith('0098') or
+             row['code'].startswith('0084')
+            )
         ) or (row['econ_cls_code_2'] == '266')
        ):
         row['code'] = '00'
@@ -133,11 +134,11 @@ def process_row(row, phase_key):
         row['hierarchy'] = [['00', 'המדינה']]
         yield row
 
-    row['parent'] = row['code']
-    row['hierarchy'].append([row['code'], row['title']])
-    row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
-    row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
-    yield row
+        row['parent'] = row['code']
+        row['hierarchy'].append([row['code'], row['title']])
+        row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
+        row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
+        yield row
 
 
 
