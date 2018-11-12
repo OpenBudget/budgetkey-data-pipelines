@@ -23,7 +23,10 @@ FIX_COMPANY_NAME = {
     'מתימו "פ ­ מרכז התעשייה הישראלית למחקר ופיתוח':'מתימו"פ - מרכז התעשייה הישראלית למחקר ופיתוח',
     ')חל "צ(החברה למתנ"סים מרכזים קהילתיים בישראל בע"מ':')חל"צ(החברה למתנ"סים מרכזים קהילתיים בישראל בע"מ',
     'החברה לחינוך ימי בישראל (בתיה"ס הימיים)':'החברה לחינוך ימי בישראל (בי"ס ימיים)',
+    'רותם אינק.':'.רותם אינק',
+
 }
+
 
 # For now I keep a manual table. It looks like errors are rare and I prefer this will fail and get a human to fix
 # if errors happen often then change
