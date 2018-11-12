@@ -1,6 +1,6 @@
 FROM frictionlessdata/datapackage-pipelines:v2.0.0rc
 
-RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils
+RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils openjdk7-jre
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
