@@ -25,6 +25,12 @@ FIX_COMPANY_NAME = {
     'החברה לחינוך ימי בישראל (בתיה"ס הימיים)':'החברה לחינוך ימי בישראל (בי"ס ימיים)',
 }
 
+# For now I keep a manual table. It looks like errors are rare and I prefer this will fail and get a human to fix
+# if errors happen often then change
+FIX_DATE = {
+    '12/092021':'12/09/2021'
+}
+
 def trim_list(arr):
     try:
         st = next(i for i,v in enumerate(arr) if v)
@@ -54,36 +60,43 @@ def process_rows_in_resource(resource):
     for row in resource:
         pdf_record = row['data']
         url = row['url']
-        trimmed_pdf_record = trim_list(pdf_record)
+        try:
+            trimmed_pdf_record = trim_list(pdf_record)
 
-        if len(trimmed_pdf_record) == 0:
-            continue
-
-        if "דירקטורים מכהנים בחברות" in trimmed_pdf_record[0]:
-            continue
-
-        if len(trimmed_pdf_record) in [1,2]:
-            company = trimmed_pdf_record[0]
-            if len(trimmed_pdf_record) == 2:
-                company = trimmed_pdf_record[1] + ' ' + trimmed_pdf_record[0]
-
-            if company in FIX_COMPANY_NAME:
-                company = FIX_COMPANY_NAME[company]
-        else:
-            if trimmed_pdf_record[2] == 'תפקיד':
+            if len(trimmed_pdf_record) == 0:
                 continue
-            new_row = {k:v for k,v in row.items() if k != 'data'}
-            new_row['company'] = company
 
-            new_row['last_name'] = trimmed_pdf_record[0]
-            new_row['first_name'] = trimmed_pdf_record[1]
+            if "דירקטורים מכהנים בחברות" in trimmed_pdf_record[0]:
+                continue
 
-            new_row['position'] = parse_position(trimmed_pdf_record[2])
-            new_row['gender'] = parse_gender(trimmed_pdf_record[2])
+            if len(trimmed_pdf_record) in [1,2]:
+                company = trimmed_pdf_record[0]
+                if len(trimmed_pdf_record) == 2:
+                    company = trimmed_pdf_record[1] + ' ' + trimmed_pdf_record[0]
 
-            if len(trimmed_pdf_record) >3:
-                new_row['expected_end_date'] = datetime.strptime(trimmed_pdf_record[3], "%d/%m/%Y")
-            yield new_row
+                if company in FIX_COMPANY_NAME:
+                    company = FIX_COMPANY_NAME[company]
+            else:
+                if trimmed_pdf_record[2] == 'תפקיד':
+                    continue
+                new_row = {k:v for k,v in row.items() if k != 'data'}
+                new_row['company'] = company
+
+                new_row['last_name'] = trimmed_pdf_record[0]
+                new_row['first_name'] = trimmed_pdf_record[1]
+
+                new_row['position'] = parse_position(trimmed_pdf_record[2])
+                new_row['gender'] = parse_gender(trimmed_pdf_record[2])
+
+                if len(trimmed_pdf_record) >3:
+                    date_str = FIX_DATE.get(trimmed_pdf_record[3], trimmed_pdf_record[3])
+                    new_row['expected_end_date'] = datetime.strptime(date_str, "%d/%m/%Y")
+                yield new_row
+        except Exception as e:
+            raise ValueError("Failed parsing file {} ( {})".format(url, pdf_record)) from e
+
+
+
 
 
 
