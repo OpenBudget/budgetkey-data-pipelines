@@ -1,0 +1,14 @@
+tzabar:
+  kind: wrapped-python
+  parameters:
+    wrapper: >
+      ssh adam@tzabar.obudget.org
+      "docker run
+      -i --entrypoint /bin/sh
+      -e DPP_DB_ENGINE={env[DPP_DB_ENGINE]}
+      -e AWS_ACCESS_KEY_ID={env[AWS_ACCESS_KEY_ID]}
+      -e AWS_SECRET_ACCESS_KEY={env[AWS_SECRET_ACCESS_KEY]}
+      -e S3_ENDPOINT_URL={env[S3_ENDPOINT_URL]}
+      budgetkey/budgetkey-data-pipelines
+      -c 'cd /datapackage_pipelines_budgetkey/pipelines/{path} ; {cmd}'"
+

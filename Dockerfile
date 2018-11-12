@@ -14,7 +14,9 @@ RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-
 RUN pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py
 
 ADD ./ /
-ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
+
+ADD .dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/
+RUN mv /datapackage_pipelines_budgetkey/pipelines/.dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/dpp-runners.yaml
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
