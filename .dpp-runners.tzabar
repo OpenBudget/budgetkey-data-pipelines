@@ -2,8 +2,8 @@ tzabar:
   kind: wrapped-python
   parameters:
     wrapper: >
-      ssh adam@tzabar.obudget.org 
-      "docker run 
+      ssh adam@tzabar.obudget.org
+      "docker run
       -i --entrypoint /bin/sh
       -e DPP_DB_ENGINE={env[DPP_DB_ENGINE]}
       -e AWS_ACCESS_KEY_ID={env[AWS_ACCESS_KEY_ID]}
