@@ -1,9 +1,13 @@
 united:
+  schedule:
+    crontab: "0 10 * * *"
+
   pipeline:
     - run: add_metadata
       parameters:
         name: united_spending
         title: All Spending data
+        revision: '2018-11'
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/supports/with-entities/datapackage.json
