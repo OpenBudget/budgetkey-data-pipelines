@@ -1,6 +1,6 @@
 all:
   dependencies:
-    - pipeline: ./people/appointments/all-appointments
+    - pipeline: ./people/company_appointments/all-appointments
     - pipeline: ./people/association_founders/association-founders
     - pipeline: ./people/procurement/procurement-individuals
 
@@ -15,8 +15,8 @@ all:
     -
       run: load_resource
       parameters:
-#        url: /var/datapackages/people/appointments/all/datapackage.json
-        url: dependency://./people/appointments/all-appointments
+#        url: /var/datapackages/people/company_appointments/all/datapackage.json
+        url: dependency://./people/company_appointments/all-appointments
         resource: 0
 
     -

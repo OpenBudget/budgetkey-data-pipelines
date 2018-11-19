@@ -5,7 +5,7 @@ from pyquery import PyQuery as pq
 
 from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
-from datapackage_pipelines_budgetkey.pipelines.people.appointments.maya.maya_nomination_form import MayaForm
+from datapackage_pipelines_budgetkey.pipelines.people.company_appointments.maya.maya_nomination_form import MayaForm
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)

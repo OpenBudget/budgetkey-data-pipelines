@@ -18,7 +18,7 @@ maya-notification-updates:
     - run: scrape-individual-nomination
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/maya/maya-notification-updates
+        out-path: /var/datapackages/people/company_appointments/maya/maya-notification-updates
     - run: dump.to_sql
       parameters:
         tables:
@@ -31,11 +31,11 @@ maya-notification-updates:
 
 maya-list:
   dependencies:
-    - pipeline: ./people/appointments/maya/maya-notification-updates
+    - pipeline: ./people/company_appointments/maya/maya-notification-updates
   pipeline:
     - run: add_sql_resource
       parameters:
-        datapackage: /var/datapackages/people/appointments/maya/maya-notification-updates/datapackage.json
+        datapackage: /var/datapackages/people/company_appointments/maya/maya-notification-updates/datapackage.json
         resource: maya-notification-updates
         table: maya_notification_list
 
@@ -90,12 +90,12 @@ maya-list:
         name: maya-list
     - run: dump.to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/maya/maya-list
+          out-path: /var/datapackages/people/company_appointments/maya/maya-list
 
 
 maya-nominations:
   dependencies:
-   - pipeline: ./people/appointments/maya/maya-list
+   - pipeline: ./people/company_appointments/maya/maya-list
   title: Appointment notices from Maya
   description: Name, job and company description.
   pipeline:
@@ -104,7 +104,7 @@ maya-nominations:
         name: maya-nominations
     - run: load_resource
       parameters:
-        url: dependency://./people/appointments/maya/maya-list
+        url: dependency://./people/company_appointments/maya/maya-list
         resource: maya-list
     - run: filter
       parameters:
@@ -140,4 +140,4 @@ maya-nominations:
             with: "{name} מונה ל{position} ב{organisation_name}"
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/maya/maya-nominations
+        out-path: /var/datapackages/people/company_appointments/maya/maya-nominations
