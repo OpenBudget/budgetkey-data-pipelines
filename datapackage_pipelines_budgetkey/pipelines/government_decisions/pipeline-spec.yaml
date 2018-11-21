@@ -12,11 +12,11 @@ government_decisions:
           name: government_decisions
           path: data/government_decisions.csv
     - run: set_types
-    - run: dump.to_path
+    - run: allstar_dumper
       parameters:
         out-path: /var/datapackages/government_decisions
-#    - run: dump.to_sql
-#      parameters:
-#        tables:
-#          government_decisions:
-#            resource-name: government_decisions
+    - run: dump_to_sql
+      parameters:
+        tables:
+          government_decisions:
+            resource-name: government_decisions
