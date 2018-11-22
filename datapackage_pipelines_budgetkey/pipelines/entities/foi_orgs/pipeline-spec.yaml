@@ -1,0 +1,10 @@
+foi_orgs:
+  pipeline:
+    - run: load
+      parameters:
+        from: https://foi.gov.il/GetallofficetolistXMLpublished
+        name: foi_orgs
+        format: xml
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/entities/foi_orgs
