@@ -167,3 +167,12 @@ reports:
     - run: enrich_ngo_reports
     - run: make_ngo_main_page_report
     - run: make_open_procure_main_page_report
+
+gov_decisions:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./government_decisions/government_decisions
+  source_datapackage: /var/datapackages/government_decisions/datapackage.json
+  page-title-pattern: 'פרסומי הממשלה - {title}'
+  key-fields:
+    - id

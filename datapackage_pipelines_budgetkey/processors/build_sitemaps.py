@@ -22,12 +22,16 @@ def generate_sitemap(kind, db_table, doc_id):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ''')
             for doc_id, last_modified in batch:
+                if last_modified:
+                    last_modified = last_modified.isoformat()[:10]
+                else:
+                    last_modified = ''
                 doc_id = doc_id.replace('&', '&amp;')
                 out.write('''   <url>
       <loc>https://next.obudget.org/i/{}</loc>
       <lastmod>{}</lastmod>
    </url>
-'''.format(doc_id, last_modified.isoformat()[:10]))
+'''.format(doc_id, last_modified))
             out.write('''</urlset>''')
 
         logging.info('WRITTEN -> %s', filename)

@@ -12,6 +12,10 @@ government_decisions:
           name: government_decisions
           path: data/government_decisions.csv
     - run: set_types
+      parameters:
+        types:
+          title:
+            es:title: true
     - run: set_primary_key
       parameters:
         government_decisions:
