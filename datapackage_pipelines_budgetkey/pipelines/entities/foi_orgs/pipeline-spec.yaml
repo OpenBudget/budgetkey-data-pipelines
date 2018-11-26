@@ -5,6 +5,16 @@ foi_orgs:
         from: https://foi.gov.il/GetallofficetolistXMLpublished
         name: foi_orgs
         format: xml
+    - run: fingerprint
+      parameters:
+        source-field: Title
+        resource-name: foi_orgs
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/entities/foi_orgs
+    - run: dump_to_sql
+      parameters:
+        tables:
+          foi_orgs:
+            resource-name: foi_orgs
+
