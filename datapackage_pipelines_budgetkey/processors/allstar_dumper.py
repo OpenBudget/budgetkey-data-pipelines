@@ -4,27 +4,26 @@ import logging
 
 import requests
 
-from datapackage_pipelines.lib.dump.to_path import PathDumper
+from datapackage_pipelines.lib.dump_to_path import flow as dtp_flow
 
 
-class BudgetKeyPathDumper(PathDumper):
+def resource_url(out_path, res_path):
+    assert out_path.startswith('/var/datapackages')
+    assert out_path.endswith('datapackage.json')
+    dp_path = out_path[5:-16]
+    res_path = os.path.join(dp_path, res_path)
+    return 'https://next.obudget.org/{}'.format(res_path)
 
-    def datapackage_path(self):
-        datapackage_path = os.path.join(self.out_path, 'datapackage.json')
-        return datapackage_path
 
-    def resource_url(self, res_path):
-        assert self.out_path.startswith('/var/datapackages')
-        dp_path = self.out_path[5:]
-        res_path = os.path.join(dp_path, res_path)
-        return 'https://next.obudget.org/{}'.format(res_path)
+if __name__ == '__main__':
+    with ingest() as ctx:
+        spew_flow(dtp_flow(ctx.parameters, ctx.stats), ctx)
 
-    def finalize(self):
-        super(BudgetKeyPathDumper, self).finalize()
         if any(os.environ.get('DATAHUB_'+x) is None
                for x in ('OWNER', 'OWNERID', 'ENDPOINT', 'TOKEN')):
             return
-        dp_path = self.datapackage_path()
+
+        dp_path = ctx.stats[STATS_DPP_KEY][STATS_OUT_DP_URL_KEY]
         datapackage = json.load(open(dp_path))
         flowspec = {
             'meta': {
@@ -37,11 +36,11 @@ class BudgetKeyPathDumper(PathDumper):
             'inputs': [
                 {
                     'kind': 'datapackage',
-                    'url': self.resource_url('datapackage.json'),
+                    'url': resource_url(dp_path, 'datapackage.json'),
                     'parameters': {
                         'descriptor': datapackage,
                         'resource-mapping': dict(
-                            (r['name'], self.resource_url(r['path']))
+                            (r['name'], resource_url(dp_path, r['path']))
                             for r in datapackage['resources']
                         )
                     }
@@ -61,7 +60,3 @@ class BudgetKeyPathDumper(PathDumper):
                             ).json()
         logging.info('UPLOAD response: %r', resp)
         assert resp['success'], json.dumps(resp, indent=2)
-
-
-if __name__ == '__main__':
-    BudgetKeyPathDumper()()
