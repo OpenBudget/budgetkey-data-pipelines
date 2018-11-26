@@ -4,6 +4,8 @@ import logging
 
 import requests
 
+from datapackage_pipelines.wrapper import ingest
+from datapackage_pipelines.utilities.flow_utils import spew_flow
 from datapackage_pipelines.lib.dump_to_path import flow as dtp_flow
 
 
