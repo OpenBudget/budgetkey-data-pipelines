@@ -6,13 +6,14 @@ import requests
 
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
+from datapackage_pipelines.utilities.stat_utils import STATS_DPP_KEY, STATS_OUT_DP_URL_KEY
 from datapackage_pipelines.lib.dump_to_path import flow as dtp_flow
 
 
 def resource_url(out_path, res_path):
     assert out_path.startswith('/var/datapackages')
     assert out_path.endswith('datapackage.json')
-    dp_path = out_path[5:-16]
+    dp_path = out_path[5:-16]   
     res_path = os.path.join(dp_path, res_path)
     return 'https://next.obudget.org/{}'.format(res_path)
 
