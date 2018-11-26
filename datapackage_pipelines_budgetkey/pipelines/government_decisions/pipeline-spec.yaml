@@ -1,4 +1,6 @@
 government_decisions:
+  schedule:
+    crontab: 0 12 * * *
   pipeline:
     - run: add_metadata
       parameters:
