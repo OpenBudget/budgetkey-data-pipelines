@@ -3,7 +3,7 @@ all-appointments:
     - pipeline: ./people/appointments/media/themarker/themarker
     - pipeline: ./people/appointments/media/calcalist/calcalist
     - pipeline: ./people/appointments/maya/maya-nominations
-
+    - pipeline: ./people/appointments/state_owned/state-owned-nominations
   pipeline:
     -
       run: add_metadata
@@ -28,6 +28,12 @@ all-appointments:
       parameters:
         url: /var/datapackages/people/appointments/maya/maya-nominations/datapackage.json
         resource: maya-nominations
+
+    -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/state_owned/state-owned-nominations/datapackage.json
+        resource: state-owned-nominations
 
     -
       run: concatenate

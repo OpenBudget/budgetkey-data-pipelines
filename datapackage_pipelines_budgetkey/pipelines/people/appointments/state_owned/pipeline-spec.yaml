@@ -69,6 +69,7 @@ correlate:
             first_name: null
             gender: null
             position: null
+            position_he: null
             is_latest:
               aggregate: max
             first_date:
@@ -89,3 +90,43 @@ correlate:
         tables:
           state_owned_company_officers:
             resource-name: reports
+
+
+state-owned-nominations:
+  dependencies:
+   - pipeline: ./people/appointments/state_owned/correlate
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: dependency://./people/appointments/state_owned/correlate
+        resource: reports
+    - run: add_computed_field
+      parameters:
+        fields:
+          - target: name
+            operation: format
+            with: "{first_name} {last_name}"
+    - run: fix_for_ui
+    - run: concatenate
+      parameters:
+        target:
+          name: state-owned-nominations
+        fields:
+          name: []
+          organisation_name: ['company']
+          start_date: ['first_date']
+          position: ['position_he']
+          gender: []
+          proof_url: []
+          source: []
+          verb: []
+
+    - run: add_computed_field
+      parameters:
+        fields:
+          - target: description
+            operation: format
+            with: "{name} {verb} ל{position} ב{organisation_name}"
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/state_owned/state-owned-nominations

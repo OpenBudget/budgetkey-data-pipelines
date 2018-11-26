@@ -6,14 +6,25 @@ from datetime import datetime
 parameters, dp, res_iter = ingest()
 
 POSITION_MAP = {
-    "CEO": ["מנכ \"ל", "מנ כ\"לית בפועל",  "מנכ\"ל", "מנכ\"לית", "מנ כ\"ל", "מנכ\"לית בפועל", "מנכ\"ל בפועל", "מנ כ\"ל בפועל", "מנ כ\"לית"],
-    "Chairperson": ["יו\"רית", "יו\"ר", "י ו\"ר", "י ו\"רית",],
-    "Board member": ["דירקטור /חבר",  "דירקטור", "דירקטור/חבר", "דיקטורית", "דח\"צ",  "דירקטורית", "דח\"צית",]
+    "CEO": ["מנכ\"ל", "מנכ\"לית"],
+    "Chairperson": ["יו\"רית", "יו\"ר"],
+    "Board member": ["דירקטור", "דח\"צ",  "דירקטורית", "דח\"צית",]
+}
+
+FIX_POSITION = {
+    "מנכ\"ל":["מנכ \"ל", "מנ כ\"ל", "מנכ\"ל בפועל", "מנ כ\"ל בפועל"],
+    "מנכ\"לית":["מנ כ\"לית בפועל","מנכ\"לית בפועל","מנ כ\"לית"],
+    "יו\"ר":["י ו\"ר"],
+    "יו\"רית":["י ו\"רית"],
+    "דירקטור":["דירקטור /חבר",  "דירקטור/חבר"],
+    "דירקטורית":[ "דיקטורית"],
+    "דח\"צ":[],
+    "דח\"צית":[],
 }
 
 GENDER_MAP = {
-    "man": ["מנכ \"ל", "מנכ\"ל",  "יו\"ר", "י ו\"ר", "דירקטור /חבר",  "דירקטור", "דירקטור/חבר", "מנ כ\"ל", "מנכ\"ל בפועל", "דח\"צ", "מנ כ\"ל בפועל",],
-    "woman": ["מנ כ\"לית בפועל", "יו\"רית", "דיקטורית", "מנכ\"לית", "מנכ\"לית בפועל",  "דירקטורית", "דח\"צית", "י ו\"רית", "מנ כ\"לית"]
+    "man": ["מנכ\"ל",  "יו\"ר", "דירקטור", "דח\"צ", ],
+    "woman": ["יו\"רית", "מנכ\"לית", "דירקטורית", "דח\"צית"]
 }
 
 FIX_COMPANY_NAME = {
@@ -48,6 +59,11 @@ def trim_list(arr):
     except StopIteration:
         return []
 
+def fix_position(val):
+    try:
+        return next(k for k,v in FIX_POSITION.items() if val in v)
+    except StopIteration:
+        return val
 
 def parse_position(val):
     try:
@@ -94,8 +110,9 @@ def process_rows_in_resource(resource):
                 new_row['last_name'] = trimmed_pdf_record[0]
                 new_row['first_name'] = trimmed_pdf_record[1]
 
-                new_row['position'] = parse_position(trimmed_pdf_record[2])
-                new_row['gender'] = parse_gender(trimmed_pdf_record[2])
+                new_row['position_he'] = fix_position(trimmed_pdf_record[2])
+                new_row['position'] = parse_position(new_row['position_he'])
+                new_row['gender'] = parse_gender(new_row['position_he'])
 
                 if len(trimmed_pdf_record) >3:
                     date_str = FIX_DATE.get(trimmed_pdf_record[3], trimmed_pdf_record[3])
@@ -115,6 +132,7 @@ def modify_datapackage(datapackage):
     resource['schema']['fields'].extend([
         {"name": "company", "type": "string"},
         {"name": "expected_end_date", "type": "date"},
+        {"name": "position_he", "type": "string"},
         {"name": "position", "type": "string"},
         {"name": "first_name", "type": "string"},
         {"name": "last_name", "type": "string"},
