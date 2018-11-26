@@ -63,7 +63,8 @@ def dump_to_datahub(ctx):
 
 
 if __name__ == '__main__':
+    stats = {}
     with ingest() as ctx:
         spew_flow(dtp_flow(ctx.parameters, ctx.stats), ctx)
-
-        dump_to_datahub(ctx)
+        stats = ctx.stats
+    dump_to_datahub(dict(stats))
