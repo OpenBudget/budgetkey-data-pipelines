@@ -86,6 +86,7 @@ quarterly-contract-spending-reports:
             - תאור התחייבות (מרכבה)
             - תאור ההזמנה
             - מטרת התקשרות + תאור התחייבות
+            - מטרת התקשרות-הטור לדיווח
           exemption_reason:
             - סיבת פטור
           end_date:
