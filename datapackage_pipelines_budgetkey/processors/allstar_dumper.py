@@ -18,12 +18,12 @@ def resource_url(out_path, res_path):
     return 'https://next.obudget.org/{}'.format(res_path)
 
 
-def dump_to_datahub(ctx):
+def dump_to_datahub(stats):
     if any(os.environ.get('DATAHUB_'+x) is None
             for x in ('OWNER', 'OWNERID', 'ENDPOINT', 'TOKEN')):
         return
 
-    dp_path = ctx.stats[STATS_DPP_KEY][STATS_OUT_DP_URL_KEY]
+    dp_path = stats[STATS_DPP_KEY][STATS_OUT_DP_URL_KEY]
     datapackage = json.load(open(dp_path))
     flowspec = {
         'meta': {
