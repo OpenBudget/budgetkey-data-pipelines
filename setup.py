@@ -29,7 +29,7 @@ setup(
 #                      'urllib3==1.21.1',
                       'geocoder',
                       'boto3',
-                      'dataflows>=0.0.35',
+                      'dataflows>=0.0.37',
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}

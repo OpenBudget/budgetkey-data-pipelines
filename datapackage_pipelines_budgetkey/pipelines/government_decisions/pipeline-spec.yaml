@@ -31,7 +31,6 @@ scraper:
             format: default
           update_date:
             format: default
-
     - run: set_primary_key
       parameters:
         gov_decisions:
