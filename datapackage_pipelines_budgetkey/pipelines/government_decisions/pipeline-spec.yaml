@@ -1,4 +1,4 @@
-government_decisions:
+scraper:
   schedule:
     crontab: 0 12 * * *
   pipeline:
@@ -22,13 +22,25 @@ government_decisions:
       parameters:
         gov_decisions:
           - id
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
-        out-path: /var/datapackages/government_decisions
+        out-path: /var/datapackages/government_decisions/scraper/
     - run: dump_to_sql
       parameters:
         tables:
           government_decisions:
             resource-name: gov_decisions
             mode: update
-            
+
+government_decisions:            
+  dependencies:
+    - pipeline: ./government_decisions/scraper
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/government_decisions/scraper/datapackage.json
+        resource: gov_decisions
+        table: government_decisions
+    - run: allstar_dumper
+      parameters:
+        out-path: /var/datapackages/government_decisions
