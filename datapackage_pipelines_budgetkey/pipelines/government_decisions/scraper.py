@@ -58,7 +58,7 @@ def get_decision_list():
             links = get_links(result['Content'], session)
             yield {
                 'text': content_pq.text() if content_pq else '',
-                'documents': links,
+                'linked_documents': links,
                 'doc_published_date': result['DocPublishedDate'],
                 'doc_update_date': result['DocUpdateDate'],
                 'id': result['ItemUniqueId'],
@@ -86,7 +86,7 @@ schema = {
     'fields': [
         {'name': 'text', 'type': 'string'},
         {
-            "name": "documents",
+            "name": "linked_documents",
             "type": "array",
             "es:itemType": "string",
             "es:index": False
