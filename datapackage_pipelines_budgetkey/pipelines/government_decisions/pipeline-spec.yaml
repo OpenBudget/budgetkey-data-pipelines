@@ -11,7 +11,7 @@ government_decisions:
       runner: tzabar
       parameters:
         resource:
-          name: government_decisions
+          name: gov_decisions
           path: data/government_decisions.csv
     - run: set_types
       parameters:
@@ -20,7 +20,7 @@ government_decisions:
             es:title: true
     - run: set_primary_key
       parameters:
-        government_decisions:
+        gov_decisions:
           - id
     - run: allstar_dumper
       parameters:
@@ -29,6 +29,6 @@ government_decisions:
       parameters:
         tables:
           government_decisions:
-            resource-name: government_decisions
+            resource-name: gov_decisions
             mode: update
             
