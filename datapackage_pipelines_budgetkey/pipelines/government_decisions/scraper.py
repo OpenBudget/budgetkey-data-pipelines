@@ -70,7 +70,7 @@ def get_decision_list():
                 'publish_date': result['PublishDate'],
                 'publish_date_prod': result['PublishProd'],
                 'title': result['Title'],
-                'unit': result['UnitsDesc'][0] if result.get('UnitsDesc') else (results.get('Units')[0] if results.get('Units') else None),
+                'unit': result['UnitsDesc'][0] if result.get('UnitsDesc') else (result.get('Units')[0] if result.get('Units') else None),
                 'update_date': result['UpdateDate'],
                 'url_id': result['UrlName'],
             }
