@@ -176,3 +176,6 @@ gov_decisions:
   page-title-pattern: 'פרסומי הממשלה - {title}'
   key-fields:
     - id
+  date-range:
+    type: year
+    field: publish_date
