@@ -18,6 +18,20 @@ scraper:
         types:
           title:
             es:title: true
+    - run: set_types
+      parameters:
+        types:
+          doc_published_date:
+            format: default
+          doc_update_date:
+            format: default
+          publish_date:
+            format: default
+          publish_date_prod:
+            format: default
+          update_date:
+            format: default
+
     - run: set_primary_key
       parameters:
         gov_decisions:
