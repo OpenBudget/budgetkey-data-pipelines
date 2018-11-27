@@ -5,7 +5,7 @@ scraper:
     - run: add_metadata
       parameters:
         name: government_decisions
-        title: Government Decisions
+        title: Government Decisions Scraper
         homepage: https://www.gov.il/he/Departments/policies
     - run: scraper
       runner: tzabar
