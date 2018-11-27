@@ -63,7 +63,7 @@ def get_decision_list():
                 'doc_update_date': result['DocUpdateDate'],
                 'id': result['ItemUniqueId'],
                 'office': result['ConnectedOffices'][0]["Title"] if result.get('ConnectedOffices') else '',
-                'government': result['PmoGovernmentDesc'][0] if result.get('PmoGovernmentDesc') else (result.get('PmoGovernment')[0] if ult.get('PmoGovernment') else None),
+                'government': result['PmoGovernmentDesc'][0] if result.get('PmoGovernmentDesc') else (result.get('PmoGovernment')[0] if result.get('PmoGovernment') else None),
                 'policy_type': result['PolicyTypeDesc'][0] if result.get('PolicyTypeDesc') else '',
                 'procedure_number': result['ProcedureNumberNumeric'],
                 'procedure_number_str': result['ProcedureNumber'],
