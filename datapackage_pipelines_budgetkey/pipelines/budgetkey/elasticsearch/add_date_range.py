@@ -1,5 +1,6 @@
 from datapackage_pipelines.wrapper import ingest, spew
 from functools import partial
+from datetime import date
 
 
 parameters, dp, res_iter = ingest()
@@ -11,6 +12,8 @@ def get_no_date_range(row):
 
 def get_year_date_range(field, row):
     year = row[field]
+    if isinstance(year, date):
+        year = year.year
     return '{}-01-01'.format(year), '{}-12-31'.format(year), ["{}-{:0>2}".format(year, i) for i in range(1,13)]
 
 
