@@ -58,7 +58,7 @@ def get_decision_list():
             links = get_links(result['Content'], session)
             yield {
                 'text': content_pq.text() if content_pq else '',
-                'linked_documents': links,
+                'linked_docs': links,
                 'doc_published_date': result['DocPublishedDate'],
                 'doc_update_date': result['DocUpdateDate'],
                 'id': result['ItemUniqueId'],
@@ -87,9 +87,9 @@ schema = {
     'fields': [
         {'name': 'text', 'type': 'string'},
         {
-            "name": "linked_documents",
+            "name": "linked_docs",
             "type": "array",
-            "es:itemType": "string",
+            "es:itemType": "object",
             "es:index": False
         },
         {'name': 'doc_published_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
