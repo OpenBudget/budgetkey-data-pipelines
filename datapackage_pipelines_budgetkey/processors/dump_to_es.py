@@ -78,7 +78,7 @@ class DumpToElasticSearch(ESDumper):
                                         spec, parameters, datapackage)
             except Exception as e:
                 logging.error('DUMP TO ES ERROR %s', str(e))
-                if hasattr(e, errors):
+                if hasattr(e, 'errors'):
                     logging.error('errors %r', e.errors)
                 logging.exception('TB')
                 raise
