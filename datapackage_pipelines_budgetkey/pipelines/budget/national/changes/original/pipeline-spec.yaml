@@ -215,16 +215,18 @@ current-year-fixes:
       parameters:
         resource: national-budget-changes
         url: dependency://./budget/national/changes/original/national-budget-changes
-    - run: filter_rows
+    - run: filter
       parameters:
         in:
           - year: 2018
-    - run: filter_rows
+    - run: filter
       parametrs:
         out:
           - pending: true
     - run: concatenate
       parameters:
+        target:
+          name: budget-fixes
         fields:
           year: []
           code:
