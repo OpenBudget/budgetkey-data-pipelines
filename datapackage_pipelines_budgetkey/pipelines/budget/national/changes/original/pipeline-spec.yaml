@@ -207,6 +207,45 @@ national-budget-changes:
           raw_budget_changes:
             resource-name: national-budget-changes
 
+current-year-fixes:
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+  pipeline:
+    - run: load_resource
+      parameters:
+        resource: national-budget-changes
+        url: dependency://./budget/national/changes/original/national-budget-changes
+    - run: filter_rows
+      parameters:
+        in:
+          - year: 2018
+    - run: filter_rows
+      parametrs:
+        out:
+          - pending: true
+    - run: concatenate
+      parameters:
+        fields:
+          year: []
+          code:
+            - budget_code
+          net_revised:
+            - net_expense_diff
+          gross_revised:
+            - gross_expense_diff
+          dedicated_revised:
+            - allocated_income_diff
+          commitment_allowance_revised:
+            - commitment_limit_diff
+          personnel_revised:
+            - personnel_max_diff
+    - run: split_rows
+    - run: printer
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/current-year-fixes
+
+
 #fake-grouping:
 #  dependencies:
 #    - pipeline: ./budget/national/changes/original/national-budget-changes
