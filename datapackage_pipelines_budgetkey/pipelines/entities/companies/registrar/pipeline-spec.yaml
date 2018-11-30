@@ -112,7 +112,7 @@ details:
   dependencies:
     # - pipeline: ./entities/companies/registrar/details-scraper
     - pipeline: ./entities/companies/government/registrar/government_companies
-    - pipeline: ./entities/safety-orders/safety-orders-by-entity
+    # - pipeline: ./entities/safety-orders/safety-orders-by-entity
 
   schedule:
     crontab: "0 20 * * *"
