@@ -79,7 +79,7 @@ resource['schema']['fields'] = new_fields
 
 
 def process_row(row, phase_key):
-    if 'title' not in row:
+    if codes_and_titles[0][0] not in row:
         yield row
         return
 
