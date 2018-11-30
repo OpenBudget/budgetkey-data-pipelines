@@ -18,9 +18,12 @@ aggregated-yearly:
       parameters:
         resource: national-budget
         url: dependency://./budget/national/original/national-budgets
+    - run: load_resource
+      parameters:
+        resource: budget-fixes
+        url: /var/datapackages/budget/national/changes/current-year-fixes/datapackage.json
     - run: concatenate
       parameters:
-        sources: national-budget
         target:
           name: national-budget
         fields:

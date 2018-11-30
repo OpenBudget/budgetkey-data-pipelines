@@ -220,7 +220,7 @@ current-year-fixes:
         in:
           - year: 2018
     - run: filter
-      parametrs:
+      parameters:
         out:
           - pending: true
     - run: concatenate

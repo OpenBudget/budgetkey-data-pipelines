@@ -79,6 +79,10 @@ resource['schema']['fields'] = new_fields
 
 
 def process_row(row, phase_key):
+    if 'title' not in row:
+        yield row
+        return
+
     for amount, factor in zip(amounts, factors):
         value = row[amount]
         if isinstance(value, str):
