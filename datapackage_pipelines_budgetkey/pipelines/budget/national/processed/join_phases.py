@@ -53,6 +53,10 @@ new_fields = [{
     {
         'name': 'parent',
         'type': 'string'
+    },
+    {
+        'name': 'depth',
+        'type': 'integer'
     }
 ]
 for field in fields:
@@ -106,6 +110,7 @@ def process_row(row, phase_key):
         row['title'] = save[title_key] or 'לא ידוע'
         row['hierarchy'] = hierarchy
         row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
+        row['depth'] = i+1
         yield row
         hierarchy.append([row['code'], row['title']])
 
@@ -127,17 +132,20 @@ def process_row(row, phase_key):
        ):
         row['code'] = '00'
         row['title'] = 'המדינה'
+        row['depth'] = 0
         yield row
 
         row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
         row['title'] = '%s' % (row['func_cls_title_1'],)
         row['hierarchy'] = [['00', 'המדינה']]
+        row['depth'] = -2
         yield row
 
         row['parent'] = row['code']
         row['hierarchy'].append([row['code'], row['title']])
         row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
         row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
+        row['depth'] = -1
         yield row
 
 

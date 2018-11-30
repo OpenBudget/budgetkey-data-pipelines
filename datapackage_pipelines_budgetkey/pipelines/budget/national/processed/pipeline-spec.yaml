@@ -120,6 +120,7 @@ aggregated-yearly:
           year: null
           code: null
           title: null
+          depth: null
           hierarchy: null
           parent: null
           func_cls_title_1:
