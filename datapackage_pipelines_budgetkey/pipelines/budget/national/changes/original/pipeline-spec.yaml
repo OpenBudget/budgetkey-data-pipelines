@@ -226,22 +226,43 @@ current-year-fixes:
     - run: concatenate
       parameters:
         target:
-          name: budget-fixes
+          name: budget-fixes-c
         fields:
           year: []
           code:
             - budget_code
-          net_revised:
+          net:
             - net_expense_diff
-          gross_revised:
+          gross:
             - gross_expense_diff
-          dedicated_revised:
+          dedicated:
             - allocated_income_diff
-          commitment_allowance_revised:
+          commitment_allowance:
             - commitment_limit_diff
-          personnel_revised:
+          personnel:
             - personnel_max_diff
-    - run: split_rows
+    - run: join
+      parameters:
+        source:
+          name: budget-fixes-c
+          key: ['year', 'code']
+          delete: true
+        target:
+          name: budget-fixes
+          key: null
+        fields:
+          year: null
+          code: null
+          net:
+            aggregate: sum
+          gross:
+            aggregate: sum
+          dedicated:
+            aggregate: sum
+          commitment_allowance:
+            aggregate: sum
+          personnel:
+            aggregate: sum
     - run: printer
     - run: dump_to_path
       parameters:

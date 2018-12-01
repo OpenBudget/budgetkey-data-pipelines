@@ -1,6 +1,8 @@
 import copy
 import logging
 
+from datapackage import Package
+
 from datapackage_pipelines.wrapper import spew, ingest
 from decimal import Decimal
 
@@ -23,6 +25,13 @@ factors = [
     1000, 1000, 1000, 1000, 1000, 1, 1, 1,
 ]
 
+budget_fixes = Package('/var/datapackages/budget/national/changes/current-year-fixes/datapackage.json')
+budget_fixes = list(budget_fixes.resources[0].iter(keyed=True))
+budget_fixes = dict(
+    ((x['year'], x['code']), x)
+    for x in budget_fixes
+)
+logging.info('GOT %s budget fixes', len(budget_fixes))
 
 codes_and_titles = [
     ('admin_cls_code_%d' % l, 'admin_cls_title_%d' % l)
@@ -79,9 +88,16 @@ resource['schema']['fields'] = new_fields
 
 
 def process_row(row, phase_key):
-    if codes_and_titles[0][0] not in row:
-        yield row
-        return
+    if phase_key == 'revised':
+        program_code = row['admin_cls_code_6']
+        program_code = '0'*(8-len(program_code)) + program_code
+        budget_fix = budget_fixes.get((row['year'], program_code))
+        if budget_fix is not None:
+            logging.info('FIXING BUDGET "%s"', program_code)
+            for k, v in budget_fix.items():
+                if k not in ('code', 'year'):
+                    row.setdefault(k, Decimal(0))
+                    row[k] += v
 
     for amount, factor in zip(amounts, factors):
         value = row[amount]
