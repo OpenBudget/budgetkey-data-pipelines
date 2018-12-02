@@ -34,11 +34,11 @@ def get_all_reports():
             row = pq(r)
             cells = [pq(td) for td in row.find('td')]
             rec = {
-                "title": cells[0].text(),
-                "paper_type": cells[1].text(),
-                "office": cells[2].text(),
-                "date": cells[3].text(),
-                "pdf_url": extract_url(pq(cells[4].find('a')).attr('href'))
+                "pdf_url": extract_url(pq(cells[0].find('a')).attr('href')),
+                "title": cells[1].text(),
+                "office": cells[2].text().split(':')[-1],
+                "paper_type": cells[3].text(),
+                "date": cells[4].text(),
             }
             yield rec
         if len(rows) == 0:
