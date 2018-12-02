@@ -13,7 +13,7 @@ support-criteria:
         target-resource:
           name: criteria
           path: data/criteria.csv
-    - run: parser
+    # - run: parser
     - run: set_types
     - run: allstar_dumper
       parameters:

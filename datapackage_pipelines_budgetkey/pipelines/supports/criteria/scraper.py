@@ -37,6 +37,7 @@ def get_all_reports():
                 "pdf_url": extract_url(pq(cells[0].find('a')).attr('href')),
                 "title": cells[1].text(),
                 "office": cells[2].text().split(':')[-1],
+                "purpose": ','.join(cells[2].text().split(':')[:-1]),
                 "paper_type": cells[3].text(),
                 "date": cells[4].text(),
             }
@@ -64,6 +65,10 @@ resource['schema'] = {
         },
         {
             'name': 'office',
+            'type': 'string'
+        },
+        {
+            'name': 'purpose',
             'type': 'string'
         },
         {
