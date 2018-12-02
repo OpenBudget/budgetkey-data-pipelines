@@ -92,8 +92,8 @@ def process_row(row, phase_key):
     if phase_key == 'revised':
         program_code = row['admin_cls_code_6']
         program_code = '0'*(8-len(program_code)) + program_code
-        budget_fix = budget_fixes.get((row['year'], program_code))
-        if budget_fix is not None:
+        budget_fix = budget_fixes.get((row['year'], program_code), {})
+        if budget_fix:
             logging.info('FIXING BUDGET %s, %s', program_code, budget_fix)
 
     for amount, factor in zip(amounts, factors):
@@ -105,7 +105,12 @@ def process_row(row, phase_key):
                 value = Decimal(0)
         if isinstance(value, Decimal):
             value *= factor
-        value += budget_fix.get(amount, Decimal(0))
+        fix = budget_fix.get(amount)
+        if fix is not None:
+            if value is not None:
+                value += fix
+            else:
+                value = fix
         row[amount + '_' + phase_key] = value
         del row[amount]
 
