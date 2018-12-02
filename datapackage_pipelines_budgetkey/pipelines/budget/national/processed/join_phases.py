@@ -88,16 +88,13 @@ resource['schema']['fields'] = new_fields
 
 
 def process_row(row, phase_key):
+    budget_fix = {}
     if phase_key == 'revised':
         program_code = row['admin_cls_code_6']
         program_code = '0'*(8-len(program_code)) + program_code
         budget_fix = budget_fixes.get((row['year'], program_code))
         if budget_fix is not None:
-            logging.info('FIXING BUDGET "%s"', program_code, budget_fix)
-            for k, v in budget_fix.items():
-                if k not in ('code', 'year'):
-                    row.setdefault(k, Decimal(0))
-                    row[k] += v
+            logging.info('FIXING BUDGET %s, %s', program_code, budget_fix)
 
     for amount, factor in zip(amounts, factors):
         value = row[amount]
@@ -108,6 +105,7 @@ def process_row(row, phase_key):
                 value = Decimal(0)
         if isinstance(value, Decimal):
             value *= factor
+        value += budget_fix.get(amount, Decimal(0))
         row[amount + '_' + phase_key] = value
         del row[amount]
 
