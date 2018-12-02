@@ -92,7 +92,7 @@ def process_row(row, phase_key):
     if phase_key == 'revised':
         program_code = row['admin_cls_code_6']
         program_code = '0'*(8-len(program_code)) + program_code
-        budget_fix = budget_fixes.get((row['year'], program_code), {})
+        budget_fix = budget_fixes.pop((row['year'], program_code), {})
         if budget_fix:
             logging.info('FIXING BUDGET %s, %s', program_code, budget_fix)
 
@@ -105,12 +105,6 @@ def process_row(row, phase_key):
                 value = Decimal(0)
         if isinstance(value, Decimal):
             value *= factor
-        fix = budget_fix.get(amount)
-        if fix is not None:
-            if value is not None:
-                value += fix
-            else:
-                value = fix
         row[amount + '_' + phase_key] = value
         del row[amount]
 
@@ -136,6 +130,18 @@ def process_row(row, phase_key):
         row['depth'] = i+1
         yield row
         hierarchy.append([row['code'], row['title']])
+
+    if budget_fix:
+        for amount in amounts:
+            row[amount] = budget_fix.get(amount)
+        for i, (code_key, title_key) in enumerate(codes_and_titles):
+            expected_length = i*2 + 4
+            if expected_length > 8:
+                continue
+            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
+            row['title'] = save[title_key] or 'לא ידוע'
+            row['depth'] = i+1
+            yield row
 
     row['hierarchy'] = None
     row['parent'] = None
