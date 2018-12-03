@@ -131,9 +131,12 @@ def process_row(row, phase_key):
         yield row
         hierarchy.append([row['code'], row['title']])
 
+    row['parent'] = None
+    row['hierarchy'] = []
+
     if budget_fix:
         for amount in amounts:
-            row[amount] = budget_fix.get(amount)
+            row[amount + '_' + phase_key] = budget_fix.get(amount)
         for i, (code_key, title_key) in enumerate(codes_and_titles):
             expected_length = i*2 + 4
             if expected_length > 8:
@@ -142,10 +145,6 @@ def process_row(row, phase_key):
             row['title'] = save[title_key] or 'לא ידוע'
             row['depth'] = i+1
             yield row
-
-    row['hierarchy'] = None
-    row['parent'] = None
-    row['hierarchy'] = []
 
     if (
         (not
