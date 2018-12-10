@@ -26,6 +26,7 @@ all:
         url: dependency://./people/association_founders/association-founders
         resource: 0
 
+    -
       run: load_resource
       parameters:
         url: dependency://./people/procurement/procurement-individuals
