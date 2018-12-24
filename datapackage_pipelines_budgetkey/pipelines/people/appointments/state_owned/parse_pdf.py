@@ -55,7 +55,7 @@ def tabula_pdf_parser(url, transpose = False, tabula_params = None):
     try:
         if (url.startswith('http')):
             temp_file = tempfile.NamedTemporaryFile(delete=False)
-            stream = requests.get(url, stream=True).raw
+            stream = requests.get(url, stream=True, verify=False).raw
             shutil.copyfileobj(stream, temp_file)
             temp_file.close()
             file_name = temp_file.name
