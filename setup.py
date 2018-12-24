@@ -22,7 +22,7 @@ setup(
                       'fuzzywuzzy[speedup]',
                       'plyvel',
                       'filemagic',
-                      'datapackage-pipelines-elasticsearch>=0.0.11',
+                      'datapackage-pipelines-elasticsearch>=0.0.13',
                       'datapackage-pipelines-aws',
                       'dataflows',
                       'textract==1.5.0',  # later versions of textract introduce unnecessary dependency on swig
@@ -30,6 +30,7 @@ setup(
 #                      'urllib3==1.21.1',
                       'geocoder',
                       'boto3',
+                      'dataflows>=0.0.37',
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}

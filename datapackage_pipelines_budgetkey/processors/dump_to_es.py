@@ -71,9 +71,18 @@ class DumpToElasticSearch(ESDumper):
         return super(DumpToElasticSearch, self).initialize(parameters)
 
     def handle_resource(self, resource, spec, parameters, datapackage):
-        return super(DumpToElasticSearch, self)\
-                .handle_resource(self.format_datetime_rows(spec, resource), 
-                                 spec, parameters, datapackage)
+        def func():
+            try:
+                yield from super(DumpToElasticSearch, self)\
+                                    .handle_resource(self.format_datetime_rows(spec, resource), 
+                                        spec, parameters, datapackage)
+            except Exception as e:
+                logging.error('DUMP TO ES ERROR %s', str(e))
+                if hasattr(e, 'errors'):
+                    logging.error('errors %r', e.errors)
+                logging.exception('TB')
+                raise
+        return func()
 
     # def __call__(self):
     #     super(DumpToElasticSearch, self).__call__()

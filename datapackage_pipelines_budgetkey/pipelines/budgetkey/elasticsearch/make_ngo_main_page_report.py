@@ -64,7 +64,7 @@ select sum(amount) as x from b
 def get_district_totals():
     foas_q = """
 with a as (SELECT association_field_of_activity as foa, jsonb_array_elements(association_activity_region_districts) as district, count(1) as cnt
-FROM guidestar_processed
+FROM guidestar_processed where association_status_active
 GROUP BY 1, 2),
 b as (select district, sum(cnt) as district_total from a group by 1),
 c as (select foa, district, cnt/district_total as foa_district_pct from a join b using (district)),
@@ -90,6 +90,8 @@ order by district, rank"""
 SELECT jsonb_array_elements(association_activity_region_districts) as district,
        count(1) as count
 FROM guidestar_processed
+where association_status_active
+
 GROUP BY 1"""
     results = engine.execute(totals_q)
     results = [dict(r) for r in results]

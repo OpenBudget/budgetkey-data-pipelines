@@ -181,6 +181,8 @@ def modify_datapackage(datapackage, parameters, stats):
          "description": "what is the required support"},
         {"name": "purpose", "type": "string",
          "description": "purpose of this support / where / how will it be used"},
+        {"name": "for_purpose", "type": "string",
+         "description": "parsed purpose"},
         {"name": "parsed_office", "type": "string",
          "description": "office parsed from the title"},
         {"name": "warning", "type": "string",

@@ -2,9 +2,9 @@ import os
 import logging
 import datetime
 import hashlib
+from kvfile import KVFile
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.kvstore import DB
 from datapackage_pipelines_budgetkey.common.line_selector import LineSelector
 
 from sqlalchemy import create_engine
@@ -46,7 +46,7 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
     ])
 
     engine = create_engine(connection_string)
-    ret = DB()
+    ret = KVFile()
     
     try:
         rows = engine.execute(stmt)
@@ -58,15 +58,15 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
             )
             key = calc_key(rec, key_fields)
             ret.set(key, existing_id)
-    except ProgrammingError as e:
+    except ProgrammingError:
         logging.exception('Failed to fetch existing keys')
-    except OperationalError as e:
+    except OperationalError:
         logging.exception('Failed to fetch existing keys')
 
     return ret
 
 
-def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
+def process_resource(res, key_fields, hash_fields, existing_ids, prefix, max_staleness):
 
     count_existing = 0
     count_modified = 0
@@ -91,7 +91,7 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
             days_since_last_update = (now - existing_id[prefix+'__last_updated_at']).days
             days_since_last_update = max(0, days_since_last_update)
             next_update_days = existing_id[prefix+'__next_update_days']
-            next_update_days = min(next_update_days, 90)
+            next_update_days = min(next_update_days, max_staleness)
             is_stale = days_since_last_update > next_update_days
             overdue = max(1, days_since_last_update - next_update_days)
             staleness = int(100000+100000/(1+overdue))
@@ -150,10 +150,10 @@ def process_resource(res, key_fields, hash_fields, existing_ids, prefix):
     logging.info('| STALE  : %7d', count_stale)
 
 
-def process_resources(res_iter, resource_name, key_fields, hash_fields, existing_ids, prefix):
+def process_resources(res_iter, resource_name, key_fields, hash_fields, existing_ids, prefix, max_staleness):
     for res in res_iter:
         if res.spec['name'] == resource_name:
-            yield process_resource(res, key_fields, hash_fields, existing_ids, prefix)
+            yield process_resource(res, key_fields, hash_fields, existing_ids, prefix, max_staleness)
             break
         else:
             yield res
@@ -170,6 +170,7 @@ def main():
     input_key_fields = parameters['key-fields']
     input_hash_fields = parameters.get('hash-fields')
     prefix = parameters.get('prefix', '')
+    max_staleness = parameters.get('max-staleness', 90)
 
     STATUS_FIELDS = [
         {'name': prefix+'__last_updated_at',  'type': 'datetime'},
@@ -204,6 +205,7 @@ def main():
                                          prefix + '__next_update_days',
                                          prefix + '__hash',
                                          prefix + '__created_at',
+                                         prefix + '__last_modified_at',
                                      ]
                                     )
             break
@@ -216,7 +218,8 @@ def main():
                                input_key_fields,
                                input_hash_fields,
                                existing_ids,
-                               prefix))
+                               prefix,
+                               max_staleness))
 
 
 main()

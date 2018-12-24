@@ -2,7 +2,7 @@ bumper: 2
 
 budget:
   kind: indexer
-  revision: 18
+  revision: 19
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: 'תקציב {title} ({nice-code})'
@@ -155,7 +155,7 @@ people:
 
 reports:
   kind: indexer
-  revision: 49
+  revision: 50
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
@@ -167,3 +167,15 @@ reports:
     - run: enrich_ngo_reports
     - run: make_ngo_main_page_report
     - run: make_open_procure_main_page_report
+
+gov_decisions:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./government_decisions/government_decisions
+  source_datapackage: /var/datapackages/government_decisions/datapackage.json
+  page-title-pattern: 'פרסומי הממשלה - {title}'
+  key-fields:
+    - id
+  date-range:
+    type: year
+    field: publish_date

@@ -1,7 +1,7 @@
 import logging
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from dataflows.helpers.resource_matcher import ResourceMatcher
 
 
 def process_resource(res, afield, tfield):
@@ -44,7 +44,7 @@ def modify_datapackage(dp, resource_matcher, afield, tfield):
 
 if __name__ == '__main__':
     parameters, dp, res_iter = ingest()
-    resource_matcher = ResourceMatcher(parameters.get('resource'))
+    resource_matcher = ResourceMatcher(parameters.get('resource'), dp)
     afield, tfield = parameters['array-field'], parameters['unwound-field']
     spew(modify_datapackage(dp, resource_matcher, afield, tfield),
          process_resources(res_iter, resource_matcher,

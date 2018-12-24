@@ -35,6 +35,7 @@ guidestar-scraper:
         db-key-fields:
           - id
         hash-fields: []
+        max-staleness: 7
     - run: scraper
       runner: tzabar
       parameters:
@@ -46,6 +47,7 @@ guidestar-scraper:
         db-table: guidestar
         key-fields:
           - id
+        max-staleness: 7
     - run: set_primary_key
       parameters:
         guidestar:

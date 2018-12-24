@@ -76,6 +76,10 @@ def process_row(row, *_):
     except:
         global match_errors
         match_errors.add(repr(key))
+        row['simple_decision'] = None
+        row['simple_decision_long'] = None
+        row['extended_status'] = None
+        row['actionable_tips'] = []
 
     # # Simplify Decision
     decision = row['decision']

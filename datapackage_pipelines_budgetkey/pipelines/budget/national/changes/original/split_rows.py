@@ -1,21 +1,22 @@
+import copy
+
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from dataflows import Flow, add_field
 
 
-def update_row(key_pattern):
-    def func(row):
-        row['doc_id'] = key_pattern.format(**row)
-    return func
+def split_rows(rows):
+    for row in rows:
+        for i in range(4):
+            r = copy.deepcopy(row)
+            r['code'] = r['code'][:i*2+2]
+            yield r
 
 
-def flow(parameters):
-    key_pattern = parameters['doc-id-pattern']
-
+def flow(_):
     return Flow(
-        add_field('doc_id', 'string'),
-        update_row(key_pattern)
+        split_rows
     )
 
 

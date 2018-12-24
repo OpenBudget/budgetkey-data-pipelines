@@ -35,10 +35,31 @@ HEBREW_WORD = re.compile('[א-ת]+')
 
 slugs = {}
 
+SLUG_LOOKUP = {
+    'direction_הוצאה': 'total_direction_expense',
+    'direction_הכנסה': 'total_direction_income',
+    'econ_cls_title_1_הוצאות הון': 'total_econ_cls_capital_expenditure',
+    'econ_cls_title_1_החזר חוב - קרן': 'total_econ_cls_debt_repayment_principal',
+    'econ_cls_title_1_החזר חוב - ריבית': 'total_econ_cls_debt_repayment_interest',
+    'econ_cls_title_1_הכנסות המדינה - בנק ישראל': 'total_econ_cls_income_bank_of_israel',
+    'econ_cls_title_1_הכנסות המדינה - הכנסות': 'total_econ_cls_income',
+    'econ_cls_title_1_הכנסות המדינה - מילוות': 'total_econ_cls_income_loans',
+    'econ_cls_title_1_הכנסות המדינה - מענקים': 'total_econ_cls_income_grants',
+    'econ_cls_title_1_הכנסות מיועדות': 'total_econ_cls_dedicated_income',
+    'econ_cls_title_1_העברות': 'total_econ_cls_transfers',
+    'econ_cls_title_1_העברות  פנים תקציביות': 'total_econ_cls_internal_transfers',
+    'econ_cls_title_1_השקעה': 'total_econ_cls_investment',
+    'econ_cls_title_1_חשבונות מעבר': 'total_econ_cls_interim_accounts',
+    'econ_cls_title_1_מתן אשראי': 'total_econ_cls_credit',
+    'econ_cls_title_1_קניות': 'total_econ_cls_procurement',
+    'econ_cls_title_1_רזרבות': 'total_econ_cls_reserve',
+    'econ_cls_title_1_שכר': 'total_econ_cls_salaries',
+    'econ_cls_title_1_*** ביצוע ללא מקביל בתקציב ***': 'total_econ_cls_unknown'
+}
 
 def to_slug(k, v):
     slug = k + '_' + v
-    return slug
+    return SLUG_LOOKUP[slug]
 
 
 datapackage['resources'][0]['schema']['fields'].extend(

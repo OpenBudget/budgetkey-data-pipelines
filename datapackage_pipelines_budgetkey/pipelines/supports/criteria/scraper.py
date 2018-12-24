@@ -13,6 +13,8 @@ URL = "http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&P
 
 
 def extract_url(href):
+    if href is None:
+        return None
     marker = "OpenWindow(this,'"
     start = href.find(marker)
     assert start > 0
@@ -32,11 +34,12 @@ def get_all_reports():
             row = pq(r)
             cells = [pq(td) for td in row.find('td')]
             rec = {
-                "title": cells[0].text(),
-                "paper_type": cells[1].text(),
-                "office": cells[2].text(),
-                "date": cells[3].text(),
-                "pdf_url": extract_url(pq(cells[4].find('a')).attr('href'))
+                "pdf_url": extract_url(pq(cells[0].find('a')).attr('href')),
+                "title": cells[1].text(),
+                "office": cells[2].text().split(':')[-1],
+                "purpose": ','.join(cells[2].text().split(':')[:-1]),
+                "paper_type": cells[3].text(),
+                "date": cells[4].text(),
             }
             yield rec
         if len(rows) == 0:
@@ -62,6 +65,10 @@ resource['schema'] = {
         },
         {
             'name': 'office',
+            'type': 'string'
+        },
+        {
+            'name': 'purpose',
             'type': 'string'
         },
         {

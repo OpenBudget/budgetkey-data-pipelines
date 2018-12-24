@@ -1,12 +1,14 @@
 import copy
 import logging
 
+from datapackage import Package
+
 from datapackage_pipelines.wrapper import spew, ingest
 from decimal import Decimal
 
 parameters, datapackage, res_iter = ingest()
 
-last_completed_year = str(parameters['last-completed-year'])
+last_completed_year = parameters['last-completed-year']
 
 amounts = [
     'net',
@@ -23,6 +25,13 @@ factors = [
     1000, 1000, 1000, 1000, 1000, 1, 1, 1,
 ]
 
+budget_fixes = Package('/var/datapackages/budget/national/changes/current-year-fixes/datapackage.json')
+budget_fixes = list(budget_fixes.resources[0].iter(keyed=True))
+budget_fixes = dict(
+    ((x['year'], x['code']), x)
+    for x in budget_fixes
+)
+logging.info('GOT %s budget fixes', len(budget_fixes))
 
 codes_and_titles = [
     ('admin_cls_code_%d' % l, 'admin_cls_title_%d' % l)
@@ -53,6 +62,10 @@ new_fields = [{
     {
         'name': 'parent',
         'type': 'string'
+    },
+    {
+        'name': 'depth',
+        'type': 'integer'
     }
 ]
 for field in fields:
@@ -75,10 +88,23 @@ resource['schema']['fields'] = new_fields
 
 
 def process_row(row, phase_key):
+    budget_fix = {}
+    if phase_key == 'revised':
+        program_code = row['admin_cls_code_6']
+        program_code = '0'*(8-len(program_code)) + program_code
+        budget_fix = budget_fixes.pop((row['year'], program_code), {})
+        if budget_fix:
+            logging.info('FIXING BUDGET %s, %s', program_code, budget_fix)
+
     for amount, factor in zip(amounts, factors):
         value = row[amount]
-        if value is not None and value.strip() != '':
-            value = Decimal(row[amount]) * factor
+        if isinstance(value, str):
+            if value.strip() != '':
+                value = Decimal(value)
+            else:
+                value = Decimal(0)
+        if isinstance(value, Decimal):
+            value *= factor
         row[amount + '_' + phase_key] = value
         del row[amount]
 
@@ -101,30 +127,54 @@ def process_row(row, phase_key):
         row['title'] = save[title_key] or 'לא ידוע'
         row['hierarchy'] = hierarchy
         row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
+        row['depth'] = i+1
         yield row
         hierarchy.append([row['code'], row['title']])
 
-    row['hierarchy'] = None
     row['parent'] = None
     row['hierarchy'] = []
 
-    if ((not row['code'].startswith('0000')) and 
-        (not row['code'].startswith('0084'))) or \
-        (row['econ_cls_code_2'] == '266'):
+    if budget_fix:
+        for amount in amounts:
+            row[amount + '_' + phase_key] = budget_fix.get(amount)
+        for i, (code_key, title_key) in enumerate(codes_and_titles):
+            expected_length = i*2 + 4
+            if expected_length > 8:
+                continue
+            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
+            row['title'] = save[title_key] or 'לא ידוע'
+            row['depth'] = i+1
+            yield row
+
+    if (
+        (not
+            (row['code'].startswith('0000') or
+             row['code'].startswith('0089') or
+             row['code'].startswith('0091') or 
+             row['code'].startswith('0094') or 
+             row['code'].startswith('0095') or
+             row['code'].startswith('0098') or
+             row['code'].startswith('0084')
+            )
+        ) or (row['econ_cls_code_2'] == '266')
+       ):
         row['code'] = '00'
         row['title'] = 'המדינה'
+        row['depth'] = 0
         yield row
 
-    row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
-    row['title'] = '%s' % (row['func_cls_title_1'],)
-    row['hierarchy'] = [['00', 'המדינה']]
-    yield row
+        row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
+        row['title'] = '%s' % (row['func_cls_title_1'],)
+        row['hierarchy'] = [['00', 'המדינה']]
+        row['depth'] = -2
+        yield row
 
-    row['parent'] = row['code']
-    row['hierarchy'].append([row['code'], row['title']])
-    row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
-    row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
-    yield row
+        row['parent'] = row['code']
+        row['hierarchy'].append([row['code'], row['title']])
+        row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
+        row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
+        row['depth'] = -1
+        yield row
 
 
 

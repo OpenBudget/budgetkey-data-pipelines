@@ -1,6 +1,6 @@
-FROM frictionlessdata/datapackage-pipelines:latest
+FROM frictionlessdata/datapackage-pipelines:v2.0.0rc
 
-RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils
+RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils openjdk7-jre
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
@@ -11,10 +11,12 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     chmod 700 /home/dpp/.ssh && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev
-RUN pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic
+RUN pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py
 
 ADD ./ /
-ADD dpp-runners.yaml /datapackage_pipelines_budgetkey/pipelines/
+
+ADD .dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/
+RUN mv /datapackage_pipelines_budgetkey/pipelines/.dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/dpp-runners.yaml
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /

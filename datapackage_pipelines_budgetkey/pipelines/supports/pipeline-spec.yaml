@@ -7,6 +7,7 @@ all:
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
+        revision: '2018-11'
     - run: add_resource
       parameters:
         name: s2008

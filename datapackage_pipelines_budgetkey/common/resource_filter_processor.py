@@ -1,6 +1,6 @@
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from dataflows.helpers.resource_matcher import ResourceMatcher
 
 
 class ResourceFilterProcessor(object):
@@ -13,7 +13,7 @@ class ResourceFilterProcessor(object):
         self.parameters, self.datapackage, self.resource_iterator = ingest_response
         self.set_default_parameters(default_input_resource, default_output_resource, default_replace_resource)
         self._resource_filter_param = resource_filter
-        self.input_resource_matcher = ResourceMatcher(self.parameters["input_resource"])
+        self.input_resource_matcher = ResourceMatcher(self.parameters["input_resource"], self.datapackage)
         self.output_resource_name = self.parameters["output_resource"]
         self.output_resource_descriptor = {"name": self.output_resource_name,
                                            PROP_STREAMING: True,

@@ -1,0 +1,132 @@
+reports:
+  title: "collect links to all pdf reports on https://mof.gov.il/GCA/Directors/Pages/DirectorsManningReport.aspx"
+  description: "columns: date, url"
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: collect-reports
+        title: Link to all Reports on gov website
+    - run: scrape-directors-list
+      runner: tzabar
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/state_owned/reports
+
+parse_pdf_resources:
+  title: "Parse and concatenate all PDF reports"
+  dependencies:
+    - pipeline: ./people/appointments/state_owned/reports
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/state_owned/reports/datapackage.json
+        resource: reports
+    - run: parse_pdf
+      parameters:
+        source:
+          name: "reports"
+          key: "url"
+        target: "data"
+        tabula_params:
+          spreadsheet: true
+          pages: 'all'
+          area: "%0,0,100,100"
+    - run: clean_data
+
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/appointments/state_owned/parse_pdf_resources
+
+correlate:
+  title: "Join the parsed PDF to get start and end time for each person"
+  dependencies:
+    - pipeline: ./people/appointments/state_owned/parse_pdf_resources
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/people/appointments/state_owned/parse_pdf_resources/datapackage.json
+        resource: reports
+    - run: fingerprint
+      parameters:
+        source-field: company
+        target-field: company_fingerprint
+        resource-name: reports
+    - run: join
+      parameters:
+          source:
+            name: reports
+            key: ['company_fingerprint', 'last_name', 'first_name', 'position']
+            delete: true
+          target:
+            name: reports
+            key: null
+          fields:
+            company_fingerprint: null
+            company: null
+            last_name: null
+            first_name: null
+            gender: null
+            position: null
+            position_he: null
+            is_latest:
+              aggregate: max
+            first_date:
+              name: date
+              aggregate: last
+            last_date:
+              name: date
+              aggregate: first
+            urls:
+              name: url
+              aggregate: array
+    - run: fix_end_date
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/people/appointments/state_owned/correlate
+    - run: dump.to_sql
+      parameters:
+        tables:
+          state_owned_company_officers:
+            resource-name: reports
+
+
+state-owned-nominations:
+  dependencies:
+   - pipeline: ./people/appointments/state_owned/correlate
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: dependency://./people/appointments/state_owned/correlate
+        resource: reports
+    - run: add_computed_field
+      parameters:
+        fields:
+          - target: name
+            operation: format
+            with: "{first_name} {last_name}"
+    - run: fix_for_ui
+    - run: concatenate
+      parameters:
+        target:
+          name: state-owned-nominations
+        fields:
+          name: []
+          organisation_name: ['company']
+          start_date: ['first_date']
+          position: ['position_he']
+          gender: []
+          proof_url: []
+          source: []
+          verb: []
+
+    - run: add_computed_field
+      parameters:
+        fields:
+          - target: description
+            operation: format
+            with: "{name} {verb} ל{position} ב{organisation_name}"
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/appointments/state_owned/state-owned-nominations

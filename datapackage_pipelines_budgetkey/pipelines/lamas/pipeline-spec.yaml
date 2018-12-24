@@ -23,46 +23,47 @@ municipal-data:
   dependencies:
     - pipeline: ./entities/special/registry
   pipeline:
-    - run: add_metadata
+    - run: update_package
       parameters:
         name: lamas-municipal-data
-    - run: load_resource
+    - run: load
       parameters:
-        url: /var/datapackages/entities/special/datapackage.json
-        resource: special-entities
+        from: /var/datapackages/entities/special/datapackage.json
+        resources: special-entities
     - run: filter
       parameters:
         resources: special-entities
         in:
           -
             kind: municipality
-    - run: add_resource
+    - run: load
       parameters:
-        name: lamas-municipal-data-1
         # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
-        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
+        from: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
+        name: lamas-municipal-data-1
         sheet: 2
         headers: 2
-    - run: add_resource
+    - run: load
       parameters:
+        # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        from: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         name: lamas-municipal-data-2
-        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 3
         headers: 2
-    - run: add_resource
+    - run: load
       parameters:
+        # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        from: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         name: lamas-municipal-data-3
-        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 4
         headers: 2
-    - run: add_resource
+    - run: load
       parameters:
+        # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
+        from: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         name: lamas-municipal-data-4
-        url: "https://ams3.digitaloceanspaces.com/budgetkey-files/lamas/municipal/p_libud_15.xls"
         sheet: 5
         headers: 2
-    - run: stream_remote_resources
-      cache: true
     - run: translate_headers
     - run: fix_bad_values
     - run: concatenate
@@ -460,6 +461,7 @@ municipal-data:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
           (symbol_municipality_2015|name_municipality).*:
+            type: string
             constraints:
               required: true
     - run: join

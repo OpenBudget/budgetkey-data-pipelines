@@ -1,4 +1,5 @@
 import datetime
+import logging
 from datapackage_pipelines.wrapper import process
 
 old = datetime.datetime.fromtimestamp(0)
@@ -27,6 +28,9 @@ def process_row(row, *_):
     row['score'] = 1
     row['person_key'] = row['key']
     row['details'] = sorted(row['details'], key=start_date)
+    if len(row['details']) > 50:
+        logging.error('VERY LONG LIST FOR %s: %d items',
+                      row['person_key'], len(row['details']))
     return row
 
 

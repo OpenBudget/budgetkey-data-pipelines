@@ -2,65 +2,50 @@ national-budget-changes:
   schedule:
     crontab: "0 0 fri * *"
   pipeline:
-    - run: add_metadata
+    - run: update_package
       parameters:
         name: national-budget-changes
         title: National Budget Amendments
-    - run: data_gov_il_resource
+    - run: data_gov_il_resources
+      runner: tzabar
       parameters:
-        dataset-name: 2005
-        resource-name: 'שינויי תקציב 2005'
-        resource:
-          name: changes_2005
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2006
-        resource-name: 'שינויי תקציב 2006'
-        resource:
-          name: changes_2006
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2007
-        resource-name: 'שינויי תקציב 2007'
-        resource:
-          name: changes_2007
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2008
-        resource-name: 'שינויי תקציב 2008'
-        resource:
-          name: changes_2008
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2009
-        resource-name: 'שינויי תקציב 2009'
-        resource:
-          name: changes_2009
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2010
-        resource-name: 'שינויי תקציב 2010'
-        resource:
-          name: changes_2010
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 2011
-        resource-name: 'שינויי תקציב 2011'
-        resource:
-          name: changes_2011
-
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 531
-        resource-name: 'שינויי תקציב 2012'
-        resource:
-          name: changes_2012
-    - run: data_gov_il_resource
-      parameters:
-        dataset-name: 711
-        resource-name: 'שינויי תקציב 2013'
-        resource:
-          name: changes_2013
+        batch:
+          - dataset-name: 2005
+            resource-name: 'שינויי תקציב 2005'
+            resource:
+              name: changes_2005
+          - dataset-name: 2006
+            resource-name: 'שינויי תקציב 2006'
+            resource:
+              name: changes_2006
+          - dataset-name: 2007
+            resource-name: 'שינויי תקציב 2007'
+            resource:
+              name: changes_2007
+          - dataset-name: 2008
+            resource-name: 'שינויי תקציב 2008'
+            resource:
+              name: changes_2008
+          - dataset-name: 2009
+            resource-name: 'שינויי תקציב 2009'
+            resource:
+              name: changes_2009
+          - dataset-name: 2010
+            resource-name: 'שינויי תקציב 2010'
+            resource:
+              name: changes_2010
+          - dataset-name: 2011
+            resource-name: 'שינויי תקציב 2011'
+            resource:
+              name: changes_2011
+          - dataset-name: 531
+            resource-name: 'שינויי תקציב 2012'
+            resource:
+              name: changes_2012
+          - dataset-name: 711
+            resource-name: 'שינויי תקציב 2013'
+            resource:
+              name: changes_2013
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
@@ -100,7 +85,7 @@ national-budget-changes:
           path: data/changes_2017.csv
         tabulator:
           encoding: windows-1255
-          headers: 2
+          headers: 3
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
@@ -121,8 +106,6 @@ national-budget-changes:
         tabulator:
           encoding: windows-1255
           headers: 3
-    - run: stream_remote_resources
-      cache: true
     - run: set_pending
       parameters:
         pending-resource-name: pending_changes_2018
@@ -180,6 +163,10 @@ national-budget-changes:
     - run: set_types
       parameters:
         types:
+          budget_code:
+            type: string
+            constraints:
+              required: yes
           year:
             type: integer
             constraints:
@@ -219,6 +206,68 @@ national-budget-changes:
         tables:
           raw_budget_changes:
             resource-name: national-budget-changes
+
+current-year-fixes:
+  dependencies:
+    - pipeline: ./budget/national/changes/original/national-budget-changes
+  pipeline:
+    - run: load_resource
+      parameters:
+        resource: national-budget-changes
+        url: dependency://./budget/national/changes/original/national-budget-changes
+    - run: filter
+      parameters:
+        in:
+          - year: 2018
+    - run: filter
+      parameters:
+        out:
+          - pending: true
+    - run: concatenate
+      parameters:
+        target:
+          name: budget-fixes-c
+        fields:
+          year: []
+          code:
+            - budget_code
+          net:
+            - net_expense_diff
+          gross:
+            - gross_expense_diff
+          dedicated:
+            - allocated_income_diff
+          commitment_allowance:
+            - commitment_limit_diff
+          personnel:
+            - personnel_max_diff
+    - run: join
+      parameters:
+        source:
+          name: budget-fixes-c
+          key: ['year', 'code']
+          delete: true
+        target:
+          name: budget-fixes
+          key: null
+        fields:
+          year: null
+          code: null
+          net:
+            aggregate: sum
+          gross:
+            aggregate: sum
+          dedicated:
+            aggregate: sum
+          commitment_allowance:
+            aggregate: sum
+          personnel:
+            aggregate: sum
+    - run: printer
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/current-year-fixes
+
 
 #fake-grouping:
 #  dependencies:

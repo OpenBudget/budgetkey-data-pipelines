@@ -125,11 +125,11 @@ class Generator(GeneratorBase):
                 date_range_parameters = parameters.get('date-range', {})
 
                 pipeline_steps = steps(*[
-                    ('add_metadata', {
+                    ('update_package', {
                         'name': pipeline_id,
                     }),
-                    ('load_resource', {
-                        'url': source_datapackage,
+                    ('load_big', {
+                        'from': source_datapackage,
                         'resource': doc_type,
                     })]) + parameters.get('extra-steps', []) + steps(*[
                     ('set-revision', {'revision': revision}),

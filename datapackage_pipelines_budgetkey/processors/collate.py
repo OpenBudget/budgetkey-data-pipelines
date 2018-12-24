@@ -1,12 +1,12 @@
 from datetime import date
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines.utilities.resource_matcher import ResourceMatcher
+from dataflows.helpers.resource_matcher import ResourceMatcher
 from decimal import Decimal
 
 parameters, dp, res_iter = ingest()
 
-resource_matcher = ResourceMatcher(parameters.get('resource'))
+resource_matcher = ResourceMatcher(parameters.get('resource'), dp)
 key = parameters['key']
 collated_field_name = parameters['collated-field-name']
 assert isinstance(key, list)
