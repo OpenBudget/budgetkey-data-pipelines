@@ -1,0 +1,6 @@
+municipal_representitives:
+  pipeline:
+    - flow: municipal_representitives
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/municipal_representitives

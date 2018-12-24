@@ -3,6 +3,7 @@ all:
     - pipeline: ./people/company_appointments/all-appointments
     - pipeline: ./people/association_founders/association-founders
     - pipeline: ./people/procurement/procurement-individuals
+    - pipeline: ./people/municipal_appointments/municipal_representitives
 
 
   pipeline:
@@ -26,9 +27,18 @@ all:
         url: dependency://./people/association_founders/association-founders
         resource: 0
 
+    -
       run: load_resource
       parameters:
+#        url: /var/datapackages/people/procurement/procurement-individuals/datapackage.json
         url: dependency://./people/procurement/procurement-individuals
+        resource: 0
+
+    -
+      run: load_resource
+      parameters:
+#        url: /var/datapackages/people/municipal_representitives/datapackage.json
+        url: dependency://./people/municipal_representitives
         resource: 0
 
     -
