@@ -1,6 +1,7 @@
 import math
 import datetime
 import logging
+from decimal import Decimal
 from datapackage_pipelines.wrapper import process
 
 decision_boosters = {
@@ -41,8 +42,8 @@ def process_row(row, *_):
         amount = base.get(row['tender_type'], 1)
     else:
         amount = amount / 1000
-    amount *= decision_boosters.get(row['simple_decision'], 1)
-    amount *= tender_type_boosters.get(row['tender_type'], 1)
+    amount *= Decimal(decision_boosters.get(row['simple_decision'], 1))
+    amount *= Decimal(tender_type_boosters.get(row['tender_type'], 1))
     row['score'] = amount
     return row
 
