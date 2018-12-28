@@ -63,7 +63,7 @@ def process_row(row, *_):
         if period is None:
             continue
         paid = sum(t[1] for t in payments)
-        percent = 100 * paid / volume
+        percent = 100 * paid / volume if volume > 0 else 0
         timeline.append(dict(
             timestamp = str(period),
             title = 'תשלום של ₪{:,.0f}, {:.0f}% מהסכום'.format(paid, percent),
