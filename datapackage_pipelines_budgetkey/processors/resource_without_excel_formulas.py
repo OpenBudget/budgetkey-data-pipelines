@@ -18,7 +18,7 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         resource = parameters.get('resource')
         resource[PROP_STREAMING] = True
 
-        content = requests.get(url).content
+        content = requests.get(url, verify=False).content
         if len(content) < 1024:
             content = cookie_monster_get(url)
 
