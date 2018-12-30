@@ -26,6 +26,8 @@ def process_row(row, *_):
     # depth = len(row['code'])/2
     # amount /= depth
     row['score'] = max(1, amount / 1000)
+    if row.get('code', '').startswith('0000'):
+        row['score'] /= 2
     return row
 
 
