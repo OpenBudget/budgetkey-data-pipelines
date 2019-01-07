@@ -14,6 +14,7 @@ def add_fields_to_schema(package):
         {'name': 'date', 'type': 'date'},
         {'name': 'title', 'type': 'string'},
         {'name': 'event', 'type': 'string'},
+        {'name': 'sources', 'type': 'array'},
     ])
     package.pkg.descriptor['resources'][0][PROP_STREAMING] = True
 
@@ -28,6 +29,7 @@ def convert_excel_row_to_people_row(row):
         'date': MUNICIPAL_ELECTION_DATE,
         'title': 'municipal_party_elected_{}'.format(int(row["מס' סידורי"])),
         'event': 'municipal elections',
+        'sources': [], # for consistency with other people resources
     }
     # municipality: שם ישוב
     # municipal party: כינוי
