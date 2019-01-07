@@ -250,7 +250,7 @@ def get_last_activity_report_data(last_activity_report_href):
                         'Chrome/54.0.2840.87 Safari/537.36'
     }
     for i in range(100):
-        response = requests.get(last_activity_report_href, headers=headers)
+        response = requests.get(last_activity_report_href, headers=headers, verify=False)
         logging.info('(%s) Got data: %r', i+1, response.content[:256])
         if len(response.content) > 1024:
             break

@@ -1,6 +1,8 @@
 import os
 import logging
 import json
+import re
+
 
 from datapackage_pipelines.wrapper import process
 
@@ -33,31 +35,26 @@ def modify_datapackage(dp, *_):
     ))
     return dp
 
+splitter = re.compile('[-/0-9]{4,}')
 failed = set()
 def process_row(row, *_):
     if TK in row:
         del row[TK]
-    mf = row['manof_ref']
-    if mf:
-        mf = mf.strip()
-    if mf and len(mf)>4:
+    manof_ref = row['manof_ref']
+    if manof_ref:
+        parts = splitter.findall(manof_ref)
+    else:
+        parts = []
+    row[TK] = None
+    for mf in parts:
         if mf not in failed:
             if mf not in DISALLOWED:
                 if mf in all_tenders_dict:
                     row[TK] = json.dumps(list(all_tenders_dict[mf]))
-                else:
-                    for k, v in all_tenders_dict.items():
-                        if k in mf:
-                            row[TK] = json.dumps(list(v))
-                            break
+                    break
             if TK not in row:
-                row[TK] = None
-                logging.info('Failed to find reference for "%s"', mf)
+                logging.info('Failed to find reference for "%s" (part: %s)', manof_ref, mf)
                 failed.add(mf)
-        else:
-            row[TK] = None
-    else:
-        row[TK] = None
     return row
 
 if __name__ == '__main__':

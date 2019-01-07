@@ -1,22 +1,23 @@
 import math
 import datetime
 import logging
+from decimal import Decimal
 from datapackage_pipelines.wrapper import process
 
 decision_boosters = {
-    'סגור': 2,
-    'הסתיים': 1,
-    'עתידי': 10,
-    'פתוח': 15,
-    'אושר פטור ממכרז': 8,
-    'בתהליך': 8,
-    'לא אושר': 4,	
+    'סגור': 2/15,
+    'הסתיים': 1/15,
+    'עתידי': 10/15,
+    'פתוח': 15/15,
+    'אושר פטור ממכרז': 8/15,
+    'בתהליך': 8/15,
+    'לא אושר': 4/15,	
 }
 
 tender_type_boosters = {
-    'central': 4,
-    'office': 2,
-    'exemptions': 1
+    'central': 4/4,
+    'office': 2/4,
+    'exemptions': 1/4
 }
 
 base = {
@@ -41,8 +42,8 @@ def process_row(row, *_):
         amount = base.get(row['tender_type'], 1)
     else:
         amount = amount / 1000
-    amount *= decision_boosters.get(row['simple_decision'], 1)
-    amount *= tender_type_boosters.get(row['tender_type'], 1)
+    amount *= Decimal(decision_boosters.get(row['simple_decision'], 1))
+    amount *= Decimal(tender_type_boosters.get(row['tender_type'], 1))
     row['score'] = amount
     return row
 

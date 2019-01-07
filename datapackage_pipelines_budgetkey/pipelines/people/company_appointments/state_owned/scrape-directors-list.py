@@ -36,7 +36,7 @@ def scrape():
 
 
     while next_url is not None:
-        page = pq(session.get(urljoin(site,next_url)).text)
+        page = pq(session.get(urljoin(site,next_url), verify=False).text)
         sleep(3)
 
 

@@ -27,7 +27,7 @@ logging.info('Found %d distinct tender keys (in contracts)',
 
 query = text("""
 select entity_name, entity_id, entity_kind, executed, volume, supplier_name, payments, contract_is_active,
-       jsonb_array_elements_text(tender_key) as tender_key from contract_spending
+       jsonb_array_elements_text(tender_key) as tender_key, order_date  from contract_spending
 """)
 for r in conn.execute(query):
     r = dict(r)
@@ -75,7 +75,18 @@ def modify_datapackage(dp, *_):
 def process_row(row, *_):
     key_fields = ('publication_id', 'tender_type', 'tender_id')
     key = json.dumps([str(row[k]) for k in key_fields])
-    all_contracts = get_all_contracts(key)
+    all_contracts_ = get_all_contracts(key)
+    all_contracts = []
+    for contract in all_contracts_:
+        if row['publication_id'] == 621615:
+            logging.error('XXX %r', row)
+            logging.error('XXX %r', contract)
+            logging.error('XXX %r', row.get('start_date') <= contract.get('order_date'))
+        if row.get('start_date') and contract.get('order_date'):
+            if row.get('start_date') <= contract.get('order_date'):
+                all_contracts.append(contract)
+            continue
+        all_contracts.append(contract)
     row['contract_volume'] = sum(c.get('volume', 0) for c in all_contracts)
     row['contract_executed'] = sum(c.get('executed', 0) for c in all_contracts)
     timestamps = sorted(set(p['timestamp'] for c in all_contracts for p in c['payments']))
