@@ -7,7 +7,7 @@ all:
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
-        revision: '2018-11'
+        revision: '2019-01'
     - run: add_resource
       parameters:
         name: s2008
@@ -60,8 +60,13 @@ all:
         format: csv
     - run: add_resource
       parameters:
-        name: s2017
+        name: s2018
         url: https://www.dropbox.com/s/cqfurmpk1w1l8nl/2018.csv?dl=1
+        format: csv
+    - run: add_resource
+      parameters:
+        name: s2019
+        url: https://www.dropbox.com/s/69ll1941494xioz/2019.csv?dl=1
         format: csv
 
 
