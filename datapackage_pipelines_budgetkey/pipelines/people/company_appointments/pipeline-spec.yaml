@@ -1,9 +1,10 @@
 all-appointments:
   dependencies:
-    - pipeline: ./people/appointments/media/themarker/themarker
-    - pipeline: ./people/appointments/media/calcalist/calcalist
-    - pipeline: ./people/appointments/maya/maya-nominations
-    - pipeline: ./people/appointments/state_owned/state-owned-nominations
+    - pipeline: ./people/company_appointments/media/themarker/themarker
+    - pipeline: ./people/company_appointments/media/calcalist/calcalist
+    - pipeline: ./people/company_appointments/maya/maya-nominations
+    - pipeline: ./people/company_appointments/state_owned/state-owned-nominations
+
   pipeline:
     -
       run: add_metadata
@@ -14,25 +15,25 @@ all-appointments:
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/media/themarker/datapackage.json
+        url: /var/datapackages/people/company_appointments/media/themarker/datapackage.json
         resource: 0
 
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/media/calcalist/datapackage.json
+        url: /var/datapackages/people/company_appointments/media/calcalist/datapackage.json
         resource: nominations-list
 
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/maya/maya-nominations/datapackage.json
+        url: /var/datapackages/people/company_appointments/maya/maya-nominations/datapackage.json
         resource: maya-nominations
 
     -
       run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/state_owned/state-owned-nominations/datapackage.json
+        url: /var/datapackages/people/company_appointments/state_owned/state-owned-nominations/datapackage.json
         resource: state-owned-nominations
 
     -
@@ -133,4 +134,4 @@ all-appointments:
     -
       run: dump.to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/all
+          out-path: /var/datapackages/people/company_appointments/all

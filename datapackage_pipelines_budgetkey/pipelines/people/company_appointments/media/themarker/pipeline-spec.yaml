@@ -57,6 +57,4 @@ themarker:
     -
       run: dump.to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/media/themarker
-
-
+          out-path: /var/datapackages/people/company_appointments/media/themarker

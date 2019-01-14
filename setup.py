@@ -24,6 +24,7 @@ setup(
                       'filemagic',
                       'datapackage-pipelines-elasticsearch>=0.0.13',
                       'datapackage-pipelines-aws',
+                      'dataflows',
                       'textract==1.5.0',  # later versions of textract introduce unnecessary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
 #                      'urllib3==1.21.1',

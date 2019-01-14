@@ -31,5 +31,5 @@ calcalist:
     -
       run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/media/calcalist
+        out-path: /var/datapackages/people/company_appointments/media/calcalist
 
