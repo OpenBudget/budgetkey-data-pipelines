@@ -121,7 +121,7 @@ datapackage['resources'].append({
             {'name': 'url', 'type': 'string'},
             {'name': 's3_object_name', 'type': 'string'},
             {'name': 'source', 'type':'string'},
-            {'name': 'date', 'type': 'date'}
+            {'name': 'date', 'type': 'datetime'}
         ]
     }
 })

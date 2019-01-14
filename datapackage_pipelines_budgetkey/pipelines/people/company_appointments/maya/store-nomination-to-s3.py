@@ -34,22 +34,35 @@ def get_charset(conn, default="windows-1255"):
     return default
 
 
+from datetime import datetime
+
+counter = 0
+st = datetime.now()
 
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
-    url = row['url']
-    conn = session.get(url)
-    time.sleep(3)
-    if not conn.status_code == requests.codes.ok:
-        return None
+    global counter
+    global st
 
-    charset = get_charset(conn)
-    conn.encode = charset
-    object_storage.write(s3_object_name,
-                         data=conn.content,
-                         public_bucket=True,
-                         create_bucket=True,
-                         content_type="text/html; charset={}".format(charset))
+    counter += 1
+
+    if not object_storage.exists(s3_object_name):
+        url = row['url']
+        conn = session.get(url)
+        time.sleep(3)
+        if not conn.status_code == requests.codes.ok:
+            return None
+
+        charset = get_charset(conn)
+        conn.encode = charset
+        object_storage.write(s3_object_name,
+                             data=conn.content,
+                             public_bucket=True,
+                             create_bucket=True,
+                             content_type="text/html; charset={}".format(charset))
+    if counter % 100 == 0:
+        logging.warning("Took {} for {} records".format( ( datetime.now() -st).total_seconds(), counter))
+        st = datetime.now()
     return row
 
 

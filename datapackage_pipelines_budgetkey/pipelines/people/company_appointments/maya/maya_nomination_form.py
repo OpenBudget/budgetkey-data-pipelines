@@ -46,13 +46,10 @@ class MayaForm(object):
     @property
     @_wrap_parse_error
     def id(self):
-        elem = self._page.find('#HeaderProofValue')
+        'This method works with new documents and old documents that do not support #HeaderProofValue'
+        elem = self._page.find('#HeaderProof ~ span:first')
         if len(elem)==0:
-            #Old documents do not have a proofValue. The content is in the first span
-            #after the HeaderProof element
-            elem = self._page.find('#HeaderProof ~ span:first')
-            if not len(elem)==1:
-                raise ValueError("Could not find אסמכתא in form")
+            raise ValueError("Could not find אסמכתא in form")
         elif len(elem)>1:
             raise ValueError("Found multiple אסמכתאs in form")
         return pq(elem[0]).text().strip()

@@ -25,9 +25,7 @@ def get_all_existing_ids():
         logging.warning('Failed to fetch table maya_notification_list')
     return ret
 
-
 all_existing_ids = get_all_existing_ids()
-
 
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
