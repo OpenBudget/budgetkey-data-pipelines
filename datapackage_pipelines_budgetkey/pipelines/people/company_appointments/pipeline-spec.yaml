@@ -1,6 +1,6 @@
 all-appointments:
   dependencies:
-    # - pipeline: ./people/company_appointments/media/themarker/themarker
+    - pipeline: ./people/company_appointments/media/themarker/themarker
     - pipeline: ./people/company_appointments/media/calcalist/calcalist
     - pipeline: ./people/company_appointments/maya/maya-nominations
     - pipeline: ./people/company_appointments/state_owned/state-owned-nominations
@@ -12,11 +12,11 @@ all-appointments:
         name: all-appointment-data
         title: Appointment data from various sources
 
-    # -
-    #   run: load_resource
-    #   parameters:
-    #     url: /var/datapackages/people/company_appointments/media/themarker/datapackage.json
-    #     resource: 0
+    -
+      run: load_resource
+      parameters:
+        url: /var/datapackages/people/company_appointments/media/themarker/datapackage.json
+        resource: 0
 
     -
       run: load_resource
