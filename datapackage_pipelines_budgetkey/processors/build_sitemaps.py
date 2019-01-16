@@ -26,7 +26,7 @@ def generate_sitemap(kind, db_table, doc_id):
                     last_modified = last_modified.isoformat()[:10]
                     last_modified = '<lastmod>{}</lastmod>'.format(last_modified)
                 else:
-                    last_modified = ''
+                    last_modified = '<lastmod>2019-01-15</lastmod>'
                 doc_id = doc_id.replace('&', '&amp;')
                 out.write('''   <url>
       <loc>https://next.obudget.org/i/{}</loc>{}     
