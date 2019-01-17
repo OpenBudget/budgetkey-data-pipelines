@@ -46,6 +46,7 @@ def get_all_reports():
             break
         pid += 1
 
+
 resource = parameters['target-resource']
 resource[PROP_STREAMING] = True
 resource['schema'] = {
