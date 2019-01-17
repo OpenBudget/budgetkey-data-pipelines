@@ -19,18 +19,6 @@ scraper:
           title:
             es:title: true
     - run: set_types
-      parameters:
-        types:
-          doc_published_date:
-            format: '%Y-%m-%dT%H:%M:%S'
-          doc_update_date:
-            format: '%Y-%m-%dT%H:%M:%S'
-          publish_date:
-            format: '%Y-%m-%dT%H:%M:%S'
-          publish_date_prod:
-            format: '%Y-%m-%dT%H:%M:%S'
-          update_date:
-            format: '%Y-%m-%dT%H:%M:%S'
     - run: set_primary_key
       parameters:
         gov_decisions:
