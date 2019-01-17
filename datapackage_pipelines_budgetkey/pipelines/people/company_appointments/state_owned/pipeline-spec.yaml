@@ -17,7 +17,7 @@ reports:
 parse_pdf_resources:
   title: "Parse and concatenate all PDF reports"
   dependencies:
-    - pipeline: ./people/appointments/state_owned/reports
+    - pipeline: ./people/company_appointments/state_owned/reports
   pipeline:
     - run: load_resource
       parameters:
@@ -42,7 +42,7 @@ parse_pdf_resources:
 correlate:
   title: "Join the parsed PDF to get start and end time for each person"
   dependencies:
-    - pipeline: ./people/appointments/state_owned/parse_pdf_resources
+    - pipeline: ./people/company_appointments/state_owned/parse_pdf_resources
   pipeline:
     - run: load_resource
       parameters:
@@ -94,11 +94,11 @@ correlate:
 
 state-owned-nominations:
   dependencies:
-   - pipeline: ./people/appointments/state_owned/correlate
+   - pipeline: ./people/company_appointments/state_owned/correlate
   pipeline:
     - run: load_resource
       parameters:
-        url: dependency://./people/appointments/state_owned/correlate
+        url: dependency://./people/company_appointments/state_owned/correlate
         resource: reports
     - run: add_computed_field
       parameters:
