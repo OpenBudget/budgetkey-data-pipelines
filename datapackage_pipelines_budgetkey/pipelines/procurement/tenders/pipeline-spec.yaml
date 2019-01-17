@@ -239,6 +239,7 @@ processed:
         source-id-field: supplier_id
     # Set types for ES
     - run: set_types
+    - run: set_types
       parameters:
         types:
           description:
