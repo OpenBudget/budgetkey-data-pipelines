@@ -12,7 +12,7 @@ reports:
       runner: tzabar
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/state_owned/reports
+        out-path: /var/datapackages/people/company_appointments/state_owned/reports
 
 parse_pdf_resources:
   title: "Parse and concatenate all PDF reports"
@@ -21,7 +21,7 @@ parse_pdf_resources:
   pipeline:
     - run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/state_owned/reports/datapackage.json
+        url: /var/datapackages/people/company_appointments/state_owned/reports/datapackage.json
         resource: reports
     - run: parse_pdf
       parameters:
@@ -37,7 +37,7 @@ parse_pdf_resources:
 
     - run: dump.to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/state_owned/parse_pdf_resources
+          out-path: /var/datapackages/people/company_appointments/state_owned/parse_pdf_resources
 
 correlate:
   title: "Join the parsed PDF to get start and end time for each person"
@@ -46,7 +46,7 @@ correlate:
   pipeline:
     - run: load_resource
       parameters:
-        url: /var/datapackages/people/appointments/state_owned/parse_pdf_resources/datapackage.json
+        url: /var/datapackages/people/company_appointments/state_owned/parse_pdf_resources/datapackage.json
         resource: reports
     - run: fingerprint
       parameters:
@@ -84,7 +84,7 @@ correlate:
     - run: fix_end_date
     - run: dump.to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/state_owned/correlate
+          out-path: /var/datapackages/people/company_appointments/state_owned/correlate
     - run: dump.to_sql
       parameters:
         tables:
@@ -129,4 +129,4 @@ state-owned-nominations:
             with: "{name} {verb} ל{position} ב{organisation_name}"
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/state_owned/state-owned-nominations
+        out-path: /var/datapackages/people/company_appointments/state_owned/state-owned-nominations
