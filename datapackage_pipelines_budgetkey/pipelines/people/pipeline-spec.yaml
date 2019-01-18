@@ -38,7 +38,7 @@ all:
       run: load_resource
       parameters:
 #        url: /var/datapackages/people/municipal_representitives/datapackage.json
-        url: dependency://./people/municipal_representitives
+        url: dependency://./people/municipal_appointments/municipal_representitives
         resource: 0
 
     -
