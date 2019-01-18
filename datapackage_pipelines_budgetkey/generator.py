@@ -113,7 +113,8 @@ class Generator(GeneratorBase):
                     sitemap_params.append({
                         'kind': doc_type,
                         'db-table': db_table,
-                        'doc-id': key_pattern
+                        'doc-id': key_pattern,
+                        'page-title': page_title_pattern
                     })
 
                 keep_history = parameters.get('keep-history', [])

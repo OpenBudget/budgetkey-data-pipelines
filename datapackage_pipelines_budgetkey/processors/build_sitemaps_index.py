@@ -34,6 +34,15 @@ def generate_sitemap_index(rows):
         
         out.write('''</sitemapindex>''')
 
+    with open('/var/datapackages/sitemaps/sitemap.html', 'w') as out:
+        out.write('''<html><body><ul>''')
+        for row in rows:
+            fn = row['filename'].replace('/var/', '').replace('.xml', '.html')
+            out.write('''<li><a href="{}">{}</a></li>
+'''.format(fn, fn))
+        
+        out.write('''</ul></body></html>''')
+
 
 if __name__ == '__main__':
     params, dp, res_iter = ingest()
