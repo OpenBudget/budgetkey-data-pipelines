@@ -47,7 +47,10 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
         html_filename = '/var/datapackages/sitemaps/{}.{:04d}.html'\
                         .format(kind, index)
         with open(html_filename, 'w') as out:
-            out.write('''<html><body><ul>''')
+            out.write('''<!DOCTYPE html>
+        <html><head><meta charset="utf-8"></head>
+        <body><ul>
+        ''')
             for doc_id, _, page_title in batch:
                 doc_id = doc_id.replace('&', '&amp;')
                 page_title = page_title.replace('&', '&amp;')
