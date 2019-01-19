@@ -14,8 +14,8 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
     logging.info('Kind %s', kind)
     while True:
         rows = (dict(r)
-                for r in engine.execute('select * from {} limit 10000 '
-                                        'offset {} order by __hash'
+                for r in engine.execute('select * from {} order by __hash '
+                                        'limit 10000 offset {}'
                                         .format(db_table, offset)))
         batch = [(doc_id.format(**r),
                   r['__last_modified_at'],
