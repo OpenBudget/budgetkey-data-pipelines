@@ -40,7 +40,7 @@ def generate_sitemap_index(rows):
     <body><ul>
     ''')
         for row in rows:
-            fn = row['filename'].replace('/var/', '').replace('.xml', '.html')
+            fn = row['filename'].replace('/var/datapackages/sitemaps/', '').replace('.xml', '.html')
             out.write('''<li><a href="{}">{}</a></li>
 '''.format(fn, fn))
 
