@@ -5,7 +5,7 @@ import logging
 import datetime
 
 def generate_sitemap_index(rows):
-    rows = next(rows)
+    rows = list(next(rows))
     now = datetime.datetime.now().date().isoformat()
     with open('/var/datapackages/sitemaps/common.xml', 'w') as out:
         out.write('''<?xml version="1.0" encoding="UTF-8"?>
@@ -31,7 +31,7 @@ def generate_sitemap_index(rows):
       <loc>https://next.obudget.org/{}</loc>
    </sitemap>
 '''.format(row['filename'].replace('/var/', '')))
-        
+
         out.write('''</sitemapindex>''')
 
     with open('/var/datapackages/sitemaps/sitemap.html', 'w') as out:
@@ -43,7 +43,7 @@ def generate_sitemap_index(rows):
             fn = row['filename'].replace('/var/', '').replace('.xml', '.html')
             out.write('''<li><a href="{}">{}</a></li>
 '''.format(fn, fn))
-        
+
         out.write('''</ul></body></html>''')
 
 
