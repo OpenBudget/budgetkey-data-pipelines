@@ -96,6 +96,9 @@ def process_row(row, phase_key):
         if budget_fix:
             logging.info('FIXING BUDGET %s, %s', program_code, budget_fix)
 
+    row_amounts = {}
+    fixed_amounts = {}
+
     for amount, factor in zip(amounts, factors):
         value = row[amount]
         if isinstance(value, str):
@@ -105,7 +108,10 @@ def process_row(row, phase_key):
                 value = Decimal(0)
         if isinstance(value, Decimal):
             value *= factor
-        row[amount + '_' + phase_key] = value
+        key = amount + '_' + phase_key
+        row_amounts[key] = value
+        if budget_fix:
+            fixed_amounts[key] = value + budget_fix.get(amount)
         del row[amount]
 
     save = {}
@@ -123,6 +129,7 @@ def process_row(row, phase_key):
         hierarchy = []
     for i, (code_key, title_key) in enumerate(codes_and_titles):
         expected_length = i*2 + 4
+        row.update(fixed_amounts if expected_length < 10 else row_amounts)
         row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
         row['title'] = save[title_key] or 'לא ידוע'
         row['hierarchy'] = hierarchy
@@ -134,17 +141,7 @@ def process_row(row, phase_key):
     row['parent'] = None
     row['hierarchy'] = []
 
-    if budget_fix:
-        for amount in amounts:
-            row[amount + '_' + phase_key] = budget_fix.get(amount)
-        for i, (code_key, title_key) in enumerate(codes_and_titles):
-            expected_length = i*2 + 4
-            if expected_length > 8:
-                continue
-            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
-            row['title'] = save[title_key] or 'לא ידוע'
-            row['depth'] = i+1
-            yield row
+    row.update(fixed_amounts)
 
     if (
         (not
