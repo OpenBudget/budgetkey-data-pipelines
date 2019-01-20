@@ -31,7 +31,7 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ''')
             for doc_id, last_modified, _ in batch:
-                if last_modified and last_modified > '2019-01-20':
+                if last_modified and last_modified.isoformat() > '2019-01-20':
                     last_modified = last_modified.isoformat()[:10]
                     last_modified = '<lastmod>{}</lastmod>'\
                                     .format(last_modified)
