@@ -280,7 +280,7 @@ def process_resource(res_):
                     'layout': layout
                 }
             )
-        if row['code'].startswith('C'):
+        if row['code'].startswith('C') or len(row['code']) <= 4:
             chart, layout = history_chart(row, normalisation=totals)
             if chart is not None:
                 change_charts.append(
