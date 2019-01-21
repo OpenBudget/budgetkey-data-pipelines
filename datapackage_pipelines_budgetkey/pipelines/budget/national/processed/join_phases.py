@@ -110,7 +110,8 @@ def process_row(row, phase_key):
             value *= factor
         key = amount + '_' + phase_key
         row_amounts[key] = value
-        if budget_fix:
+        fixed_amounts[key] = value
+        if budget_fix and value and budget_fix.get(amount):
             fixed_amounts[key] = value + budget_fix.get(amount)
         del row[amount]
 
