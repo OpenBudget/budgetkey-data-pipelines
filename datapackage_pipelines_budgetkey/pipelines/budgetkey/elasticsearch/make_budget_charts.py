@@ -12,6 +12,7 @@ parameters, dp, res_iter = ingest()
 
 
 gdp = dict(datapackage.Package('./data/gdp/datapackage.json').resources[0].iter())
+inflation = dict(datapackage.Package('./data/inflation/datapackage.json').resources[0].iter())
 totals = dict(
     (int(row['year']), row['net_revised'])
     for row in
@@ -175,7 +176,7 @@ def query_based_charts(row):
         yield 'חלוקה למשרדים', 'אילו משרדים ממשלתיים מטפלים בנושא זה?', 'פירוט הסעיפים התקציביים הראשיים הקשורים לנושא זה ', chart
 
 
-def history_chart(row, normalisation=None):
+def history_chart(row, normalisation=None, normalisation_unit='אחוזים'):
     traces = []
     history = row.get('history', [])
     history = dict(
@@ -202,7 +203,7 @@ def history_chart(row, normalisation=None):
                           else None
                           for year, factor
                           in zip(years, normalisation)]
-                unit = 'אחוזים'
+                unit = normalisation_unit
             else:
                 values = [history[year].get(measure) for year in years]
                 unit = 'תקציב ב-₪'
@@ -298,6 +299,17 @@ def process_resource(res_):
                     {
                         'title': 'לעומת התוצר המקומי הגולמי',
                         'long_title': 'ערכי התקציב לאורך השנים כאחוז מהתוצר הלאומי הגולמי',
+                        'type': 'plotly',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
+            chart, layout = history_chart(row, normalisation=inflation, normalisation_unit='מחירי 2016')
+            if chart is not None:
+                change_charts.append(
+                    {
+                        'title': 'בערכים ריאליים',
+                        'long_title': 'ערכי התקציב לאורך השנים, מותאמים לאינפלציה (במחירי 2016)',
                         'type': 'plotly',
                         'chart': chart,
                         'layout': layout
