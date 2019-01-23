@@ -7,7 +7,7 @@ import datetime
 from datapackage_pipelines.wrapper import ingest, spew
 
 
-CSRF_RE = re.compile('\{"name":"getUserInfo","len":0,"ns":"","ver":39.0,"csrf":"([^"]+)"\}')
+CSRF_RE = re.compile('\{"name":"getUserInfo","len":0,"ns":"","ver":43.0,"csrf":"([^"]+)"\}')
 VID_RE = re.compile('RemotingProviderImpl\(\{"vf":\{"vid":"([^"]+)"')
 
 
