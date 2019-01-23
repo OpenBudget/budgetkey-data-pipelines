@@ -13,6 +13,8 @@ parameters, dp, res_iter = ingest()
 
 gdp = dict(datapackage.Package('./data/gdp/datapackage.json').resources[0].iter())
 inflation = dict(datapackage.Package('./data/inflation/datapackage.json').resources[0].iter())
+population = dict(datapackage.Package('./data/population/datapackage.json').resources[0].iter())
+infl_pop = dict((k,v*inflation[k]) for k, v in population.items() if k in inflation)
 totals = dict(
     (int(row['year']), row['net_revised'])
     for row in
@@ -310,6 +312,17 @@ def process_resource(res_):
                     {
                         'title': 'בערכים ריאליים',
                         'long_title': 'ערכי התקציב לאורך השנים, מותאמים לאינפלציה (במחירי 2016)',
+                        'type': 'plotly',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
+            chart, layout = history_chart(row, normalisation=infl_pop, normalisation_unit='תקציב לתושב, מחירי 2016')
+            if chart is not None:
+                change_charts.append(
+                    {
+                        'title': 'תקציב ריאלי לתושב',
+                        'long_title': 'ערכי התקציב לאורך השנים, מנורמלים לפי גודל האוכלוסיה ומותאמים לאינפלציה (במחירי 2016)',
                         'type': 'plotly',
                         'chart': chart,
                         'layout': layout

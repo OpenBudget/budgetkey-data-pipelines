@@ -1,0 +1,42 @@
+{
+  "bytes": 381,
+  "count_of_rows": 26,
+  "hash": "f99241f986a29dc76a50e0ecb166f339",
+  "profile": "data-package",
+  "resources": [
+    {
+      "dialect": {
+        "caseSensitiveHeader": false,
+        "delimiter": ",",
+        "doubleQuote": true,
+        "header": true,
+        "lineTerminator": "\r\n",
+        "quoteChar": "\"",
+        "skipInitialSpace": false
+      },
+      "encoding": "utf-8",
+      "format": "csv",
+      "mediatype": "text/xlsx",
+      "name": "population",
+      "path": "population.csv",
+      "profile": "tabular-data-resource",
+      "schema": {
+        "fields": [
+          {
+            "format": "default",
+            "name": "year",
+            "type": "integer"
+          },
+          {
+            "format": "default",
+            "name": "population",
+            "type": "integer"
+          }
+        ],
+        "missingValues": [
+          ""
+        ]
+      }
+    }
+  ]
+}
