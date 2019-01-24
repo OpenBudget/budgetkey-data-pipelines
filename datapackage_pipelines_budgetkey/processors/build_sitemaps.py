@@ -30,18 +30,18 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
             out.write('''<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ''')
-            for doc_id, last_modified, _ in batch:
+            for did, last_modified, _ in batch:
                 if last_modified and last_modified.isoformat() > '2019-01-20':
                     last_modified = last_modified.isoformat()[:10]
                     last_modified = '<lastmod>{}</lastmod>'\
                                     .format(last_modified)
                 else:
                     last_modified = '<lastmod>2019-01-20</lastmod>'
-                doc_id = doc_id.replace('&', '&amp;')
+                did = did.replace('&', '&amp;')
                 out.write('''   <url>
       <loc>https://next.obudget.org/i/{}</loc>{}
    </url>
-'''.format(doc_id, last_modified))
+'''.format(did, last_modified))
             out.write('''</urlset>''')
 
         html_filename = '/var/datapackages/sitemaps/{}.{:04d}.html'\
@@ -51,11 +51,11 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
         <html><head><meta charset="utf-8"></head>
         <body><ul>
         ''')
-            for doc_id, _, page_title in batch:
-                doc_id = doc_id.replace('&', '&amp;')
-                page_title = page_title.replace('&', '&amp;')
+            for did, _, pt in batch:
+                did = did.replace('&', '&amp;')
+                pt = pt.replace('&', '&amp;')
                 out.write('''   <li><a href='https://next.obudget.org/i/{}'>{}</a></li>
-'''.format(doc_id, page_title))
+'''.format(did, pt))
             out.write('''</ul></body></html>''')
 
         logging.info('WRITTEN -> %s', filename)
