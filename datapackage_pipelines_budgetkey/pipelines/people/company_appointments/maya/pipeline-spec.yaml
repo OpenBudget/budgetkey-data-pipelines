@@ -19,10 +19,11 @@ collect-maya-forms-debug-stats:
   dependencies:
     - pipeline: ./people/company_appointments/maya/maya-notification-list
   pipeline:
-      - run: add_metadata
-        parameters:
-          name: collect-maya-forms-debug-stats
-          title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
+    - run: add_metadata
+      parameters:
+        name: collect-maya-forms-debug-stats
+        title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
+    - run: load_resource
       parameters:
         url: dependency://./people/company_appointments/maya/maya-notification-list
         resource: maya-notification-updates
