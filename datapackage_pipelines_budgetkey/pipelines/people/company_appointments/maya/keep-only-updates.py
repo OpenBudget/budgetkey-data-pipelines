@@ -5,7 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 
-
 def get_connection_string():
     connection_string = os.environ.get("DPP_DB_ENGINE")
     assert connection_string is not None, \
@@ -25,9 +24,7 @@ def get_all_existing_ids():
         logging.warning('Failed to fetch table maya_notification_list')
     return ret
 
-
 all_existing_ids = get_all_existing_ids()
-
 
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']

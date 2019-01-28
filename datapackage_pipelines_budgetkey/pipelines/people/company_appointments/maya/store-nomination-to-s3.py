@@ -34,22 +34,25 @@ def get_charset(conn, default="windows-1255"):
     return default
 
 
-
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
-    url = row['url']
-    conn = session.get(url)
-    time.sleep(3)
-    if not conn.status_code == requests.codes.ok:
-        return None
 
-    charset = get_charset(conn)
-    conn.encode = charset
-    object_storage.write(s3_object_name,
-                         data=conn.content,
-                         public_bucket=True,
-                         create_bucket=True,
-                         content_type="text/html; charset={}".format(charset))
+
+    if not object_storage.exists(s3_object_name):
+        url = row['url']
+        conn = session.get(url)
+        time.sleep(3)
+        if not conn.status_code == requests.codes.ok:
+            return None
+
+        charset = get_charset(conn)
+        conn.encode = charset
+        object_storage.write(s3_object_name,
+                             data=conn.content,
+                             public_bucket=True,
+                             create_bucket=True,
+                             content_type="text/html; charset={}".format(charset))
+
     return row
 
 

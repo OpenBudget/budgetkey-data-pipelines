@@ -47,12 +47,10 @@ class MayaForm(object):
     @_wrap_parse_error
     def id(self):
         elem = self._page.find('#HeaderProofValue')
-        if len(elem)==0:
-            #Old documents do not have a proofValue. The content is in the first span
-            #after the HeaderProof element
+        if len(elem) == 0:
             elem = self._page.find('#HeaderProof ~ span:first')
-            if not len(elem)==1:
-                raise ValueError("Could not find אסמכתא in form")
+        if len(elem)==0:
+            raise ValueError("Could not find אסמכתא in form")
         elif len(elem)>1:
             raise ValueError("Found multiple אסמכתאs in form")
         return pq(elem[0]).text().strip()
@@ -94,13 +92,12 @@ class MayaForm(object):
     @property
     @_wrap_parse_error
     def is_nomination(self):
-        return self.type in [APPOINTMENT_DIRECTOR, APPOINTMENT_VIP, APPOINTMENT_VIP]
+        return self.type in [APPOINTMENT_DIRECTOR, APPOINTMENT_VIP]
 
     @property
     @_wrap_parse_error
     def position_start_date(self):
-        aliases = ['TaarichTchilatHaCehuna', 'TaarichTchilatCehuna', 'TaarichTehilatCehuna',
-                          'TaarichTchilatHaKehuna', 'TaarichTchilatKehuna', 'TaarichTehilatKehuna']
+        aliases = ['TaarichTchilatHaCehuna', 'TaarichTehilatCehuna', 'TaarichTchilatHaKehuna', 'TaarichTchilatKehuna', 'TaarichTehilatKehuna']
         elem = _findByTextAlias(self._page, aliases)
         if len(elem)==0:
             raise ValueError("Could not find position start date in form")
@@ -111,8 +108,10 @@ class MayaForm(object):
     @property
     @_wrap_parse_error
     def positions(self):
-        aliases = ['Tapkid', 'Tafkid', 'HaTafkidLoMuna']
+        aliases = ['Tafkid', 'HaTafkidLoMuna']
         desc_aliases = ['TeurTafkid', 'LeloTeur', 'TeurHaTafkidLoMuna']
+        empty_vals = ['אחר', '_________']
+
         elems = _findByTextAlias(self._page, aliases)
 
         if len(elems)==0 and self.type == APPOINTMENT_ACCOUNTANT:
@@ -121,23 +120,21 @@ class MayaForm(object):
             raise ValueError("Could not find position in form")
 
         def extract_title(elem):
-            txt = elem.text().strip()
-            if txt is None or txt in [':', 'אחר']:
-                row = elem.closest('tr')
-                aliases = _findByTextAlias(pq(row[0]), desc_aliases)
-                if len(aliases)==0:
-                    raise ValueError("could not find position description in form")
-                elif len(aliases)>1:
-                    raise ValueError("Found multiple position descriptions in form")
-                return pq(aliases[0]).text().strip()
-            return txt
+            row = elem.closest('tr')
+            txt1 = _findByTextAlias(pq(row[0]), aliases).text().strip()
+            txt2 = _findByTextAlias(pq(row[0]), desc_aliases).text().strip()
+            if txt1 in empty_vals:
+                return txt2
+            if txt2 in empty_vals:
+                return txt1
+            return "{} {}".format(txt1, txt2)
 
         return [extract_title(pq(it)) for it in elems]
 
     @property
     @_wrap_parse_error
     def gender(self):
-        aliases = ['Gender', 'Min', 'gender']
+        aliases = ['Gender']
         elem = _findByTextAlias(self._page, aliases)
         if len(elem)==0:
             return ""
@@ -146,16 +143,14 @@ class MayaForm(object):
         gender = pq(elem[0]).text().strip()
         if gender.startswith("ז"):
             return "man"
-        return "woman"
+        if gender.startswith("נ"):
+            return "woman"
+        return ""
 
     @property
     @_wrap_parse_error
     def full_name(self):
-        elem = _findByTextAlias(self._page, ['Accountant'])
-        if len(elem)==1:
-            return pq(elem[0]).text().strip()
-        aliases = ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha', 'ShemMishpahaVePrati',
-                   'ShemRoeCheshbon', 'ShemRoehHeshbon']
+        aliases = ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha', 'ShemMishpahaVePrati']
         elem = _findByTextAlias(self._page, aliases)
         if len(elem)==0:
             raise ValueError("Could not find full name in form")

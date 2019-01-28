@@ -1,6 +1,4 @@
-maya-notification-updates:
-  title: List all notifications from maya system
-  description: id, date, company, notification_type, s3_object_name, url
+maya-notification-list:
   schedule:
     crontab: 0 0 * * *
   pipeline:
@@ -13,6 +11,36 @@ maya-notification-updates:
       parameters:
         name: maya-notification-updates
         from: '2006-01-01'
+    - run: dump_to_path
+      parameters:
+          out-path: /var/datapackages/people/company_appointments/maya/maya-notification-list
+
+collect-maya-forms-debug-stats:
+  dependencies:
+    - pipeline: ./people/company_appointments/maya/maya-notification-list
+  pipeline:
+      - run: add_metadata
+        parameters:
+          name: collect-maya-forms-debug-stats
+          title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
+      parameters:
+        url: dependency://./people/company_appointments/maya/maya-notification-list
+        resource: maya-notification-updates
+    - run: collect-maya-forms-debug-stats
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/company_appointments/maya/maya-forms
+
+maya-notification-updates:
+  dependencies:
+    - pipeline: ./people/company_appointments/maya/maya-notification-list
+  title: List all notifications from maya system
+  description: id, date, company, notification_type, s3_object_name, url
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: dependency://./people/company_appointments/maya/maya-notification-list
+        resource: maya-notification-updates
     - run: keep-only-updates
     - run: store-nomination-to-s3
     - run: scrape-individual-nomination

@@ -48,11 +48,14 @@ def _get_maya_headers():
 
 
 def _maya_api_call(date_from, date_to, page_num):
-    url = 'https://mayaapi.tase.co.il/api/report/filter'
-    session.cookies.clear()
-    res = session.post(url, json=_get_maya_filter_request(date_from, date_to, page_num), headers=_get_maya_headers())
-    return res.json()
-
+    try:
+        url = 'https://mayaapi.tase.co.il/api/report/filter'
+        session.cookies.clear()
+        res = session.post(url, json=_get_maya_filter_request(date_from, date_to, page_num), headers=_get_maya_headers())
+        return res.json()
+    except Exception as e:
+        raise Exception("Failed to Call Maya API for date_from:{} date_to:{} page_num:{}".format(date_from, date_to, page_num)) from e
+    
 def _split_period(date_from, date_to):
     current_date = date_from
     next = current_date + relativedelta(years=1)
@@ -121,7 +124,7 @@ datapackage['resources'].append({
             {'name': 'url', 'type': 'string'},
             {'name': 's3_object_name', 'type': 'string'},
             {'name': 'source', 'type':'string'},
-            {'name': 'date', 'type': 'date'}
+            {'name': 'date', 'type': 'datetime'}
         ]
     }
 })
