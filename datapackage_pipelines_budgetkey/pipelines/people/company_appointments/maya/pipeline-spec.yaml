@@ -7,37 +7,39 @@ maya-notification-list:
         name: maya-notification-updates
         title: List all notifications from maya system
     - run: scrape-notification-list
-      #runner: tzabar
+      runner: tzabar
       parameters:
         name: maya-notification-updates
         from: '2006-01-01'
     - run: dump_to_path
       parameters:
-          out-path: /var/datapackages/people/appointments/maya/maya-notification-list
+          out-path: /var/datapackages/people/company_appointments/maya/maya-notification-list
 
-maya-forms:
+collect-maya-forms-debug-stats:
   dependencies:
-    - pipeline: ./people/appointments/maya/maya-notification-list
+    - pipeline: ./people/company_appointments/maya/maya-notification-list
   pipeline:
-    - run: load_resource
+      - run: add_metadata
+        parameters:
+          name: collect-maya-forms-debug-stats
+          title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
       parameters:
-        url: dependency://./people/appointments/maya/maya-notification-list
+        url: dependency://./people/company_appointments/maya/maya-notification-list
         resource: maya-notification-updates
-        limit-rows: 2000
-    - run: collect_info
+    - run: collect-maya-forms-debug-stats
     - run: dump.to_path
       parameters:
-        out-path: /var/datapackages/people/appointments/maya/maya-forms
+        out-path: /var/datapackages/people/company_appointments/maya/maya-forms
 
 maya-notification-updates:
   dependencies:
-    - pipeline: ./people/appointments/maya/maya-notification-list
+    - pipeline: ./people/company_appointments/maya/maya-notification-list
   title: List all notifications from maya system
   description: id, date, company, notification_type, s3_object_name, url
   pipeline:
     - run: load_resource
       parameters:
-        url: dependency://./people/appointments/maya/maya-notification-list
+        url: dependency://./people/company_appointments/maya/maya-notification-list
         resource: maya-notification-updates
     - run: keep-only-updates
     - run: store-nomination-to-s3

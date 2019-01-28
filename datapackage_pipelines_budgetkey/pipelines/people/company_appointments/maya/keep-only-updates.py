@@ -5,7 +5,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 
-
 def get_connection_string():
     connection_string = os.environ.get("DPP_DB_ENGINE")
     assert connection_string is not None, \

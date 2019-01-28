@@ -34,17 +34,9 @@ def get_charset(conn, default="windows-1255"):
     return default
 
 
-from datetime import datetime
-
-counter = 0
-st = datetime.now()
-
 def process_row(row, *_):
     s3_object_name = row['s3_object_name']
-    global counter
-    global st
 
-    counter += 1
 
     if not object_storage.exists(s3_object_name):
         url = row['url']
@@ -60,9 +52,7 @@ def process_row(row, *_):
                              public_bucket=True,
                              create_bucket=True,
                              content_type="text/html; charset={}".format(charset))
-    if counter % 100 == 0:
-        logging.warning("Took {} for {} records".format( ( datetime.now() -st).total_seconds(), counter))
-        st = datetime.now()
+
     return row
 
 
