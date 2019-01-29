@@ -228,7 +228,6 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2018
           - year: 2019
     - run: filter
       parameters:

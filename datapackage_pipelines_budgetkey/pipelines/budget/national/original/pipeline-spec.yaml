@@ -10,7 +10,7 @@ national-budgets:
       parameters:
         name: national-budget
         title: National Budget
-        revision: '2018-10'
+        revision: '2019-01'
     - run: data_gov_il_resources
       runner: tzabar
       parameters:
