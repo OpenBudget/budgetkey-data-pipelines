@@ -101,8 +101,6 @@ def _collect_date_range(date_from, date_to):
 
 
 def collect():
-    logging.info('Scraping Maya')
-
     date_from = date(2011, 1, 1)
     if 'from' in parameters:
         date_from = datetime.strptime(parameters.get('from'), "%Y-%m-%d").date()
