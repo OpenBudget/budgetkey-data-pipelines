@@ -67,7 +67,11 @@ maya-list:
         datapackage: /var/datapackages/people/company_appointments/maya/maya-notification-updates/datapackage.json
         resource: maya-notification-updates
         table: maya_notification_list
-
+        fields:
+            - name: date
+              format: '%Y-%m-%dT%H:%M:%S'
+            - name: start_date
+              format: '%Y-%m-%dT%H:%M:%S'
     - run: stream_remote_resources
     - run: duplicate
       parameters:

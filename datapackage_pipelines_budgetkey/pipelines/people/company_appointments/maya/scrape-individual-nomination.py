@@ -24,7 +24,7 @@ def modify_datapackage(datapackage, parameters, stats):
 
 
         #Specific to nominations
-        {'name': 'start_date', 'type': 'date'},
+        {'name': 'start_date', 'type': 'datetime'},
         {'name': 'positions', 'type': 'array'},
         {'name': 'gender', 'type': 'string'},
         {'name': 'name','type': 'string'},
