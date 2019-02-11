@@ -10,7 +10,7 @@ reports:
         title: Link to all Reports on gov website
     - run: scrape-directors-list
       runner: tzabar
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/state_owned/reports
 
@@ -35,7 +35,7 @@ parse_pdf_resources:
           area: "%0,0,100,100"
     - run: clean_data
 
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
           out-path: /var/datapackages/people/company_appointments/state_owned/parse_pdf_resources
 
@@ -82,10 +82,10 @@ correlate:
               name: url
               aggregate: array
     - run: fix_end_date
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
           out-path: /var/datapackages/people/company_appointments/state_owned/correlate
-    - run: dump.to_sql
+    - run: dump_to_sql
       parameters:
         tables:
           state_owned_company_officers:
@@ -127,6 +127,6 @@ state-owned-nominations:
           - target: description
             operation: format
             with: "{name} {verb} ל{position} ב{organisation_name}"
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/state_owned/state-owned-nominations
