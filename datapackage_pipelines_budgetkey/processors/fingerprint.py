@@ -70,11 +70,6 @@ SIMPLIFICATIONS = [
                  ]
 
 
-CLEAN_SUFFIXES = set()
-for w in CLEAN_WORDS:
-    for i in range(1, len(w)+1):
-        CLEAN_SUFFIXES.add(" "+w[:i])
-
 def calc_fingerprint(name):
     tgt = name
     options = []
@@ -85,10 +80,10 @@ def calc_fingerprint(name):
         done = False
         while not done:
             done = True
-            for suffix in CLEAN_SUFFIXES:
+            for suffix in CLEAN_WORDS:
                 for l in range(len(suffix), 0, -1):
-                    if tgt.endswith(suffix[:l]):
-                        tgt = tgt[:-l]
+                    if tgt.endswith(' ' + suffix[:l]):
+                        tgt = tgt[:-l].strip()
                         options.append(tgt)
                         done = False
                         break

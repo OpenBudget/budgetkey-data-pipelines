@@ -18,8 +18,10 @@ def process_resource(res_):
                 break
         if okay:
             row['nice-category'] = '{func_cls_title_1[0]} / {func_cls_title_2[0]}'.format(**row)
+            row['nice-short-category'] = '{func_cls_title_2[0]}'.format(**row)
         else:
             row['nice-category'] = ''
+            row['nice-short-category'] = ''
 
         if 'econ_cls_json' in row:
             econ_cls_json = [json.loads(x) for x in row['econ_cls_json']]
@@ -39,6 +41,12 @@ def process_resources(res_iter_):
 dp['resources'][0]['schema']['fields'].append(
     {
         'name': 'nice-category',
+        'type': 'string'
+    }
+)
+dp['resources'][0]['schema']['fields'].append(
+    {
+        'name': 'nice-short-category',
         'type': 'string'
     }
 )
