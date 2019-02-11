@@ -111,6 +111,10 @@ def process_rows_in_resource(resource):
                 if company in FIX_COMPANY_NAME:
                     company = FIX_COMPANY_NAME[company]
             else:
+                if company == 'חברת נמלי ישראל - פיתוח  ונכסים בע"מ' and url == 'https://mof.gov.il/gca/directors/doclib1/directormanningreport_31012019-file1.pdf':
+                    # Escape horrible parsing junk in a specific date.. hopefully this will not reoccur
+                    continue
+
                 if trimmed_pdf_record[2] == 'תפקיד':
                     continue
                 new_row = {k:v for k,v in row.items() if k != 'data'}
