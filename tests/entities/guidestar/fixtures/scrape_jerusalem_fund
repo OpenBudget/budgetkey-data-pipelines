@@ -89,7 +89,7 @@ entities.associations.guidestar.scraper
 "אפרים לו",
 "ארנון גפני",
 "דב בן דרור",
-"רות חשין",
+"רות הדסה חשין",
 "משה חנוך ינובסקי"],
 "association_guidestar_title": "הקרן לירושלים",
 "association_has_article_46": "יש אישור",
@@ -120,7 +120,7 @@ entities.associations.guidestar.scraper
 "association_address_house_num": "11",
 "association_address_city": "ירושלים",
 "association_activity_region_national": false,
-"association_logo_url": "https://www.guidestar.org.il//servlet/servlet.FileDownload?file=00P2400000ESTTREA5"
+"association_logo_url": "/servlet/servlet.FileDownload?file=00P2400000ESTTREA5"
 }
 
 {}
