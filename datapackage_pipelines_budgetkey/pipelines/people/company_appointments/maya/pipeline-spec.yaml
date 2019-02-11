@@ -28,7 +28,7 @@ collect-maya-forms-debug-stats:
         url: dependency://./people/company_appointments/maya/maya-notification-list
         resource: maya-notification-updates
     - run: collect-maya-forms-debug-stats
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-forms
 
@@ -40,15 +40,12 @@ maya-notification-updates:
   pipeline:
     - run: load_resource
       parameters:
-        url: dependency://./people/company_appointments/maya/maya-notification-list
+        url: /var/datapackages/people/company_appointments/maya/maya-notification-list/datapackage.json
         resource: maya-notification-updates
     - run: keep-only-updates
     - run: store-nomination-to-s3
     - run: scrape-individual-nomination
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/people/company_appointments/maya/maya-notification-updates
-    - run: dump.to_sql
+    - run: dump_to_sql
       parameters:
         tables:
           maya_notification_list:
@@ -56,7 +53,9 @@ maya-notification-updates:
             mode: update
             update_keys:
               - s3_object_name
-
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/people/company_appointments/maya/maya-notification-updates
 
 maya-list:
   dependencies:
@@ -71,7 +70,7 @@ maya-list:
             - name: date
               format: '%Y-%m-%dT%H:%M:%S'
             - name: start_date
-              format: '%Y-%m-%dT%H:%M:%S'
+              format: '%Y-%m-%d'
     - run: stream_remote_resources
     - run: duplicate
       parameters:
@@ -121,7 +120,7 @@ maya-list:
     - run: add_metadata
       parameters:
         name: maya-list
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
           out-path: /var/datapackages/people/company_appointments/maya/maya-list
 
@@ -171,6 +170,6 @@ maya-nominations:
           - target: details
             operation: format
             with: "{name} מונה ל{position} ב{organisation_name}"
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-nominations
