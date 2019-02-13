@@ -11,7 +11,7 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     chmod 700 /home/dpp/.ssh && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev
-RUN pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py
+RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py
 
 ADD ./ /
 
