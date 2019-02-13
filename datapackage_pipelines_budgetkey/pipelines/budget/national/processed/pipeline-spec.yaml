@@ -88,9 +88,6 @@ aggregated-yearly:
         resources: national-budget
         out:
           - func_cls_title_2: גרעון
-    - run: join_phases
-      parameters:
-        last-completed-year: 2018
 
     - run: set_types
       parameters:
@@ -103,6 +100,10 @@ aggregated-yearly:
             type: number
           '.+_executed':
             type: number
+
+    - run: join_phases
+      parameters:
+        last-completed-year: 2018
 
     - run: topical_sums
     - run: join_categories

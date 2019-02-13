@@ -101,11 +101,8 @@ def process_row(row, phase_key):
 
     for amount, factor in zip(amounts, factors):
         value = row[amount]
-        if isinstance(value, str):
-            if value.strip() != '':
-                value = Decimal(value)
-            else:
-                value = Decimal(0)
+        if value is None:
+            value = Decimal(0)
         if isinstance(value, Decimal):
             value *= factor
         key = amount + '_' + phase_key
