@@ -94,11 +94,21 @@ aggregated-yearly:
         types:
           year:
             type: integer
-          '.+_allocated':
+          net:
             type: number
-          '.+_revised':
+          gross:
             type: number
-          '.+_executed':
+          dedicated:
+            type: number
+          commitment_allowance:
+            type: number
+          commitment_balance:
+            type: number
+          personnel:
+            type: number
+          contractors:
+            type: number
+          amounts:
             type: number
 
     - run: sample
