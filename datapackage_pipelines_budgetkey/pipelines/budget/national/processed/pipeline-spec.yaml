@@ -92,7 +92,7 @@ aggregated-yearly:
     - run: set_types
       parameters:
         types:
-          'year':
+          year:
             type: integer
           '.+_allocated':
             type: number
@@ -101,13 +101,14 @@ aggregated-yearly:
           '.+_executed':
             type: number
 
+    - run: sample
+
     - run: join_phases
       parameters:
         last-completed-year: 2018
 
     - run: topical_sums
     - run: join_categories
-    - run: sample
     - run: join
       parameters:
         source:
