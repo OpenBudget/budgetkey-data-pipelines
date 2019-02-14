@@ -78,7 +78,7 @@ _note: To understand a bit more on the difference between the different types of
 
 ## What's currenty running?
 
- To see what's the current processing status of each pipeline, just hop to the [dashboard](https://next.obudget.org/pipelines/).
+ To see what's the current processing status of each pipeline, just hop to the [dashboard](https://pipelines.obudget.org/).
  
 ## Developing a new pipeline
 
