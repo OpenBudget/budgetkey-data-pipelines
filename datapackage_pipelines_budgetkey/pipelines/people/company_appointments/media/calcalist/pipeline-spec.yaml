@@ -29,7 +29,7 @@ calcalist:
             type: string
 
     -
-      run: dump.to_path
+      run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/media/calcalist
 

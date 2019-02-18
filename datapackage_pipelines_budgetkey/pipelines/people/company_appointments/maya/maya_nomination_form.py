@@ -53,7 +53,7 @@ class MayaForm(object):
             raise ValueError("Could not find אסמכתא in form")
         elif len(elem)>1:
             raise ValueError("Found multiple אסמכתאs in form")
-        return pq(elem[0]).text().strip()
+        return elem.text().strip()
 
 
     @property
@@ -64,7 +64,7 @@ class MayaForm(object):
             raise ValueError("Could not find company name in form")
         elif len(elem)>1:
             raise ValueError("Found multiple company names in form")
-        return pq(elem[0]).text().strip()
+        return elem.text().strip()
 
     @property
     @_wrap_parse_error
@@ -74,7 +74,7 @@ class MayaForm(object):
             raise ValueError("Could not find form type in form")
         elif len(elem)>1:
             raise ValueError("Found multiple form types in form")
-        return pq(elem[0]).text().strip()
+        return elem.text().strip()
 
     @property
     @_wrap_parse_error
@@ -87,12 +87,17 @@ class MayaForm(object):
             raise ValueError("Could not find form replacement")
         elif len(link)>1:
             raise ValueError("Found multiple form replacements")
-        return pq(link[0]).text().strip()
+        return link.text().strip()
 
     @property
     @_wrap_parse_error
     def is_nomination(self):
         return self.type in [APPOINTMENT_DIRECTOR, APPOINTMENT_VIP]
+
+    @property
+    @_wrap_parse_error
+    def is_resignation(self):
+        return self.type in [RETIRED_VIP]
 
     @property
     @_wrap_parse_error
@@ -103,13 +108,23 @@ class MayaForm(object):
             raise ValueError("Could not find position start date in form")
         elif len(elem)>1:
             raise ValueError("Found multiple  position start date in form")
-        return datetime.strptime(pq(elem[0]).text().strip(), '%d/%m/%Y')
+        return datetime.strptime(elem.text().strip(), '%d/%m/%Y')
+
+    @property
+    @_wrap_parse_error
+    def position_end_date(self):
+        elem = _findByTextAlias(self._page, ['TaarichBoChadalLeKahen'])
+        if len(elem)==0:
+            raise ValueError("Could not find position end date in form")
+        elif len(elem)>1:
+            raise ValueError("Found multiple  position end date in form")
+        return datetime.strptime(elem.text().strip(), '%d/%m/%Y')
 
     @property
     @_wrap_parse_error
     def positions(self):
-        aliases = ['Tafkid', 'HaTafkidLoMuna']
-        desc_aliases = ['TeurTafkid', 'LeloTeur', 'TeurHaTafkidLoMuna']
+        aliases = ['Tafkid', 'HaTafkidLoMuna', 'HaTafkid1']
+        desc_aliases = ['TeurTafkid', 'TeurHaTafkidLoMuna', 'HaTafkid2']
         empty_vals = ['אחר', '_________']
 
         elems = _findByTextAlias(self._page, aliases)
@@ -127,9 +142,19 @@ class MayaForm(object):
                 return txt2
             if txt2 in empty_vals:
                 return txt1
-            return "{} {}".format(txt1, txt2)
+            return "{}: {}".format(txt1.strip(':'), txt2)
 
         return [extract_title(pq(it)) for it in elems]
+
+    @property
+    @_wrap_parse_error
+    def quit_reason(self):
+        elem = _findByTextAlias(self._page, ['OfenSiumHaCehuna'])
+        if len(elem)==0:
+            raise ValueError("Could not find quit_reason in form")
+        if len(elem)>1:
+            raise ValueError("Found multiple quit_reasons in form")
+        return elem.text().strip()
 
     @property
     @_wrap_parse_error
@@ -140,7 +165,7 @@ class MayaForm(object):
             return ""
         elif len(elem)>1:
             raise ValueError("Found multiple gender in form")
-        gender = pq(elem[0]).text().strip()
+        gender = elem.text().strip()
         if gender.startswith("ז"):
             return "man"
         if gender.startswith("נ"):
@@ -150,11 +175,14 @@ class MayaForm(object):
     @property
     @_wrap_parse_error
     def full_name(self):
-        aliases = ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha', 'ShemMishpahaVePrati']
-        elem = _findByTextAlias(self._page, aliases)
-        if len(elem)==0:
-            raise ValueError("Could not find full name in form")
-        elif len(elem)>1:
-            raise ValueError("Found multiple full names in form")
-        return pq(elem[0]).text().strip()
+        if self.is_resignation:
+            return "{} {}".format(_findByTextAlias(self._page, ['ShemPrati']).text().strip(), _findByTextAlias(self._page, ['ShemTaagid']).text().strip())
+        else:
+            aliases = ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha', 'ShemMishpahaVePrati']
+            elem = _findByTextAlias(self._page, aliases)
+            if len(elem)==0:
+                raise ValueError("Could not find full name in form")
+            elif len(elem)>1:
+                raise ValueError("Found multiple full names in form")
+            return elem.text().strip()
 

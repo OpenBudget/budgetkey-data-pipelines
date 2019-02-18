@@ -25,7 +25,7 @@ collect-maya-forms-debug-stats:
         title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
     - run: load_resource
       parameters:
-        url: dependency://./people/company_appointments/maya/maya-notification-list
+        url: /var/datapackages//people/company_appointments/maya/maya-notification-list/datapackage.json
         resource: maya-notification-updates
     - run: collect-maya-forms-debug-stats
     - run: dump_to_path
@@ -71,6 +71,8 @@ maya-list:
               format: '%Y-%m-%dT%H:%M:%S'
             - name: start_date
               format: '%Y-%m-%d'
+            - name: end_date
+              format: '%Y-%m-%d'
     - run: stream_remote_resources
     - run: duplicate
       parameters:
@@ -112,9 +114,12 @@ maya-list:
           fix_for: []
           organisation_name: []
           is_nomination: []
+          is_resignation: []
           positions: []
           gender: []
           name: []
+          end_date: []
+          quit_reason: []
         target:
           name: maya-list
     - run: add_metadata
@@ -151,6 +156,8 @@ maya-nominations:
         fields:
           source: []
           id: []
+          start_date: []
+          end_date: []
           date: []
           notification_type: []
           s3_object_name: []
@@ -163,13 +170,60 @@ maya-nominations:
       parameters:
         array-field: positions
         unwound-field: position
-    - run: add_computed_field
-      parameters:
-        resources: maya-nominations
-        fields:
-          - target: details
-            operation: format
-            with: "{name} מונה ל{position} ב{organisation_name}"
+    - run: compute_nomination_text
+    - run: fix_nomination_dates
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-nominations
+
+
+maya-resignations:
+  dependencies:
+   - pipeline: ./people/company_appointments/maya/maya-list
+  title: Appointment notices from Maya
+  description: Name, job and company description.
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: maya-nominations
+    - run: load_resource
+      parameters:
+        url: dependency://./people/company_appointments/maya/maya-list
+        resource: maya-list
+    - run: filter
+      parameters:
+        resources: maya-list
+        in:
+          - is_resignation: true
+    - run: concatenate
+      parameters:
+        target:
+          name: maya-resignations
+        sources: maya-list
+        fields:
+          source: []
+          id: []
+          start_date: []
+          end_date: []
+          date: []
+          notification_type: []
+          s3_object_name: []
+          proof_url: ['url']
+          organisation_name: []
+          positions: []
+          quit_reason: []
+          name: []
+    - run: unwind_array
+      parameters:
+        array-field: positions
+        unwound-field: position
+    - run: add_computed_field
+      parameters:
+        resources: maya-resignations
+        fields:
+          - target: details
+            operation: format
+            with: "{name} עזב/ה את התפקיד {position} ב{organisation_name}. הסיבה שניתנה: {quit_reason}"
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/people/company_appointments/maya/maya-resignations

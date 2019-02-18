@@ -27,8 +27,7 @@ themarker:
         fields:
           full_name:
             - name
-          start_date:
-            - date
+          date: []
           position:
             - title
           organisation_name:
@@ -38,23 +37,13 @@ themarker:
           gender: []
           source: []
           proof_url: []
-
     -
       run: filter
       parameters:
         resources: concat
         out:
           - organisation_name: null
-
     -
-      run: set_types
-      parameters:
-        resources: concat
-        types:
-          start_date:
-            type: date
-            format: "%d.%m.%y"
-    -
-      run: dump.to_path
+      run: dump_to_path
       parameters:
           out-path: /var/datapackages/people/company_appointments/media/themarker

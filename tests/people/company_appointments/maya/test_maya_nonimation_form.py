@@ -55,6 +55,12 @@ def test_form_extract_position_start_date():
            == datetime.strptime("01/07/2004", "%d/%m/%Y")
 
 
+def test_form_extract_position_end_date():
+    #Form Uses the alias TaarichBoChadalLeKahen
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235356.htm")).position_end_date \
+           == datetime.strptime("28/12/2006", "%d/%m/%Y")
+
+
 def test_form_extract_gender():
     #Empty values do not fail
     assert MayaForm(get_url("maya.tase.co.il/2007_01/235402.htm")).gender == ""
@@ -70,14 +76,18 @@ def test_form_extract_gender():
 
 
 def test_form_extract_full_name():
-    #Form Users the alias 'Shem'
+
+    # Form Users the alias 'Shem'
     assert MayaForm(get_url("maya.tase.co.il/2007_01/235402.htm")).full_name == "ברגמן דלי"
 
-    #Form Users the alias 'ShemPriatiVeMishpacha'
+    # Form Users the alias 'ShemPriatiVeMishpacha'
     assert MayaForm(get_url("maya.tase.co.il/2007_01/235392.htm")).full_name == "צ'צ'יק ישראל"
 
-    #Form Users the alias 'ShemMishpahaVePrati'
+    # Form Users the alias 'ShemMishpahaVePrati'
     assert MayaForm(get_url("maya.tase.co.il/2010_05/537834.htm")).full_name == "צימר יוסף"
+
+    # Extract for resignation form
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235356.htm")).full_name == "יהושע נאמן"
 
 
 def test_form_extract_positions():
@@ -90,4 +100,15 @@ def test_form_extract_positions():
 
     # Form contains a job listing from two strings"
     assert MayaForm(get_url("maya.tase.co.il/2008_12/408859.htm")).positions == ['מנהל כללי', 'נושא משרה בכירה בתאגיד נשלט בעל השפעה מהותית על התאגיד: מנכ"ל אסים נדל"ן בע"מ, חברה בת של החברה (להלן: "אסים נדל"ן")']
+
+
+def test_form_extract_quit_reason():
+
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235356.htm")).quit_reason =='סיום כהונה'
+
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235296.htm")).quit_reason =='התפטרות'
+
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235236.htm")).quit_reason =='פיטורין'
+
+    assert MayaForm(get_url("maya.tase.co.il/2007_01/235092.htm")).quit_reason =='אחר'
 
