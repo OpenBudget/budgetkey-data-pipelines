@@ -3,6 +3,7 @@ all-appointments:
     - pipeline: ./people/company_appointments/media/themarker/themarker
     - pipeline: ./people/company_appointments/media/calcalist/calcalist
     - pipeline: ./people/company_appointments/maya/maya-nominations
+    - pipeline: ./people/company_appointments/maya/maya-resignations
     - pipeline: ./people/company_appointments/state_owned/state-owned-nominations
 
   pipeline:
@@ -33,6 +34,12 @@ all-appointments:
     -
       run: load_resource
       parameters:
+        url: /var/datapackages/people/company_appointments/maya/maya-resignations/datapackage.json
+        resource: maya-resignations
+
+    -
+      run: load_resource
+      parameters:
         url: /var/datapackages/people/company_appointments/state_owned/state-owned-nominations/datapackage.json
         resource: state-owned-nominations
 
@@ -44,7 +51,7 @@ all-appointments:
         fields:
           full_name: ['name']
           company: ['organisation_name']
-          date: ['start_date']
+          date: []
           position: []
           details: ['description']
           gender: []

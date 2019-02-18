@@ -16,19 +16,21 @@ PROOF_COLUMN = 'proof_url';
 #
 FIX_BAD_DATE = [{'from':'2/3/217', 'to':'2/3/17'}]
 
-def modify_datapackage(datapackage, parameters, stats):
-    logging.info('datapackage: %s' % datapackage)
-    datapackage['resources'][0]['schema']['fields']\
-        .extend([{'name': SOURCE_COLUMN,'type': 'string'},
-                 {'name': PROOF_COLUMN, 'type': 'string'}
-                ])
-    logging.info('second datapackage: %s' % datapackage)
+
+def modify_datapackage(datapackage, *_):
+    fields = datapackage['resources'][0]['schema']['fields']
+
+    date_field = next( (f for f in fields if f['name']==DATE_COLUMN))
+    date_field['type'] = 'date'
+
+    fields.extend([
+        {'name': SOURCE_COLUMN,'type': 'string'},
+        {'name': PROOF_COLUMN, 'type': 'string'}
+    ])
     return datapackage
 
 
-def process_row(row, row_index,
-                resource_descriptor, resource_index,
-                parameters, stats):
+def process_row(row, *_):
     row_date = row[DATE_COLUMN]
 
     fix_date = [it['to'] for it in FIX_BAD_DATE if it['from'] == row_date]

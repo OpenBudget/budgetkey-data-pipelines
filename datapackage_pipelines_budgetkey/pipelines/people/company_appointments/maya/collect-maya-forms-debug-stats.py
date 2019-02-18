@@ -43,6 +43,14 @@ def modify_datapackage(dp, *_):
         {'name': 'ShemMishpahaVePrati', 'type': 'number'},
         {'name': 'ShemRoeCheshbon', 'type': 'number'},
         {'name': 'ShemRoehHeshbon', 'type': 'number'},
+        {'name': 'ShemPrati', 'type': 'number'},
+        {'name': 'ShemTaagid', 'type': 'number'},
+        {'name': 'HaTafkid1', 'type': 'number'},
+        {'name': 'HaTafkid2', 'type': 'number'},
+        {'name': 'TaarichBoChadalLeKahen', 'type': 'number'},
+        {'name': 'OfenSiumHaCehuna', 'type':'number'},
+        {'name': 'quit_reason', 'type': 'string'},
+
         {'name': 'Accountant', 'type': 'number'},
         {'name': 'Tapkid', 'type': 'number'},
         {'name': 'Tafkid', 'type': 'number'},
@@ -72,8 +80,8 @@ def _findByTextAlias(e, aliaes):
     return e.find(selector)
 
 def get_positions_array(pg):
-    aliases = ['Tapkid', 'Tafkid', 'HaTafkidLoMuna']
-    desc_aliases = ['TeurTafkid', 'LeloTeur', 'TeurHaTafkidLoMuna']
+    aliases = ['Tafkid', 'HaTafkidLoMuna', 'HaTafkid1']
+    desc_aliases = ['TeurTafkid', 'TeurHaTafkidLoMuna', 'HaTafkid2']
     elems = _findByTextAlias(pg, aliases)
 
     def extract_title(elem):
@@ -122,9 +130,19 @@ def process_row(row, *_):
                 'ShemMishpahaVePrati': len(pg.find("[fieldalias=ShemMishpahaVePrati]")),
                 'ShemRoeCheshbon': len(pg.find("[fieldalias=ShemRoeCheshbon]")),
                 'ShemRoehHeshbon': len(pg.find("[fieldalias=ShemRoehHeshbon]")),
+                'ShemPrati':  len(pg.find("[fieldalias=ShemPrati]")),
+                'ShemTaagid':  len(pg.find("[fieldalias=ShemTaagid]")),
                 'Accountant': len(pg.find("[fieldalias=Accountant]")),
                 'Tapkid':  len(pg.find("[fieldalias=Tapkid]")),
                 'Tafkid':  len(pg.find("[fieldalias=Tafkid]")),
+
+                'HaTafkid1': len(pg.find("[fieldalias=HaTafkid1]")),
+                'HaTafkid2': len(pg.find("[fieldalias=HaTafkid2]")),
+
+                'TaarichBoChadalLeKahen': len(pg.find("[fieldalias=TaarichBoChadalLeKahen]")),
+                'OfenSiumHaCehuna': len(pg.find("[fieldalias=OfenSiumHaCehuna]")),
+                'quit_reason': all_aliases_as_string(pg, ['OfenSiumHaCehuna']),
+
                 'HaTafkidLoMuna':  len(pg.find("[fieldalias=HaTafkidLoMuna]")),
                 'TeurTafkid':  len(pg.find("[fieldalias=TeurTafkid]")),
                 'LeloTeur':  len(pg.find("[fieldalias=LeloTeur]")),
@@ -135,11 +153,6 @@ def process_row(row, *_):
 
                 'positions': get_positions_array(pg),
 
-
-                #'is_nomination': False,
-                #'positions':"",
-                #'gender':"",
-                #'name':""
             })
         else:
             return None
@@ -149,3 +162,4 @@ def process_row(row, *_):
 
 
 process(process_row=process_row, modify_datapackage=modify_datapackage)
+

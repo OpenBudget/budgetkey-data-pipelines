@@ -114,7 +114,7 @@ state-owned-nominations:
         fields:
           name: []
           organisation_name: ['company']
-          start_date: ['first_date']
+          date: ['first_date']
           position: ['position_he']
           gender: []
           proof_url: []

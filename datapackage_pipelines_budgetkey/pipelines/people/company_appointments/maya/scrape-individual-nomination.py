@@ -10,7 +10,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 session = requests.Session()
 
-def modify_datapackage(datapackage, parameters, stats):
+def modify_datapackage(datapackage, *_):
     datapackage['resources'][0]['schema']['fields'].extend([
         {'name': 'source', 'type': 'string'},
 
@@ -20,6 +20,8 @@ def modify_datapackage(datapackage, parameters, stats):
         {'name': 'notification_type', 'type':'string'},
         {'name': 'fix_for', 'type':'string'},
         {'name': 'is_nomination', 'type': 'boolean' },
+        {'name': 'is_resignation', 'type': 'boolean' },
+
         {'name': 'is_parse_error', 'type': 'boolean'},
 
 
@@ -29,7 +31,9 @@ def modify_datapackage(datapackage, parameters, stats):
         {'name': 'gender', 'type': 'string'},
         {'name': 'name','type': 'string'},
 
-
+        #Specific to resignation
+        {'name': 'end_date', 'type': 'date'},
+        {'name': 'quit_reason', 'type': 'string'},
     ])
     return datapackage
 
@@ -48,10 +52,13 @@ def process_row(row, *_):
             'notification_type': maya_form.type,
             'fix_for': maya_form.fix_for,
             'is_nomination': False,
+            'is_resignation': False,
             'start_date': None,
             'positions':"",
             'gender':"",
-            'name':""
+            'name':"",
+            'end_date': None,
+            'quit_reason': ""
         })
 
         if maya_form.is_nomination:
@@ -62,6 +69,17 @@ def process_row(row, *_):
                 'gender': maya_form.gender,
                 'name': maya_form.full_name
             })
+
+        if maya_form.is_resignation:
+            row.update({
+                'is_resignation': True,
+                'start_date' : maya_form.position_start_date,
+                'end_date':maya_form.position_end_date,
+                'positions': maya_form.positions,
+                'name': maya_form.full_name,
+                'quit_reason': maya_form.quit_reason
+            })
+
     except ParseError as err:
         logging.info("Failed to parse Maya Form {} with err {}".format(url, str(err.__cause__) if err.__cause__ else str(err)))
         row.update({'is_parse_error': True})
