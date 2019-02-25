@@ -118,6 +118,7 @@ maya-list:
           positions: []
           gender: []
           name: []
+          start_date: []
           end_date: []
           quit_reason: []
         target:
