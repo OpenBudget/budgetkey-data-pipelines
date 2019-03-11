@@ -7,44 +7,37 @@ all-appointments:
     - pipeline: ./people/company_appointments/state_owned/state-owned-nominations
 
   pipeline:
-    -
-      run: add_metadata
+    - run: add_metadata
       parameters:
         name: all-appointment-data
         title: Appointment data from various sources
 
-    -
-      run: load_resource
+    - run: load_resource
       parameters:
         url: /var/datapackages/people/company_appointments/media/themarker/datapackage.json
         resource: 0
 
-    -
-      run: load_resource
+    - run: load_resource
       parameters:
         url: /var/datapackages/people/company_appointments/media/calcalist/datapackage.json
         resource: nominations-list
 
-    -
-      run: load_resource
+    - run: load_resource
       parameters:
         url: /var/datapackages/people/company_appointments/maya/maya-nominations/datapackage.json
         resource: maya-nominations
 
-    -
-      run: load_resource
+    - run: load_resource
       parameters:
         url: /var/datapackages/people/company_appointments/maya/maya-resignations/datapackage.json
         resource: maya-resignations
 
-    -
-      run: load_resource
+    - run: load_resource
       parameters:
         url: /var/datapackages/people/company_appointments/state_owned/state-owned-nominations/datapackage.json
         resource: state-owned-nominations
 
-    -
-      run: concatenate
+    - run: concatenate
       parameters:
         target:
           name: people
@@ -62,14 +55,14 @@ all-appointments:
       parameters:
         resources: people
         sort-by: "{date}"
-    -
-      run: fingerprint
+
+    - run: fingerprint
       parameters:
         source-field: company
         target-field: fingerprinted_company
         resource-name: people
-    -
-      run: add_computed_field
+
+    - run: add_computed_field
       parameters:
         resources: people
         fields:
@@ -78,8 +71,7 @@ all-appointments:
             target: year_month
             with: '{date:%Y-%m}'
 
-    -
-      run: collate
+    - run: collate
       parameters:
         resource: people
         key:
@@ -88,8 +80,7 @@ all-appointments:
           - year_month
         collated-field-name: sources
 
-    -
-      run: join
+    - run: join
       parameters:
         source:
           name: people
@@ -104,11 +95,9 @@ all-appointments:
           sources:
             aggregate: array
 
-    -
-      run: collate_schema
+    - run: collate_schema
 
-    -
-      run: fingerprint
+    - run: fingerprint
       parameters:
         source-field: fingerprinted_company
         resource-name: people
@@ -117,8 +106,7 @@ all-appointments:
 
     - run: select_from_sources
 
-    -
-      run: concatenate
+    - run: concatenate
       parameters:
         target:
           name: people
@@ -138,7 +126,7 @@ all-appointments:
             type: date
             format: "%Y-%m-%d"
 
-    -
-      run: dump.to_path
+
+    - run: dump.to_path
       parameters:
           out-path: /var/datapackages/people/company_appointments/all

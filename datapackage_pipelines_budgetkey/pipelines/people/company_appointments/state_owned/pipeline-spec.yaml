@@ -98,7 +98,7 @@ state-owned-nominations:
   pipeline:
     - run: load_resource
       parameters:
-        url: dependency://./people/company_appointments/state_owned/correlate
+        url: /var/datapackages/people/company_appointments/state_owned/correlate/datapackage.json
         resource: reports
     - run: add_computed_field
       parameters:
