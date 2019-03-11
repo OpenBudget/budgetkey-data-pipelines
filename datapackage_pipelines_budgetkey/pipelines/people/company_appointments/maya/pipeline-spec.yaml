@@ -230,3 +230,85 @@ maya-resignations:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-resignations
+
+
+correlate:
+  title: "Join the parsed PDF to get start and end time for each person"
+  dependencies:
+    - pipeline: ./people/company_appointments/maya/maya-nominations
+    - pipeline: ./people/company_appointments/maya/maya-resignations
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/people/company_appointments/maya/maya-nominations/datapackage.json
+        resource: maya-nominations
+
+#    - run: load_resource
+#      parameters:
+#        url: /var/datapackages/people/company_appointments/maya/maya-resignations/datapackage.json
+#        resource: maya-resignations
+
+    - run: concatenate
+      parameters:
+        target:
+          name: maya
+        fields:
+          source: []
+          id: []
+          start_date: []
+          end_date: []
+          record_date: [date]
+          notification_type: []
+          s3_object_name: []
+          gender: []
+          proof_url: []
+          details: []
+          organisation_name: []
+          position: []
+          quit_reason: []
+          name: []
+
+    - run: fingerprint
+      parameters:
+        source-field: organisation_name
+        target-field: company_fingerprint
+        resource-name: maya
+
+    - run: join
+      parameters:
+          source:
+            name: maya
+            key: ['company_fingerprint', 'name', 'position']
+            delete: true
+          target:
+            name: maya
+            key: null
+          fields:
+            company_fingerprint: null
+            name: null
+            position: null
+
+            source:
+              aggregate: last
+            id:
+              aggregate: last
+            gender:
+              aggregate: max
+            start_date:
+              aggregate: min
+            end_date:
+              aggregate: max
+            record_date:
+              aggregate: min
+            proof_url:
+              aggregate: array
+            details:
+              aggregate: array
+    - run: dump_to_path
+      parameters:
+          out-path: /var/datapackages/people/company_appointments/maya/correlate
+    - run: dump_to_sql
+      parameters:
+        tables:
+          public_company_officers:
+            resource-name: maya
