@@ -173,6 +173,7 @@ maya-nominations:
         unwound-field: position
     - run: compute_nomination_text
 #    - run: fix_nomination_dates
+    - run: datetime_to_date
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-nominations
@@ -225,7 +226,7 @@ maya-resignations:
           - target: details
             operation: format
             with: "{name} עזב/ה את התפקיד {position} ב{organisation_name}. הסיבה שניתנה: {quit_reason}"
-#    - run: fix_resignation_dates
+    - run: datetime_to_date
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/people/company_appointments/maya/maya-resignations
