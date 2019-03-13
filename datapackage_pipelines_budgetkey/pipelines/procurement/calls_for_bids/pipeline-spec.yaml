@@ -1,0 +1,78 @@
+scraper-exemptions:
+  schedule:
+    crontab: "0 16 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: calls-for-bids
+    # get the main HTML page of the exemptions search
+    - flow: molsa
+      runner: tzabar
+    - run: concatenate
+      parameters:
+        fields:
+          publication_id: []
+          tender_type: []
+          page_title: []
+          publisher: []
+          publishing_unit: []
+          ordering_units: []
+
+          start_date: []
+          claim_date: []
+
+          decision: []
+          reason: []
+          description: []
+
+          contact: []
+          conatct_email: []
+
+          target_audience: []
+          required_documents: []
+          partners: []
+
+          documents: []
+    - run: set_types
+      parameters:
+        types:
+          publication_id:
+            type: integer
+          ordering_units:
+            type: array
+            es:itemType: string
+
+          start_date:
+            type: date
+            format: '%Y/%m/%d'
+          claim_date:
+            type: date
+            format: '%Y/%m/%d'
+
+          required_documents:
+            type: array
+            es:itemType: string
+
+          documents:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: link, type: string}
+                - {name: description, type: string}
+                - {name: update_time, type: string}
+
+    - run: set_primary_key
+      parameters:
+        calls_to_bids:
+          - publication_id
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/procurement/calls_to_bids
+    - run: dump_to_sql
+      parameters:
+        tables:
+          calls_to_bids:
+            resource-name: calls_to_bids
+            mode: update
+
