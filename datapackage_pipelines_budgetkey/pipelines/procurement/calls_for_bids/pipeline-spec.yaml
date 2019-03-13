@@ -1,4 +1,4 @@
-scraper-exemptions:
+calls-for-bids:
   schedule:
     crontab: "0 16 * * *"
 
@@ -6,9 +6,9 @@ scraper-exemptions:
     - run: add_metadata
       parameters:
         name: calls-for-bids
-    # get the main HTML page of the exemptions search
     - flow: molsa
       runner: tzabar
+    - run: sample
     - run: concatenate
       parameters:
         fields:
@@ -34,6 +34,9 @@ scraper-exemptions:
           partners: []
 
           documents: []
+        target:
+          name: calls_for_bids
+          path: calls_for_bids.csv
     - run: set_types
       parameters:
         types:
@@ -45,16 +48,17 @@ scraper-exemptions:
 
           start_date:
             type: date
-            format: '%Y/%m/%d'
+            format: '%d/%m/%Y'
           claim_date:
             type: date
-            format: '%Y/%m/%d'
+            format: '%d/%m/%Y'
 
           required_documents:
             type: array
             es:itemType: string
 
           documents:
+            type: array
             es:itemType: object
             es:schema:
               fields:
@@ -62,17 +66,18 @@ scraper-exemptions:
                 - {name: description, type: string}
                 - {name: update_time, type: string}
 
+
     - run: set_primary_key
       parameters:
-        calls_to_bids:
+        calls_for_bids:
           - publication_id
     - run: dump_to_path
       parameters:
-        out-path: /var/datapackages/procurement/calls_to_bids
+        out-path: /var/datapackages/procurement/calls_for_bids
     - run: dump_to_sql
       parameters:
         tables:
-          calls_to_bids:
-            resource-name: calls_to_bids
+          calls_for_bids:
+            resource-name: calls_for_bids
             mode: update
 

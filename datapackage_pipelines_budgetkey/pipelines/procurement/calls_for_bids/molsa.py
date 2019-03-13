@@ -1,5 +1,6 @@
 from hashlib import md5
-from dataflows import Flow, printer
+from dataflows import Flow, printer, update_resource
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import requests
 from pyquery import PyQuery as pq
 
@@ -115,9 +116,15 @@ def flow(*args):
         resolve_ordering_unit(),
         fix_documents(),
         calculate_publication_id(),
+        update_resource(
+            -1, name='molsa',
+            **{
+                PROP_STREAMING: True
+            }
+        ),
         printer()
     )
 
 
-if __name__ == '__main__':
-    flow().process()
+# if __name__ == '__main__':
+#     flow().process()
