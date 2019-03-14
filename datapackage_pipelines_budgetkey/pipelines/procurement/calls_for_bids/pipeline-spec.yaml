@@ -81,3 +81,18 @@ calls-for-bids:
             resource-name: calls_for_bids
             mode: update
 
+calls-for-bids-all:
+  dependencies:
+    - pipeline: ./procurement/call_for_bids/calls-for-bids
+
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/calls_for_bids/datapackage.json
+        resource: calls_for_bids
+        table: calls_for_bids
+    - run: stream_remote_resources
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/procurement/calls_for_bids_all
+

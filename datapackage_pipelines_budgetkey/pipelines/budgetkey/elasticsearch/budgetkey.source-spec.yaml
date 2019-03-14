@@ -143,6 +143,31 @@ tenders:
     from-field: start_date
     to-field: end_date
 
+calls_for_bids:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./procurement/calls_for_bids/processed
+  source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
+  page-title-pattern: '{page_title}'
+  key-fields:
+    - tender_type
+    - publication_id
+    - tender_id
+  extra-steps:
+    - run: add_semantic_tags
+      parameters:
+        resource: calls_for_bids
+        source-fields:
+          - description
+          - page_title
+          - reason
+        target-field: semantic_tags
+  date-range:
+    type: date-range
+    from-field: start_date
+    to-field: claim_date
+
+
 people:
   kind: indexer
   revision: 5
