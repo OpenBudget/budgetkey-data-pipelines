@@ -14,6 +14,8 @@ calls-for-bids:
         fields:
           publication_id: []
           tender_type: []
+          tender_id: []
+          
           page_title: []
           publisher: []
           publishing_unit: []
@@ -46,6 +48,9 @@ calls-for-bids:
             type: array
             es:itemType: string
 
+          page_title:
+            es:title: true
+
           start_date:
             type: date
             format: '%d/%m/%Y'
@@ -70,7 +75,9 @@ calls-for-bids:
     - run: set_primary_key
       parameters:
         calls_for_bids:
+          - tender_type
           - publication_id
+          
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids

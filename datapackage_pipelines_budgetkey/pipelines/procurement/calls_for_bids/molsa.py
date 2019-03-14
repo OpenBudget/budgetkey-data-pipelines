@@ -10,6 +10,7 @@ BASE = {
     'publisher': 'משרד העבודה, הרווחה והשירותים החברתיים',
     'tender_type': 'call_for_bids',
     'publication_id': None,
+    'tender_id': None,
 }
 
 headers = [
