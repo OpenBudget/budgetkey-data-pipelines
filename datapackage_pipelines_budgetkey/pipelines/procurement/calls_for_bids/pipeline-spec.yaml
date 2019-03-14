@@ -82,6 +82,7 @@ calls-for-bids:
             type: string
           description:
             type: string
+            es:title: true
           contact:
             type: string
 
