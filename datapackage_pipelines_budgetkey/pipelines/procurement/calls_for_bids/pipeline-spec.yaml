@@ -58,7 +58,7 @@ calls-for-bids:
             type: date
             format: '%d/%m/%Y'
           claim_date:
-            type: date
+            type: datetime
             format: '%d/%m/%Y'
 
           required_documents:
