@@ -146,8 +146,8 @@ tenders:
 calls_for_bids:
   kind: indexer
   revision: 1
-  dependent_pipeline: ./procurement/calls_for_bids/processed
-  source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
+  dependent_pipeline: ./procurement/calls_for_bids/calls-for-bids-all
+  source_datapackage: /var/datapackages/procurement/calls_for_bids_all/datapackage.json
   page-title-pattern: '{page_title}'
   key-fields:
     - tender_type
