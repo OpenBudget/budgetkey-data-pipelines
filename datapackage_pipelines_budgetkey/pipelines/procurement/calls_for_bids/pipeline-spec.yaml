@@ -44,6 +44,9 @@ calls-for-bids:
         types:
           publication_id:
             type: integer
+          tender_id:
+            type: string
+
           ordering_units:
             type: array
             es:itemType: string
@@ -71,13 +74,23 @@ calls-for-bids:
                 - {name: description, type: string}
                 - {name: update_time, type: string}
 
+          publishing_unit:
+            type: string
+          partners:
+            type: string
+          reason:
+            type: string
+          description:
+            type: string
+          contact:
+            type: string
 
     - run: set_primary_key
       parameters:
         calls_for_bids:
           - tender_type
           - publication_id
-          
+
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids
