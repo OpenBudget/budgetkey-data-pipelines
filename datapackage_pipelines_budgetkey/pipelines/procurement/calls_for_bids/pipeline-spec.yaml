@@ -83,7 +83,7 @@ calls-for-bids:
 
 calls-for-bids-all:
   dependencies:
-    - pipeline: procurement/calls_for_bids/calls-for-bids
+    - pipeline: ./procurement/calls_for_bids/calls-for-bids
 
   pipeline:
     - run: add_sql_resource
