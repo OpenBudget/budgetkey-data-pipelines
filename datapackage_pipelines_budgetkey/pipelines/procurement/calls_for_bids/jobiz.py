@@ -34,7 +34,7 @@ def fetch_results():
             index += 1
 
 
-§KIND_MAPPING = {
+KIND_MAPPING = {
     'קולות קוראים': 'call_fot_bids',
     'תמיכות': 'support_criteria',
 }
