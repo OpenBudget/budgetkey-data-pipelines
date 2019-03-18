@@ -7,14 +7,8 @@ support-criteria:
         name: support-criteria
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים
         homepage: http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx
-    - run: scraper
+    - flow: scraper
       runner: tzabar
-      parameters:
-        target-resource:
-          name: criteria
-          path: data/criteria.csv
-    # - run: parser
-    - run: set_types
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/supports/criteria

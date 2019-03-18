@@ -4,6 +4,8 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import requests
 from pyquery import PyQuery as pq
 
+from common.publication_id import calculate_publication_id
+
 s = requests.session()
 
 BASE = {
@@ -96,27 +98,13 @@ def fix_documents():
     return func
 
 
-def calculate_publication_id():
-    def func(row):
-        title_hash = int.from_bytes(
-            md5(
-                (row['publisher'] + row['page_title']).encode('utf8')
-            ).digest()[:4],
-            'big'
-        )
-        mod = 1000000000
-        title_hash = mod + (title_hash % mod)
-        row['publication_id'] = title_hash
-    return func
-
-
 def flow(*args):
     return Flow(
         fetch_calls(),
         call_details(),
         resolve_ordering_unit(),
         fix_documents(),
-        calculate_publication_id(),
+        calculate_publication_id(1),
         update_resource(
             -1, name='molsa',
             **{

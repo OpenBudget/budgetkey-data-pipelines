@@ -1,7 +1,10 @@
 import requests
 from pyquery import PyQuery as pq
 
-from dataflows import Flow, printer, set_type, set_primary_key, delete_fields
+from dataflows import Flow, printer, set_type, set_primary_key, delete_fields, update_resource
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
+
+from common.publication_id import calculate_publication_id
 
 
 URL = 'https://jobiz.gov.il/ajax/results/הודעה ציבורית' + '/{}?ie=0&typeie=הודעה+ציבורית&search=Array'
@@ -31,21 +34,7 @@ def fetch_results():
             index += 1
 
 
-def calculate_publication_id():
-    def func(row):
-        title_hash = int.from_bytes(
-            md5(
-                (row['publisher'] + row['page_title']).encode('utf8')
-            ).digest()[:4],
-            'big'
-        )
-        mod = 1000000000
-        title_hash = 2*mod + (title_hash % mod)
-        row['publication_id'] = title_hash
-    return func
-
-
-KIND_MAPPING = {
+§KIND_MAPPING = {
     'קולות קוראים': 'call_fot_bids',
     'תמיכות': 'support_criteria',
 }
@@ -61,7 +50,14 @@ def flow(*_):
         set_type('start_date', type='date', format='%d.%m.%Y'),
         process_kind,
         delete_fields(['kind']),
-        set_primary_key(['publisher', 'page_title', 'start_date', 'kind'])
+        calculate_publication_id(2),
+        set_primary_key(['publisher', 'page_title', 'start_date', 'kind']),
+        update_resource(
+            -1, name='jobiz',
+            **{
+                PROP_STREAMING: True
+            }
+        ),
     )
 
 
