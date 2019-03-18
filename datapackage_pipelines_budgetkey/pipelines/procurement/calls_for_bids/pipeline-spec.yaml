@@ -1,4 +1,61 @@
+jobiz-scraper:
+  schedule:
+    crontab: "0 15 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: jobiz
+        title: All items from jobiz
+    - flow: jobiz
+      runner: tzabar
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/jobiz-scraper
+    - run: dump_to_sql
+      parameters:
+        tables:
+          jobiz:
+            resource-name: jobiz
+            mode: update
+
+jobiz-all:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/jobiz-scraper
+
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/publications/jobiz-scraper/datapackage.json
+        resource: jobiz
+        table: jobiz
+    - run: stream_remote_resources
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/jobiz
+
+
+jobiz-calls-for-bids:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/jobiz-all
+  
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/jobiz/datapackage.json
+    - run: filter
+      parameters:
+        in:
+          - tender_type: call_for_bids
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/jobiz-calls-for-bids
+
+
 calls-for-bids:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
+
   schedule:
     crontab: "0 16 * * *"
 
@@ -8,6 +65,9 @@ calls-for-bids:
         name: calls-for-bids
     - flow: molsa
       runner: tzabar
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
     - run: sample
     - run: concatenate
       parameters:
