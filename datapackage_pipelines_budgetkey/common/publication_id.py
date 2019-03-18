@@ -1,3 +1,6 @@
+from hashlib import md5
+
+
 def calculate_publication_id(factor):
     def func(row):
         title_hash = int.from_bytes(
