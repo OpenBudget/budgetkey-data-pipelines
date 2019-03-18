@@ -51,7 +51,7 @@ def flow(*_):
         process_kind,
         delete_fields(['kind']),
         calculate_publication_id(2),
-        set_primary_key(['publisher', 'page_title', 'start_date', 'kind']),
+        set_primary_key(['publication_id']),
         update_resource(
             -1, name='jobiz',
             **{
