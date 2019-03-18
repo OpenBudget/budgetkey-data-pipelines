@@ -4,7 +4,7 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import requests
 from pyquery import PyQuery as pq
 
-from common.publication_id import calculate_publication_id
+from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 s = requests.session()
 

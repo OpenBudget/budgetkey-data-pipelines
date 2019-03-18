@@ -4,7 +4,7 @@ from pyquery import PyQuery as pq
 from dataflows import Flow, printer, set_type, set_primary_key, delete_fields, update_resource
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-from common.publication_id import calculate_publication_id
+from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 
 URL = 'https://jobiz.gov.il/ajax/results/הודעה ציבורית' + '/{}?ie=0&typeie=הודעה+ציבורית&search=Array'
