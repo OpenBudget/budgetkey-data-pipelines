@@ -3,9 +3,6 @@ import json
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-parameters, datapackage, res_iter = ingest()
-
-
 tenders = {}
 FIELDS = (
     'tender_type', 
@@ -88,5 +85,8 @@ def process_datapackage(dp):
     return dp
 
 
-spew(process_datapackage(datapackage),
-     process_resources(res_iter))
+if __name__ == '__main__':
+    with ingest() as ctx:
+        parameters, datapackage, res_iter = tuple(ctx)
+        spew(process_datapackage(datapackage),
+             process_resources(res_iter))
