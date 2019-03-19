@@ -74,7 +74,8 @@ class GetTransactions(object):
         if len(resp[0]) < 1000:
             return resp[0]
         else:
-            print(len(resp[0]))
+            logging.error('got %d results!', len(resp[0]))
+
 
     def get_for_candidate(self,cid):
         year_start = 2010
