@@ -22,7 +22,7 @@ def fetch_results():
         for box in boxes:
             box = pq(box)
             yield dict(
-                publication_id=None,
+                publication_id=0,
                 tender_id=None,
                 tender_type=None,
                 page_title=pq(box.find('#modal-title')).text(),
