@@ -221,16 +221,16 @@ by-payment-year:
 by-request-year:
   dependencies:
     - pipeline: ./supports/with-entities
-    - pipeline: ./supports/criteria/support-criteria
+    # - pipeline: ./supports/criteria/support-criteria
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: All support data, aggregated by request year
-    - run: load_resource
-      parameters:
-        url: dependency://./supports/criteria/support-criteria
-        resource: criteria
+    # - run: load_resource
+    #   parameters:
+    #     url: dependency://./supports/criteria/support-criteria
+    #     resource: criteria
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/with-entities/datapackage.json
@@ -326,7 +326,7 @@ by-request-year:
           payments:
             aggregate: array
 
-    - run: match_criteria
+    # - run: match_criteria
     - run: fix_values_by_request_year
     - run: collate_schema
     - run: calc-support-score

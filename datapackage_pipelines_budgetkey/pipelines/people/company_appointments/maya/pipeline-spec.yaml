@@ -76,18 +76,18 @@ maya-list:
     - run: stream_remote_resources
     - run: duplicate
       parameters:
-        source: _
+        source: maya-notification-updates
         target-name: maya-full-list
         target-path: maya-full-list
     - run: filter
       parameters:
-        resources: _
+        resources: maya-notification-updates
         out:
           - fix_for: null
     - run: join
       parameters:
         source:
-          name: _
+          name: maya-notification-updates
           key: ['fix_for']
           delete: true
         target:
