@@ -9,7 +9,7 @@ def calculate_publication_id(factor):
             ).digest()[:4],
             'big'
         )
-        mod = 1000000000
+        mod = 100000000
         title_hash = factor*mod + (title_hash % mod)
         row['publication_id'] = title_hash
     return func
