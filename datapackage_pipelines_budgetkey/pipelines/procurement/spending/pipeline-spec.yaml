@@ -220,15 +220,16 @@ latest-contract-spending:
           - name: claim_date
             format: "%Y-%m-%dT%H:%M:%S"
     - run: stream_remote_resources
-    - run: load_resource
+    - run: load
       parameters:
-        resource: quarterly-contract-spending-reports
-        url: dependency://./procurement/spending/quarterly-contract-spending-reports-data
+        from: /var/datapackages/procurement/spending/quarterly-contract-spending-reports-data/datapackage.json
+        resources: quarterly-contract-spending-reports
     - run: collate_payments
       parameters:
         resource: quarterly-contract-spending-reports
         field-name: payments
 
+    - run: sample
     - run: join
       parameters:
         source:
@@ -295,9 +296,9 @@ latest-contract-spending:
           payments:
             name: payment
             aggregate: array
+    - run: sample
     - run: join_tenders_and_contracts
     - run: set_contract_active
-    - run: sample
     - run: set_types
       parameters:
         resources: contract-spending
