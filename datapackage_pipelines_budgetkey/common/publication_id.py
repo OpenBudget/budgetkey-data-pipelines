@@ -5,7 +5,9 @@ def calculate_publication_id(factor):
     def func(row):
         title_hash = int.from_bytes(
             md5(
-                (str(row['publisher']) + str(row['page_title'])).encode('utf8')
+                (str(row['publisher']) +
+                 str(row['page_title']) +
+                 str(row['start_date'])).encode('utf8')
             ).digest()[:4],
             'big'
         )
