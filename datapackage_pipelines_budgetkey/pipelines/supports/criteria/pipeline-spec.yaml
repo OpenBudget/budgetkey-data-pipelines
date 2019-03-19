@@ -1,14 +1,68 @@
-support-criteria:
+support-criteria-doj:
   schedule:
     crontab: "0 0 * * *"
   pipeline:
     - run: add_metadata
       parameters:
         name: support-criteria
-        title: רשימת מבחני תמיכה ומסמכים רלוונטיים
+        title: רשימת מבחני תמיכה ומסמכים רלוונטיים ממשרד המשפטים
         homepage: http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx
     - flow: scraper
       runner: tzabar
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/support-criteria/doj
+
+
+support-criteria-jobiz:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/jobiz-all
+  
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/jobiz/datapackage.json
+    - run: filter
+      parameters:
+        in:
+          - tender_type: support_criteria
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/support-criteria/jobiz
+
+
+support-criteria:
+
+  dependencies:
+    - pipeline: ./supports/criteria/support-criteria-doj
+    - pipeline: ./supports/criteria/support-criteria-jobiz
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: support-criteria
+        title: רשימת מבחני תמיכה ומסמכים רלוונטיים
+    - run: load
+      parameters:
+        from:  /var/datapackages/support-criteria/jobiz/datapackage.json
+    - run: load
+      parameters:
+        from:  /var/datapackages/support-criteria/doj/datapackage.json
+    - run: concatenate
+      parameters:
+        fields:
+          publication_id: []
+          tender_id: []
+          tender_type: []
+          page_title: []
+          publisher: []
+          kind: []
+          start_date: []
+          description: []
+          documents: []
+          subject_list_keywords: []
+          reason: []
+
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/supports/criteria

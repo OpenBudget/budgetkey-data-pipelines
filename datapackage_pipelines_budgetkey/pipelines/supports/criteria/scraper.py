@@ -46,7 +46,7 @@ def get_all_reports():
                 )],
                 "page_title": title,
                 "publisher": cells[2].text().split(':')[-1],
-                "subjects": cells[2].text().split(':')[:-1],
+                "subject_list_keywords": cells[2].text().split(':')[:-1],
                 "description": ','.join(cells[2].text().split(':')[:-1]),
                 "reason": cells[3].text(),
                 "start_date": date
@@ -61,6 +61,12 @@ def flow(*_):
     return Flow(
         get_all_reports(),
         set_type('start_date', type='date', format='%d-%m-%Y'),
+        set_type('subject_list_keywords', **{
+            'type': 'array',
+            'es:itemType': 'string',
+            'es:title': True,
+            'es:keyword': True,
+        }),
         calculate_publication_id(3),
         set_primary_key(['publication_id']),
         update_resource(
