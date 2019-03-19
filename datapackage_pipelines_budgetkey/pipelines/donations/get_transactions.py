@@ -8,34 +8,25 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 
-class GetTransactions(object):
+def ranges(div):
+    period = 365*86400/div
+    start = datetime.datetime.utcfromtimestamp(0)
+    ret = []
+    while start.year == 1970:
+        end = start + datetime.timedelta(seconds=period)
+        if end.year > 1970:
+            end = datetime.datetime(year=1970,month=12,day=31)
+        else:
+            end = datetime.datetime(year=end.year,month=end.month, day=end.day)
+        ret.append((
+            start.strftime('%m/%d'),
+            end.strftime('%m/%d'),
+        ))
+        start = end + datetime.timedelta(days=1)
+    return ret
 
-    RANGES = [
-        ('01/01', '01/15'),
-        ('01/16', '02/01'),
-        ('02/02', '02/15'),
-        ('02/16', '03/01'),
-        ('03/02', '03/15'),
-        ('03/16', '04/01'),
-        ('04/02', '04/15'),
-        ('04/16', '05/01'),
-        ('05/02', '05/15'),
-        ('05/16', '06/01'),
-        ('06/02', '06/15'),
-        ('06/16', '07/01'),
-        ('07/02', '07/15'),
-        ('07/16', '08/01'),
-        ('08/02', '08/15'),
-        ('08/16', '09/01'),
-        ('09/02', '09/15'),
-        ('09/16', '10/01'),
-        ('10/02', '10/15'),
-        ('10/16', '11/01'),
-        ('11/02', '11/15'),
-        ('11/16', '12/01'),
-        ('12/02', '12/15'),
-        ('12/16', '12/31')
-    ]
+
+class GetTransactions(object):
 
     def requests_post(self, url, data):
         return requests.post(url, data=data).json()
@@ -77,22 +68,22 @@ class GetTransactions(object):
             logging.error('got %d results!', len(resp[0]))
 
 
-    def get_for_candidate(self,cid):
+    def get_for_candidate(self, cid):
         year_start = 2010
         year_end = datetime.datetime.now().year
-        resp = self.get_for_range(cid, year_start, self.RANGES[0][0], year_end, self.RANGES[-1][-1])
-        if resp is None:
-            for year in range(year_start, year_end + 1):
-                resp = self.get_for_range(cid, year, self.RANGES[0][0], year, self.RANGES[-1][-1])
-                if resp is None:
-                    for range_start, range_end in self.RANGES:
-                        resp = self.get_for_range(cid, year, range_start, year, range_end)
-                        assert resp is not None
-                        yield resp
-                else:
-                    yield resp
-        else:
-            yield resp
+        for year in range(year_start, year_end + 1):
+            div = 1
+            ret = []
+            while div < 512 and len(ret) == 0:
+                for range_start, range_end in ranges(div):
+                    resp = self.get_for_range(cid, year, range_start, year, range_end)
+                    if resp is None:
+                        div *= 2
+                        ret = []
+                        break
+                    ret.append(resp)
+                break
+            yield from ret
 
     def get_transactions(self, rows):
         for row in rows:
