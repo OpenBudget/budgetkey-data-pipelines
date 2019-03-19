@@ -57,6 +57,8 @@ def process_resources(resources):
 
 
 def process_datapackage(dp):
+    print('Here are the list of resources I have')
+    print(','.join(x['name'] for x in dp['resources']))
     tenders_res = next(iter(filter(
         lambda x: x['name'] == 'tenders',
         dp['resources']
