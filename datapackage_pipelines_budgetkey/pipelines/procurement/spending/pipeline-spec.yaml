@@ -229,7 +229,6 @@ latest-contract-spending:
         resource: quarterly-contract-spending-reports
         field-name: payments
 
-    - run: sample
     - run: join
       parameters:
         source:
@@ -240,7 +239,7 @@ latest-contract-spending:
             - report-publisher
           delete: true
         target:
-          name: contract-spending
+          name: quarterly-contract-spending-reports
           key: null
         fields:
           executed:

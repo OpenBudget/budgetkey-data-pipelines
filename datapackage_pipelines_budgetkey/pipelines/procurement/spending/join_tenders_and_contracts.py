@@ -47,7 +47,7 @@ def process_resources(resources):
     for res in resources:
         if res.spec['name'] == 'tenders':
             collect_tenders(res)
-        elif res.spec['name'] == 'contract-spending':
+        elif res.spec['name'] == 'quarterly-contract-spending-reports':
             yield join_tenders(res)
         else:
             yield res
@@ -66,7 +66,7 @@ def process_datapackage(dp):
         dp['resources']
     ))
     contract_spending_res = next(iter(filter(
-        lambda x: x['name'] == 'contract-spending',
+        lambda x: x['name'] == 'quarterly-contract-spending-reports',
         dp['resources']
     )))
     contract_spending_res['schema']['fields'].extend([
@@ -82,6 +82,7 @@ def process_datapackage(dp):
             }
         }
     ])
+    contract_spending_res['name'] = 'contract-spending'
     return dp
 
 
