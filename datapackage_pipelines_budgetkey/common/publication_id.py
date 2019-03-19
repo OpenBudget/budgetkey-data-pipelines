@@ -1,13 +1,18 @@
 from hashlib import md5
+import json
 
 
 def calculate_publication_id(factor):
     def func(row):
         title_hash = int.from_bytes(
-            md5(
-                (str(row['publisher']) +
+            md5((
+                 str(row['publisher']) +
                  str(row['page_title']) +
-                 str(row['start_date'])).encode('utf8')
+                 str(row['start_date']) +
+                 json.dumps(row.get('documents'),
+                            sort_keys=True,
+                            ensure_ascii=False)
+                ).encode('utf8')
             ).digest()[:4],
             'big'
         )

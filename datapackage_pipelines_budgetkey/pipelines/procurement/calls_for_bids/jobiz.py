@@ -50,7 +50,7 @@ def flow(*_):
         set_type('start_date', type='date', format='%d.%m.%Y'),
         process_kind,
         delete_fields(['kind']),
-        calculate_publication_id(2),
+        calculate_publication_id(1),
         set_primary_key(['publication_id']),
         update_resource(
             -1, name='jobiz',

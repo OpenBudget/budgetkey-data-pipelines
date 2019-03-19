@@ -104,7 +104,7 @@ def flow(*args):
         call_details(),
         resolve_ordering_unit(),
         fix_documents(),
-        calculate_publication_id(1),
+        calculate_publication_id(3),
         update_resource(
             -1, name='molsa',
             **{
