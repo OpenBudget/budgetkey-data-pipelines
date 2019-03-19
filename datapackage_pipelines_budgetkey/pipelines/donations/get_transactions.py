@@ -73,16 +73,19 @@ class GetTransactions(object):
         year_end = datetime.datetime.now().year
         for year in range(year_start, year_end + 1):
             div = 1
-            ret = []
-            while div < 512 and len(ret) == 0:
+            ret = None
+            while div < 512 and ret is None:
                 for range_start, range_end in ranges(div):
                     resp = self.get_for_range(cid, year, range_start, year, range_end)
                     if resp is None:
                         div *= 2
-                        ret = []
+                        ret = None
                         break
+                    if ret is None:
+                        ret = []
                     ret.append(resp)
-                break
+                if ret is not None:
+                    break
             yield from ret
 
     def get_transactions(self, rows):
