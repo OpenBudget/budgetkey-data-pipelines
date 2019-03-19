@@ -36,7 +36,7 @@ def get_all_reports():
             title = cells[1].text()
             date = cells[4].text()
             rec = {
-                "publication_id": None,
+                "publication_id": 0,
                 "tender_type": "support_criteria",
                 "tender_id": None,
                 "documents": [dict(
