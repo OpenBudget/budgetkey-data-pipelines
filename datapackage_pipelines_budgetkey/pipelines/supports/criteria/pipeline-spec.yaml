@@ -61,10 +61,36 @@ support-criteria:
           documents: []
           subject_list_keywords: []
           reason: []
+        target:
+          name: criteria
+          path: data/criteria.csv
+    - run: set_types
+      parameters:
+        types:
+          publication_id:
+            type: integer
+          tender_id:
+            type: string
+
+          page_title:
+            es:title: true
+
+          documents:
+            type: array
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: link, type: string}
+                - {name: description, type: string}
+                - {name: update_time, type: string}
+
+          description:
+            type: string
+            es:title: true
 
     - run: dump_to_path
       parameters:
-        out-path: /var/datapackages/supports/criteria
+        out-path: /var/datapackages/support-criteria
     - run: dump.to_sql
       parameters:
         tables:
