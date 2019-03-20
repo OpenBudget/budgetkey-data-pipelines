@@ -8,23 +8,27 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 
 
-def ranges(div):
-    year_start = 2010
-    year_end = datetime.datetime.now().year
-    period = (year_end - year_start + 1)*365*86400/div
-    start = datetime.datetime(year=year_start, month=1, day=1)
+def ranges(div, range_start=None):
+    end = datetime.date(year=datetime.datetime.now().year, month=12, day=31)
+    if range_start is None:
+        year_start = 2010
+        start = datetime.datetime(year=year_start, month=1, day=1)
+    else:
+        start = range_start
+    period = (end - start).seconds/div
     ret = []
-    while start.year <= year_end:
-        end = start + datetime.timedelta(seconds=period)
-        if end.year > year_end:
-            end = datetime.datetime(year=year_end, month=12, day=31)
+    range_start = start
+    while range_start <= end:
+        range_end = start + datetime.timedelta(seconds=period)
+        if range_end > end:
+            range_end = end
         else:
-            end = datetime.datetime(year=end.year, month=end.month, day=end.day)
+            range_end = datetime.datetime(year=range_end.year, month=range_end.month, day=range_end.day)
         ret.append((
-            start.strftime('%m/%d/%Y'),
-            end.strftime('%m/%d/%Y'),
+            range_start,
+            range_end,
         ))
-        start = end + datetime.timedelta(days=1)
+        range_start = range_end + datetime.timedelta(days=1)
     return ret
 
 
@@ -42,8 +46,8 @@ class GetTransactions(object):
                 "GD_Name": "",
                 "CityID": "",
                 "CountryID": "",
-                "FromDate": range_start,
-                "ToDate": range_end,
+                "FromDate": range_start.strftime('%m/%d/%Y'),
+                "ToDate": range_end.strftime('%m/%d/%Y'),
                 "FromSum": "",
                 "ToSum": "",
                 "ID": None,
@@ -71,17 +75,15 @@ class GetTransactions(object):
 
     def get_for_candidate(self, cid):
         div = 1
-        ret = None
+        ret = []
+        start = None
         while div < 4096 and ret is None:
-            for range_start, range_end in ranges(div):
+            for range_start, range_end in ranges(div, start):
                 resp = self.get_for_range(cid, range_start, range_end)
                 if resp is None:
                     div *= 2
-                    ret = None
-                    break
+                    start = range_start
                 else:
-                    if ret is None:
-                        ret = []
                     ret.append(resp)
         yield from ret
 
