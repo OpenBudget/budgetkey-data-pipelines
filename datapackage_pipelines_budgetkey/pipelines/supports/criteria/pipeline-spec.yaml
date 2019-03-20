@@ -48,6 +48,7 @@ support-criteria:
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
     - flow: molsa
+    - run: sample
     - run: concatenate
       parameters:
         fields:

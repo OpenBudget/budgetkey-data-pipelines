@@ -1,4 +1,5 @@
-from dataflows import Flow, printer, set_type, concatenate, update_resource
+from dataflows import Flow, set_type, concatenate, update_resource
+from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import requests
 from pyquery import PyQuery as pq
 
@@ -75,10 +76,14 @@ def get_results():
 def flow(*args):
     return Flow(
         get_results(),
-        update_resource(-1, name='molsa'),
+        update_resource(
+            -1, name='molsa',
+            **{
+                PROP_STREAMING: True
+            }
+        ),
         set_type('claim_date', resources='molsa',
                  type='datetime', format='%d/%m/%Y %H:%M'),
-        printer()
     )
 
 
