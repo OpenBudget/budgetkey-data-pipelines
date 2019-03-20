@@ -2,6 +2,7 @@ from dataflows import Flow, set_type, concatenate, update_resource
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import requests
 from pyquery import PyQuery as pq
+from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 BASE = 'https://www.molsa.gov.il'
 URL = BASE + '/subsidizing/pages/supportshomepage.aspx'
@@ -54,6 +55,9 @@ def get_results():
         content = [pq(x) for x in pq(row).find('td')]
         emails = content[4].find('a')
         row = dict(
+            publication_id=0,
+            tender_id=None,
+            tender_type='support_criteria',
             reason=content[0].text(),
             target_audience=content[1].text(),
             page_title=content[2].text(),
@@ -82,6 +86,7 @@ def flow(*args):
                 PROP_STREAMING: True
             }
         ),
+        calculate_publication_id(),
         set_type('claim_date', resources='molsa',
                  type='datetime', format='%d/%m/%Y %H:%M'),
     )
