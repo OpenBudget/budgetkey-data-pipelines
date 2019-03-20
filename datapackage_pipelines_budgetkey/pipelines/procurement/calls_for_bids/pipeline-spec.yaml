@@ -6,7 +6,7 @@ jobiz-scraper:
     - run: add_metadata
       parameters:
         name: jobiz
-        title: All items from jobiz
+        title: All items from jobiz website
     - flow: jobiz
       runner: tzabar
     - run: dump_to_path
