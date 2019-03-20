@@ -47,20 +47,31 @@ support-criteria:
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
+    - flow: molsa
     - run: concatenate
       parameters:
         fields:
           publication_id: []
           tender_id: []
           tender_type: []
+
           page_title: []
           publisher: []
-          kind: []
+
           start_date: []
+          claim_date: []
+
           description: []
+          decision: []
+          reason: []
+          target_audience: []
+
           documents: []
           subject_list_keywords: []
-          reason: []
+
+          contact: []
+          contact_email: []
+
         target:
           name: criteria
           path: data/criteria.csv
