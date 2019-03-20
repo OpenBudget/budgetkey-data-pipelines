@@ -9,18 +9,20 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 
 def ranges(div):
-    period = 365*86400/div
-    start = datetime.datetime.utcfromtimestamp(0)
+    year_start = 2010
+    year_end = datetime.datetime.now().year
+    period = (year_end - year_start + 1)*365*86400/div
+    start = datetime.datetime(year=year_start, month=1, day=1)
     ret = []
-    while start.year == 1970:
+    while start.year <= year_end:
         end = start + datetime.timedelta(seconds=period)
-        if end.year > 1970:
-            end = datetime.datetime(year=1970,month=12,day=31)
+        if end.year > year_end:
+            end = datetime.datetime(year=year_end, month=12, day=31)
         else:
-            end = datetime.datetime(year=end.year,month=end.month, day=end.day)
+            end = datetime.datetime(year=end.year, month=end.month, day=end.day)
         ret.append((
-            start.strftime('%m/%d'),
-            end.strftime('%m/%d'),
+            start.strftime('%m/%d/%Y'),
+            end.strftime('%m/%d/%Y'),
         ))
         start = end + datetime.timedelta(days=1)
     return ret
@@ -40,8 +42,8 @@ class GetTransactions(object):
                 "GD_Name": "",
                 "CityID": "",
                 "CountryID": "",
-                "FromDate": "%s/%d" % (range_start, year_start),
-                "ToDate": "%s/%d" % (range_end, year_end),
+                "FromDate": range_start,
+                "ToDate": range_end,
                 "FromSum": "",
                 "ToSum": "",
                 "ID": None,
@@ -67,26 +69,21 @@ class GetTransactions(object):
         else:
             logging.error('got %d results!', len(resp[0]))
 
-
     def get_for_candidate(self, cid):
-        year_start = 2010
-        year_end = datetime.datetime.now().year
-        for year in range(year_start, year_end + 1):
-            div = 1
-            ret = None
-            while div < 512 and ret is None:
-                for range_start, range_end in ranges(div):
-                    resp = self.get_for_range(cid, year, range_start, year, range_end)
-                    if resp is None:
-                        div *= 2
-                        ret = None
-                        break
+        div = 1
+        ret = None
+        while div < 4096 and ret is None:
+            for range_start, range_end in ranges(div):
+                resp = self.get_for_range(cid, range_start, range_end)
+                if resp is None:
+                    div *= 2
+                    ret = None
+                    break
+                else:
                     if ret is None:
                         ret = []
                     ret.append(resp)
-                if ret is not None:
-                    break
-            yield from ret
+        yield from ret
 
     def get_transactions(self, rows):
         for row in rows:
@@ -100,6 +97,7 @@ class GetTransactions(object):
 def process_resources(res_iter_):
     first = next(res_iter_)
     yield GetTransactions().get_transactions(first)
+
 
 def get_resource_descriptor():
     return {

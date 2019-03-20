@@ -297,6 +297,10 @@ latest-contract-spending:
             aggregate: array
     - run: sample
     - run: join_tenders_and_contracts
+    - run: rename_resource
+      parameters:
+        source: quarterly-contract-spending-reports
+        target: contract-spending
     - run: set_contract_active
     - run: set_types
       parameters:

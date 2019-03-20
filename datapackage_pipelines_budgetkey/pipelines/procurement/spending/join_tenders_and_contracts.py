@@ -82,7 +82,6 @@ def process_datapackage(dp):
             }
         }
     ])
-    contract_spending_res['name'] = 'contract-spending'
     return dp
 
 
