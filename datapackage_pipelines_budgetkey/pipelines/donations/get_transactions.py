@@ -33,8 +33,8 @@ class GetTransactions(object):
     def requests_post(self, url, data):
         return requests.post(url, data=data).json()
 
-    def get_for_range(self, cid, year_start, range_start, year_end, range_end):
-        logging.info('%r %s/%s -> %s/%s', cid, year_start, range_start, year_end, range_end)
+    def get_for_range(self, cid, range_start, range_end):
+        logging.info('%r %s -> %s', cid, range_start, range_end)
         data = {"PartyID": None,
                 "EntityID": cid,
                 "EntityTypeID": 1,
