@@ -1,4 +1,4 @@
-from dataflows import Flow, printer, set_type
+from dataflows import Flow, printer, set_type, concatenate, update_resource
 import requests
 from pyquery import PyQuery as pq
 
@@ -37,17 +37,17 @@ def get_results():
     # headers = pq(rows[0])
     # headers = [pq(x).text() for x in headers.find('th')]
     # print(headers)
-    headers = [
-        'reason',
-        'target_audience',
-        'page_title',
-        'year',
-        'contact',
-        'claim_date',
-        'documents',
-        'description',
-        'decision',
-    ]
+    # headers = [
+    #     'reason',
+    #     'target_audience',
+    #     'page_title',
+    #     'year',
+    #     'contact',
+    #     'claim_date',
+    #     'documents',
+    #     'description',
+    #     'decision',
+    # ]
     rows = rows[1:]
     for row in rows:
         content = [pq(x) for x in pq(row).find('td')]
@@ -75,7 +75,9 @@ def get_results():
 def flow(*args):
     return Flow(
         get_results(),
-        set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M'),
+        update_resource(-1, name='molsa'),
+        set_type('claim_date', resources='molsa',
+                 type='datetime', format='%d/%m/%Y %H:%M'),
         printer()
     )
 
