@@ -189,7 +189,7 @@ support_criteria:
   date-range:
     type: date-range
     from-field: start_date
-    to-field: start_date
+    to-field: claim_date
 
 
 
