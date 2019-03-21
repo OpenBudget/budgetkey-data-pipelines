@@ -74,8 +74,8 @@ support-criteria:
           contact_email: []
 
         target:
-          name: criteria
-          path: data/criteria.csv
+          name: support_criteria
+          path: data/support_criteria.csv
     - run: set_types
       parameters:
         types:
@@ -107,5 +107,5 @@ support-criteria:
       parameters:
         tables:
           support_criteria:
-            resource-name: criteria
+            resource-name: support_criteria
             mode: update
