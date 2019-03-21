@@ -72,9 +72,9 @@ class GetTransactions(object):
             return resp[0]
         else:
             if not to_sum and not from_sum:
-                small = self.get_for_range(self, cid, range_start, range_end,
+                small = self.get_for_range(cid, range_start, range_end,
                                            to_sum='49.93')
-                large = self.get_for_range(self, cid, range_start, range_end,
+                large = self.get_for_range(cid, range_start, range_end,
                                            from_sum='49.94')
                 if small is not None and large is not None:
                     logging.error('Splitting sums: %s, %s', len(small), len(large))
