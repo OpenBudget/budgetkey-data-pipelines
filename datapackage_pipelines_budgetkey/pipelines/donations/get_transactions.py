@@ -37,7 +37,7 @@ class GetTransactions(object):
     def requests_post(self, url, data):
         return requests.post(url, data=data).json()
 
-    def get_for_range(self, cid, range_start, range_end):
+    def get_for_range(self, cid, range_start, range_end, from_sum='', to_sum=''):
         logging.info('%r %s -> %s', cid, range_start, range_end)
         data = {"PartyID": None,
                 "EntityID": cid,
@@ -48,8 +48,8 @@ class GetTransactions(object):
                 "CountryID": "",
                 "FromDate": range_start.strftime('%m/%d/%Y'),
                 "ToDate": range_end.strftime('%m/%d/%Y'),
-                "FromSum": "",
-                "ToSum": "",
+                "FromSum": from_sum,
+                "ToSum": to_sum,
                 "ID": None,
                 "State": 0,
                 "URL": None,
@@ -71,6 +71,17 @@ class GetTransactions(object):
         if len(resp[0]) < 1000:
             return resp[0]
         else:
+            if not to_sum and not from_sum:
+                small = self.get_for_range(self, cid, range_start, range_end,
+                                           to_sum='49.93')
+                large = self.get_for_range(self, cid, range_start, range_end,
+                                           from_sum='49.94')
+                if small is not None and large is not None:
+                    logging.error('Splitting sums: %s, %s', len(small), len(large))
+                    return small + large
+                else:
+                    logging.error('Splitting sums failed: %s, %s',
+                                  small is None, large is None)
             logging.error('got %d results!', len(resp[0]))
 
     def get_for_candidate(self, cid):
