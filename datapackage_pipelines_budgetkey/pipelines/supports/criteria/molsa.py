@@ -58,6 +58,7 @@ def get_results():
             publication_id=0,
             tender_id=None,
             tender_type='support_criteria',
+            publisher='משרד העבודה, הרווחה והשירותים החברתיים',
             reason=content[0].text(),
             target_audience=content[1].text(),
             page_title=content[2].text(),
