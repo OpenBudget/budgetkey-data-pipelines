@@ -83,6 +83,8 @@ support-criteria:
             type: integer
           tender_id:
             type: string
+          tender_type:
+            type: string
 
           page_title:
             es:title: true
