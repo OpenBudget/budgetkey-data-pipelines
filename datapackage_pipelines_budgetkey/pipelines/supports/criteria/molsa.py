@@ -86,7 +86,7 @@ def flow(*args):
                 PROP_STREAMING: True
             }
         ),
-        calculate_publication_id(),
+        calculate_publication_id(4),
         set_type('claim_date', resources='molsa',
                  type='datetime', format='%d/%m/%Y %H:%M'),
     )

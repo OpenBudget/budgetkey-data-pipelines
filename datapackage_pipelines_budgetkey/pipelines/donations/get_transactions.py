@@ -9,17 +9,17 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 
 def ranges(div, range_start=None):
-    end = datetime.date(year=datetime.datetime.now().year, month=12, day=31)
+    end = datetime.datetime(year=datetime.datetime.now().year, month=12, day=31)
     if range_start is None:
         year_start = 2010
         start = datetime.datetime(year=year_start, month=1, day=1)
     else:
         start = range_start
-    period = (end - start).seconds/div
+    period = (end - start).total_seconds()/div
     ret = []
     range_start = start
     while range_start <= end:
-        range_end = start + datetime.timedelta(seconds=period)
+        range_end = range_start + datetime.timedelta(seconds=period)
         if range_end > end:
             range_end = end
         else:
@@ -77,14 +77,19 @@ class GetTransactions(object):
         div = 1
         ret = []
         start = None
-        while div < 4096 and ret is None:
+        done = False
+        while div < 4096 and not done:
+            done = True
             for range_start, range_end in ranges(div, start):
                 resp = self.get_for_range(cid, range_start, range_end)
                 if resp is None:
                     div *= 2
                     start = range_start
+                    done = False
+                    break
                 else:
                     ret.append(resp)
+            assert div < 4096
         yield from ret
 
     def get_transactions(self, rows):
