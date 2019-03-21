@@ -42,7 +42,7 @@ def get_all_reports():
                 "documents": [dict(
                     link=extract_url(pq(cells[0].find('a')).attr('href')),
                     description=title,
-                    update_date=date
+                    update_time=date
                 )],
                 "page_title": title,
                 "publisher": cells[2].text().split(':')[-1],

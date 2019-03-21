@@ -92,7 +92,7 @@ def fix_documents():
             dict(
                 description=title,
                 link=href,
-                update_date=update_date
+                update_time=update_date
             )
         ]
     return func
