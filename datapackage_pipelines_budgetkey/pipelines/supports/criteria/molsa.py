@@ -82,15 +82,15 @@ def get_results():
 def flow(*args):
     return Flow(
         get_results(),
-        calculate_publication_id(4),
-        set_type('claim_date', resources='molsa',
-                 type='datetime', format='%d/%m/%Y %H:%M'),
         update_resource(
             -1, name='molsa',
             **{
                 PROP_STREAMING: True
             }
         ),
+        calculate_publication_id(4),
+        set_type('claim_date', resources='molsa',
+                 type='datetime', format='%d/%m/%Y %H:%M'),
     )
 
 
