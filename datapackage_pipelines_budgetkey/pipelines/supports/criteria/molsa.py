@@ -64,6 +64,7 @@ def get_results():
             page_title=content[2].text(),
             contact=content[4].text(),
             contact_email=pq(emails[0]).attr('href').replace('mailto:', '') if len(emails) > 0 else None,
+            start_date=None,
             claim_date=' '.join(content[5].text().split()[-2:]),
             documents=[
                 dict(
