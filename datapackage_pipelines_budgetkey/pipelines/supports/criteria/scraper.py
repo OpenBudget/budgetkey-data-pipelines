@@ -9,7 +9,7 @@ from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 
-URL = "http://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&PN={0}"
+URL = "https://www.justice.gov.il/Units/Tmihot/Pages/TestServies.aspx?WPID=WPQ8&PN={0}"
 
 
 def extract_url(href):
