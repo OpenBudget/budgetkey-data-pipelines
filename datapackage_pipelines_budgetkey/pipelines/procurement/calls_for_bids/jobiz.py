@@ -49,8 +49,8 @@ def flow(*_):
         fetch_results(),
         set_type('start_date', type='date', format='%d.%m.%Y'),
         process_kind,
-        delete_fields(['kind']),
         calculate_publication_id(2),
+        delete_fields(['kind']),
         set_primary_key(['publication_id']),
         update_resource(
             -1, name='jobiz',

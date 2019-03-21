@@ -103,8 +103,8 @@ def flow(*args):
         fetch_calls(),
         call_details(),
         resolve_ordering_unit(),
-        fix_documents(),
         calculate_publication_id(3),
+        fix_documents(),
         update_resource(
             -1, name='molsa',
             **{

@@ -10,6 +10,7 @@ def calculate_publication_id(factor):
                     str(row['publisher']) +
                     str(row['page_title']) +
                     str(row['start_date']) +
+                    str(row.get('claim_date')) +
                     json.dumps(row.get('documents'),
                                sort_keys=True,
                                ensure_ascii=False)).encode('utf8')
