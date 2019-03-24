@@ -169,7 +169,7 @@ calls_for_bids:
 
 support_criteria:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./supports/criteria/support-criteria
   source_datapackage: /var/datapackages/support-criteria/datapackage.json
   page-title-pattern: '{page_title}'
