@@ -35,10 +35,10 @@ def fetch_results():
                 publication_id=0,
                 tender_id=None,
                 tender_type=None,
+                tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 decision='פתוח',
                 page_title=pq(box.find('#modal-title')).text(),
                 publisher=pq(box.find('.publisher_link')).text(),
-                tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
                 description=description.html(),
             )
