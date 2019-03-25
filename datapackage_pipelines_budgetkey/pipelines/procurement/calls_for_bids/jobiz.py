@@ -50,7 +50,6 @@ KIND_MAPPING = {
     'תמיכות': 'support_criteria',
 }
 
-
 def process_kind(row):
     row['tender_type'] = KIND_MAPPING.get(row['tender_type_he'], row['tender_type_he'])
 
