@@ -1,18 +1,20 @@
 import os
 import json
+import logging
+import datetime
+
 from datapackage_pipelines.utilities.resources import PATH_PLACEHOLDER
 
 from datapackage_pipelines.generators import (
     GeneratorBase, steps
 )
 
-import logging
 
 
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/budgetkey_spec_schema.json')
-
+REF_DATE = datetime.date(year=2019, month=3, day=1)
 
 class Generator(GeneratorBase):
 
@@ -88,10 +90,13 @@ class Generator(GeneratorBase):
         all_pipelines = []
         sitemap_params = []
         bumper = source.get('bumper', 0)
+        today = datetime.date.today()
+        weeks_bump = (today - REF_DATE).days // 7
+        bumper += weeks_bump
         for doc_type, parameters in source.items():
             if not isinstance(parameters, dict):
                 continue
-            if not 'kind' in parameters:
+            if 'kind' not in parameters:
                 continue
             if parameters['kind'] == 'indexer':
                 snake_doc_type = doc_type.replace('-', '_')

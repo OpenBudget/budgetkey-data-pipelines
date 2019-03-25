@@ -48,7 +48,7 @@ def get_all_reports():
                 "publisher": cells[2].text().split(':')[-1],
                 "subject_list_keywords": cells[2].text().split(':')[:-1],
                 "description": ','.join(cells[2].text().split(':')[:-1]),
-                "reason": cells[3].text(),
+                "tender_type_he": cells[3].text(),
                 "start_date": date
             }
             yield rec

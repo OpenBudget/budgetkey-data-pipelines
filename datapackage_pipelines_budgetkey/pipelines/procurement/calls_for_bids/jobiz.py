@@ -25,9 +25,10 @@ def fetch_results():
                 publication_id=0,
                 tender_id=None,
                 tender_type=None,
+                decision='פתוח',
                 page_title=pq(box.find('#modal-title')).text(),
                 publisher=pq(box.find('.publisher_link')).text(),
-                kind=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
+                tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
                 description=pq(box.find('.moreInfoInner')).text(),
             )
@@ -50,7 +51,6 @@ def flow(*_):
         set_type('start_date', type='date', format='%d.%m.%Y'),
         process_kind,
         calculate_publication_id(2),
-        delete_fields(['kind']),
         set_primary_key(['publication_id']),
         update_resource(
             -1, name='jobiz',

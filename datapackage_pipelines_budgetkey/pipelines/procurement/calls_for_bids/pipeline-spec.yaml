@@ -75,6 +75,7 @@ calls-for-bids:
           publication_id: []
           tender_type: []
           tender_id: []
+          tender_type_he: []
           
           page_title: []
           publisher: []
