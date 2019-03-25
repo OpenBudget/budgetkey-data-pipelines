@@ -91,6 +91,7 @@ def get_decision_list():
             return
 
 
+
 resource = parameters['resource']
 resource[PROP_STREAMING] = True
 schema = {
@@ -120,5 +121,6 @@ schema = {
 }
 resource['schema'] = schema
 datapackage['resources'].append(resource)
+
 
 spew(datapackage, chain(res_iter, [get_decision_list()]))
