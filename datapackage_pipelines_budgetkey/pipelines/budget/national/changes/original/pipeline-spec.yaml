@@ -236,7 +236,7 @@ current-year-fixes:
     - run: concatenate
       parameters:
         target:
-          name: budget-fixes-c
+          name: budget-fixes
         fields:
           year: []
           code:
@@ -254,7 +254,7 @@ current-year-fixes:
     - run: join
       parameters:
         source:
-          name: budget-fixes-c
+          name: budget-fixes
           key: ['year', 'code']
           delete: true
         target:
