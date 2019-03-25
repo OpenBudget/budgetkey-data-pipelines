@@ -1,5 +1,6 @@
 import requests
 from pyquery import PyQuery as pq
+from lxml.etree import ElementBase
 
 from dataflows import Flow, printer, set_type, set_primary_key, delete_fields, update_resource
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
@@ -21,6 +22,15 @@ def fetch_results():
             break
         for box in boxes:
             box = pq(box)
+            description = pq(box.find('.moreInfoInner'))
+            for el in description.find('*'):
+                if el.tag == 'a':
+                    href = el.attrib.get('href')
+                    el.attrib.clear()
+                    el.attrib['href'] = href
+                    el.attrib['target'] = '_blank'
+                else:
+                    el.attrib.clear()
             yield dict(
                 publication_id=0,
                 tender_id=None,
@@ -30,7 +40,7 @@ def fetch_results():
                 publisher=pq(box.find('.publisher_link')).text(),
                 tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
-                description=pq(box.find('.moreInfoInner')).text(),
+                description=description.html(),
             )
             index += 1
 
@@ -42,7 +52,7 @@ KIND_MAPPING = {
 
 
 def process_kind(row):
-    row['tender_type'] = KIND_MAPPING.get(row['kind'], row['kind'])
+    row['tender_type'] = KIND_MAPPING.get(row['tender_type_he'], row['tender_type_he'])
 
 
 def flow(*_):
