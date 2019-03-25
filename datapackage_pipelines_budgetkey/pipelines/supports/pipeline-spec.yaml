@@ -370,7 +370,7 @@ supports-by-entity:
             - entity_id
           delete: true
         target:
-          name: supports-by-entity
+          name: supports
           key: null
         fields:
           id:
@@ -397,6 +397,10 @@ supports-by-entity:
           max_year:
             name: year_paid
             aggregate: max
+    - run: rename_resource
+      parameters:
+        source: supports
+        target: supports-by-entity
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/supports/supports-by-entity
