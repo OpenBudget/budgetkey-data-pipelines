@@ -54,7 +54,19 @@ def fetch_calls():
         if len(cells) == len(headers):
             for header, cell in zip(headers, cells):
                 cell, main, *anchor = pq(cell), *header
-                ret[main] = cell.text()
+                if main != 'description':
+                    ret[main] = cell.text()
+                else:
+                    for el in cell.find('*'):
+                        if el.tag == 'a':
+                            href = el.attrib.get('href')
+                            el.attrib.clear()
+                            el.attrib['href'] = href
+                            el.attrib['target'] = '_blank'
+                        else:
+                            el.attrib.clear()
+                    ret[main] = cell.html()
+
                 if len(anchor) > 0:
                     a = cell.find('a')
                     if len(a) > 0:
