@@ -10,6 +10,7 @@ from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
 
 
 URL = 'https://jobiz.gov.il/ajax/results/הודעה ציבורית' + '/{}?ie=0&typeie=הודעה+ציבורית&search=Array'
+SRC_URL = 'https://jobiz.gov.il/public_messages'
 
 
 def fetch_results():
@@ -32,7 +33,7 @@ def fetch_results():
                 tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 decision='פתוח',
                 page_title=pq(box.find('#modal-title')).text(),
-                page_url=URL.format(index),
+                page_url=SRC_URL,
                 publisher=pq(box.find('.publisher_link')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
                 description=description,
