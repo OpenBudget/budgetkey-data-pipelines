@@ -61,12 +61,6 @@ def flow(*_):
         get_all_reports(),
         calculate_publication_id(1),
         set_type('start_date', type='date', format='%d-%m-%Y'),
-        set_type('subject_list_keywords', **{
-            'type': 'array',
-            'es:itemType': 'string',
-            'es:title': True,
-            'es:keyword': True,
-        }),
         set_primary_key(['publication_id']),
         update_resource(
             -1, name='criteria',
