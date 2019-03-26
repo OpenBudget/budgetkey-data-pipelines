@@ -90,5 +90,5 @@ def process_datapackage(dp):
 if __name__ == '__main__':
     with ingest() as ctx:
         parameters, datapackage, res_iter = tuple(ctx)
-        spew(process_datapackage(datapackage),
-             process_resources(res_iter))
+        ctx.datapackage = process_datapackage(datapackage)
+        ctx.resource_iterator = process_resources(res_iter)

@@ -295,7 +295,6 @@ latest-contract-spending:
           payments:
             name: payment
             aggregate: array
-    - run: sample
     - run: join_tenders_and_contracts
     - run: rename_resource
       parameters:
