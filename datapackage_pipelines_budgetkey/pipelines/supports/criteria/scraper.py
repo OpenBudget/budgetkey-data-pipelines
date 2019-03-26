@@ -39,7 +39,7 @@ def get_all_reports():
                 "publication_id": 0,
                 "tender_type": "support_criteria",
                 "page_url": URL.format(pid),
-                "tender_type_he": cells[3].text(),
+                "tender_type_he": cells[3].text().replace('מבחני ', 'מבחן '),
                 "tender_id": None,
                 "documents": [dict(
                     link=extract_url(pq(cells[0].find('a')).attr('href')),
@@ -48,8 +48,6 @@ def get_all_reports():
                 )],
                 "page_title": title,
                 "publisher": cells[2].text().split(':')[-1],
-                "subject_list_keywords": cells[2].text().split(':')[:-1],
-                "description": ','.join(cells[2].text().split(':')[:-1]),
                 "start_date": date
             }
             yield rec
