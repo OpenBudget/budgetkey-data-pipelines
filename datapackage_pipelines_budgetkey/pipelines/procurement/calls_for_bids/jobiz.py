@@ -43,9 +43,14 @@ KIND_MAPPING = {
     'קולות קוראים': 'call_for_bids',
     'תמיכות': 'support_criteria',
 }
+KIND_HE_MAPPING = {
+    'קולות קוראים': 'קול קורא',
+    'תמיכות': 'מבחן תמיכה',
+}
 
 def process_kind(row):
     row['tender_type'] = KIND_MAPPING.get(row['tender_type_he'], row['tender_type_he'])
+    row['tender_type_he'] = KIND_HE_MAPPING.get(row['tender_type_he'], row['tender_type_he'])
 
 
 def flow(*_):
