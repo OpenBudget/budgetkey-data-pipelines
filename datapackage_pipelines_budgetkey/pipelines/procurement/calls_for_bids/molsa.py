@@ -5,6 +5,7 @@ import requests
 from pyquery import PyQuery as pq
 
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
+from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
 
 s = requests.session()
 
@@ -54,18 +55,7 @@ def fetch_calls():
         if len(cells) == len(headers):
             for header, cell in zip(headers, cells):
                 cell, main, *anchor = pq(cell), *header
-                if main != 'description':
-                    ret[main] = cell.text()
-                else:
-                    for el in cell.find('*'):
-                        if el.tag == 'a':
-                            href = el.attrib.get('href')
-                            el.attrib.clear()
-                            el.attrib['href'] = href
-                            el.attrib['target'] = '_blank'
-                        else:
-                            el.attrib.clear()
-                    ret[main] = cell.html()
+                ret[main] = cell.text()
 
                 if len(anchor) > 0:
                     a = cell.find('a')
@@ -84,7 +74,11 @@ def call_details():
             if selector.endswith('li'):
                 row[key] = [pq(x).text() for x in details.find(selector)]
             else:
-                row[key] = details.find(selector).text()
+                el = pq(details.find(selector))
+                if key == 'description':
+                    row[key] = sanitize_html(el)
+                else:
+                    row[key] = pq(el).text()
     return func
 
 

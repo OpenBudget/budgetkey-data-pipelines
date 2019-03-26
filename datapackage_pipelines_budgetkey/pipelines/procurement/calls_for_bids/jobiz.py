@@ -6,6 +6,7 @@ from dataflows import Flow, printer, set_type, set_primary_key, delete_fields, u
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
+from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
 
 
 URL = 'https://jobiz.gov.il/ajax/results/הודעה ציבורית' + '/{}?ie=0&typeie=הודעה+ציבורית&search=Array'
@@ -23,14 +24,7 @@ def fetch_results():
         for box in boxes:
             box = pq(box)
             description = pq(box.find('.moreInfoInner'))
-            for el in description.find('*'):
-                if el.tag == 'a':
-                    href = el.attrib.get('href')
-                    el.attrib.clear()
-                    el.attrib['href'] = href
-                    el.attrib['target'] = '_blank'
-                else:
-                    el.attrib.clear()
+            description = sanitize_html(description)
             yield dict(
                 publication_id=0,
                 tender_id=None,
@@ -38,9 +32,10 @@ def fetch_results():
                 tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 decision='פתוח',
                 page_title=pq(box.find('#modal-title')).text(),
+                page_url=URL.format(index),
                 publisher=pq(box.find('.publisher_link')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
-                description=description.html(),
+                description=description,
             )
             index += 1
 

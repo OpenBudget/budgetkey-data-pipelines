@@ -24,6 +24,7 @@ def collect_tenders(res):
         )
         if row.get('subjects') and isinstance(row['subjects'], str):
             tenders[key]['subject_list'] = [x.strip() for x in row['subjects'].split(';')]
+    print('Done collecting tenders, got %d tenders' % len(tenders))
 
 
 def join_tenders(res):
@@ -45,12 +46,13 @@ def join_tenders(res):
 
 def process_resources(resources):
     for res in resources:
+        print('Processing %s' % res.spec['name'])
         if res.spec['name'] == 'tenders':
             collect_tenders(res)
         elif res.spec['name'] == 'quarterly-contract-spending-reports':
             yield join_tenders(res)
         else:
-            yield res
+            assert False
 
 
 def process_datapackage(dp):

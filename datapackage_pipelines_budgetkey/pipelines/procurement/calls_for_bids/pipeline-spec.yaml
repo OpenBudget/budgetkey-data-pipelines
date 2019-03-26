@@ -78,6 +78,7 @@ calls-for-bids:
           tender_type_he: []
           
           page_title: []
+          page_url: []
           publisher: []
           publishing_unit: []
           ordering_units: []
@@ -114,6 +115,9 @@ calls-for-bids:
 
           page_title:
             es:title: true
+          page_url:
+            constraints:
+              required: true
 
           start_date:
             type: date

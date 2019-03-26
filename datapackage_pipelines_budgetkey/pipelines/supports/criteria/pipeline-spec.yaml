@@ -58,6 +58,7 @@ support-criteria:
           tender_type_he: []
 
           page_title: []
+          page_url: []
           publisher: []
 
           start_date: []
@@ -89,6 +90,10 @@ support-criteria:
 
           page_title:
             es:title: true
+          page_url:
+            type: string
+            constraints:
+              required: true
 
           documents:
             type: array

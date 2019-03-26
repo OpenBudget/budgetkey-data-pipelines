@@ -2,6 +2,7 @@
 import requests
 from itertools import chain
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
+from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
 from pyquery import PyQuery as pq
@@ -56,18 +57,10 @@ def get_decision_list():
         for result in results:
             content_pq = pq(result['Content']) if result['Content'] else None
             links = get_links(result['Content'], session)
-            if content_pq:
-                for el in content_pq.find('*'):
-                    if el.tag == 'a':
-                        href = el.attrib.get('href')
-                        el.attrib.clear()
-                        el.attrib['href'] = href
-                        el.attrib['target'] = '_blank'
-                    else:
-                        el.attrib.clear()
+            content_pq = sanitize_html(content_pq)
 
             yield {
-                'text': content_pq.html() if content_pq else '',
+                'text': content_pq,
                 'linked_docs': links,
                 'doc_published_date': result['DocPublishedDate'],
                 'doc_update_date': result['DocUpdateDate'],

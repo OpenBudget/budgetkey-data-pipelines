@@ -36,20 +36,6 @@ def get_results():
     page = requests.post(URL, data=DATA).text
     page = pq(page)
     rows = page.find('.ms-listviewtable tr')
-    # headers = pq(rows[0])
-    # headers = [pq(x).text() for x in headers.find('th')]
-    # print(headers)
-    # headers = [
-    #     'reason',
-    #     'target_audience',
-    #     'page_title',
-    #     'year',
-    #     'contact',
-    #     'claim_date',
-    #     'documents',
-    #     'description',
-    #     'decision',
-    # ]
     rows = rows[1:]
     for row in rows:
         content = [pq(x) for x in pq(row).find('td')]
@@ -62,6 +48,7 @@ def get_results():
             publisher='משרד העבודה, הרווחה והשירותים החברתיים',
             target_audience=content[1].text(),
             page_title=content[2].text(),
+            page_url=URL,
             contact=content[4].text(),
             contact_email=pq(emails[0]).attr('href').replace('mailto:', '') if len(emails) > 0 else None,
             start_date=None,

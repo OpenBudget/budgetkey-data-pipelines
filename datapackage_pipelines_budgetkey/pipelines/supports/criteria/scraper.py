@@ -38,6 +38,7 @@ def get_all_reports():
             rec = {
                 "publication_id": 0,
                 "tender_type": "support_criteria",
+                "page_url": URL.format(pid),
                 "tender_type_he": cells[3].text(),
                 "tender_id": None,
                 "documents": [dict(
