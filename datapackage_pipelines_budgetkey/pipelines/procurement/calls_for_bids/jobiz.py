@@ -39,7 +39,6 @@ def fetch_results():
             )
             index += 1
 
-
 KIND_MAPPING = {
     'קולות קוראים': 'call_for_bids',
     'תמיכות': 'support_criteria',
