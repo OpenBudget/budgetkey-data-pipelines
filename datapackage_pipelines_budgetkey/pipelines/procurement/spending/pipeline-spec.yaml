@@ -412,7 +412,7 @@ spending-by-entity:
             - entity_id
           delete: true
         target:
-          name: spending-by-entity
+          name: contract-spending
           key: null
         fields:
           id:
@@ -439,6 +439,10 @@ spending-by-entity:
           max_year:
             name: max_year
             aggregate: max
+    - run: rename_resource
+      parameters:
+        source: contract-spending
+        target: spending-by-entity
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/spending-by-entity
