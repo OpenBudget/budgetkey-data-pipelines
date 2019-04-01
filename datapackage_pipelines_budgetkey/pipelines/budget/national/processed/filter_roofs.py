@@ -5,7 +5,7 @@ parameters, datapackage, res_iter = ingest()
 
 def process_first(rows):
     for row in rows:
-        if len(row.get('code') == 4):
+        if row.get('code') and len(row.get('code')) == 4:
             yield row
 
 
