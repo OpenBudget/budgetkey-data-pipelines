@@ -50,6 +50,8 @@ all:
         reports:
           - key
 
+    - run: calc-score
+
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/reports/all/
