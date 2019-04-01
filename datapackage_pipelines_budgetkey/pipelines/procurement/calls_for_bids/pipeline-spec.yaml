@@ -158,7 +158,6 @@ calls-for-bids:
         calls_for_bids:
           - tender_type
           - publication_id
-
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids
@@ -179,6 +178,7 @@ calls-for-bids-all:
         datapackage: /var/datapackages/procurement/calls_for_bids/datapackage.json
         resource: calls_for_bids
         table: calls_for_bids
+    - run: calc-score
     - run: stream_remote_resources
     - run: dump_to_path
       parameters:

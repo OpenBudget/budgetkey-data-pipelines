@@ -107,12 +107,13 @@ support-criteria:
             type: string
             es:title: true
 
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/support-criteria
-    - run: dump.to_sql
+            - run: dump.to_sql
       parameters:
         tables:
           support_criteria:
             resource-name: support_criteria
             mode: update
+    - run: calc-score
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/support-criteria
