@@ -19,7 +19,7 @@ def process_row(row, *_):
     report = row.get('details',{}).get('report',{}).get('total',{})
     count1 = report.get('total_amount')
     count2 = report.get('count')
-    row['score'] += count1 or count2s
+    row['score'] += count1 or count2
     return row
 
 
