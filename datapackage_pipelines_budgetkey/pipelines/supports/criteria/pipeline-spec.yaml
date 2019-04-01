@@ -107,7 +107,7 @@ support-criteria:
             type: string
             es:title: true
 
-            - run: dump.to_sql
+    - run: dump.to_sql
       parameters:
         tables:
           support_criteria:
