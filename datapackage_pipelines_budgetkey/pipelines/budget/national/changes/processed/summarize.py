@@ -28,6 +28,7 @@ def process_row(row, row_index,
             roofs.setdefault(code, 0)
             roofs[code] += amount
         roofs = sorted(roofs.items(), key=lambda r: -abs(r[1]))
+        roofs = [list(r) for r in roofs]
         for r in roofs:
             r.append(ROOF_TITLES.get((row['year'], r[0]), r[0]))
         row['summary'] = {
