@@ -439,6 +439,36 @@ just-the-total:
         out-path: /var/datapackages/budget/national/processed/totals
 
 
+roof-names:
+  title: National Yearly Budgets - Main Item Names
+
+  dependencies:
+    - pipeline: ./budget/national/processed/with-extras
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        title: National Budget Main Item Names
+        name: national-budget-roof-names
+    - run: load_resource
+      parameters:
+        url: dependency://./budget/national/processed/with-extras
+        resource: budget
+    - run: filter_roofs
+      parameters:
+        resources: budget
+    - run: concatenate
+      parameters:
+        resources: budget
+        fields:
+          year: []
+          code: []
+          title: []
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/processed/roof-names
+
+
 category-explanations:
   pipeline:
     - run: parse-category-explanations
