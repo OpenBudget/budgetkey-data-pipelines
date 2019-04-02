@@ -2,7 +2,7 @@ import requests
 from pyquery import PyQuery as pq
 from dataflows import Flow, printer, update_resource, dump_to_path
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
-from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
+#from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 
 def m_tmicha_scraper():
@@ -18,7 +18,7 @@ def m_tmicha_scraper():
             yield dict(
                 link=link,
                 page_title=title,
-                publication_id=None,
+                publication_id=0,
                 documents='',
                 tender_type='call_for_bids',
                 tender_id=None
@@ -28,11 +28,11 @@ def m_tmicha_scraper():
 def flow(*args):
     return Flow(
         m_tmicha_scraper(),
-        calculate_publication_id(3),
-        update_resource('res_1', **{
-            # Set a proper name for the resource
-            'name': 'm_tmicha',
-            'path': 'm_tmicha.csv',
-            'dpp:streaming': True,
-        })
+        # calculate_publication_id(4),
+        update_resource(
+            -1, name='m_tmicha',
+            **{
+                PROP_STREAMING: True
+            }
+        )
     )
