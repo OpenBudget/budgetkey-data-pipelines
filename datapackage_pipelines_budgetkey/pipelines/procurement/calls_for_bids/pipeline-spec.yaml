@@ -1,3 +1,10 @@
+m_tmicha_scraper:
+  pipeline:
+  - flow: m_tmicha
+  - run: dump.to_path
+    parameters:
+      out-path: /var/datapackages/publications/data/m_tmicha
+
 jobiz-scraper:
   schedule:
     crontab: "0 15 * * *"

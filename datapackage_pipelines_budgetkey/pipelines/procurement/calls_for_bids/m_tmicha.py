@@ -13,7 +13,7 @@ def m_tmicha_scraper():
 
     for row in page.find('.ms-rtestate-field a'):
         if row.attrib['href'][-3:] == 'pdf':
-            link = row.attrib['href']
+            link = 'https://www.health.gov.il' + row.attrib['href']
             title = row.text
             yield dict(
                 link=link,
@@ -28,7 +28,7 @@ def m_tmicha_scraper():
 def flow(*args):
     return Flow(
         m_tmicha_scraper(),
-        # calculate_publication_id(4),
+        # calculate_publication_id(?),
         update_resource(
             -1, name='m_tmicha',
             **{
