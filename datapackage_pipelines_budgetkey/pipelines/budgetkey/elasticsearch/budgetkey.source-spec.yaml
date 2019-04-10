@@ -112,7 +112,7 @@ supports:
 
 tenders:
   kind: indexer
-  revision: 25
+  revision: 26
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'
@@ -145,7 +145,7 @@ tenders:
 
 calls_for_bids:
   kind: indexer
-  revision: 4
+  revision: 5
   dependent_pipeline: ./procurement/calls_for_bids/calls-for-bids-all
   source_datapackage: /var/datapackages/procurement/calls_for_bids_all/datapackage.json
   page-title-pattern: '{page_title}'
@@ -169,7 +169,7 @@ calls_for_bids:
 
 support_criteria:
   kind: indexer
-  revision: 5
+  revision: 6
   dependent_pipeline: ./supports/criteria/support-criteria
   source_datapackage: /var/datapackages/support-criteria/datapackage.json
   page-title-pattern: '{page_title}'
