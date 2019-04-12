@@ -32,6 +32,18 @@ SECTIONS = [
         ['tenders']
     ),
     (
+        'קולות קוראים שנסגרים השבוע', 
+        'הזדמנות אחרונה להגיש הצעות!',
+        'dd=opportunities&theme=socialmap&focused=closing',
+        ['support_criteria', 'calls_for_bids']
+    ),
+    (
+        'קולות קוראים ומבחני חדשים',
+        'הזדמנויות חדשות שעשויות לעניין אותך',
+        'dd=opportunities&theme=socialmap&focused=new',
+        ['support_criteria', 'calls_for_bids']
+    ),
+    (
         'ומה חוץ מזה?',
         'עוד כמה עדכונים שקשורים בחיפושים השמורים שלך',
         'dd=tenders&theme=govbuy&focused=updated',
