@@ -34,14 +34,20 @@ SECTIONS = [
     (
         'קולות קוראים שנסגרים השבוע', 
         'הזדמנות אחרונה להגיש הצעות!',
-        'dd=opportunities&theme=socialmap&focused=closing',
-        ['support_criteria', 'calls_for_bids']
+        'dd=opportunities&theme=socialmap&kind=calls_for_bids&focused=closing',
+        ['calls_for_bids']
     ),
     (
-        'קולות קוראים ומבחני חדשים',
-        'הזדמנויות חדשות שעשויות לעניין אותך',
-        'dd=opportunities&theme=socialmap&focused=new',
-        ['support_criteria', 'calls_for_bids']
+        'קולות קוראים חדשים',
+        'קולות קוראים חדשים שעשויים לעניין אותך',
+        'dd=opportunities&theme=socialmap&kind=calls_for_bids&focused=new',
+        ['calls_for_bids']
+    ),
+    (
+        'מבחני תמיכה חדשים',
+        'מבחני תמיכה חדשים שעשויים לעניין אותך',
+        'dd=opportunities&theme=socialmap&kind=support_criteria&focused=new',
+        ['support_criteria']
     ),
     (
         'ומה חוץ מזה?',
