@@ -4,29 +4,38 @@ import logging
 import requests
 import urllib.parse
 import json
-import datetime
 import time
 
 SECTIONS = [
-    ('מכרזים שנסגרים השבוע', 
-     'הזדמנות אחרונה להגיש הצעות!',
-     'dd=tenders&theme=govbuy&focused=closing'
+    (
+        'מכרזים שנסגרים השבוע', 
+        'הזדמנות אחרונה להגיש הצעות!',
+        'dd=tenders&theme=govbuy&focused=closing',
+        ['tenders']
     ),
-    ('מכרזים חדשים',
-     'מכרזים חדשים שעשויים לעניין אותך',
-     'dd=tenders&theme=govbuy&focused=new'
+    (
+        'מכרזים חדשים',
+        'מכרזים חדשים שעשויים לעניין אותך',
+        'dd=tenders&theme=govbuy&focused=new',
+        ['tenders']
     ),
-    ('בקשות חדשות לפטור ממכרז',
-     'משרדי ממשלה ויחידות פרסמו השבוע תהליכי רכש בפטור ממכרז בנושאים אלו',
-     'dd=exemptions&theme=govbuy&focused=new'
+    (
+        'בקשות חדשות לפטור ממכרז',
+        'משרדי ממשלה ויחידות פרסמו השבוע תהליכי רכש בפטור ממכרז בנושאים אלו',
+        'dd=exemptions&theme=govbuy&focused=new',
+        ['tenders']
     ),
-    ('התקשרויות חדשות',
-     'התקשרויות חדשות בנושאים שמעניינים אותך',
-     'dd=contracts&theme=govbuy&focused=new'
+    (
+        'התקשרויות חדשות',
+        'התקשרויות חדשות בנושאים שמעניינים אותך',
+        'dd=contracts&theme=govbuy&focused=new',
+        ['tenders']
     ),
-    ('ומה חוץ מזה?',
-     'עוד כמה עדכונים שקשורים בחיפושים השמורים שלך',
-     'dd=tenders&theme=govbuy&focused=updated'
+    (
+        'ומה חוץ מזה?',
+        'עוד כמה עדכונים שקשורים בחיפושים השמורים שלך',
+        'dd=tenders&theme=govbuy&focused=updated',
+        ['tenders']
     ),
 ]
 
@@ -40,7 +49,7 @@ def process_row(row, *_):
     logging.info('ROW: %r', row)
     items = row['items']
     sections = []
-    for header, subheader, filters in SECTIONS:
+    for header, subheader, filters, relevant_types in SECTIONS:
         terms = []
         section = dict(
             header=header,
@@ -54,12 +63,15 @@ def process_row(row, *_):
             except Exception as e:
                 logging.error('Failed to parse properties %s', e)
                 continue
-            if props and 'displayDocsTypes' in props:
-                if any(x in props['displayDocsTypes'] for x in ('tenders', 'all')):
-                  terms.append(dict(
-                      term=props['term'],
-                      query_url=query_url(props['term'], filters)
-                  ))
+            doctypes = props.get('displayDocsTypes',
+                                 props.get('docType', {}).get('types'))
+            if doctypes is not None:
+                if any(x in doctypes
+                       for x in (*relevant_types, 'all')):
+                    terms.append(dict(
+                        term=props['term'],
+                        query_url=query_url(props['term'], filters)
+                    ))
         if len(terms) > 0:
             sections.append(section)
     if len(sections) > 0:
@@ -70,9 +82,9 @@ def process_row(row, *_):
         logging.info('DATAS: %r', ret)
         for retry in range(2):
             try:
-                result = requests.post('http://budgetkey-emails:8000/', 
-                                    json=ret,
-                                    timeout=630)
+                result = requests.post('http://budgetkey-emails:8000/',
+                                       json=ret,
+                                       timeout=630)
                 if result.status_code == 200:
                     result = result.json()
                     logging.info('RESULT #%d: %r', retry, result)
@@ -84,7 +96,8 @@ def process_row(row, *_):
             logging.info('RESULT #%d: %r', retry, result)
             time.sleep(60)
     else:
-        logging.info('SKIPPING %s as has no relevant subscriptions', row['email'])
+        logging.info('SKIPPING %s as has no relevant subscriptions',
+                     row['email'])
 
 
 if __name__ == '__main__':
