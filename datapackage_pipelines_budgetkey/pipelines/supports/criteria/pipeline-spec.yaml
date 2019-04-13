@@ -94,6 +94,9 @@ support-criteria:
             constraints:
               required: true
 
+          contact_email:
+            type: string            
+
           documents:
             type: array
             es:itemType: object
