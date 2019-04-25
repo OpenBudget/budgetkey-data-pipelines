@@ -48,16 +48,7 @@ def resource_filter(resource_data, parameters):
             urls = scraper.get_urls()
             existing_count = 0
             for url in urls:
-                if url in existing_ids:
-                    existing_count += 1
-                    if existing_count % 10 == 0 or existing_count == 1:
-                        logging.info('EXISTING (%d) %s', existing_count, url)
-                else:
-                    logging.info('NEW %s', url)
-                    existing_count = 0
-                    yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
-                # if existing_count == 10:
-                #     break
+                yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
 
 
 if __name__ == "__main__":
