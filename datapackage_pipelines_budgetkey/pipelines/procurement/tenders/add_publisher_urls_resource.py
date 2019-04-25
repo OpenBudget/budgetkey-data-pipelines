@@ -50,13 +50,14 @@ def resource_filter(resource_data, parameters):
             for url in urls:
                 if url in existing_ids:
                     existing_count += 1
-                    logging.info('EXISTING (%d) %s', existing_count, url)
+                    if existing_count % 10 == 0 or existing_count == 1:
+                        logging.info('EXISTING (%d) %s', existing_count, url)
                 else:
                     logging.info('NEW %s', url)
                     existing_count = 0
                     yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
-                if existing_count == 10:
-                    break
+                # if existing_count == 10:
+                #     break
 
 
 if __name__ == "__main__":
