@@ -155,6 +155,10 @@ scraper:
         db-key-fields:
           - page_url
         hash-fields: []
+    - run: filter
+      parameters:
+        in:
+          - __is_stale: true
     - run: sort
       parameters:
         resources: tender-urls
