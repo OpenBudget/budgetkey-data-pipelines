@@ -16,6 +16,7 @@ class AddCentralUrlsResource(ResourceFilterProcessor):
                                                      table_schema=TABLE_SCHEMA,
                                                      default_replace_resource=False,
                                                      **kwargs)
+        self.found = set()
 
     def filter_datapackage(self):
         self.datapackage["resources"].append(self.output_resource_descriptor)
@@ -29,15 +30,19 @@ class AddCentralUrlsResource(ResourceFilterProcessor):
 
     def yield_tab_urls(self):
         results_per_page = 10
-        max_pages = 50
+        max_pages = 100
         for start in range(1, max_pages*results_per_page + 1, results_per_page):
             url = "https://www.mr.gov.il/CentralTenders/Pages/SearchTenders.aspx?start1={s}&start2={s}&start3={s}&start4={s}".format(s=start)
             page = pq(self.requests_get(url))
             i = 0
             for a in page("a"):
                 if a.attrib.get("id", "").endswith("_Title") and a.attrib.get("id", "").startswith("SRB_"):
-                    yield {"id": None, "url": a.attrib.get("href"), "tender_type": "central"}
+                    url = a.attrib.get("href")
                     i += 1
+                    if url in self.found:
+                        continue
+                    self.found.add(url)
+                    yield {"id": None, "url": url, "tender_type": "central"}
             if i == 0:
                 return
         raise Exception("got more then {} pages, this could be an indication that something is broken".format(max_pages))
