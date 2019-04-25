@@ -83,14 +83,7 @@ entities.associations.guidestar.scraper
 "association_email": null,
 "association_field_of_activity": "קרנות (שמעבירות כספים לעמותות אחרות)",
 "association_fields_of_activity": ["קרנות (שמעבירות כספים לעמותות אחרות)"],
-"association_founders": ["טדי תיאודור קולק",
-"שלמה בלקינד",
-"יצחק טאוב",
-"אפרים לו",
-"ארנון גפני",
-"דב בן דרור",
-"רות הדסה חשין",
-"משה חנוך ינובסקי"],
+"association_founders": [],
 "association_guidestar_title": "הקרן לירושלים",
 "association_has_article_46": "יש אישור",
 "association_num_of_employees": null,
@@ -102,11 +95,11 @@ entities.associations.guidestar.scraper
 "association_registration_date": "2010-02-03",
 "association_title": "ארגון לתת - סיוע הומניטרי ישראלי (ע\"ר)",
 "association_top_salaries": [
-{"role": "תפקיד אחר", "salary": 569714.0}, 
+{"role": "נשיאת הקרן", "salary": 569714.0}, 
 {"role": "מנהל כללי", "salary": 482056.0}, 
-{"role": "תפקיד אחר",  "salary": 365755.0}, 
-{"role": "תפקיד אחר", "salary": 350586.0}, 
-{"role": "תפקיד אחר", "salary": 329659.0}],
+{"role": "מנהל כספים",  "salary": 365755.0}, 
+{"role": "ראש מחלקת גיוס ומחלקת כתיבה", "salary": 350586.0}, 
+{"role": "ראש דסק מדינות דוברות גרמנית", "salary": 329659.0}],
 "association_year_established": 1982,
 "id": "580012805",
 "association_last_report_year": null,
@@ -120,7 +113,7 @@ entities.associations.guidestar.scraper
 "association_address_house_num": "11",
 "association_address_city": "ירושלים",
 "association_activity_region_national": false,
-"association_logo_url": "/servlet/servlet.FileDownload?file=00P2400000ESTTREA5"
+"association_logo_url": "https://www.guidestar.org.il//servlet/servlet.FileDownload?file=00P2400000ESTTREA5"
 }
 
 {}

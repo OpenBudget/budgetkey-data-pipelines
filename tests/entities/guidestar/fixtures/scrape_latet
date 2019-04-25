@@ -103,11 +103,12 @@ entities.associations.guidestar.scraper
 "association_email": "latet@latet.org.il",
 "association_facebook": "https://www.facebook.com/latet",
 "association_website": "http://www.latet.org.il",
-"association_top_salaries": [], 
+"association_top_salaries": [{"role": "מנהל כללי", "salary": 356229.0},{"role": "סגן מנהל כללי", "salary": 295594.0},{"role": "סגן מנהל כללי", "salary": 242082.0},{"role": "מנהלת קשרי משיקעים",
+"salary": 234912.0},{"role": "מנהל כספים", "salary": 227912.0}],
 "association_year_established": 1997, 
 "association_last_report_year": 2017, 
 "association_online_data_update_year": 0,
-"association_logo_url": "/servlet/servlet.FileDownload?file=00P2400000ESTB4EAP"
+"association_logo_url": "https://www.guidestar.org.il//servlet/servlet.FileDownload?file=00P2400000ESTB4EAP"
 }
 
 {}
