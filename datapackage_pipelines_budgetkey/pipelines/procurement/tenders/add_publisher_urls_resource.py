@@ -46,7 +46,6 @@ def resource_filter(resource_data, parameters):
             logging.info("processing publisher {}".format(publisher_id))
             scraper = publisher_scraper_class(publisher_id, **publisher_scraper_kwargs)
             urls = scraper.get_urls()
-            existing_count = 0
             for url in urls:
                 yield {"id": publisher_id, "url": url, "tender_type": parameters["tender_type"]}
 

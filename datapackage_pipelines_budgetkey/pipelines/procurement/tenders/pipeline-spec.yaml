@@ -39,9 +39,11 @@ scraper-exemptions:
     - run: dump.to_sql
       parameters:
         tables:
-          procurement_tender_urls:
+          procurement_tender_urls_exemptions:
             resource-name: exemptions
-            mode: update
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/scraper-exemptions
 
 scraper-office:
   schedule:
@@ -81,9 +83,11 @@ scraper-office:
     - run: dump.to_sql
       parameters:
         tables:
-          procurement_tender_urls:
+          procurement_tender_urls_office:
             resource-name: office
-            mode: update
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/procurement/tenders/scraper-office
 
 scraper-central:
   schedule:
@@ -102,9 +106,8 @@ scraper-central:
     - run: dump.to_sql
       parameters:
         tables:
-          procurement_tender_urls:
+          procurement_tender_urls_central:
             resource-name: central
-            mode: update
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/scraper-central
@@ -123,7 +126,17 @@ scraper:
       parameters:
         datapackage: /var/datapackages/procurement/tenders/scraper-central/datapackage.json
         resource: central
-        table: procurement_tender_urls
+        table: procurement_tender_urls_central
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/tenders/scraper-office/datapackage.json
+        resource: office
+        table: procurement_tender_urls_office
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/procurement/tenders/scraper-exemptions/datapackage.json
+        resource: exemptions
+        table: procurement_tender_urls_exemptions
     - run: stream_remote_resources
     - run: concatenate
       parameters:
