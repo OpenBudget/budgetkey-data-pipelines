@@ -237,7 +237,7 @@ def admin_hierarchy_chart(row):
         # Admin Hierarchy chart
         kids = [
             {
-                'label': '‹ (…{}) {}'.format(child['code'][-2:], child['title']),
+                'label': '‹ {} / …{}'.format(child['title'], child['code'][-2:]),
                 'extra': child['code'],
                 'amount': child['net_revised'],
             }
