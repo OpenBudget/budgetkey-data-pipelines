@@ -1,3 +1,16 @@
+support-criteria-moh:
+  pipeline:
+  - run: add_metadata
+    parameters:
+      name: support-criteria-from-ministry-of-health
+      title: Support criteria from ministry of health website
+  - flow: m_tmicha
+    runner: tzabar
+  - run: dump.to_path
+    parameters:
+      out-path: /var/datapackages/support-criteria/moh
+
+
 support-criteria-doj:
   schedule:
     crontab: "0 0 * * *"
@@ -33,6 +46,7 @@ support-criteria-jobiz:
 support-criteria:
 
   dependencies:
+    - pipeline: ./supports/criteria/support-criteria-moh
     - pipeline: ./supports/criteria/support-criteria-doj
     - pipeline: ./supports/criteria/support-criteria-jobiz
 
@@ -44,6 +58,30 @@ support-criteria:
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/jobiz/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/support-criteria/moh/datapackage.json
+    - flow: m_tmicha
+    - run: concatenate
+      parameters:
+        fields:
+          publication_id: []
+          tender_id: []
+          tender_type: []
+          tender_type_he: []
+
+          page_title: []
+          page_url: []
+          publisher: []
+
+          target_audience: []
+
+          documents: []
+
+        target:
+          name: support_criteria
+          path: data/support_criteria.csv
+
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
