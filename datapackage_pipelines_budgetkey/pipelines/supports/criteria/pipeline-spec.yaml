@@ -1,4 +1,6 @@
 support-criteria-moh:
+  schedule:
+    crontab: "0 0 * * *"
   pipeline:
   - run: add_metadata
     parameters:
@@ -61,27 +63,6 @@ support-criteria:
     - run: load
       parameters:
         from: /var/datapackages/support-criteria/moh/datapackage.json
-    - flow: m_tmicha
-    - run: concatenate
-      parameters:
-        fields:
-          publication_id: []
-          tender_id: []
-          tender_type: []
-          tender_type_he: []
-
-          page_title: []
-          page_url: []
-          publisher: []
-
-          target_audience: []
-
-          documents: []
-
-        target:
-          name: support_criteria
-          path: data/support_criteria.csv
-
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
