@@ -1,4 +1,4 @@
-from dataflows import Flow, load, dump_to_path, printer, concatenate
+from dataflows import Flow, load, printer, concatenate, update_resource
 
 
 
@@ -40,13 +40,13 @@ def _get_columns_mapping_dict():
     return columns_mapping_dict
 
 
-def flow(parameters, *_):
+def flow(*_):
     return Flow(
         load('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv'),
-        concatenate(_get_columns_mapping_dict()),
-        dump_to_path(parameters['out_path'] or '/var/datapackages/entities/companies/scraper'),
+        concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
+        update_resource(**{'dpp:streaming': True}),
     )
 
 
 if __name__=='__main__':
-    flow().process(dict(out_path='scraper'))[1]
+    flow().process()

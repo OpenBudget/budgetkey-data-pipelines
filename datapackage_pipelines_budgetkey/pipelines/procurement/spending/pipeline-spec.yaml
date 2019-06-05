@@ -381,7 +381,7 @@ latest-contract-spending:
             es:title: false
           purpose:
             es:title: true
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/latest-contract-spending
     - run: dump.to_sql

@@ -1,6 +1,31 @@
+scraper:
+  title: חברות פעילות מרשם החברות
+  description: רשימת כלל החברות הפעילות, מתעדכן שבועית.
+  schedule:
+    crontab: 0 0 * * 1
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: company-registry
+        title: חברות פעילות מתוך רשם החברות
+    - flow: read_companies
+      runner: tzabar
+    - run: set_primary_key
+      parameters:
+        company-details:
+          - id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          company_details:
+            resource-name: company-details
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/entities/companies/scraper  
+
 details:
   dependencies:
-    # - pipeline: ./entities/companies/registrar/details-scraper
+    - pipeline: ./entities/companies/registrar/scraper
     - pipeline: ./entities/companies/government/registrar/government_companies
     # - pipeline: ./entities/safety-orders/safety-orders-by-entity
 
@@ -22,18 +47,10 @@ details:
         url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
         resource: safety-orders-by-entity
 
-    - run: add_sql_resource
+    - run: load_resource
       parameters:
-        datapackage: /var/datapackages/entities/companies/scraper/datapackage.json
+        url: dependency://./entities/companies/registrar/scraper
         resource: company-details
-        table: company_details
-        fields:
-            - name: __last_updated_at
-              format: '%Y-%m-%dT%H:%M:%S'
-            - name: __last_modified_at
-              format: '%Y-%m-%dT%H:%M:%S'
-            - name: __created_at
-              format: '%Y-%m-%dT%H:%M:%S'
 
     - run: stream_remote_resources
     - run: join
