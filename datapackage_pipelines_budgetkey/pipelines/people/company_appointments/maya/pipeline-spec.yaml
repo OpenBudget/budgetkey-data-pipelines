@@ -25,7 +25,7 @@ collect-maya-forms-debug-stats:
         title: Collect statistics of elements that exist in each Maya Form. Can be used to find anomalies. And find examples for unit tests
     - run: load_resource
       parameters:
-        url: /var/datapackages//people/company_appointments/maya/maya-notification-list/datapackage.json
+        url: /var/datapackages/people/company_appointments/maya/maya-notification-list/datapackage.json
         resource: maya-notification-updates
     - run: collect-maya-forms-debug-stats
     - run: dump_to_path

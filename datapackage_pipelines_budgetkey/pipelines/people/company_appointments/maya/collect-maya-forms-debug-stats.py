@@ -1,7 +1,8 @@
 import logging
 import requests
-import json
+import random
 from pyquery import PyQuery as pq
+import os
 
 from datetime import datetime
 
@@ -18,46 +19,20 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].extend([
         {'name': 'HeaderEntityNameEB', 'type': 'number'},
         {'name': 'HeaderProofValue', 'type': 'number'},
+
         {'name': 'HeaderProof', 'type': 'number'},
         {'name': 'HeaderProofValue_equals_HeaderProof', 'type':'number'},
-
-        {'name': 'notification_type', 'type': 'string'},
         {'name': 'HeaderFixtReport', 'type': 'number'},
         {'name': 'HeaderProofFormat', 'type': 'number'},
 
-        {'name': 'TaarichTchilatHaCehuna', 'type': 'number'},
-        {'name': 'TaarichTchilatCehuna', 'type': 'number'},
-        {'name': 'TaarichTehilatCehuna', 'type': 'number'},
-        {'name': 'TaarichTchilatHaKehuna', 'type': 'number'},
-        {'name': 'TaarichTchilatKehuna', 'type': 'number'},
-        {'name': 'TaarichTehilatKehuna', 'type': 'number'},
 
-        {'name': 'Gender', 'type': 'number'},
-        {'name': 'full_name', 'type': 'string'},
-        {'name': 'gender', 'type': 'string'},
+        {'name': 'notification_type', 'type': 'string'},
+
+
+
         {'name': 'positions', 'type': 'array'},
 
-        {'name': 'Shem', 'type': 'number'},
-        {'name': 'ShemPratiVeMishpacha', 'type': 'number'},
-        {'name': 'ShemPriatiVeMishpacha', 'type': 'number'},
-        {'name': 'ShemMishpahaVePrati', 'type': 'number'},
-        {'name': 'ShemRoeCheshbon', 'type': 'number'},
-        {'name': 'ShemRoehHeshbon', 'type': 'number'},
-        {'name': 'ShemPrati', 'type': 'number'},
-        {'name': 'ShemTaagid', 'type': 'number'},
-        {'name': 'HaTafkid1', 'type': 'number'},
-        {'name': 'HaTafkid2', 'type': 'number'},
-        {'name': 'TaarichBoChadalLeKahen', 'type': 'number'},
-        {'name': 'OfenSiumHaCehuna', 'type':'number'},
-        {'name': 'quit_reason', 'type': 'string'},
-
-        {'name': 'Accountant', 'type': 'number'},
-        {'name': 'Tapkid', 'type': 'number'},
-        {'name': 'Tafkid', 'type': 'number'},
-        {'name': 'HaTafkidLoMuna', 'type': 'number'},
-        {'name': 'TeurTafkid', 'type': 'number'},
-        {'name': 'LeloTeur', 'type': 'number'},
-        {'name': 'TeurHaTafkidLoMuna', 'type': 'number'},
+        {'name': 'alias_stats', 'type':'array'}
     ])
     return dp
 
@@ -92,8 +67,17 @@ def get_positions_array(pg):
 
     return [extract_title(pq(it)) for it in elems]
 
+def collect_all_aliases(qry):
+    elems = qry.find("[fieldalias]")
+    return [ {pq(e).attr("fieldalias").strip(): pq(e).text().strip() } for e in elems ]
+
+
 def process_row(row, *_):
+#    if random.uniform(0, 1) >= 0.005:
+#        return None
+
     s3_object_name = row['s3_object_name']
+    #url = os.path.join("https://ams3.digitaloceanspaces.com", "budgetkey-files", s3_object_name)
     url = object_storage.urlfor(s3_object_name)
     try:
         if object_storage.exists(s3_object_name):
@@ -109,49 +93,17 @@ def process_row(row, *_):
                 'HeaderProofValue': len(pg.find('#HeaderProofValue')),
                 'HeaderProof': len(pg.find('#HeaderProof ~ span:first')),
                 'HeaderProofValue_equals_HeaderProof': pg.find('#HeaderProof ~ span:first').text().strip() == pg.find('#HeaderProofValue').text().strip(),
-                'notification_type': pg.find('#HeaderFormNumber').text().strip(),
 
                 'HeaderFixtReport': len(pg.find('#HeaderFixtReport')),
                 'HeaderProofFormat': len(pg.find("#HeaderProofFormat")),
 
-                'TaarichTchilatHaCehuna': len(pg.find("[fieldalias=TaarichTchilatHaCehuna]")),
-                'TaarichTchilatCehuna': len(pg.find("[fieldalias=TaarichTchilatCehuna]")),
-                'TaarichTehilatCehuna': len(pg.find("[fieldalias=TaarichTehilatCehuna]")),
-                'TaarichTchilatHaKehuna': len(pg.find("[fieldalias=TaarichTchilatHaKehuna]")),
-                'TaarichTchilatKehuna': len(pg.find("[fieldalias=TaarichTchilatKehuna]")),
-                'TaarichTehilatKehuna': len(pg.find("[fieldalias=TaarichTehilatKehuna]")),
+                'notification_type': pg.find('#HeaderFormNumber').text().strip(),
 
-                'Gender': len(pg.find("[fieldalias=Gender]")),
-                'gender': pg.find("[fieldalias=Gender]").text().strip(),
 
-                'Shem': len(pg.find("[fieldalias=Shem]")),
-                'ShemPratiVeMishpacha': len(pg.find("[fieldalias=ShemPratiVeMishpacha]")),
-                'ShemPriatiVeMishpacha': len(pg.find("[fieldalias=ShemPriatiVeMishpacha]")),
-                'ShemMishpahaVePrati': len(pg.find("[fieldalias=ShemMishpahaVePrati]")),
-                'ShemRoeCheshbon': len(pg.find("[fieldalias=ShemRoeCheshbon]")),
-                'ShemRoehHeshbon': len(pg.find("[fieldalias=ShemRoehHeshbon]")),
-                'ShemPrati':  len(pg.find("[fieldalias=ShemPrati]")),
-                'ShemTaagid':  len(pg.find("[fieldalias=ShemTaagid]")),
-                'Accountant': len(pg.find("[fieldalias=Accountant]")),
-                'Tapkid':  len(pg.find("[fieldalias=Tapkid]")),
-                'Tafkid':  len(pg.find("[fieldalias=Tafkid]")),
-
-                'HaTafkid1': len(pg.find("[fieldalias=HaTafkid1]")),
-                'HaTafkid2': len(pg.find("[fieldalias=HaTafkid2]")),
-
-                'TaarichBoChadalLeKahen': len(pg.find("[fieldalias=TaarichBoChadalLeKahen]")),
-                'OfenSiumHaCehuna': len(pg.find("[fieldalias=OfenSiumHaCehuna]")),
-                'quit_reason': all_aliases_as_string(pg, ['OfenSiumHaCehuna']),
-
-                'HaTafkidLoMuna':  len(pg.find("[fieldalias=HaTafkidLoMuna]")),
-                'TeurTafkid':  len(pg.find("[fieldalias=TeurTafkid]")),
-                'LeloTeur':  len(pg.find("[fieldalias=LeloTeur]")),
-                'TeurHaTafkidLoMuna':  len(pg.find("[fieldalias=TeurHaTafkidLoMuna]")),
-
-                'full_name': all_aliases_as_string(pg, ['Shem', 'ShemPratiVeMishpacha', 'ShemPriatiVeMishpacha',
-                                                        'ShemMishpahaVePrati']),
 
                 'positions': get_positions_array(pg),
+
+                'alias_stats': collect_all_aliases(pg)
 
             })
         else:
