@@ -1,0 +1,29 @@
+scrape-maya-notification-list:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - flow: scrape_maya_notification_list
+      runner: tzabar
+    - run: dump_to_path
+      parameters:
+          out-path: /var/datapackages/maya/scrape_maya_notification_list
+
+
+maya-notification-parse-updates:
+  pipeline:
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/maya/scrape_maya_notification_list/datapackage.json
+        resource: maya_notification_list
+    - flow: maya_notification_parse_updates
+    - run: dump_to_sql
+      parameters:
+        tables:
+          maya_notifications:
+            resource-name: maya_notification_parse_updates
+            mode: update
+            update_keys:
+              - s3_object_name
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_notification_parse_updates
