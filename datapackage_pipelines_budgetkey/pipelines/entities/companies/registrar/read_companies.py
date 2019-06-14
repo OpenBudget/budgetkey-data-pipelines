@@ -44,7 +44,7 @@ def flow(*_):
     return Flow(
         load('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv'),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
-        update_resource(**{'dpp:streaming': True}),
+        update_resource(**{'dpp:streaming': True}, resources='company-details'),
     )
 
 

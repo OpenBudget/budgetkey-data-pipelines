@@ -14,6 +14,7 @@ def m_tmicha_scraper():
     id_ = 'div#ctl00_PlaceHolderMain_GovXContentSectionPanel_ctl00__ControlWrapper_RichHtmlField'
     data = page.find(id_)
     rows = data.find('a')
+    total = 0
 
     for i in range(len(rows)):
         if rows[i].attrib['href'][-3:] == 'pdf':
@@ -33,6 +34,8 @@ def m_tmicha_scraper():
 
                 documents=link,
             )
+            total += 1
+    assert total > 0
 
 
 def flow(*args):

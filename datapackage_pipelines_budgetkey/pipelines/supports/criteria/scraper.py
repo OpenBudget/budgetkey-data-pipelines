@@ -24,6 +24,7 @@ def extract_url(href):
 
 def get_all_reports():
     pid = 1
+    total = 0
     while True:
         response = cookie_monster_get(URL.format(pid))
         response = response.decode('utf8')
@@ -51,7 +52,9 @@ def get_all_reports():
                 "start_date": date
             }
             yield rec
+        total += len(rows)
         if len(rows) == 0:
+            assert total > 0
             break
         pid += 1
 
