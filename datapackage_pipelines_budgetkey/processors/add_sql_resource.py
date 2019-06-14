@@ -56,7 +56,7 @@ def flow(parameters):
              name=resource_name),
         update_resource(resource_name,
                         **resource.descriptor,
-                        **{PROP_STREAMING, True})
+                        **{PROP_STREAMING: True})
     )
 
 
