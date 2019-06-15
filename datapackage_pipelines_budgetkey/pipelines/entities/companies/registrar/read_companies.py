@@ -1,11 +1,14 @@
-from dataflows import Flow, load, printer, concatenate, update_resource, set_primary_key
+from dataflows import (
+    Flow, load, concatenate, update_resource,
+    set_primary_key, set_type
+)
 
 
 
 # Map the original column headers (in Hebrew) to the new column names (in English)
 COLUMN_HEADERS_MAPPER = {
     'שם חברה': 'company_name',
-    'מספר חברה':'company_id',
+    'מספר חברה':'id',
     'שם באנגלית':'company_name_eng',
     'סוג תאגיד':'company_type',
     'סטטוס חברה':'company_status',
@@ -42,12 +45,14 @@ def _get_columns_mapping_dict():
 
 def flow(*_):
     return Flow(
-        load('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv'),
+        load('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv',
+             cast_strategy=load.CAST_TO_STRINGS),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
+        set_type('id', type='string'),
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
     )
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     flow().process()
