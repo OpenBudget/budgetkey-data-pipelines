@@ -10,6 +10,8 @@ scrape-maya-notification-list:
 
 
 maya-notification-parse-updates:
+  dependencies:
+    - pipeline: ./maya/scrape-maya-notification-list
   pipeline:
     - run: load_resource
       parameters:
