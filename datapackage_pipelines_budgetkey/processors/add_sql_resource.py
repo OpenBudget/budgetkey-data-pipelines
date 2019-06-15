@@ -55,7 +55,8 @@ def flow(parameters):
              table=parameters['table'],
              name=resource_name),
         update_resource(resource_name,
-                        **resource.descriptor,
+                        **resource.descriptor),
+        update_resource(resource_name,
                         **{PROP_STREAMING: True})
     )
 
