@@ -10,10 +10,10 @@ scraper:
         title: חברות פעילות מתוך רשם החברות
     - flow: read_companies
       runner: tzabar
-    - run: set_primary_key
-      parameters:
-        company-details:
-          - id
+    # - run: set_primary_key
+    #   parameters:
+    #     company-details:
+    #       - id
     - run: dump.to_sql
       parameters:
         tables:
