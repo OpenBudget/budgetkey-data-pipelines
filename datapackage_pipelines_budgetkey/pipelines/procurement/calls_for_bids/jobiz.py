@@ -20,14 +20,19 @@ def fetch_results():
         content = content['content']
         if len(content) == 0:
             break
+        else:
+            print('GOT {} chars'.format(len(content)))
         content = pq(content)
         boxes = content.find('.modal')
         if len(boxes) == 0:
             break
+        else:
+            print('GOT {} boxes'.format(len(boxes)))
         for box in boxes:
             box = pq(box)
             description = pq(box.find('.moreInfoInner'))
             description = sanitize_html(description)
+            print('GOT {}'.format(pq(box.find('#modal-title')).text()))
             yield dict(
                 publication_id=0,
                 tender_id=None,
@@ -60,6 +65,8 @@ def flow(*_):
     return Flow(
         fetch_results(),
         set_type('start_date', type='date', format='%d.%m.%Y'),
+        set_type('tender_id', type='string'),
+        set_type('tender_type', type='string'),
         process_kind,
         calculate_publication_id(2),
         set_primary_key(['publication_id']),
