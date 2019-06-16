@@ -18,6 +18,8 @@ def fetch_results():
     while True:
         content = requests.get(URL.format(index)).json()
         content = content['content']
+        if len(content) == 0:
+            break
         content = pq(content)
         boxes = content.find('.modal')
         if len(boxes) == 0:
