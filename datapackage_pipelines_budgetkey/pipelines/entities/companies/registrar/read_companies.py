@@ -49,6 +49,7 @@ def flow(*_):
              cast_strategy=load.CAST_TO_STRINGS),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
+        set_type('company_registration_date', type='date', format='%d/%m/%Y'),
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
     )
