@@ -14,7 +14,7 @@ from dateutil.relativedelta import relativedelta
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-START_DATE = "2006-01-01"
+START_DATE = "2018-01-01"
 END_DATE = None
 
 logging.getLogger("requests").setLevel(logging.WARNING)
