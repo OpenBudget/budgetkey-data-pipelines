@@ -51,7 +51,7 @@ def flow(parameters):
     resource = source_datapackage.get_resource(resource_name)
 
     return Flow(
-        load(os.environ['DPP_DB_ENGINE'],
+        load('env://DPP_DB_ENGINE',
              table=parameters['table'],
              name=resource_name),
         update_resource(resource_name,

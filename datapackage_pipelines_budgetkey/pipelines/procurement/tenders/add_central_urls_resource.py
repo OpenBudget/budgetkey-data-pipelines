@@ -29,23 +29,18 @@ class AddCentralUrlsResource(ResourceFilterProcessor):
         return requests.get(url).text
 
     def yield_tab_urls(self):
-        results_per_page = 10
-        max_pages = 100
-        for start in range(1, max_pages*results_per_page + 1, results_per_page):
-            url = "https://www.mr.gov.il/CentralTenders/Pages/SearchTenders.aspx?start1={s}&start2={s}&start3={s}&start4={s}".format(s=start)
-            page = pq(self.requests_get(url))
-            i = 0
-            for a in page("a"):
-                if a.attrib.get("id", "").endswith("_Title") and a.attrib.get("id", "").startswith("SRB_"):
-                    url = a.attrib.get("href")
-                    i += 1
-                    if url in self.found:
-                        continue
-                    self.found.add(url)
-                    yield {"id": None, "url": url, "tender_type": "central"}
-            if i == 0:
-                return
-        raise Exception("got more then {} pages, this could be an indication that something is broken".format(max_pages))
+        url = "https://www.mr.gov.il/CentralTenders/Pages/SearchTenders.aspx"
+        page = pq(self.requests_get(url))
+        i = 0
+        for a in page('.ContentLayoutRightSide .liWithChildren a'):
+            url = a.attrib.get('href')
+            i += 1
+            if url in self.found:
+                continue
+            self.found.add(url)
+            yield dict(id=None, url=url, tender_type='central')
+        if i == 0:
+            raise Exception("got no data, something is broken")
 
 
 if __name__ == "__main__":
