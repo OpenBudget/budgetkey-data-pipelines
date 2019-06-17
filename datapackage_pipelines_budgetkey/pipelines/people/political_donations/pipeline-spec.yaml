@@ -1,0 +1,6 @@
+political_donations:
+  pipeline:
+    - flow: political_donations
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/people/political_donations
