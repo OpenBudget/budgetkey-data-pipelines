@@ -29,3 +29,67 @@ maya-notification-parse-updates:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_notification_parse_updates
+
+maya-complete-notification-list:
+  dependencies:
+    - pipeline: ./maya/maya-notification-parse-updates
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/maya/maya_notification_parse_updates/datapackage.json
+        resource: maya_notification_parse_updates
+        table: maya_notifications
+        fields:
+            - name: date
+              format: '%Y-%m-%dT%H:%M:%S'
+    - run: stream_remote_resources
+    - run: duplicate
+      parameters:
+        source: maya_notification_parse_updates
+        target-name: maya_complete_notification_list
+        target-path: maya_complete_notification_list
+    - run: filter
+      parameters:
+        resources: maya_notification_parse_updates
+        out:
+          - fix_for: null
+    - run: join
+      parameters:
+        source:
+          name: maya_notification_parse_updates
+          key: ['fix_for']
+          delete: true
+        target:
+          name: maya_complete_notification_list
+          key: ['id']
+        fields:
+          fixed_by:
+            name: 'id'
+            aggregate: 'last'
+    - run: filter
+      parameters:
+        resources: maya_complete_notification_list
+        in:
+          - fixed_by: null
+    - run: concatenate
+      parameters:
+        fields:
+          date: []
+          source: []
+          s3_object_name: []
+          url: []
+          pdf: []
+          other: []
+          num_files: []
+          parser_version: []
+          id: []
+          company: []
+          type: []
+          fix_for: []
+          document: []
+          fixed_by: []
+        target:
+          name: maya-complete-notification-list
+    - run: dump_to_path
+      parameters:
+          out-path: /var/datapackages/maya/maya_complete_notification_list
