@@ -24,7 +24,7 @@ logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
 def get_connection_string():
-    connection_string = os.environ.get("DATAFLOWS_DB_ENGINE", default=None)
+    connection_string = os.environ.get("DPP_DB_ENGINE", default=None)
     assert connection_string is not None, \
         "Couldn't connect to DB - " \
         "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
