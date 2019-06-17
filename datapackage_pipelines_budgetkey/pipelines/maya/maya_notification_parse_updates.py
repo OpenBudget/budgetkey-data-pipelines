@@ -25,14 +25,14 @@ def get_connection_string():
 
 
 def get_all_existing_ids():
-    engine = create_engine(get_connection_string())
     ret = set()
     try:
+        engine = create_engine(get_connection_string())
         rows = engine.execute(text("SELECT s3_object_name FROM maya_notifications where parser_version=:v"), v=PARSER_VERSION)
         ret.update(row['s3_object_name'] for row in rows)
     except (OperationalError, ProgrammingError) as e:
         #ProgrammingError is for postgres and OperationError is on sqlite
-        logging.warning('Failed to fetch table maya_notifications',e)
+        logging.warning('Failed to fetch table maya_notifications')
     return ret
 
 
@@ -100,20 +100,21 @@ def remove_already_parsed(rows):
 def flow(*_):
 
     return Flow(
-        remove_already_parsed,
-        store_on_s3,
-        add_field('parser_version', 'number'),
-        add_field('id', 'string'),
-        add_field('company', 'string'),
-        add_field('type', 'string'),
-        add_field('fix_for', 'string'),
-        add_field('document', 'object'),
-        set_primary_key(['s3_object_name']),
-        parse_notification,
-
         update_resource(
             -1, name='maya_notification_parse_updates', path="data/maya_notification_parse_updates.csv",
         ),
+        add_field('parser_version', 'number', default=-1),
+        add_field('id', 'string', default=""),
+        add_field('company', 'string', default=""),
+        add_field('type', 'string', default=""),
+        add_field('fix_for', 'string', default=""),
+        add_field('document', 'object', default=None),
+        set_primary_key(['s3_object_name']),
+
+        remove_already_parsed,
+        store_on_s3,
+        parse_notification,
+
     )
 
 

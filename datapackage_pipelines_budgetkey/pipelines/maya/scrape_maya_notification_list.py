@@ -8,18 +8,27 @@ import logging
 from time import sleep
 import requests
 import pytz
+import os
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError, ProgrammingError
+
 from dateutil.parser import parse
 from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
-START_DATE = "2018-01-01"
-END_DATE = None
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
-session = requests.Session()
+
+
+def get_connection_string():
+    connection_string = os.environ.get("DATAFLOWS_DB_ENGINE", default=None)
+    assert connection_string is not None, \
+        "Couldn't connect to DB - " \
+        "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
+    return connection_string
 
 
 def _get_maya_filter_request(date_from, date_to, page_num):
@@ -58,7 +67,7 @@ def _get_maya_headers():
     }
 
 
-def _maya_api_call(date_from, date_to, page_num):
+def _maya_api_call(session, date_from, date_to, page_num):
     try:
         url = 'https://mayaapi.tase.co.il/api/report/filter'
         session.cookies.clear()
@@ -68,22 +77,22 @@ def _maya_api_call(date_from, date_to, page_num):
         raise Exception("Failed to Call Maya API for date_from:{} date_to:{} page_num:{}".format(date_from, date_to, page_num)) from e
 
 def _split_period(date_from, date_to):
-    current_date = date_from
-    next_date = current_date + relativedelta(years=1)
-    while next_date < date_to:
-        yield(current_date, next_date)
-        current_date = next_date
-        next_date = current_date + relativedelta(years=1)
-    yield(current_date, date_to)
+    end_period = date_to
+    start_period = end_period - relativedelta(months=6)
+    while start_period > date_from:
+        yield(start_period, end_period)
+        end_period = start_period
+        start_period = end_period - relativedelta(months=6)
+    yield(date_from, end_period)
 
 
-def _collect_date_range(date_from, date_to):
+def _collect_date_range(session, date_from, date_to):
 
     current_page = 0
     has_more = True
 
     while has_more:
-        res = _maya_api_call(date_from, date_to, current_page)
+        res = _maya_api_call(session, date_from, date_to, current_page)
         sleep(3)
 
         # Figure out how many pages are available in total
@@ -120,14 +129,21 @@ def _collect_date_range(date_from, date_to):
 
 
 def scrape_maya_notification_list():
-    date_from = datetime.strptime(START_DATE, "%Y-%m-%d").date()
-
+    date_from = date.today() - relativedelta(months=3)
     date_to = date.today()
-    if END_DATE:
-        date_to = datetime.strptime(END_DATE, "%Y-%m-%d").date()
 
+    try:
+        engine = create_engine(get_connection_string())
+        earliest_record = next(iter(engine.execute(text("SELECT min(date) as dt FROM maya_notifications"))),None)
+        if earliest_record and earliest_record['dt']:
+            date_from = earliest_record['dt'].date() - relativedelta(months=3)
+    except (OperationalError, ProgrammingError):
+        pass
+
+    logging.info("Scrape Maya From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
+    session = requests.Session()
     for year_start, year_end in _split_period(date_from, date_to):
-        yield from _collect_date_range(year_start, year_end)
+        yield from _collect_date_range(session, year_start, year_end)
 
 
 
