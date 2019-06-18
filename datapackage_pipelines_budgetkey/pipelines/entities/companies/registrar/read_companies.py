@@ -42,6 +42,16 @@ def _get_columns_mapping_dict():
         columns_mapping_dict[new_header] = [original_header]
     return columns_mapping_dict
 
+def clear_bool_values(package):
+    for res in package.pkg.descriptor['resources']:
+        for field in res['schema']['fields']:
+            if 'falseValues' in field:
+                del field['falseValues']
+            if 'trueValues' in field:
+                del field['trueValues']
+    yield package.pkg
+    yield from package
+
 
 def flow(*_):
     return Flow(
@@ -51,7 +61,7 @@ def flow(*_):
         set_type('id', type='string'),
         set_type('company_registration_date', type='date', format='%d/%m/%Y'),
         set_type('company_is_government', type='boolean', falseValues=['לא'], trueValues=['כן']),
-        set_type('company_is_government', type='boolean', falseValues=None, trueValues=None),
+        clear_bool_values,
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
     )
