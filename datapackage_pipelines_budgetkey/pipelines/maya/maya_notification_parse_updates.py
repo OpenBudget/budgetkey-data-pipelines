@@ -21,7 +21,7 @@ def get_connection_string():
 
     assert connection_string is not None, \
         "Couldn't connect to DB - " \
-        "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
+        "Please set your '%s' environment variable" % "DPP_DB_ENGINE"
     return connection_string
 
 
@@ -75,11 +75,15 @@ def store_on_s3(rows):
 
             charset = get_charset(conn)
             conn.encode = charset
-            object_storage.write(s3_object_name,
-                                 data=conn.content,
-                                 public_bucket=True,
-                                 create_bucket=True,
-                                 content_type="text/html; charset={}".format(charset))
+            try:
+                object_storage.write(s3_object_name,
+                                     data=conn.content,
+                                     public_bucket=True,
+                                     create_bucket=True,
+                                     content_type="text/html; charset={}".format(charset))
+            except Exception as e:
+                logging.warning("Skipping {} due to error: {}".format(url, str(e)))
+                continue
         yield row
 
 

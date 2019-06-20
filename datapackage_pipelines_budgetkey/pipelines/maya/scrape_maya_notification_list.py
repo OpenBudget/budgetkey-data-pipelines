@@ -8,9 +8,9 @@ import logging
 from time import sleep
 import requests
 import pytz
-import os
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import OperationalError, ProgrammingError
+# import os
+# from sqlalchemy import create_engine, text
+# from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from dateutil.parser import parse
 from datetime import date, datetime, time
@@ -23,12 +23,12 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 
-def get_connection_string():
-    connection_string = os.environ.get("DPP_DB_ENGINE", default=None)
-    assert connection_string is not None, \
-        "Couldn't connect to DB - " \
-        "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
-    return connection_string
+# def get_connection_string():
+#     connection_string = os.environ.get("DPP_DB_ENGINE", default=None)
+#     assert connection_string is not None, \
+#         "Couldn't connect to DB - " \
+#         "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
+#     return connection_string
 
 
 def _get_maya_filter_request(date_from, date_to, page_num):
@@ -129,16 +129,16 @@ def _collect_date_range(session, date_from, date_to):
 
 
 def scrape_maya_notification_list():
-    date_from = date.today() - relativedelta(months=3)
+    date_from = date.today() - relativedelta(years=3)
     date_to = date.today()
 
-    try:
-        engine = create_engine(get_connection_string())
-        earliest_record = next(iter(engine.execute(text("SELECT min(date) as dt FROM maya_notifications"))),None)
-        if earliest_record and earliest_record['dt']:
-            date_from = earliest_record['dt'].date() - relativedelta(months=3)
-    except (OperationalError, ProgrammingError):
-        pass
+    # try:
+    #     engine = create_engine(get_connection_string())
+    #     earliest_record = next(iter(engine.execute(text("SELECT min(date) as dt FROM maya_notifications"))),None)
+    #     if earliest_record and earliest_record['dt']:
+    #         date_from = earliest_record['dt'].date() - relativedelta(months=3)
+    # except (OperationalError, ProgrammingError):
+    #     pass
 
     logging.info("Scrape Maya From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
     session = requests.Session()
