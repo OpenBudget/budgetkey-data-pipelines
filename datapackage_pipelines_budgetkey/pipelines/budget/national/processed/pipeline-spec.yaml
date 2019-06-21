@@ -21,7 +21,7 @@ aggregated-yearly:
     - run: concatenate
       parameters:
         target:
-          name: national-budget
+          name: immediate-children
         fields:
           year:
             - שנה
@@ -85,7 +85,7 @@ aggregated-yearly:
             - יתרת התחיבויות
     - run: filter
       parameters:
-        resources: national-budget
+        resources: immediate-children
         out:
           - func_cls_title_2: גרעון
 
@@ -122,11 +122,11 @@ aggregated-yearly:
     - run: join
       parameters:
         source:
-          name: national-budget
+          name: immediate-children
           key: ['year', 'code']
           delete: true
         target:
-          name: budget
+          name: immediate-children
           key: null
         fields:
           year: null
@@ -241,7 +241,7 @@ aggregated-yearly:
     - run: join
       parameters:
         source:
-          name: budget
+          name: immediate-children
           key: ['year', 'parent']
         target:
           name: immediate-children
