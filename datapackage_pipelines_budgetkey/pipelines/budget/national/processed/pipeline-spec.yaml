@@ -124,7 +124,6 @@ aggregated-yearly:
         source:
           name: immediate-children
           key: ['year', 'code']
-          delete: true
         target:
           name: immediate-children
           key: null
