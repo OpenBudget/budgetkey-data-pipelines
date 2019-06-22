@@ -30,6 +30,8 @@ def m_tmicha_scraper():
                 page_url=url,
                 publisher='משרד הבריאות',
 
+                start_date=None,
+
                 target_audience='מוסדות ציבור',
 
                 documents=link,
