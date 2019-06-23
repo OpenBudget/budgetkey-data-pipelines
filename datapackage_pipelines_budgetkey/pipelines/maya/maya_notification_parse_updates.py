@@ -89,10 +89,13 @@ def store_on_s3(rows):
 
 def parse_notification(rows):
     for row in rows:
-        row.update(parse_maya_html_form(object_storage.urlfor(row['s3_object_name'])))
-        row['parser_version'] = PARSER_VERSION
+        try:
+            row.update(parse_maya_html_form(object_storage.urlfor(row['s3_object_name'])))
+            row['parser_version'] = PARSER_VERSION
+        except Exception as e:
+            logging.warning("Skipping {} due to error: {}".format(row['s3_object_name'], str(e)))
+            continue
         yield row
-
 
 def remove_already_parsed(rows):
     all_existing_ids = get_all_existing_ids()
@@ -127,9 +130,9 @@ def flow(*_):
         set_primary_key(['s3_object_name']),
 
         remove_already_parsed,
+        limit(5000),
         store_on_s3,
         parse_notification,
-        limit(5000),
     )
 
 
