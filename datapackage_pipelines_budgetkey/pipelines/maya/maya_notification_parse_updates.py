@@ -102,6 +102,16 @@ def remove_already_parsed(rows):
         if not s3_object_name in all_existing_ids:
             yield row
 
+def limit(num_rows):
+    def limiter(rows):
+        cnt = 0
+        for row in rows:
+            if cnt >= num_rows:
+                break
+            cnt +=1
+            yield row
+    return limiter
+
 def flow(*_):
 
     return Flow(
@@ -119,7 +129,7 @@ def flow(*_):
         remove_already_parsed,
         store_on_s3,
         parse_notification,
-
+        limit(5000),
     )
 
 
