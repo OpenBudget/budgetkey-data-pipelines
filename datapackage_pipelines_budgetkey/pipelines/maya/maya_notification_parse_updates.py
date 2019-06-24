@@ -110,7 +110,7 @@ def limit(num_rows):
         cnt = 0
         for row in rows:
             if cnt >= num_rows:
-                break
+                continue
             cnt +=1
             yield row
     return limiter
