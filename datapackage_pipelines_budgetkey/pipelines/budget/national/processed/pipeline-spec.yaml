@@ -111,19 +111,19 @@ aggregated-yearly:
           amounts:
             type: number
 
-    - run: sample
-
     - run: join_phases
       parameters:
         last-completed-year: 2018
 
     - run: topical_sums
     - run: join_categories
+
     - run: join
       parameters:
         source:
           name: immediate-children
           key: ['year', 'code']
+          delete: true
         target:
           name: immediate-children
           key: null
@@ -237,11 +237,13 @@ aggregated-yearly:
           total_econ_cls_salaries:
             aggregate: sum
 
+
     - run: join
       parameters:
         source:
           name: immediate-children
           key: ['year', 'parent']
+          delete: true
         target:
           name: immediate-children
           key: null
@@ -264,6 +266,7 @@ aggregated-yearly:
     - run: combine-immediate-children
       parameters:
         resource-name: immediate-children
+    - run: sample
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/aggregated-yearly
