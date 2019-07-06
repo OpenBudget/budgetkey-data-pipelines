@@ -317,24 +317,25 @@ entities:
           entities_processed:
             resource-name: entities
 
-geocode:
-  schedule:
-    crontab: "0 0 fri * *"
-  pipeline:
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/entities/scored/datapackage.json
-        resource: entities
-        table: entities_processed
-    - run: stream_remote_resources
-    - run: geocode_entities
-      parameters:
-        input-resource: entities
-        output-resource: entities-geo
-        geo-table: entities_geo
-    - run: dump.to_sql
-      parameters:
-        tables:
-          entities_geo:
-            resource-name: entities-geo
-            mode: update
+# Not used at the moment
+# geocode:
+#   schedule:
+#     crontab: "0 0 fri * *"
+#   pipeline:
+#     - run: add_sql_resource
+#       parameters:
+#         datapackage: /var/datapackages/entities/scored/datapackage.json
+#         resource: entities
+#         table: entities_processed
+#     - run: stream_remote_resources
+#     - run: geocode_entities
+#       parameters:
+#         input-resource: entities
+#         output-resource: entities-geo
+#         geo-table: entities_geo
+#     - run: dump.to_sql
+#       parameters:
+#         tables:
+#           entities_geo:
+#             resource-name: entities-geo
+#             mode: update
