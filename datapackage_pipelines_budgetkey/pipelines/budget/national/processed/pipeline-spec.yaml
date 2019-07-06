@@ -21,7 +21,7 @@ aggregated-yearly:
     - run: concatenate
       parameters:
         target:
-          name: immediate-children
+          name: budget
         fields:
           year:
             - שנה
@@ -85,7 +85,7 @@ aggregated-yearly:
             - יתרת התחיבויות
     - run: filter
       parameters:
-        resources: immediate-children
+        resources: budget
         out:
           - func_cls_title_2: גרעון
 
@@ -118,6 +118,12 @@ aggregated-yearly:
     - run: topical_sums
     - run: join_categories
 
+    - run: duplicate
+      parameters:
+        source: budget
+        target-name: immediate-children
+        target-path: data/immediate-children.csv
+        batch_size: 100000
     - run: join
       parameters:
         source:
