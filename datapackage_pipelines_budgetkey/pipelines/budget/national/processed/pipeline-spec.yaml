@@ -314,12 +314,23 @@ with-extras:
       parameters:
         resources: budget
         sort-by: "{year}{code}"
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/with-extras
+    - run: join
+      parameters:
+        source:
+          name: budget
+          key: ['year', 'code']
+          delete: true
+        target:
+          name: budget
+          key: null
+        fields: {'*': {}}
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
+    - run: sample
     - run: dump.to_sql
       parameters:
         tables:
