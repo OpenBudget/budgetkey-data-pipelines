@@ -108,7 +108,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
         children = row['children']
 
         if iii % 1000 == 0:
-            logging.info('Processed %d rows..., unmatched %d', iii, unmatched_count)
+            logging.info('%d: Processed %d rows..., unmatched %d', cur_year, iii, unmatched_count)
 
         ids = [{'code': row['code'], 'title': row['title']}]
         while len(ids) > 0:
