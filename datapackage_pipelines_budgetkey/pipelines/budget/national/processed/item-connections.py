@@ -99,7 +99,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
     unmatched_count = 0
 
     def append_unmatched(row):
-        put(unmatched_db, '%08d' % 10000000 - unmatched_count, row)
+        put(unmatched_db, '%08d' % (10000000 - unmatched_count), row)
 
     for iii, row in enumerate(rows):
         row = normalize(row)
@@ -125,6 +125,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
             if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
                 if not row.get('code').startswith('C'):
                     append_unmatched(row)
+                    unmatched_count += 1
                     row = None
                     break
 
@@ -133,6 +134,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
             if curated_items is not None:
                 if len(curated_items) == 0:
                     append_unmatched(row)
+                    unmatched_count += 1
                     row = None
                     break
 
@@ -190,6 +192,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
             # Couldn't find match - no point in continuing
             logging.debug('FAILED TO FIND MATCH for %s/%s', cur_year, id)
             append_unmatched(row)
+            unmatched_count += 1
             row = None
             break
 
