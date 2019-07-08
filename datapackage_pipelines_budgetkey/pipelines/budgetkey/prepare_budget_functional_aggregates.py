@@ -11,7 +11,7 @@ def process_row(row, *_):
             'year': row['year'],
             'func_cls_title_1': row['func_cls_title_1'][0],
             'func_cls_title_2': row['func_cls_title_2'][0],
-            'net_revised': int(row['net_revised']),
+            'net_revised': int(row['net_revised'] or 0),
         }
         return ret
 
