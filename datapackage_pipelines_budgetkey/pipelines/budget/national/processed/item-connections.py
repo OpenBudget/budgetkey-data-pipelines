@@ -257,6 +257,11 @@ def process_budgets(rows_):
             row['history'] = {}
             put(new_connected_items, row['code'], row)
 
+        unmatched1.close()
+        unmatched2.close()
+        del unmatched1
+        del unmatched2
+
         yield from iterate_values(connected_items)
 
         del connected_items
