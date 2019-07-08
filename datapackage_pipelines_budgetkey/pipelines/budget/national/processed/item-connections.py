@@ -20,6 +20,8 @@ parameters, dp, res_iter = ingest()
 
 CURRENT_DB = 'connected_items.db'
 NEW_CURRENT_DB = 'new_connected_items.db'
+UNMATCHED1 = 'unmatched1.db'
+UNMATCHED2 = 'unmatched2.db'
 
 
 def similar(s1, s2):
@@ -86,7 +88,7 @@ def update_equiv(e1, e2):
     e1['code_titles'] = sorted(set(e1['code_titles']))
 
 
-def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete):
+def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete, unmatched_db):
 
     # rows = list(rows)
     # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
@@ -94,12 +96,19 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
     # logging.info('new_connected_items: %r', new_connected_items)
 
     mapped_levels = {}
-    unmatched = []
-    for row in rows:
+    unmatched_count = 0
+
+    def append_unmatched(row):
+        put(unmatched_db, '%08d' % 10000000 - unmatched_count, row)
+
+    for iii, row in enumerate(rows):
         row = normalize(row)
         equivs = []
         parent = row['parent']
         children = row['children']
+
+        if iii % 1000 == 0:
+            logging.info('Processed %d rows..., unmatched %d', iii, unmatched_count)
 
         ids = [{'code': row['code'], 'title': row['title']}]
         while len(ids) > 0:
@@ -115,7 +124,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
             non_repeating = '1' in non_repeating and len(non_repeating) == 1
             if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
                 if not row.get('code').startswith('C'):
-                    unmatched.append(row)
+                    append_unmatched(row)
                     row = None
                     break
 
@@ -123,7 +132,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
             curated_items = curated.get((cur_year, id['code']))
             if curated_items is not None:
                 if len(curated_items) == 0:
-                    unmatched.append(row)
+                    append_unmatched(row)
                     row = None
                     break
 
@@ -180,7 +189,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
 
             # Couldn't find match - no point in continuing
             logging.debug('FAILED TO FIND MATCH for %s/%s', cur_year, id)
-            unmatched.append(row)
+            append_unmatched(row)
             row = None
             break
 
@@ -211,9 +220,7 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete)
             row['history'] = new_history
             put(new_connected_items, row['code'], row)
 
-    logging.error('UNMATCHED %d: %d', cur_year, len(unmatched))
-
-    return unmatched
+    logging.error('UNMATCHED %d: %d', cur_year, unmatched_count)
 
 
 def process_budgets(rows_):
@@ -225,17 +232,25 @@ def process_budgets(rows_):
 
         connected_items = plyvel.DB(CURRENT_DB, create_if_missing=True)
         new_connected_items = plyvel.DB(NEW_CURRENT_DB, create_if_missing=True)
+
+        shutil.rmtree(UNMATCHED1, ignore_errors=True)
+        shutil.rmtree(UNMATCHED2, ignore_errors=True)
+        unmatched1 = plyvel.DB(UNMATCHED1, create_if_missing=True)
+        unmatched2 = plyvel.DB(UNMATCHED2, create_if_missing=True)
+
         codes_to_delete = set()
 
-        unmatched = calc_equivs(cur_year, rows,
-                                connected_items, new_connected_items, codes_to_delete)
-        unmatched = calc_equivs(cur_year, reversed(unmatched),
-                                connected_items, new_connected_items, codes_to_delete)
+        calc_equivs(cur_year, rows,
+                    connected_items, new_connected_items, codes_to_delete,
+                    unmatched1)
+        calc_equivs(cur_year, iterate_values(unmatched1),
+                    connected_items, new_connected_items, codes_to_delete,
+                    unmatched2)
 
         for code in codes_to_delete:
             delete(connected_items, code)
 
-        for row in unmatched:
+        for row in iterate_values(unmatched2):
             row['history'] = {}
             put(new_connected_items, row['code'], row)
 
