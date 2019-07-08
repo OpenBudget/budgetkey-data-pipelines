@@ -118,20 +118,14 @@ aggregated-yearly:
     - run: topical_sums
     - run: join_categories
 
-    - run: duplicate
-      parameters:
-        source: budget
-        target-name: immediate-children
-        target-path: data/immediate-children.csv
-        batch_size: 100000
     - run: join
       parameters:
         source:
-          name: immediate-children
+          name: budget
           key: ['year', 'code']
           delete: true
         target:
-          name: immediate-children
+          name: budget
           key: null
         fields:
           year: null
@@ -244,6 +238,13 @@ aggregated-yearly:
             aggregate: sum
 
 
+    - run: duplicate
+      parameters:
+        source: budget
+        target-name: immediate-children
+        target-path: data/immediate-children.csv
+        batch_size: 100000
+
     - run: join
       parameters:
         source:
@@ -317,20 +318,9 @@ with-extras:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/with-extras
-    - run: join
-      parameters:
-        source:
-          name: budget
-          key: ['year', 'code']
-          delete: true
-        target:
-          name: budget
-          key: null
-        fields: {'*': {}}
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
-    - run: sample
     - run: dump.to_sql
       parameters:
         tables:
