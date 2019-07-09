@@ -8,7 +8,7 @@ budget-functional-aggregates:
     - run: add_metadata
       parameters:
         name: budget-functional-aggregates
-        title: Main Page - Aggregated budget by functional classification
+        title: Main Page - Aggregated budget by functional classifications
     - run: load_resource
       parameters:
         url: /var/datapackages/budget/national/processed/aggregated-yearly/datapackage.json
