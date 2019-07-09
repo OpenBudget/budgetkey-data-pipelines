@@ -14,7 +14,6 @@ budget-functional-aggregates:
         url: /var/datapackages/budget/national/processed/aggregated-yearly/datapackage.json
         resource: budget
     - run: prepare_budget_functional_aggregates
-      cache: true
     - run: join
       parameters:
         source:
