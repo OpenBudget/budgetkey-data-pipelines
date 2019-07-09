@@ -17,7 +17,7 @@ budget-functional-aggregates:
       cache: true
     - run: update_resource
       parameters:
-        resource: budget
+        resources: budget
         name: budget-functional-aggregates
     - run: join
       parameters:
