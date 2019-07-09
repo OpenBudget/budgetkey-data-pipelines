@@ -23,6 +23,7 @@ def modify_datapackage(dp, *_):
         {'name': 'net_revised', 'type': 'integer'},
         {'name': 'year', 'type': 'integer'},
     ]
+    df['resources'][0]['name'] = 'budget-functional-aggregates'
     return dp
 
 process(modify_datapackage=modify_datapackage,
