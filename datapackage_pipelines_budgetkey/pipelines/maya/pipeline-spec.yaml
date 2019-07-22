@@ -93,3 +93,17 @@ maya-complete-notification-list:
     - run: dump_to_path
       parameters:
           out-path: /var/datapackages/maya/maya_complete_notification_list
+
+maya-company-officer-list:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya-complete-notification-list
+    - flow: parse_maya_company_officer_list
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_officer_list
+
