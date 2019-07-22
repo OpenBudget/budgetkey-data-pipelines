@@ -59,9 +59,6 @@ FIELDS = [
     'HasStocksInTheCompany',
     'HasStocksInSubsidiaryOrConnectedCompany',
 
-    'PreviousPositions',
-    'Positions',
-
     'HeaderMisparBaRasham',
     'HeaderSemelBursa',
     'KodSugYeshut',
@@ -72,6 +69,8 @@ FIELDS = [
     'PumbiLoPumbi',
     'AsmachtaDuachMeshubash',
     'TaarichIdkunMivne']
+
+ADDITIONAL_FIELDS = ['PreviousPositions', 'Positions']
 
 
 def filter_by_type(rows):
@@ -144,6 +143,7 @@ def flow(*_):
         filter_by_type,
         rename_fields,
         add_fields(FIELDS, 'string'),
+        add_fields(ADDITIONAL_FIELDS, 'string'),
         parse_document,
         delete_fields(['document', 'pdf', 'other', 'num_files', 'parser_version', 'source', 's3_object_name']),
     )
