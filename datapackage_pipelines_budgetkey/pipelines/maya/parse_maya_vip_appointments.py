@@ -38,7 +38,7 @@ RENAME_FIELDS = {
 }
 
 FIELDS = [
-    'SugMisparZihui',
+    'SugMisparZihuy',
     'MisparZihuy',
     'FullName',
     'FullNameEn',
@@ -107,7 +107,7 @@ def parse_document(rows):
                 job_titles.append('{} {}'.format(title1, title2))
 
         for field in FIELDS:
-            row[field] = doc.get(field, [""])[0]
+            row[field] = (doc.get(field, None) or [""])[0]
 
         for field in FIELDS:
             if _is_null_string(row[field]):
@@ -118,6 +118,8 @@ def parse_document(rows):
 
         row['PreviousPositions'] = previous_jobs_at_the_company
         row['Positions'] = job_titles
+
+
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
 
         yield row
