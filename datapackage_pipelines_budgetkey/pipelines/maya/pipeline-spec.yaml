@@ -90,6 +90,11 @@ maya-complete-notification-list:
           fixed_by: []
         target:
           name: maya-complete-notification-list
+    - run: sort
+      parameters:
+        resources: maya-complete-notification-list
+        sort-by: "{date}"
+    - flow: link-to-next-report
     - run: dump_to_path
       parameters:
           out-path: /var/datapackages/maya/maya_complete_notification_list
@@ -119,3 +124,70 @@ maya-company-vip-appointments:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_company_vip_appointments
+
+maya-company-stakeholder-list:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya-complete-notification-list
+    - flow: parse_maya_stakeholder_list
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_stakeholder_list
+    - run: filter
+      parameters:
+        in:
+          - next_doc: null
+    - run: join
+      parameters:
+        source:
+          name: maya-complete-notification-list
+          key: ['id', 'MisparZihui']
+          delete: true
+        target:
+          name: maya-complete-notification-list
+          key: null
+        fields:
+          date: null
+          url: null
+          company: null
+          type: null
+          fix_for: null
+          fixed_by: null
+          stakeholder_type: null
+          CompanyName: null
+          CompanyUrl: null
+          HeaderMisparBaRasham: null
+          HeaderSemelBursa: null
+          KodSugYeshut: null
+          MezahehHotem: null
+          MezahehTofes: null
+          MezahehYeshut: null
+          NeyarotErechReshumim: null
+          PreviousCompanyNames: null
+          Date: null
+          FullName: null
+          FullNameEn: null
+          Position: null
+          SugMisparZihui: null
+          Nationality: null
+          IsFrontForOthers:
+            aggregate: max
+          IsRequiredToReportChange:
+            aggregate: max
+          Notes:
+            aggregate: set
+          CapitalPct:
+            aggregate: sum
+          VotePower:
+            aggregate: sum
+          CapitalPct_Dilul:
+            aggregate: sum
+          VotePower_Dilul:
+            aggregate: sum
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_aggregate_stakeholder_list
