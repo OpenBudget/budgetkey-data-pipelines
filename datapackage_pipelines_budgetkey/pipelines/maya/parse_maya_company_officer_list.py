@@ -51,7 +51,7 @@ TABLE_FIELDS = ['FullName',
 
 def filter_by_type(rows):
     for row in rows:
-        if row['type'] == 'ת097':
+        if row['type'] in ['ת097', 'ת306']:
             yield row
 
 
