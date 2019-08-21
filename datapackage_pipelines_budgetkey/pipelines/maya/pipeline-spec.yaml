@@ -94,7 +94,7 @@ maya-complete-notification-list:
       parameters:
         resources: maya-complete-notification-list
         sort-by: "{date}"
-    - flow: link-to-next-report
+    - flow: link_to_next_report
     - run: dump_to_path
       parameters:
           out-path: /var/datapackages/maya/maya_complete_notification_list
