@@ -34,7 +34,7 @@ def m_tmicha_scraper():
 
                 target_audience='מוסדות ציבור',
 
-                documents=link,
+                documents=[dict(link=link, description=page_title)],
             )
             total += 1
     assert total > 0
