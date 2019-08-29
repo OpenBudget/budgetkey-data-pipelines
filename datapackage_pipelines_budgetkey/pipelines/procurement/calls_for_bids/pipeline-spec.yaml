@@ -63,8 +63,8 @@ calls-for-bids:
     - run: add_metadata
       parameters:
         name: calls-for-bids
-    - flow: molsa
-      runner: tzabar
+    #- flow: molsa
+    #  runner: tzabar
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
