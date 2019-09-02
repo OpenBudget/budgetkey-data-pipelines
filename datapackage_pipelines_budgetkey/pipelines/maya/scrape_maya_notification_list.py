@@ -129,16 +129,8 @@ def _collect_date_range(session, date_from, date_to):
 
 
 def scrape_maya_notification_list():
-    date_from = date.today() - relativedelta(years=3)
+    date_from = date.today() - relativedelta(years=9)
     date_to = date.today()
-
-    # try:
-    #     engine = create_engine(get_connection_string())
-    #     earliest_record = next(iter(engine.execute(text("SELECT min(date) as dt FROM maya_notifications"))),None)
-    #     if earliest_record and earliest_record['dt']:
-    #         date_from = earliest_record['dt'].date() - relativedelta(months=3)
-    # except (OperationalError, ProgrammingError):
-    #     pass
 
     logging.info("Scrape Maya From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
     session = requests.Session()

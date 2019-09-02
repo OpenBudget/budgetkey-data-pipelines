@@ -3,6 +3,8 @@ from dataflows import Flow, printer, delete_fields, add_field, add_computed_fiel
 import csv
 import logging
 
+
+
 RENAME_FIELDS = {
     'NoseMisra': 'FullName',
     'ShemAnglit': 'FullNameEn',
@@ -17,20 +19,20 @@ RENAME_FIELDS = {
 }
 
 FIELDS = [
-      'CompanyName'
+      'CompanyName',
       'CompanyUrl',
       'HeaderMisparBaRasham',
       'HeaderSemelBursa',
       'KodSugYeshut',
       'MezahehHotem',
       'MezahehTofes',
-      'MezahehYeshut',
+
       'NeyarotErechReshumim',
       'PumbiLoPumbi',
-      'AsmachtaDuachMeshubash',
       'PreviousCompanyNames',
-      'Date',
       'TaarichIdkunMivne']
+
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'Date', 'MezahehYeshut']
 
 TABLE_FIELDS = ['FullName',
                 'FullNameEn',
@@ -48,10 +50,30 @@ TABLE_FIELDS = ['FullName',
                 ]
 
 
+def verify_row_count(row, expected_fields, expected_count, is_required=True):
+    doc = row['document']
+    url = row['url']
+    for field in expected_fields:
+        if not is_required and field not in doc:
+            return
+        if field not in doc:
+            raise Exception("Document {} failed validation. textAlias {} not found. (expected: {})".format(url, field, expected_count))
+        elif len(doc[field]) != expected_count:
+            raise Exception("Document {} failed validation. textAlias {} found {} times. (expected: {})".format(url, field, len(doc[field]), expected_count))
+
+
+def validate(rows):
+    for row in rows:
+        doc = row['document']
+        verify_row_count(row, FIELDS, 1)
+        verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
+        num_officers = len(doc.get('FullName', []))
+        verify_row_count(row, TABLE_FIELDS, num_officers)
+        yield row
 
 def filter_by_type(rows):
     for row in rows:
-        if row['type'] in ['ת097', 'ת306']:
+        if row['type'] in ['ת097']:
             yield row
 
 
@@ -62,12 +84,10 @@ def parse_document(rows):
         fields = {k:doc.get(k, []) for k in TABLE_FIELDS }
 
         num_officers = max(len(fields[k]) for k in TABLE_FIELDS  )
-
-        if min(len(fields[k]) for k in TABLE_FIELDS  ) != num_officers:
-            logging.warning("Expected all company officers to have same number of records: Mismatch in {} num_officers: {} missing_records: {}"
-                            .format(row['url'], num_officers, num_officers - min(len(fields[k]) for k in TABLE_FIELDS  )))
         for field in FIELDS:
-            row[field] = doc.get(field,[""])[0]
+            row[field] = doc[field][0]
+        for field in OPTIONAL_FIELDS:
+            row[field] = doc[field][0] if doc.get(field) else None
         for i in range(num_officers):
             officer_fields = {k:(fields[k][i] if len(fields[k]) >i else "") for k in TABLE_FIELDS}
             new_record = {}
@@ -95,12 +115,15 @@ def fix_fields(rows):
             if row[f] == ('-' * len(row[f])):
                 row[f] = ""
         yield row
+
 def flow(*_):
     return Flow(
         filter_by_type,
         rename_fields,
         add_fields(FIELDS, 'string'),
+        add_fields(OPTIONAL_FIELDS, 'string'),
         add_fields(TABLE_FIELDS,'string'),
+        validate,
         parse_document,
         fix_fields,
         delete_fields(['document', 'pdf', 'other', 'num_files', 'parser_version', 'source', 's3_object_name']),
@@ -108,7 +131,6 @@ def flow(*_):
 
 if __name__ == '__main__':
     csv.field_size_limit(512*1024)
-
     Flow(
         load('/var/datapackages/maya/maya_complete_notification_list/datapackage.json'),
         flow(),
