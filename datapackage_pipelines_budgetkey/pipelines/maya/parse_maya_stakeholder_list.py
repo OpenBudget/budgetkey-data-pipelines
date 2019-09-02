@@ -1,7 +1,6 @@
 
 from dataflows import Flow, printer, delete_fields, add_field, add_computed_field, load, set_type
 import csv
-import logging
 
 CORE_STAKE_HOLDER_TEXT = 'בעלי עניין בתאגיד בעלי אמצעי שליטה מהותי'
 CORE_STAKE_HOLDER_FIELDS = {
@@ -49,12 +48,12 @@ FIELDS = [
       'KodSugYeshut',
       'MezahehHotem',
       'MezahehTofes',
-      'MezahehYeshut',
       'NeyarotErechReshumim',
       'PumbiLoPumbi',
-      'AsmachtaDuachMeshubash',
       'PreviousCompanyNames',
       'Date']
+
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut',]
 
 TABLE_FIELDS = ['FullName',
                 'FullNameEn',
@@ -63,7 +62,7 @@ TABLE_FIELDS = ['FullName',
                 'MisparZihui',
                 'Nationality',
                 'IsFrontForOthers',
-                'IsRequiredToReportChange',
+
                 'TreasuryShares',
                 'PreviousAmount',
                 'ChangeSincePrevious',
@@ -72,7 +71,43 @@ TABLE_FIELDS = ['FullName',
                 'MinimumRetentionRate',
                 'Notes',
                 ]
+OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange',]
 
+def verify_row_count(row, expected_fields, expected_count, is_required=True):
+    doc = row['document']
+    url = row['url']
+    for field in expected_fields:
+        if not is_required and not doc.get(field):
+            return
+        if field not in doc:
+            raise Exception("Document {} failed validation. textAlias {} not found. (expected: {})".format(url, field, expected_count))
+        elif len(doc[field]) != expected_count:
+            raise Exception("Document {} failed validation. textAlias {} found {} times. (expected: {})".format(url, field, len(doc[field]), expected_count))
+
+
+def validate(rows):
+    for row in rows:
+        doc = row['document']
+        url = row['url']
+
+        verify_row_count(row, FIELDS, 1)
+        verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
+        num_stakeholders = len(doc.get('FullName', []))
+        verify_row_count(row, TABLE_FIELDS, num_stakeholders)
+        verify_row_count(row, OPTIONAL_TABLE_FIELDS, num_stakeholders, is_required=False)
+
+        num_core_stake_holders = len(doc.get('ShemVeSugNiarErech', []))
+        verify_row_count(row, CORE_STAKE_HOLDER_FIELDS.keys(), num_core_stake_holders)
+
+        num_officer_stake_holders = len(doc.get('ShemVeSugNiarErechBaelyEnyan', []))
+        verify_row_count(row, OFFICER_STAKE_HOLDER_FIELDS.keys(), num_officer_stake_holders)
+
+        is_empty_officer_list = num_officer_stake_holders==1 and not doc['ShemVeSugNiarErechBaelyEnyan'][0].replace('_','').replace('-','').strip()
+        if is_empty_officer_list and (num_stakeholders != num_core_stake_holders):
+            raise Exception("Documnet {} failed Validation. Expected the core list {} to match stakeholder count {}".format(url, num_stakeholders, num_core_stake_holders ))
+        elif not is_empty_officer_list and (num_stakeholders != num_core_stake_holders + num_officer_stake_holders):
+            raise Exception("Documnet {} failed Validation. Expected the core list {} to match stakeholder count + officer count: {} + {}".format(url, num_stakeholders, num_core_stake_holders, num_officer_stake_holders ))
+        yield row
 
 def filter_by_type(rows):
     for row in rows:
@@ -85,13 +120,13 @@ def parse_document(rows):
         doc = row['document']
 
         for field in FIELDS:
-            try:
-                row[field] = doc.get(field,[""])[0]
-            except:
-                logging.warning(field)
-                raise
-        stakeholder_fields = {k:doc.get(k, []) for k in TABLE_FIELDS }
-        num_stakeholders = max(len(stakeholder_fields[k]) for k in stakeholder_fields  )
+            row[field] = doc[field][0]
+        for field in OPTIONAL_FIELDS:
+            row[field] = doc[field][0] if doc.get(field) else None
+
+        num_stakeholders = len(doc[TABLE_FIELDS[0]])
+        stakeholder_fields = {k:doc[k] for k in TABLE_FIELDS }
+        stakeholder_fields.update({k: doc[k] if doc.get(k) else [None] * num_stakeholders  for k in OPTIONAL_TABLE_FIELDS})
 
         core_stakeholder_fields = {v:doc.get(k, []) for k,v in CORE_STAKE_HOLDER_FIELDS.items() }
         num_core_stakeholders = max(len(core_stakeholder_fields[k]) for k in core_stakeholder_fields  )
@@ -138,9 +173,10 @@ def flow(*_):
         filter_by_type,
         rename_fields,
         add_field('stakeholder_type', 'string'),
-        add_fields(FIELDS, 'string'),
-        add_fields(TABLE_FIELDS,'string'),
+        add_fields(FIELDS + OPTIONAL_FIELDS, 'string'),
+        add_fields(TABLE_FIELDS + OPTIONAL_TABLE_FIELDS,'string'),
         add_fields(CORE_STAKE_HOLDER_FIELDS.values(),'string'),
+        validate,
         parse_document,
         delete_fields(['document', 'pdf', 'other', 'num_files', 'parser_version', 'source', 's3_object_name']),
         fix_fields,
