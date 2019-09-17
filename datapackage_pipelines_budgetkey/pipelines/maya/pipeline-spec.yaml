@@ -125,6 +125,19 @@ maya-company-vip-appointments:
       parameters:
         out-path: /var/datapackages/maya/maya_company_vip_appointments
 
+maya-holdings-changes:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya-complete-notification-list
+    - flow: parse_maya_holdings_change
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_holdings_change
+
 maya-company-stakeholder-list:
   dependencies:
     - pipeline: ./maya/maya-complete-notification-list
