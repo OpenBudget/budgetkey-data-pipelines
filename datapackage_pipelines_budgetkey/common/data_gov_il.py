@@ -13,9 +13,10 @@ BASE_PATH = os.path.dirname(__file__)
 
 def search_resource(name):
     try:
-        results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()['result']['results']
+        results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()
     except Exception:
         results = json.load(open(os.path.join(BASE_PATH, 'datagovil.json')))
+    results = results['result']['results']
     results = [
         r for r in results
         if r['name'] == name
