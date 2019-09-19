@@ -1,16 +1,21 @@
+import os
 import logging
 import requests
+import json
 
 # ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
 SEARCH_RESOURCE_URL = 'https://data.gov.il/api/action/resource_search'
-
+BASE_PATH = os.path.dirname(__file__)
 
 # def get_all_packages():
 #     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
 
 
 def search_resource(name):
-    results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()['result']['results']
+    try:
+        results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()['result']['results']
+    except Exception:
+        results = json.load(open(os.path.join(BASE_PATH, 'datagovil.json')))
     results = [
         r for r in results
         if r['name'] == name
