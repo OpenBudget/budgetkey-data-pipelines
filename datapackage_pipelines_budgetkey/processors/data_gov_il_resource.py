@@ -27,6 +27,7 @@ def flow(parameters):
     data_gov_il_resource = get_resource(dataset_name, resource_name)
 
     url = data_gov_il_resource['url']
+    url = url.replace('e.data.gov.il', 'data.gov.il')
     args = {
         'name': resource_name,
     }
