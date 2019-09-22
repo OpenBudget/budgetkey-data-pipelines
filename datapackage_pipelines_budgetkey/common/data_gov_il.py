@@ -11,7 +11,7 @@ BASE_PATH = os.path.dirname(__file__)
 #     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
 
 
-def search_dataset(dataset_name, resource_name):
+def search_dataset(dataset_name):
     try:
         results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+dataset_name)).json()
     except Exception:
