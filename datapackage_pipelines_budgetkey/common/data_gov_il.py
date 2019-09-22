@@ -11,19 +11,24 @@ BASE_PATH = os.path.dirname(__file__)
 #     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
 
 
-def search_resource(name):
+def search_dataset(dataset_name, resource_name):
     try:
-        results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+name)).json()
+        results = requests.get(SEARCH_RESOURCE_URL, params=dict(query='name:'+dataset_name)).json()
     except Exception:
         results = json.load(open(os.path.join(BASE_PATH, 'datagovil.json')))
     results = results['result']['results']
     results = [
         r for r in results
-        if r['name'] == name
+        if r['name'] == dataset_name
     ]
-    assert len(results) == 1, 'Failed to find result for name %s: %r' % (name, results)
+    assert len(results) == 1, 'Failed to find dataset for name %s: %r' % (dataset_name, results)
     return results[0]
 
 
 def get_resource(dataset_name, resource_name):
-    return search_resource(resource_name)
+    dataset = search_dataset(dataset_name)
+    for resource in dataset['resources']:
+        if resource['name'] == resource_name:
+            return resource
+    assert False, 'Failed to find resource for name %s' % (resource_name,)
+
