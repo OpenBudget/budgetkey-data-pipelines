@@ -116,6 +116,9 @@ support-criteria:
           contact_email:
             type: string            
 
+          claim_date:
+            type: datetime
+
           documents:
             type: array
             es:itemType: object
