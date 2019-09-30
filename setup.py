@@ -29,6 +29,7 @@ setup(
 #                      'urllib3==1.21.1',
                       'geocoder',
                       'boto3',
+                      'paramiko',
                       'dataflows>=0.0.56',
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
