@@ -4,6 +4,7 @@ import itertools
 import logging
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver import ActionChains
@@ -51,19 +52,8 @@ scraped_ids = set()
 
 def scrape():
 
-    dcap = dict(DesiredCapabilities.PHANTOMJS)
-    dcap["phantomjs.page.settings.userAgent"] = (
-        "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKML, like Gecko) Chrome/60.0.3112.113 Safari/537.36"
-    )
-
-    # Prepare Driver
-    driver = webdriver.Remote(
-        command_executor='http://tzabar.obudget.org:8910',
-        desired_capabilities=dcap
-    )
-    driver = webdriver.Chrome()
-
-    driver.set_window_size(1200, 1024)
+    gcd = google_chrome_driver()
+    driver = gcd.driver
 
     def prepare():
         logging.info('PREPARING')
@@ -135,6 +125,7 @@ def scrape():
             else:
                 break
 
+    gcd.teardown()
 
 datapackage['resources'].append({
     'name': 'special-entities',
