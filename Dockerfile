@@ -1,6 +1,7 @@
 FROM frictionlessdata/datapackage-pipelines:latest
 
-RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword poppler-utils libmagic binutils openjdk7-jre
+RUN apk add --update --no-cache libxml2 libxslt sudo openssh-client curl jpeg-dev antiword \
+    poppler-utils libmagic binutils openjdk7-jre 
 RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && addgroup dpp redis && addgroup redis dpp && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && chmod -R a+r /var/datapackages && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
@@ -10,7 +11,7 @@ RUN addgroup dpp && adduser -s /bin/bash -D -G dpp dpp && addgroup dpp root && a
     chown dpp.dpp /var/run/dpp -R && \
     chmod 700 /home/dpp/.ssh && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
-RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev
+RUN apk --update --no-cache --virtual=build-dependencies add build-base libxml2-dev libxslt-dev libffi-dev
 RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py
 
 ADD ./ /
