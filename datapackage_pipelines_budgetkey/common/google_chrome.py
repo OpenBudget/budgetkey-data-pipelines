@@ -41,7 +41,7 @@ class google_chrome_driver():
 
         chrome_options = webdriver.ChromeOptions()
         chrome_options.debugger_address = f'{hostname_ip}:{port}'
-        self.driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
+        self.driver = webdriver.Chrome('/usr/bin/chromedriver', options=chrome_options)
 
     def teardown(self):
         if self.docker_container:
