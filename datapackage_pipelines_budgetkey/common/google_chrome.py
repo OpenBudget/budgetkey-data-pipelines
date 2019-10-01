@@ -24,6 +24,7 @@ class google_chrome_driver():
         self.client.connect(username=username, hostname=hostname)
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
+        self.docker_container = None
         while not self.docker_container:
             time.sleep(3)
             self.docker_container = stdout.read().decode('ascii').strip()
