@@ -16,7 +16,9 @@ RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filem
 
 ADD ./ /
 
-RUN apk --update --no-cache add chromium-chromedriver
+RUN \
+    echo "@community http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk --update --no-cache add chromium-chromedriver
 # wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
 #     unzip chromedriver_linux64.zip && \
 #     mv chromedriver /usr/bin/chromedriver && \
