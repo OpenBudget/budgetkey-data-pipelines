@@ -33,8 +33,8 @@ class google_chrome_driver():
         for i in range(10):
             time.sleep(6)
             try:
-                windows = len(requests.get(f'http://{hostname_ip}:{port}/json/list').json())
-                if windows > 0:
+                windows = requests.get(f'http://{hostname_ip}:{port}/json/list').json()
+                if len(windows) == 1:
                     break
             except Exception as e:
                 logging.error('Waiting %s (%s): %s', i, windows, e)
