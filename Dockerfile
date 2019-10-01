@@ -16,20 +16,19 @@ RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filem
 
 ADD ./ /
 
-RUN \
-    echo "@community http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    apk --update --no-cache add chromium-chromedriver
-# wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
-#     unzip chromedriver_linux64.zip && \
-#     mv chromedriver /usr/bin/chromedriver && \
-#     chmod +x /usr/bin/chromedriver
-
 ADD .dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/
 RUN mv /datapackage_pipelines_budgetkey/pipelines/.dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/dpp-runners.yaml
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN pip install -U -r /requirements-dev.txt
+
+RUN apk --update --no-cache add chromium-chromedriver --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+# wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
+#     unzip chromedriver_linux64.zip && \
+#     mv chromedriver /usr/bin/chromedriver && \
+#     chmod +x /usr/bin/chromedriver
+
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/* && \
     ln -s /usr/lib/libmagic.so.1 /usr/lib/libmagic.so
