@@ -16,10 +16,11 @@ RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filem
 
 ADD ./ /
 
-RUN wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && \
-    mv chromedriver /usr/bin/chromedriver && \
-    chmod +x /usr/bin/chromedriver
+RUN apk --update --no-cache add chromium-chromedriver
+# wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
+#     unzip chromedriver_linux64.zip && \
+#     mv chromedriver /usr/bin/chromedriver && \
+#     chmod +x /usr/bin/chromedriver
 
 ADD .dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/
 RUN mv /datapackage_pipelines_budgetkey/pipelines/.dpp-runners.tzabar /datapackage_pipelines_budgetkey/pipelines/dpp-runners.yaml
