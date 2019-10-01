@@ -24,7 +24,6 @@ RUN pip install -e /
 RUN pip install -U -r /requirements-dev.txt
 
 RUN apk --update --no-cache add -u chromium-chromedriver --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
-RUN apk --update --no-cache add -u libstdc++ --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main
 # wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
 #     unzip chromedriver_linux64.zip && \
 #     mv chromedriver /usr/bin/chromedriver && \
@@ -33,6 +32,8 @@ RUN apk --update --no-cache add -u libstdc++ --repository=http://dl-cdn.alpineli
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/* && \
     ln -s /usr/lib/libmagic.so.1 /usr/lib/libmagic.so
+
+RUN apk --update --no-cache add -u --repository=http://dl-cdn.alpinelinux.org/alpine/edge/main libstdc++ musl
 
 USER dpp
 
