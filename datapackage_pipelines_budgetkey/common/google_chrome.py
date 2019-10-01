@@ -1,11 +1,10 @@
 import paramiko
 import random
-import os
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 import time
 import requests
 import socket
+import logging
+from selenium import webdriver
 
 
 class google_chrome_driver():
@@ -25,10 +24,19 @@ class google_chrome_driver():
         self.client.connect(username=username, hostname=hostname)
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
-        time.sleep(10)
-        self.docker_container = stdout.read().decode('ascii').strip()
+        while not self.docker_container:
+            time.sleep(3)
+            self.docker_container = stdout.read().decode('ascii').strip()
 
-        assert len(requests.get(f'http://{hostname_ip}:{port}/json/list').json()) > 0
+        windows = None
+        for i in range(10):
+            time.sleep(6)
+            try:
+                windows = len(requests.get(f'http://{hostname_ip}:{port}/json/list').json())
+                if windows > 0:
+                    break
+            except Exception as e:
+                logging.error('Waiting %s (%s): %s', i, windows, e)
 
         chrome_options = webdriver.ChromeOptions()
         chrome_options.debugger_address = f'{hostname_ip}:{port}'
