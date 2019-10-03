@@ -1,3 +1,5 @@
+import logging
+
 from dataflows import Flow, load, update_resource
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
@@ -21,8 +23,12 @@ def finalize(f):
     def func(package):
         yield package.pkg
         yield from package
-        f()
+        try:
+            f()
+        except Exception:
+            logging.exception('Failed to finalize')
     return func
+
 
 def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
