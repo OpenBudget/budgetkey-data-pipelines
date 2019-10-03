@@ -20,6 +20,6 @@ def get_resource(gcd, dataset_name, resource_name):
     dataset = search_dataset(gcd, dataset_name)
     for resource in dataset['resources']:
         if resource['name'] == resource_name:
-            gcd.download(resource['url'].replace('//e.', '//'))
+            return gcd.download(resource['url'].replace('//e.', '//'))
     assert False, 'Failed to find resource for name %s' % (resource_name,)
 
