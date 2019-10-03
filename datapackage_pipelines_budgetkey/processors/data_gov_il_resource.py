@@ -3,6 +3,7 @@ from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 def add_source(title, path):
@@ -15,6 +16,12 @@ def add_source(title, path):
         yield from package
     return func
         
+def finalize(f):
+    def func(package):
+        yield package.pkg
+        yield from package
+        f()
+    return func
 
 def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
@@ -24,10 +31,9 @@ def flow(parameters):
         'dpp:streaming': True,
     })
 
-    data_gov_il_resource = get_resource(dataset_name, resource_name)
+    gcd = google_chrome_driver()
+    url = get_resource(gcd, dataset_name, resource_name)
 
-    url = data_gov_il_resource['url']
-    url = url.replace('e.data.gov.il', 'data.gov.il')
     args = {
         'name': resource_name,
     }
@@ -37,7 +43,8 @@ def flow(parameters):
     return Flow(
         add_source('{}/{}'.format(dataset_name, resource_name), url),
         load(url, **args),
-        update_resource(resource_name, **resource)
+        update_resource(resource_name, **resource),
+        finalize(gcd.teardown),
     )
 
 
