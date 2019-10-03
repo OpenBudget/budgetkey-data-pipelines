@@ -4,7 +4,7 @@ import requests
 import json
 
 # ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
-PACKAGE_GET_URL = 'https://data.gov.il/api/action/package_show'
+PACKAGE_GET_URL = 'https://data.gov.il/api/action/package_show?id='
 BASE_PATH = os.path.dirname(__file__)
 
 # def get_all_packages():
@@ -12,7 +12,7 @@ BASE_PATH = os.path.dirname(__file__)
 
 
 def search_dataset(gcd, dataset_name):
-    results = gcd.json(PACKAGE_GET_URL, params=dict(id=dataset_name)).json()
+    results = gcd.json(PACKAGE_GET_URL + dataset_name).json()
     return results['result']
 
 
