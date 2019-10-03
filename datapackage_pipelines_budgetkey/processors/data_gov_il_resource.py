@@ -15,7 +15,8 @@ def add_source(title, path):
         yield package.pkg
         yield from package
     return func
-        
+
+
 def finalize(f):
     def func(package):
         yield package.pkg
@@ -31,7 +32,7 @@ def flow(parameters):
         'dpp:streaming': True,
     })
 
-    gcd = google_chrome_driver()
+    gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
     url = get_resource(gcd, dataset_name, resource_name)
 
     args = {
