@@ -12,7 +12,6 @@ national-budgets:
         title: National Budget
         revision: '2019-01'
     - run: data_gov_il_resources
-      runner: tzabar
       parameters:
         batch:
           - dataset-name: 2004-1997
