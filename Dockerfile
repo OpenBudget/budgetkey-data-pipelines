@@ -23,7 +23,8 @@ RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN pip install -U -r /requirements-dev.txt
 
-RUN apk --update --no-cache add -u chromium-chromedriver --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community
+RUN apk --update --no-cache add -u chromium-chromedriver --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community && \
+    cd /usr/local/bin/ && ln -s /usr/bin/chromedriver
 # wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
 #     unzip chromedriver_linux64.zip && \
 #     mv chromedriver /usr/bin/chromedriver && \
