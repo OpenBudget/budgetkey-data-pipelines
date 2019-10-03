@@ -65,8 +65,8 @@ class google_chrome_driver():
         expected = os.path.basename(url)
         self.driver.get(url)
         downloads = []
-        for i in range(10):
-            time.sleep(3)
+        for i in range(120):
+            time.sleep(6)
             downloads = self.list_downloads()
             if expected in downloads:
                 return f'http://{self.hostname}:{self.port+1}/{expected}'
