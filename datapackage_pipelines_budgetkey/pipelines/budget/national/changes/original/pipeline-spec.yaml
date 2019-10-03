@@ -7,7 +7,6 @@ national-budget-changes:
         name: national-budget-changes
         title: National Budget Amendments
     - run: data_gov_il_resources
-      runner: tzabar
       parameters:
         batch:
           - dataset-name: 2005

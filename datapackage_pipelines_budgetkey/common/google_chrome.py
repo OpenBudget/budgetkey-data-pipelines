@@ -23,10 +23,7 @@ class google_chrome_driver():
         self.client._policy = paramiko.WarningPolicy()
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-        try:
-            self.client.connect(username=username, hostname=self.hostname, key_filename='/home/dpp/.ssh/id_rsa')
-        except:
-            self.client.connect(username=username, hostname=self.hostname)
+        self.client.connect(username=username, hostname=self.hostname)
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
         self.docker_container = None
