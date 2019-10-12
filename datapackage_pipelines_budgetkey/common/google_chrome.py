@@ -6,6 +6,8 @@ import socket
 import logging
 import json
 import os
+import shutil
+import tempfile
 from selenium import webdriver
 
 
@@ -71,7 +73,14 @@ class google_chrome_driver():
             time.sleep(6)
             downloads = self.list_downloads()
             if expected in downloads:
-                return f'http://{self.hostname}:{self.port+1}/{expected}'
+                print('found {} in {}'.format(expected, downloads))
+                time.sleep(20)
+                out = tempfile.NamedTemporaryFile(delete=False)
+                url = f'http://{self.hostname}:{self.port+1}/{expected}'
+                stream = requests.get(url, stream=True, timeout=30).raw
+                shutil.copyfileobj(stream, out)
+                out.close()
+                return out.name
         assert False, 'Failed to download file, %r' % downloads
 
 

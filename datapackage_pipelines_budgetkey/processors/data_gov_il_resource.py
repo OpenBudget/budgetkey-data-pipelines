@@ -40,18 +40,18 @@ def flow(parameters):
     })
 
     gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
-    url = get_resource(gcd, dataset_name, resource_name)
+    url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {
         'name': resource_name,
         'http_timeout': 30
     }
-    if '.xls' in url:
+    if '.xls' in path:
         args['force_strings'] = True
 
     return Flow(
         add_source('{}/{}'.format(dataset_name, resource_name), url),
-        load(url, **args),
+        load(path, **args),
         update_resource(resource_name, **resource),
         finalize(gcd.teardown),
     )

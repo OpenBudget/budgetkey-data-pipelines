@@ -37,7 +37,7 @@ def get_explanations(url):
             resp = requests.get(url, stream=True)
             stream = resp.raw
             shutil.copyfileobj(stream, archive)
-            archive.flush()            
+            archive.flush()
         archive = open(archive.name, 'rb')
 
         if '.tar.gz' in url:
