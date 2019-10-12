@@ -24,6 +24,7 @@ def finalize(f):
         yield package.pkg
         yield from package
         try:
+            logging.warning('Finalizing connection')
             f()
         except Exception:
             logging.exception('Failed to finalize')
@@ -43,6 +44,7 @@ def flow(parameters):
 
     args = {
         'name': resource_name,
+        'http_timeout': 30
     }
     if '.xls' in url:
         args['force_strings'] = True
