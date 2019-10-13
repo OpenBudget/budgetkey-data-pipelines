@@ -18,7 +18,7 @@ class google_chrome_driver():
         self.hostname_ip = socket.gethostbyname(self.hostname)
         username = 'adam'
         self.port = random.randint(20000, 30000)
-        print('Creating connection for client #{}'.format(self.port))
+        # print('Creating connection for client #{}'.format(self.port))
         cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} -d akariv/google-chrome-in-a-box {self.port} {self.port+1}'
 
         self.client = paramiko.SSHClient()
@@ -49,7 +49,7 @@ class google_chrome_driver():
         self.driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
 
     def teardown(self):
-        print('Closing connection for client #{}'.format(self.port))
+        # print('Closing connection for client #{}'.format(self.port))
         if self.docker_container:
             stdin, stdout, stderr = self.client.exec_command(f'docker stop {self.docker_container}')
             stdout.read()
