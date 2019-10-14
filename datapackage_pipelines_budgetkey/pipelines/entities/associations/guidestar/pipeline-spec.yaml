@@ -117,12 +117,12 @@ guidestar:
         target_column: association_is_new_org
         year_column: association_year_established
 
-    - run: dump.to_sql
+    - run: dump_to_sql
       parameters:
         tables:
           guidestar_processed:
             resource-name: guidestar
 
-    - run: dump.to_path
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/entities/associations/guidestar
