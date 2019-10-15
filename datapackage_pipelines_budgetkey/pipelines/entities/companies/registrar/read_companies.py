@@ -2,6 +2,7 @@ from dataflows import (
     Flow, load, concatenate, update_resource,
     set_primary_key, set_type, printer
 )
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 
@@ -54,9 +55,10 @@ def clear_bool_values(package):
 
 
 def flow(*_):
+    gcd = google_chrome_driver()
+    download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
     return Flow(
-        load('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv',
-             cast_strategy=load.CAST_TO_STRINGS),
+        load(download, cast_strategy=load.CAST_TO_STRINGS),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
         set_type('company_registration_date', type='date', format='%d/%m/%Y'),

@@ -9,7 +9,7 @@ scraper:
         name: company-registry
         title: חברות פעילות מתוך רשם החברות
     - flow: read_companies
-      runner: tzabar
+      # runner: tzabar
     # - run: set_primary_key
     #   parameters:
     #     company-details:
