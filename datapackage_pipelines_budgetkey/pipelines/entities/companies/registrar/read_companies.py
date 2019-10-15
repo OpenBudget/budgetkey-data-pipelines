@@ -1,6 +1,6 @@
 from dataflows import (
     Flow, load, concatenate, update_resource,
-    set_primary_key, set_type
+    set_primary_key, set_type, printer
 )
 
 
@@ -66,6 +66,7 @@ def flow(*_):
         clear_bool_values,
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
+        printer(),
     )
 
 
