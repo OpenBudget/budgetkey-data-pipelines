@@ -25,10 +25,6 @@ RUN pip install -U -r /requirements-dev.txt
 
 RUN apk --update --no-cache add -u chromium-chromedriver --repository=http://dl-cdn.alpinelinux.org/alpine/edge/community && \
     cd /usr/local/bin/ && ln -s /usr/bin/chromedriver
-# wget https://chromedriver.storage.googleapis.com/78.0.3904.11/chromedriver_linux64.zip && \
-#     unzip chromedriver_linux64.zip && \
-#     mv chromedriver /usr/bin/chromedriver && \
-#     chmod +x /usr/bin/chromedriver
 
 RUN apk del build-dependencies && \
     sudo rm -rf /var/cache/apk/* && \
@@ -38,13 +34,13 @@ RUN apk --update --no-cache add -u --repository=http://dl-cdn.alpinelinux.org/al
 
 USER dpp
 
-
 ENV PYTHONPATH=/
 ENV LD_LIBRARY_PATH=/usr/lib
 ENV DPP_PROCESSOR_PATH=/datapackage_pipelines_budgetkey/processors
 ENV DPP_REDIS_HOST=localhost
 ENV REDIS_USER=dpp
 ENV REDIS_GROUP=dpp
+ENV DPP_NUM_WORKERS=8
 
 WORKDIR /datapackage_pipelines_budgetkey/pipelines/
 
