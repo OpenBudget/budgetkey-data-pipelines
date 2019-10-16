@@ -1,6 +1,7 @@
-import csv, os, io, contextlib
+import os
+import io
 import shutil
-from urllib.parse import urljoin
+import time
 
 import logging
 from botocore.client import Config
@@ -141,7 +142,7 @@ class ObjectStorage(FileBasedStorage):
         else:
             return bool(res)
 
-    def write(self, object_name, data=None, file_name=None, create_bucket=True, public_bucket=False, content_type=None):
+    def write(self, object_name, data=None, file_name=None, create_bucket=True, public_bucket=False, content_type=None, attempt=0):
         addtional_attrs = {}
         if content_type is not None:
             addtional_attrs['ContentType'] = content_type
@@ -157,7 +158,15 @@ class ObjectStorage(FileBasedStorage):
             return self.urlfor(object_name)
         except ClientError as e:
             logging.exception('Error WRITING')
-            if create_bucket:
+            if attempt == 0:
+                logging.info('RETRYING IN A MINUTE')
+                time.sleep(60)
+                return self.write(
+                    object_name, data=data, file_name=file_name, 
+                    create_bucket=create_bucket, public_bucket=public_bucket, 
+                    content_type=content_type, attempt=attempt+1)
+
+            elif create_bucket:
                 self.s3.create_bucket(Bucket=self.bucket_name)
                 if public_bucket:
                     try:
@@ -168,7 +177,10 @@ class ObjectStorage(FileBasedStorage):
                     except ClientError as e2:
                         logging.exception('Failed to put bucket policy', exc_info=e2)
                         pass
-                return self.write(object_name, data=data, file_name=file_name, create_bucket=False, public_bucket=public_bucket)
+                return self.write(
+                    object_name, data=data, file_name=file_name,
+                    create_bucket=False, public_bucket=public_bucket, 
+                    content_type=content_type, attempt=attempt)
             else:
                 raise
 
