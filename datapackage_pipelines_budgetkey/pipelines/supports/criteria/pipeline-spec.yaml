@@ -57,6 +57,14 @@ support-criteria:
       parameters:
         name: support-criteria
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים
+    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
+      runner: tzabar
+      parameters:
+        publication_type: 7b76d87f-d299-4019-8637-5f1de71c9523
+        tender_type: support_criteria
+        office_id: ''
+        resource:
+          name: gov
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/jobiz/datapackage.json
@@ -66,7 +74,6 @@ support-criteria:
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
-    # - flow: molsa
     - run: sample
     - run: concatenate
       parameters:
@@ -82,6 +89,7 @@ support-criteria:
 
           start_date: []
           claim_date: []
+          last_update_date: []
 
           description: []
           decision: []
@@ -131,6 +139,13 @@ support-criteria:
           description:
             type: string
             es:title: true
+
+    - run: set_primary_key
+      parameters:
+        calls_for_bids:
+          - tender_type
+          - publication_id
+          - tender_id
 
     - run: dump.to_sql
       parameters:

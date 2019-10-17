@@ -35,7 +35,7 @@ def fetch_results():
             print('GOT {}'.format(pq(box.find('#modal-title')).text()))
             yield dict(
                 publication_id=0,
-                tender_id=None,
+                tender_id='0',
                 tender_type=None,
                 tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
                 decision='פתוח',
