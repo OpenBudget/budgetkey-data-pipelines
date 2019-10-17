@@ -63,8 +63,14 @@ calls-for-bids:
     - run: add_metadata
       parameters:
         name: calls-for-bids
-    #- flow: molsa
-    #  runner: tzabar
+    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
+      runner: tzabar
+      parameters:
+        publication_type: 7159e036-77d5-44f9-a1bf-4500e6125bf1
+        tender_type: calls_for_bids
+        office_id: ''
+        resource:
+          name: gov_publications
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
@@ -85,6 +91,7 @@ calls-for-bids:
 
           start_date: []
           claim_date: []
+          last_update_date: []
 
           decision: []
           reason: []
@@ -158,6 +165,7 @@ calls-for-bids:
         calls_for_bids:
           - tender_type
           - publication_id
+          - tender_id
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids

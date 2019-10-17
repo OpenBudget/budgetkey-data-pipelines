@@ -22,7 +22,7 @@ def m_tmicha_scraper():
             title = rows[i].text
             yield dict(
                 publication_id=0,
-                tender_id=None,
+                tender_id='0',
                 tender_type='support_criteria',
                 tender_type_he='מבחני תמיכה',
 

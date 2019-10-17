@@ -41,7 +41,7 @@ def get_all_reports():
                 "tender_type": "support_criteria",
                 "page_url": URL.format(pid),
                 "tender_type_he": cells[3].text().replace('מבחני ', 'מבחן '),
-                "tender_id": None,
+                "tender_id": '0',
                 "documents": [dict(
                     link=extract_url(pq(cells[0].find('a')).attr('href')),
                     description=title,
