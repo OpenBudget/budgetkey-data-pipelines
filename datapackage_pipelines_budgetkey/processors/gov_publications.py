@@ -74,7 +74,7 @@ def flow(parameters, *_):
         set_type('claim_date', type='datetime', format=DATE_FMT),
         datetime_to_date('last_update_date'),
         datetime_to_date('start_date'),
-        set_primary_key(['tender_id']),
+        set_primary_key(['publication_id', 'tender_type', 'tender_id']),
         update_resource(-1, **parameters.pop('resource')),
         update_resource(-1, **{'dpp:streaming': True}),
         validate(),

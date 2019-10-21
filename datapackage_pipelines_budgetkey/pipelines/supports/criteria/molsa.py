@@ -42,7 +42,7 @@ def get_results():
         emails = content[4].find('a')
         row = dict(
             publication_id=0,
-            tender_id=None,
+            tender_id='0',
             tender_type='support_criteria',
             tender_type_he='מבחן תמיכה: ' + content[0].text(),
             publisher='משרד העבודה, הרווחה והשירותים החברתיים',
