@@ -2,7 +2,7 @@ import requests
 
 from dataflows import (
     Flow, concatenate, set_type, update_resource,
-    validate, delete_fields, add_field, set_primary_key, 
+    validate, delete_fields, add_field, set_primary_key,
     printer
 )
 
@@ -84,7 +84,6 @@ def flow(parameters, *_):
 
 
 if __name__ == '__main__':
-    from dataflows import printer
     Flow(
         flow(dict(
             # office_id="4fa63b79-3d73-4a66-b3f5-ff385dd31cc7",
