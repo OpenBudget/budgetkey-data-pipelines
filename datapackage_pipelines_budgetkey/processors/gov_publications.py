@@ -72,6 +72,7 @@ def flow(parameters, *_):
         set_type('start_date', type='datetime', format=DATE_FMT),
         set_type('last_update_date', type='datetime', format=DATE_FMT),
         set_type('claim_date', type='datetime', format=DATE_FMT),
+        datetime_to_date('last_update_date'),
         datetime_to_date('start_date'),
         set_primary_key(['tender_id']),
         update_resource(-1, **parameters.pop('resource')),
