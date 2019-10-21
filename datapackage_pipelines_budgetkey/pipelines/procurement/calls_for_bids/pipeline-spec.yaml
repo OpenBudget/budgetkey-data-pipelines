@@ -28,7 +28,7 @@ jobiz-all:
       parameters:
         name: jobiz
         title: All items from jobiz website
-        revision: 1
+        revision: 2
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/publications/jobiz-scraper/datapackage.json
