@@ -20,6 +20,7 @@ jobiz-scraper:
             mode: update
 
 jobiz-all:
+  revision: 1
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-scraper
 
