@@ -20,11 +20,15 @@ jobiz-scraper:
             mode: update
 
 jobiz-all:
-  revision: 1
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-scraper
 
   pipeline:
+    - run: add_metadata
+      parameters:
+        name: jobiz
+        title: All items from jobiz website
+        revision: 1
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/publications/jobiz-scraper/datapackage.json
