@@ -19,11 +19,17 @@ def fetcher(parameters):
     while True:
         url = URL.format(**parameters, limit=skip+10, skip=skip)
         skip += 10
-        results = requests.get(url).json()
+        results = requests.get(url)
+        try:
+            results = results.json()
+        except Exception:
+            print('FAILED to parse JSON', results.content[:2048])
+            raise
         results = results.get('results', [])
         yield from results
         if len(results) == 0:
             break
+
 
 DATE_FMT = '%Y-%m-%dT%H:%M:%SZ'
 
