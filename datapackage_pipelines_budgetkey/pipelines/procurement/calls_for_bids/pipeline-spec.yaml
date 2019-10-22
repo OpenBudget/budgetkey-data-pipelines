@@ -71,7 +71,7 @@ calls-for-bids:
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
       parameters:
         publication_type: 7159e036-77d5-44f9-a1bf-4500e6125bf1
-        tender_type: calls_for_bids
+        tender_type: call_for_bids
         office_id: ''
         resource:
           name: gov_publications
