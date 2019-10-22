@@ -58,7 +58,6 @@ support-criteria:
         name: support-criteria
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
-      runner: tzabar
       parameters:
         publication_type: 7b76d87f-d299-4019-8637-5f1de71c9523
         tender_type: support_criteria
