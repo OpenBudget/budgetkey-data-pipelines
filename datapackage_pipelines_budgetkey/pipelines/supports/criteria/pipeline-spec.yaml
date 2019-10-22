@@ -153,7 +153,24 @@ support-criteria:
           support_criteria:
             resource-name: support_criteria
             mode: update
-    - run: calc-score
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/support-criteria
+
+
+support-criteria-all:
+  dependencies:
+    - pipeline: ./supports/criteria/support-criteria
+
+  pipeline:
+    - run: add_sql_resource
+      parameters:
+        datapackage: /var/datapackages/support-criteria/datapackage.json
+        resource: support_criteria
+        table: support_criteria
+    - run: stream_remote_resources
+    - run: calc-score
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/support-criteria-all
+
