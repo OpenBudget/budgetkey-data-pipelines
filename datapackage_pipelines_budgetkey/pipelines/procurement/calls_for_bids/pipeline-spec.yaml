@@ -69,7 +69,6 @@ calls-for-bids:
       parameters:
         name: calls-for-bids
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
-      runner: tzabar
       parameters:
         publication_type: 7159e036-77d5-44f9-a1bf-4500e6125bf1
         tender_type: calls_for_bids
