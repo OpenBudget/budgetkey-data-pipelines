@@ -5,6 +5,7 @@ from dataflows import (
     validate, delete_fields, add_field, set_primary_key,
     printer
 )
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 URL = "https://www.gov.il/he/api/PublicationApi/Index?limit={limit}&OfficeId={office_id}&publicationType={publication_type}&skip={skip}"
@@ -13,22 +14,28 @@ URL = "https://www.gov.il/he/api/PublicationApi/Index?limit={limit}&OfficeId={of
 # - publication_type: "7b76d87f-d299-4019-8637-5f1de71c9523" supports
 
 
-
 def fetcher(parameters):
     skip = 0
-    while True:
-        url = URL.format(**parameters, limit=skip+10, skip=skip)
-        skip += 10
-        results = requests.get(url)
-        try:
-            results = results.json()
-        except Exception:
-            print('FAILED to parse JSON', results.content[:2048])
-            raise
-        results = results.get('results', [])
-        yield from results
-        if len(results) == 0:
-            break
+    gcd = None
+    try:
+        while True:
+            url = URL.format(**parameters, limit=skip+10, skip=skip)
+            skip += 10
+            results = requests.get(url)
+            try:
+                results = results.json()
+            except Exception:
+                print('FAILED to parse JSON <pre>%s</pre>' % results.content[:2048])
+                if gcd is None:
+                    gcd = google_chrome_driver()
+                results = gcd.json(url)
+            results = results.get('results', [])
+            yield from results
+            if len(results) == 0:
+                break
+    finally:
+        if gcd is not None:
+            gcd.teardown()
 
 
 DATE_FMT = '%Y-%m-%dT%H:%M:%SZ'
