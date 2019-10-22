@@ -87,7 +87,7 @@ if __name__ == '__main__':
     Flow(
         flow(dict(
             # office_id="4fa63b79-3d73-4a66-b3f5-ff385dd31cc7",
-            tender_type='calls_for_bids',
+            tender_type='call_for_bids',
             office_id="",
             publication_type="7159e036-77d5-44f9-a1bf-4500e6125bf1",
             # publication_type="7b76d87f-d299-4019-8637-5f1de71c9523",
