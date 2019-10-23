@@ -3,6 +3,7 @@ import re
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 URL = 'https://pob.education.gov.il/KolotKorim/_layouts/15/Edu.Pob.SharePoint.Portal/Pages/POBSPHandler.aspx?FunctionName=GetKolKore&ListUrl=/Lists/KolKore&NumOfItem=0'
+PAGE_URL = 'https://pob.education.gov.il/KolotKorim/Pages/KolKore.aspx'
 
 HE = re.compile('[א-ת]+')
 EMAIL = re.compile('[a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+')
@@ -46,6 +47,7 @@ def flow(*_):
             att_title=['PobCreteriaLink_description'],
             att_url=['PobCreteriaLink_url'],
         ), resources=-1, target=dict(name='education')),
+        DF.add_field('page_url', 'string', PAGE_URL, resources=-1),
         DF.add_field('publisher', 'string', 'משרד החינוך', resources=-1),
         DF.add_field('tender_type', 'string', 'call_for_bids', resources=-1),
         DF.add_field('tender_type_he', 'string', 'קול קורא', resources=-1),
