@@ -75,6 +75,8 @@ calls-for-bids:
         office_id: ''
         resource:
           name: gov_publications
+    - flow: education
+      runner: tzabar
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
