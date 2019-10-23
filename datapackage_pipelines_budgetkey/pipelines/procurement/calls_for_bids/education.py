@@ -58,7 +58,7 @@ def flow(*_):
         DF.add_field('contact_email', 'string', lambda row: extract_email(row, 'email'), resources=-1),
         DF.add_field('publishing_unit', 'string', lambda row: row['publishing_unit_x'][0]['PobYechida'], resources=-1),
         DF.add_field('budget_code', 'string', lambda row: extract_budget_code(row, 'budget_code_x'), resources=-1),
-        DF.add_field('documents', 'array', lambda row: dict(title=row['att_title'], link=row['att_url']), resources=-1),
+        DF.add_field('documents', 'array', lambda row: [dict(title=row['att_title'], link=row['att_url'])], resources=-1),
         DF.delete_fields(['email', 'publishing_unit_x', 'budget_code_x', 'att_title', 'att_url'], resources=-1),
         DF.set_type('start_date', type='date', format='%d/%m/%Y %H:%M:%S'),
         DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M:%S'),
