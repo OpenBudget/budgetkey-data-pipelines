@@ -67,20 +67,22 @@ class google_chrome_driver():
 
     def download(self, url):
         expected = os.path.basename(url)
-        self.driver.get(url)
-        downloads = []
-        for i in range(120):
-            time.sleep(6)
-            downloads = self.list_downloads()
-            if expected in downloads:
-                print('found {} in {}'.format(expected, downloads))
-                time.sleep(20)
-                out = tempfile.NamedTemporaryFile(delete=False, suffix=expected)
-                url = f'http://{self.hostname}:{self.port+1}/{expected}'
-                stream = requests.get(url, stream=True, timeout=30).raw
-                shutil.copyfileobj(stream, out)
-                out.close()
-                return out.name
+        for j in range(3):
+            print('Attempt {}'.format(j))
+            self.driver.get(url)
+            downloads = []
+            for i in range(10):
+                time.sleep(6)
+                downloads = self.list_downloads()
+                if expected in downloads:
+                    print('found {} in {}'.format(expected, downloads))
+                    time.sleep(20)
+                    out = tempfile.NamedTemporaryFile(delete=False, suffix=expected)
+                    url = f'http://{self.hostname}:{self.port+1}/{expected}'
+                    stream = requests.get(url, stream=True, timeout=30).raw
+                    shutil.copyfileobj(stream, out)
+                    out.close()
+                    return out.name
         assert False, 'Failed to download file, %r' % downloads
 
 
