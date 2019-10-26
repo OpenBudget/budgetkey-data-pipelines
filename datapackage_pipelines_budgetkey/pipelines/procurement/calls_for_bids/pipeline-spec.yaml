@@ -160,6 +160,7 @@ calls-for-bids:
             type: array
             es:itemType: string
             es:keyword: true
+            es:title: True
 
           publishing_unit:
             type: string
