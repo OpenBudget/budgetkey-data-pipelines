@@ -1,4 +1,14 @@
+ezvonot_crontab:
+  schedule:
+    crontab: "0 0 * * *"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: ezvonot
+
 ezvonot_deposits:
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_crontab
   pipeline:
     - run: add_metadata
       parameters:
@@ -59,9 +69,16 @@ ezvonot_deposits:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/deposits
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ezvonot_deposits:
+            resource-name: ezvonot_deposits
 
 
 ezvonot_accounts:
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_crontab
   pipeline:
     - run: add_metadata
       parameters:
@@ -112,8 +129,16 @@ ezvonot_accounts:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/accounts
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ezvonot_accounts:
+            resource-name: ezvonot_accounts
+
 
 ezvonot_cases:
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_crontab
   pipeline:
     - run: add_metadata
       parameters:
@@ -170,8 +195,15 @@ ezvonot_cases:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/cases
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ezvonot_cases:
+            resource-name: ezvonot_cases
 
 ezvonot_purposes:
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_crontab
   pipeline:
     - run: add_metadata
       parameters:
@@ -222,8 +254,15 @@ ezvonot_purposes:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/purposes
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ezvonot_purposes:
+            resource-name: ezvonot_purposes
 
 ezvonot_decisions:
+  dependencies:
+    - pipeline: ./ezvonot/ezvonot_crontab
   pipeline:
     - run: add_metadata
       parameters:
@@ -299,11 +338,14 @@ ezvonot_decisions:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/ezvonot/decisions
+    - run: dump.to_sql
+      parameters:
+        tables:
+          ezvonot_decisions:
+            resource-name: ezvonot_decisions
 
 
 ezvonot_decisions_join:
-  schedule:
-    crontab: "0 0 fri * *"
   dependencies:
     - pipeline: ./ezvonot/ezvonot_accounts
     - pipeline: ./ezvonot/ezvonot_cases
