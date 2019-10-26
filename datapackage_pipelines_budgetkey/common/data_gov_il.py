@@ -21,6 +21,9 @@ def get_resource(gcd, dataset_name, resource_name):
     for resource in dataset['resources']:
         if resource['name'] == resource_name:
             url = resource['url'].replace('//e.', '//')
-            return url, gcd.download(url)
+            try:
+                return url, gcd.download(url)
+            except AssertionError:
+                return url, None
     assert False, 'Failed to find resource for name %s' % (resource_name,)
 

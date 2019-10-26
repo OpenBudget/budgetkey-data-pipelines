@@ -1,4 +1,6 @@
 import logging
+import time
+import random
 
 from dataflows import Flow, load, update_resource
 from datapackage_pipelines.wrapper import ingest
@@ -40,7 +42,15 @@ def flow(parameters):
     })
 
     gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
-    url, path = get_resource(gcd, dataset_name, resource_name)
+    path = None
+    for attempt in range(3):
+        url, path = get_resource(gcd, dataset_name, resource_name)
+        if path is None:
+            logging.warning('Failed to download file, retrying')
+            time.sleep(random.randint(60, 300))
+            gcd = google_chrome_driver()
+        else:
+            break
 
     args = {
         'name': resource_name,
