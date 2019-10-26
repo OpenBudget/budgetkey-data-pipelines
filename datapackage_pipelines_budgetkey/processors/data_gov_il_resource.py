@@ -48,6 +48,7 @@ def flow(parameters):
         if path is None:
             logging.warning('Failed to download file, retrying')
             time.sleep(random.randint(60, 300))
+            gcd.teardown()
             gcd = google_chrome_driver()
         else:
             break
