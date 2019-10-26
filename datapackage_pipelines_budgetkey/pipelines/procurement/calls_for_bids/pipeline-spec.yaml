@@ -77,6 +77,8 @@ calls-for-bids:
           name: gov_publications
     - flow: education
       runner: tzabar
+    - flow: btl
+      runner: tzabar
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
