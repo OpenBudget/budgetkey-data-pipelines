@@ -42,16 +42,7 @@ def flow(parameters):
     })
 
     gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
-    path = None
-    for attempt in range(3):
-        url, path = get_resource(gcd, dataset_name, resource_name)
-        if path is None:
-            logging.warning('Failed to download file, retrying')
-            time.sleep(random.randint(60, 300))
-            gcd.teardown()
-            gcd = google_chrome_driver()
-        else:
-            break
+    url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {
         'name': resource_name,
