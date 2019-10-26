@@ -23,6 +23,7 @@ def scrape():
             publisher='הביטוח הלאומי',
             start_date=None,
             claim_date=None,
+            subject_list_keywords=[],
         )
         item = pq(item)
         links = item.find('a')
@@ -64,7 +65,11 @@ def scrape():
             if not kind:
                 continue
             ret[kind] = value
+        for x in ('reason', 'target_audience'):
+            if x in ret:
+                ret['subject_list_keywords'].append(ret.pop(x))
         yield ret
+
 
 def flow(*_):
     return DF.Flow(

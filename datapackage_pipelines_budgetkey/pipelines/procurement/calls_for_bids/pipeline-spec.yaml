@@ -113,6 +113,8 @@ calls-for-bids:
           partners: []
 
           documents: []
+          subject_list_keywords: []
+
         target:
           name: calls_for_bids
           path: calls_for_bids.csv
@@ -153,6 +155,11 @@ calls-for-bids:
                 - {name: link, type: string}
                 - {name: description, type: string}
                 - {name: update_time, type: string}
+          
+          subject_list_keywords:
+            type: array
+            es:itemType: string
+            es:keyword: true
 
           publishing_unit:
             type: string
