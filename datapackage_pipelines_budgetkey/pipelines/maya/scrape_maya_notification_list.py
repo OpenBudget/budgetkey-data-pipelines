@@ -8,27 +8,41 @@ import logging
 from time import sleep
 import requests
 import pytz
-# import os
-# from sqlalchemy import create_engine, text
-# from sqlalchemy.exc import OperationalError, ProgrammingError
+import os
+
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import OperationalError, ProgrammingError
+
 
 from dateutil.parser import parse
 from datetime import date, datetime, time
 from dateutil.relativedelta import relativedelta
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
-
+from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser import PARSER_VERSION
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 
+def get_existing_records():
+    try:
+        engine = create_engine(get_connection_string())
+        with engine.connect() as con:
+            rs = con.execute(text("SELECT min(date), max(date) FROM maya_notifications where parser_version=:v"), v=PARSER_VERSION)
+            row = rs.fetchone()
+            return (row[0].date(), row[1].date()) if row[0] else (None, None)
+    except (OperationalError, ProgrammingError) as e:
+        #ProgrammingError is for postgres and OperationError is on sqlite
+        logging.warning('Failed to fetch table maya_notifications')
+    return (None, None)
 
-# def get_connection_string():
-#     connection_string = os.environ.get("DPP_DB_ENGINE", default=None)
-#     assert connection_string is not None, \
-#         "Couldn't connect to DB - " \
-#         "Please set your '%s' environment variable" % "DATAFLOWS_DB_ENGINE"
-#     return connection_string
+def get_connection_string():
+    connection_string = os.environ.get("DPP_DB_ENGINE", default=None)
+
+    assert connection_string is not None, \
+        "Couldn't connect to DB - " \
+        "Please set your '%s' environment variable" % "DPP_DB_ENGINE"
+    return connection_string
 
 
 def _get_maya_filter_request(date_from, date_to, page_num):
@@ -129,17 +143,36 @@ def _collect_date_range(session, date_from, date_to):
 
 
 def scrape_maya_notification_list():
-    date_from = date.today() - relativedelta(years=9)
-    date_to = date.today()
-
-    logging.info("Scrape Maya From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
     session = requests.Session()
-    for year_start, year_end in _split_period(date_from, date_to):
-        yield from _collect_date_range(session, year_start, year_end)
+
+    first_date, last_date = get_existing_records()
+    if first_date:
+        logging.info("Previously Scraped data From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(first_date, last_date))
+
+        date_from = last_date - relativedelta(months=1)
+        date_to = date.today()
+        logging.info("Scrape New Maya data From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
+        for year_start, year_end in _split_period(date_from, date_to):
+            yield from _collect_date_range(session, year_start, year_end)
+
+        date_from = first_date - relativedelta(months=4)
+        date_to = first_date + relativedelta(months=1)
+        logging.info("Scrape Old Maya data From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}".format(date_from, date_to))
+        for year_start, year_end in _split_period(date_from, date_to):
+            yield from _collect_date_range(session, year_start, year_end)
+
+    else:
+        date_from = date.today() - relativedelta(months=6)
+        date_to = date.today()
+
+        logging.info("Scrape Maya From:{0:%Y-%m-%d} To:{1:%Y-%m-%d}\n".format(date_from, date_to))
+        for year_start, year_end in _split_period(date_from, date_to):
+            yield from _collect_date_range(session, year_start, year_end)
 
 
 
 def flow(*_):
+
     return Flow(
         add_field('date', 'date'),
         add_field('source', 'string'),
