@@ -56,10 +56,38 @@ jobiz-calls-for-bids:
       parameters:
         out-path: /var/datapackages/publications/jobiz-calls-for-bids
 
+gov-publications:
+  pipeline:
+    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
+      parameters:
+        publication_type: 7159e036-77d5-44f9-a1bf-4500e6125bf1
+        tender_type: call_for_bids
+        office_id: ''
+        resource:
+          name: gov_publications
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/gov/calls-for-bids
+
+gov-publications-ministry-of-immigration:
+  pipeline:
+    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
+      parameters:
+        publication_type: be652b8e-bb3c-4a5b-bb5d-78a37edbff82
+        tender_type: call_for_bids
+        office_id: 27db3169-ab0e-490c-af70-6d03133cb1f3
+        filter-out: 'מסמכי המכרז מפורסמים באתר מינהל הרכש הממשלתי'
+        resource:
+          name: gov_publications_immigration
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/gov/calls-for-bids-immigration
 
 calls-for-bids:
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
+    - pipeline: ./procurement/calls_for_bids/gov-publications
+    - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
 
   schedule:
     crontab: "0 16 * * *"
@@ -68,19 +96,18 @@ calls-for-bids:
     - run: add_metadata
       parameters:
         name: calls-for-bids
-    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
-      parameters:
-        publication_type: 7159e036-77d5-44f9-a1bf-4500e6125bf1
-        tender_type: call_for_bids
-        office_id: ''
-        resource:
-          name: gov_publications
     - flow: education
       runner: tzabar
     - flow: btl
       runner: tzabar
     - flow: class_action
       runner: tzabar
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/gov/calls-for-bids/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/gov/calls-for-bids-immigration/datapackage.json
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
