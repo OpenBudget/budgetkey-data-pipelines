@@ -1,7 +1,7 @@
 import requests
 
 from dataflows import (
-    Flow, concatenate, set_type, update_resource,
+    Flow, concatenate, set_type, update_resource, filter_rows,
     validate, delete_fields, add_field, set_primary_key,
     printer
 )
@@ -59,6 +59,17 @@ def flow(parameters, *_):
             f, set_type(field, type='date'),
         )
 
+    def approve(parameters):
+        def func(row):
+            if parameters.get('filter-out') is None:
+                return True
+            bad_phrase = parameters['filter-out']
+            for f in ('page_title', 'description'):
+                if row.get(f) and bad_phrase in row[f]:
+                    return False
+            return True
+        return func
+
     return Flow(
         fetcher(parameters),
         concatenate(dict(
@@ -81,6 +92,7 @@ def flow(parameters, *_):
         add_field('page_url', 'string',
                   default=lambda row: 'https://www.gov.il/he{base_url}{url_name}'.format(**row)),
         # delete_fields(['base_url', 'url_name']),
+        filter_rows(approve(parameters)),
         set_type('publication_id', type='integer'),
         set_type('start_date', type='datetime', format=DATE_FMT),
         set_type('last_update_date', type='datetime', format=DATE_FMT),
