@@ -76,7 +76,7 @@ gov-publications-ministry-of-immigration:
         publication_type: be652b8e-bb3c-4a5b-bb5d-78a37edbff82
         tender_type: call_for_bids
         office_id: 27db3169-ab0e-490c-af70-6d03133cb1f3
-        filter-out: 'מסמכי המכרז מפורסמים באתר מינהל הרכש הממשלתי'
+        filter-out: מכרז
         resource:
           name: gov_publications_immigration
     - run: dump_to_path
