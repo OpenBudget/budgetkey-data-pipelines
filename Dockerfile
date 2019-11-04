@@ -26,7 +26,7 @@ RUN pip install -U -r /requirements-dev.txt
 RUN echo "http://nl.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories && \
     echo "http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     echo "http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && cat /etc/apk/repositories && \
-    apk --update --no-cache add -u chromium-chromedriver && \
+    apk --update --no-cache add -u chromium-chromedriver libevent && \
     cd /usr/local/bin/ && ln -s /usr/bin/chromedriver
 
 RUN apk del build-dependencies && \
