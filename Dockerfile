@@ -26,7 +26,9 @@ RUN pip install -U -r /requirements-dev.txt
 RUN echo "http://nl.alpinelinux.org/alpine/edge/main" > /etc/apk/repositories && \
     echo "http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
     echo "http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && cat /etc/apk/repositories
-RUN apk --update --no-cache add -u libevent && ls -la /usr/lib/libevent* && \
+RUN apk --update --no-cache add -u libevent && \
+    ln -s /usr/lib/libevent-2.1.so.7 /usr/lib/libevent-2.1.so.6 && \
+    ls -la /usr/lib/libevent* && \
     apk --update --no-cache add -u chromium-chromedriver && \
     cd /usr/local/bin/ && ln -s /usr/bin/chromedriver
 
