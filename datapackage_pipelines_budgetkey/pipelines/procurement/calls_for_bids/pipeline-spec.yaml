@@ -79,6 +79,8 @@ calls-for-bids:
       runner: tzabar
     - flow: btl
       runner: tzabar
+    - flow: class_action
+      runner: tzabar
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
