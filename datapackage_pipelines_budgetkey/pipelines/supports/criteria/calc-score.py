@@ -18,7 +18,7 @@ def process_row(row, *_):
     row['score'] = 10
     start_date = row.get('start_date')
     if start_date and isinstance(start_date, datetime.date):
-        row['score'] += (start_date - datetime.date(year=2010, month=1, day=1)).days
+        row['score'] += (start_date - datetime.date(year=2005, month=1, day=1)).days
 
     return row
 
