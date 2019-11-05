@@ -21,8 +21,9 @@ def fetcher(parameters):
         while True:
             url = URL.format(**parameters, limit=skip+10, skip=skip)
             skip += 10
-            results = requests.get(url)
+            results = None
             try:
+                results = requests.get(url)
                 results = results.json()
             except Exception:
                 print('FAILED to parse JSON <pre>%s</pre>' % results.content[:2048])
