@@ -1,6 +1,6 @@
 import dataflows as DF
 import time
-import os
+import logging
 
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -16,7 +16,7 @@ def wrapper(wait=False):
         gcd = google_chrome_driver(wait=wait)
         return scraper(gcd)
     finally:
-        print('Tearing down', gcd)
+        logging.info('Tearing down %r', gcd)
         if gcd:
             gcd.teardown()
 
@@ -119,14 +119,13 @@ def scraper(gcd):
     for rect in rects:
         driver.execute_script("arguments[0].setAttribute('height','200')", rect)
     num = len(rects)
-    print(num)
     for i in range(num):
         year = 2007 + num - i
         # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
         rects = get_chart(driver, charts_wh).find_elements_by_css_selector('rect.v-datapoint')
         get_results_for_column(driver, rects[i], main_wh, charts_wh)
-        print(year, gcd.list_downloads())
-    time.speep(20)
+        logging.info('Completed %r, %r', year, gcd.list_downloads())
+    time.sleep(20)
     return [gcd.download(x) for x in gcd.list_downloads()]
 
 
@@ -140,7 +139,7 @@ def flow(*_):
 
 
 if __name__ == '__main__':
-    # print(wrapper())
+    # logging.info(wrapper())
     DF.Flow(
-        flow(), DF.printer()
+        flow(), DF.logging.infoer()
     ).process()

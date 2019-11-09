@@ -70,7 +70,7 @@ all:
     #     format: csv
 
     # - run: stream_remote_resources
-    - run: scraper
+    - flow: scraper
     - run: concatenate
       parameters:
         target:
