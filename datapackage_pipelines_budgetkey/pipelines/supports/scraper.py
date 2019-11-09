@@ -132,7 +132,9 @@ def scraper(gcd):
 def flow(*_):
     return DF.Flow(
         *[
-            DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i)
+            DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i,
+                    infer_strategy=DF.load.INFER_STRINGS,
+                    cast_strategy=DF.load.CAST_STRINGS)
             for i, x
             in enumerate(wrapper())
         ],
