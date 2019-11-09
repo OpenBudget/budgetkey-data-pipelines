@@ -115,7 +115,7 @@ all:
             constraints:
               required: true
               pattern: '[0-9]{10}'
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/supports/all
 

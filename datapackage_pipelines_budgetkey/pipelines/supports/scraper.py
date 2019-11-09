@@ -132,7 +132,9 @@ def scraper(gcd):
 def flow(*_):
     return DF.Flow(
         *[
-            DF.load(x, encoding='windows-1255', format='csv') for x in wrapper()
+            DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i)
+            for i, x
+            in enumerate(wrapper())
         ],
         DF.update_resource(None, **{'dpp:streaming': True})
     )
@@ -141,5 +143,5 @@ def flow(*_):
 if __name__ == '__main__':
     # logging.info(wrapper())
     DF.Flow(
-        flow(), DF.logging.infoer()
+        flow(), DF.printer()
     ).process()
