@@ -134,7 +134,7 @@ def flow(*_):
         *[
             DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i,
                     infer_strategy=DF.load.INFER_STRINGS,
-                    cast_strategy=DF.load.CAST_STRINGS)
+                    cast_strategy=DF.load.CAST_DO_NOTHING)
             for i, x
             in enumerate(wrapper())
         ],
