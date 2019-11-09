@@ -126,7 +126,7 @@ def scraper(gcd):
         get_results_for_column(driver, rects[i], main_wh, charts_wh)
         logging.info('Completed %r, %r', year, gcd.list_downloads())
     time.sleep(20)
-    return [gcd.download('http://netx.obudget.com/datapackages/' + x) for x in gcd.list_downloads() if x]
+    return [gcd.download('https://next.obudget.org/datapackages/' + x) for x in gcd.list_downloads() if x]
 
 
 def flow(*_):
