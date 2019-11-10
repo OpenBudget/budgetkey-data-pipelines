@@ -18,7 +18,7 @@ def m_tmicha_scraper():
 
     for i in range(len(rows)):
         link = rows[i].attrib['href']
-        if if link.lower().endswith('pdf') or link.lower().endswith('docx'):
+        if link.lower().endswith('pdf') or link.lower().endswith('docx'):
             if not link.startswith('http'):
                 link = 'https://www.health.gov.il' + link
             if 'health.gov' not in link:
