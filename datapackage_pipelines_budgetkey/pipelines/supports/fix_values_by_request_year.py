@@ -16,6 +16,7 @@ def process_row(row, *_):
         payments.append(new_deet)
     row['payments'] = payments
     row['amount_total'] = amount_total
+    row['doc_id'] = (row['entity_id'] or row['recipient'][:32]).strip()
     return row
 
 
@@ -23,6 +24,10 @@ def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
         'name': 'amount_total',
         'type': 'number'
+    })
+    dp['resources'][0]['schema']['fields'].append({
+        'name': 'doc_id',
+        'type': 'string'
     })
     return dp
 
