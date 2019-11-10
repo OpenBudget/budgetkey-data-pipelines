@@ -68,6 +68,8 @@ def scrape():
         for x in ('reason', 'target_audience'):
             if x in ret:
                 ret['subject_list_keywords'].append(ret.pop(x))
+        if ret['claim_date'].split(' ') == 1:
+            ret['claim_date'] += ' 00:00'
         yield ret
 
 
@@ -75,7 +77,7 @@ def flow(*_):
     return DF.Flow(
         scrape(),
         DF.update_resource(-1, **{'dpp:streaming': True, 'name': 'btl'}),
-        DF.set_type('claim_date', type='datetime', format='%d/%m/%Y', resources=-1),
+        DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M', resources=-1),
         DF.set_type('start_date', type='date', format='%d/%m/%Y', resources=-1),
         calculate_publication_id(7),
     )
