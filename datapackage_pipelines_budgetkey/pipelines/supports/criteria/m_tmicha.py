@@ -1,6 +1,6 @@
 import requests
 from pyquery import PyQuery as pq
-from dataflows import Flow, update_resource
+from dataflows import Flow, update_resource, printer
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
@@ -16,14 +16,18 @@ def m_tmicha_scraper():
     rows = data.find('a')
     total = 0
 
-    for i in range(len(rows)):
-        link = rows[i].attrib['href']
+    for row in rows:
+        row = pq(row)
+        link = row.attr('href')
         if link.lower().endswith('pdf') or link.lower().endswith('docx'):
             if not link.startswith('http'):
                 link = 'https://www.health.gov.il' + link
             if 'health.gov' not in link:
                 continue
-            title = rows[i].text
+            title = row.text()
+            if not title:
+                print('BAD ROW', row)
+                continue
             draft = title.startswith('טיוט')
             yield dict(
                 publication_id=0,
@@ -54,3 +58,8 @@ def flow(*args):
             }
         )
     )
+
+if __name__ == '__main__':
+    Flow(
+        flow(), printer()
+    ).process()
