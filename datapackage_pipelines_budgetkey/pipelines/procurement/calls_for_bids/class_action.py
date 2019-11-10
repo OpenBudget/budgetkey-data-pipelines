@@ -41,7 +41,7 @@ def scrape():
             tender_type_he='קול קורא',
             publisher='ועדת העזבונות',
             start_date=None,
-            documents=[dict(link=link, title='מסמכי הקול הקורא')],
+            documents=[dict(link=link, description='מסמכי הקול הקורא')],
             contact='מוחמד זחלקה',
             contact_email='keren27@justice.gov.il'
         ))
