@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
+from slugify import slugify
 
 
 def process_row(row, *_):
@@ -16,7 +17,7 @@ def process_row(row, *_):
         payments.append(new_deet)
     row['payments'] = payments
     row['amount_total'] = amount_total
-    row['short_id'] = (row['entity_id'] or row['recipient'][:32]).strip()
+    row['short_id'] = (row['entity_id'] or slugify(row['recipient'], max_length=32)).strip()
     return row
 
 
