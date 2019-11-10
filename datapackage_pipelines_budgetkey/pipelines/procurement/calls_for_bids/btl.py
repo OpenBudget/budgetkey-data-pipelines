@@ -40,7 +40,7 @@ def scrape():
                 href = 'https://www.btl.gov.il' + href,
             documents.append(dict(
                 link='https://www.btl.gov.il' + link.attr('href'),
-                description=link.text()
+                description=link.text(),
             ))
         ret['documents'] = documents
         title = documents[0]

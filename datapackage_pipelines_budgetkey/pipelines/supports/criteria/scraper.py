@@ -36,6 +36,10 @@ def get_all_reports():
             cells = [pq(td) for td in row.find('td')]
             title = cells[1].text()
             date = cells[4].text()
+            if date:
+                revdate = date.split('-')
+                revdate.reverse()
+                revdate = '-'.join(revdate)
             rec = {
                 "publication_id": 0,
                 "tender_type": "support_criteria",
@@ -45,7 +49,7 @@ def get_all_reports():
                 "documents": [dict(
                     link=extract_url(pq(cells[0].find('a')).attr('href')),
                     description=title,
-                    update_time=date
+                    update_time=revdate
                 )],
                 "page_title": title,
                 "publisher": cells[2].text().split(':')[-1],
