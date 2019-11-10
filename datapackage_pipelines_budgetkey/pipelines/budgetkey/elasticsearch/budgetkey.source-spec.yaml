@@ -89,14 +89,14 @@ entities:
 
 supports:
   kind: indexer
-  revision: 9
+  revision: 10
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
   page-title-pattern: 'תמיכה תקציבית ב{recipient}'
   key-fields:
     - budget_code
     - year_requested
-    - recipient
+    - doc_id
     - request_type
   keep-history:
     -
