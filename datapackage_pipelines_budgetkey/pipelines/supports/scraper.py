@@ -1,6 +1,7 @@
 import dataflows as DF
 import time
 import logging
+import csv
 
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -133,6 +134,7 @@ def flow(*_):
     return DF.Flow(
         *[
             DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i,
+                    quoting=csv.QUOTE_NONE,
                     infer_strategy=DF.load.INFER_STRINGS,
                     cast_strategy=DF.load.CAST_DO_NOTHING)
             for i, x
