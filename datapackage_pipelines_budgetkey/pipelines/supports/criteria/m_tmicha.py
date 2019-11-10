@@ -17,22 +17,25 @@ def m_tmicha_scraper():
     total = 0
 
     for i in range(len(rows)):
-        if rows[i].attrib['href'][-3:] == 'pdf':
-            link = 'https://www.health.gov.il' + rows[i].attrib['href']
+        link = rows[i].attrib['href']
+        if if link.lower().endswith('pdf') or link.lower().endswith('docx'):
+            if not link.startswith('http'):
+                link = 'https://www.health.gov.il' + link
+            if 'health.gov' not in link:
+                continue
             title = rows[i].text
+            draft = title.startswith('טיוט')
             yield dict(
                 publication_id=0,
                 tender_id='0',
-                tender_type='support_criteria',
-                tender_type_he='מבחני תמיכה',
+                tender_type='support_criteria' if not draft else 'support_criteria_draft',
+                tender_type_he='מבחן תמיכה' if not draft else 'טיוטת מבחן תמיכה',
 
                 page_title=title,
                 page_url=url,
                 publisher='משרד הבריאות',
 
                 start_date=None,
-
-                target_audience='מוסדות ציבור',
 
                 documents=[dict(link=link, description=title)],
             )
