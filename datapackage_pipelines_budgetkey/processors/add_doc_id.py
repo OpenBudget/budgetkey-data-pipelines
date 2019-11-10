@@ -10,7 +10,7 @@ from dataflows import Flow, add_field
 def get_doc_id(key_pattern):
     def func(row):
         ret = key_pattern.format(**row)
-        if len(ret) > 400:
+        if len(ret.encode('utf8')) > 400:
             logging.warning('DOC_ID length is %d %s (%r)', len(ret), ret, row)
         return ret
     return func
