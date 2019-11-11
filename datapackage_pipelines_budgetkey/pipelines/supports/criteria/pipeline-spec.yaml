@@ -56,7 +56,7 @@ support-criteria:
     - run: add_metadata
       parameters:
         name: support-criteria
-        title: רשימת מבחני תמיכה ומסמכים רלוונטיים
+        title: רשימת מבחני תמיכה, טיוטות למבחני תמיכה ומסמכים רלוונטיים
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
       parameters:
         publication_type: 7b76d87f-d299-4019-8637-5f1de71c9523
