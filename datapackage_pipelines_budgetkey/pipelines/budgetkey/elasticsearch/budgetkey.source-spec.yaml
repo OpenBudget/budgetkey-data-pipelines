@@ -98,13 +98,13 @@ supports:
     - year_requested
     - short_id
     - request_type
-  keep-history:
-    -
-      key: payments
-      fields: 
-        - amount_total
-        - last_payment_year
-        - last_payment_amount
+  # keep-history:
+  #   -
+  #     key: payments
+  #     fields: 
+  #       - amount_total
+  #       - last_payment_year
+  #       - last_payment_amount
   date-range:
     type: year
     field: year_requested
