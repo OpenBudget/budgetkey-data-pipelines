@@ -1,6 +1,6 @@
 #Description of Maya Files and Fields
 
-## 1. parse_maya_company_officer_list
+## 1. maya_company_officer_list
 
 * Maya Form Number: ת097
 * Title: "דוח מיידי על מצבת נושאי משרה בכירה"

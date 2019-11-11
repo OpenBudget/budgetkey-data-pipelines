@@ -1,5 +1,7 @@
 
-from dataflows import Flow, printer, delete_fields, add_field, add_computed_field, load, set_type
+from dataflows import Flow, printer, delete_fields, add_field, add_computed_field, load, set_type, update_resource
+from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import rename_fields, add_fields, \
+    verify_row_count, verify_same_row_count
 import csv
 
 CORE_STAKE_HOLDER_TEXT = 'בעלי עניין בתאגיד בעלי אמצעי שליטה מהותי'
@@ -71,19 +73,10 @@ TABLE_FIELDS = ['FullName',
                 'MinimumRetentionRate',
                 'Notes',
                 ]
-OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange',]
+OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange', 'HolderOwner', 'AccumulateHoldings']
 
-def verify_row_count(row, expected_fields, expected_count, is_required=True):
-    doc = row['document']
-    url = row['url']
-    for field in expected_fields:
-        if not is_required and not doc.get(field):
-            return
-        if field not in doc:
-            raise Exception("Document {} failed validation. textAlias {} not found. (expected: {})".format(url, field, expected_count))
-        elif len(doc[field]) != expected_count:
-            raise Exception("Document {} failed validation. textAlias {} found {} times. (expected: {})".format(url, field, len(doc[field]), expected_count))
-
+def first(x):
+    return next(iter(x))
 
 def validate(rows):
     for row in rows:
@@ -96,11 +89,11 @@ def validate(rows):
         verify_row_count(row, TABLE_FIELDS, num_stakeholders)
         verify_row_count(row, OPTIONAL_TABLE_FIELDS, num_stakeholders, is_required=False)
 
-        num_core_stake_holders = len(doc.get('ShemVeSugNiarErech', []))
-        verify_row_count(row, CORE_STAKE_HOLDER_FIELDS.keys(), num_core_stake_holders)
+        verify_same_row_count(row, CORE_STAKE_HOLDER_FIELDS.keys())
+        num_core_stake_holders = len(doc.get(first(CORE_STAKE_HOLDER_FIELDS.keys()),[]))
 
-        num_officer_stake_holders = len(doc.get('ShemVeSugNiarErechBaelyEnyan', []))
-        verify_row_count(row, OFFICER_STAKE_HOLDER_FIELDS.keys(), num_officer_stake_holders)
+        verify_same_row_count(row, OFFICER_STAKE_HOLDER_FIELDS.keys())
+        num_officer_stake_holders = len(doc.get(first(OFFICER_STAKE_HOLDER_FIELDS.keys()), []))
 
         is_empty_officer_list = num_officer_stake_holders==1 and not doc['ShemVeSugNiarErechBaelyEnyan'][0].replace('_','').replace('-','').strip()
         if is_empty_officer_list and (num_stakeholders != num_core_stake_holders):
@@ -148,17 +141,6 @@ def parse_document(rows):
             new_record.update(new_fields)
             yield new_record
 
-def add_fields(names, type):
-    return add_computed_field( [dict(target=name,
-                                     type=type,
-                                     operation=(lambda row: None)
-                                     ) for name in names])
-def rename_fields(rows):
-    for row in rows:
-        doc = row['document']
-        for (k,v) in RENAME_FIELDS.items():
-            doc[v] = doc.get(k,[])
-        yield row
 
 def fix_fields(rows):
     for row in rows:
@@ -170,8 +152,11 @@ def fix_fields(rows):
         yield row
 def flow(*_):
     return Flow(
+        update_resource(
+            -1, name='maya_stakeholder_list', path="data/maya_stakeholder_list.csv",
+        ),
         filter_by_type,
-        rename_fields,
+        rename_fields(RENAME_FIELDS),
         add_field('stakeholder_type', 'string'),
         add_fields(FIELDS + OPTIONAL_FIELDS, 'string'),
         add_fields(TABLE_FIELDS + OPTIONAL_TABLE_FIELDS,'string'),

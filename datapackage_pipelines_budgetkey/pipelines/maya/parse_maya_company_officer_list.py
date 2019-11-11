@@ -1,8 +1,7 @@
 
-from dataflows import Flow, printer, delete_fields, add_field, add_computed_field, load
+from dataflows import Flow, printer, delete_fields, update_resource, load
 import csv
-import logging
-
+from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, add_fields, rename_fields, fix_fields, verify_same_row_count
 
 
 RENAME_FIELDS = {
@@ -15,7 +14,6 @@ RENAME_FIELDS = {
     'ShemYeshutIvrit':'CompanyName',
     'ShemYeshutKodem':'PreviousCompanyNames',
     'ShemYeshutLoazit': 'CompanyNameEn'
-
 }
 
 FIELDS = [
@@ -26,7 +24,6 @@ FIELDS = [
       'KodSugYeshut',
       'MezahehHotem',
       'MezahehTofes',
-
       'NeyarotErechReshumim',
       'PumbiLoPumbi',
       'PreviousCompanyNames',
@@ -50,25 +47,11 @@ TABLE_FIELDS = ['FullName',
                 ]
 
 
-def verify_row_count(row, expected_fields, expected_count, is_required=True):
-    doc = row['document']
-    url = row['url']
-    for field in expected_fields:
-        if not is_required and field not in doc:
-            return
-        if field not in doc:
-            raise Exception("Document {} failed validation. textAlias {} not found. (expected: {})".format(url, field, expected_count))
-        elif len(doc[field]) != expected_count:
-            raise Exception("Document {} failed validation. textAlias {} found {} times. (expected: {})".format(url, field, len(doc[field]), expected_count))
-
-
 def validate(rows):
     for row in rows:
-        doc = row['document']
         verify_row_count(row, FIELDS, 1)
         verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
-        num_officers = len(doc.get('FullName', []))
-        verify_row_count(row, TABLE_FIELDS, num_officers)
+        verify_same_row_count(row, TABLE_FIELDS)
         yield row
 
 def filter_by_type(rows):
@@ -95,37 +78,20 @@ def parse_document(rows):
             new_record.update(officer_fields)
             yield new_record
 
-def add_fields(names, type):
-    return add_computed_field( [dict(target=name,
-                                     type=type,
-                                     operation=(lambda row: None)
-                                     ) for name in names])
-def rename_fields(rows):
-    for row in rows:
-        doc = row['document']
-        for (k,v) in RENAME_FIELDS.items():
-            doc[v] = doc.get(k,[])
-        yield row
-
-def fix_fields(rows):
-    for row in rows:
-        for f in TABLE_FIELDS:
-            if row[f] == ('_' * len(row[f])):
-                row[f] = ""
-            if row[f] == ('-' * len(row[f])):
-                row[f] = ""
-        yield row
 
 def flow(*_):
     return Flow(
+        update_resource(
+            -1, name='maya_company_officer_list', path="data/maya_company_officer_list.csv",
+        ),
         filter_by_type,
-        rename_fields,
+        rename_fields(RENAME_FIELDS),
         add_fields(FIELDS, 'string'),
         add_fields(OPTIONAL_FIELDS, 'string'),
         add_fields(TABLE_FIELDS,'string'),
         validate,
         parse_document,
-        fix_fields,
+        fix_fields(TABLE_FIELDS),
         delete_fields(['document', 'pdf', 'other', 'num_files', 'parser_version', 'source', 's3_object_name']),
     )
 

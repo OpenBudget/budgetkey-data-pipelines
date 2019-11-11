@@ -3,7 +3,6 @@ scrape-maya-notification-list:
     crontab: 0 0 * * *
   pipeline:
     - flow: scrape_maya_notification_list
-      runner: tzabar
     - run: dump_to_path
       parameters:
           out-path: /var/datapackages/maya/scrape_maya_notification_list
@@ -31,8 +30,8 @@ maya-notification-parse-updates:
         out-path: /var/datapackages/maya/maya_notification_parse_updates
 
 maya-complete-notification-list:
-  dependencies:
-    - pipeline: ./maya/maya-notification-parse-updates
+#  dependencies:
+#    - pipeline: ./maya/maya-notification-parse-updates
   pipeline:
     - run: add_sql_resource
       parameters:
@@ -89,10 +88,10 @@ maya-complete-notification-list:
           document: []
           fixed_by: []
         target:
-          name: maya-complete-notification-list
+          name: maya_complete_notification_list
     - run: sort
       parameters:
-        resources: maya-complete-notification-list
+        resources: maya_complete_notification_list
         sort-by: "{date}"
     - flow: link_to_next_report
     - run: dump_to_path
@@ -106,7 +105,7 @@ maya-company-officer-list:
     - run: load_big
       parameters:
         from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
-        resource: maya-complete-notification-list
+        resource: maya_complete_notification_list
     - flow: parse_maya_company_officer_list
     - run: dump_to_path
       parameters:
@@ -119,7 +118,7 @@ maya-company-vip-appointments:
     - run: load_big
       parameters:
         from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
-        resource: maya-complete-notification-list
+        resource: maya_complete_notification_list
     - flow: parse_maya_vip_appointments
     - run: dump_to_path
       parameters:
@@ -145,7 +144,7 @@ maya-company-stakeholder-list:
     - run: load_big
       parameters:
         from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
-        resource: maya-complete-notification-list
+        resource: maya_complete_notification_list
     - flow: parse_maya_stakeholder_list
     - run: dump_to_path
       parameters:
@@ -157,11 +156,11 @@ maya-company-stakeholder-list:
     - run: join
       parameters:
         source:
-          name: maya-complete-notification-list
+          name: maya_stakeholder_list
           key: ['id', 'MisparZihui']
           delete: true
         target:
-          name: maya-complete-notification-list
+          name: maya_stakeholder_list
           key: null
         fields:
           date: null
@@ -204,3 +203,29 @@ maya-company-stakeholder-list:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_company_aggregate_stakeholder_list
+
+maya-reported-academic-degrees:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya_complete_notification_list
+    - flow: parse_reported_academic_degrees
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_reported_academic_degrees
+
+maya-reported-work-record:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya_complete_notification_list
+    - flow: parse_reported_work_record
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_reported_work_record
