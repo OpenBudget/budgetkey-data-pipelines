@@ -162,6 +162,7 @@ calls_for_bids:
           - page_title
           - reason
         target-field: semantic_tags
+  pre-indexing:
     - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
   date-range:
     type: date-range
@@ -187,6 +188,7 @@ support_criteria:
           - page_title
           - reason
         target-field: semantic_tags
+  pre-indexing:
     - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
   date-range:
     type: date-range

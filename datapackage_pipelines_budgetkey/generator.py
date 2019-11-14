@@ -167,7 +167,8 @@ class Generator(GeneratorBase):
                     ('add_page_title', {
                         'page-title-pattern': page_title_pattern
                     }),
-                    ('add_date_range', date_range_parameters),
+                    ('add_date_range', date_range_parameters)
+                ]) + parameters.get('pre-indexing', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
                             'budgetkey': [
