@@ -3,6 +3,7 @@ import dataflows as DF
 
 
 now = datetime.now()
+today = now.date()
 
 
 def process(row):
@@ -15,9 +16,11 @@ def process(row):
             row['decision'] = decision or 'סגור'
     else:
         publication_date = row.get('start_date') or row.get('__created_at')
+        if isinstance(publication_date, datetime):
+            publication_date = publication_date.date()
         if not decision or decision.startswith('FILLER'):
             if publication_date:
-                if (now.date() - publication_date).days < 30:
+                if (today - publication_date).days < 30:
                     row['decision'] = 'חדש'
                 else:
                     row['decision'] = 'לא ידוע'
