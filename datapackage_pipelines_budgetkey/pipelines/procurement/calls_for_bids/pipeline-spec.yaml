@@ -232,6 +232,7 @@ calls-for-bids-all:
         table: calls_for_bids
     - run: stream_remote_resources
     - run: calc-score
+    - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids_all
