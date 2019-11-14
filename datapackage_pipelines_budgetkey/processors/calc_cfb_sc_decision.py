@@ -15,7 +15,7 @@ def process(row):
             row['decision'] = decision or 'סגור'
     else:
         publication_date = row.get('start_date') or row.get('__created_at')
-        if not decision or decision.startswith('TEMP'):
+        if not decision or decision.startswith('FILLER'):
             if publication_date:
                 if (now.date() - publication_date).days < 30:
                     row['decision'] = 'חדש'
