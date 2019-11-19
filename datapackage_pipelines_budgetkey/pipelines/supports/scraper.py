@@ -30,7 +30,8 @@ def get_chart(driver, charts_wh):
     )
     driver.switch_to.frame(frame)
     chart = WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.ID, "UIComp_27"))
+        # EC.presence_of_element_located((By.ID, "UIComp_27"))
+        EC.presence_of_element_located((By.ID, "UIComp_0"))
     )
     return chart
 
