@@ -64,27 +64,27 @@ entities:
     - run: enrich_entities
     - run: make_entity_charts
 
-# contract-spending:
-#   kind: indexer
-#   revision: 13
-#   dependent_pipeline: ./procurement/spending/latest-contract-spending
-#   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
-#   page-title-pattern: '{purpose}'
-#   key-fields:
-#     - publisher_name
-#     - order_id
-#     - budget_code
-#   extra-steps:
-#     - run: add_semantic_tags
-#       parameters:
-#         resource: contract-spending
-#         source-fields:
-#           - purpose
-#         target-field: semantic_tags
-#   date-range:
-#     type: date-range
-#     from-field: order_date
-#     to-field: end_date
+contract-spending:
+  kind: indexer
+  revision: 14
+  dependent_pipeline: ./procurement/spending/latest-contract-spending
+  source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
+  page-title-pattern: '{purpose}'
+  key-fields:
+    - publisher_name
+    - order_id
+    - budget_code
+  extra-steps:
+    - run: add_semantic_tags
+      parameters:
+        resource: contract-spending
+        source-fields:
+          - purpose
+        target-field: semantic_tags
+  date-range:
+    type: date-range
+    from-field: order_date
+    to-field: end_date
 
 
 supports:
