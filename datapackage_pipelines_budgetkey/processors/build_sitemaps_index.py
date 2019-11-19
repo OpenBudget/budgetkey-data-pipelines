@@ -36,7 +36,7 @@ def generate_sitemap_index(rows):
 
     with open('/var/datapackages/sitemaps/sitemap.html', 'w') as out:
         out.write('''<!DOCTYPE html>
-    <html><head><meta charset="utf-8"></head>
+    <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
     <body><ul>
     ''')
         for row in rows:
