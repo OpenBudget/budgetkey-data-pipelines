@@ -35,7 +35,7 @@ def process_row(row):
 
 
 def process(package):
-    fields = package.pkg.descriptor['resources'][0]['fields']
+    fields = package.pkg.descriptor['resources'][0]['schema']['fields']
     names = [f['name'] for f in fields]
     if 'actionable_tips' not in names:
         fields.append({
