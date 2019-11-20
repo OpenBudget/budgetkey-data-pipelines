@@ -22,7 +22,8 @@ def process_row(row):
         if not decision or decision.startswith('FILLER'):
             if publication_date:
                 tips.append((
-                    'לא הצלחנו לאתר במקור המידע הממשלתי את התאריך בו נסגרת ההרשמה. לבירור, מומלץ לבדוק בפרסום המקורי או ליצור קשר עם האחרא/ית',
+                    '<b class="red">לא הצלחנו לאתר במקור המידע הממשלתי את התאריך בו נסגרת ההרשמה</b>' +
+                    '. לבירור, מומלץ לבדוק בפרסום המקורי או ליצור קשר עם האחרא/ית',
                     None
                 ))
                 if (today - publication_date).days < 30:
