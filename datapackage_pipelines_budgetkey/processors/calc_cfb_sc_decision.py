@@ -32,6 +32,7 @@ def process_row(row):
             else:
                 # Ensure this will get filled later
                 row['decision'] = 'FILLER' + now.isoformat()
+    return row
 
 
 def process(package):
