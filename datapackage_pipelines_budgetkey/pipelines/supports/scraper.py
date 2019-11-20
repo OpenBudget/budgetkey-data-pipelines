@@ -111,20 +111,22 @@ def scraper(gcd):
     time.sleep(15)
 
     # Click on all columns :)
-    rects = get_chart(driver, charts_wh).find_elements_by_css_selector('g.v-column .v-datashape')
-    for i, rect in enumerate(rects):
+    groups_selector = 'g.v-plot-main g.v-datapoint'
+    rects_selector = groups_selector + ' rect'
+    groups = get_chart(driver, charts_wh).find_elements_by_css_selector(groups_selector)
+    for i, group in enumerate(groups):
         x = i * 30
         driver.execute_script(
-            "arguments[0].setAttribute('transform','translate(%d, 0)')" % x, rect
+            "arguments[0].setAttribute('transform','translate(%d, 0)')" % x, group
         )
-    rects = get_chart(driver, charts_wh).find_elements_by_css_selector('g.v-column .v-datapoint')
+    rects = get_chart(driver, charts_wh).find_elements_by_css_selector(rects_selector)
     for rect in rects:
         driver.execute_script("arguments[0].setAttribute('height','200')", rect)
     num = len(rects)
     for i in range(num):
         year = 2007 + num - i
         # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
-        rects = get_chart(driver, charts_wh).find_elements_by_css_selector('rect.v-datapoint')
+        rects = get_chart(driver, charts_wh).find_elements_by_css_selector(rects_selector)
         get_results_for_column(driver, rects[i], main_wh, charts_wh)
         logging.info('Completed %r, %r', year, gcd.list_downloads())
     time.sleep(20)
