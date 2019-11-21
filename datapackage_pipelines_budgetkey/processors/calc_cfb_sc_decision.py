@@ -27,7 +27,7 @@ def process_row(row):
                     None
                 ))
                 if (today - publication_date).days < 30:
-                    row['decision'] = 'חדש'
+                    row['decision'] = 'פתוח'
                 else:
                     row['decision'] = 'לא ידוע'
             else:
