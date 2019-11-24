@@ -120,5 +120,3 @@ def process_row(row, *_):
 
 if __name__ == '__main__':
     process(process_row=process_row)
-
-
