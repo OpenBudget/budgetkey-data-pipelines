@@ -30,8 +30,8 @@ maya-notification-parse-updates:
         out-path: /var/datapackages/maya/maya_notification_parse_updates
 
 maya-complete-notification-list:
-#  dependencies:
-#    - pipeline: ./maya/maya-notification-parse-updates
+  dependencies:
+    - pipeline: ./maya/maya-notification-parse-updates
   pipeline:
     - run: add_sql_resource
       parameters:
@@ -163,6 +163,8 @@ maya-company-stakeholder-list:
           name: maya_stakeholder_list
           key: null
         fields:
+          id: null
+          MisparZihui: null
           date: null
           url: null
           company: null
