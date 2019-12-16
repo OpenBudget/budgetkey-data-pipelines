@@ -2,10 +2,13 @@
 from dataflows import Flow, printer, delete_fields, update_resource, add_computed_field, load
 import csv
 from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import rename_fields, add_fields, fix_fields, \
-    verify_row_count, verify_same_row_count
+    verify_row_count, verify_same_row_count, verify_row_values
 
-SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number', 'מספר דרכון': 'passport_number', 'מספר זיהוי לא ידוע': 'unknown'}
-
+SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
+                            'מספר דרכון': 'passport_number',
+                            'מספר ביטוח לאומי':'Social Security Number',
+                            'מספר זיהוי לא ידוע': 'unknown'
+                            }
 
 RENAME_FIELDS = {
     'Shem': 'FullName',
@@ -45,6 +48,7 @@ def validate(rows):
     for row in rows:
         verify_row_count(row, FIELDS, 1)
         verify_same_row_count(row, TABLE_FIELDS)
+        verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         yield row
 
 

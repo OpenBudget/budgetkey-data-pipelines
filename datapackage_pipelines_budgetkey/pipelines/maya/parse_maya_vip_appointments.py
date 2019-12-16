@@ -4,7 +4,11 @@ import csv
 from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, \
     add_fields, rename_fields, verify_row_values
 
-SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number', 'מספר דרכון': 'passport_number', 'מספר זיהוי לא ידוע': 'unknown'}
+SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
+                            'מספר דרכון': 'passport_number',
+                            'מספר ביטוח לאומי':'Social Security Number',
+                            'מספר זיהוי לא ידוע': 'unknown'
+                            }
 
 EMPTY_STRING = '_________'
 
@@ -80,6 +84,7 @@ def validate(rows):
         verify_row_values(row, 'RelativeOfAnotherVip', {'אינו', 'הינו'})
         verify_row_values(row, 'HasStocksInTheCompany', {'אינו מחזיק', 'מחזיק'})
         verify_row_values(row, 'HasStocksInSubsidiaryOrConnectedCompany', {'_________', 'אינו מחזיק', 'מחזיק'})
+        verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         yield row
 
 
@@ -94,6 +99,7 @@ def _is_null_string(string):
 
 
 def parse_document(rows):
+
     for row in rows:
         doc = row['document']
         previous_jobs_at_the_company = []
@@ -128,8 +134,6 @@ def parse_document(rows):
 
         row['PreviousPositions'] = previous_jobs_at_the_company
         row['Positions'] = job_titles
-
-
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
 
         yield row

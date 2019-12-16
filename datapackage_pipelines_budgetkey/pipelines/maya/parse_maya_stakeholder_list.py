@@ -55,7 +55,7 @@ FIELDS = [
       'PreviousCompanyNames',
       'Date']
 
-OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut',]
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut']
 
 TABLE_FIELDS = ['FullName',
                 'FullNameEn',
@@ -69,11 +69,11 @@ TABLE_FIELDS = ['FullName',
                 'PreviousAmount',
                 'ChangeSincePrevious',
                 'MisparNiarErech',
-                'MaximumRetentionRate',
-                'MinimumRetentionRate',
+
                 'Notes',
                 ]
-OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange', 'HolderOwner', 'AccumulateHoldings']
+OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange', 'HolderOwner', 'AccumulateHoldings',  'MaximumRetentionRate',
+                         'MinimumRetentionRate']
 
 def first(x):
     return next(iter(x))
