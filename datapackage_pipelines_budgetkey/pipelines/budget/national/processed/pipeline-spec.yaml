@@ -374,8 +374,6 @@ connected-national-budgets:
             type: array
           current:
             type: array
-          non_repeating:
-            type: integer
     - run: load_resource
       parameters:
         url: dependency://./budget/national/processed/with-extras
@@ -385,6 +383,11 @@ connected-national-budgets:
     - run: set_primary_key
       parameters:
         budget: ['code', 'year']
+    - run: set_types
+      parameters:
+        types:
+          non_repeating:
+            type: integer
     - run: set_types
       parameters:
         types:
