@@ -110,6 +110,8 @@ aggregated-yearly:
             type: number
           amounts:
             type: number
+          non_repeating:
+            type: boolean
 
     - run: join_phases
       parameters:
@@ -386,11 +388,6 @@ connected-national-budgets:
     - run: set_types
       parameters:
         types:
-          non_repeating:
-            type: integer
-    - run: set_types
-      parameters:
-        types:
           title:
             es:title: true
           admin_cls_code_0:
@@ -406,7 +403,6 @@ connected-national-budgets:
           hierarchy:
             es:itemType: string
           non_repeating:
-            type: boolean
             es:itemType: boolean
           children:
             es:itemType: object
