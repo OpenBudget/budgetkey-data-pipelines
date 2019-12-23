@@ -374,6 +374,8 @@ connected-national-budgets:
             type: array
           current:
             type: array
+          non_repeating:
+            type: integer
     - run: load_resource
       parameters:
         url: dependency://./budget/national/processed/with-extras
@@ -401,6 +403,7 @@ connected-national-budgets:
           hierarchy:
             es:itemType: string
           non_repeating:
+            type: boolean
             es:itemType: boolean
           children:
             es:itemType: object
