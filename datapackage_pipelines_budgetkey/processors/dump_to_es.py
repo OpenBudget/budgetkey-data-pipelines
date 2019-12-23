@@ -108,8 +108,9 @@ if __name__ == '__main__':
         with ingest() as ctx:
             spew_flow(flow(ctx.parameters), ctx)
     except Exception as e:
-        logging.error('DUMP TO ES ERROR %s', e)
+        logging.error('DUMP TO ES ERROR %s', str(e)[:64000])
         if hasattr(e, 'errors'):
-            logging.error('errors %r', e.errors)
+            for error in e.errors:
+                logging.error('error: %s', str(error)[:64000])
         logging.exception('TB')
         raise
