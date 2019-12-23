@@ -102,13 +102,14 @@ def flow(parameters):
     )
 
 
+
 if __name__ == '__main__':
-    with ingest() as ctx:
-        try:
+    try:
+        with ingest() as ctx:
             spew_flow(flow(ctx.parameters), ctx)
-        except Exception as e:
-            logging.error('DUMP TO ES ERROR %s', str(e))
-            if hasattr(e, 'errors'):
-                logging.error('errors %r', e.errors)
-            logging.exception('TB')
-            raise
+    except Exception as e:
+        logging.error('DUMP TO ES ERROR %s', e)
+        if hasattr(e, 'errors'):
+            logging.error('errors %r', e.errors)
+        logging.exception('TB')
+        raise
