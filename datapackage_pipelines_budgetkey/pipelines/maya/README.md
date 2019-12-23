@@ -101,7 +101,7 @@ with details about the stock they are holding.
                         
 ## 3. reported_acedemic_degrees
 
-* Maya Form Number: ת91
+* Maya Form Number: ת91/93
 * Title: "דוח מיידי על מינוי נושא משרה בכירה (למעט מינוי דירקטור/ יו"ר דירקטוריון ולמעט יחיד שמונה מטעם תאגיד שהוא דירקטור)"
 
 when appointing a new officer a company will list the academic degrees the person has. This is this list
@@ -122,7 +122,7 @@ when appointing a new officer a company will list the academic degrees the perso
               
 ## 4. reported_work_record
 
-* Maya Form Number: ת91
+* Maya Form Number: ת91/93
 * Title: "דוח מיידי על מינוי נושא משרה בכירה (למעט מינוי דירקטור/ יו"ר דירקטוריון ולמעט יחיד שמונה מטעם תאגיד שהוא דירקטור)"
 
 when appointing a new officer a company will list the previous work expirence the person has. This is this list
@@ -142,8 +142,46 @@ when appointing a new officer a company will list the previous work expirence th
     | CompanyName| שם החברה כפי שנכתב בטופס|
     | DurationInPosition/When| משך הזמן שמילא בתפקיד זה שדה חופשי שמכיל לעיתים טווח שנים, לפעמים מספר וכו | 
          
-     
-     		
+## 5. maya_holdings_change
+
+* Maya Form Number: ת086
+* Title: "דוח מיידי על שינוי בהחזקה עצמית של תעודות התחייבות וכתבי אופציה של התאגיד"
+    
+    |  Title | Meaning  |  
+    |---|---|
+    | date  | date notification was posted to maya  |    																
+    | url   | original url data was scraped from |    
+     | id | אסמכתא של הטופס |
+     | type | סוג הטופס | 
+     | fix_for | אם הטופס מתקן טופס קודם אז זו האסמכתא של הטופס אותו מתקנים | 
+     | perv_doc| המזהה של הטופס הקודם לחברה זו מהסוג הזה כשזה ריק זה הטופס הראשון שנסרק |
+     | next_doc| המזהה של הטופס הבא לחברה זו מהסוג הזה כשזה ריק זה הטופס האחרון והעדכני ביותר שנסרק לחברה |
+     | company| שם החברה בעברית |
+     |CompanyUrl | עמוד הבית של החברה אם כתבו | 
+     |HeaderMisparBaRasham | מספר החברה ברשם | 
+     |HeaderSemelBursa | סמל החברה בבורסא | 
+     |MezahehHotem |  לא בטוח.. נראה כמזהה של מי שמילא את הטופס במערכת | 
+     |MezahehTofes | סוג הטופס| 
+     |NeyarotErechReshumim | האם לחברה יש נירות ערך בבורסת תל אביב  | 
+     |PumbiLoPumbi |  האם הטופס פומבי או לא| 
+     |PreviousCompanyNames | שמות עבר של החברה | 
+     |IsHeldBySubsidiary| האם המחזיק הוא החברה עצמה או חברת בת |
+     |SubsidiaryName | שם חברת הבת|
+     |SubsidiaryNameEn | שם חברת הבת באנגלית |
+     |PercentageHeld | כמות האחזקה באחוזים|
+    | StockNumber| מס' ניר הערך|
+    | ChangedStockName| שם ניר הערך|
+    | ChangeDate | תאריך השינוי|
+    | StockAmountChange| כמות השינוי במספר מניות|
+    | NumberOfStocksAfterChange| מספר המניות שנותרו לאחר השינוי|	
+    | CitizenshipOfRegistering|  אזרחות של רישום החברה|
+    | countryOfRegistering| ארץ רישום החברה|
+    | Proceeds| הסכום שהתקבל (לא קיים תמיד)|
+    | ChangeExplanation| הסבר לשינוי|   
+    | Subsidiary_IDType| סוג מספר הזיהוי של חברה הבת|
+    | Subsidiary_IDNumber| מספר הזהוי של חברת הבת|           	
+   
+       		
 ## טפסים בעבודה 
 דוח מיידי על מינוי נושא משרה בכירה   
 שינוי החזקות ב"ע/נ.משרה.     
