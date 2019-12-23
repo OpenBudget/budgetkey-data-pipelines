@@ -1,7 +1,8 @@
 # coding=utf-8
 from dataflows import Flow, printer, delete_fields, update_resource, load
-from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, \
-    add_fields, rename_fields, verify_row_values
+
+from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, add_fields, \
+    rename_fields, verify_row_values, fix_fields
 
 import csv
 
@@ -11,36 +12,51 @@ ID_TYPE_MAPPING = {'מספר מזהה אחר': 'other',
                    'מספר ברשם השותפויות בישראל': 'id_at_association_registry',
                    'מספר תעודת זהות':'id_number'}
 
-BOOLEAN_FIELDS_TO_TRUE_VALUES = {
-    'IsHeldBySubsidiary': 'חברת בת של החברה',
-}
+HOLDER_TYPE_MAPPING = {'החברה':False,
+                       'חברת בת של החברה':True }
 
 RENAME_FIELDS = {
     'HolderType': 'IsHeldBySubsidiary',
-    'ShemChevratBat': 'CompanyName',
-    'CompanyEnglishName': 'CompanyNameEn',
+    'ShemChevratBat': 'SubsidiaryName',
+    'CompanyEnglishName': 'SubsidiaryNameEn',
+    'ShemYeshutKodem':'PreviousCompanyNames',
+    'ShemYeshutLoazit': 'CompanyNameEn',
+
     'ShiurHachzaka': 'PercentageHeld',
-    'IDType': 'SugMisparZihuy',
-    'IdNumber': 'MisparZihuy',
+    'IDType': 'Subsidiary_IDType',
+    'IdNumber': 'Subsidiary_IDNumber',
     'MisparNiyarBursa': 'StockNumber',
     'TheNameOfTheChangedSecuritie': 'ChangedStockName',
     'SecuritiesAmountChange': 'StockAmountChange',
     'SecuritiesHolderBalanceAfterChange': 'NumberOfStocksAfterChange',
 }
 
+FIELDS = [
+    'CompanyNameEn',
+    'CompanyUrl',
+    'HeaderMisparBaRasham',
+    'HeaderSemelBursa',
+    'KodSugYeshut',
+    'MezahehHotem',
+    'MezahehTofes',
+    'NeyarotErechReshumim',
+    'PumbiLoPumbi',
+    'PreviousCompanyNames',
+]
+
 TABLE_FIELDS = [
     'IsHeldBySubsidiary',
-    'CompanyName',
-    'CompanyNameEn',
+    'SubsidiaryName',
+    'SubsidiaryNameEn',
     'PercentageHeld',
-    'SugMisparZihuy',
-    'MisparZihuy',
+    'Subsidiary_IDType',
+    'Subsidiary_IDNumber',
     'StockNumber',
     'ChangedStockName',
     'ChangeDate',
 
     'StockAmountChange',
-    'StockHeldChange',
+    'NumberOfStocksAfterChange',
     'CitizenshipOfRegistering',
     'countryOfRegistering',
 
@@ -69,15 +85,21 @@ def _is_null_string(string):
 def validate(rows):
     for row in rows:
         doc = row['document']
-        num_records = len(doc.get('MisparZihuy', []))
+        num_records = len(doc.get(TABLE_FIELDS[0], []))
+
+        verify_row_count(row, FIELDS, 1)
         verify_row_count(row, TABLE_FIELDS, num_records)
         verify_row_count(row, OPTIONAL_TABLE_FIELDS, num_records, is_required=False)
-        verify_row_values(row, 'SugMisparZihuy', ID_TYPE_MAPPING)
+        verify_row_values(row, 'IsHeldBySubsidiary', HOLDER_TYPE_MAPPING)
+        verify_row_values(row, 'Subsidiary_IDType', ID_TYPE_MAPPING)
         yield row
 
 def parse_document(rows):
     for row in rows:
         doc = row['document']
+        for field in FIELDS:
+            row[field] = doc[field][0]
+
         for idx in range(len(doc[TABLE_FIELDS[0]])):
 
 
@@ -94,12 +116,10 @@ def parse_document(rows):
                 if field in new_record and _is_null_string(new_record[field]):
                     new_record[field] = ''
 
-            for field, true_value in BOOLEAN_FIELDS_TO_TRUE_VALUES.items():
-                row[field] = row[field] == true_value
-
 
             new_record['PercentageHeld'] = new_record['PercentageHeld'].replace('%', '')
-            new_record['SugMisparZihuy'] = ID_TYPE_MAPPING[new_record['SugMisparZihuy']]
+            new_record['Subsidiary_IDType'] = ID_TYPE_MAPPING[new_record['Subsidiary_IDType']]
+            new_record['IsHeldBySubsidiary'] = HOLDER_TYPE_MAPPING[new_record['IsHeldBySubsidiary']]
             new_record['ChangeExplanation'] = ' '.join(x for x in
                                             [new_record['Table776'], new_record['Table774'], new_record['Table775'], new_record['OtherChange']]
                                             if not _is_null_string(x))
@@ -113,10 +133,12 @@ def flow(*_):
             -1, name='maya_holdings_change', path="data/maya_holdings_change.csv",
         ),
         filter_by_type,
-        rename_fields(RENAME_FIELDS),
+        add_fields(FIELDS, 'string'),
         add_fields(TABLE_FIELDS, 'string'),
         add_fields(OPTIONAL_TABLE_FIELDS,'string'),
         add_fields(ADDITIONAL_FIELDS, 'string'),
+        rename_fields(RENAME_FIELDS),
+        fix_fields(FIELDS + TABLE_FIELDS + OPTIONAL_TABLE_FIELDS + ADDITIONAL_FIELDS),
         validate,
         parse_document,
         delete_fields(['document',

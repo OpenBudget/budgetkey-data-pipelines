@@ -51,6 +51,8 @@ def fix_fields(fields):
     def iter(rows):
         for row in rows:
             for f in fields:
+                if f not in row:
+                    continue
                 if row[f] is None:
                     row[f] = ""
                 if row[f] == ('_' * len(row[f])):
