@@ -9,12 +9,12 @@ from datapackage_pipelines.generators import (
     GeneratorBase, steps
 )
 
-
-
+GLOBAL_BUMP = 1
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/budgetkey_spec_schema.json')
 REF_DATE = datetime.date(year=2019, month=3, day=1)
+
 
 class Generator(GeneratorBase):
 
@@ -93,6 +93,7 @@ class Generator(GeneratorBase):
         today = datetime.date.today()
         weeks_bump = (today - REF_DATE).days // 7
         bumper += weeks_bump
+        bumper += GLOBAL_BUMP
         for doc_type, parameters in source.items():
             if not isinstance(parameters, dict):
                 continue
@@ -171,9 +172,8 @@ class Generator(GeneratorBase):
                 ]) + parameters.get('pre-indexing', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
-                            'budgetkey': [
+                            'budgetkey__' + doc_type: [
                                 {'resource-name': doc_type,
-                                 'doc-type': doc_type,
                                  'revision': revision}
                             ]
                         }
@@ -186,9 +186,8 @@ class Generator(GeneratorBase):
                     ),
                     ('dump_to_es', {
                         'indexes': {
-                            'budgetkey': [
-                                {'resource-name': 'document',
-                                 'doc-type': 'document'}
+                            'budgetkey__docs': [
+                                {'resource-name': 'document'}
                             ]
                         }
                     }),

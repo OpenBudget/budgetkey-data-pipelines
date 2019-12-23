@@ -1,9 +1,16 @@
-from datapackage_pipelines_elasticsearch.processors.dump.to_index import ESDumper
+from datapackage_pipelines.wrapper import ingest
+from datapackage_pipelines.utilities.flow_utils import spew_flow
+from dataflows_elasticsearch import dump_to_es
 from tableschema_elasticsearch.mappers import MappingGenerator
+import dataflows as DF
 
 import logging
 import collections
 import datetime
+
+
+def id(x):
+    return x
 
 
 class BoostingMappingGenerator(MappingGenerator):
@@ -33,20 +40,20 @@ class BoostingMappingGenerator(MappingGenerator):
         return prop
 
 
+class DumpToElasticSearch(dump_to_es):
 
-class DumpToElasticSearch(ESDumper):
-    
-    def __init__(self):
-        super(DumpToElasticSearch, self).__init__(
+    def __init__(self, indexes):
+        super().__init__(
+            indexes=indexes,
             mapper_cls=BoostingMappingGenerator,
             index_settings={
                 'index.mapping.coerce': True
             }
           )
-    
-    def format_datetime_rows(self, spec, rows):
+
+    def normalizer(self, resource: DF.ResourceWrapper):
         formatters = {}
-        for f in spec['schema']['fields']:
+        for f in resource.res.descriptor['schema']['fields']:
             if f['type'] == 'datetime':
                 logging.info('FIELD datetime: %r', f)
                 if f.get('format', 'default') in ('any', 'default'):
@@ -54,50 +61,28 @@ class DumpToElasticSearch(ESDumper):
                 else:
                     def formatter(f):
                         fmt = f['format']
+
                         def func(x):
                             if x is None:
                                 return None
                             else:
-                                return x.strftime(fmt)    
-                        return func                
+                                return x.strftime(fmt)
+                        return func
+
                     formatters[f['name']] = formatter(f)
-        id = lambda x: x
 
-        for row in rows:
+        for row in super().normalizer(resource):
             yield dict((k, formatters.get(k, id)(v)) for k, v in row.items())
-
-    def initialize(self, parameters):
-        parameters['reindex'] = False
-        return super(DumpToElasticSearch, self).initialize(parameters)
-
-    def handle_resource(self, resource, spec, parameters, datapackage):
-        def func():
-            try:
-                yield from super(DumpToElasticSearch, self)\
-                                    .handle_resource(self.format_datetime_rows(spec, resource), 
-                                        spec, parameters, datapackage)
-            except Exception as e:
-                logging.error('DUMP TO ES ERROR %s', str(e))
-                if hasattr(e, 'errors'):
-                    logging.error('errors %r', e.errors)
-                logging.exception('TB')
-                raise
-        return func()
-
-    # def __call__(self):
-    #     super(DumpToElasticSearch, self).__call__()
-    #     self.finalize()
 
     def finalize(self):
         for index_name, configs in self.index_to_resource.items():
             for config in configs:
                 if 'revision' in config:
                     revision = config['revision']
-                    doc_type = config['doc-type']
-                    logging.info('DELETING from "%s", "%s" items with revision < %d',
-                                index_name, doc_type, revision)
+                    logging.info('DELETING from "%s", iitems with revision < %d',
+                                index_name, revision)
                     ret = self.engine.delete_by_query(
-                        index_name, 
+                        index_name,
                         {
                             "query": {
                                 "range": {
@@ -107,10 +92,16 @@ class DumpToElasticSearch(ESDumper):
                                 }
                             }
                         },
-                        doc_type=doc_type
                     )
                     logging.info('GOT %r', ret)
 
 
+def flow(parameters):
+    return DF.Flow(
+        DumpToElasticSearch(parameters['indexes'])
+    )
+
+
 if __name__ == '__main__':
-    DumpToElasticSearch()()
+    with ingest() as ctx:
+        spew_flow(flow(ctx.parameters), ctx)
