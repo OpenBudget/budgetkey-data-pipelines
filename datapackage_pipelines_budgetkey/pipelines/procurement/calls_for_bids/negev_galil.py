@@ -26,7 +26,7 @@ def scraper():
                 tender_type='call_for_bids',
                 tender_type_he='קול קורא',
                 publication_id=None,
-                tender_id=None,
+                tender_id='0',
             )
         PN += 1
 
