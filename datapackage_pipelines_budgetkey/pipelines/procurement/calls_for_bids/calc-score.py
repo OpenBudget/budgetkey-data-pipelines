@@ -15,10 +15,11 @@ def modify_datapackage(dp, *_):
 
 
 def process_row(row, *_):    
-    row['score'] = 10
     start_date = row.get('start_date')
+    years = 1
     if start_date and isinstance(start_date, datetime.date):
-        row['score'] += (start_date - datetime.date(year=2010, month=1, day=1)).days
+        years = (datetime.date.today() - start_date).days / 365
+    row['score'] = 30 - years
     return row
 
 
