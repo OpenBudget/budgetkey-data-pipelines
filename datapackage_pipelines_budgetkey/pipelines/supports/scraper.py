@@ -83,7 +83,7 @@ def get_results_for_column(driver, column, main_wh, charts_wh):
     click_on_export(driver)
     time.sleep(10)
     driver.close()
-    driver.switch_to.window(charts_wh)
+    # driver.switch_to.window(charts_wh)
 
 
 def scraper(gcd):
@@ -111,24 +111,29 @@ def scraper(gcd):
     time.sleep(15)
 
     # Click on all columns :)
-    groups_selector = 'g.v-m-main g.v-datapoint'
+    groups_selector = 'g.v-m-main g.v-datapoint[combination-column=true]'
     rects_selector = groups_selector + ' rect'
-    groups = get_chart(driver, charts_wh).find_elements_by_css_selector(groups_selector)
-    for i, group in enumerate(groups):
-        x = i * 30
-        driver.execute_script(
-            "arguments[0].setAttribute('transform','translate(%d, 0)')" % x, group
-        )
-    rects = get_chart(driver, charts_wh).find_elements_by_css_selector(rects_selector)
-    for rect in rects:
-        driver.execute_script("arguments[0].setAttribute('height','200')", rect)
-    num = len(rects)
-    for i in range(num):
-        year = 2007 + num - i
+    label_selector = 'g.v-m-main g.v-m-xAxis g.v-m-axisBody text'
+    chart = get_chart(driver, charts_wh)
+    first_label = chart.find_elements_by_css_selector(label_selector)[0]
+    last_year = int(first_label.text)
+    print('LAST YEAR', last_year)
+    for i in range(100):
+        year = last_year - i
         # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
-        rects = get_chart(driver, charts_wh).find_elements_by_css_selector(rects_selector)
+        if chart is None:
+            chart = get_chart(driver, charts_wh)
+        groups = chart.find_elements_by_css_selector(groups_selector)
+        rects = chart.find_elements_by_css_selector(rects_selector)
+        if i >= len(rects):
+            break
+        driver.execute_script(
+            "arguments[0].setAttribute('transform','translate(%d, 0)')" % (i * 30), groups[i]
+        )
+        driver.execute_script("arguments[0].setAttribute('height','50')", rects[i])
         get_results_for_column(driver, rects[i], main_wh, charts_wh)
         logging.info('Completed %r, %r', year, gcd.list_downloads())
+        chart = None
     time.sleep(20)
     return [gcd.download('https://next.obudget.org/datapackages/' + x) for x in gcd.list_downloads() if x]
 
@@ -149,6 +154,10 @@ def flow(*_):
 
 if __name__ == '__main__':
     # logging.info(wrapper())
-    DF.Flow(
-        flow(), DF.printer()
-    ).process()
+    # DF.Flow(
+    #     flow(), DF.printer()
+    # ).process()
+    from selenium import webdriver
+    class b:
+        driver = webdriver.Chrome()
+    scraper(b())
