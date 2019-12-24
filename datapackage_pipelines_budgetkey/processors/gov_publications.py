@@ -22,13 +22,17 @@ def fetcher(parameters):
             url = URL.format(**parameters, limit=skip+10, skip=skip)
             skip += 10
             results = None
-            try:
-                results = requests.get(url)
-                results = results.json()
-            except Exception:
-                print('FAILED to parse JSON <pre>%s</pre>' % results.content[:2048])
-                if gcd is None:
-                    gcd = google_chrome_driver()
+            if gcd is None:
+                try:
+                    results = requests.get(url)
+                    results = results.json()
+                except Exception as e:
+                    print('FAILED to load from %s: %s' % (url, e))
+                    if results and hasattr(results, 'content'):
+                        print('FAILED to parse JSON <pre>%s</pre>' % results.content[:2048])
+                    if gcd is None:
+                        gcd = google_chrome_driver()
+            if gcd is not None:
                 results = gcd.json(url)
             results = results.get('results', [])
             yield from results
