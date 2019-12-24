@@ -120,8 +120,8 @@ all:
         out-path: /var/datapackages/supports/all
 
 with-entities:
-  dependencies:
-    - pipeline: ./supports/all
+  schedule:
+    crontab: "0 4 * * *"
   pipeline:
     - run: add_metadata
       parameters:
