@@ -111,7 +111,7 @@ def scraper(gcd):
     time.sleep(15)
 
     # Click on all columns :)
-    groups_selector = 'g.v-plot-main g.v-datapoint'
+    groups_selector = 'g.v-m-main g.v-datapoint'
     rects_selector = groups_selector + ' rect'
     groups = get_chart(driver, charts_wh).find_elements_by_css_selector(groups_selector)
     for i, group in enumerate(groups):
