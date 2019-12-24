@@ -3,7 +3,7 @@ import requests
 from dataflows import (
     Flow, concatenate, set_type, update_resource, filter_rows,
     validate, delete_fields, add_field, set_primary_key,
-    printer
+    printer, ResourceWrapper
 )
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
@@ -41,6 +41,22 @@ def fetcher(parameters):
     finally:
         if gcd is not None:
             gcd.teardown()
+
+
+def dedup():
+    def func(rows: ResourceWrapper):
+        pk = rows.res.descriptor['schema'].get('primaryKey', [])
+        if len(pk) == 0:
+            yield from rows
+        else:
+            keys = set()
+            for row in rows:
+                key = tuple(row[k] for k in pk)
+                if key in keys:
+                    continue
+                keys.add(key)
+                yield row
+    return func
 
 
 DATE_FMT = '%Y-%m-%dT%H:%M:%SZ'
@@ -105,6 +121,7 @@ def flow(parameters, *_):
         datetime_to_date('last_update_date'),
         datetime_to_date('start_date'),
         set_primary_key(['publication_id', 'tender_type', 'tender_id']),
+        dedup(),
         update_resource(-1, **parameters.pop('resource')),
         update_resource(-1, **{'dpp:streaming': True}),
         validate(),
