@@ -9,13 +9,8 @@ def calculate_publication_id(factor):
                 md5((
                     str(row['publisher']) +
                     str(row['page_title']) +
-                    str(row['start_date']) +
-                    str(row.get('claim_date')) +
-                    json.dumps(row.get('documents'),
-                               sort_keys=True,
-                               ensure_ascii=False)).encode('utf8')
-                    ).digest()[:4],
-                'big'
+                    str(row['start_date'])
+                ).encode('utf8')).digest()[:4], 'big'
             )
             mod = 100000000
             title_hash = factor*mod + (title_hash % mod)
