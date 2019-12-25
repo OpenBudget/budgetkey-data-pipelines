@@ -5,6 +5,7 @@ from datapackage_pipelines.wrapper import process
 
 curyear = datetime.datetime.now().date().year + 1
 
+
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].append({
         'name': 'score',
