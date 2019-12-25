@@ -38,7 +38,7 @@ def fetch_results():
                 tender_id='0',
                 tender_type=None,
                 tender_type_he=pq(box.find('.generalInfo-jobs li:nth-child(1) span')).text(),
-                decision='פתוח',
+                decision=None,
                 page_title=pq(box.find('#modal-title')).text(),
                 page_url=SRC_URL,
                 publisher=pq(box.find('.publisher_link')).text(),
