@@ -85,7 +85,6 @@ def get_decision_list():
             return
 
 
-
 resource = parameters['resource']
 resource[PROP_STREAMING] = True
 schema = {
