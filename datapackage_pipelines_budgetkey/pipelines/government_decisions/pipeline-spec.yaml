@@ -18,7 +18,6 @@ scraper:
         types:
           title:
             es:title: true
-    - run: calc-score
     - run: set_types
     - run: set_primary_key
       parameters:
