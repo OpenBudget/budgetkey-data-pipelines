@@ -76,6 +76,7 @@ def get_decision_list():
                 'unit': result['UnitsDesc'][0] if result.get('UnitsDesc') else (result.get('Units')[0] if result.get('Units') else None),
                 'update_date': result['UpdateDate'],
                 'url_id': result['UrlName'],
+                'score': 1
             }
             count += 1
         response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count)).json()
@@ -110,6 +111,7 @@ schema = {
         {'name': 'unit', 'type': 'string'},
         {'name': 'update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'url_id', 'type': 'string'},
+        {'name': 'score', 'type': 'number', 'es:score-column': True}
     ]
 }
 resource['schema'] = schema
