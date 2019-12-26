@@ -9,11 +9,12 @@ from datapackage_pipelines.generators import (
     GeneratorBase, steps
 )
 
-GLOBAL_BUMP = 2
+GLOBAL_BUMP = 3
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/budgetkey_spec_schema.json')
 REF_DATE = datetime.date(year=2019, month=3, day=1)
+INDEX_NAME = os.environ.get('INDEX_NAME', 'budgetkey')
 
 
 class Generator(GeneratorBase):
@@ -172,7 +173,7 @@ class Generator(GeneratorBase):
                 ]) + parameters.get('pre-indexing', []) + steps(*[
                     ('dump_to_es', {
                         'indexes': {
-                            'budgetkey__' + doc_type: [
+                            INDEX_NAME + '__' + doc_type: [
                                 {'resource-name': doc_type,
                                  'revision': revision}
                             ]
@@ -186,7 +187,7 @@ class Generator(GeneratorBase):
                     ),
                     ('dump_to_es', {
                         'indexes': {
-                            'budgetkey__docs': [
+                            INDEX_NAME + '__docs': [
                                 {'resource-name': 'document'}
                             ]
                         }
