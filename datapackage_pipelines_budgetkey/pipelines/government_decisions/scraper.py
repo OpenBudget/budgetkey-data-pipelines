@@ -106,7 +106,7 @@ schema = {
         {'name': 'procedure_number_str', 'type': 'string', 'es:keyword': True},
         {'name': 'publish_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'publish_date_prod', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
-        {'name': 'title', 'type': 'string'},
+        {'name': 'title', 'type': 'string', 'es:title': True},
         {'name': 'unit', 'type': 'string'},
         {'name': 'update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'url_id', 'type': 'string', 'es:index': False},
