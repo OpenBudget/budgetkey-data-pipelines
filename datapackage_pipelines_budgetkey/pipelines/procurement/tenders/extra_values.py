@@ -83,42 +83,6 @@ def process_row(row, *_):
 
     # # Simplify Decision
     decision = row['decision']
-    # simple_decision = decision
-    # if decision in ('חדש', 'עודכן', 'פורסם וממתין לתוצאות'):
-    #   simple_decision = 'מכרז פתוח'
-    # elif decision in ('הסתיים', 'בתוקף'):
-    #   simple_decision = 'מכרז שנסגר'
-    # elif decision == 'בוטל':
-    #   simple_decision = 'מכרז שבוטל'
-    # elif decision == 'עתידי':
-    #   simple_decision = 'מכרז עתידי'
-    # elif decision == 'לא בתוקף':
-    #   simple_decision = 'הושלם תהליך הרכש'
-    # elif not decision:
-    #   simple_decision = None
-    # elif decision.startswith('אושר '):
-    #   simple_decision = 'הושלם תהליך הרכש'
-    # elif decision.startswith('לא אושר '):
-    #   simple_decision = 'לא אושר'
-    # elif decision.startswith('התקשרות בדיעבד '):
-    #   simple_decision = 'הושלם תהליך הרכש'
-    # elif row['tender_type'] == 'exemptions':
-    #   simple_decision = 'בתהליך'
-    # row['simple_decision'] = simple_decision
-    # row['simple_decision_long'] = simple_decision
-
-    # # Extended Status
-    # extended_status = simple_decision
-    # awardees = row['awardees']
-    # if decision == 'הסתיים' or decision == 'בתוקף':
-    #     if not awardees:
-    #         extended_status = 'הושלם תהליך הרכש - לא החלה התקשרות'
-    #     elif len(awardees) > 0:
-    #         if any(awardee['active'] for awardee in awardees):
-    #             extended_status = 'הושלם תהליך הרכש - החלה התקשרות'
-    #         else:
-    #             extended_status = 'הושלם תהליך הרכש והושלמה ההתקשרות'
-    # row['extended_status'] = extended_status
 
     # Awardees text
     awardees_text = None
@@ -151,23 +115,23 @@ def modify_datapackage(dp, *_):
         **{'es:index': False}
     ), dict(
         name='simple_decision',
-        type='string'
+        type='string',
         **{'es:keyword': True}
     ), dict(
         name='simple_decision_long',
-        type='string'
+        type='string',
         **{'es:keyword': True}
     ), dict(
         name='extended_status',
-        type='string'
+        type='string',
         **{'es:keyword': True}
     ), dict(
         name='awardees_text',
-        type='string'
+        type='string',
         **{'es:index': False}
     ), dict(
         name='tender_type_he',
-        type='string'
+        type='string',
         **{'es:keyword': True}
     ), {
         'name': 'actionable_tips',
