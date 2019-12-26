@@ -44,6 +44,10 @@ all:
             es:title: true
           kind:
             type: string
+            es:keyword: true
+          key:
+            type: string
+            es:keyword: true
 
     - run: set_primary_key
       parameters:
