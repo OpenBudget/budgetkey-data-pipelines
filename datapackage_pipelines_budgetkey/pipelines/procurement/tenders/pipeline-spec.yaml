@@ -285,6 +285,7 @@ processed:
                 - {name: description, type: string}
                 - {name: update_time, type: string, 'es:index': false}
     # add score field based on exemption amount and volume
+    - run: sample
     - run: calc-score-volume
     - run: set_primary_key
       parameters:
@@ -292,14 +293,13 @@ processed:
           - publication_id
           - tender_type
           - tender_id
-    - run: sample
     - run: dump.to_sql
       parameters:
         tables:
           procurement_tenders_processed:
             resource-name: tenders
             mode: update
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/processed
 
