@@ -462,6 +462,11 @@ municipal-data:
       parameters:
         resources: lamas-municipal-data
         types:
+          (symbol_municipality_2015|name_municipality).*:
+            type: string
+            es:keyword: true
+            constraints:
+              required: true
           .*:
             es:keyword: true
     - run: set_types
@@ -471,10 +476,6 @@ municipal-data:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
             es:keyword: false
-          (symbol_municipality_2015|name_municipality).*:
-            type: string
-            constraints:
-              required: true
     - run: join
       parameters:
         source:
