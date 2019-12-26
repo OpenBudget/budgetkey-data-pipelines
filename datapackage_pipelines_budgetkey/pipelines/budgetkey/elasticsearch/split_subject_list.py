@@ -20,7 +20,7 @@ def modify_datapackage(dp, *_):
             'name': 'subject_list_keywords',
             'type': 'array',
             'es:itemType': 'string',
-            'es:title': True,
+            'es:boost': True,
             'es:keyword': True,
         }
     ])

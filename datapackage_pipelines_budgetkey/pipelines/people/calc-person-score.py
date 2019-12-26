@@ -12,7 +12,7 @@ def modify_datapackage(dp, *_):
     }, {
         'name': 'person_key',
         'type': 'string',
-        'es:title': True
+        'es:boost': True,
     }])
     return dp
 

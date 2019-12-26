@@ -14,11 +14,6 @@ scraper:
           name: gov_decisions
           path: data/government_decisions.csv
     - run: set_types
-      parameters:
-        types:
-          title:
-            es:title: true
-    - run: set_types
     - run: set_primary_key
       parameters:
         gov_decisions:

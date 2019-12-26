@@ -148,7 +148,7 @@ support-criteria:
 
           description:
             type: string
-            es:title: true
+            es:boost: true
 
     - run: set_primary_key
       parameters:

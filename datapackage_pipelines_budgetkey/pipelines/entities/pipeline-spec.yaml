@@ -119,13 +119,16 @@ all:
       parameters:
         types:
           kind:
+            es:keyword: true
             constraints:
               pattern: "[a-z-_]+"
           kind_he:
+            es:keyword: true
             constraints:
               required: true
           id:
             type: string
+            es:keyword: true
             constraints:
               pattern: "[0-9]+"
           details:
@@ -302,9 +305,9 @@ entities:
           score:
             es:score-column: true
           name:
-            es:title: true
+            es:boost: true
           name_en:
-            es:title: true
+            es:boost: true
 
     # And dump it
     - run: dump.to_path

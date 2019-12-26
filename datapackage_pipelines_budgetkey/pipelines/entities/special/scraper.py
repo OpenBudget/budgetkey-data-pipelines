@@ -46,7 +46,6 @@ slugs = {u"\u05ea\u05d0\u05d2\u05d9\u05d3\u05d9 \u05d4\u05d0\u05d6\u05d5\u05e8  
 
 headers = ['kind', 'name', 'id', 'street', 'house_number', 'city', 'zipcode']
 
-
 scraped_ids = set()
 
 

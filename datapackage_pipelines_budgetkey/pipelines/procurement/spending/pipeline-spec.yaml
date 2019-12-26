@@ -315,16 +315,26 @@ latest-contract-spending:
             type: date
           order_date:
             type: date
+          budget_code:
+            es:keyword: true
+          company_id:
+            es:keyword: true
+          order_id:
+            es:keyword: true
+          currency:
+            es:keyword: true
           buyer_description:
             es:itemType: string
           exemption_reason:
             es:itemType: string
           explanation:
             es:itemType: string
-            es:hebrew: true
+            es:title: true
           manof_ref:
+            es:keyword: true
             es:itemType: string
           tender_key:
+            es:keyword: true
             es:itemType: string
           publisher:
             es:itemType: string
@@ -333,14 +343,19 @@ latest-contract-spending:
           purchasing_unit:
             es:itemType: string
           purchasing_unit_code:
+            es:keyword: true
             es:itemType: string
           sensitive_order:
             es:itemType: boolean
           supplier_code:
+            es:keyword: true
             es:itemType: string
           supplier_name:
             es:itemType: string
-            es:hebrew: true
+            es:boost: true
+          supplier_name_fingerprint:
+            es:itemType: string
+            es:index: false
           payments:
             type: array
             es:itemType: object
@@ -348,10 +363,10 @@ latest-contract-spending:
               fields:
                 - { 'name': 'year', 'type': 'integer' }
                 - { 'name': 'period', 'type': 'integer' }
-                - { 'name': 'date', 'type': 'string' }
+                - { 'name': 'date', 'type': 'string', 'es:index': false }
                 - { 'name': 'title', 'type': 'string' }
-                - { 'name': 'url', 'type': 'string' }
-                - { 'name': 'timestamp', 'type': 'string' }
+                - { 'name': 'url', 'type': 'string', 'es:index': false }
+                - { 'name': 'timestamp', 'type': 'string', 'es:index': false }
                 - { 'name': 'executed', 'type': 'number' }
                 - { 'name': 'volumne', 'type': 'number' }
     - run: fingerprint

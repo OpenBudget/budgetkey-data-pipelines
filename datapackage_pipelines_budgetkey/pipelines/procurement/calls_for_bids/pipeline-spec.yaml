@@ -198,7 +198,7 @@ calls-for-bids:
             type: array
             es:itemType: string
             es:keyword: true
-            es:title: True
+            es:boost: True
 
           publishing_unit:
             type: string
@@ -208,7 +208,7 @@ calls-for-bids:
             type: string
           description:
             type: string
-            es:title: true
+            es:boost: true
           target_audience:
             type: string
             es:keyword: true

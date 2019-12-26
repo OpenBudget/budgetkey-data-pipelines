@@ -53,13 +53,13 @@ entities:
   key-fields:
     - id
   key-pattern: 'org/{kind}/{id}'
-  extra-steps:
-    - run: add_semantic_tags
-      parameters:
-        resource: entities
-        source-fields:
-          - name
-        target-field: semantic_tags
+  # extra-steps:
+  #   - run: add_semantic_tags
+  #     parameters:
+  #       resource: entities
+  #       source-fields:
+  #         - name
+  #       target-field: semantic_tags
   document-steps:
     - run: enrich_entities
     - run: make_entity_charts

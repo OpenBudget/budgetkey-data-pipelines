@@ -194,7 +194,8 @@ if __name__ == "__main__":
     if tgt_field:
         resource['schema']['fields'].append({
             'name': tgt_field,
-            'type': 'string'
+            'type': 'string',
+            'es:index': False
         })
     else:
         resource['schema']['fields'].extend([{
