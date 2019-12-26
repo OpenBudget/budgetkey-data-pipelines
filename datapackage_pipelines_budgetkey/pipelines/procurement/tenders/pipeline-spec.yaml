@@ -248,6 +248,7 @@ processed:
           -  __hash
     - run: process_contracts      
     - run: extra_values      
+    - run: sample
     # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:
@@ -285,7 +286,6 @@ processed:
                 - {name: description, type: string}
                 - {name: update_time, type: string, 'es:index': false}
     # add score field based on exemption amount and volume
-    - run: sample
     - run: calc-score-volume
     - run: set_primary_key
       parameters:
