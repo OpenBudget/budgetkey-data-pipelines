@@ -6,5 +6,5 @@ now = datetime.datetime.now().date().isoformat()
 
 def flow(*_):
     return DF.Flow(
-        DF.add_field('__seen_date', 'string', now)
+        DF.add_field('__seen_date', 'string', now, **{'es:index': False})
     )

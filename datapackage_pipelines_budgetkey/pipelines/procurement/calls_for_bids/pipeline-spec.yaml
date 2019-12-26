@@ -151,10 +151,16 @@ calls-for-bids:
     - run: set_types
       parameters:
         types:
+          tender_type:
+            es:keyword: true
+          tender_type_he:
+            es:keyword: true
+
           publication_id:
             type: integer
           tender_id:
             type: string
+            es:index: false
 
           ordering_units:
             type: array
@@ -163,6 +169,7 @@ calls-for-bids:
           page_title:
             es:title: true
           page_url:
+            es:index: false
             constraints:
               required: true
 
@@ -176,15 +183,16 @@ calls-for-bids:
           required_documents:
             type: array
             es:itemType: string
+            es:index: false
 
           documents:
             type: array
             es:itemType: object
             es:schema:
               fields:
-                - {name: link, type: string}
+                - {name: link, type: string, 'es:index': false}
                 - {name: description, type: string}
-                - {name: update_time, type: string}
+                - {name: update_time, type: string, 'es:index': false}
           
           subject_list_keywords:
             type: array
@@ -201,10 +209,20 @@ calls-for-bids:
           description:
             type: string
             es:title: true
+          target_audience:
+            type: string
+            es:keyword: true
           contact:
             type: string
+            es:keyword: true
           contact_email:
             type: string
+            es:index: false
+
+          decision:
+            type: string
+            es:keyword: true
+
 
     - run: set_primary_key
       parameters:
