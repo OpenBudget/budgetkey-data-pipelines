@@ -110,19 +110,30 @@ support-criteria:
             type: integer
           tender_id:
             type: string
+            es:index: false
           tender_type:
             type: string
+            es:keyword: true
+          tender_type_he:
+            type: string
+            es:keyword: true
 
           page_title:
             es:title: true
           page_url:
             type: string
+            es:index: false
             constraints:
               required: true
 
+          decision:
+            es:keyword: true
+          contact:
+            type: string
+            es:keyword: true
           contact_email:
-            type: string            
-
+            type: string
+            es:index: false
           claim_date:
             type: datetime
 
@@ -131,9 +142,9 @@ support-criteria:
             es:itemType: object
             es:schema:
               fields:
-                - {name: link, type: string}
+                - {name: link, type: string, 'es:index': false}
                 - {name: description, type: string}
-                - {name: update_time, type: string}
+                - {name: update_time, type: string, 'es:index': false}
 
           description:
             type: string
