@@ -20,7 +20,7 @@ support-criteria-doj:
     - run: add_metadata
       parameters:
         name: support-criteria
-        title: רשימת מבחני תמיכה ומסמכים רלוונטיים ממשרד המשפטים
+        title: רשימת מבחני תמיכה ומסמכים רלוונטיים מאתר משרד המשפטים
     - flow: scraper
       runner: tzabar
     - run: dump_to_path
