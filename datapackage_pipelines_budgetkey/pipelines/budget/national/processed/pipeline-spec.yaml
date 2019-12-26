@@ -392,25 +392,35 @@ connected-national-budgets:
             es:title: true
           admin_cls_code_0:
             es:itemType: string
+            es:keyword: true
+          code:
+            es:keyword: true
           direction:
+            es:keyword: true
             es:itemType: string
           econ_cls_title_.*:
             es:itemType: string
+            es:keyword: true
           .*_cls_json:
+            es:index: false
             es:itemType: string
           func_cls_title_.*:
             es:itemType: string
+            es:keyword: true
           hierarchy:
             es:itemType: string
+            es:index: false
           non_repeating:
             es:itemType: boolean
           children:
             es:itemType: object
             es:schema:
               fields:
-                - {name: code, type: string}
-                - {name: title, type: string}
+                - {name: code, type: string, 'es:keyword': true}
+                - {name: title, type: string, 'es:index': false}
                 - {name: net_revised, type: number}
+          parent:
+            es:index: false
           history:
             es:index: false
     - run: dump.to_path
@@ -525,6 +535,11 @@ connected-items-explained:
           explanation_short: null
           explanation_source:
             name: source
+    - run: set_types
+      parameters:
+        types:
+          explanation_source:
+            es:index: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/processed/connected-items-explained

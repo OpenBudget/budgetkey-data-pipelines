@@ -20,7 +20,7 @@ def flow(parameters):
     key_pattern = parameters['doc-id-pattern']
 
     return Flow(
-        add_field('doc_id', 'string', get_doc_id(key_pattern)),
+        add_field('doc_id', 'string', get_doc_id(key_pattern), **{'es:index': False}),
     )
 
 

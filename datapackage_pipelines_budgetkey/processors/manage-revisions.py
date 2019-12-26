@@ -180,7 +180,7 @@ def main():
         {'name': prefix+'__is_stale',         'type': 'boolean'},
         {'name': prefix+'__staleness',        'type': 'integer'},
         {'name': prefix+'__next_update_days', 'type': 'integer'},
-        {'name': prefix+'__hash',             'type': 'string'},
+        {'name': prefix+'__hash',             'type': 'string', 'es:index': False},
     ]
     STATUS_FIELD_NAMES = list(f['name'] for f in STATUS_FIELDS)
 
@@ -194,7 +194,7 @@ def main():
             input_hash_fields = set(input_hash_fields) - set(STATUS_FIELD_NAMES)
 
             db_key_fields = parameters.get('db-key-fields', input_key_fields)
-            db_hash_fields = parameters.get('db-hash-fields', input_hash_fields)
+            # db_hash_fields = parameters.get('db-hash-fields', input_hash_fields)
 
             existing_ids = \
                 get_all_existing_ids(connection_string,

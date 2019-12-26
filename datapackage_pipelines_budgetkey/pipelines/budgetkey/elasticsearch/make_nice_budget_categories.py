@@ -41,19 +41,22 @@ def process_resources(res_iter_):
 dp['resources'][0]['schema']['fields'].append(
     {
         'name': 'nice-category',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     }
 )
 dp['resources'][0]['schema']['fields'].append(
     {
         'name': 'nice-short-category',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     }
 )
 dp['resources'][0]['schema']['fields'].append(
     {
         'name': 'nice-econ-category',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     }
 )
 

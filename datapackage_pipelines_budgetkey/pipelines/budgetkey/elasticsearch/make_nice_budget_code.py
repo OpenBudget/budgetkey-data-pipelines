@@ -26,11 +26,13 @@ def process_resources(res_iter_):
 dp['resources'][0]['schema']['fields'].extend([
     {
         'name': 'nice-code',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     },
     {
         'name': 'simple-code',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     }
 ])
 
