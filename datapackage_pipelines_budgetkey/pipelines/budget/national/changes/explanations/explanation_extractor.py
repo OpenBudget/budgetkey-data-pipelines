@@ -64,7 +64,7 @@ schema = {
         {'name': 'year', 'type': 'integer'},
         {'name': 'leading_item', 'type': 'integer'},
         {'name': 'req_code', 'type': 'integer'},
-        {'name': 'explanation', 'type': 'string'},
+        {'name': 'explanation', 'type': 'string', 'es:hebrew': True},
     ]
 }
 resource['schema'] = schema

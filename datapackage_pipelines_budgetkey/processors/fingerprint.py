@@ -206,7 +206,7 @@ if __name__ == "__main__":
             'type': 'string'
         }, {
             'name': 'entity_kind',
-            'type': 'string'
+            'type': 'string',
             'es:keyword': True
         }])
         

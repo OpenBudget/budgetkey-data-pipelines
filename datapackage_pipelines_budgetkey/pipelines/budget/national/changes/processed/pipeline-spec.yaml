@@ -185,6 +185,7 @@ national-budget-changes-aggregated:
         types:
           req_title:
             es:itemType: string
+            es:title: true
           change_code:
             es:itemType: integer
           change_title:
@@ -193,10 +194,12 @@ national-budget-changes-aggregated:
             es:itemType: integer
           change_type_name:
             es:itemType: string
+            es:keyword: true
           committee_id:
             es:itemType: integer
           budget_code_title:
             es:itemType: string
+            es:keyword: true
           change_list:
             es:itemType: object
             es:index: false

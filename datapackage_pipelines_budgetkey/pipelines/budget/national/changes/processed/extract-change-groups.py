@@ -24,7 +24,8 @@ def update_datapackage(datapackage):
             new_fields.append(field)
     new_fields.append({
         'name': 'transaction_id',
-        'type': 'string'
+        'type': 'string',
+        'es:keyword': True
     })
     resource['schema']['fields'] = new_fields
     return datapackage
