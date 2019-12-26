@@ -18,8 +18,9 @@ def process_resources(res_iter_):
     yield from res_iter_
 
 
-dp['resources'][0]['schema']['fields'].append(
-    {'name': 'page_title', 'type': 'string'}
-)
+if 'page_title' not in key_pattern:
+    dp['resources'][0]['schema']['fields'].append(
+        {'name': 'page_title', 'type': 'string', 'es:index': False}
+    )
 
 spew(dp, process_resources(res_iter))

@@ -89,7 +89,7 @@ resource = parameters['resource']
 resource[PROP_STREAMING] = True
 schema = {
     'fields': [
-        {'name': 'text', 'type': 'string'},
+        {'name': 'text', 'type': 'string', 'es:hebrew': True},
         {
             "name": "linked_docs",
             "type": "array",
@@ -98,18 +98,18 @@ schema = {
         },
         {'name': 'doc_published_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'doc_update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
-        {'name': 'id', 'type': 'string'},
+        {'name': 'id', 'type': 'string', 'es:index': False},
         {'name': 'office', 'type': 'string'},
-        {'name': 'government', 'type': 'string'},
-        {'name': 'policy_type', 'type': 'string'},
+        {'name': 'government', 'type': 'string', 'es:keyword': True},
+        {'name': 'policy_type', 'type': 'string', 'es:keyword': True},
         {'name': 'procedure_number', 'type': 'integer'},
-        {'name': 'procedure_number_str', 'type': 'string'},
+        {'name': 'procedure_number_str', 'type': 'string', 'es:keyword': True},
         {'name': 'publish_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'publish_date_prod', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'title', 'type': 'string'},
         {'name': 'unit', 'type': 'string'},
         {'name': 'update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
-        {'name': 'url_id', 'type': 'string'},
+        {'name': 'url_id', 'type': 'string', 'es:index': False},
         {'name': 'score', 'type': 'number', 'es:score-column': True}
     ]
 }
