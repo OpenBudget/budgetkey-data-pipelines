@@ -1,7 +1,7 @@
 from pyquery import PyQuery as pq
 
 from dataflows import Flow, printer, set_type, set_primary_key, \
-        delete_fields, update_resource
+        delete_fields, update_resource, deduplicate
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 
@@ -69,6 +69,7 @@ def flow(*_):
         calculate_publication_id(1),
         set_type('start_date', type='date', format='%d-%m-%Y'),
         set_primary_key(['publication_id']),
+        deduplicate(),
         update_resource(
             -1, name='criteria',
             **{
