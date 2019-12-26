@@ -111,7 +111,10 @@ all:
             type: number
           year.+:
             type: integer
+          request_type:
+            es:keyword: true
           budget_code:
+            es:keyword: true
             constraints:
               required: true
               pattern: '[0-9]{10}'

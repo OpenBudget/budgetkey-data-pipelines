@@ -28,7 +28,8 @@ def modify_datapackage(dp, *_):
     })
     dp['resources'][0]['schema']['fields'].append({
         'name': 'short_id',
-        'type': 'string'
+        'type': 'string',
+        'es:index': False
     })
     return dp
 
