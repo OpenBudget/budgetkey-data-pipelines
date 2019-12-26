@@ -44,6 +44,8 @@ municipal-data:
         sheet: 2
         headers: 2
         deduplicate_headers: true
+        cast_strategy: strings
+        infer_strategy: strings
     - run: load
       parameters:
         # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
@@ -52,6 +54,8 @@ municipal-data:
         sheet: 3
         headers: 2
         deduplicate_headers: true
+        cast_strategy: strings
+        infer_strategy: strings
     - run: load
       parameters:
         # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
@@ -60,6 +64,8 @@ municipal-data:
         sheet: 4
         headers: 2
         deduplicate_headers: true
+        cast_strategy: strings
+        infer_strategy: strings
     - run: load
       parameters:
         # Actually from: "http://www.cbs.gov.il/publications16/local_authorities14_1642/excel/p_libud_15.xls"
@@ -68,6 +74,8 @@ municipal-data:
         sheet: 5
         headers: 2
         deduplicate_headers: true
+        cast_strategy: strings
+        infer_strategy: strings
     - run: translate_headers
     - run: fix_bad_values
     - run: concatenate
@@ -463,16 +471,10 @@ municipal-data:
         resources: lamas-municipal-data
         types:
           (symbol_municipality_2015|name_municipality).*:
-            type: string
-            es:keyword: true
             constraints:
               required: true
           .*:
             es:keyword: true
-    - run: set_types
-      parameters:
-        resources: lamas-municipal-data
-        types:
           (?!symbol_municipality_2015|status_municipal_2015|index_peripheral_2004_grade_by_group_cluster|name_committee_planning_construction_2015|district_2015|name_municipality).*:
             type: number
             es:keyword: false
