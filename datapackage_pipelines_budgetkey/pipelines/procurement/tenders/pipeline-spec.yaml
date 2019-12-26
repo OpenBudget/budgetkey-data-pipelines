@@ -259,6 +259,20 @@ processed:
     - run: set_types
       parameters:
         types:
+          tender_type:
+            es:keyword: true
+          page_url:
+            es:index: false
+          supplier_id:
+            es:keyword: true
+          contact_email:
+            es:index: false
+          source_currency:
+            es:keyword: true
+          decision:
+            es:keyword: true
+          tender_id:
+            es:keyword: true
           description:
             es:title: true
           subjects:
@@ -267,9 +281,9 @@ processed:
             es:itemType: object
             es:schema:
               fields:
-                - {name: link, type: string}
+                - {name: link, type: string, 'es:index': false}
                 - {name: description, type: string}
-                - {name: update_time, type: string}
+                - {name: update_time, type: string, 'es:index': false}
     # add score field based on exemption amount and volume
     - run: calc-score-volume
     - run: set_primary_key

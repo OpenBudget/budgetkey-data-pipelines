@@ -147,22 +147,28 @@ def process_row(row, *_):
 def modify_datapackage(dp, *_):
     dp['resources'][0]['schema']['fields'].extend([dict(
         name='snippet',
-        type='string'
+        type='string',
+        **{'es:index': False}
     ), dict(
         name='simple_decision',
         type='string'
+        **{'es:keyword': True}
     ), dict(
         name='simple_decision_long',
         type='string'
+        **{'es:keyword': True}
     ), dict(
         name='extended_status',
         type='string'
+        **{'es:keyword': True}
     ), dict(
         name='awardees_text',
         type='string'
+        **{'es:index': False}
     ), dict(
         name='tender_type_he',
         type='string'
+        **{'es:keyword': True}
     ), {
         'name': 'actionable_tips',
         'type': 'array',

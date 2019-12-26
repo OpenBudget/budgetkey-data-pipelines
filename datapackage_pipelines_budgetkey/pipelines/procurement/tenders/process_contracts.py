@@ -57,9 +57,9 @@ def modify_datapackage(dp, *_):
             'es:itemType': 'object',
             'es:schema': {
                 'fields': [
-                    {'name': 'entity_id', 'type': 'string'},
+                    {'name': 'entity_id', 'type': 'string', 'es:keyword': True},
                     {'name': 'entity_name', 'type': 'string'},
-                    {'name': 'entity_kind', 'type': 'string'},
+                    {'name': 'entity_kind', 'type': 'string', 'es:keyword': True},
                     {'name': 'active', 'type': 'boolean'},
                     {'name': 'volume', 'type': 'number'},
                     {'name': 'executed', 'type': 'number'},

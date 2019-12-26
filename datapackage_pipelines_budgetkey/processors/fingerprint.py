@@ -199,13 +199,15 @@ if __name__ == "__main__":
     else:
         resource['schema']['fields'].extend([{
             'name': 'entity_id',
-            'type': 'string'
+            'type': 'string',
+            'es:keyword': True
         }, {
             'name': 'entity_name',
             'type': 'string'
         }, {
             'name': 'entity_kind',
             'type': 'string'
+            'es:keyword': True
         }])
         
     spew(dp, process_resources(res_iter, src_field, tgt_field, src_id_field, unique_fingerprints))
