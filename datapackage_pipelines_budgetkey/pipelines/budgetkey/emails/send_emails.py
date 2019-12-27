@@ -63,10 +63,15 @@ def query_url(term, filters):
     return f'https://next.obudget.org/s/?q={term}&{filters}'
 
 
-def process_row(row, *_):
+def process_row(row, row_index,
+                spec, resource_index,
+                parameters, stats):
     logging.info('ROW: %r', row)
     items = row['items']
     sections = []
+    stats.setdefault('subscriptions', 0)
+    stats.setdefault('errors', 0)
+    stats['subscriptions'] += 1
     for header, subheader, filters, relevant_types in SECTIONS:
         terms = []
         section = dict(
@@ -104,16 +109,22 @@ def process_row(row, *_):
                                        json=ret,
                                        timeout=630)
                 if result.status_code == 200:
+                    stats.setdefault('sent', 0)
+                    stats['sent'] += 1
                     result = result.json()
                     logging.info('RESULT #%d: %r', retry, result)
                     break
                 else:
+                    stats['errors'] += 1
                     result = '%s: %s' % (result.status_code, result)
             except Exception as e:
                 result = str(e)
+            stats['errors'] += 1
             logging.info('RESULT #%d: %r', retry, result)
             time.sleep(60)
     else:
+        stats.setdefault('skipped', 0)
+        stats['skipped'] += 1
         logging.info('SKIPPING %s as has no relevant subscriptions',
                      row['email'])
 

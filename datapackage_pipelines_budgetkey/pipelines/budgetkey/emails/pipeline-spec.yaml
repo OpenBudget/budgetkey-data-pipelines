@@ -7,4 +7,4 @@ emails:
   pipeline:
     - run: fetch_subscriptions
     - run: sample
-    # - run: send_emails
+    - run: send_emails
