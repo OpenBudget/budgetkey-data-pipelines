@@ -6,7 +6,7 @@ import csv
 
 SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
                             'מספר דרכון': 'passport_number',
-                            'מספר ביטוח לאומי':'Social Security Number',
+                            'מספר ביטוח לאומי':'social_security_number',
                             'מספר זיהוי לא ידוע': 'unknown'
                             }
 RENAME_FIELDS = {

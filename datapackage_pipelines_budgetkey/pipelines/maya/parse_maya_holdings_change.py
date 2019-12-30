@@ -10,7 +10,10 @@ ID_TYPE_MAPPING = {'מספר מזהה אחר': 'other',
                    'מספר רשם בארץ ההתאגדות בחו"ל': 'id_at_foreign_corporation_registry',
                    'מספר ברשם החברות בישראל': 'id_at_corporation_registry',
                    'מספר ברשם השותפויות בישראל': 'id_at_association_registry',
-                   'מספר תעודת זהות':'id_number'}
+                   'מספר תעודת זהות':'id_number',
+                   'מספר ביטוח לאומי':'social_security_number'}
+
+
 
 HOLDER_TYPE_MAPPING = {'החברה':False,
                        'חברת בת של החברה':True }
@@ -45,7 +48,7 @@ FIELDS = [
 ]
 
 TABLE_FIELDS = [
-    'IsHeldBySubsidiary',
+
     'SubsidiaryName',
     'SubsidiaryNameEn',
     'PercentageHeld',
@@ -60,6 +63,8 @@ TABLE_FIELDS = [
     'CitizenshipOfRegistering',
     'countryOfRegistering',
 
+    'IsHeldBySubsidiary',
+
     'Table776',
     'Table774',
     'Table775',
@@ -73,7 +78,8 @@ ADDITIONAL_FIELDS = ['ChangeExplanation']
 
 def filter_by_type(rows):
     for row in rows:
-        if row['type'] == 'ת086':
+        # 'ZeutRochesh' indicates old forms we don't know to parse currently
+        if row['type'] == 'ת086' and 'ZeutRochesh' not in row['document']:
             yield row
 
 
