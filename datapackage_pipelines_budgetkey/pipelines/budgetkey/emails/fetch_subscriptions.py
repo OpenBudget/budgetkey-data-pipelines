@@ -25,10 +25,14 @@ if __name__ == '__main__':
     e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL'])
     r = map(dict,
             e.execute("""
-select email, title, url, properties 
+with a as (select users.email as email, title, url, properties, max(send_time) as last_send_time
 from items join lists on(items.list_id=lists.id) 
 join users on(lists.user_id=users.id) 
-where lists.name='searches' 
+left join sendlog on (sendlog.email=users.email)
+where lists.name='searches'
+group by 1,2,3,4)
+select * from a 
+where (last_send_time is null or current_timestamp > last_send_time + interval '7 days')
 order by email
 """
         ))

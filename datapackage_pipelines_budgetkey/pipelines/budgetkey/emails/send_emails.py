@@ -1,10 +1,13 @@
 from datapackage_pipelines.wrapper import process
 
+import os
 import logging
 import requests
 import urllib.parse
 import json
 import time
+import datetime
+import sqlalchemy
 
 SECTIONS = [
     (
@@ -63,6 +66,14 @@ def query_url(term, filters):
     return f'https://next.obudget.org/s/?q={term}&{filters}'
 
 
+e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
+
+
+def update_db(email):
+    t = sqlalchemy.sql.text("insert into sendlog (email, send_time) values (:email, :send_time)")
+    e.execute(t, email=email, send_time=datetime.datetime.now())
+
+
 def process_row(row, row_index,
                 spec, resource_index,
                 parameters, stats):
@@ -103,6 +114,7 @@ def process_row(row, row_index,
             email=row['email']
         )
         logging.info('DATAS: %r', ret)
+        update_db(row['email'])
         for retry in range(2):
             try:
                 result = requests.post('http://budgetkey-emails:8000/',
