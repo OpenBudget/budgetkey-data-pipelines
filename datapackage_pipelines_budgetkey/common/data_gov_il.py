@@ -12,8 +12,12 @@ BASE_PATH = os.path.dirname(__file__)
 
 
 def search_dataset(gcd, dataset_name):
-    results = gcd.json(PACKAGE_GET_URL + dataset_name)
-    logging.info('GOT JSON %s', results)
+    try:
+        results = requests.get(PACKAGE_GET_URL + dataset_name, headers={'User-Agent':'datagov-internal-client'}).json()
+        logging.info('GOT REQUESTS JSON %s', results)
+    except:
+        results = gcd.json(PACKAGE_GET_URL + dataset_name)
+        logging.info('GOT GCD JSON %s', results)
     return results['result']
 
 
