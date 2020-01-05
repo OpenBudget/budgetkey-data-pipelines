@@ -15,10 +15,12 @@ def search_dataset(gcd, dataset_name):
     try:
         results = requests.get(PACKAGE_GET_URL + dataset_name, headers={'User-Agent':'datagov-internal-client'}).json()
         logging.info('GOT REQUESTS JSON %s', results)
+        results = results['result']
     except:
         results = gcd.json(PACKAGE_GET_URL + dataset_name)
         logging.info('GOT GCD JSON %s', results)
-    return results['result']
+        results = results['result']
+    return results
 
 
 def get_resource(gcd, dataset_name, resource_name):
