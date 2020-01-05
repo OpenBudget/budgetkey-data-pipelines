@@ -13,6 +13,7 @@ BASE_PATH = os.path.dirname(__file__)
 
 def search_dataset(gcd, dataset_name):
     results = gcd.json(PACKAGE_GET_URL + dataset_name)
+    logging.info('GOT JSON %s', results)
     return results['result']
 
 
