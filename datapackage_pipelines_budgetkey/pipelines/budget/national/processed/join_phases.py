@@ -158,6 +158,17 @@ def process_row(row, phase_key):
         row['depth'] = 0
         yield row
 
+    if (
+        (not
+            (row['code'].startswith('0000') or
+             row['code'].startswith('0089') or
+             row['code'].startswith('0091') or 
+             row['code'].startswith('0094') or 
+             row['code'].startswith('0095') or
+             row['code'].startswith('0098')
+            )
+        ) or (row['econ_cls_code_2'] == '266')
+       ):
         row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
         row['title'] = '%s' % (row['func_cls_title_1'],)
         row['hierarchy'] = [['00', 'המדינה']]
