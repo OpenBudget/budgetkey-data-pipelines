@@ -10,7 +10,7 @@ national-budgets:
       parameters:
         name: national-budget
         title: National Budget
-        revision: '2019-01'
+        revision: '2020-01'
     - run: data_gov_il_resources
       parameters:
         batch:
