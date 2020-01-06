@@ -2,22 +2,30 @@
 from dataflows import Flow, printer, delete_fields, load
 import csv
 from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, \
-    add_fields, rename_fields, verify_row_values
+    fix_fields, add_fields, rename_fields, verify_row_values
 
 SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
                             'מספר דרכון': 'passport_number',
                             'מספר ביטוח לאומי':'Social Security Number',
                             'מספר זיהוי לא ידוע': 'unknown'
                             }
+HAS_STOCKS_IN_THE_COMPANY_MAPPING = {
+    'מחזיק': True,
+    'אינו מחזיק': False,
+    '_________': None
+}
 
+RELATIVE_OF_ANOTHER_VIP_MAPPING = {
+    'הינו':True,
+    'הנו':True,
+    'אינו':False
+}
 EMPTY_STRING = '_________'
 
 FIELD_CONVERSION = {
     'IsIsraeli': (lambda val: 'אדם פרטי עם אזרחות ישראלית' in val),
     'IsBothDirectorAndCeoOrRelativeOfCeo': (lambda val: True if 'כן' == val else (False if 'לא' == val else None) ),
     'EmployedAtAnotherJobConnectedToTheCompany': (lambda val: 'ממלא' == val) ,
-    'RelativeOfAnotherVip': (lambda val: 'הינו' == val),
-    'HasStocksInTheCompany': (lambda val: 'מחזיק' == val) ,
     'HasStocksInSubsidiaryOrConnectedCompany': (lambda val: True if 'מחזיק' == val else (False if 'אינו מחזיק' == val else None) )
 }
 
@@ -81,8 +89,8 @@ def validate(rows):
         verify_row_values(row, 'IsIsraeli', {'אדם פרטי ללא אזרחות ישראלית', 'אדם פרטי עם אזרחות ישראלית'})
         verify_row_values(row, 'IsBothDirectorAndCeoOrRelativeOfCeo', {'_________', 'כן', 'לא'})
         verify_row_values(row, 'EmployedAtAnotherJobConnectedToTheCompany', {'אינו ממלא', 'ממלא'})
-        verify_row_values(row, 'RelativeOfAnotherVip', {'אינו', 'הינו'})
-        verify_row_values(row, 'HasStocksInTheCompany', {'אינו מחזיק', 'מחזיק'})
+        verify_row_values(row, 'RelativeOfAnotherVip', RELATIVE_OF_ANOTHER_VIP_MAPPING)
+        verify_row_values(row, 'HasStocksInTheCompany', HAS_STOCKS_IN_THE_COMPANY_MAPPING)
         verify_row_values(row, 'HasStocksInSubsidiaryOrConnectedCompany', {'_________', 'אינו מחזיק', 'מחזיק'})
         verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         yield row
@@ -125,15 +133,13 @@ def parse_document(rows):
         for field in FIELDS:
             row[field] = (doc.get(field, None) or [""])[0]
 
-        for field in FIELDS:
-            if _is_null_string(row[field]):
-                row[field] = ''
-
         for field, convert_value in FIELD_CONVERSION.items():
             row[field] = convert_value(row[field])
 
         row['PreviousPositions'] = previous_jobs_at_the_company
         row['Positions'] = job_titles
+        row['RelativeOfAnotherVip'] = RELATIVE_OF_ANOTHER_VIP_MAPPING[row['RelativeOfAnotherVip']]
+        row['HasStocksInTheCompany'] = HAS_STOCKS_IN_THE_COMPANY_MAPPING[row['HasStocksInTheCompany']]
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
 
         yield row
@@ -148,6 +154,7 @@ def flow(*_):
         add_fields(FIELDS, 'string'),
         validate,
         parse_document,
+        fix_fields(FIELDS),
         delete_fields(['document', 'pdf', 'other', 'num_files', 'parser_version', 'source', 's3_object_name']),
     )
 
