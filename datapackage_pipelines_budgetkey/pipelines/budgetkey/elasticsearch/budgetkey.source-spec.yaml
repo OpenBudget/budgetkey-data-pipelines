@@ -171,7 +171,7 @@ calls_for_bids:
 
 support_criteria:
   kind: indexer
-  revision: 17
+  revision: 18
   dependent_pipeline: ./supports/criteria/support-criteria-all
   source_datapackage: /var/datapackages/support-criteria-all/datapackage.json
   page-title-pattern: '{page_title}'
