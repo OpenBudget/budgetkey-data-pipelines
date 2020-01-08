@@ -32,7 +32,7 @@ left join sendlog on (sendlog.email=users.email)
 where lists.name='searches'
 group by 1,2,3,4)
 select * from a 
-where (last_send_time is null or current_timestamp > last_send_time + interval '7 days')
+where (last_send_time is null or current_timestamp > last_send_time + interval '5 days')
 order by email
 """
         ))
