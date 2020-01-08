@@ -5,24 +5,8 @@ import logging
 import datetime
 
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_budgetkey.common.guidestar_api import GuidestarApi
 
-
-CSRF_RE = re.compile('\{"name":"getUserInfo","len":0,"ns":"","ver":43.0,"csrf":"([^"]+)"\}')
-VID_RE = re.compile('RemotingProviderImpl\(\{"vf":\{"vid":"([^"]+)"')
-
-
-HEADERS = {
-    'X-User-Agent': 'Visualforce-Remoting',
-    'Origin': 'https://www.guidestar.org.il',
-    'Accept-Encoding': 'gzip, deflate, br',
-    'Accept-Language': 'en-US,en;q=0.9,he;q=0.8',
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36',
-    'Content-Type': 'application/json',
-    'Accept': '*/*',
-    'Referer': 'https://www.guidestar.org.il/organization/580030104',
-    'X-Requested-With': 'XMLHttpRequest',
-    'Connection': 'keep-alive',
-}
 
 def lineSplitter(x):
     return [xx.strip() for xx in x.split('\n')]
@@ -155,55 +139,14 @@ def scrape_guidestar(ass_recs):
         assert 'Association_Number' in ass_rec
         anum = ass_rec['Association_Number']
 
-        guidestar_url = 'https://www.guidestar.org.il/he/organization/{}'.format(anum)
-        page = None
-        while page is None:
-            try:
-                response = requests.get(guidestar_url)
-                if response.status_code == 200:
-                    page = response.text
-            except:
-                time.sleep(60)
-        
-            if page is None:
-               continue
+        api = GuidestarApi('https://www.guidestar.org.il/he/organization/{}'.format(anum))
 
-        csrf = CSRF_RE.findall(page)[0]
-        vid = VID_RE.findall(page)[0]
-        
-        body = []
-        for i, method in enumerate(["getMalkarDetails", 
-                                    "getMalkarWageEarners",
-                                    "getMalkarDonations"]):
-            body.append({
-                "action": "GSTAR_Ctrl",
-                "method": method,
-                "data": [anum],
-                "type": "rpc",
-                "tid": 3 + i,
-                "ctx": {
-                    "csrf": csrf,
-                    "ns":"",
-                    "vid": vid,
-                    "ver":39
-                }
-            })
+        data = api.prepare()\
+            .method('getMalkarDetails', [anum], 39)\
+            .method('getMalkarWageEarners', [anum], 39)\
+            .method('getMalkarDonations', [anum], 39)\
+            .run()
 
-        data = None
-        for i in range(5):
-            try:
-                data = requests.post('https://www.guidestar.org.il/apexremote', 
-                json=body, headers=HEADERS).json()
-                break
-            except Exception as e:
-                logging.exception('Failed to fetch data for %s: %r', anum, e)
-                time.sleep(60)
-        if data is None:
-            continue
-        for entry in data:
-            if 'result' not in entry:
-                data = None
-                break            
         if data is None:
             continue
 
@@ -214,7 +157,7 @@ def scrape_guidestar(ass_recs):
         rec['id'] = ass_rec['Association_Number']
         rec['association_registration_date'] = ass_rec['Association_Registration_Date']
         rec['association_title'] = ass_rec['Association_Name']
-        
+
         address = ''
         if rec.get('association_address_street'):
             address += rec['association_address_street']

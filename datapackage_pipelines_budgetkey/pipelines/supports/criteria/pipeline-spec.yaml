@@ -21,7 +21,7 @@ support-criteria-doj:
       parameters:
         name: support-criteria
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים מאתר משרד המשפטים
-    - flow: scraper
+    - flow: guidestar_scraper
       runner: tzabar
     - run: dump_to_path
       parameters:
