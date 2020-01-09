@@ -42,7 +42,6 @@ all:
             - "תקנה - מפתח"
             - "תקנה (ZCMMT_ITM) - מפתח"
     - run: fix_values
-    - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: sample
     - run: set_types
       parameters:
@@ -74,7 +73,7 @@ with-entities:
       parameters:
         url: /var/datapackages/supports/all/datapackage.json
         resource: supports
-
+    - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: fingerprint
       parameters:
         resource-name: supports
