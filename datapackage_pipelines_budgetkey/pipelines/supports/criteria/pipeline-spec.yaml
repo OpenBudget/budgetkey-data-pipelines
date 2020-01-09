@@ -155,6 +155,15 @@ support-criteria:
             type: string
             es:boost: true
 
+          resolved_budget_codes:
+            type: array
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: code, type: string, 'es:keyword': true}
+                - {name: year, type: integer}
+                - {name: doc_id, type: string, 'es:index': false}
+
     - run: set_primary_key
       parameters:
         calls_for_bids:
