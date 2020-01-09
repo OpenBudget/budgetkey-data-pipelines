@@ -1,6 +1,8 @@
 import os
 from sqlalchemy import create_engine
 import dataflows as DF
+import logging
+
 
 query = """
 WITH a AS
