@@ -25,7 +25,7 @@ def process_row(codes):
         ret = []
         row['resolved_budget_codes'] = ret
         if budget_codes:
-            if isinstance(budget_codes, string):
+            if isinstance(budget_codes, str):
                 budget_codes = [budget_codes]
             for code in budget_codes:
                 code = codes.get(code)
