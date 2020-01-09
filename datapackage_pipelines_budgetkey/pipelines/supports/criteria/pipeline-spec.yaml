@@ -23,6 +23,7 @@ support-criteria-doj:
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים מאתר משרד המשפטים
     - flow: guidestar_scraper
       runner: tzabar
+    - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/support-criteria/doj
@@ -100,6 +101,9 @@ support-criteria:
           contact: []
           contact_email: []
 
+          budget_codes: []
+          resolved_budget_codes: []
+
         target:
           name: support_criteria
           path: data/support_criteria.csv
@@ -156,7 +160,7 @@ support-criteria:
           - tender_type
           - publication_id
           - tender_id
-    - flow: datapackage_pipelines_budgetkey.processors.add_seen_date
+    # - flow: datapackage_pipelines_budgetkey.processors.add_seen_date
 
     - run: dump.to_sql
       parameters:

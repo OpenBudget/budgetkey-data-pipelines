@@ -8,68 +8,7 @@ all:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
         revision: '2019-01'
-    # - run: add_resource
-    #   parameters:
-    #     name: s2008
-    #     url: https://www.dropbox.com/s/znhiq9untxheoed/2008.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2009
-    #     url: https://www.dropbox.com/s/nxw1dwopdch97a8/2009.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2010
-    #     url: https://www.dropbox.com/s/0x0iu4ol898evqy/2010.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2011
-    #     url: https://www.dropbox.com/s/lbzerfbcdg6uqqc/2011.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2012
-    #     url: https://www.dropbox.com/s/4kdi6zep9wkjj4c/2012.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2013
-    #     url: https://www.dropbox.com/s/ly0mq0wpcry570p/2013.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2014
-    #     url: https://www.dropbox.com/s/pd2maiwdn0q41lo/2014.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2015
-    #     url: https://www.dropbox.com/s/a1bya5cqb1vgnjx/2015.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2016
-    #     url: https://www.dropbox.com/s/utvndt7w6s146j6/2016.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2017
-    #     url: https://www.dropbox.com/s/buer47p7pzxuaso/2017.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2018
-    #     url: https://www.dropbox.com/s/cqfurmpk1w1l8nl/2018.csv?dl=1
-    #     format: csv
-    # - run: add_resource
-    #   parameters:
-    #     name: s2019
-    #     url: https://www.dropbox.com/s/69ll1941494xioz/2019.csv?dl=1
-    #     format: csv
 
-    # - run: stream_remote_resources
     - flow: scraper
     - run: concatenate
       parameters:
@@ -103,6 +42,7 @@ all:
             - "תקנה - מפתח"
             - "תקנה (ZCMMT_ITM) - מפתח"
     - run: fix_values
+    - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: sample
     - run: set_types
       parameters:
