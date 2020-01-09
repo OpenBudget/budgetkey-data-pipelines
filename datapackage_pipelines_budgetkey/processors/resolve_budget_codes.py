@@ -23,7 +23,6 @@ def process_row(codes):
     def func(row):
         budget_codes = row.get('budget_codes', row.get('budget_code'))
         ret = []
-        row['resolved_budget_codes'] = ret
         if budget_codes:
             if isinstance(budget_codes, str):
                 budget_codes = [budget_codes]
@@ -36,6 +35,7 @@ def process_row(codes):
                         title=code['title'],
                         doc_id='budget/{code}/{year}'.format(**code)
                     ))
+        return ret
     return func
 
 
@@ -46,6 +46,7 @@ def flow(*_):
     codes = dict(
         (i['code'], i) for i in data
     )
+    logging.info('GOT %d CODES', len(codes))
     return DF.Flow(
         DF.add_field('resolved_budget_codes', 'array', default=process_row(codes),
                      **{
