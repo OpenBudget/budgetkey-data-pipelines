@@ -160,7 +160,6 @@ support-criteria:
           - tender_type
           - publication_id
           - tender_id
-    # - flow: datapackage_pipelines_budgetkey.processors.add_seen_date
 
     - run: dump.to_sql
       parameters:
@@ -186,7 +185,6 @@ support-criteria-all:
     - run: stream_remote_resources
     - run: calc-score
     - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
-    # - flow: datapackage_pipelines_budgetkey.processors.filter_seen_date
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/support-criteria-all

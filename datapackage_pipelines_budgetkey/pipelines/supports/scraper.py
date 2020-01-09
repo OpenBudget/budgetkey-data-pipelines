@@ -97,6 +97,7 @@ def scraper(gcd):
     # Click on 'דוחות'
     frame = driver.find_element_by_id('idd1')
     driver.switch_to.frame(frame)
+    time.sleep(10)
     el = driver.find_element_by_id('__cell0')
     ActionChains(driver).move_to_element(el)\
                         .move_to_element_with_offset(el, xoffset=10, yoffset=10)\
