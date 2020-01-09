@@ -51,7 +51,7 @@ def flow(*_):
                      **{
                          'es:itemType': 'object',
                          'es:schema': dict(
-                             code=dict(type='string', 'es:keyword': True),
+                             code=dict(type='string', **{'es:keyword': True}),
                              year=dict(type='integer'),
                              title=dict(type='string'),
                          )
