@@ -8,5 +8,5 @@ election_candidates21:
     - flow: get_parties
     - run: dump_to_path
       parameters:
-        out-path: /var/datapackages/election_candidates21
+        out-path: /var/datapackages/people/political_candidates/
 
