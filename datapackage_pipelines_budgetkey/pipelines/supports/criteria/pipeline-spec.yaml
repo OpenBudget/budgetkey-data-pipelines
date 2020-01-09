@@ -155,6 +155,10 @@ support-criteria:
             type: string
             es:boost: true
 
+          budget_codes:
+            type: array
+            es:itemType: string
+
           resolved_budget_codes:
             type: array
             es:itemType: object
