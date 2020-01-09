@@ -63,8 +63,8 @@ all:
         out-path: /var/datapackages/supports/all
 
 with-entities:
-  schedule:
-    crontab: "0 4 * * *"
+  dependencies:
+    - pipeline: ./supports/all
   pipeline:
     - run: add_metadata
       parameters:
@@ -216,6 +216,7 @@ by-request-year:
           amount_paid: null
           amount_advance: null
           amount_total: null
+          resolved_budget_codes: null
           last_payment_year:
             name: year_paid
             aggregate: last
