@@ -58,6 +58,7 @@ support-criteria:
       parameters:
         name: support-criteria
         title: מבחני תמיכה, טיוטות למבחני תמיכה ומסמכים רלוונטיים
+        revision: "2020-01"
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
       parameters:
         publication_type: 7b76d87f-d299-4019-8637-5f1de71c9523
