@@ -10,6 +10,7 @@ WITH a AS
           max(YEAR) AS year
    FROM raw_budget
    WHERE length(code)=10
+   AND net_revised > 0
    GROUP BY code)
 SELECT year,
        code,
