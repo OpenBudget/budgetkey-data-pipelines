@@ -40,7 +40,3 @@ order by email
     r = (dict(email=email, items=list(items))
          for email, items in itertools.groupby(r, lambda x: x['email']))
     spew(dp, [r])
-
-
-
-
