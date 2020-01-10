@@ -1,6 +1,6 @@
 emails:
   schedule:
-    crontab: "0 5 fri * *"
+    crontab: "1 5 fri * *"
 
   title: Send periodic emails (1)
 
