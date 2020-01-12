@@ -11,8 +11,9 @@ def sanitize_html(container_el):
             if el.tag == 'a':
                 href = el.attrib.get('href')
                 el.attrib.clear()
-                el.attrib['href'] = href
-                el.attrib['target'] = '_blank'
+                if href:
+                    el.attrib['href'] = href
+                    el.attrib['target'] = '_blank'
             else:
                 el.attrib.clear()
         return container_el.html()
