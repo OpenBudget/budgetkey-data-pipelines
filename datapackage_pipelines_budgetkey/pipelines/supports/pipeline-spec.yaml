@@ -1,6 +1,6 @@
 all:
   schedule:
-    crontab: "0 0 * * *"
+    crontab: "0 17 * * *"
 
   pipeline:
     - run: add_metadata
