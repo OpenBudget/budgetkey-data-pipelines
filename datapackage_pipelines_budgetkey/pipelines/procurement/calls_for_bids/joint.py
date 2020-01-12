@@ -59,7 +59,7 @@ def scraper():
         )
 
 
-def flow():
+def flow(*_):
     return DF.Flow(
         scraper(),
         DF.update_resource(-1, **{'dpp:streaming': True})

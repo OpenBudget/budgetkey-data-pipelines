@@ -86,7 +86,7 @@ def scraper(gcd):
 gcd = None
 
 
-def flow():
+def flow(*_):
     global gcd
     gcd = google_chrome_driver(wait=False)
     return DF.Flow(
