@@ -11,13 +11,12 @@ import logging
 logging.getLogger().setLevel(logging.INFO)
 
 
-BASE_URL = 'http://www2.jdc.org.il'
 BASE_URL = 'https://www.kkl.org.il'
 MAIN_PAGES = ['/tenders/bids/', '/tenders/bids/2019-archive/', '/tenders/bids/2018-archive/', '/tenders/bids/2017-archive/']
 
 
-claim_date_re = re.compile('מועד[^\n]+הגש[^\n]+הצע.*\n?.*[^0-9]' + '([0-9]{1,2}[./][0-9]{1,2}[./][0-9]{2,4})', re.MULTILINE)
-start_date_re = re.compile('תאריך פרסום באינטרנט:' + '[^0-9\n]*' + '([0-9]{1,2}[./][0-9]{1,2}[./][0-9]{2,4})', re.MULTILINE)
+claim_date_re = re.compile('מועד[^\n]+הגש[^\n]+הצע.*\n?.*[^0-9]' + '([0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{2,4})', re.MULTILINE)
+start_date_re = re.compile('תאריך פרסום באינטרנט:' + '[^0-9\n]*' + '([0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{2,4})', re.MULTILINE)
 claim_date_re_parts = re.compile('[0-9]+')
 
 
