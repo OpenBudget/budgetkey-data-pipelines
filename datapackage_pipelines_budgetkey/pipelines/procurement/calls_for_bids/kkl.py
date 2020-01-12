@@ -65,8 +65,8 @@ def scraper(gcd):
             claim_date = [int(p) for p in claim_date_re_parts.findall(claim_date)]
             if claim_date[2] < 1000:
                 claim_date[2] += 2000
-            claim_date = '/'.join(str(p) for p in reversed(claim_date))
-        start_date = '/'.join(x for x in reversed(start_date.split('.')))
+            claim_date = '/'.join(str(p) for p in claim_date)
+        start_date = '/'.join(x for x in start_date.split('.'))
 
         yield dict(
             page_url=url,

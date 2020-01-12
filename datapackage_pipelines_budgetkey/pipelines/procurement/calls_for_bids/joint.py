@@ -29,7 +29,7 @@ def scraper():
         text = pq(main.find('article.node'))
         start_date = text.find('div.field-type-datetime')
         start_date = pq(start_date).text()
-        start_date = '/'.join(x for x in reversed(start_date.split('/')))
+        start_date = '/'.join(x for x in start_date.split('/'))
         description = sanitize_html(pq(text.find('.field-type-text-with-summary')))
         try:
             claim_date = pq(text.find('strong')[-1]).text()
@@ -43,7 +43,7 @@ def scraper():
         claim_date = [int(p) for p in claim_date_re_parts.findall(claim_date)]
         if claim_date[2] < 1000:
             claim_date[2] += 2000
-        claim_date = '/'.join(str(p) for p in reversed(claim_date))
+        claim_date = '/'.join(str(p) for p in claim_date)
         yield dict(
             page_url=url,
             page_title=title,
