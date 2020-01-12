@@ -7,7 +7,7 @@ from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 
 
 def add_source(title, path):
@@ -18,18 +18,6 @@ def add_source(title, path):
         })
         yield package.pkg
         yield from package
-    return func
-
-
-def finalize(f):
-    def func(package):
-        yield package.pkg
-        yield from package
-        try:
-            logging.warning('Finalizing connection')
-            f()
-        except Exception:
-            logging.exception('Failed to finalize')
     return func
 
 
@@ -55,7 +43,7 @@ def flow(parameters):
         add_source('{}/{}'.format(dataset_name, resource_name), url),
         load(path, **args),
         update_resource(resource_name, **resource),
-        finalize(gcd.teardown),
+        finalize_teardown(gcd),
     )
 
 

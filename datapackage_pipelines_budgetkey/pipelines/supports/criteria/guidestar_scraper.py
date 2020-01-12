@@ -40,7 +40,10 @@ def scrape():
                     if len(budget_code) == 8:
                         budget_code = '00' + budget_code
                         cleaned_budget_codes.append(budget_code)
-            creation_date = item.get('MaxUpdatedCreatedDate', item.get('CreationDate', item.get('DateUpdated', item.get('StartDate'))))
+            creation_date = item.get('MaxUpdatedCreatedDate',
+                                     item.get('DateUpdated',
+                                              item.get('CreationDate',
+                                                       item.get('StartDate'))))
             if creation_date:
                 creation_date = datetime.date.fromtimestamp(creation_date / 1000)
             else:

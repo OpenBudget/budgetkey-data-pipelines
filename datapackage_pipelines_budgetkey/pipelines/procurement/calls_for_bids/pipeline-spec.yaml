@@ -104,6 +104,7 @@ calls-for-bids:
       runner: tzabar
     - flow: class_action
     - flow: joint
+    - flow: kkl
     - run: load
       parameters:
         from: /var/datapackages/publications/gov/calls-for-bids/datapackage.json

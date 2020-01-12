@@ -88,6 +88,22 @@ class google_chrome_driver():
         assert False, 'Failed to download file, %r' % downloads
 
 
+def finalize(f):
+    def func(package):
+        yield package.pkg
+        yield from package
+        try:
+            logging.warning('Finalizing connection')
+            f()
+        except Exception:
+            logging.exception('Failed to finalize')
+    return func
+
+
+def finalize_teardown(gcd):
+    return finalize(lambda: gcd.teardown())
+
+
 if __name__ == '__main__':
     gcd = google_chrome_driver()
     c = gcd.driver
