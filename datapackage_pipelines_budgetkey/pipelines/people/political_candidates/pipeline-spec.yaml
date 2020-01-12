@@ -1,0 +1,12 @@
+election_candidates21:
+  pipeline:
+    - run: update_package
+      parameters:
+        name: election_candidates21
+        title: Candidates for the 21 knesset
+        homepage: https://bechirot21.bechirot.gov.il/election/Candidates/Pages/default.aspx
+    - flow: get_parties
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/people/political_candidates/
+
