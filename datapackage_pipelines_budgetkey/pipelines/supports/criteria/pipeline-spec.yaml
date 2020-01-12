@@ -166,6 +166,7 @@ support-criteria:
               fields:
                 - {name: code, type: string, 'es:keyword': true}
                 - {name: year, type: integer}
+                - {name: title, type: string}
                 - {name: doc_id, type: string, 'es:index': false}
 
     - run: set_primary_key

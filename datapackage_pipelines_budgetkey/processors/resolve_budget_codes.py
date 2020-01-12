@@ -54,11 +54,11 @@ def flow(*_):
         DF.add_field('resolved_budget_codes', 'array', default=process_row(codes),
                      **{
                          'es:itemType': 'object',
-                         'es:schema': dict(
-                             code=dict(type='string', **{'es:keyword': True}),
-                             year=dict(type='integer'),
-                             title=dict(type='string'),
-                         )
-                        }), 
+                         'es:schema': dict(fields=[
+                             dict(name='code', type='string', **{'es:keyword': True}),
+                             dict(name='year', type='integer'),
+                             dict(name='title', type='string'),
+                             dict(name='doc_id', type='string', **{'es:index': False}),
+                         ])
+                        }),
     )
-
