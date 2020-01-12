@@ -66,7 +66,6 @@ def page_parser():
             ]
         output['documents'] = files
         row['parsed'] = output
-        print(row['parsed'])
     return func
 
 
