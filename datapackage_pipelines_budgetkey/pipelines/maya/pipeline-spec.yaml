@@ -110,6 +110,9 @@ maya-company-officer-list:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_company_officer_list
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_officer_list
 
 maya-company-vip-appointments:
   dependencies:
@@ -121,6 +124,9 @@ maya-company-vip-appointments:
         resource: maya_complete_notification_list
     - flow: parse_maya_vip_appointments
     - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_vip_appointments
+    - run: dump_to_json
       parameters:
         out-path: /var/datapackages/maya/maya_company_vip_appointments
 
@@ -136,6 +142,9 @@ maya-holdings-changes:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_holdings_change
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya_holdings_change
 
 maya-company-stakeholder-list:
   dependencies:
@@ -147,6 +156,9 @@ maya-company-stakeholder-list:
         resource: maya_complete_notification_list
     - flow: parse_maya_stakeholder_list
     - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_stakeholder_list
+    - run: dump_to_json
       parameters:
         out-path: /var/datapackages/maya/maya_company_stakeholder_list
     - run: filter
@@ -205,6 +217,9 @@ maya-company-stakeholder-list:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_company_aggregate_stakeholder_list
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_aggregate_stakeholder_list
 
 maya-reported-academic-degrees:
   dependencies:
@@ -216,6 +231,9 @@ maya-reported-academic-degrees:
         resource: maya_complete_notification_list
     - flow: parse_reported_academic_degrees
     - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_reported_academic_degrees
+    - run: dump_to_json
       parameters:
         out-path: /var/datapackages/maya/maya_reported_academic_degrees
 
@@ -231,3 +249,6 @@ maya-reported-work-record:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/maya/maya_reported_work_record
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya_reported_academic_degrees
