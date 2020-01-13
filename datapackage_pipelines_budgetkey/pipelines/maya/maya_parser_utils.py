@@ -53,8 +53,8 @@ def fix_fields(fields):
             for f in fields:
                 if f not in row:
                     continue
-                if row[f] is None:
-                    row[f] = ""
+                if not isinstance(row[f], str):
+                    continue
                 if row[f] == ('_' * len(row[f])):
                     row[f] = ""
                 if row[f] == ('-' * len(row[f])):
