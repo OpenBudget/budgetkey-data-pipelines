@@ -1,15 +1,17 @@
 # coding=utf-8
-import typing
-from urllib.parse import urljoin
-
 import requests
-from dataflows import Flow, printer, update_resource, set_type
+import typing
+from dataflows import Flow, printer, update_resource, set_type, PackageWrapper, ResourceWrapper
+from datetime import datetime
 from pyquery import PyQuery as pq, PyQuery
 from requests import Response
+from urllib.parse import urljoin
 
 BASE_DOMAIN = "https://bechirot21.bechirot.gov.il"
 BASE_URL_FOR_CANDIDATES = f"{BASE_DOMAIN}/election/Candidates/Pages/default.aspx"
 MEMBER_BEHALF_OF_STRING = "מטעם מפלגת "
+PROP_STREAMING = 'dpp:streaming'
+TWENTY_ONE_ELECTION_DATE = datetime(2019, 4, 9)
 
 
 def get_party_data_from_party_page(link_to_party_page: str) -> dict:
@@ -102,11 +104,11 @@ def get_all_parties_data() -> typing.Generator[dict, None, None]:
         yield base_party_dict
 
 
-def flow(*_) -> Flow:
+def flow_base(*_) -> Flow:
     return Flow(
         get_all_parties_data(),
         update_resource(
-            None, **{'dpp:streaming': True, 'name': 'election_candidates21'}
+            None, **{PROP_STREAMING: True, 'name': 'election_candidates21'}
         ),
         set_type('party_letter', type='string'),
         set_type('party_name', type='string'),
@@ -114,6 +116,45 @@ def flow(*_) -> Flow:
         set_type('resign_candidates', type='string', default=''),
         set_type('members', type='object', default=None),
         set_type('agreement_doc_link', type='array', default=[]),
+    )
+
+
+def update_fields_in_schema(package: PackageWrapper):
+    package.pkg.descriptor['resources'][0]['schema']['fields'] = [
+        {'name': 'full_name', 'type': 'string'},
+        {'name': 'company', 'type': 'string'},
+        {'name': 'date', 'type': 'date'},
+        {'name': 'title', 'type': 'string'},
+        {'name': 'event', 'type': 'string'},
+        {'name': 'sources', 'type': 'array'},
+    ]
+    package.pkg.descriptor['resources'][0][PROP_STREAMING] = True
+
+    yield package.pkg
+    yield from package
+
+
+def convert_website_data_to_people(rows: ResourceWrapper) -> typing.Generator[dict, None, None]:
+    """This function remove some of the data in each row so it will be compatible with rest of the pipeline,
+        also this function converts some of the names to the required names in the pipeline"""
+    for row in rows:
+        for position, member_data in row['members'].items():
+            party_name = row['party_name'] if member_data['member_from'] == '' else member_data['member_from']
+            yield {
+                'full_name': member_data['member_name'],
+                'company': party_name,
+                'date': TWENTY_ONE_ELECTION_DATE,
+                'title': f"{member_data['member_name']} in position {position} from {row['party_name']}",
+                'event': 'political candidates for the 21 election',
+                'sources': [{'url': BASE_URL_FOR_CANDIDATES}],
+            }
+
+
+def flow(*_) -> Flow:
+    return Flow(
+        flow_base(),
+        update_fields_in_schema,
+        convert_website_data_to_people,
     )
 
 
