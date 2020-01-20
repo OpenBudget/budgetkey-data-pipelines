@@ -237,7 +237,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2019
+          - year: 2020
     - run: filter
       parameters:
         out:

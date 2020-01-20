@@ -28,25 +28,25 @@ national-budgets:
               name: budget_2015_2013
     - run: load
       parameters:
-        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2016.xlsx 
+        from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2016.xlsx
         name: fd-2016
         sheet: 1
         force_strings: true
     - run: load
       parameters:
-        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2017.xlsx
+        from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2017.xlsx
         name: fd-2017
         sheet: 1
         force_strings: true
     - run: load
       parameters:
-        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2018.xlsx
+        from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2018.xlsx
         name: fd-2018
         sheet: 1
         force_strings: true
     - run: load
       parameters:
-        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2019.xlsx
+        from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2019.xlsx
         name: fd-2019
         sheet: 1
         force_strings: true
