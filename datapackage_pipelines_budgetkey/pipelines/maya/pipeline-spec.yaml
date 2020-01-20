@@ -251,4 +251,4 @@ maya-reported-work-record:
         out-path: /var/datapackages/maya/maya_reported_work_record
     - run: dump_to_json
       parameters:
-        out-path: /var/datapackages/maya/maya_reported_academic_degrees
+        out-path: /var/datapackages/maya/maya_reported_work_record
