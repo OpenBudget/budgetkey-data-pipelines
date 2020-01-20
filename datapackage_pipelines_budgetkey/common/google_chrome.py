@@ -45,19 +45,23 @@ class google_chrome_driver():
             time.sleep(3)
             self.docker_container = stdout.read().decode('ascii').strip()
 
-        windows = None
-        for i in range(10):
-            time.sleep(6)
-            try:
-                windows = requests.get(f'http://{self.hostname_ip}:{self.port}/json/list').json()
-                if len(windows) == 1:
-                    break
-            except Exception as e:
-                logging.error('Waiting %s (%s): %s', i, windows, e)
+        try:
+            windows = None
+            for i in range(10):
+                time.sleep(6)
+                try:
+                    windows = requests.get(f'http://{self.hostname_ip}:{self.port}/json/list').json()
+                    if len(windows) == 1:
+                        break
+                except Exception as e:
+                    logging.error('Waiting %s (%s): %s', i, windows, e)
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.debugger_address = f'{self.hostname_ip}:{self.port}'
-        self.driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
+            chrome_options = webdriver.ChromeOptions()
+            chrome_options.debugger_address = f'{self.hostname_ip}:{self.port}'
+            self.driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
+        except Exception:
+            logging.exception('Error in setting up')
+            self.teardown()
 
     def teardown(self):
         # print('Closing connection for client #{}'.format(self.port))
