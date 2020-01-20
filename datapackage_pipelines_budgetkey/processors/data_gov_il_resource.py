@@ -29,8 +29,11 @@ def flow(parameters):
         'dpp:streaming': True,
     })
 
-    gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
-    finalize_teardown(gcd)
+    if parameters.get('gcd'):
+        gcd = parameters['gcd']
+    else:
+        gcd = google_chrome_driver()
+        finalize_teardown(gcd)
     url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {
@@ -44,7 +47,6 @@ def flow(parameters):
         add_source('{}/{}'.format(dataset_name, resource_name), url),
         load(path, **args),
         update_resource(resource_name, **resource),
-        finalize_teardown(gcd),
     )
 
 
