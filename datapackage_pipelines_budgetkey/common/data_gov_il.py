@@ -54,7 +54,7 @@ def get_resource(gcd, dataset_name, resource_name):
         if resource['name'] == resource_name:
             url = resource['url'].replace('//e.', '//')
             try:
-                return url, gcd.download(url)
+                return url, gcd.download(url, any_file=True)
             except AssertionError:
                 return url, None
     assert False, 'Failed to find resource for name %s' % (resource_name,)

@@ -83,8 +83,13 @@ class google_chrome_driver():
         _, stdout, _ = self.client.exec_command(cmd)
         return stdout.read().decode('utf8').split('\n')
 
-    def download(self, url):
-        expected = os.path.basename(url)
+    def download(self, url, any_file=False):
+        if any_file:
+            expected = None
+        else:
+            expected = os.path.basename(url)
+        current_downloads = self.list_downloads()
+        logging.info('CURRENT DOWNLOADS: %r', current_downloads)
         for j in range(3):
             print('Attempt {}'.format(j))
             self.driver.get(url)
@@ -92,6 +97,10 @@ class google_chrome_driver():
             for i in range(10):
                 time.sleep(6)
                 downloads = self.list_downloads()
+                if len(downloads) > current_downloads:
+                    expected = (set(current_downloads) - set(downloads)).pop()
+                    logging.info('GOT FILNAME: %s', expected)
+
                 if expected in downloads:
                     print('found {} in {}'.format(expected, downloads))
                     time.sleep(20)
