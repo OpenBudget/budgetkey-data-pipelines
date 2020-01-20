@@ -7,7 +7,7 @@ from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 
 from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 def add_source(title, path):
@@ -33,7 +33,6 @@ def flow(parameters):
         gcd = parameters['gcd']
     else:
         gcd = google_chrome_driver()
-        finalize_teardown(gcd)
     url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {

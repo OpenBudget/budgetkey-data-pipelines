@@ -1,7 +1,7 @@
 from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
 from pyquery import PyQuery as pq
 import re
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 import dataflows as DF
 import time
 import logging
@@ -91,7 +91,6 @@ def flow(*_):
     return DF.Flow(
         scraper(gcd),
         DF.update_resource(-1, **{'dpp:streaming': True}),
-        finalize_teardown(gcd),
     )
 
 

@@ -9,6 +9,7 @@ import os
 import shutil
 import tempfile
 from selenium import webdriver
+import atexit
 
 
 class google_chrome_driver():
@@ -19,6 +20,8 @@ class google_chrome_driver():
         username = 'adam'
         self.port = random.randint(20000, 30000)
         # print('Creating connection for client #{}'.format(self.port))
+
+        atexit.register(self.teardown)
 
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -112,11 +115,6 @@ def finalize(f):
             logging.exception('Failed to finalize')
     return func
 
-
-def finalize_teardown(gcd):
-    import atexit
-    atexit.register(lambda: gcd.teardown())
-    return finalize(lambda: gcd.teardown())
 
 
 if __name__ == '__main__':
