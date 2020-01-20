@@ -44,6 +44,21 @@ def scraper():
         if claim_date[2] < 1000:
             claim_date[2] += 2000
         claim_date = '/'.join(str(p) for p in claim_date)
+
+        tender_type = None
+        if not tender_type:
+            for x in ["מכרז ל", "במכרז ל", "למכרז ל", "הזמנה לקבלת הצעות"]:
+                if x in title:
+                    tender_type = 'office'
+                    break
+        if not tender_type:
+            for x in ["פטור ממכרז", "בפטור"]:
+                if x in title:
+                    tender_type = 'exemptions'
+                    break
+        if not tender_type:
+            tender_type = 'call_for_bids'
+
         yield dict(
             page_url=url,
             page_title=title,
@@ -51,7 +66,7 @@ def scraper():
             claim_date=claim_date,
             description=description,
 
-            tender_type='call_for_bids',
+            tender_type=tender_type,
             publication_id=0,
             tender_type_he='קול קורא',
             tender_id='joint' + link.replace('/', '-'),
