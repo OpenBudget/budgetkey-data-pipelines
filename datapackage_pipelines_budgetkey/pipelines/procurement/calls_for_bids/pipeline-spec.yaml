@@ -255,6 +255,8 @@ calls-for-bids-all:
     - run: stream_remote_resources
     - run: calc-score
     - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
+      parameters:
+        creation_date_table: _elasticsearch_mirror__calls_for_bids
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids_all
