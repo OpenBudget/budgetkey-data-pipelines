@@ -57,7 +57,12 @@ def scraper():
                     tender_type = 'exemptions'
                     break
         if not tender_type:
-            tender_type = 'call_for_bids'
+            for x in ["קול קורא", "הודעה על", "הליך לקבלת הצעות"]:
+                if x in title:
+                    tender_type = 'call_for_bids'
+                    break
+        if not tender_type:
+            continue
 
         yield dict(
             page_url=url,
