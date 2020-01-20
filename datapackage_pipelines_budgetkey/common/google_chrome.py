@@ -56,6 +56,7 @@ class google_chrome_driver():
                     windows = requests.get(f'http://{self.hostname_ip}:{self.port}/json/list').json()
                     if len(windows) == 1:
                         break
+                    logging.info('GOT %d WINDOWS: %r', len(windows), windows)
                 except Exception as e:
                     logging.error('Waiting %s (%s): %s', i, windows, e)
 
