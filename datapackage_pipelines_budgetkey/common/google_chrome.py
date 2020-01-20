@@ -85,9 +85,8 @@ class google_chrome_driver():
         return stdout.read().decode('utf8').split('\n')
 
     def download(self, url, any_file=False):
-        if any_file:
-            expected = None
-        else:
+        expected = None
+        if not any_file:
             expected = os.path.basename(url)
         current_downloads = self.list_downloads()
         logging.info('CURRENT DOWNLOADS: %r', current_downloads)
@@ -98,7 +97,7 @@ class google_chrome_driver():
             for i in range(10):
                 time.sleep(6)
                 downloads = self.list_downloads()
-                if len(downloads) > current_downloads:
+                if expected is None and len(downloads) > (current_downloads):
                     expected = (set(current_downloads) - set(downloads)).pop()
                     logging.info('GOT FILNAME: %s', expected)
 
