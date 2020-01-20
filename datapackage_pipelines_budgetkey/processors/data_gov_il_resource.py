@@ -30,6 +30,7 @@ def flow(parameters):
     })
 
     gcd = parameters.get('gcd') if parameters and parameters.get('gcd') else google_chrome_driver()
+    finalize_teardown(gcd)
     url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {
