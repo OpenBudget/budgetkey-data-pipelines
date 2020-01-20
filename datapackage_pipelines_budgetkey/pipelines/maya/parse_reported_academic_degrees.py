@@ -31,7 +31,6 @@ FIELDS = [
     'SugMisparZihuy',
     'MisparZihuy',
     'FullName',
-    'FullNameEn',
 
 ]
 
@@ -41,7 +40,8 @@ TABLE_FIELDS = [
     'Institution'
 ]
 
-OPTIONAL_FIELDS = ['OtherEducation']
+OPTIONAL_FIELDS = ['OtherEducation',
+                   'FullNameEn']
 
 def validate(rows):
     for row in rows:
