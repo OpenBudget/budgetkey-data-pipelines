@@ -28,6 +28,7 @@ def search_dataset(gcd, dataset_name):
 def get_dataset_html(gcd, dataset_name):
     try:
         page = requests.get(PACKAGE_PAGE_URL + dataset_name, headers={'User-Agent':'datagov-internal-client'}).text
+        assert 'resource-item' in page
     except:
         gcd.driver.get(PACKAGE_PAGE_URL + dataset_name)
         page = gcd.driver.page_source
