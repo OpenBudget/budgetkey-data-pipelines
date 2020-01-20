@@ -83,11 +83,56 @@ gov-publications-ministry-of-immigration:
       parameters:
         out-path: /var/datapackages/publications/gov/calls-for-bids-immigration
 
+
+joint-all:
+  pipeline:
+    - flow: joint
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/joint/all
+
+
+joint-calls-for-bids:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/joint-all
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/joint/all/datapackage.json
+    - run: filter
+      parameters:
+        in:
+          - tender_type: call_for_bids
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/joint/calls_for_bids
+
+
+joint-procurement:
+  dependencies:
+    - pipeline: ./procurement/calls_for_bids/joint-all
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/joint/all/datapackage.json
+    - run: filter
+      parameters:
+        in:
+          - tender_type: exemptions
+          - tender_type: office
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/joint/procurement
+
+        
+
+
 calls-for-bids:
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
     - pipeline: ./procurement/calls_for_bids/gov-publications
     - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
+    - pipeline: ./procurement/calls_for_bids/joint-calls-for-bids
 
   schedule:
     crontab: "0 16 * * *"
@@ -103,7 +148,6 @@ calls-for-bids:
     - flow: negev_galil
       runner: tzabar
     - flow: class_action
-    - flow: joint
     - flow: kkl
     - run: load
       parameters:
@@ -114,6 +158,9 @@ calls-for-bids:
     - run: load
       parameters:
         from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/joint/calls_for_bids/datapackage.json
     - run: sample
     - run: concatenate
       parameters:

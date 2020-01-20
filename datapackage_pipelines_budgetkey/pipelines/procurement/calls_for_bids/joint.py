@@ -62,7 +62,7 @@ def scraper():
 def flow(*_):
     return DF.Flow(
         scraper(),
-        DF.update_resource(-1, **{'dpp:streaming': True})
+        DF.update_resource(-1, name='joint', path='joint.csv', **{'dpp:streaming': True})
     )
 
 if __name__ == '__main__':

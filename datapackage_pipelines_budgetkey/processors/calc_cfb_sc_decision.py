@@ -22,7 +22,7 @@ def process_row(creation_dates, pk, row):
         created_at = creation_dates.get((row.get(k) for k in pk))
         if not created_at:
             logging.warning('ROW %r doesn''t have a creation date', row)
-        publication_date = row.get('start_date') or created_at or datetime.datetime.now()
+        publication_date = row.get('start_date') or created_at or datetime.now()
         if isinstance(publication_date, datetime):
             publication_date = publication_date.date()
         if not decision:
@@ -55,7 +55,8 @@ def process(table_name):
         creation_dates = {}
         try:
             engine = create_engine(os.environ['DPP_DB_ENGINE'])
-            creation_dates = map(dict, engine.execute("select " + ''.join('"%s",' % k for k in pk) + ",__created_at from " + table_name))
+            sql = "select " + ''.join('"%s",' % k for k in pk) + ",__created_at from " + table_name
+            creation_dates = map(dict, engine.execute(sql))
             creation_dates = dict((tuple(r[k] for k in pk), r['__created_at']) for r in creation_dates)
         except Exception:
             logging.exception('Failed to fetch creation dates')

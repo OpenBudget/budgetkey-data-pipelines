@@ -14,14 +14,11 @@ from selenium import webdriver
 class google_chrome_driver():
 
     def __init__(self, wait=True):
-        if wait:
-            time.sleep(random.randint(1, 300))
         self.hostname = 'tzabar.obudget.org'
         self.hostname_ip = socket.gethostbyname(self.hostname)
         username = 'adam'
         self.port = random.randint(20000, 30000)
         # print('Creating connection for client #{}'.format(self.port))
-        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} -d akariv/google-chrome-in-a-box {self.port} {self.port+1}'
 
         self.client = paramiko.SSHClient()
         self.client.load_system_host_keys()
@@ -29,6 +26,18 @@ class google_chrome_driver():
         self.client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         self.client.connect(username=username, hostname=self.hostname)
+
+        count_cmd = 'docker ps'
+        while wait:
+            stdin, stdout, stderr = self.client.exec_command(count_cmd)
+            containers = stdout.read().decode('ascii').split('\n')
+            running = len([x for x in containers if 'google-chrome' in x])
+            if running < 6:
+                break
+            logging.info('COUNTED %d running containers, waiting', running)
+            time.sleep(60)
+
+        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} -d akariv/google-chrome-in-a-box {self.port} {self.port+1}'
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
         self.docker_container = None
