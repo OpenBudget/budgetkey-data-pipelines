@@ -49,7 +49,7 @@ def get_resource(gcd, dataset_name, resource_name):
     try:
         dataset = search_dataset(gcd, dataset_name)
     except:
-        dataset = get_dataset_html(gc, dataset_name)
+        dataset = get_dataset_html(gcd, dataset_name)
     for resource in dataset['resources']:
         if resource['name'] == resource_name:
             url = resource['url'].replace('//e.', '//')
