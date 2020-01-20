@@ -110,6 +110,8 @@ def finalize(f):
 
 
 def finalize_teardown(gcd):
+    import atexit
+    atexit.register(lambda: gcd.teardown())
     return finalize(lambda: gcd.teardown())
 
 

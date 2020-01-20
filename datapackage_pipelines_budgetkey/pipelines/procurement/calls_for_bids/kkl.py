@@ -87,7 +87,7 @@ gcd = None
 
 def flow(*_):
     global gcd
-    gcd = google_chrome_driver(wait=False)
+    gcd = google_chrome_driver()
     return DF.Flow(
         scraper(gcd),
         DF.update_resource(-1, **{'dpp:streaming': True}),

@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import dataflows as DF
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 BASE = 'https://www.gov.il'
@@ -12,6 +12,7 @@ URL = BASE + '/he/Departments/publications/reports/class_action_law'
 
 def scrape():
     gcd = google_chrome_driver()
+    finalize_teardown(gcd)
     driver = gcd.driver
 
     driver.get(URL)

@@ -8,13 +8,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 
 
 def wrapper(wait=False):
     gcd = None
     try:
         gcd = google_chrome_driver(wait=wait)
+        finalize_teardown(gcd)
         return scraper(gcd)
     finally:
         logging.info('Tearing down %r', gcd)

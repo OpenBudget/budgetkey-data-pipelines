@@ -2,7 +2,7 @@ from dataflows import (
     Flow, load, concatenate, update_resource,
     set_primary_key, set_type, printer
 )
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 
 
 
@@ -69,6 +69,7 @@ def flow(*_):
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
         printer(),
+        finalize_teardown(gcd),
     )
 
 

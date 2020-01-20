@@ -5,7 +5,7 @@ from dataflows import (
     validate, delete_fields, add_field, set_primary_key,
     printer, ResourceWrapper
 )
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 
 
 URL = "https://www.gov.il/he/api/PublicationApi/Index?limit={limit}&OfficeId={office_id}&publicationType={publication_type}&skip={skip}"
@@ -32,6 +32,7 @@ def fetcher(parameters):
                         print('FAILED to parse JSON <pre>%s</pre>' % results.content[:2048])
                     if gcd is None:
                         gcd = google_chrome_driver()
+                        finalize_teardown(gcd)
             if gcd is not None:
                 results = gcd.json(url)
             results = results.get('results', [])

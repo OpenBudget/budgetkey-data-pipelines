@@ -4,7 +4,7 @@ import itertools
 import logging
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver, finalize_teardown
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver import ActionChains
@@ -52,6 +52,7 @@ scraped_ids = set()
 def scrape():
 
     gcd = google_chrome_driver()
+    finalize_teardown(gcd)
     driver = gcd.driver
 
     def prepare():
