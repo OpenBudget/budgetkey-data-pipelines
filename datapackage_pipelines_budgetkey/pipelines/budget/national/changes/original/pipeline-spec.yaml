@@ -48,7 +48,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2014.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2014.csv
         resource:
           name: changes_2014
           path: data/changes_2014.csv
@@ -58,7 +58,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2015.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2015.csv
         resource:
           name: changes_2015
           path: data/changes_2015.csv
@@ -68,7 +68,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2016.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2016.csv
         resource:
           name: changes_2016
           path: data/changes_2016.csv
@@ -78,7 +78,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2017.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2017.csv
         resource:
           name: changes_2017
           path: data/changes_2017.csv
@@ -88,7 +88,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChangesLastYears/approv_data_2018.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2018.csv
         resource:
           name: changes_2018
           path: data/changes_2018.csv
@@ -98,7 +98,7 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/approv_data.csv
+        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2019.csv
         resource:
           name: changes_2019
           path: data/changes_2019.csv
@@ -108,16 +108,26 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
-        url: http://mof.gov.il/BudgetSite/statebudget/BudgetChanges/vaada_data.csv
+        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
         resource:
-          name: pending_changes_2019
+          name: changes_2020
+          path: data/changes_2020.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 3
+    - run: resource_without_excel_formulas
+      runner: tzabar
+      parameters:
+        url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
+        resource:
+          name: pending_changes_2020
           path: data/pending_changes.csv
         tabulator:
           encoding: windows-1255
           headers: 3
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2019
+        pending-resource-name: pending_changes_2020
     - run: concatenate
       parameters:
         target:
