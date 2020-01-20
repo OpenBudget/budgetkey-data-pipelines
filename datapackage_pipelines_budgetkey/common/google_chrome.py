@@ -15,6 +15,8 @@ import atexit
 class google_chrome_driver():
 
     def __init__(self, wait=True):
+        if wait:
+            time.sleep(random.randint(1, 300))
         self.hostname = 'tzabar.obudget.org'
         self.hostname_ip = socket.gethostbyname(self.hostname)
         username = 'adam'
