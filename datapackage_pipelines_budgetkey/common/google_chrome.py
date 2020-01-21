@@ -116,6 +116,7 @@ class google_chrome_driver():
                     stream = requests.get(url, stream=True, timeout=30).raw
                     shutil.copyfileobj(stream, out)
                     out.close()
+                    print('DELETE', requests.delete(url).text)
                     return out.name
         assert False, 'Failed to download file, %r' % downloads
 
