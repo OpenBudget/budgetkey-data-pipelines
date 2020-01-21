@@ -1,7 +1,7 @@
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 from datapackage_pipelines.lib.load import flow as load_flow
-from datapackage_pipelines.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 def flow(parameters):
