@@ -24,24 +24,29 @@ def search_dataset(gcd, dataset_name):
         results = results['result']
     return results
 
+def get_page(gcd, url, test):
+    try:
+        page = requests.get(url, headers={'User-Agent':'datagov-internal-client'}).text
+        assert test(page)
+    except:
+        gcd.driver.get(url)
+        page = gcd.driver.page_source
+        assert test(page)
+    return pq(page)
+
 
 def get_dataset_html(gcd, dataset_name):
-    try:
-        page = requests.get(PACKAGE_PAGE_URL + dataset_name, headers={'User-Agent':'datagov-internal-client'}).text
-        assert 'resource-item' in page
-    except:
-        gcd.driver.get(PACKAGE_PAGE_URL + dataset_name)
-        page = gcd.driver.page_source
-    page = pq(page)
+    page = get_page(gcd, PACKAGE_PAGE_URL + dataset_name, lambda page: 'resource-item' in page)
     resources = page.find('#dataset-resources .resource-item')
     results = []
     for resource in resources:
+        resource_page = get_page('http://data.gov.il' + pq(resource.find('a.heading')).attr('href')
         resource = pq(resource)
         results.append(dict(
             name=pq(resource.find('a.heading')).attr('title'),
-            url='https://data.gov.il' + pq(resource.find('.dropdown-menu li:last-child a')).attr('href'),
-            format=pq(resource.find('span.format-label')).text().lower(),
-            any_file=True
+            url='https://data.gov.il' + pq(resource_page.find('.module .module-content:first-child p.muted.ellipsis a.btn-primary')).attr('href'),
+            # format=pq(resource.find('span.format-label')).text().lower(),
+            # any_file=False
         ))
 
     return dict(resources=results)
