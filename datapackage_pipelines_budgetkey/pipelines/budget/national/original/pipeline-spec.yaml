@@ -26,25 +26,25 @@ national-budgets:
             resource-name: 'תקציב וביצוע 2015-2013 כולל התחיבויות'
             resource:
               name: budget_2015_2013
-    - run: load
+    - run: load_gcl
       parameters:
         from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2016.xlsx
         name: fd-2016
         sheet: 1
         force_strings: true
-    - run: load
+    - run: load_gcl
       parameters:
         from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2017.xlsx
         name: fd-2017
         sheet: 1
         force_strings: true
-    - run: load
+    - run: load_gcl
       parameters:
         from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2018.xlsx
         name: fd-2018
         sheet: 1
         force_strings: true
-    - run: load
+    - run: load_gcl
       parameters:
         from: https://www.gov.il/BlobFolder/policy/tableau/he/tableau_BudgetData2019.xlsx
         name: fd-2019

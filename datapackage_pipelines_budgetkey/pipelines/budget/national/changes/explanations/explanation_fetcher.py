@@ -11,7 +11,7 @@ import base64
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.doc_parser import Parser
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines_budgetkey.common import cookie_monster
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 parameters, dp, res_iter = ingest()
 
@@ -29,16 +29,10 @@ class DocParser(Parser):
 def get_explanations(url):
     with tempfile.NamedTemporaryFile(mode='wb', delete=False) as archive:
         logging.info('Connecting to %r', url)
-        if '.gov.il' in url:
-            for chunk in cookie_monster.cookie_monster_iter(url):
-                archive.write(chunk)
-            archive.close()
-        else:
-            resp = requests.get(url, stream=True)
-            stream = resp.raw
-            shutil.copyfileobj(stream, archive)
-            archive.flush()
-        archive = open(archive.name, 'rb')
+        gcl = google_chrome_driver()
+        archive = gcl.download(url)
+        gcl.teardown()
+        archive = open(archive, 'rb')
 
         if '.tar.gz' in url:
             t_archive = tarfile.open(fileobj=archive, mode='r|gz')

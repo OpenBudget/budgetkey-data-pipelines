@@ -7,7 +7,7 @@ import itertools
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest
 
-from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster_get
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 with tempfile.NamedTemporaryFile(suffix='.csv') as out:
@@ -18,9 +18,10 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         resource = parameters.get('resource')
         resource[PROP_STREAMING] = True
 
-        content = requests.get(url, verify=False).content
-        if len(content) < 1024:
-            content = cookie_monster_get(url)
+        gcl = google_chrome_driver()
+        download = gcl.download(url)
+        gcl.teardown()
+        content = open(download, 'rb').read()
 
         content = content.replace(b'\n="', b'\n"')
         content = content.replace(b',="', b',"')

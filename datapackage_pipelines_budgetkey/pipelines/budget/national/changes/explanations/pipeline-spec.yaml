@@ -10,35 +10,30 @@ all:
           path: data/explanation-history.csv
         url: https://www.dropbox.com/s/3sfjno7l2v3lkpy/explanations.tar.gz?dl=1
     - run: explanation_fetcher
-      runner: tzabar
       parameters:
         resource:
           name: explanation-2017
           path: data/explanation-2017.csv
         url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2017.zip
     - run: explanation_fetcher
-      runner: tzabar
       parameters:
         resource:
           name: explanation-2018
           path: data/explanation-2018.csv
         url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2018.zip
     - run: explanation_fetcher
-      runner: tzabar
       parameters:
         resource:
           name: explanation-2019
           path: data/explanation-2019.csv
         url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2019.zip
     - run: explanation_fetcher
-      runner: tzabar
       parameters:
         resource:
           name: explanation-current
           path: data/explanation-current.csv
         url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
     - run: explanation_fetcher
-      runner: tzabar
       parameters:
         resource:
           name: explanation-pending
