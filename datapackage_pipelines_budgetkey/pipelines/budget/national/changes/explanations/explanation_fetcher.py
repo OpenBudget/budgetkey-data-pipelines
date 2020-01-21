@@ -15,7 +15,7 @@ from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_d
 
 parameters, dp, res_iter = ingest()
 
-logging.getLogger().setLevel(logging.INFO)
+# logging.getLogger().setLevel(logging.INFO)
 
 
 class DocParser(Parser):
@@ -27,31 +27,28 @@ class DocParser(Parser):
 
 
 def get_explanations(url):
-    with tempfile.NamedTemporaryFile(mode='wb', delete=False) as archive:
-        logging.info('Connecting to %r', url)
-        gcl = google_chrome_driver()
-        archive = gcl.download(url)
-        gcl.teardown()
-        archive = open(archive, 'rb')
+    logging.info('Connecting to %r', url)
+    gcl = google_chrome_driver()
+    archive = gcl.download(url)
+    gcl.teardown()
 
-        if '.tar.gz' in url:
-            t_archive = tarfile.open(fileobj=archive, mode='r|gz')
-            files = ((os.path.basename(member.name), t_archive.extractfile(member))
-                     for member in t_archive
-                     if member is not None and member.isfile())
-        elif '.zip' in url:
-            z_archive = zipfile.ZipFile(archive)
-            files = ((os.path.basename(member.filename), z_archive.open(member))
-                     for member in z_archive.filelist)
-        else:
-            assert False
+    if '.tar.gz' in url:
+        t_archive = tarfile.open(name=archive, mode='r|gz')
+        files = ((os.path.basename(member.name), t_archive.extractfile(member))
+                    for member in t_archive
+                    if member is not None and member.isfile())
+    elif '.zip' in url:
+        z_archive = zipfile.ZipFile(archive)
+        files = ((os.path.basename(member.filename), z_archive.open(member))
+                    for member in z_archive.filelist)
+    else:
+        assert False
 
-        for name, item in files:
-            contents = base64.b64encode(item.read()).decode('ascii')
-            yield {'contents': contents, 'orig_name': name}
+    for name, item in files:
+        contents = base64.b64encode(item.read()).decode('ascii')
+        yield {'contents': contents, 'orig_name': name}
 
-        os.unlink(archive.name)
-
+    os.unlink(archive)
 
 resource = parameters['resource']
 resource[PROP_STREAMING] = True
