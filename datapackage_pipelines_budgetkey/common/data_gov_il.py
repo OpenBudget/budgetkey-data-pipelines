@@ -39,7 +39,9 @@ def get_dataset_html(gcd, dataset_name):
         resource = pq(resource)
         results.append(dict(
             name=pq(resource.find('a.heading')).attr('title'),
-            url='https://data.gov.il' + pq(resource.find('.dropdown-menu li:last-child a')).attr('href')
+            url='https://data.gov.il' + pq(resource.find('.dropdown-menu li:last-child a')).attr('href'),
+            format=pq(resource.find('span.format-label')).text().lower(),
+            any_file=True
         ))
 
     return dict(resources=results)
@@ -54,7 +56,10 @@ def get_resource(gcd, dataset_name, resource_name):
         if resource['name'] == resource_name:
             url = resource['url'].replace('//e.', '//')
             try:
-                return url, gcd.download(url, any_file=True)
+                if resource.get('any_file'):
+                    return url, gcd.download(url, any_file=True, format='.' + resource['format'])
+                else:
+                    return url, gcd.download(url)
             except AssertionError:
                 return url, None
     assert False, 'Failed to find resource for name %s' % (resource_name,)

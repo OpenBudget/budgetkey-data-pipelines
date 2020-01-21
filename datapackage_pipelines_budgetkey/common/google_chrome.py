@@ -86,7 +86,7 @@ class google_chrome_driver():
         _, stdout, _ = self.client.exec_command(cmd)
         return stdout.read().decode('utf8').split('\n')
 
-    def download(self, url, any_file=False):
+    def download(self, url, any_file=False, format=''):
         expected = None
         if not any_file:
             expected = os.path.basename(url)
@@ -106,7 +106,7 @@ class google_chrome_driver():
                 if expected in downloads:
                     print('found {} in {}'.format(expected, downloads))
                     time.sleep(20)
-                    out = tempfile.NamedTemporaryFile(delete=False, suffix=expected)
+                    out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
                     url = f'http://{self.hostname}:{self.port+1}/{expected}'
                     stream = requests.get(url, stream=True, timeout=30).raw
                     shutil.copyfileobj(stream, out)
