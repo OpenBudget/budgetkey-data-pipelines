@@ -100,8 +100,13 @@ class google_chrome_driver():
                 time.sleep(6)
                 downloads = self.list_downloads()
                 if expected is None and len(downloads) > len(current_downloads):
-                    expected = (set(downloads) - set(current_downloads)).pop()
-                    logging.info('GOT FILNAME: %s', expected)
+                    diff = set(downloads) - set(current_downloads)
+                    while len(diff) > 0:
+                        candidate = diff.pop()
+                        if 'crdownload' not in candidate:
+                            expected = candidate
+                            logging.info('GOT FILNAME: %s', expected)
+                            break
 
                 if expected in downloads:
                     print('found {} in {}'.format(expected, downloads))
