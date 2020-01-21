@@ -40,7 +40,7 @@ def get_dataset_html(gcd, dataset_name):
     resources = page.find('#dataset-resources .resource-item')
     results = []
     for resource in resources:
-        resource_page = get_page('http://data.gov.il' + pq(resource.find('a.heading')).attr('href')
+        resource_page = get_page(gcd, 'http://data.gov.il' + pq(resource.find('a.heading')).attr('href'), lambda page: 'module-content' in page)
         resource = pq(resource)
         results.append(dict(
             name=pq(resource.find('a.heading')).attr('title'),
