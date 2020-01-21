@@ -92,32 +92,31 @@ class google_chrome_driver():
             expected = os.path.basename(url)
         current_downloads = self.list_downloads()
         logging.info('CURRENT DOWNLOADS: %r', current_downloads)
-        for j in range(3):
-            print('Attempt {}'.format(j))
-            self.driver.get(url)
-            downloads = []
-            for i in range(10):
-                time.sleep(6)
-                downloads = self.list_downloads()
-                if expected is None and len(downloads) > len(current_downloads):
-                    diff = set(downloads) - set(current_downloads)
-                    while len(diff) > 0:
-                        candidate = diff.pop()
-                        if 'crdownload' not in candidate:
-                            expected = candidate
-                            logging.info('GOT FILNAME: %s', expected)
-                            break
+        self.driver.get(url)
+        downloads = []
+        for i in range(30):
+            time.sleep(6)
+            downloads = self.list_downloads()
+            logging.info('DOWNLOADS: %r', downloads)
+            if expected is None and len(downloads) > len(current_downloads):
+                diff = set(downloads) - set(current_downloads)
+                while len(diff) > 0:
+                    candidate = diff.pop()
+                    if 'crdownload' not in candidate:
+                        expected = candidate
+                        logging.info('GOT FILNAME: %s', expected)
+                        break
 
-                if expected in downloads:
-                    print('found {} in {}'.format(expected, downloads))
-                    time.sleep(20)
-                    out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
-                    url = f'http://{self.hostname}:{self.port+1}/{expected}'
-                    stream = requests.get(url, stream=True, timeout=30).raw
-                    shutil.copyfileobj(stream, out)
-                    out.close()
-                    print('DELETE', requests.delete(url).text)
-                    return out.name
+            if expected in downloads:
+                print('found {} in {}'.format(expected, downloads))
+                time.sleep(20)
+                out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
+                url = f'http://{self.hostname}:{self.port+1}/{expected}'
+                stream = requests.get(url, stream=True, timeout=30).raw
+                shutil.copyfileobj(stream, out)
+                out.close()
+                print('DELETE', requests.delete(url).text)
+                return out.name
         assert False, 'Failed to download file, %r' % downloads
 
 
