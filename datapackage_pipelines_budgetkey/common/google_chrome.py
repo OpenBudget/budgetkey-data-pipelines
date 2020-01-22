@@ -72,9 +72,15 @@ class google_chrome_driver():
     def teardown(self):
         # print('Closing connection for client #{}'.format(self.port))
         if self.docker_container:
-            stdin, stdout, stderr = self.client.exec_command(f'docker stop {self.docker_container}')
-            stdout.read()
-        self.client.close()
+            try:
+                stdin, stdout, stderr = self.client.exec_command(f'docker stop {self.docker_container}')
+                stdout.read()
+            except:
+                logging.warning('FAILED to teardown google-chrome')
+        try:
+            self.client.close()
+        except:
+            logging.warning('FAILED to close connection')
 
     def json(self, url):
         self.driver.get(url)
@@ -90,8 +96,10 @@ class google_chrome_driver():
         expected = None
         if not any_file:
             expected = os.path.basename(url)
+            expected = expected.split('?')[0]
         current_downloads = self.list_downloads()
         logging.info('CURRENT DOWNLOADS: %r', current_downloads)
+        logging.info('EXPECTING: %r', expected)
         self.driver.get(url)
         downloads = []
         for i in range(30):
