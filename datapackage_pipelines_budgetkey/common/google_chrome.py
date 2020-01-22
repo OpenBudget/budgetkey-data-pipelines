@@ -120,7 +120,9 @@ class google_chrome_driver():
                 time.sleep(20)
                 out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
                 url = f'http://{self.hostname}:{self.port+1}/{expected}'
-                stream = requests.get(url, stream=True, timeout=30).raw
+                response = requests.get(url, stream=True, timeout=30)
+                assert response.status_code == 200
+                stream = response.raw
                 shutil.copyfileobj(stream, out)
                 out.close()
                 print('DELETE', requests.delete(url).text)
