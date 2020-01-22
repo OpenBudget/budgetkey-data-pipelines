@@ -97,36 +97,52 @@ class google_chrome_driver():
         if not any_file:
             expected = os.path.basename(url)
             expected = expected.split('?')[0]
-        current_downloads = self.list_downloads()
-        logging.info('CURRENT DOWNLOADS: %r', current_downloads)
         logging.info('EXPECTING: %r', expected)
-        self.driver.get(url)
-        downloads = []
-        for i in range(60):
-            time.sleep(6)
-            downloads = self.list_downloads()
-            logging.info('DOWNLOADS: %r', downloads)
-            if expected is None and len(downloads) > len(current_downloads):
-                diff = set(downloads) - set(current_downloads)
-                while len(diff) > 0:
-                    candidate = diff.pop()
-                    if 'crdownload' not in candidate:
-                        expected = candidate
-                        logging.info('GOT FILNAME: %s', expected)
-                        break
+        for attempt in range(3):
+            logging.info('Attempt %d', attempt)
+            current_downloads = self.list_downloads()
+            logging.info('CURRENT DOWNLOADS: %r', current_downloads)
+            downloads = []
+            timeout = 0
+            downloading = False
+            self.driver.get(url)
+            while True:
+                downloads = self.list_downloads()
+                logging.info('DOWNLOADS: %r', downloads)
+                if expected is None and len(downloads) > len(current_downloads):
+                    diff = set(downloads) - set(current_downloads)
+                    while len(diff) > 0:
+                        candidate = diff.pop()
+                        if 'crdownload' not in candidate:
+                            expected = candidate
+                            logging.info('GOT FILNAME: %s', expected)
+                            break
+                        else:
+                            if not downloading:
+                                downloading = True
 
-            if expected in downloads:
-                logging.info('found {} in {}'.format(expected, downloads))
-                time.sleep(20)
-                out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
-                url = f'http://{self.hostname}:{self.port+1}/{expected}'
-                response = requests.get(url, stream=True, timeout=30)
-                assert response.status_code == 200
-                stream = response.raw
-                shutil.copyfileobj(stream, out)
-                out.close()
-                logging.info('DELETE', requests.delete(url).text)
-                return out.name
+                if expected in downloads:
+                    logging.info('found {} in {}'.format(expected, downloads))
+                    time.sleep(20)
+                    out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
+                    url = f'http://{self.hostname}:{self.port+1}/{expected}'
+                    response = requests.get(url, stream=True, timeout=30)
+                    assert response.status_code == 200
+                    stream = response.raw
+                    shutil.copyfileobj(stream, out)
+                    out.close()
+                    logging.info('DELETE', requests.delete(url).text)
+                    return out.name
+
+                if timeout > 5 and not downloading:
+                    logging.info('TIMED OUT while NOT downloading')
+                    break
+                if timeout > 50 and downloading:
+                    logging.info('TIMED OUT while downloading')
+                    break
+
+                timeout += 1
+                time.sleep(6)
         assert False, 'Failed to download file, %r' % downloads
 
 
