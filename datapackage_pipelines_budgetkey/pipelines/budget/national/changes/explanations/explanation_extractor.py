@@ -25,10 +25,10 @@ def get_explanations(res_iter_):
 
     for res in res_iter_:
         for row in res:
-            with tempfile.NamedTemporaryFile(mode='wb') as tmp:
+            orig_name = row['orig_name']
+            with tempfile.NamedTemporaryFile(mode='wb', suffix=orig_name) as tmp:
                 tmp.write(base64.b64decode(row['contents'].encode('ascii')))
                 filename = tmp.name
-                orig_name = row['orig_name']
                 try:
                     text = DocParser().process(filename, '')
                 except ShellError:
@@ -55,6 +55,8 @@ def get_explanations(res_iter_):
                     'req_code': req_code,
                     'explanation': text.strip()
                 }
+                logging.info('Parsed filename %s', orig_name)
+
 
 
 resource = parameters['resource']

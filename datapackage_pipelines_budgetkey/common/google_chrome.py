@@ -102,7 +102,7 @@ class google_chrome_driver():
         logging.info('EXPECTING: %r', expected)
         self.driver.get(url)
         downloads = []
-        for i in range(30):
+        for i in range(60):
             time.sleep(6)
             downloads = self.list_downloads()
             logging.info('DOWNLOADS: %r', downloads)
