@@ -2,6 +2,7 @@ import os
 import logging
 import requests
 import json
+import time
 from pyquery import PyQuery as pq
 
 # ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
@@ -26,7 +27,12 @@ def search_dataset(gcd, dataset_name):
 
 def get_page(gcd, url, test):
     try:
-        page = requests.get(url, headers={'User-Agent':'datagov-internal-client'}).text
+        for i in range(3):
+            response = requests.get(url, headers={'User-Agent':'datagov-internal-client'})
+            if response.status_code == 200:
+                page = response.text
+                break
+            time.sleep(5)
         assert test(page)
     except:
         gcd.driver.get(url)
