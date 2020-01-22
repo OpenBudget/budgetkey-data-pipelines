@@ -116,7 +116,7 @@ class google_chrome_driver():
                         break
 
             if expected in downloads:
-                print('found {} in {}'.format(expected, downloads))
+                logging.info('found {} in {}'.format(expected, downloads))
                 time.sleep(20)
                 out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
                 url = f'http://{self.hostname}:{self.port+1}/{expected}'
@@ -125,7 +125,7 @@ class google_chrome_driver():
                 stream = response.raw
                 shutil.copyfileobj(stream, out)
                 out.close()
-                print('DELETE', requests.delete(url).text)
+                logging.info('DELETE', requests.delete(url).text)
                 return out.name
         assert False, 'Failed to download file, %r' % downloads
 
