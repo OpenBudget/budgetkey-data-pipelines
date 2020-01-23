@@ -5,6 +5,7 @@ all:
     - pipeline: ./people/procurement/procurement-individuals
     - pipeline: ./people/municipal_appointments/municipal_representitives
     - pipeline: ./people/political_donations/political_donations
+    - pipeline: ./people/political_candidates/election_candidates21
 
 
   pipeline:
@@ -46,6 +47,12 @@ all:
       parameters:
 #        url: /var/datapackages/people/political_donations/datapackage.json
         url: dependency://./people/political_donations/political_donations
+        resource: 0
+
+    - run: load_resource
+      parameters:
+#        url: /var/datapackages/people/political_candidates/datapackage.json
+        url: dependency://./people/political_candidates/election_candidates21
         resource: 0
 
     -
