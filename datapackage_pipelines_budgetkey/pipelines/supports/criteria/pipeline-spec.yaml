@@ -1,18 +1,3 @@
-support-criteria-moh:
-  schedule:
-    crontab: "0 0 * * *"
-  pipeline:
-  - run: add_metadata
-    parameters:
-      name: support-criteria-from-ministry-of-health
-      title: Support criteria from ministry of health website
-  - flow: m_tmicha
-    runner: tzabar
-  - run: dump.to_path
-    parameters:
-      out-path: /var/datapackages/support-criteria/moh
-
-
 support-criteria-doj:
   schedule:
     crontab: "0 0 * * *"
@@ -29,29 +14,10 @@ support-criteria-doj:
         out-path: /var/datapackages/support-criteria/doj
 
 
-support-criteria-jobiz:
-  dependencies:
-    - pipeline: ./procurement/calls_for_bids/jobiz-all
-  
-  pipeline:
-    - run: load
-      parameters:
-        from: /var/datapackages/publications/jobiz/datapackage.json
-    - run: filter
-      parameters:
-        in:
-          - tender_type: support_criteria
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/support-criteria/jobiz
-
-
 support-criteria:
 
   dependencies:
-    - pipeline: ./supports/criteria/support-criteria-moh
     - pipeline: ./supports/criteria/support-criteria-doj
-    - pipeline: ./supports/criteria/support-criteria-jobiz
 
   pipeline:
     - run: add_metadata
@@ -66,12 +32,6 @@ support-criteria:
         office_id: ''
         resource:
           name: gov
-    - run: load
-      parameters:
-        from:  /var/datapackages/support-criteria/jobiz/datapackage.json
-    - run: load
-      parameters:
-        from: /var/datapackages/support-criteria/moh/datapackage.json
     - run: load
       parameters:
         from:  /var/datapackages/support-criteria/doj/datapackage.json
@@ -176,33 +136,17 @@ support-criteria:
           - publication_id
           - tender_id
 
+    - run: calc-score
+    - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
+      parameters:
+        creation_date_table: _elasticsearch_mirror__support_criteria
+
     - run: dump.to_sql
       parameters:
         tables:
           support_criteria:
             resource-name: support_criteria
-            mode: update
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/support-criteria
-
-
-support-criteria-all:
-  dependencies:
-    - pipeline: ./supports/criteria/support-criteria
-
-  pipeline:
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/support-criteria/datapackage.json
-        resource: support_criteria
-        table: support_criteria
-    - run: stream_remote_resources
-    - run: calc-score
-    - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
-      parameters:
-        creation_date_table: _elasticsearch_mirror__support_criteria
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/support-criteria-all
 

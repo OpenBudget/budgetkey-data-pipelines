@@ -3,6 +3,8 @@ import logging
 import requests
 import json
 import time
+import shutil
+import tempfile
 from pyquery import PyQuery as pq
 
 # ALL_PACKAGES_URL = 'https://data.gov.il/api/3/action/package_search?rows=10000'
@@ -47,7 +49,7 @@ def get_dataset_html(gcd, dataset_name):
     results = []
     for resource in resources:
         resource = pq(resource)
-        resource_page = get_page(gcd, 'http://data.gov.il' + pq(resource.find('a.heading')).attr('href'), lambda page: 'module-content' in page)
+        resource_page = get_page(gcd, 'https://data.gov.il' + pq(resource.find('a.heading')).attr('href'), lambda page: 'module-content' in page)
         results.append(dict(
             name=pq(resource.find('a.heading')).attr('title'),
             url='https://data.gov.il' + pq(resource_page.find('.module .module-content:first-child p.muted.ellipsis a.btn-primary')).attr('href'),
@@ -67,11 +69,18 @@ def get_resource(gcd, dataset_name, resource_name):
         if resource['name'] == resource_name:
             url = resource['url'].replace('//e.', '//')
             try:
-                if resource.get('any_file'):
-                    return url, gcd.download(url, any_file=True, format='.' + resource['format'])
-                else:
-                    return url, gcd.download(url)
+                try:
+                    with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=os.path.basename(url)) as downloaded:
+                        resp = requests.get(url, stream=True)
+                        stream = resp.raw
+                        shutil.copyfileobj(stream, downloaded)
+                        downloaded.close()
+                        return url, downloaded.name
+                except:
+                    if resource.get('any_file'):
+                        return url, gcd.download(url, any_file=True, format='.' + resource['format'])
+                    else:
+                        return url, gcd.download(url)
             except AssertionError:
                 return url, None
     assert False, 'Failed to find resource for name %s' % (resource_name,)
-

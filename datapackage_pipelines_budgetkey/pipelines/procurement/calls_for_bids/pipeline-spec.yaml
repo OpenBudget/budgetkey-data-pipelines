@@ -83,6 +83,19 @@ gov-publications-ministry-of-immigration:
       parameters:
         out-path: /var/datapackages/publications/gov/calls-for-bids-immigration
 
+calls-for-bids-moh:
+  schedule:
+    crontab: "0 0 * * *"
+  pipeline:
+  - run: add_metadata
+    parameters:
+      name: calls-for-bidsfrom-ministry-of-health
+      title: Calls for bids from ministry of health website
+  - flow: m_tmicha
+    runner: tzabar
+  - run: dump.to_path
+    parameters:
+      out-path: /var/datapackages/calls-for-bids/moh
 
 joint-all:
   pipeline:
@@ -126,13 +139,13 @@ joint-procurement:
 
         
 
-
-calls-for-bids:
+calls-for-bids-all:
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
     - pipeline: ./procurement/calls_for_bids/gov-publications
     - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
     - pipeline: ./procurement/calls_for_bids/joint-calls-for-bids
+    - pipeline: ./procurement/calls_for_bids/calls-for-bids-moh
 
   schedule:
     crontab: "0 16 * * *"
@@ -161,6 +174,9 @@ calls-for-bids:
     - run: load
       parameters:
         from: /var/datapackages/publications/joint/calls_for_bids/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/calls-for-bids/moh/datapackage.json
     - run: sample
     - run: concatenate
       parameters:
@@ -279,32 +295,18 @@ calls-for-bids:
           - tender_type
           - publication_id
           - tender_id
-    - run: dump_to_path
+
+    - run: calc-score
+    - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
       parameters:
-        out-path: /var/datapackages/procurement/calls_for_bids
+        creation_date_table: _elasticsearch_mirror__calls_for_bids
+
     - run: dump_to_sql
       parameters:
         tables:
           calls_for_bids:
             resource-name: calls_for_bids
-            mode: update
 
-calls-for-bids-all:
-  dependencies:
-    - pipeline: ./procurement/calls_for_bids/calls-for-bids
-
-  pipeline:
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/procurement/calls_for_bids/datapackage.json
-        resource: calls_for_bids
-        table: calls_for_bids
-    - run: stream_remote_resources
-    - run: calc-score
-    - flow: datapackage_pipelines_budgetkey.processors.calc_cfb_sc_decision
-      parameters:
-        creation_date_table: _elasticsearch_mirror__calls_for_bids
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/calls_for_bids_all
-

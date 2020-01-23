@@ -170,8 +170,8 @@ calls_for_bids:
 support_criteria:
   kind: indexer
   revision: 19
-  dependent_pipeline: ./supports/criteria/support-criteria-all
-  source_datapackage: /var/datapackages/support-criteria-all/datapackage.json
+  dependent_pipeline: ./supports/criteria/support-criteria
+  source_datapackage: /var/datapackages/support-criteria/datapackage.json
   page-title-pattern: '{page_title}'
   key-fields:
     - tender_type

@@ -49,11 +49,11 @@ def fetch_results():
 
 KIND_MAPPING = {
     'קולות קוראים': 'call_for_bids',
-    'תמיכות': 'support_criteria',
+    'תמיכות': 'call_for_bids',
 }
 KIND_HE_MAPPING = {
     'קולות קוראים': 'קול קורא',
-    'תמיכות': 'מבחן תמיכה',
+    'תמיכות': 'קול קורא',
 }
 
 def process_kind(row):
