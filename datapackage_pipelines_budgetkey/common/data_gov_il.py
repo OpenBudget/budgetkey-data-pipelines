@@ -75,6 +75,7 @@ def get_resource(gcd, dataset_name, resource_name):
                         stream = resp.raw
                         shutil.copyfileobj(stream, downloaded)
                         downloaded.close()
+                        assert open(downloaded.name, 'rb').read(5) != b'<html'
                         return url, downloaded.name
                 except:
                     if resource.get('any_file'):
