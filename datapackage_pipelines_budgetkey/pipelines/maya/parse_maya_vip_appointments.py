@@ -59,7 +59,6 @@ FIELDS = [
     'SugMisparZihuy',
     'MisparZihuy',
     'FullName',
-    'FullNameEn',
     'CompanyName',
     'PreviousCompanyNames',
     'CompanyNameEn',
@@ -98,7 +97,8 @@ def validate(rows):
 
 def filter_by_type(rows):
     for row in rows:
-        if row['type'] == 'ת091':
+        # 'NoseMisraBechira4' indicates that this is a new format >2005 where the type holdings is indicated
+        if row['type'] == 'ת091' and 'NoseMisraBechira4'  in row['document']:
             yield row
 
 
