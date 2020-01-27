@@ -44,7 +44,6 @@ RENAME_FIELDS = {
 
 FIELDS = [
       'CompanyName',
-      'CompanyUrl',
       'HeaderMisparBaRasham',
       'HeaderSemelBursa',
       'KodSugYeshut',
@@ -55,7 +54,7 @@ FIELDS = [
       'PreviousCompanyNames',
       'Date']
 
-OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut']
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut', 'CompanyUrl' ]
 
 TABLE_FIELDS = ['FullName',
                 'FullNameEn',
