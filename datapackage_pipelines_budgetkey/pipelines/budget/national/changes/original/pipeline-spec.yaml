@@ -6,49 +6,37 @@ national-budget-changes:
       parameters:
         name: national-budget-changes
         title: National Budget Amendments
-    - run: data_gov_il_resources
+    - run: load
       parameters:
-        batch:
-          - dataset-name: 2005
-            resource-name: 'שינויי תקציב 2005'
-            resource:
-              name: changes_2005
-          - dataset-name: 2006
-            resource-name: 'שינויי תקציב 2006'
-            resource:
-              name: changes_2006
-          - dataset-name: 2007
-            resource-name: 'שינויי תקציב 2007'
-            resource:
-              name: changes_2007
-          - dataset-name: 2008
-            resource-name: 'שינויי תקציב 2008'
-            resource:
-              name: changes_2008
-          - dataset-name: 2009
-            resource-name: 'שינויי תקציב 2009'
-            resource:
-              name: changes_2009
-          - dataset-name: 2010
-            resource-name: 'שינויי תקציב 2010'
-            resource:
-              name: changes_2010
-          - dataset-name: 2011
-            resource-name: 'שינויי תקציב 2011'
-            resource:
-              name: changes_2011
-          - dataset-name: 531
-            resource-name: 'שינויי תקציב 2012'
-            resource:
-              name: changes_2012
-          - dataset-name: 711
-            resource-name: 'שינויי תקציב 2013'
-            resource:
-              name: changes_2013
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2005.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2006.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2007.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2008.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2009.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2010.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2011.csv
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2012.xlsx
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2013.xlsx
+    
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2014.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2014.csv
         resource:
           name: changes_2014
           path: data/changes_2014.csv
@@ -56,9 +44,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 2
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2015.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2015.csv
         resource:
           name: changes_2015
           path: data/changes_2015.csv
@@ -66,9 +53,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 2
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2016.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2016.csv
         resource:
           name: changes_2016
           path: data/changes_2016.csv
@@ -76,9 +62,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 2
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2017.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2017.csv
         resource:
           name: changes_2017
           path: data/changes_2017.csv
@@ -86,9 +71,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 3
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2018.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2018.csv
         resource:
           name: changes_2018
           path: data/changes_2018.csv
@@ -96,9 +80,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 3
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_data_2019.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2019.csv
         resource:
           name: changes_2019
           path: data/changes_2019.csv
@@ -106,7 +89,6 @@ national-budget-changes:
           encoding: windows-1255
           headers: 3
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
         url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
         resource:
@@ -116,7 +98,6 @@ national-budget-changes:
           encoding: windows-1255
           headers: 3
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
         url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
         resource:
