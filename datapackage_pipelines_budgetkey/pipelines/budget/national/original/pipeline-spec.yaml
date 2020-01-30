@@ -16,116 +16,139 @@ national-budgets:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData1997.xlsx
         sheet: 1
         force_strings: true
+        name: budget1997
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData1998.xlsx
         sheet: 1
         force_strings: true
+        name: budget1998
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData1999.xlsx
         sheet: 1
         force_strings: true
+        name: budget1999
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2000.xlsx
         sheet: 1
         force_strings: true
+        name: budget2000
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2001.xlsx
         sheet: 1
         force_strings: true
+        name: budget2001
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2002.xlsx
         sheet: 1
         force_strings: true
+        name: budget2002
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2003.xlsx
         sheet: 1
         force_strings: true
+        name: budget2003
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2004.xlsx
         sheet: 1
         force_strings: true
+        name: budget2004
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2005.xlsx
         sheet: 1
         force_strings: true
+        name: budget2005
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2006.xlsx
         sheet: 1
         force_strings: true
+        name: budget2006
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2007.xlsx
         sheet: 1
         force_strings: true
+        name: budget2007
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2008.xlsx
         sheet: 1
         force_strings: true
+        name: budget2008
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2009.xlsx
         sheet: 1
         force_strings: true
+        name: budget2009
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2010.xlsx
         sheet: 1
         force_strings: true
+        name: budget2010
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2011.xlsx
         sheet: 1
         force_strings: true
+        name: budget2011
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2012.xlsx
         sheet: 1
         force_strings: true
+        name: budget2012
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2013.xlsx
         sheet: 1
         force_strings: true
+        name: budget2013
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2014.xlsx
         sheet: 1
         force_strings: true
+        name: budget2014
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2015.xlsx
         sheet: 1
         force_strings: true
+        name: budget2015
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2016.xlsx
         sheet: 1
         force_strings: true
+        name: budget2016
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2017.xlsx
         sheet: 1
         force_strings: true
+        name: budget2017
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2018.xlsx
         sheet: 1
         force_strings: true
+        name: budget2018
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2019.xlsx
         sheet: 1
         force_strings: true
+        name: budget2019
     - run: concatenate
       parameters:
         target:
