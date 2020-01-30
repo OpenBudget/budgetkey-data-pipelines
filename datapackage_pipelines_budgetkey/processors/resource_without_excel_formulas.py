@@ -1,13 +1,15 @@
+import os
 import logging
 import requests
 import tempfile
+import shutil
 import tabulator
 import itertools
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest
 
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+# from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
 with tempfile.NamedTemporaryFile(suffix='.csv') as out:
@@ -18,10 +20,15 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         resource = parameters.get('resource')
         resource[PROP_STREAMING] = True
 
-        gcl = google_chrome_driver()
-        download = gcl.download(url)
-        gcl.teardown()
+        # gcl = google_chrome_driver()
+        # download = gcl.download(url)
+        # gcl.teardown()
+        download = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
+        shutil.copyfileobj(requests.get(url, stream=True).raw, download)
+        download.close()
+        download = download.name
         content = open(download, 'rb').read()
+        os.unlink(download)
 
         content = content.replace(b'\n="', b'\n"')
         content = content.replace(b',="', b',"')
@@ -34,7 +41,7 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         datapackage['resources'].append(resource)
 
         stream = \
-            tabulator.Stream('file://'+out.name, **parameters.get('tabulator', {}))\
+            tabulator.Stream('file://'+out.name, force_strings=True, **parameters.get('tabulator', {}))\
             .open()
         resource['schema'] = {
             'fields': [
