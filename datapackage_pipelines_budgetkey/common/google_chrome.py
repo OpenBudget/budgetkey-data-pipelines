@@ -131,7 +131,7 @@ class google_chrome_driver():
                     stream = response.raw
                     shutil.copyfileobj(stream, out)
                     out.close()
-                    logging.info('DELETE', requests.delete(url).text)
+                    logging.info('DELETE %s', requests.delete(url).text)
                     return out.name
 
                 if timeout > 5 and not downloading:
