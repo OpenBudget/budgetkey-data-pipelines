@@ -114,24 +114,24 @@ national-budget-changes:
         tabulator:
           encoding: windows-1255
           headers: 3
-    - run: resource_without_excel_formulas
-      parameters:
-        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
-        resource:
-          name: changes_2020
-          path: data/changes_2020.csv
-        tabulator:
-          encoding: windows-1255
-          headers: 3
-    - run: resource_without_excel_formulas
-      parameters:
-        url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
-        resource:
-          name: pending_changes_2020
-          path: data/pending_changes.csv
-        tabulator:
-          encoding: windows-1255
-          headers: 3
+    # - run: resource_without_excel_formulas
+    #   parameters:
+    #     url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+    #     resource:
+    #       name: changes_2020
+    #       path: data/changes_2020.csv
+    #     tabulator:
+    #       encoding: windows-1255
+    #       headers: 3
+    # - run: resource_without_excel_formulas
+    #   parameters:
+    #     url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
+    #     resource:
+    #       name: pending_changes_2020
+    #       path: data/pending_changes.csv
+    #     tabulator:
+    #       encoding: windows-1255
+    #       headers: 3
     - run: set_pending
       parameters:
         pending-resource-name: pending_changes_2020
