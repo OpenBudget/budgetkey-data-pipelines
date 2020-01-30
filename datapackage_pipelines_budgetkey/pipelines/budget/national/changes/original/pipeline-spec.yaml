@@ -9,31 +9,39 @@ national-budget-changes:
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2005.xlsx
+        name: f2005
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2006.xlsx
+        name: f2006
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2007.xlsx
+        name: f2007
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2008.xlsx
+        name: f2008
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2009.xlsx
+        name: f2009
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2010.xlsx
+        name: f2010
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2011.csv
+        name: f2011
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2012.xlsx
+        name: f2012
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2013.xlsx
-    
+        name: f2013
     - run: resource_without_excel_formulas
       parameters:
         url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2014.csv
