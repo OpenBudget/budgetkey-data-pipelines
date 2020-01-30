@@ -149,10 +149,7 @@ national-budgets:
         sheet: 1
         force_strings: true
         name: budget2019
-    - run: filter
-      parameters:
-        out:
-          - שנה: null
+    - flow: only_years
     - run: concatenate
       parameters:
         target:
