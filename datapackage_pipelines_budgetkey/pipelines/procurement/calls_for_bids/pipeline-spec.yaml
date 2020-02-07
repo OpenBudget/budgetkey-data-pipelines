@@ -145,7 +145,7 @@ calls-for-bids-all:
     - pipeline: ./procurement/calls_for_bids/gov-publications
     - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
     - pipeline: ./procurement/calls_for_bids/joint-calls-for-bids
-    - pipeline: ./procurement/calls_for_bids/calls-for-bids-moh
+    # - pipeline: ./procurement/calls_for_bids/calls-for-bids-moh
 
   schedule:
     crontab: "0 16 * * *"
@@ -174,9 +174,9 @@ calls-for-bids-all:
     - run: load
       parameters:
         from: /var/datapackages/publications/joint/calls_for_bids/datapackage.json
-    - run: load
-      parameters:
-        from: /var/datapackages/calls-for-bids/moh/datapackage.json
+    # - run: load
+    #   parameters:
+    #     from: /var/datapackages/calls-for-bids/moh/datapackage.json
     - run: sample
     - run: concatenate
       parameters:
