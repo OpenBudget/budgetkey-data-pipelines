@@ -26,7 +26,10 @@ def all_links(gcd):
         time.sleep(1)
         page = gcd.driver.page_source
         main = pq(page)
-        items = main.find('.page-content-item')
+        items = list(main.find('.page-content-item'))
+        if len(items) == 0:
+            logging.warning('FAILED TO FIND ANY ITEM in %s', BASE_URL + main_page)
+            print('page content ', page)
         for item in items:
             item = pq(item)
             item_text = item.text()
