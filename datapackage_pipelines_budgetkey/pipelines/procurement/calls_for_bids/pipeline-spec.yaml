@@ -161,7 +161,7 @@ calls-for-bids-all:
     - flow: negev_galil
       runner: tzabar
     - flow: class_action
-    - flow: kkl
+    # - flow: kkl
     - run: load
       parameters:
         from: /var/datapackages/publications/gov/calls-for-bids/datapackage.json

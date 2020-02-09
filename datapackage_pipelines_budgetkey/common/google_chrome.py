@@ -14,7 +14,7 @@ import atexit
 
 class google_chrome_driver():
 
-    def __init__(self, wait=True):
+    def __init__(self, wait=True, initial='https://data.gov.il'):
         if wait:
             time.sleep(random.randint(1, 300))
         self.hostname = 'tzabar.obudget.org'

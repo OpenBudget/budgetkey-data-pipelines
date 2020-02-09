@@ -90,7 +90,14 @@ gcd = None
 
 def flow(*_):
     global gcd
-    gcd = google_chrome_driver()
+    gcd = google_chrome_driver(initial=BASE_URL + MAIN_PAGES[0], wait=False)
+    # import selenium
+    # class G:
+    #     def __init__(self):
+    #         chrome_options = selenium.webdriver.ChromeOptions()
+    #         chrome_options.debugger_address = 'localhost:9222'
+    #         self.driver = selenium.webdriver.Chrome(options=chrome_options)
+    # gcd = G()
     return DF.Flow(
         scraper(gcd),
         DF.update_resource(-1, **{'dpp:streaming': True}),
@@ -98,10 +105,6 @@ def flow(*_):
 
 
 if __name__ == '__main__':
-    try:
-        DF.Flow(
-            flow(), DF.printer()
-        ).process()
-    finally:
-        if gcd:
-            gcd.teardown()
+    DF.Flow(
+        flow(), DF.printer()
+    ).process()
