@@ -374,6 +374,7 @@ latest-contract-spending:
         resource-name: contract-spending
         source-field: supplier_name_fingerprint
         source-id-field: company_id
+    - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: calc-min-max-years
     - run: calc-spending-score
     - run: limit_last_years
