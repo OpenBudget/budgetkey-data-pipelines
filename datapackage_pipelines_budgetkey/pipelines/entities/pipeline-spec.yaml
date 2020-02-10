@@ -295,6 +295,11 @@ entities:
           min_year: null
           max_year: null
 
+    # Add fingerprint
+    - run: fingerprint
+      parameters:
+        source-field: name
+        target-field: fingerprint
 
     # Calculate score
     - run: calc-entity-score
@@ -308,6 +313,8 @@ entities:
             es:boost: true
           name_en:
             es:boost: true
+          fingerprint:
+            es:index: true
 
     # And dump it
     - run: dump.to_path
