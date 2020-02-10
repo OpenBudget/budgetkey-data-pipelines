@@ -1,3 +1,4 @@
+import requests
 from dataflows import (
     Flow, load, concatenate, update_resource,
     set_primary_key, set_type, printer
@@ -54,14 +55,31 @@ def clear_bool_values(package):
     yield from package
 
 
+def fetch_rows():
+    params = dict(
+        offset=0,
+        limit=1000,
+        resource_id='f004176c-b85f-4542-8901-7b3176f9a054'
+    )
+    url = 'https://data.gov.il/api/action/datastore_search'
+    while True:
+        resp = requests.get(url, params=params).json()
+        if len(resp['result']['records']) == 0:
+            break
+        for x in resp['result']['records']:
+            x['מספר חברה'] = str(x['מספר חברה'])
+            yield x
+        params['offset'] += 1000
+
+
 def flow(*_):
-    gcd = google_chrome_driver()
-    download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
+    # gcd = google_chrome_driver()
+    # download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
     return Flow(
-        load(download, cast_strategy=load.CAST_TO_STRINGS),
+        fetch_rows(),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
-        set_type('company_registration_date', type='date', format='%d/%m/%Y'),
+        set_type('company_registration_date', type='date', format='%Y-%m-%dT%H:%M:%S'),
         set_type('company_is_government', type='boolean', falseValues=['לא'], trueValues=['כן']),
         set_type('company_is_mafera', type='boolean', falseValues=['לא'], trueValues=['מפרה', 'התראה']),
         set_type('company_last_report_year', type='integer'),
