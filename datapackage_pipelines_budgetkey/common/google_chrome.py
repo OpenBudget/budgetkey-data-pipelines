@@ -50,6 +50,7 @@ class google_chrome_driver():
             time.sleep(3)
             self.docker_container = stdout.read().decode('ascii').strip()
 
+        time.sleep(45)
         try:
             windows = None
             for i in range(10):
