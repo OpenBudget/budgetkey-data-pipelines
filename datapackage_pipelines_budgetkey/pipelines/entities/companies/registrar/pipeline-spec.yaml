@@ -89,6 +89,8 @@ details:
         types:
           company_last_report_year:
             type: integer
+          company_postal_code:
+            type: string
           safety_violations:
             es:itemType: object
             es:index: false
