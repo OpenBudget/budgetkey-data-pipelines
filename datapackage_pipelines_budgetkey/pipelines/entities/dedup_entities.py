@@ -22,13 +22,13 @@ def process_resources(res_iter_):
 
 
 def modify_datapackage(datapackage):
+    logging.info('DETAILS DATAPACKAGE\n%s', json.dumps(datapackage, indent=2, ensure_ascii=False))
     if 'detailsSchema' in datapackage:
         ds = datapackage.pop('detailsSchema')
         for resource in datapackage['resources']:
             for field in resource['schema']['fields']:
                 if field['name'] == 'details':
                     field['es:schema'] = ds
-                    logging.info('DETAILS SCHEMA\n%s', json.dumps(ds, indent=2, ensure_ascii=False))
                     break
     return datapackage
 
