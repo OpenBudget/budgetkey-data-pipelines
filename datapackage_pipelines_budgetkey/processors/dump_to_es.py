@@ -7,6 +7,7 @@ import dataflows as DF
 import logging
 import collections
 import datetime
+import json
 
 
 def id(x):
@@ -34,6 +35,10 @@ class BoostingMappingGenerator(MappingGenerator):
         elif schema_type in ('number', 'integer', 'datetime'):
             prop['index'] = True
         return prop
+
+    def generate_from_schema(self, schema):
+        super(BoostingMappingGenerator, self).generate_from_schema(schema)
+        logging.info('GENERATED MAPPING: %s', json.dumps(self.get_mapping(), indent=2, ensure_ascii=False))
 
 
 class DumpToElasticSearch(dump_to_es):
