@@ -68,6 +68,7 @@ def fetch_rows():
             break
         for x in resp['result']['records']:
             x['מספר חברה'] = str(x['מספר חברה'])
+            x['מיקוד'] = str(x['מיקוד'])
             x['שם חברה'] = x['שם חברה'].replace('~', '״')
             yield x
         params['offset'] += 1000
