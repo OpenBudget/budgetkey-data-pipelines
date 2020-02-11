@@ -298,6 +298,7 @@ entities:
     # Add fingerprint
     - run: fingerprint
       parameters:
+        resource-name: entities
         source-field: name
         target-field: fingerprint
 
