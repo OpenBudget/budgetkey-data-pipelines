@@ -67,9 +67,9 @@ def fetch_rows():
         if len(resp['result']['records']) == 0:
             break
         for x in resp['result']['records']:
-            x['מספר חברה'] = str(x['מספר חברה']) if x['מספר חברה'] else x['מספר חברה']
-            x['מיקוד'] = str(x['מיקוד']) if x['מיקוד'] else x['מיקוד']
-            x['ת.ד.'] = str(x['ת.ד.']) if x['ת.ד.'] else x['ת.ד.']
+            x['מספר חברה'] = str(x['מספר חברה']) if x['מספר חברה'] is not None else x['מספר חברה']
+            x['מיקוד'] = str(x['מיקוד']) if x['מיקוד'] is not None else x['מיקוד']
+            x['ת.ד.'] = str(x['ת.ד.']) if x['ת.ד.'] is not None else x['ת.ד.']
             x['שם חברה'] = x['שם חברה'].replace('~', '״')
             yield x
         params['offset'] += 1000
