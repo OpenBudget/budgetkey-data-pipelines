@@ -1,5 +1,8 @@
 from datapackage_pipelines.wrapper import ingest, spew
 import json
+import logging
+
+
 parameters, datapackage, res_iter = ingest()
 
 
