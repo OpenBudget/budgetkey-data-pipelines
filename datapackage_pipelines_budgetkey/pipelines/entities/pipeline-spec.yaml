@@ -187,6 +187,7 @@ entities:
   dependencies:
     - pipeline: ./procurement/spending/spending-by-entity
     - pipeline: ./supports/supports-by-entity
+    - pipeline: ./entities/all
 
   pipeline:
     - run: add_metadata
