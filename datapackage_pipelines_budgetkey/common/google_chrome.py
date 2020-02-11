@@ -42,7 +42,7 @@ class google_chrome_driver():
             logging.info('COUNTED %d running containers, waiting', running)
             time.sleep(60)
 
-        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} -v /home/adam/chrome-user-data:/userdata -d akariv/google-chrome-in-a-box {self.port} {self.port+1} {initial}'
+        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} -d akariv/google-chrome-in-a-box {self.port} {self.port+1} {initial}'
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
         self.docker_container = None
