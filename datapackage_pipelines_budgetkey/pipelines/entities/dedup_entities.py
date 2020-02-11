@@ -1,5 +1,5 @@
 from datapackage_pipelines.wrapper import ingest, spew
-
+import json
 parameters, datapackage, res_iter = ingest()
 
 
@@ -25,6 +25,7 @@ def modify_datapackage(datapackage):
             for field in resource['schema']['fields']:
                 if field['name'] == 'details':
                     field['es:schema'] = ds
+                    logging.info('DETAILS SCHEMA\n%s', json.dumps(ds, indent=2, ensure_ascii=False))
                     break
     return datapackage
 
