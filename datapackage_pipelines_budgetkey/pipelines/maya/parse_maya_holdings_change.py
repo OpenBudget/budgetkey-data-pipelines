@@ -6,80 +6,95 @@ from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import ver
 
 import csv
 
-ID_TYPE_MAPPING = {'מספר מזהה אחר': 'other',
-                   'מספר רשם בארץ ההתאגדות בחו"ל': 'id_at_foreign_corporation_registry',
-                   'מספר ברשם החברות בישראל': 'id_at_corporation_registry',
-                   'מספר ברשם השותפויות בישראל': 'id_at_association_registry',
-                   'מספר תעודת זהות':'id_number',
-                   'מספר ביטוח לאומי':'social_security_number'}
-
-
-
-HOLDER_TYPE_MAPPING = {'החברה':False,
-                       'חברת בת של החברה':True }
 
 RENAME_FIELDS = {
-    'HolderType': 'IsHeldBySubsidiary',
-    'ShemChevratBat': 'SubsidiaryName',
-    'CompanyEnglishName': 'SubsidiaryNameEn',
+    'ShemYeshutIvrit':'CompanyName',
     'ShemYeshutKodem':'PreviousCompanyNames',
     'ShemYeshutLoazit': 'CompanyNameEn',
+    'Date': 'HoldingsChangeDate', #התאריך בהם נודע לתאגיד לראשונה על הארוע
+    'TextHofshi': 'Comments',
+    'Shem': 'FullName',
+    'EnglishName': 'FullNameEn',
+    'ErezEzrahutSlashHitagdut' :'Nationality',
+    'ErechTavle122nd' : 'IsFrontForOthers',
+    'MahutShinui1': 'ChangeType',
+    'MahutShinui2': 'IncreaseReason',
+    'MahutShinui3': 'DecreaseReason',
+    'Aher': 'FreeTextReason',
+    'EzrahutSlashErez': 'EntityType',
+    'table757': 'HolderType',
+    'ErechTavla121st': 'IsNostroAccountOfBankOrInsuranceCompany',
 
-    'ShiurHachzaka': 'PercentageHeld',
-    'IDType': 'Subsidiary_IDType',
-    'IdNumber': 'Subsidiary_IDNumber',
-    'MisparNiyarBursa': 'StockNumber',
-    'TheNameOfTheChangedSecuritie': 'ChangedStockName',
-    'SecuritiesAmountChange': 'StockAmountChange',
-    'SecuritiesHolderBalanceAfterChange': 'NumberOfStocksAfterChange',
 }
 
 FIELDS = [
-    'CompanyNameEn',
-    'CompanyUrl',
-    'HeaderMisparBaRasham',
-    'HeaderSemelBursa',
-    'KodSugYeshut',
-    'MezahehHotem',
-    'MezahehTofes',
-    'NeyarotErechReshumim',
-    'PumbiLoPumbi',
+    'Comments', #Additional noted in free text
     'PreviousCompanyNames',
+    'CompanyNameEn',
+    'MezahehHotem',
+    'MoedHashlamatTashlum', #אם לא שולמה כל התמורה במועד השינוי נא לציין את מועד השלמת התשלום
+    'MezahehTofes',
+    'KodSugYeshut',
+    'PumbiLoPumbi',
+    'HeaderSemelBursa',
+    'NeyarotErechReshumim',
+    'HoldingsChangeDate',
+    'CompanyName',
+    'OfenSiumHashala', #אם השינוי הוא בדרך של חתימה על כתב ההשאלה נא לציין פרטים בדבר אופן סיום ההשאלה
+    'HeaderMisparBaRasham',
+
+]
+
+OPTIONAL_FIELDS = [
+    'MezahehYeshut',
+    'CompanyUrl',
+    'DataToEstimateValue', #פירוט הפעולות שגרמו לשינוי
 ]
 
 TABLE_FIELDS = [
+    'FullName',
+    'SugMisparZihui',
+    'MisparZihui',
+    'EntityType',
+    'MisparNiarErech',
+    'IsFrontForOthers',
+    'Nationality',
+    'ItraKodemet',
+    'ItraLeaharShinui',
+    #'GidulOKitun',
+    'ShiurAhzakaBedilulBehon',
+    'ShiurAhzakaBedilulBekoahHazbaa',
+    'ShiurAhzakaBehon',
+    'ShaarIska',
+    'Matbea',
+    'ChangeType',
+    'FreeTextReason',
+    'HeyotanMenayotRedumot',
+    'ShemVeSugNiarErech'
 
-    'SubsidiaryName',
-    'SubsidiaryNameEn',
-    'PercentageHeld',
-    'Subsidiary_IDType',
-    'Subsidiary_IDNumber',
-    'StockNumber',
-    'ChangedStockName',
-    'ChangeDate',
-
-    'StockAmountChange',
-    'NumberOfStocksAfterChange',
-    'CitizenshipOfRegistering',
-    'countryOfRegistering',
-
-    'IsHeldBySubsidiary',
-
-    'Table776',
-    'Table774',
-    'Table775',
-    'OtherChange'
 ]
 
-OPTIONAL_TABLE_FIELDS = ['Proceeds']
+#SubtractionAdditionTable + GidulOKitun
 
-ADDITIONAL_FIELDS = ['ChangeExplanation']
+#BiorTbl
+OPTIONAL_TABLE_FIELDS = ['IsNostroAccountOfBankOrInsuranceCompany', 'FullNameEn', 'EntityType', 'MisparBior',
+                         'InterestedShareholdeName',
+                         'InterestedShareholdeID',]
 
+ADDITIONAL_FIELDS = ['FooterMisparAsmachta1', 'FooterMisparAsmachta2', 'FooterMisparAsmachta3']
+
+#IsNostroAccountOfBankOrInsuranceCompany
+YES_NO_VALUES = {'כן': True, 'לא': False}
+
+#EntityType
+ENTITY_TYPES = {'התאגד בישראל': 'Israeli Corporation',
+ 'אדם פרטי עם אזרחות ישראלית': 'Israeli Citizen',
+ 'אדם פרטי ללא אזרחות ישראלית': 'Foreign Citizen',
+ 'התאגד בחו"ל': 'Foreign Corporation'}
 
 def filter_by_type(rows):
     for row in rows:
-        # 'ZeutRochesh' indicates old forms we don't know to parse currently
-        if row['type'] == 'ת086' and 'ZeutRochesh' not in row['document']:
+        if row['type'] == 'ת076':
             yield row
 
 
@@ -94,10 +109,12 @@ def validate(rows):
         num_records = len(doc.get(TABLE_FIELDS[0], []))
 
         verify_row_count(row, FIELDS, 1)
+        verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
+        verify_row_count(row, ADDITIONAL_FIELDS, 1, is_required=False)
         verify_row_count(row, TABLE_FIELDS, num_records)
         verify_row_count(row, OPTIONAL_TABLE_FIELDS, num_records, is_required=False)
-        verify_row_values(row, 'IsHeldBySubsidiary', HOLDER_TYPE_MAPPING)
-        verify_row_values(row, 'Subsidiary_IDType', ID_TYPE_MAPPING)
+        verify_row_values(row, 'IsNostroAccountOfBankOrInsuranceCompany', YES_NO_VALUES)
+        verify_row_values(row, 'EntityType', ENTITY_TYPES)
         yield row
 
 def parse_document(rows):
@@ -105,10 +122,10 @@ def parse_document(rows):
         doc = row['document']
         for field in FIELDS:
             row[field] = doc[field][0]
+        for field in OPTIONAL_FIELDS + ADDITIONAL_FIELDS:
+            row[field] = doc.get(field,[None])[0]
 
         for idx in range(len(doc[TABLE_FIELDS[0]])):
-
-
             new_record = {}
             new_record.update(row)
             new_record.update({k: doc[k][idx] for k in TABLE_FIELDS})
@@ -122,13 +139,12 @@ def parse_document(rows):
                 if field in new_record and _is_null_string(new_record[field]):
                     new_record[field] = ''
 
-
-            new_record['PercentageHeld'] = new_record['PercentageHeld'].replace('%', '')
-            new_record['Subsidiary_IDType'] = ID_TYPE_MAPPING[new_record['Subsidiary_IDType']]
-            new_record['IsHeldBySubsidiary'] = HOLDER_TYPE_MAPPING[new_record['IsHeldBySubsidiary']]
-            new_record['ChangeExplanation'] = ' '.join(x for x in
-                                            [new_record['Table776'], new_record['Table774'], new_record['Table775'], new_record['OtherChange']]
-                                            if not _is_null_string(x))
+            if new_record.get('IsNostroAccountOfBankOrInsuranceCompany',None):
+                new_record['IsNostroAccountOfBankOrInsuranceCompany'] = YES_NO_VALUES[new_record['IsNostroAccountOfBankOrInsuranceCompany']]
+            new_record['EntityType'] = ENTITY_TYPES[new_record['EntityType']]
+            new_record['AdditionalRecords'] = ' '.join(x for x in
+                                                       [new_record['FooterMisparAsmachta1'], new_record['FooterMisparAsmachta2'], new_record['FooterMisparAsmachta3']]
+                                                       if not _is_null_string(x))
 
             yield new_record
 
@@ -139,12 +155,9 @@ def flow(*_):
             -1, name='maya_holdings_change', path="data/maya_holdings_change.csv",
         ),
         filter_by_type,
-        add_fields(FIELDS, 'string'),
-        add_fields(TABLE_FIELDS, 'string'),
-        add_fields(OPTIONAL_TABLE_FIELDS,'string'),
-        add_fields(ADDITIONAL_FIELDS, 'string'),
+        add_fields(FIELDS + OPTIONAL_FIELDS +  TABLE_FIELDS + OPTIONAL_TABLE_FIELDS, 'string'),
         rename_fields(RENAME_FIELDS),
-        fix_fields(FIELDS + TABLE_FIELDS + OPTIONAL_TABLE_FIELDS + ADDITIONAL_FIELDS),
+        fix_fields(FIELDS + OPTIONAL_FIELDS +  TABLE_FIELDS + OPTIONAL_TABLE_FIELDS),
         validate,
         parse_document,
         delete_fields(['document',
@@ -154,10 +167,7 @@ def flow(*_):
                        'parser_version',
                        'source',
                        's3_object_name',
-                       'Table776',
-                       'Table774',
-                       'Table775',
-                       'OtherChange']),
+                       ]),
     )
 
 
