@@ -38,6 +38,11 @@ class DumpToJson(DataStreamProcessor):
 
         out_file = os.path.join(self._out_path, resource_path)
         out_file, _ = os.path.splitext(out_file)
+        if not os.path.exists(os.path.dirname(out_file)):
+            try:
+                os.makedirs(os.path.dirname(out_file))
+            except OSError:
+                pass
 
         with open(out_file + '.json', mode='w', encoding="utf-8") as f:
             f.write("[")
