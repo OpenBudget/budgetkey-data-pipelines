@@ -38,7 +38,6 @@ FIELDS = [
     'PumbiLoPumbi',
     'HeaderSemelBursa',
     'NeyarotErechReshumim',
-    'HoldingsChangeDate',
     'CompanyName',
     'OfenSiumHashala', #אם השינוי הוא בדרך של חתימה על כתב ההשאלה נא לציין פרטים בדבר אופן סיום ההשאלה
     'HeaderMisparBaRasham',
@@ -48,6 +47,7 @@ FIELDS = [
 OPTIONAL_FIELDS = [
     'MezahehYeshut',
     'CompanyUrl',
+    'HoldingsChangeDate',
     'DataToEstimateValue', #פירוט הפעולות שגרמו לשינוי
 ]
 
@@ -161,7 +161,6 @@ def flow(*_):
         validate,
         parse_document,
         delete_fields(['document',
-                       'pdf',
                        'other',
                        'num_files',
                        'parser_version',

@@ -51,10 +51,9 @@ FIELDS = [
       'MezahehTofes',
       'NeyarotErechReshumim',
       'PumbiLoPumbi',
-      'PreviousCompanyNames',
-      'Date']
+      'PreviousCompanyNames']
 
-OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut', 'CompanyUrl' ]
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut', 'CompanyUrl', 'Date' ]
 
 TABLE_FIELDS = ['FullName',
                 'FullNameEn',
