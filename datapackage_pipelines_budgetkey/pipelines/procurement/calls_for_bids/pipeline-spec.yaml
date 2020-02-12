@@ -69,6 +69,19 @@ gov-publications:
       parameters:
         out-path: /var/datapackages/publications/gov/calls-for-bids
 
+gov-publications2:
+  pipeline:
+    - flow: datapackage_pipelines_budgetkey.processors.gov_publications
+      parameters:
+        publication_type: 7b76d87f-d299-4019-8637-5f1de71c9523
+        tender_type: call_for_bids
+        office_id: ''
+        resource:
+          name: gov_publications
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/publications/gov/calls-for-bids2
+
 gov-publications-ministry-of-immigration:
   pipeline:
     - flow: datapackage_pipelines_budgetkey.processors.gov_publications
@@ -143,6 +156,7 @@ calls-for-bids-all:
   dependencies:
     - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
     - pipeline: ./procurement/calls_for_bids/gov-publications
+    - pipeline: ./procurement/calls_for_bids/gov-publications2
     - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
     - pipeline: ./procurement/calls_for_bids/joint-calls-for-bids
     # - pipeline: ./procurement/calls_for_bids/calls-for-bids-moh
@@ -165,6 +179,9 @@ calls-for-bids-all:
     - run: load
       parameters:
         from: /var/datapackages/publications/gov/calls-for-bids/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/publications/gov/calls-for-bids2/datapackage.json
     - run: load
       parameters:
         from: /var/datapackages/publications/gov/calls-for-bids-immigration/datapackage.json
