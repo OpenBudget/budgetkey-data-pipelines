@@ -66,7 +66,6 @@ TABLE_FIELDS = [
     'ShiurAhzakaBedilulBekoahHazbaa',
     'ShiurAhzakaBehon',
     'ShaarIska',
-    'Matbea',
     'ChangeType',
     'FreeTextReason',
     'HeyotanMenayotRedumot',
@@ -79,7 +78,9 @@ TABLE_FIELDS = [
 #BiorTbl
 OPTIONAL_TABLE_FIELDS = ['IsNostroAccountOfBankOrInsuranceCompany', 'FullNameEn', 'EntityType', 'MisparBior',
                          'InterestedShareholdeName',
-                         'InterestedShareholdeID',]
+                         'InterestedShareholdeID',
+                         'Matbea',
+                         ]
 
 ADDITIONAL_FIELDS = ['FooterMisparAsmachta1', 'FooterMisparAsmachta2', 'FooterMisparAsmachta3']
 
