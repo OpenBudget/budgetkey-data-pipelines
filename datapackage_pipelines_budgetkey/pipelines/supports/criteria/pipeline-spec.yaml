@@ -125,7 +125,7 @@ support-criteria:
 
     - run: set_primary_key
       parameters:
-        calls_for_bids:
+        support_criteria:
           - tender_type
           - publication_id
           - tender_id
