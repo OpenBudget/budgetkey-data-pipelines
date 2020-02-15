@@ -116,15 +116,15 @@ def modify_datapackage(dp, *_):
     ), dict(
         name='simple_decision',
         type='string',
-        **{'es:keyword': True}
+        **{'es:keyword': True, 'es:exclude': True}
     ), dict(
         name='simple_decision_long',
         type='string',
-        **{'es:keyword': True}
+        **{'es:keyword': True, 'es:exclude': True}
     ), dict(
         name='extended_status',
         type='string',
-        **{'es:keyword': True}
+        **{'es:keyword': True, 'es:exclude': True}
     ), dict(
         name='awardees_text',
         type='string',
