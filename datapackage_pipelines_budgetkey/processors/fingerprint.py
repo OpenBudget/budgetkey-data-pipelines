@@ -10,6 +10,7 @@ DIGITS = re.compile(r'\d+')
 ENGLISH = re.compile('[a-zA-Z]+')
 
 CLEAN_WORDS = [ 'בע"מ',
+                'בע״מ',
                 'בעמ',
                 "בע'מ",
                 '(חל"צ)',
