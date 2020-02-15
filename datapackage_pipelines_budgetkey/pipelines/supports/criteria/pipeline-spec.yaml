@@ -86,6 +86,7 @@ support-criteria:
 
           decision:
             es:keyword: true
+            es:exclude: true
           contact:
             type: string
             es:keyword: true

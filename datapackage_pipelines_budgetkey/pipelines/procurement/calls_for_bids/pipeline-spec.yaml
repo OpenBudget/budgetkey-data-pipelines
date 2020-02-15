@@ -304,6 +304,7 @@ calls-for-bids-all:
           decision:
             type: string
             es:keyword: true
+            es:exclude: true
 
 
     - run: set_primary_key

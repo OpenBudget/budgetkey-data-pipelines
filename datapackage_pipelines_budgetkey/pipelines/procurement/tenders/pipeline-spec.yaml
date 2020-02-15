@@ -272,6 +272,7 @@ processed:
             es:keyword: true
           decision:
             es:keyword: true
+            es:exclude: true
           tender_id:
             es:keyword: true
           description:
