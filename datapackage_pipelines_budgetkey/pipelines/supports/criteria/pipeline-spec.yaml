@@ -95,7 +95,8 @@ support-criteria:
             es:index: false
           claim_date:
             type: datetime
-
+          last_update_date:
+            type: datetime
           documents:
             type: array
             es:itemType: object
