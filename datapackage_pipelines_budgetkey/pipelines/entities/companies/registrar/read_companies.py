@@ -70,7 +70,9 @@ def fetch_rows():
             x['מספר חברה'] = str(x['מספר חברה']) if x['מספר חברה'] is not None else x['מספר חברה']
             x['מיקוד'] = str(x['מיקוד']) if x['מיקוד'] is not None else x['מיקוד']
             x['ת.ד.'] = str(x['ת.ד.']) if x['ת.ד.'] is not None else x['ת.ד.']
-            x['שם חברה'] = x['שם חברה'].replace('~', '״')
+            for k, v in list(x.items()):
+                if isinstance(v, str) and '~' in v:
+                    x[k] = v.replace('~', '״')
             yield x
         params['offset'] += 1000
 
