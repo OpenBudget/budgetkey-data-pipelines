@@ -43,7 +43,7 @@ quarterly-contract-spending-reports:
         input-pipeline: ./procurement/spending/quarterly-contract-spending-report-uris
         db-table: quarterly_contract_spending_reports
         error-db-table: quarterly_contract_spending_reports_errors
-    - run: sample
+    # - run: sample
     - run: stream_remote_resources
     - run: add_dummy_report
     - run: fix_bad_spaces

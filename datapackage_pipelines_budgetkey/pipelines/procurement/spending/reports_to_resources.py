@@ -82,14 +82,14 @@ reports = datapackage.DataPackage(input_file).resources[0]
 scraped = 0
 try:
     for i, report in enumerate(reports.iter(keyed=True)):
-        logging.info('#%r: %r', i, report)
         report_url = report['report-url']
         if report_url in all_good:
-            logging.info('SKIPPING ALL GOOD %s', report_url)
+            # logging.info('SKIPPING ALL GOOD %s', report_url)
             continue
         if scraped > 1000 and report_url not in errd_urls:
             logging.info('SKIPPING DONE %s', report_url)
             continue
+        logging.info('#%r: %r', i, report)
         report['revision'] = REVISION
         time.sleep(1)
         url_to_use = report_url
@@ -141,9 +141,8 @@ try:
                 canary = None
                 try:
                     try:
-                        logging.info('Trying sheet %d in %s', sheet, report['report-url'])
-                        logging.info('Using url %s', url_to_use)
-                        logging.info('Temp filename %s', filename)
+                        logging.info('Trying sheet %d in %s (using %s)', sheet, report['report-url'], url_to_use)
+                        # logging.info('Temp filename %s', filename)
                         canary = tabulator.Stream(filename, sheet=sheet)
                         canary.open()
                     except SourceError as e:
