@@ -96,7 +96,8 @@ support-criteria:
           claim_date:
             type: datetime
           last_update_date:
-            type: datetime
+            type: date
+            format: '%Y-%m-%dT%H:%M:%SZ'
           documents:
             type: array
             es:itemType: object
