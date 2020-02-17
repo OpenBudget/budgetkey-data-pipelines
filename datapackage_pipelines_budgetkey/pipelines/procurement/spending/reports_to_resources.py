@@ -46,7 +46,7 @@ except:
 
 order_id_headers = [
     'הזמנת רכש',
-    'מספר הזמנה'
+    'מספר הזמנה',
 ]
 
 budget_code_headers = [
@@ -159,7 +159,7 @@ try:
                         if j > 20:
                             break
                         row = [str(x).strip().replace('\xa0', ' ') if x is not None else '' for x in row]
-                        if len(row) == 0 or row[0] == '':
+                        if len(list(filter(lambda x: x, row))) < 2:
                             continue
                         row_fields = set(row)
                         if '' in row_fields:
