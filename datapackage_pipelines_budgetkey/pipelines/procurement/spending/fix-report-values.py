@@ -86,6 +86,7 @@ BAD_WORDS = [
 
 bad_rows = {}
 total_rows = {}
+last_error_url = None
 
 
 def process_row(row, row_index, spec, resource_index, parameters, stats):
@@ -132,10 +133,12 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
                 elif isinstance(v, str):
                     row[k] = v.strip()
             stats['good-lines'] += 1
-        except Exception as e:
+        except Exception:
             stats['bad-lines'] += 1
-            if stats['bad-lines'] % 50 == 1:
+            global last_error_url
+            if last_error_url != row['report-url']:
                 logging.exception('ERROR #%d in row %d: %r', stats['bad-lines'], row_index, row)
+                last_error_url = row['report-url']
             bad_rows[row['report-url']] += 1
             return
     elif resource_index == 1: # the errors
