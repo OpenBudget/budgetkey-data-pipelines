@@ -109,7 +109,7 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
                     return
 
         if non_empty <= 8:
-            continue
+            return
 
         try:
             assert row['order_id']
