@@ -6,6 +6,7 @@ quarterly-contract-spending-report-uris:
       parameters:
         name: quarterly-contract-spending-report-uris
         title: Quarterly Contact Spending Report URIs
+        revision: 2019-02
     - run: collect_report_uris
       runner: tzabar
       parameters:
