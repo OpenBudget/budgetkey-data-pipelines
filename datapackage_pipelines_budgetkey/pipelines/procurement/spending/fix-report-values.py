@@ -99,11 +99,17 @@ def process_row(row, row_index, spec, resource_index, parameters, stats):
 
         total_rows[row['report-url']] += 1
 
+        non_empty = 0
         for v in row.values():
+            if v:
+                non_empty += 1
             for bw in BAD_WORDS:
                 if isinstance(v, str) and bw in v:
                     bad_rows[row['report-url']] += 1
                     return
+
+        if non_empty <= 8:
+            continue
 
         try:
             assert row['order_id']
