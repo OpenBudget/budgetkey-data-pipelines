@@ -120,10 +120,12 @@ all:
         types:
           kind:
             es:keyword: true
+            es:exclude: true
             constraints:
               pattern: "[a-z-_]+"
           kind_he:
             es:keyword: true
+            es:exclude: true
             constraints:
               required: true
           id:
