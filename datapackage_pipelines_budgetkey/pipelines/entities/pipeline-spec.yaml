@@ -314,10 +314,11 @@ entities:
           score:
             es:score-column: true
           name:
-            es:boost: true
+            es:title: true
           name_en:
             es:boost: true
           fingerprint:
+            es:boost: true
             es:index: true
 
     # And dump it
