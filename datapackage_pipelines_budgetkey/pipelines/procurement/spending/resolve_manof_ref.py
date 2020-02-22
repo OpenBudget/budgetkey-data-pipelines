@@ -33,6 +33,10 @@ def modify_datapackage(dp, *_):
         name = TK,
         type = 'string'
     ))
+    dp['resources'][0]['schema']['fields'].append(dict(
+        name = TK + '_simple',
+        type = 'string'
+    ))
     return dp
 
 splitter = re.compile('[-/0-9]{4,}')
@@ -46,6 +50,7 @@ def process_row(row, *_):
     else:
         parts = []
     row[TK] = None
+    row[TK + '_simple'] = None
     for mf in parts:
         if mf not in failed:
             if mf not in DISALLOWED:
@@ -55,6 +60,10 @@ def process_row(row, *_):
             if TK not in row:
                 logging.info('Failed to find reference for "%s" (part: %s)', manof_ref, mf)
                 failed.add(mf)
+    if row.get(TK):
+        tk = json.loads(row[TK])
+        if len(tk) == 1:
+            row[TK + '_simple'] = '/'.join(tk[0])
     return row
 
 if __name__ == '__main__':
