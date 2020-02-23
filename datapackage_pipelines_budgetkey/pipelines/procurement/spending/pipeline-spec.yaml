@@ -249,6 +249,8 @@ latest-contract-spending:
             aggregate: set
           tender_key:
             aggregate: set
+          tender_key_simple:
+            aggregate: max
           volume:
             aggregate: last
           purchase_method:
@@ -337,6 +339,8 @@ latest-contract-spending:
           tender_key:
             es:keyword: true
             es:itemType: string
+          tender_key_simple:
+            es:keyword: true
           publisher:
             es:itemType: string
           purchase_method:
