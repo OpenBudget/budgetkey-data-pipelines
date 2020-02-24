@@ -44,8 +44,8 @@ class RollingJSONFile:
         if not self.file:
             self.open()
 
-        if self.num_rows >0:
-            self.file.write(",")
+        if self.num_rows>0:
+            self.file.write(",\n")
 
         self.file.write(json.dumps(record, cls=ExtendedJSONEncoder))
         self.num_rows += 1
@@ -65,6 +65,7 @@ class RollingJSONFile:
     def open(self):
         next_file_name = RollingJSONFile.__get_file_name(self.base_file_name, self.file_num)
         self.file = open(next_file_name, mode='w', encoding="utf-8")
+        self.file.write("[")
         self.num_rows = 0
 
     @staticmethod
