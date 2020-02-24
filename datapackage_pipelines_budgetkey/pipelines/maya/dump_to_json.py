@@ -26,17 +26,67 @@ class ExtendedJSONEncoder(json.JSONEncoder):
             return list(obj)
         return super().default(obj)
 
+class RollingJSONFile:
+    def __init__(self, file_name, max_rows=0):
+        self.num_rows = 0
+        self.file_num = 0
+        self.base_file_name = file_name
+        self.max_rows = max_rows
+        self.file = None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def write(self,record):
+        if not self.file:
+            self.open()
+
+        if self.num_rows >0:
+            self.file.write(",")
+
+        self.file.write(json.dumps(record, cls=ExtendedJSONEncoder))
+        self.num_rows += 1
+
+        if self.max_rows>0 and self.num_rows >= self.max_rows:
+            self.close()
+            self.file_num += 1
+
+
+    def close(self):
+        if self.file:
+            self.file.write("]")
+            self.file.close()
+        self.file = None
+
+
+    def open(self):
+        next_file_name = RollingJSONFile.__get_file_name(self.base_file_name, self.file_num)
+        self.file = open(next_file_name, mode='w', encoding="utf-8")
+        self.num_rows = 0
+
+    @staticmethod
+    def __get_file_name(base_file_name, file_num):
+        if file_num ==0:
+            return base_file_name
+        root, ext = os.path.splitext(base_file_name)
+        return "{0}{1:02d}{2}".format(root,file_num,ext)
+
+
+
 class DumpToJson(DataStreamProcessor):
-    def __init__(self,out_path):
+    def __init__(self,out_path, max_rows):
         super(DataStreamProcessor, self).__init__()
-        self._out_path = out_path
+        self.out_path = out_path
+        self.max_rows = max_rows
         self.stats = {}
 
     def process_resource(self, resource):
-        is_first = True
         resource_path = resource.res.infer().get('path', '.')
 
-        out_file = os.path.join(self._out_path, resource_path)
+        out_file = os.path.join(self.out_path, resource_path)
         out_file, _ = os.path.splitext(out_file)
         if not os.path.exists(os.path.dirname(out_file)):
             try:
@@ -44,23 +94,20 @@ class DumpToJson(DataStreamProcessor):
             except OSError:
                 pass
 
-        with open(out_file + '.json', mode='w', encoding="utf-8") as f:
-            f.write("[")
+        with RollingJSONFile(out_file + '.json', self.max_rows) as f:
             for row in resource:
-                if not is_first:
-                    f.write(",")
-                f.write(json.dumps(row, cls=ExtendedJSONEncoder))
-                is_first = False
+                f.write(row)
                 yield row
-            f.write("]")
+
 
 
 
 def flow(parameters: dict, stats: dict):
     out_path = parameters.pop('out-path', '.')
+    max_rows = parameters.get('max-rows', 0)
     stats.setdefault(STATS_DPP_KEY, {})[STATS_OUT_DP_URL_KEY] = os.path.join(out_path, 'datapackage.json')
     return Flow(
-        DumpToJson(out_path)
+        DumpToJson(out_path,max_rows)
     )
 
 
