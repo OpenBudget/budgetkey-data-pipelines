@@ -11,14 +11,16 @@ from pyquery import PyQuery as pq
 PACKAGE_GET_URL = 'https://data.gov.il/api/action/package_show?id='
 PACKAGE_PAGE_URL = 'https://data.gov.il/dataset/'
 BASE_PATH = os.path.dirname(__file__)
-
+HEADERS = {
+    'User-Agent': 'datagov-external-client'
+}
 # def get_all_packages():
 #     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
 
 
 def search_dataset(gcd, dataset_name):
     try:
-        results = requests.get(PACKAGE_GET_URL + dataset_name, headers={'User-Agent':'datagov-internal-client'}).json()
+        results = requests.get(PACKAGE_GET_URL + dataset_name, headers=HEADERS).json()
         logging.info('GOT REQUESTS JSON %s', results)
         results = results['result']
     except:
@@ -30,7 +32,7 @@ def search_dataset(gcd, dataset_name):
 def get_page(gcd, url, test):
     try:
         for i in range(3):
-            response = requests.get(url, headers={'User-Agent':'datagov-internal-client'})
+            response = requests.get(url, headers=HEADERS)
             if response.status_code == 200:
                 page = response.text
                 break
@@ -71,7 +73,7 @@ def get_resource(gcd, dataset_name, resource_name):
             try:
                 try:
                     with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=os.path.basename(url)) as downloaded:
-                        resp = requests.get(url, stream=True)
+                        resp = requests.get(url, stream=True, headers=HEADERS)
                         stream = resp.raw
                         shutil.copyfileobj(stream, downloaded)
                         downloaded.close()
