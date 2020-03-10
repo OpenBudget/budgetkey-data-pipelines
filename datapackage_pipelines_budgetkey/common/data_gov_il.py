@@ -74,8 +74,9 @@ def get_resource(gcd, dataset_name, resource_name):
                 try:
                     with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=os.path.basename(url)) as downloaded:
                         resp = requests.get(url, stream=True, headers=HEADERS)
-                        stream = resp.raw
-                        shutil.copyfileobj(stream, downloaded)
+                        for chunk in resp.iter_content(chunk_size=8192):
+                            if chunk:
+                                downloaded.write(chunk)
                         downloaded.close()
                         data = open(downloaded.name, 'rb').read(256)
                         assert data[:5] != b'<html'
