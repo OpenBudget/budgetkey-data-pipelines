@@ -23,9 +23,9 @@ RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN pip install -U -r /requirements-dev.txt
 
-RUN echo "http://nl.alpinelinux.org/alpine/edge/main" >> /etc/apk/repositories && \
-    echo "http://nl.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
-    echo "http://nl.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && cat /etc/apk/repositories
+RUN echo "http://nl.alpinelinux.org/alpine/v3.11/main" >> /etc/apk/repositories && \
+    echo "http://nl.alpinelinux.org/alpine/v3.11/community" >> /etc/apk/repositories && \
+    echo "http://nl.alpinelinux.org/alpine/v3.11/testing" >> /etc/apk/repositories && cat /etc/apk/repositories
 RUN apk --update --no-cache add -u chromium-chromedriver=79.0.3945.130-r0  && \
     cd /usr/local/bin/ && ln -s /usr/bin/chromedriver 
 

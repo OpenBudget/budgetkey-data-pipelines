@@ -15,7 +15,7 @@ HEADERS = {
     'User-Agent': 'datagov-external-client'
 }
 # def get_all_packages():
-#     return requests.get(ALL_PACKAGES_URL).json()['result']['results']
+#     return requests.get(ALL_PACKAGES_URL, headers=HEADERS).json()['result']['results']
 
 
 def search_dataset(gcd, dataset_name):
