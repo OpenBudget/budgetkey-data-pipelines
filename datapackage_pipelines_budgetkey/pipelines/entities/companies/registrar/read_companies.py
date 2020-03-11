@@ -78,13 +78,14 @@ def fetch_rows():
 
 
 def flow(*_):
-    # gcd = google_chrome_driver()
-    # download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
+    gcd = google_chrome_driver(wait=False)
+    download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
     return Flow(
-        fetch_rows(),
+        # fetch_rows(),
+        load(download, cast_strategy=load.CAST_TO_STRINGS),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
-        set_type('company_registration_date', type='date', format='%Y-%m-%dT%H:%M:%S'),
+        set_type('company_registration_date', type='date', format='%d/%m/%Y'),
         set_type('company_is_government', type='boolean', falseValues=['לא'], trueValues=['כן']),
         set_type('company_is_mafera', type='boolean', falseValues=['לא'], trueValues=['מפרה', 'התראה']),
         set_type('company_last_report_year', type='integer'),
