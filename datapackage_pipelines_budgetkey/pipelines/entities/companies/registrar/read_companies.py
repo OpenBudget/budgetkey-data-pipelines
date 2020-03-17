@@ -44,6 +44,7 @@ def _get_columns_mapping_dict():
         columns_mapping_dict[new_header] = [original_header]
     return columns_mapping_dict
 
+
 def clear_bool_values(package):
     for res in package.pkg.descriptor['resources']:
         for field in res['schema']['fields']:
@@ -66,15 +67,19 @@ def fetch_rows():
         resp = requests.get(url, params=params).json()
         if len(resp['result']['records']) == 0:
             break
-        for x in resp['result']['records']:
-            x['מספר חברה'] = str(x['מספר חברה']) if x['מספר חברה'] is not None else x['מספר חברה']
-            x['מיקוד'] = str(x['מיקוד']) if x['מיקוד'] is not None else x['מיקוד']
-            x['ת.ד.'] = str(x['ת.ד.']) if x['ת.ד.'] is not None else x['ת.ד.']
-            for k, v in list(x.items()):
-                if isinstance(v, str) and '~' in v:
-                    x[k] = v.replace('~', '״')
-            yield x
+        yield from resp['result']['records']
         params['offset'] += 1000
+
+
+def fix_values():
+    def func(row):
+        row['מספר חברה'] = str(row['מספר חברה']) if row['מספר חברה'] is not None else row['מספר חברה']
+        row['מיקוד'] = str(row['מיקוד']) if row['מיקוד'] is not None else row['מיקוד']
+        row['ת.ד.'] = str(row['ת.ד.']) if row['ת.ד.'] is not None else row['ת.ד.']
+        for k, v in list(row.items()):
+            if isinstance(v, str) and '~' in v:
+                row[k] = v.replace('~', '״')
+    return func
 
 
 def flow(*_):
@@ -83,6 +88,7 @@ def flow(*_):
     return Flow(
         # fetch_rows(),
         load(download, cast_strategy=load.CAST_TO_STRINGS),
+        fix_values(),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
         set_type('company_registration_date', type='date', format='%d/%m/%Y'),
