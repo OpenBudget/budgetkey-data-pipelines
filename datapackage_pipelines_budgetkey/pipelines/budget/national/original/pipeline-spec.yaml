@@ -139,7 +139,7 @@ national-budgets:
         name: budget2017
     - run: load
       parameters:
-        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2018.xlsx
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetData2018.xlsx
         sheet: 1
         force_strings: true
         name: budget2018
