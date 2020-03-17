@@ -50,6 +50,7 @@ def get_links(content, session):
 
 def get_decision_list():
     session = requests.Session()
+    session.headers['User-Agent'] = 'datagov-external-client'
     response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0)).json()
     results = response['results']
     count = 0

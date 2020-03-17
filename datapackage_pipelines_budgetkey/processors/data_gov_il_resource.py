@@ -39,6 +39,7 @@ def flow(parameters):
         'name': resource_name,
         'http_timeout': 30
     }
+    args.update(parameters.get('options', {}))
     if '.xls' in path:
         args['force_strings'] = True
 
