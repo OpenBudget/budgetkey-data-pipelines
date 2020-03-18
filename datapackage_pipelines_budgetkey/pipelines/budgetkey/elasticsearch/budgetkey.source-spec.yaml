@@ -46,7 +46,7 @@ national-budget-changes:
 
 entities:
   kind: indexer
-  revision: 36
+  revision: 37
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   page-title-pattern: '{name} ({kind_he})'
@@ -66,7 +66,7 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 14
+  revision: 15
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
