@@ -166,7 +166,7 @@ all:
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
-        revision: '2020-03'
+        revision: '2020-03-1'
 
     - run: load
       parameters:
