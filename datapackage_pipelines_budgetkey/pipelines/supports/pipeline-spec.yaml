@@ -159,7 +159,7 @@ supports-2020:
 
 all:
   dependencies:
-    pipeline: ./supports/supports-2020
+    - pipeline: ./supports/supports-2020
 
   pipeline:
     - run: add_metadata
