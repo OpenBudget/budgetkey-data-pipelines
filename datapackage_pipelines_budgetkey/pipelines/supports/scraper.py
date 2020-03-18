@@ -11,11 +11,11 @@ from selenium.webdriver.support import expected_conditions as EC
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
-def wrapper(wait=False):
+def wrapper(year):
     gcd = None
     try:
-        gcd = google_chrome_driver(wait=wait)
-        return scraper(gcd)
+        gcd = google_chrome_driver()
+        return scraper(gcd, year)
     finally:
         logging.info('Tearing down %r', gcd)
         if gcd:
@@ -86,7 +86,7 @@ def get_results_for_column(driver, column, main_wh, charts_wh):
     # driver.switch_to.window(charts_wh)
 
 
-def scraper(gcd):
+def scraper(gcd, selected_year):
     # Open main page
     driver = gcd.driver
     driver.get('http://www.tmichot.gov.il')
@@ -132,6 +132,8 @@ def scraper(gcd):
             "arguments[0].setAttribute('transform','translate(%d, 0)')" % (i * 30), groups[i]
         )
         driver.execute_script("arguments[0].setAttribute('height','50')", rects[i])
+        if year != selected_year:
+            continue
         get_results_for_column(driver, rects[i], main_wh, charts_wh)
         logging.info('Completed %r, %r', year, gcd.list_downloads())
         chart = None
@@ -139,7 +141,7 @@ def scraper(gcd):
     return [gcd.download('https://next.obudget.org/datapackages/' + x) for x in gcd.list_downloads() if x]
 
 
-def flow(*_):
+def flow(parameters, *_):
     return DF.Flow(
         *[
             DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i,
@@ -147,7 +149,7 @@ def flow(*_):
                     infer_strategy=DF.load.INFER_STRINGS,
                     cast_strategy=DF.load.CAST_DO_NOTHING)
             for i, x
-            in enumerate(wrapper())
+            in enumerate(wrapper(parameters['year']))
         ],
         DF.update_resource(None, **{'dpp:streaming': True})
     )

@@ -1,6 +1,165 @@
-all:
+supports-2004:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2004
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2004
+
+supports-2005:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2005
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2005
+
+supports-2006:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2006
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2006
+
+supports-2007:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2007
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2007
+
+supports-2008:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2008
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2008
+
+supports-2009:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2009
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2009
+
+supports-2010:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2010
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2010
+
+supports-2011:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2011
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2011
+
+supports-2012:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2012
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2012
+
+supports-2013:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2013
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2013
+
+supports-2014:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2014
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2014
+
+supports-2015:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2015
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2015
+
+supports-2016:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2016
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2016
+
+supports-2017:
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2017
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2017
+
+supports-2018:
+  schedule:
+    crontab: "0 15 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2018
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2018
+
+supports-2019:
+  schedule:
+    crontab: "0 16 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2019
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2019
+
+supports-2020:
   schedule:
     crontab: "0 17 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2020
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2020
+
+all:
+  dependencies:
+    pipeline: ./supports/supports-2020
 
   pipeline:
     - run: add_metadata
@@ -9,7 +168,58 @@ all:
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
         revision: '2020-03'
 
-    - flow: scraper
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2004/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2005/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2006/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2007/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2008/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2009/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2010/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2011/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2012/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2013/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2014/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2015/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2016/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2017/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2018/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2019/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2020/datapackage.json
+
     - run: concatenate
       parameters:
         target:
