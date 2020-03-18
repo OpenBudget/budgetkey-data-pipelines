@@ -74,6 +74,21 @@ def click_on_export(driver):
     )
     data_label.click()
 
+    option = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#cbCharDelimiter option:first-child"))
+    )
+    option.click()
+
+    option = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#cbColSep option:first-child"))
+    )
+    option.click()
+
+    option = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#cbCharset option:first-child"))
+    )
+    option.click()
+
     ok_button = driver.find_element_by_id('OK_BTN_idExportDlg')
     ok_button.click()
 
@@ -146,8 +161,7 @@ def scraper(gcd, selected_year):
 def flow(parameters, *_):
     return DF.Flow(
         *[
-            DF.load(x, encoding='windows-1255', format='csv', name='res%d' % i,
-                    quoting=csv.QUOTE_NONE,
+            DF.load(x, format='csv', name='res%d' % i,
                     infer_strategy=DF.load.INFER_STRINGS,
                     cast_strategy=DF.load.CAST_DO_NOTHING)
             for i, x
