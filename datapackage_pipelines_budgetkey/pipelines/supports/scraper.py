@@ -14,7 +14,7 @@ from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_d
 def wrapper(year):
     gcd = None
     try:
-        gcd = google_chrome_driver()
+        gcd = google_chrome_driver(initial='http://example.com/')
         return scraper(gcd, year)
     finally:
         logging.info('Tearing down %r', gcd)
