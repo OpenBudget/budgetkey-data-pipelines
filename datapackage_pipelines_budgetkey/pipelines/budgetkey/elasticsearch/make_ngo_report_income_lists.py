@@ -48,7 +48,7 @@ def make_income_list(foa, suffix):
                 if isinstance(v, Decimal):
                     r[k] = float(v)
     except ProgrammingError:
-        logging.error('Failed to query DB for incomes')
+        logging.exception('Failed to query DB for incomes')
     return result
 
 def make_income_total(foa, suffix):
