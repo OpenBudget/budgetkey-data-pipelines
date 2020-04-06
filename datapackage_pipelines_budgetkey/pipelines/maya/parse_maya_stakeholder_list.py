@@ -28,6 +28,7 @@ OFFICER_STAKE_HOLDER_FIELDS = {
 RENAME_FIELDS = {
     'ShemHamahzik': 'FullName',
     'ShemMahzikAnglit' : 'FullNameEn',
+    'ErachTavla642': 'Position',
     'ErechTavla642' : 'Position',
     'EzrahutSlashErez' :'Nationality',
     'HaimMahzik' : 'IsFrontForOthers',
@@ -44,6 +45,7 @@ RENAME_FIELDS = {
 
 FIELDS = [
       'CompanyName',
+      'CompanyNameEn',
       'HeaderMisparBaRasham',
       'HeaderSemelBursa',
       'KodSugYeshut',
@@ -53,10 +55,14 @@ FIELDS = [
       'PumbiLoPumbi',
       'PreviousCompanyNames']
 
-OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash', 'MezahehYeshut', 'CompanyUrl', 'Date' ]
+
+OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash',
+                   'MezahehYeshut',
+                   'CompanyUrl',
+                   'Date' ]
 
 TABLE_FIELDS = ['FullName',
-                'FullNameEn',
+
                 'Position',
                 'SugMisparZihui',
                 'MisparZihui',
@@ -71,7 +77,14 @@ TABLE_FIELDS = ['FullName',
                 'Notes',
                 ]
 OPTIONAL_TABLE_FIELDS = ['IsRequiredToReportChange', 'HolderOwner', 'AccumulateHoldings',  'MaximumRetentionRate',
-                         'MinimumRetentionRate']
+                         'MinimumRetentionRate', 'FullNameEn']
+
+KNOWN_CORRUPT_INSTANCES = {
+    '520041641': (['משה גוב','משה גוב'],1),
+    '520043829': (['יופיטר החזקה בע"מ','ארלינגטון בע"מ','בועז וקסמן','רחל וקסמן','דנה וקסמן' ,'מוד אידאה אינטרנשיונל בע"מ'],5),
+    '520038787': (['בנק לאומי לישראל בע"מ', 'קיבוץ כפר עזה', 'כפרית תעשיות ואחזקות(1998) בע"מ'], 1)
+}
+
 
 def first(x):
     return next(iter(x))
@@ -83,7 +96,7 @@ def validate(rows):
 
         verify_row_count(row, FIELDS, 1)
         verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
-        num_stakeholders = len(doc.get('FullName', []))
+        num_stakeholders = len(doc.get(TABLE_FIELDS[0], []))
         verify_row_count(row, TABLE_FIELDS, num_stakeholders)
         verify_row_count(row, OPTIONAL_TABLE_FIELDS, num_stakeholders, is_required=False)
 
@@ -105,6 +118,22 @@ def filter_by_type(rows):
         if row['type'] == 'ת077':
             yield row
 
+def doc_is_corrupt(doc):
+    for corpNumber, (holderNames, num_stakeholders) in KNOWN_CORRUPT_INSTANCES.items():
+        if doc['HeaderMisparBaRasham'][0] == corpNumber:
+            if doc['HaimMahzik2'] == holderNames and len(doc['ShemHamahzik']) == num_stakeholders:
+                return True
+    return False
+
+def filter_corrupt_rows(rows):
+    for row in rows:
+        doc = row['document']
+        if 'HearatShulaim' in doc: #HearatShulaim indicates very old documents
+            continue
+        if doc_is_corrupt(doc):
+            continue
+
+        yield row
 
 def parse_document(rows):
     for row in rows:
@@ -154,6 +183,7 @@ def flow(*_):
             -1, name='maya_stakeholder_list', path="data/maya_stakeholder_list.csv",
         ),
         filter_by_type,
+        filter_corrupt_rows,
         rename_fields(RENAME_FIELDS),
         add_field('stakeholder_type', 'string'),
         add_fields(FIELDS + OPTIONAL_FIELDS, 'string'),
