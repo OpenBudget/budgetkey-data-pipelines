@@ -113,7 +113,7 @@ national-budget-changes:
           path: data/changes_2019.csv
         tabulator:
           encoding: windows-1255
-          headers: 3
+          headers: 4
     # - run: resource_without_excel_formulas
     #   parameters:
     #     url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
