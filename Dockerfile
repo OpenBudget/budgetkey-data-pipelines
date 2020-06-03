@@ -28,7 +28,7 @@ RUN pip install -U -r /requirements-dev.txt
 
 # RUN apk --update --no-cache add -u chromium-chromedriver  && \
 #     cd /usr/local/bin/ && ln -s /usr/bin/chromedriver 
-RUN apt-get install -y sudo unzip wget && wget https://chromedriver.storage.googleapis.com/81.0.4044.138/chromedriver_linux64.zip && \
+RUN apt-get install -y sudo unzip wget && wget https://chromedriver.storage.googleapis.com/83.0.4103.39/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
     chmod +x chromedriver && mv chromedriver /usr/local/bin/ 
 
