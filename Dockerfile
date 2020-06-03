@@ -1,7 +1,7 @@
 FROM frictionlessdata/datapackage-pipelines:latest-slim
 
-RUN apt-get update && apt-get install -y sudo curl 
-RUN adduser --disabled-password --home /app dpp && adduser dpp dpp && \
+RUN apt-get update && apt-get install -y sudo curl ssh
+RUN adduser --disabled-password --home /home/dpp dpp && adduser dpp dpp && \
     adduser dpp root && adduser dpp redis && adduser redis dpp && \
     mkdir -p /var/datapackages && chown dpp.dpp /var/datapackages -R && chmod -R a+r /var/datapackages && \
     mkdir -p /home/dpp/.ssh && chown dpp.dpp /home/dpp/.ssh -R && \
