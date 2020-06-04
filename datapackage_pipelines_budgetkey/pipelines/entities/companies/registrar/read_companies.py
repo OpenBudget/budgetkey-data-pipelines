@@ -95,6 +95,7 @@ def flow(*_):
         set_type('company_is_government', type='boolean', falseValues=['לא'], trueValues=['כן']),
         set_type('company_is_mafera', type='boolean', falseValues=['לא'], trueValues=['מפרה', 'התראה']),
         set_type('company_last_report_year', type='integer'),
+        set_type('company_postal_code', type='string'),
         clear_bool_values,
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
