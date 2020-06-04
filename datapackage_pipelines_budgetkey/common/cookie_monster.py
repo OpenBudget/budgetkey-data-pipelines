@@ -12,7 +12,7 @@ def cookie_monster_iter(url, chunk=1024*1024):
     accept_ranges = False
 
     while content_length is None:
-        resp = session.get(url, headers=headers)
+        resp = session.get(url, headers=headers, verify=False)
         if 'accept-ranges' in resp.headers:
             accept_ranges = True
             if 'content-length' in resp.headers:
@@ -36,14 +36,14 @@ def cookie_monster_iter(url, chunk=1024*1024):
     if accept_ranges:
         for ofs in range(0, 100*1024*1024, chunk):
             headers['range'] = 'bytes={}-{}'.format(ofs, ofs+chunk-1)
-            resp = session.get(url, headers=headers)
+            resp = session.get(url, headers=headers, verify=False)
             if resp.status_code not in (206,) or resp.headers.get('content-length') == 0:
                 break
             yield resp.content
             if len(resp.content) > chunk:
                 break
     else:
-        resp = session.get(url, headers=headers)
+        resp = session.get(url, headers=headers, verify=False)
         if resp.status_code not in (200,) or resp.headers.get('content-length') == 0:
             return
         yield resp.content

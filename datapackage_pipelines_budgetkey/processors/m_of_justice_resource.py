@@ -62,7 +62,7 @@ class IterStreamer(RawIOBase):
 
 def get_entities(url_key):
 
-    all_db_url = 'http://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
+    all_db_url = 'https://www.justice.gov.il/DataGov/Corporations/{}.csv'.format(url_key)
 
     data = cookie_monster_iter(all_db_url, chunk=100*1024)
     data = clean_machine(data)

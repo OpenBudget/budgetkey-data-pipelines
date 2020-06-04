@@ -33,7 +33,7 @@ def get_series(sid):
     session = requests.Session()
     response = session.get(SEARCH_PAGE_RESULTS_URL.format(sid=sid))
     data = response.content
-    resp = pq(data.decode(response.encoding))
+    resp = pq(data.decode(response.encoding or 'utf8'))
     results = []
     for serie_code in resp.find("table tr input.hidSeriesCode"):
         results.append({'sid': sid, 'code': serie_code.attrib['value'],
