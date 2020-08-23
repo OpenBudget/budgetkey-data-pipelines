@@ -110,17 +110,15 @@ class google_chrome_driver():
             while True:
                 downloads = self.list_downloads()
                 logging.info('DOWNLOADS: %r', downloads)
+                downloading = any('crdownload' in download for download in downloads)
                 if expected is None and len(downloads) > len(current_downloads):
                     diff = set(downloads) - set(current_downloads)
                     while len(diff) > 0:
                         candidate = diff.pop()
                         if 'crdownload' not in candidate:
                             expected = candidate
-                            logging.info('GOT FILNAME: %s', expected)
+                            logging.info('GOT FILENAME: %s', expected)
                             break
-                        else:
-                            if not downloading:
-                                downloading = True
 
                 if expected in downloads:
                     logging.info('found {} in {}'.format(expected, downloads))
