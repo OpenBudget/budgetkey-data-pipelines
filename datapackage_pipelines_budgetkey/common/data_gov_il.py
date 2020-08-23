@@ -77,15 +77,19 @@ def get_resource(gcd, dataset_name, resource_name):
                 try:
                     with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=os.path.basename(url)) as downloaded:
                         resp = requests.get(url, stream=True, headers=HEADERS)
+                        amount = 0
                         for chunk in resp.iter_content(chunk_size=8192):
                             if chunk:
                                 downloaded.write(chunk)
+                                amount += len(chunk)
                         downloaded.close()
-                        data = open(downloaded.name, 'rb').read(256)
+                        data = open(downloaded.name, 'rb').read()
                         assert data[:5] != b'<html'
-                        logging.info('%s/%s -> %s (%r)', dataset_name, resource_name, downloaded.name, data)
+                        logging.info('%s/%s -> %s %d bytes (%r...%r)',
+                                     dataset_name, resource_name, downloaded.name,
+                                     amount, data[:256], data[-256:])
                         return url, downloaded.name
-                except:
+                except Exception:
                     if callable(gcd):
                         gcd = gcd()
                     if resource.get('any_file'):

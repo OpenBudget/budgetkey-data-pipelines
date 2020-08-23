@@ -69,7 +69,7 @@ ezvonot_deposits:
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/ezvonot/deposits
-    - run: dump.to_sql
+    - run: dump_to_sql
       parameters:
         tables:
           ezvonot_deposits:
