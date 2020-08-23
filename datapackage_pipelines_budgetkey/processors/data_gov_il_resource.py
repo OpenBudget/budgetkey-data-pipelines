@@ -21,6 +21,10 @@ def add_source(title, path):
     return func
 
 
+def get_gcd():
+    return google_chrome_driver()
+
+
 def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
     resource_name = str(parameters['resource-name'])
@@ -32,7 +36,7 @@ def flow(parameters):
     if parameters.get('gcd'):
         gcd = parameters['gcd']
     else:
-        gcd = google_chrome_driver()
+        gcd = get_gcd
     url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {

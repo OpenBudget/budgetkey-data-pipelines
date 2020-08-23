@@ -86,6 +86,8 @@ def get_resource(gcd, dataset_name, resource_name):
                         logging.info('%s/%s -> %s (%r)', dataset_name, resource_name, downloaded.name, data)
                         return url, downloaded.name
                 except:
+                    if callable(gcd):
+                        gcd = gcd()
                     if resource.get('any_file'):
                         return url, gcd.download(url, any_file=True, format='.' + resource['format'])
                     else:
