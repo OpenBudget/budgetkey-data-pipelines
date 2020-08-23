@@ -141,6 +141,7 @@ class google_chrome_driver():
                 if not downloading:
                     logging.info('TIMED OUT while NOT downloading')
                     break
+
                 if timeout > 30 and downloading:
                     logging.info('TIMED OUT while downloading')
                     break
