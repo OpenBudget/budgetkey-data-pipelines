@@ -125,8 +125,6 @@ def flow(parameters, *_):
         update_resource(-1, **parameters.pop('resource')),
         update_resource(-1, **{'dpp:streaming': True}),
         validate(),
-        # printer(),
-        # lambda rows: (row for row in rows if row['tender_id'].endswith('73f3')),
     )
 
 
