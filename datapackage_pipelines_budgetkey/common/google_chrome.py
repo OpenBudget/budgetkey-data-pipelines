@@ -89,6 +89,9 @@ class google_chrome_driver():
         return json.loads(self.driver.find_element_by_css_selector('body > pre').text)
 
     def list_downloads(self):
+        cmd = f'docker exec {self.docker_container} ls -la /downloads/'
+        _, stdout, _ = self.client.exec_command(cmd)
+        logging.info('CURRENT DOWNLOADS:\n%s', stdout.read().decode('utf8'))
         cmd = f'docker exec {self.docker_container} ls -1 /downloads/'
         _, stdout, _ = self.client.exec_command(cmd)
         return stdout.read().decode('utf8').split('\n')
@@ -102,7 +105,6 @@ class google_chrome_driver():
         for attempt in range(3):
             logging.info('Attempt %d', attempt)
             current_downloads = self.list_downloads()
-            logging.info('CURRENT DOWNLOADS: %r', current_downloads)
             downloads = []
             timeout = 0
             downloading = False
@@ -136,7 +138,7 @@ class google_chrome_driver():
                 if timeout > 5 and not downloading:
                     logging.info('TIMED OUT while NOT downloading')
                     break
-                if timeout > 50 and downloading:
+                if timeout > 100 and downloading:
                     logging.info('TIMED OUT while downloading')
                     break
 

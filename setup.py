@@ -30,7 +30,7 @@ setup(
                       'geocoder',
                       'boto3',
                       'paramiko',
-                      'dataflows>=0.1.5',
+                      'dataflows>=0.1.6',
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}
