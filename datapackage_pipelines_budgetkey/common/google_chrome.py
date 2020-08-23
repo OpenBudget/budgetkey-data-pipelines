@@ -110,6 +110,9 @@ class google_chrome_driver():
             downloading = False
             self.driver.get(url)
             while True:
+                time.sleep(60)
+                timeout += 1
+
                 downloads = self.list_downloads()
                 logging.info('DOWNLOADS: %r', downloads)
                 downloading = any('crdownload' in download for download in downloads)
@@ -135,15 +138,13 @@ class google_chrome_driver():
                     logging.info('DELETE %s', requests.delete(url).text)
                     return out.name
 
-                if timeout > 5 and not downloading:
+                if not downloading:
                     logging.info('TIMED OUT while NOT downloading')
                     break
-                if timeout > 100 and downloading:
+                if timeout > 10 and downloading:
                     logging.info('TIMED OUT while downloading')
                     break
 
-                timeout += 1
-                time.sleep(6)
         assert False, 'Failed to download file, %r' % downloads
 
 
