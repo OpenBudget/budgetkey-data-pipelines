@@ -7,6 +7,9 @@ all:
         from: /var/datapackages/activities/social_services/historic_data/datapackage.json
     - run: concatenate
       parameters:
+        target:
+          name: activities
+          path: activities.csv
         fields:
           activity_name: []
           activity_description: []
