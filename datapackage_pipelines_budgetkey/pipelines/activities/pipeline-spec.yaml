@@ -1,0 +1,24 @@
+all:
+  dependencies:
+    - pipeline: ./activities/social_services/historic_data
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/activities/social_services/historic_data/datapackage.json
+    - run: concatenate
+      parameters:
+        fields:
+          activity_name: []
+          activity_description: []
+          publisher_name: []
+          history: []
+          max_year: []
+          min_year: []
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/activities/all
+    - run: dump_to_sql
+      parameters:
+        tables:
+          activities:
+            resource-name: activities

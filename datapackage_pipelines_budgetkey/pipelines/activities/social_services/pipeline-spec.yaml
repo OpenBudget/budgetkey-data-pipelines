@@ -1,0 +1,6 @@
+historic_data:
+  pipeline:
+    - flow: historic_data
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/activities/social_services/historic_data
