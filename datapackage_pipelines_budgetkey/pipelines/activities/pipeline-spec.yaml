@@ -11,6 +11,8 @@ all:
           name: activities
           path: activities.csv
         fields:
+          kind: []
+          kind_he: []
           activity_name: []
           activity_description: []
           publisher_name: []

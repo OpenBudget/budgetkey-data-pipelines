@@ -229,3 +229,15 @@ gov_decisions:
   date-range:
     type: year
     field: publish_date
+
+activities:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./activities/all
+  source_datapackage: /var/datapackages/activities/all/datapackage.json
+  page-title-pattern: '{kind_he} של {publisher_name} - {activity_name}'
+  key-fields:
+    - kind_he
+    - publisher_name
+    - activity_name
+    

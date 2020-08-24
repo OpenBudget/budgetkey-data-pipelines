@@ -225,6 +225,8 @@ def flow(*_):
             max_year=dict(name='year', aggregate='max'),
             history=dict(aggregate='array'),
         )),
+        DF.add_field('kind', 'string', 'gov_social_service'),
+        DF.add_field('kind_he', 'string', 'שירות חברתי'),
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.printer(),
     )
