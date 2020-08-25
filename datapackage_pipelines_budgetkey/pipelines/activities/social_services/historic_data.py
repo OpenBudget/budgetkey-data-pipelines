@@ -193,7 +193,7 @@ def fill_org_hierarchy(rows):
 def fix_beneficiaries(row):
     try:
         row['num_beneficiaries'] = '{:,}'.format(row['num_beneficiaries'])
-    except ValueError:
+    except:
         pass
 
 
