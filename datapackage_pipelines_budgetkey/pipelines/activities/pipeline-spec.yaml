@@ -19,6 +19,12 @@ all:
           history: []
           max_year: []
           min_year: []
+    - run: set_primary_key
+      parameters:
+        activities:
+          - kind
+          - publisher_name
+          - activity_name
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/activities/all
