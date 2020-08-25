@@ -25,6 +25,32 @@ all:
           - kind
           - publisher_name
           - activity_name
+    - run: set_types
+      parameters:
+        types:
+          activity_name:
+            es:title: true
+          activity_description:
+            es:itemType: string
+            es:boost: true
+          kind:
+            es:keyword: true
+            es:exclude: true
+          kind_he:
+            es:keyword: true
+            es:exclude: true
+          publisher_name:
+            es:keyword: true
+          history:
+            es:itemType: object
+            es:schema:
+              fields:
+                - {name: year, type: integer}
+                - {name: unit, type: string}
+                - {name: subunit, type: string}
+                - {name: subsubunit, type: string}
+                - {name: allocated_budget, type: integer}
+                - {name: num_beneficiaries, type: string, es:index: false}
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/activities/all
