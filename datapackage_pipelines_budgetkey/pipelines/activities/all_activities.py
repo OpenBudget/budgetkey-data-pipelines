@@ -34,7 +34,9 @@ def flow(*_):
                 ]
             )
         }),
-        DF.add_field('score', 'number', 1, **{'es:score-column': True}),
+        DF.add_field('score', 'number', 1,
+                     lambda x: x['history'][0]['allocated_budget'] / 1000,
+                     **{'es:score-column': True}),
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/activities/all'),
         DF.dump_to_sql(dict(
