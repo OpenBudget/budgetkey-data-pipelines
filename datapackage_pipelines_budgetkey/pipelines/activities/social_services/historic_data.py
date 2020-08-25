@@ -190,6 +190,13 @@ def fill_org_hierarchy(rows):
         )
 
 
+def fix_beneficiaries(row):
+    try:
+        row = '{:,}'.format(row['num_beneficiaries'])
+    except ValueError:
+        pass
+
+
 def prepare():
     for resource_name, load in loads:
         DF.Flow(
@@ -200,7 +207,8 @@ def prepare():
             DF.set_type('allocated_budget', type='number', groupChar=',', bareNumber=False),
             DF.set_type('num_beneficiaries', type='number', groupChar=',', bareNumber=False,
                         on_error=DF.schema_validator.ignore),
-            DF.set_type('num_beneficiaries', type='any'),
+            fix_beneficiaries,
+            DF.set_type('num_beneficiaries', type='string'),
             multiply_budget,
             fill_org_hierarchy,
             # DF.printer(tablefmt='html'),
