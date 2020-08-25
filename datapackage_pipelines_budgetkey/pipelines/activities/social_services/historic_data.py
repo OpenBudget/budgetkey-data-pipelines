@@ -178,6 +178,10 @@ def fill_org_hierarchy(rows):
         for k, v in prev.items():
             if not row.get(k):
                 row[k] = v
+        if row['subsubunit'] == row['subunit']:
+            row['subsubunit'] = None
+        if row['subunit'] == row['unit']:
+            row['subunit'] = None
         yield row
         prev = dict(
             (k, v)
