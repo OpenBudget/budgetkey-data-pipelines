@@ -213,7 +213,7 @@ def flow(*_):
             for resource_name, _ in loads
         ],
         DF.concatenate(FIELD_MAPPING, dict(name='social_services', path='social_services.csv')),
-        DF.sort_rows('{year}'),
+        DF.sort_rows('{year}', reverse=True),
         DF.add_field('history', 'object', lambda r: dict(
             (k, r[k] if not isinstance(r[k], decimal.Decimal) else int(r[k])) for k in yearly_fields
         )),
