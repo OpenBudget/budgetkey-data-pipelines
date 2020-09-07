@@ -240,6 +240,6 @@ activities:
     - kind_he
     - publisher_name
     - activity_name
-  document-steps:
+  extra-steps:
     - flow: activity_add_nice_org_hierarchy
     
