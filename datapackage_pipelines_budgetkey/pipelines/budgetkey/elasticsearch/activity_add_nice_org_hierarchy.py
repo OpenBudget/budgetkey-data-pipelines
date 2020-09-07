@@ -18,6 +18,8 @@ def update_schema(package: DF.PackageWrapper):
                 field['es:schema']['fields'].append(dict(
                     dict(name='nice_org_hierarchy', type='string'),
                 ))
+    yield package.pkg
+    yield from package
 
 
 def flow(*_):
