@@ -3,10 +3,9 @@ import dataflows as DF
 def process_history(row):
     if 'history' in row and 'publisher_name' in row:
         for x in row['history']:
-            nice_hierarchy = [row['publisher_name']]
-            nice_hierarchy.extend(
+            nice_hierarchy = [
                 x.get(f) for f in ('unit', 'subunit', 'subsubunit')
-            )
+            ]
             nice_hierarchy = [x for x in nice_hierarchy if x]
             nice_hierarchy = '/'.join(nice_hierarchy)
             x['nice_org_hierarchy'] = nice_hierarchy
