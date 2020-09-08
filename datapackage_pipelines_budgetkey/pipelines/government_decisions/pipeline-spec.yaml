@@ -43,6 +43,6 @@ government_decisions:
         resource: gov_decisions
         table: government_decisions
     - run: stream_remote_resources
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/government_decisions

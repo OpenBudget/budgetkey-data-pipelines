@@ -10,7 +10,7 @@ municipality-to-city:
         name: municipality-locality-map
         url: "file://municipality-to-city.csv"
     - run: stream_remote_resources
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/lamas-municipality-locality-map/
     - run: dump.to_sql
@@ -913,7 +913,7 @@ municipal-data:
 
           פרסום "הרשויות המקומיות בישראל" כולל נתונים כספיים של הרשויות המקומיות ונתונים פיזיים בתחומים: דמוגרפיה, חינוך, רווחה, תשתיות, תחבורה, בנייה, מים ועוד. בפרסום מוצגים נתונים כלל ארציים, נתונים מסכמים לפי מעמד מוניציפאלי (עיריות, מועצות מקומיות ומועצות אזוריות) , נתונים השוואתיים לכל רשות מקומית ונתונים ברמת הרשות המקומית המהווים את פרופיל הרשות.
 
-    - run: allstar_dumper
+    - run: dump_to_path
       parameters:
         out-path: /var/datapackages/lamas-municipal-data/
     - run: dump.to_sql
