@@ -181,6 +181,37 @@ def fetch_extra_data(row):
             )
         )
 
+        # Suppliers
+        suppliers_grouped = dict()
+        for c in spending:
+            suppliers_grouped.setdefault(c['entity_item_id'], []).append(c)
+        supplier_table = []
+        for eid, contracts in suppliers_grouped.items():
+            supplier_table.append([
+                '<a href="/i/{eid}">{supplier}</a>'.format(eid=eid, supplier=max(x['supplier'] for x in contracts)),
+                '₪{:,.2f}'.format(sum(x['volume'] for x in contracts)),
+                '₪{:,.2f}'.format(sum(x['executed'] for x in contracts)),
+                '{}-{}'.format(
+                    min(x['min_year'] for x in contracts if x['min_year']),
+                    max(x['max_year'] for x in contracts if x['max_year']),
+                )
+            ])
+        top_suppliers = dict(
+            title='ספקים',
+            long_title='מול אילו ספקים קיימות התקשרויות במסגרת שירות זה?',
+            type='template',
+            template_id='table',
+            chart=dict(
+                item=dict(
+                    headers=[
+                        'שם הספק',
+                        'סך היקף ההתקשרויות',
+                        'סך ביצוע ההתקשרויות',
+                        'תקופת הפעילות',],
+                    data=sorted(supplier_table, key=lambda x: x[1], reverse=True)
+                )
+            )
+        )
 
         # Tenders
         tender_keys = []
@@ -230,6 +261,7 @@ def fetch_extra_data(row):
         row['charts'] = [
             budget_history,
             top_tenders,
+            top_suppliers,
             top_contracts,
             budget_composition,
         ]
