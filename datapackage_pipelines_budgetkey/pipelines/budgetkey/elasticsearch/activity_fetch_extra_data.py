@@ -70,11 +70,30 @@ def fetch_tenders(**kw):
 
 def fetch_extra_data(row):
     if row['doc_id'] in MAPPINGS:
-        charts = []
-
         mappings = MAPPINGS[row['doc_id']]
         mappings = expand_mappings(mappings)
         
+        budget_composition = dict(
+            title='תקנות תקציביות',
+            long_title='מהן התקנות התקציביות מהן יוצא התקציב?',
+            type='template',
+            template_id='table',
+            chart=dict(
+                item=dict(
+                    headers=['שנה', 'קוד', 'כותרת', 'אחוז תרומה לתקציב'],
+                    data=[
+                        [
+                            r['year'],
+                            '.'.join(r['code'][i:i+2] for i in range(2, 10, 2)),
+                            '<a href="/i/budget/{code}/{year}">{title}</a>'.format(**r),
+                            '{part}%'.format(**r),
+                        ]
+                        for r in mappings
+                    ]
+                )
+            )
+        )
+
         # Budget
         budget = dict()
         for mapping in mappings:
@@ -85,7 +104,7 @@ def fetch_extra_data(row):
                     budget[year].setdefault(f, 0)
                     budget[year][f] += int(mapping[f]) * mapping['part'] / 100
         budget = sorted(budget.values(), key=lambda x: x['year'])
-        charts.append(dict(
+        budget_history = dict(
             title='התקציב המוקצה לשירות זה',
             long_title='מה היה התקציב שהוקצה לשירות זה במהלך השנים?',
             type='plotly',
@@ -113,7 +132,7 @@ def fetch_extra_data(row):
                     separatethousands=True
                 )
             )
-        ))
+        )
 
         # Spending
         budget_codes = list(set(r['code'] for r in mappings))
@@ -134,8 +153,11 @@ def fetch_extra_data(row):
             tenders.append(fetch_tenders(publication_id=tk[0], tender_type=tk[1], tender_id=tk[2]))
             print(tenders[-1]['tender_type'], tenders[-1]['volume'], tenders[-1]['description'])
 
-        row['charts'] = charts
-        print(charts)
+        row['charts'] = [
+            budget_history,
+            budget_composition
+        ]
+        print(row['charts'])
 
 
 def flow(*_):
