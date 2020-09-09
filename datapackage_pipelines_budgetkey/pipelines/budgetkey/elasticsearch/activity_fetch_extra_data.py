@@ -187,12 +187,44 @@ def fetch_extra_data(row):
         tenders = []
         for tk in tender_keys:
             tenders.append(fetch_tenders(publication_id=tk[0], tender_type=tk[1], tender_id=tk[2]))
-            print(tenders[-1]['tender_type'], tenders[-1]['volume'], tenders[-1]['description'])
+        top_tenders = dict(
+            title='מכרזים',
+            long_title='אילו מכרזים משויכים לשירות זה?',
+            type='template',
+            template_id='table',
+            chart=dict(
+                item=dict(
+                    headers=[
+                        'מפרסם',
+                        'סוג המכרז',
+                        'סטטוס',
+                        'כותרת',
+                        'פרסום במנו״ף',
+                        'מועד תחילה',
+                        'מועד סיום',
+                        'לפי תקנה'],
+                    data=[
+                        [
+                            r['publisher'],
+                            r['tender_type_he'],
+                            r['decision'],
+                            '<a href="/i/tenders/{tender_type}/{publication_id}/{tender_id}">{description}</a>'.format(**r),
+                            '<a href="{page_url}">{publication_id}</a>'.format(**r),
+                            format_date(r['start_date']),
+                            format_date(r['end_date']),
+                            r['regulation'],
+                        ]
+                        for r in tenders
+                    ]
+                )
+            )
+        )
 
         row['charts'] = [
             budget_history,
+            top_tenders,
+            top_contracts,
             budget_composition,
-            top_contracts
         ]
         print(row['charts'])
 
