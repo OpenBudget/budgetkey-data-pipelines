@@ -232,7 +232,6 @@ def fetch_extra_data(row):
             top_contracts,
             budget_composition,
         ]
-        print(row['charts'])
 
 
 def flow(*_):
@@ -251,7 +250,7 @@ def flow(*_):
 if __name__ == '__main__':
     os.environ['DPP_DB_ENGINE'] = 'postgresql://readonly:readonly@data-next.obudget.org/budgetkey'
     DF.Flow(
-        [{'doc_id': 'activities/שירות חברתי/משרד החינוך/תכנית קדם עתידים'}],
+        [{'doc_id': doc_id} for doc_id in MAPPINGS.keys()],
         flow(),
         DF.printer()
     ).process()
