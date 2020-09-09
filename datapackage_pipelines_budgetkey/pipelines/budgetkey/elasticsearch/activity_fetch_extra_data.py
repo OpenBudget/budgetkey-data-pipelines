@@ -12,7 +12,13 @@ engine = None
 MAPPINGS = {
     'activities/שירות חברתי/משרד החינוך/תכנית קדם עתידים': [
         dict(code='0020460242', year=2019, part=100)
-    ]
+    ],
+    'activities/שירות חברתי/משרד הבריאות/מכשירי שיקום וניידות – אספקה, התאמה, תיקון וחלוקת מכשירי שיקום וניידות': [
+        dict(code='0024070311', year=2019, part=100)
+    ],
+    'activities/שירות חברתי/משרד הבריאות/שיקום נכי נפש בקהילה- שירותי שיקום בדיור (הוסטלים)': [
+        dict(code='0024071460', year=2019, part=100)
+    ]    
 }
 
 def expand_mappings(mappings):
@@ -164,8 +170,8 @@ def fetch_extra_data(row):
                             r['purchasing_unit'],
                             '<a href="/i/{entity_item_id}">{supplier}</a>'.format(**r),
                             r['purpose'],
-                            '{volume:,.2f}₪'.format(**r),
-                            '{executed:,.2f}₪'.format(**r),
+                            '₪{volume:,.2f}'.format(**r),
+                            '₪{executed:,.2f}'.format(**r),
                             r['purchase_method'],
                             format_date(r['order_date']),
                             format_date(r['end_date']),
