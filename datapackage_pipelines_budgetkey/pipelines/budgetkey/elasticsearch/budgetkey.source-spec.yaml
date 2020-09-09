@@ -232,7 +232,7 @@ gov_decisions:
 
 activities:
   kind: indexer
-  revision: 5
+  revision: 6
   dependent_pipeline: ./activities/all
   source_datapackage: /var/datapackages/activities/all/datapackage.json
   page-title-pattern: '{kind_he} של {publisher_name} - {activity_name}'
@@ -242,4 +242,5 @@ activities:
     - activity_name
   extra-steps:
     - flow: activity_add_nice_org_hierarchy
-    
+  document-steps:
+    - flow: activity_fetch_extra_data
