@@ -43,7 +43,7 @@ def expand_mappings(mappings):
 def fetch_spending(budget_code):
     SPENDING = text('''
         SELECT volume, executed, currency,
-               min_year||'-'||max_year AS period,
+               min_year, max_year,
                purpose,
                'contract-spending/' || publisher_name || '/' || order_id || '/' || budget_code AS cs_item_id,
                case when entity_name is null then supplier_name->>0 else entity_name end as supplier, 

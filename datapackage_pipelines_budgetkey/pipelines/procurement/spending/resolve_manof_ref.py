@@ -63,11 +63,15 @@ def process_row(row, *_):
                         selected = options[0]
                     else:
                         publisher_name = row.get('publisher_name', '')
-                        options = dict((k[3], k) for k in options)
-                        selected, score = fw_process.extractOne(publisher_name, list(options.keys()), processor=fuzz.ratio)
-                        if not publisher_name or score < 60:
-                            logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
-                        selected = options[selected]
+                        selected = options[0]
+                        if publisher_name:
+                            options = dict((k[3], k) for k in options if k[3])
+                            publishers = list(options.keys())
+                            if len(publishers) > 0:
+                                selected, score = fw_process.extractOne(publisher_name, publishers, processor=fuzz.ratio)
+                                if score < 60:
+                                    logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
+                                selected = options[selected]
                     row[TK] = json.dumps(list(selected)[:3])
                     break
             if TK not in row:
