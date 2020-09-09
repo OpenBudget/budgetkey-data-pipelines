@@ -67,6 +67,12 @@ def fetch_tenders(**kw):
     ''')
     return dict(engine.execute(TENDER, **kw).fetchone())
 
+def format_date(x):
+    if x:
+        return x.strftime('%d/%m/%Y')
+    else:
+        return ''
+
 
 def fetch_extra_data(row):
     if row['doc_id'] in MAPPINGS:
@@ -88,7 +94,10 @@ def fetch_extra_data(row):
                             '<a href="/i/budget/{code}/{year}">{title}</a>'.format(**r),
                             '{part}%'.format(**r),
                         ]
-                        for r in mappings
+                        for r in sorted(
+                            mappings,
+                            key=lambda m: '{year}/{code}'.format(**m)
+                        )
                     ]
                 )
             )
@@ -141,6 +150,33 @@ def fetch_extra_data(row):
         for budget_code in budget_codes:
             spending.extend(fetch_spending(budget_code))
 
+        top_contracts = dict(
+            title='התקשרויות',
+            long_title='אילו התקשרויות רכש משויכות לשירות זה?',
+            description='100 ההתקשרויות בעלות ההיקף הגדול ביותר מוצגות מתוך {}'.format(len(spending)) if len(spending) > 100 else None,
+            type='template',
+            template_id='table',
+            chart=dict(
+                item=dict(
+                    headers=['יחידה רוכשת', 'ספק', 'כותרת', 'היקף', 'ביצוע', 'אופן רכישה', 'מועד הזמנה', 'מועד סיום'],
+                    data=[
+                        [
+                            r['purchasing_unit'],
+                            '<a href="/i/{entity_item_id}">{supplier}</a>'.format(**r),
+                            r['purpose'],
+                            '{volume:,.2f}₪'.format(**r),
+                            '{executed:,.2f}₪'.format(**r),
+                            r['purchase_method'],
+                            format_date(r['order_date']),
+                            format_date(r['end_date']),
+                        ]
+                        for r in spending[:100]
+                    ]
+                )
+            )
+        )
+
+
         # Tenders
         tender_keys = []
         for x in spending:
@@ -155,7 +191,8 @@ def fetch_extra_data(row):
 
         row['charts'] = [
             budget_history,
-            budget_composition
+            budget_composition,
+            top_contracts
         ]
         print(row['charts'])
 
