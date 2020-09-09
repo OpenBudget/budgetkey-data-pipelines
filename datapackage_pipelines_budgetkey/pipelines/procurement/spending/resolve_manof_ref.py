@@ -73,7 +73,7 @@ def process_row(row, *_):
                             publishers = list(options.keys())
                             if len(publishers) > 0:
                                 try:
-                                    selected, score = fw_process.extractOne(publisher_name, publishers, processor=fuzz.ratio)
+                                    selected, score = fw_process.extractOne(publisher_name, publishers, scorer=fuzz.ratio)
                                     if debug: logging.info('DEBUG: selected: %r %r', selected, score)
                                     if score < 60:
                                         logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
