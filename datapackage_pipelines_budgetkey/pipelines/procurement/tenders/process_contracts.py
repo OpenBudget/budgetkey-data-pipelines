@@ -78,10 +78,6 @@ def process_row(row, *_):
     all_contracts_ = get_all_contracts(key)
     all_contracts = []
     for contract in all_contracts_:
-        if row['publication_id'] == 621615:
-            logging.error('XXX %r', row)
-            logging.error('XXX %r', contract)
-            logging.error('XXX %r', row.get('start_date') <= contract.get('order_date'))
         if row.get('start_date') and contract.get('order_date'):
             if row.get('start_date') <= contract.get('order_date'):
                 all_contracts.append(contract)
