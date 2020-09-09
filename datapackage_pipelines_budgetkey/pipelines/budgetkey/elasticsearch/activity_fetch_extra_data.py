@@ -66,10 +66,9 @@ def fetch_tenders(**kw):
                contact, contact_email,
                decision, description, reason, regulation, page_title, page_url,
                publisher, publisher_id, 
-               entity_id, entity_kind, entity_name, volume
+               entity_id, entity_kind, entity_name, volume, contract_volume
         FROM procurement_tenders_processed
         WHERE publication_id=:publication_id AND tender_id=:tender_id AND tender_type=:tender_type
-        ORDER BY claim_date desc nulls last
     ''')
     return dict(engine.execute(TENDER, **kw).fetchone())
 
@@ -205,6 +204,7 @@ def fetch_extra_data(row):
                         'סוג המכרז',
                         'סטטוס',
                         'כותרת',
+                        'סך התקשרויות קשורות',
                         'פרסום במנו״ף',
                         'מועד תחילה',
                         'מועד סיום',
@@ -215,12 +215,13 @@ def fetch_extra_data(row):
                             r['tender_type_he'],
                             r['decision'],
                             '<a href="/i/tenders/{tender_type}/{publication_id}/{tender_id}">{description}</a>'.format(**r),
+                            '₪{contract_volume:,.2f}'.format(**r),
                             '<a href="{page_url}">{publication_id}</a>'.format(**r),
                             format_date(r['start_date']),
                             format_date(r['end_date']),
                             r['regulation'],
                         ]
-                        for r in tenders
+                        for r in sorted(tenders, key=lambda r: r['contract_volume'] or 0, reverse=True)
                     ]
                 )
             )
