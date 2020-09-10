@@ -184,6 +184,16 @@ def fetch_extra_data(row):
             )
         )
 
+        per_tender_spending = dict()
+        for r in spending:
+            if r.get('tender_key'):
+                tks = r['tender_key']
+                tks = [tuple(json.loads(t)) for t in tks]
+                for tk in tks:
+                    dd = per_tender_spending.setdefault(tk, dict(svc_executed=0, svc_volume=0))
+                    dd['svc_executed'] += r['executed']
+                    dd['svc_volume'] += r['volume']
+
         # Suppliers
         suppliers_grouped = dict()
         for c in spending:
@@ -225,7 +235,9 @@ def fetch_extra_data(row):
         tender_keys = list(set(tender_keys))
         tenders = []
         for tk in tender_keys:
-            tenders.append(fetch_tenders(publication_id=tk[0], tender_type=tk[1], tender_id=tk[2]))
+            tender = fetch_tenders(publication_id=tk[0], tender_type=tk[1], tender_id=tk[2])
+            tender.update(per_tender_spending[tk])
+            tenders.append(tender)
         top_tenders = dict(
             title='מכרזים',
             long_title='אילו מכרזים משויכים לשירות זה?',
@@ -238,7 +250,7 @@ def fetch_extra_data(row):
                         'סוג המכרז',
                         'סטטוס',
                         'כותרת',
-                        'סך התקשרויות קשורות',
+                        'סך התקשרויות בשירות זה',
                         'פרסום במנו״ף',
                         'מועד תחילה',
                         'מועד סיום',
@@ -249,13 +261,13 @@ def fetch_extra_data(row):
                             r['tender_type_he'],
                             r['decision'],
                             '<a href="/i/tenders/{tender_type}/{publication_id}/{tender_id}">{description}</a>'.format(**r),
-                            '₪{contract_volume:,.2f}'.format(**r),
+                            '₪{svc_volume:,.2f}'.format(**r),
                             '<a href="{page_url}">{publication_id}</a>'.format(**r),
                             format_date(r['start_date']),
                             format_date(r['end_date']),
                             r['regulation'],
                         ]
-                        for r in sorted(tenders, key=lambda r: r['contract_volume'] or 0, reverse=True)
+                        for r in sorted(tenders, key=lambda r: r['svc_volume'] or 0, reverse=True)
                     ]
                 )
             )
