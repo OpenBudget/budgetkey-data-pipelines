@@ -27,7 +27,7 @@ def expand_mappings(mappings):
     for mapping in mappings:
         TITLE_QUERY = text('SELECT title from raw_budget where code=:code and year=:year')
         mapping['title'] = engine.execute(TITLE_QUERY, **mapping).fetchone().title
-        ITEMS_QUERY = text('SELECT year, code, title, net_allocated, net_revised, net_executed from raw_budget where code=:code and title=:title')
+        ITEMS_QUERY = text('SELECT year, code, title, net_allocated, net_revised, net_executed from raw_budget where code=:code and title=:title and net_revised > 0')
         for r in engine.execute(ITEMS_QUERY, **mapping).fetchall():
             ret.append(dict(
                 code=r.code,
