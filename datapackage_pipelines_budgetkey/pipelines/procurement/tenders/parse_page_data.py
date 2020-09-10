@@ -373,6 +373,8 @@ def process_row(row, row_index,
             row.update(get_central_data(row, page, documents))
         else:
             raise Exception("invalid tender_type: {}".format(row["tender_type"]))
+        if row["tender_id"] and '\\' in row["tender_id"]:
+            row["tender_id"] = row["tender_id"].replace('\\', '/')
         del row['id']
         del row['url']
         return row
