@@ -47,7 +47,9 @@ def fetch_spending(budget_code):
                purpose,
                'contract-spending/' || publisher_name || '/' || order_id || '/' || budget_code AS cs_item_id,
                case when entity_name is null then supplier_name->>0 else entity_name end as supplier, 
-               case when entity_id is null then null else ('org/' || entity_kind || '/' || entity_id) end as entity_item_id,
+               case when entity_id is null 
+               then ('s?q=' || supplier_name->>0)
+               else ('i/org/' || entity_kind || '/' || entity_id) end as entity_item_id,
                purchase_method->>0 AS purchase_method,
                ((publisher->>0) || '/' || (purchasing_unit->>0)) AS purchasing_unit,
                order_date, start_date, end_date,
@@ -167,7 +169,7 @@ def fetch_extra_data(row):
                     data=[
                         [
                             r['purchasing_unit'],
-                            '<a href="/i/{entity_item_id}">{supplier}</a>'.format(**r),
+                            '<a href="/{entity_item_id}">{supplier}</a>'.format(**r),
                             r['purpose'],
                             '₪{volume:,.2f}'.format(**r),
                             '₪{executed:,.2f}'.format(**r),
@@ -188,7 +190,7 @@ def fetch_extra_data(row):
         supplier_table = []
         for eid, contracts in suppliers_grouped.items():
             supplier_table.append([
-                '<a href="/i/{eid}">{supplier}</a>'.format(eid=eid, supplier=max(x['supplier'] for x in contracts)),
+                '<a href="/{eid}">{supplier}</a>'.format(eid=eid, supplier=max(x['supplier'] for x in contracts)),
                 '₪{:,.2f}'.format(sum(x['volume'] for x in contracts)),
                 '₪{:,.2f}'.format(sum(x['executed'] for x in contracts)),
                 '{}-{}'.format(
