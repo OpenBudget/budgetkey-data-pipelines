@@ -208,7 +208,7 @@ def fetch_extra_data(row):
                         'סך היקף ההתקשרויות',
                         'סך ביצוע ההתקשרויות',
                         'תקופת הפעילות',],
-                    data=sorted(supplier_table, key=lambda x: x[1], reverse=True)
+                    data=sorted(supplier_table, key=lambda x: float(x[1][1:]), reverse=True)
                 )
             )
         )
