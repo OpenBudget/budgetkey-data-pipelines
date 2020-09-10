@@ -48,7 +48,7 @@ def fetch_spending(budget_code):
                'contract-spending/' || publisher_name || '/' || order_id || '/' || budget_code AS cs_item_id,
                case when entity_name is null then supplier_name->>0 else entity_name end as supplier, 
                case when entity_id is null 
-               then ('s?q=' || supplier_name->>0)
+               then ('s?q=' || (supplier_name->>0))
                else ('i/org/' || entity_kind || '/' || entity_id) end as entity_item_id,
                purchase_method->>0 AS purchase_method,
                ((publisher->>0) || '/' || (purchasing_unit->>0)) AS purchasing_unit,
