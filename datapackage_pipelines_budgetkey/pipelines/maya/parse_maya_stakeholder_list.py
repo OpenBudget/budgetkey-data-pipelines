@@ -47,11 +47,10 @@ FIELDS = [
       'CompanyName',
       'CompanyNameEn',
       'HeaderMisparBaRasham',
-      'HeaderSemelBursa',
       'KodSugYeshut',
       'MezahehHotem',
       'MezahehTofes',
-      'NeyarotErechReshumim',
+
       'PumbiLoPumbi',
       'PreviousCompanyNames']
 
@@ -59,10 +58,11 @@ FIELDS = [
 OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash',
                    'MezahehYeshut',
                    'CompanyUrl',
+                   'HeaderSemelBursa',
+                   'NeyarotErechReshumim',
                    'Date' ]
 
 TABLE_FIELDS = ['FullName',
-
                 'Position',
                 'SugMisparZihui',
                 'MisparZihui',
