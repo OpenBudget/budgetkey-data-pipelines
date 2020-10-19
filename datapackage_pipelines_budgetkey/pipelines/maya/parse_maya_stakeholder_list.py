@@ -50,9 +50,7 @@ FIELDS = [
       'KodSugYeshut',
       'MezahehHotem',
       'MezahehTofes',
-
-      'PumbiLoPumbi',
-      'PreviousCompanyNames']
+      'PumbiLoPumbi']
 
 
 OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash',
@@ -60,6 +58,8 @@ OPTIONAL_FIELDS = ['AsmachtaDuachMeshubash',
                    'CompanyUrl',
                    'HeaderSemelBursa',
                    'NeyarotErechReshumim',
+
+                   'PreviousCompanyNames',
                    'Date' ]
 
 TABLE_FIELDS = ['FullName',
