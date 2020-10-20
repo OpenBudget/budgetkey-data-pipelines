@@ -182,6 +182,7 @@ maya-company-stakeholder-list:
     - run: dump_to_json
       parameters:
         out-path: /var/datapackages/maya/maya_company_stakeholder_list
+        max-rows: 12500
     - run: filter
       parameters:
         in:
