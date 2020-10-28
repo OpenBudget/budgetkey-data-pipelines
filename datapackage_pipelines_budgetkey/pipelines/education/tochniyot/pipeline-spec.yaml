@@ -1,4 +1,4 @@
-tochnyot:
+tochniyot:
   pipeline:
     - flow: scraper
     - run: dump_to_path
