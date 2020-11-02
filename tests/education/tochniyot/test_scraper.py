@@ -12,12 +12,13 @@ def test_TaarichStatus_to_date():
     test the conversion from JS date format to readable date format
     :return:
     """
-    with open('data/education_programs/original_data.json') as json_data:
-        orig_data = json.load(json_data)
+    row = {TAARICH_STATUS: '/Date(23424234234234)/'}
+    TaarichStatus_to_date(row)
+    assert row[TAARICH_STATUS] == '14/04/2712 19:43:54'
 
-    for row in orig_data:
-        TaarichStatus_to_date(row)
-        assert row[TAARICH_STATUS] == '01/01/0001 00:00:00'
+    row = {TAARICH_STATUS: '/Date(-62135596800000)/'}
+    TaarichStatus_to_date(row)
+    assert row[TAARICH_STATUS] == '01/01/0001 00:00:00'
 
 
 def test_tochniyot_url_validity():
@@ -26,7 +27,3 @@ def test_tochniyot_url_validity():
     :return:
     """
     assert send_tochniyot_request(1)
-
-# def test_data_columns_exist():
-#     json_data = send_tochniyot_request(1)
-#     assert
