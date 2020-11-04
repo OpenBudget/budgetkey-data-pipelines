@@ -6,6 +6,8 @@ from datetime import datetime
 import requests
 from dataflows import Flow, set_type, update_resource
 
+DEBUG = False  # limit the number of records retrieved by the scraper
+
 # data columns
 TAARICH_STATUS = 'TaarichStatus'
 TAARICH_IDKUN_RESHUMA = 'TaarichIdkunReshuma'
@@ -48,6 +50,9 @@ def get_education_programs_count():
     Get the number of education programs listed in on the site.
     :return: number of education
     """
+    if DEBUG:  # return a limited number of records
+        return 10
+
     res = send_tochniyot_request()
     return res['d'][education_programs_count_field_name]
 
@@ -90,9 +95,9 @@ def TaarichStatus_to_date(row):
     js_date_str = row[TAARICH_STATUS]  # TaarichStatus format: /Date(<some long integer>)/
     js_date_integer_only = int(js_date_str.split('(')[1].split(')')[0])  # extracts the integer from js_date_str
     try:
-        row[TAARICH_STATUS] = datetime.utcfromtimestamp(js_date_integer_only / 1000).strftime(SHORT_DATE_FORMAT)
+        row[TAARICH_STATUS] = datetime.utcfromtimestamp(js_date_integer_only / 1000).strftime(LONG_DATE_FORMAT)
     except ValueError as e:
-        logging.error("TaarichStatus column is not in the expected date format.")
+        logging.error(f"TaarichStatus column is not in the expected date format.\n{e}")
 
 
 def TaarichIdkunReshuma_to_full_date(row):
@@ -103,11 +108,10 @@ def TaarichIdkunReshuma_to_full_date(row):
     """
     date_str = row[TAARICH_IDKUN_RESHUMA]
     if short_date_regex.fullmatch(date_str) is not None:  # the date is in SHORT_DATE_FORMAT
-
         try:
             row[TAARICH_IDKUN_RESHUMA] = datetime.strptime(date_str, SHORT_DATE_FORMAT).strftime(LONG_DATE_FORMAT)
         except ValueError as e:
-            logging.error("TaarichIdkunReshuma column is not in the expected date format.")
+            logging.error(f"TaarichIdkunReshuma column is not in the expected date format.\n{e}")
 
 
 def flow(*_):
@@ -119,11 +123,11 @@ def flow(*_):
                 set_type('CodeTchumMerkazi', type='number'),
                 set_type('MisparTaagid', type='number'),
                 set_type('KayamNatsigMisrad', type='number'),
-                set_type('TaarichStatus', type='date', format=SHORT_DATE_FORMAT),
+                set_type('TaarichStatus', type='datetime', format=LONG_DATE_FORMAT),
                 set_type('MisparMedargimLatochnit', type='number'),
                 set_type('MakorTochnit', type='number'),
                 set_type('MisparTaagid', type='number'),
-                set_type('TaarichIdkunReshuma', type='date', format=LONG_DATE_FORMAT),
+                set_type('TaarichIdkunReshuma', type='datetime', format=LONG_DATE_FORMAT),
 
                 update_resource(-1, name='education_programs', **{'dpp:streaming': True}),
                 # printer(num_rows=1, tablefmt='grid')
@@ -133,3 +137,4 @@ def flow(*_):
 if __name__ == "__main__":
     f = flow()
     f.process()
+
