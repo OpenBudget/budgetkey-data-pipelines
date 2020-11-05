@@ -4,8 +4,6 @@ import pytest
 from datapackage_pipelines_budgetkey.pipelines.education.tochniyot.scraper import TAARICH_STATUS, TaarichStatus_to_date, \
     send_tochniyot_request
 
-TEST_DATA_CSV_FILE = 'data/education_programs/res_1.csv'
-
 
 def test_TaarichStatus_to_date():
     """
