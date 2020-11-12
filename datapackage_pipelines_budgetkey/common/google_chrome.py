@@ -14,7 +14,7 @@ import atexit
 
 class google_chrome_driver():
 
-    def __init__(self, wait=True, initial='https://data.gov.il'):
+    def __init__(self, wait=True, initial='https://data.gov.il', chromedriver='/usr/local/bin/chromedriver'):
         if wait:
             time.sleep(random.randint(1, 300))
         self.hostname = 'tzabar.obudget.org'
@@ -65,7 +65,7 @@ class google_chrome_driver():
 
             chrome_options = webdriver.ChromeOptions()
             chrome_options.debugger_address = f'{self.hostname_ip}:{self.port}'
-            self.driver = webdriver.Chrome('/usr/local/bin/chromedriver', options=chrome_options)
+            self.driver = webdriver.Chrome(chromedriver, options=chrome_options)
         except Exception:
             logging.exception('Error in setting up')
             self.teardown()
