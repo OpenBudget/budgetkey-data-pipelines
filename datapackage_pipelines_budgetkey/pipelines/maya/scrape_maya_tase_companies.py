@@ -49,12 +49,18 @@ def collect_companies_from_document(doc):
             "CompanyTaseId": item.attr('href').split('/')[-2]
         }
 
+def filter_invalid(rows):
+    for row in rows:
+        if row['CompanyTaseId'] == 'hitechfund':
+            continue
+        yield row
 
 def flow(*_):
     return Flow(
         add_field('CompanyName', 'string'),
         add_field('CompanyTaseId', 'string'),
         scrape_maya_tase_companies(),
+        filter_invalid,
         update_resource(
             -1, name='scrape_maya_tase_companies', path="data/scrape_maya_tase_companies.csv",
             **{
