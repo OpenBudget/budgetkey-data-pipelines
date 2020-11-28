@@ -277,3 +277,48 @@ maya-reported-work-record:
       parameters:
         out-path: /var/datapackages/maya/maya_reported_work_record
         max-rows: 25000
+
+
+scrape-maya-tase-companies:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - flow: scrape_maya_tase_companies
+    - run: dump_to_path
+      parameters:
+          out-path: /var/datapackages/maya/scrape-maya-tase-companies
+    - run: dump_to_json
+      parameters:
+          out-path: /var/datapackages/maya/scrape-maya-tase-companies
+
+maya-tase-companies-current-shareholders:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/maya/scrape-maya-tase-companies/datapackage.json
+        resource: scrape_maya_tase_companies
+    - flow: maya_tase_companies_current_shareholders
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya-tase-companies-current-shareholders
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya-tase-companies-current-shareholders
+
+maya-tase-companies-current-management:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load
+      parameters:
+        from: /var/datapackages/maya/scrape-maya-tase-companies/datapackage.json
+        resource: scrape_maya_tase_companies
+    - flow: maya_tase_companies_current_management
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya-tase-companies-current-management
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya-tase-companies-current-management
