@@ -99,34 +99,19 @@ def TaarichStatus_to_date(row):
         logging.error(f"TaarichStatus column is not in the expected date format.\n{e}")
 
 
-def TaarichIdkunReshuma_to_full_date(row):
-    """
-    TaarichIdkunReshuma this field is sometimes in '%d/%m/%Y %H:%M:%S' format and sometimes in '%d/%m/%Y'
-    Change all values to '%d/%m/%Y %H:%M:%S'
-    :return:
-    """
-    date_str = row[TAARICH_IDKUN_RESHUMA]
-    if short_date_regex.fullmatch(date_str) is not None:  # the date is in SHORT_DATE_FORMAT
-        try:
-            row[TAARICH_IDKUN_RESHUMA] = datetime.strptime(date_str, SHORT_DATE_FORMAT).strftime(LONG_DATE_FORMAT)
-        except ValueError as e:
-            logging.error(f"TaarichIdkunReshuma column is not in the expected date format.\n{e}")
-
-
 def flow(*_):
     return Flow(scrape(),
                 TaarichStatus_to_date,
-                TaarichIdkunReshuma_to_full_date,
                 set_type('MisparTochnit', type='number'),
                 set_type('CodeYechidaAchrayit', type='number'),
                 set_type('CodeTchumMerkazi', type='number'),
                 set_type('MisparTaagid', type='number'),
                 set_type('KayamNatsigMisrad', type='number'),
-                set_type('TaarichStatus', type='any', format=LONG_DATE_FORMAT),
+                set_type('TaarichStatus', type='datetime', format='any'),
                 set_type('MisparMedargimLatochnit', type='number'),
                 set_type('MakorTochnit', type='number'),
                 set_type('MisparTaagid', type='number'),
-                set_type('TaarichIdkunReshuma', type='any', format=LONG_DATE_FORMAT),
+                set_type('TaarichIdkunReshuma', type='datetime', format='any'),
 
                 update_resource(-1, name='education_programs', **{'dpp:streaming': True}),
                 # printer(num_rows=1, tablefmt='grid')
