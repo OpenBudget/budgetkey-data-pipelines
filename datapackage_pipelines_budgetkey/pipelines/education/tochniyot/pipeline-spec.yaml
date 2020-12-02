@@ -3,7 +3,7 @@ tochniyot:
     - flow: scraper
     - run: dump_to_path
       parameters:
-        out-path: data/education_programs
+        out-path: /var/datapackages/data/education_programs
     - run: dump_to_sql
       parameters:
         tables:

@@ -77,11 +77,10 @@ def send_tochniyot_request(records_num=1):
     """
     tochniyot_search_params[records_count_field_name] = records_num
     resp = requests.post(tochniyot_url, json=tochniyot_search_params)
+    resp.raise_for_status()
+
     if resp.status_code != 200:
         logging.error('Failed request: could not get tochnyiot data.')
-        raise requests.exceptions.HTTPError(f'Request for Tochnyot data failed. URL: {tochniyot_url}\n'
-                                            f'content: {tochniyot_search_params}\n'
-                                            f'response code: {resp.reason}')
     json_data = json.loads(resp.text)
     return json_data
 
@@ -123,11 +122,11 @@ def flow(*_):
                 set_type('CodeTchumMerkazi', type='number'),
                 set_type('MisparTaagid', type='number'),
                 set_type('KayamNatsigMisrad', type='number'),
-                set_type('TaarichStatus', type='datetime', format=LONG_DATE_FORMAT),
+                set_type('TaarichStatus', type='any', format=LONG_DATE_FORMAT),
                 set_type('MisparMedargimLatochnit', type='number'),
                 set_type('MakorTochnit', type='number'),
                 set_type('MisparTaagid', type='number'),
-                set_type('TaarichIdkunReshuma', type='datetime', format=LONG_DATE_FORMAT),
+                set_type('TaarichIdkunReshuma', type='any', format=LONG_DATE_FORMAT),
 
                 update_resource(-1, name='education_programs', **{'dpp:streaming': True}),
                 # printer(num_rows=1, tablefmt='grid')

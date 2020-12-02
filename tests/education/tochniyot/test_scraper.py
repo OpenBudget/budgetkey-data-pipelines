@@ -11,9 +11,9 @@ def test_TaarichStatus_to_date():
     TaarichStatus_to_date(row)
     assert row[TAARICH_STATUS] == '14/04/2712 19:43:54'
 
-    row = {TAARICH_STATUS: '/Date(-62135596800000)/'}
+    row = {TAARICH_STATUS: '/Date(1000034234234)/'}
     TaarichStatus_to_date(row)
-    assert row[TAARICH_STATUS] == '01/01/0001 00:00:00'
+    assert row[TAARICH_STATUS] == '09/09/2001 11:17:14'
 
 
 def test_tochniyot_url_validity():
