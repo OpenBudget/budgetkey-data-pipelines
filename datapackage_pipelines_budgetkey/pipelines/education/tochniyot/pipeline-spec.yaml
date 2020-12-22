@@ -1,0 +1,12 @@
+tochniyot:
+  pipeline:
+    - flow: scraper
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/data/education_programs
+    - run: dump_to_sql
+      parameters:
+        tables:
+          education_programs:
+            resource-name: education_programs
+
