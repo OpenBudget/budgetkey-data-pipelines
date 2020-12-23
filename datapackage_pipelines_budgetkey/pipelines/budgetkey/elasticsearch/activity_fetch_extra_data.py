@@ -210,14 +210,16 @@ def fetch_extra_data(row):
             suppliers_grouped.setdefault(c['entity_item_id'], []).append(c)
         supplier_table = []
         for eid, contracts in suppliers_grouped.items():
+            max_years = [x['max_year'] for x in contracts if x['max_year']]
+            min_years = [x['min_year'] for x in contracts if x['min_year']]
             supplier_table.append([
                 '<a href="/{eid}">{supplier}</a>'.format(eid=eid, supplier=max(x['supplier'] for x in contracts)),
                 '₪{:,.2f}'.format(sum(x['volume'] for x in contracts)),
                 '₪{:,.2f}'.format(sum(x['executed'] for x in contracts)),
                 '{}-{}'.format(
-                    min((x['min_year'] for x in contracts if x['min_year'])),
-                    max((x['max_year'] for x in contracts if x['max_year'])),
-                ) if len(contracts) else '-'
+                    min(min_years) if min_years else '',
+                    max(max_years) if max_years else '',
+                )
             ])
         top_suppliers = dict(
             title='ספקים',
