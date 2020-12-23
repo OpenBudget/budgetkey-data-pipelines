@@ -215,9 +215,9 @@ def fetch_extra_data(row):
                 '₪{:,.2f}'.format(sum(x['volume'] for x in contracts)),
                 '₪{:,.2f}'.format(sum(x['executed'] for x in contracts)),
                 '{}-{}'.format(
-                    min((x['min_year'] for x in contracts if x['min_year']), '-'),
-                    max((x['max_year'] for x in contracts if x['max_year']), '-'),
-                )
+                    min((x['min_year'] for x in contracts if x['min_year'])),
+                    max((x['max_year'] for x in contracts if x['max_year'])),
+                ) if len(contracts) else '-'
             ])
         top_suppliers = dict(
             title='ספקים',
