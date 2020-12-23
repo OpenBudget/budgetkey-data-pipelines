@@ -26,6 +26,10 @@ MAPPINGS = {
     'activities/שירות חברתי/משרד הרווחה/תעסוקה מוגנת': [
         dict(code='0023062262', year=2019, part=100)
     ],
+    'activities/שירות חברתי/משרד החינוך/שירותי הפעלת וועדות מומחים יעוץ והדרכה ושירותים פסיכולוגיים': [
+        dict(code='0020460306', year=2019, part=50),
+        dict(code='0020460308', year=2019, part=50)
+    ],
 }
 
 def expand_mappings(mappings):
