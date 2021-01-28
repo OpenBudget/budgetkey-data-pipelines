@@ -248,4 +248,7 @@ def flow(*_):
 
 
 if __name__ == '__main__':
-    flow().process()
+    DF.Flow(
+        flow(),
+        DF.dump_to_path('out'),
+    ).process()

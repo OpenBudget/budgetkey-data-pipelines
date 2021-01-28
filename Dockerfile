@@ -23,7 +23,7 @@ RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 RUN pip install -U -r /requirements-dev.txt
 
-RUN apt-get install -y sudo unzip wget libglib2.0-0 && wget https://chromedriver.storage.googleapis.com/83.0.4103.39/chromedriver_linux64.zip && \
+RUN apt-get install -y sudo unzip wget libglib2.0-0 && wget https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
     chmod +x chromedriver && mv chromedriver /usr/local/bin/ 
 
