@@ -11,7 +11,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
-SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=100000"
+SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=1000"
 
 SITE_URL = 'https://www.gov.il'
 
@@ -82,7 +82,7 @@ def get_decision_list():
             count += 1
         response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count)).json()
         results = response['results']
-        if not results:
+        if not results or len(results) == 0:
             return
 
 
