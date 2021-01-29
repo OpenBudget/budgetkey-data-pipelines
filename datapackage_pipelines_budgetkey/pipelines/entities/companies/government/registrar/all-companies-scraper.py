@@ -71,10 +71,13 @@ def scrape():
     driver.get(hostname + "/GCA/CompaniesInformation/Pages/default.aspx")
 
     rows = []
+    attempts = 10
     while len(rows) == 0:
         page = pq(driver.page_source)
         rows = page.find('.gcaCompamies tbody tr')
         sleep(1)
+        attempts = attempts - 1
+        assert attempts > 0
 
     rows = page.find('.gcaCompamies tbody tr')
     logging.info('GOT %d ROWS', len(rows))
