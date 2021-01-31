@@ -73,9 +73,10 @@ def scrape():
     rows = []
     attempts = 10
     while len(rows) == 0:
+        logging.info('FETCHING...')
         page = pq(driver.page_source)
         rows = page.find('.gcaCompamies tbody tr')
-        sleep(1)
+        sleep(10)
         attempts = attempts - 1
         assert attempts > 0
 
