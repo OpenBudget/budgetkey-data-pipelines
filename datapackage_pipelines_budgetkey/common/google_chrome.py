@@ -16,7 +16,7 @@ class google_chrome_driver():
 
     def __init__(self, wait=True, initial='https://data.gov.il', chromedriver='/usr/local/bin/chromedriver'):
         if wait:
-            time.sleep(random.randint(1, 300))
+            time.sleep(random.randint(1, 600))
         self.hostname = 'tzabar.obudget.org'
         self.hostname_ip = socket.gethostbyname(self.hostname)
         username = 'adam'

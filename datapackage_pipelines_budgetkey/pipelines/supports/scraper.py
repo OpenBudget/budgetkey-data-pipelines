@@ -106,7 +106,7 @@ def get_results_for_column(driver, column, main_wh, charts_wh):
 def scraper(gcd, selected_year):
     # Open main page
     driver = gcd.driver
-    driver.get('http://www.tmichot.gov.il')
+    driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
     main_wh = driver.current_window_handle
     WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, "idd1"))
