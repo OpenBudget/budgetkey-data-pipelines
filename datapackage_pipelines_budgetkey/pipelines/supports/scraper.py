@@ -106,15 +106,19 @@ def get_results_for_column(driver, column, main_wh, charts_wh):
 def scraper(gcd, selected_year):
     # Open main page
     driver = gcd.driver
-    driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
+    driver.get('http://tmichot.gov.il/IlgTmihotSite/shell.html')
+    # driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
     main_wh = driver.current_window_handle
     WebDriverWait(driver, 30).until(
-        EC.presence_of_element_located((By.ID, "idd1"))
+        EC.presence_of_element_located((By.ID, "__cell0"))
     )
-    # Click on 'דוחות'
-    frame = driver.find_element_by_id('idd1')
-    driver.switch_to.frame(frame)
-    time.sleep(10)
+    # WebDriverWait(driver, 30).until(
+    #     EC.presence_of_element_located((By.ID, "idd1"))
+    # )
+    # # Click on 'דוחות'
+    # frame = driver.find_element_by_id('idd1')
+    # driver.switch_to.frame(frame)
+    # time.sleep(10)
     el = driver.find_element_by_id('__cell0')
     ActionChains(driver).move_to_element(el)\
                         .move_to_element_with_offset(el, xoffset=10, yoffset=10)\
