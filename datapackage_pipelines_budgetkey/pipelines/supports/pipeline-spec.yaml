@@ -157,9 +157,20 @@ supports-2020:
     parameters:
       out-path: /var/datapackages/supports/yearly-2020
 
+supports-2021:
+  schedule:
+    crontab: "0 18 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2021
+  - run: dump_to_path
+    parameters:
+      out-path: /var/datapackages/supports/yearly-2021
+
 all:
   dependencies:
-    - pipeline: ./supports/supports-2020
+    - pipeline: ./supports/supports-2021
 
   pipeline:
     - run: add_metadata
@@ -219,6 +230,9 @@ all:
     - run: load
       parameters:
         from: /var/datapackages/supports/yearly-2020/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2021/datapackage.json
 
     - run: concatenate
       parameters:

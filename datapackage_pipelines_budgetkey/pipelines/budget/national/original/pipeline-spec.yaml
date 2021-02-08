@@ -149,6 +149,12 @@ national-budgets:
         sheet: 1
         force_strings: true
         name: budget2019
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2020.xlsx
+        sheet: 1
+        force_strings: true
+        name: budget2020
     - flow: only_years
     - run: concatenate
       parameters:
