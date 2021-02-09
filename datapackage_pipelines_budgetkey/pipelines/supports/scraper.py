@@ -3,6 +3,7 @@ import time
 import logging
 import csv
 
+from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -105,7 +106,7 @@ def get_results_for_column(driver, column, main_wh, charts_wh):
 
 def scraper(gcd, selected_year):
     # Open main page
-    driver = gcd.driver
+    driver: Chrome = gcd.driver
     driver.get('http://tmichot.gov.il/IlgTmihotSite/shell.html')
     # driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
     main_wh = driver.current_window_handle
@@ -119,18 +120,24 @@ def scraper(gcd, selected_year):
     # frame = driver.find_element_by_id('idd1')
     # driver.switch_to.frame(frame)
     # time.sleep(10)
-    el = driver.find_element_by_id('__cell0')
-    ActionChains(driver).move_to_element(el)\
-                        .move_to_element_with_offset(el, xoffset=10, yoffset=10)\
-                        .click()\
-                        .perform()
-    time.sleep(30)
-
+    # el = driver.find_element_by_id('__cell0')
+    # ActionChains(driver).move_to_element(el)\
+    #                     .move_to_element_with_offset(el, xoffset=10, yoffset=10)\
+    #                     .move_to_element(el)\
+    #                     .click()\
+    #                     .perform()
+    driver.execute_script('''
+        var bundle = sap.ui.getCore().getModel("i18n").getResourceBundle();
+        $.ajax({url: bundle.getText("URLTokenGenerator"), dataType: 'text', async: false, 
+                success: function(resp){window.location.href = bundle.getText("UrlBO") + resp;} });
+    ''')
+    time.sleep(60)
+    charts_wh = main_wh
     # Switch to charts tab
-    charts_wh = set(driver.window_handles)
-    charts_wh.remove(main_wh)
-    charts_wh = charts_wh.pop()
-    time.sleep(15)
+    # charts_wh = set(driver.window_handles)
+    # charts_wh.remove(main_wh)
+    # charts_wh = charts_wh.pop()
+    # time.sleep(15)
 
     # Click on all columns :)
     groups_selector = 'g.v-m-main g.v-datapoint[combination-column=true]'
