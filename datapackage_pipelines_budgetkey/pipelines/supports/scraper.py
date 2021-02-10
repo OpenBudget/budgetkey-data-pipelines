@@ -25,9 +25,8 @@ def wrapper(year):
             gcd.teardown()
 
 
-def get_chart(driver, charts_wh):
+def get_chart(driver):
     # Switch to results page & iframe
-    driver.switch_to.window(charts_wh)
     frame = WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, "openDocChildFrame"))
     )
@@ -109,7 +108,6 @@ def scraper(gcd, selected_year):
     driver: Chrome = gcd.driver
     driver.get('http://tmichot.gov.il/IlgTmihotSite/shell.html')
     # driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
-    main_wh = driver.current_window_handle
     WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, "__cell0"))
     )
@@ -132,7 +130,6 @@ def scraper(gcd, selected_year):
                 success: function(resp){window.location.href = bundle.getText("UrlBO") + resp;} });
     ''')
     time.sleep(60)
-    charts_wh = main_wh
     # Switch to charts tab
     # charts_wh = set(driver.window_handles)
     # charts_wh.remove(main_wh)
@@ -143,7 +140,7 @@ def scraper(gcd, selected_year):
     groups_selector = 'g.v-m-main g.v-datapoint[combination-column=true]'
     rects_selector = groups_selector + ' rect'
     label_selector = 'g.v-m-main g.v-m-xAxis g.v-m-axisBody text'
-    chart = get_chart(driver, charts_wh)
+    chart = get_chart(driver)
     first_label = chart.find_elements_by_css_selector(label_selector)[0]
     last_year = int(first_label.text)
     print('LAST YEAR', last_year)
