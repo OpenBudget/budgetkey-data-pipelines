@@ -31,17 +31,16 @@ def get_chart(driver):
         EC.presence_of_element_located((By.ID, "openDocChildFrame"))
     )
     driver.switch_to.frame(frame)
-    chart = WebDriverWait(driver, 30).until(
+    chart = WebDriverWait(driver, 60).until(
         # EC.presence_of_element_located((By.ID, "UIComp_27"))
         EC.presence_of_element_located((By.ID, "UIComp_0"))
     )
     return chart
 
 
-def switch_to_results_page(driver, main_wh, charts_wh):
+def switch_to_results_page(driver: Chrome):
     results_wh = set(driver.window_handles)
-    results_wh.remove(main_wh)
-    results_wh.remove(charts_wh)
+    results_wh.remove(driver.current_window_handle)
     results_wh = results_wh.pop()
     driver.switch_to.window(results_wh)
     WebDriverWait(driver, 30).until(
@@ -93,10 +92,10 @@ def click_on_export(driver):
     ok_button.click()
 
 
-def get_results_for_column(driver, column, main_wh, charts_wh):
+def get_results_for_column(driver, column):
     column.click()
     time.sleep(10)
-    switch_to_results_page(driver, main_wh, charts_wh)
+    switch_to_results_page(driver)
     click_on_export(driver)
     time.sleep(10)
     driver.close()
@@ -148,7 +147,7 @@ def scraper(gcd, selected_year):
         year = last_year - i
         # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
         if chart is None:
-            chart = get_chart(driver, charts_wh)
+            chart = get_chart(driver)
         groups = chart.find_elements_by_css_selector(groups_selector)
         rects = chart.find_elements_by_css_selector(rects_selector)
         if i >= len(rects):
@@ -159,9 +158,10 @@ def scraper(gcd, selected_year):
         driver.execute_script("arguments[0].setAttribute('height','50')", rects[i])
         if year != selected_year:
             continue
-        get_results_for_column(driver, rects[i], main_wh, charts_wh)
+        get_results_for_column(driver, rects[i])
         logging.info('Completed %r, %r', year, gcd.list_downloads())
         chart = None
+        break
     time.sleep(20)
     return [gcd.download('https://next.obudget.org/datapackages/' + x) for x in gcd.list_downloads() if x]
 
@@ -187,4 +187,4 @@ if __name__ == '__main__':
     from selenium import webdriver
     class b:
         driver = webdriver.Chrome()
-    scraper(b())
+    scraper(b(), 2021)
