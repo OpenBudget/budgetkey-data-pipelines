@@ -21,7 +21,7 @@ FIELD_VALUES = {
         'הכנסות המדינה - מענקים',
         'הכנסות מיועדות',
         'העברות',
-        'העברות  פנים תקציביות',
+        'העברות פנים תקציביות',
         'השקעה',
         'חשבונות מעבר',
         'מתן אשראי',
@@ -47,7 +47,7 @@ SLUG_LOOKUP = {
     'econ_cls_title_1_הכנסות המדינה - מענקים': 'total_econ_cls_income_grants',
     'econ_cls_title_1_הכנסות מיועדות': 'total_econ_cls_dedicated_income',
     'econ_cls_title_1_העברות': 'total_econ_cls_transfers',
-    'econ_cls_title_1_העברות  פנים תקציביות': 'total_econ_cls_internal_transfers',
+    'econ_cls_title_1_העברות פנים תקציביות': 'total_econ_cls_internal_transfers',
     'econ_cls_title_1_השקעה': 'total_econ_cls_investment',
     'econ_cls_title_1_חשבונות מעבר': 'total_econ_cls_interim_accounts',
     'econ_cls_title_1_מתן אשראי': 'total_econ_cls_credit',
@@ -75,7 +75,7 @@ datapackage['resources'][0]['schema']['fields'].extend(
 def process_first(rows):
     for row in rows:
         for k in FIELD_VALUES.keys():
-            row[to_slug(k, row[k])] = row.get('net_revised', 0)
+            row[to_slug(k, row[k].replace('  ', ' '))] = row.get('net_revised', 0)
         yield row
 
 

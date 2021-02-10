@@ -95,6 +95,8 @@ def click_on_export(driver):
 def get_results_for_column(driver, column):
     column.click()
     time.sleep(10)
+    column.click()
+    time.sleep(10)
     switch_to_results_page(driver)
     click_on_export(driver)
     time.sleep(10)
