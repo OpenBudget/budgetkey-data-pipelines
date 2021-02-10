@@ -100,7 +100,7 @@ def get_results_for_column(driver, column):
     switch_to_results_page(driver)
     click_on_export(driver)
     time.sleep(10)
-    driver.close()
+    # driver.close()
     # driver.switch_to.window(charts_wh)
 
 
@@ -165,18 +165,14 @@ def scraper(gcd, selected_year):
         chart = None
         break
     time.sleep(20)
-    return [gcd.download('https://next.obudget.org/datapackages/' + x) for x in gcd.list_downloads() if x]
+    return gcd.download('https://next.obudget.org/datapackages/' + gcd.list_downloads())
 
 
 def flow(parameters, *_):
     return DF.Flow(
-        *[
-            DF.load(x, format='csv', name='res%d' % i,
-                    infer_strategy=DF.load.INFER_STRINGS,
-                    cast_strategy=DF.load.CAST_DO_NOTHING)
-            for i, x
-            in enumerate(wrapper(parameters['year']))
-        ],
+        DF.load(wrapper(parameters['year']), format='csv', 
+                infer_strategy=DF.load.INFER_STRINGS,
+                cast_strategy=DF.load.CAST_DO_NOTHING),
         DF.update_resource(None, **{'dpp:streaming': True})
     )
 
