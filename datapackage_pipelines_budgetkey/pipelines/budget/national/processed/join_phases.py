@@ -20,6 +20,7 @@ amounts = [
     'personnel',
     'contractors',
     'amounts',
+    'covid19_expenses'
 ]
 factors = [
     1000, 1000, 1000, 1000, 1000, 1, 1, 1,

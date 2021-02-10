@@ -114,6 +114,8 @@ aggregated-yearly:
             type: number
           non_repeating:
             type: boolean
+          covid19_expenses:
+            type: number
 
     - run: join_phases
       parameters:
@@ -172,6 +174,8 @@ aggregated-yearly:
             aggregate: sum
           commitment_balance_allocated:
             aggregate: sum
+          covid19_expenses_allocated:
+            aggregate: sum
           net_revised:
             aggregate: sum
           gross_revised:
@@ -188,6 +192,8 @@ aggregated-yearly:
             aggregate: sum
           commitment_balance_revised:
             aggregate: sum
+          covid19_expenses_revised:
+            aggregate: sum
           net_executed:
             aggregate: sum
           gross_executed:
@@ -203,6 +209,8 @@ aggregated-yearly:
           amounts_executed:
             aggregate: sum
           commitment_balance_executed:
+            aggregate: sum
+          covid19_expenses_executed:
             aggregate: sum
           total_direction_expense:
             aggregate: sum
