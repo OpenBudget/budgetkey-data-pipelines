@@ -145,27 +145,24 @@ def scraper(gcd, selected_year):
     rects_selector = groups_selector + ' rect'
     label_selector = 'g.v-m-main g.v-m-xAxis g.v-m-axisBody text'
     chart = get_chart(driver)
+    groups = chart.find_elements_by_css_selector(groups_selector)
+    rects = chart.find_elements_by_css_selector(rects_selector)
     first_label = chart.find_elements_by_css_selector(label_selector)[0]
     last_year = int(first_label.text)
     print('LAST YEAR', last_year)
     for i in range(100):
         year = last_year - i
-        # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
-        if chart is None:
-            chart = get_chart(driver)
-        groups = chart.find_elements_by_css_selector(groups_selector)
-        rects = chart.find_elements_by_css_selector(rects_selector)
+        if year != selected_year:
+            continue
         if i >= len(rects):
             break
+        # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
         driver.execute_script(
             "arguments[0].setAttribute('transform','translate(%d, 0)')" % (i * 30), groups[i]
         )
         driver.execute_script("arguments[0].setAttribute('height','50')", rects[i])
-        if year != selected_year:
-            continue
         get_results_for_column(driver, rects[i])
         logging.info('Completed %r, %r', year, gcd.list_downloads())
-        chart = None
         break
     time.sleep(20)
     return gcd.download('https://next.obudget.org/datapackages/' + gcd.list_downloads())
