@@ -23,7 +23,7 @@ amounts = [
     'covid19_expenses'
 ]
 factors = [
-    1000, 1000, 1000, 1000, 1000, 1, 1, 1,
+    1000, 1000, 1000, 1000, 1000, 1, 1, 1, 1000
 ]
 
 budget_fixes = Package('/var/datapackages/budget/national/changes/current-year-fixes/datapackage.json')
