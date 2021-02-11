@@ -199,6 +199,7 @@ national-budgets:
           עבצ: []
           כמות: []
           יתרת התחיבויות:  []
+          תקציב קורונה: []
     - run: set_types
       parameters:
         types:
