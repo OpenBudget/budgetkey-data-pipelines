@@ -94,12 +94,7 @@ def click_on_export(driver):
 
 def get_results_for_column(driver, column):
     column.click()
-    time.sleep(10)
-    try:
-        column.click()
-        time.sleep(10)
-    except:
-        pass
+    time.sleep(60)
     switch_to_results_page(driver)
     click_on_export(driver)
     time.sleep(10)
@@ -165,7 +160,7 @@ def scraper(gcd, selected_year):
         logging.info('Completed %r, %r', year, gcd.list_downloads())
         break
     time.sleep(20)
-    return gcd.download('https://next.obudget.org/datapackages/' + gcd.list_downloads())
+    return gcd.download('https://next.obudget.org/datapackages/' + gcd.list_downloads()[0])
 
 
 def flow(parameters, *_):
