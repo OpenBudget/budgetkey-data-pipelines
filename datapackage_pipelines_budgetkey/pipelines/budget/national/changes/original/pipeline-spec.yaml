@@ -114,6 +114,15 @@ national-budget-changes:
         tabulator:
           encoding: windows-1255
           headers: 4
+    - run: resource_without_excel_formulas
+      parameters:
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2020.csv
+        resource:
+          name: changes_2020
+          path: data/changes_2020.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 4
     # - run: resource_without_excel_formulas
     #   parameters:
     #     url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
@@ -134,7 +143,7 @@ national-budget-changes:
     #       headers: 3
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2020
+        pending-resource-name: pending_changes_2021
     - run: concatenate
       parameters:
         target:
@@ -244,7 +253,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2020
+          - year: 2021
     - run: filter
       parameters:
         out:

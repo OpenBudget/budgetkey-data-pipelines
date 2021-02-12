@@ -30,15 +30,15 @@ all:
     - run: explanation_fetcher
       parameters:
         resource:
-          name: explanation-current
-          path: data/explanation-current.csv
+          name: explanation-2020
+          path: data/explanation-2020.csv
         url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
-    - run: explanation_fetcher
-      parameters:
-        resource:
-          name: explanation-pending
-          path: data/explanation-pending.csv
-        url: https://www.gov.il/files/mof/Budgetchanges/vaada_explain.zip
+    # - run: explanation_fetcher
+    #   parameters:
+    #     resource:
+    #       name: explanation-pending
+    #       path: data/explanation-pending.csv
+    #     url: https://www.gov.il/files/mof/Budgetchanges/vaada_explain.zip
     - run: explanation_extractor
       parameters:
         resource:
