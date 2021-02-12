@@ -1,6 +1,6 @@
 import logging
 from datapackage_pipelines.wrapper import ingest, spew
-
+from itertools import zip_longest
 
 def nop(x):
     return x
@@ -21,7 +21,7 @@ def combine_immediate_children(rows):
         for f in ('children-net_revised', 'children-net_allocated'):
             row[f] = map(int, row[f])
         try:
-            children = zip(*(row.get('children-'+x, []) for x in FIELDS))
+            children = zip_longest(*(row.get('children-'+x, []) for x in FIELDS))
         except TypeError:
             logging.error('Failed to process children for row %r', row)
             raise
