@@ -14,6 +14,7 @@ parameters, datapackage, res_iter = ingest()
 SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=1000"
 
 SITE_URL = 'https://www.gov.il'
+TIMEOUT = 60
 
 
 def get_links(content, session):
@@ -36,7 +37,7 @@ def get_links(content, session):
             s3_object_name = 'government_decisions/' + filename
             if not object_storage.exists(s3_object_name):
                 try:
-                    conn = session.get(href)
+                    conn = session.get(href, timeout=TIMEOUT)
                     if not conn.status_code == requests.codes.ok:
                         continue
                     href = object_storage.write(s3_object_name, data=conn.content, public_bucket=True, create_bucket=True)
@@ -51,7 +52,7 @@ def get_links(content, session):
 def get_decision_list():
     session = requests.Session()
     session.headers['User-Agent'] = 'datagov-external-client'
-    response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0)).json()
+    response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0), timeout=TIMEOUT).json()
     results = response['results']
     count = 0
     while True:
@@ -80,7 +81,7 @@ def get_decision_list():
                 'score': 1
             }
             count += 1
-        response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count)).json()
+        response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count), timeout=TIMEOUT).json()
         results = response['results']
         if not results or len(results) == 0:
             return
