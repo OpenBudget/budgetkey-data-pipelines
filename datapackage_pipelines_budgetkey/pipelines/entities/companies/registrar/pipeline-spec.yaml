@@ -26,7 +26,7 @@ scraper:
 details:
   dependencies:
     - pipeline: ./entities/companies/registrar/scraper
-    - pipeline: ./entities/companies/government/registrar/government_companies
+    # - pipeline: ./entities/companies/government/registrar/government_companies
     # - pipeline: ./entities/safety-orders/safety-orders-by-entity
 
   schedule:
@@ -37,15 +37,15 @@ details:
       parameters:
         name: company-details
         title: נתונים פומביים על חברות המופיעים באתר רשם החברות
-    - run: load_resource
-      parameters:
-        url: dependency://./entities/companies/government/registrar/government_companies
-        resource: government-companies
+    # - run: load_resource
+    #   parameters:
+    #     url: dependency://./entities/companies/government/registrar/government_companies
+    #     resource: government-companies
 
-    - run: load_resource
-      parameters:
-        url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
-        resource: safety-orders-by-entity
+    # - run: load_resource
+    #   parameters:
+    #     url: /var/datapackages/entities/safety-orders/by-entity/datapackage.json
+    #     resource: safety-orders-by-entity
 
     - run: load_resource
       parameters:
@@ -53,35 +53,35 @@ details:
         resource: company-details
 
     - run: stream_remote_resources
-    - run: join
-      parameters:
-        source:
-          name: government-companies
-          delete: true
-          key:
-            - company_number
-        target:
-          name: company-details
-          key:
-            - id
-        fields:
-          government_company_info: null
+    # - run: join
+    #   parameters:
+    #     source:
+    #       name: government-companies
+    #       delete: true
+    #       key:
+    #         - company_number
+    #     target:
+    #       name: company-details
+    #       key:
+    #         - id
+    #     fields:
+    #       government_company_info: null
 
     # Load safety violations for every company
-    - run: join
-      parameters:
-        source:
-          name: safety-orders-by-entity
-          key:
-            - entity_id
-          delete: true
-        target:
-          name: company-details
-          key:
-            - id
-          full: true
-        fields:
-          safety_violations: null
+    # - run: join
+    #   parameters:
+    #     source:
+    #       name: safety-orders-by-entity
+    #       key:
+    #         - entity_id
+    #       delete: true
+    #     target:
+    #       name: company-details
+    #       key:
+    #         - id
+    #       full: true
+    #     fields:
+    #       safety_violations: null
     - run: sample
     - run: fix_values
     - run: set_types
@@ -91,9 +91,9 @@ details:
             type: integer
           company_postal_code:
             type: string
-          safety_violations:
-            es:itemType: object
-            es:index: false
+          # safety_violations:
+          #   es:itemType: object
+          #   es:index: false
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/companies/registrar/details
