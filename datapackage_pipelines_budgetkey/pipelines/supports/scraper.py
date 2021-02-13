@@ -168,7 +168,7 @@ def flow(parameters, *_):
         DF.load(wrapper(parameters['year']), format='csv', 
                 infer_strategy=DF.load.INFER_STRINGS,
                 cast_strategy=DF.load.CAST_DO_NOTHING),
-        DF.update_resource(None, **{'dpp:streaming': True})
+        DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'})
     )
 
 
