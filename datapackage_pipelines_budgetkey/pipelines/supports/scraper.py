@@ -164,11 +164,13 @@ def scraper(gcd, selected_year):
 
 
 def flow(parameters, *_):
+    year = parameters['year']
     return DF.Flow(
-        DF.load(wrapper(parameters['year']), format='csv', 
+        DF.load(wrapper(year), format='csv', 
                 infer_strategy=DF.load.INFER_STRINGS,
                 cast_strategy=DF.load.CAST_DO_NOTHING),
-        DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'})
+        DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
+        DF.dump_to_path(f'/var/datapackages/supports/yearly-{year}')
     )
 
 
