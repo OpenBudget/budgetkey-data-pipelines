@@ -110,45 +110,45 @@ calls-for-bids-moh:
     parameters:
       out-path: /var/datapackages/calls-for-bids/moh
 
-joint-all:
-  pipeline:
-    - flow: joint
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/publications/joint/all
+# joint-all:
+#   pipeline:
+#     - flow: joint
+#     - run: dump_to_path
+#       parameters:
+#         out-path: /var/datapackages/publications/joint/all
 
 
-joint-calls-for-bids:
-  dependencies:
-    - pipeline: ./procurement/calls_for_bids/joint-all
-  pipeline:
-    - run: load
-      parameters:
-        from: /var/datapackages/publications/joint/all/datapackage.json
-    - run: filter
-      parameters:
-        in:
-          - tender_type: call_for_bids
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/publications/joint/calls_for_bids
+# joint-calls-for-bids:
+#   dependencies:
+#     - pipeline: ./procurement/calls_for_bids/joint-all
+#   pipeline:
+#     - run: load
+#       parameters:
+#         from: /var/datapackages/publications/joint/all/datapackage.json
+#     - run: filter
+#       parameters:
+#         in:
+#           - tender_type: call_for_bids
+#     - run: dump_to_path
+#       parameters:
+#         out-path: /var/datapackages/publications/joint/calls_for_bids
 
 
-joint-procurement:
-  dependencies:
-    - pipeline: ./procurement/calls_for_bids/joint-all
-  pipeline:
-    - run: load
-      parameters:
-        from: /var/datapackages/publications/joint/all/datapackage.json
-    - run: filter
-      parameters:
-        in:
-          - tender_type: exemptions
-          - tender_type: office
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/publications/joint/procurement
+# joint-procurement:
+#   dependencies:
+#     - pipeline: ./procurement/calls_for_bids/joint-all
+#   pipeline:
+#     - run: load
+#       parameters:
+#         from: /var/datapackages/publications/joint/all/datapackage.json
+#     - run: filter
+#       parameters:
+#         in:
+#           - tender_type: exemptions
+#           - tender_type: office
+#     - run: dump_to_path
+#       parameters:
+#         out-path: /var/datapackages/publications/joint/procurement
 
         
 
