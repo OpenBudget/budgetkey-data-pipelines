@@ -17,6 +17,8 @@ BASE = dict(
     start_date=None,
     claim_date=None,
     subject_list_keywords=[],
+    page_title='',
+    page_url='',
 )
 
 
