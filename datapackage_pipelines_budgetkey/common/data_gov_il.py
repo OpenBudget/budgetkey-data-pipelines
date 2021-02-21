@@ -71,7 +71,7 @@ def get_resource(gcd, dataset_name, resource_name):
     except:
         dataset = get_dataset_html(gcd, dataset_name)
     for resource in dataset['resources']:
-        if resource['name'] == resource_name:
+        if resource['name'].strip() == resource_name:
             url = resource['url'].replace('//e.', '//')
             try:
                 try:
@@ -85,9 +85,9 @@ def get_resource(gcd, dataset_name, resource_name):
                         downloaded.close()
                         data = open(downloaded.name, 'rb').read()
                         assert data[:5] != b'<html'
-                        logging.info('%s/%s -> %s %d bytes (%r...%r)',
-                                     dataset_name, resource_name, downloaded.name,
-                                     amount, data[:256], data[-256:])
+                        # logging.info('%s/%s -> %s %d bytes (%r...%r)',
+                        #              dataset_name, resource_name, downloaded.name,
+                        #              amount, data[:256], data[-256:])
                         return url, downloaded.name
                 except Exception:
                     if callable(gcd):
@@ -98,4 +98,4 @@ def get_resource(gcd, dataset_name, resource_name):
                         return url, gcd.download(url)
             except AssertionError:
                 return url, None
-    assert False, 'Failed to find resource for name %s' % (resource_name,)
+    assert False, 'Failed to find resource for name %s: possibilities are %r' % (resource_name, [r['name'] for r in dataset['resources']])

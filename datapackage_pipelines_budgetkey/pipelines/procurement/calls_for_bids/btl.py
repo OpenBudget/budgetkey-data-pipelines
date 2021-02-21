@@ -8,22 +8,26 @@ URL = 'https://www.btl.gov.il/Funds/kolotkorim/Pages/default.aspx'
 HEADERS = {
     'User-agent': 'Mozillaacintosh; Intel Mac OS X 10.14; rv:71.0) Gecko/20100101 Firefox/71.0'
 }
+BASE = dict(
+    tender_id='0',
+    tender_type='call_for_bids',
+    publication_id=0,
+    tender_type_he='קול קורא',
+    publisher='הביטוח הלאומי',
+    start_date=None,
+    claim_date=None,
+    subject_list_keywords=[],
+)
 
 
 def scrape():
+    yield BASE
     page = requests.get(URL, headers=HEADERS).text
     page = pq(page)
     items = page.find('li.open')
     for item in items:
         ret = dict(
-            tender_id='0',
-            tender_type='call_for_bids',
-            publication_id=0,
-            tender_type_he='קול קורא',
-            publisher='הביטוח הלאומי',
-            start_date=None,
-            claim_date=None,
-            subject_list_keywords=[],
+            (k, v) for k, v in BASE.items()
         )
         item = pq(item)
         links = item.find('a')
@@ -80,6 +84,7 @@ def flow(*_):
         DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M', resources=-1),
         DF.set_type('start_date', type='date', format='%d/%m/%Y', resources=-1),
         calculate_publication_id(7),
+        DF.filter_rows(lambda r: r['publication_id'])
     )
 
 if __name__ == '__main__':
