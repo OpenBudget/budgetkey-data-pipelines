@@ -31,6 +31,7 @@ def scrape():
             ('tender_id', 'page_title', 'claim_date', 'description'),
             [td.text() for td in _row]
         ))
+        ret['claim_date'] = ret['claim_date'].split(' ')[0] if ret['claim_date'] else None
         link = pq(_row[0].find('a')).attr('href')
         if not link.startswith('http'):
             link = BASE + link
@@ -57,7 +58,7 @@ def flow(*_,):
             'dpp:streaming': True
         }),
         DF.set_type('claim_date', type='datetime', format='any', resources=-1),
-        DF.set_type('claim_date', type='datetime', format='%d/%m/%Y', resources=-1),
+        DF.set_type('claim_date', type='datetime', format='%d/%m/%Y', resources=-1, on_error=DF.schema_validator.clear),
         calculate_publication_id(8),
     )
 
