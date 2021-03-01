@@ -17,8 +17,8 @@ BASE = dict(
     start_date=None,
     claim_date=None,
     subject_list_keywords=[],
-    page_title='',
-    page_url='',
+    page_title=' ',
+    page_url=URL,
 )
 
 
@@ -85,8 +85,8 @@ def flow(*_):
         DF.update_resource(-1, **{'dpp:streaming': True, 'name': 'btl'}),
         DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M', resources=-1),
         DF.set_type('start_date', type='date', format='%d/%m/%Y', resources=-1),
+        DF.filter_rows(lambda r: r['publication_id']),
         calculate_publication_id(7),
-        DF.filter_rows(lambda r: r['publication_id'])
     )
 
 if __name__ == '__main__':
