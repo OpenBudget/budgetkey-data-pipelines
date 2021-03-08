@@ -74,6 +74,7 @@ quarterly-contract-spending-reports:
           purchase_method:
             - אופן רכישה
             - אופן רכישה מעודכן
+            - אופן רכישה מקור
           sensitive_order:
             - הזמנה רגישה
           order_id:
