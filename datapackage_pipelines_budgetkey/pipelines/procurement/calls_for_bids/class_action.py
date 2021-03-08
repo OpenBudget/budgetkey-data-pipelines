@@ -33,8 +33,11 @@ def scrape():
         ))
         ret['claim_date'] = ret['claim_date'].split(' ')[0] if ret['claim_date'] else None
         link = pq(_row[0].find('a')).attr('href')
-        if not link.startswith('http'):
-            link = BASE + link
+        documents = []
+        if link:
+            if not link.startswith('http'):
+                link = BASE + link
+            documents=[dict(link=link, description='מסמכי הקול הקורא')]
         ret.update(dict(
             tender_type='call_for_bids',
             page_url=URL,
@@ -42,7 +45,7 @@ def scrape():
             tender_type_he='קול קורא',
             publisher='ועדת העזבונות',
             start_date=None,
-            documents=[dict(link=link, description='מסמכי הקול הקורא')],
+            documents=documents,
             contact='מוחמד זחלקה',
             contact_email='keren27@justice.gov.il'
         ))
