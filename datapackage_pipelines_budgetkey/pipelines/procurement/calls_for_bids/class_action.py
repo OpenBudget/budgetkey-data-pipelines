@@ -60,7 +60,7 @@ def flow(*_,):
             'name': 'class_action',
             'dpp:streaming': True
         }),
-        DF.set_type('claim_date', type='datetime', format='any', resources=-1),
+        DF.set_type('claim_date', type='datetime', format='any', resources=-1, on_error=DF.schema_validator.clear),
         DF.set_type('claim_date', type='datetime', format='%d/%m/%Y', resources=-1, on_error=DF.schema_validator.clear),
         calculate_publication_id(8),
     )
