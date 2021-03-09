@@ -43,6 +43,7 @@ def fetch_results():
                 page_url=SRC_URL,
                 publisher=pq(box.find('.publisher_link')).text(),
                 start_date=pq(box.find('.generalInfo-jobs li:nth-child(2) span')).text(),
+                claim_date=None,
                 description=description,
             )
             index += 1
@@ -65,6 +66,7 @@ def flow(*_):
     return Flow(
         fetch_results(),
         set_type('start_date', type='date', format='%d.%m.%Y'),
+        set_type('claim_date', type='datetime', format='any'),
         set_type('tender_id', type='string'),
         set_type('tender_type', type='string'),
         process_kind,
