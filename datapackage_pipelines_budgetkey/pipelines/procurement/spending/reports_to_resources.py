@@ -27,7 +27,7 @@ input_file = get_dependency_datapackage_url(parameters['input-pipeline'])
 db_table = parameters['db-table']
 errors_db_table = parameters['error-db-table']
 
-REVISION = 1
+REVISION = 2
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
 try:
