@@ -13,8 +13,9 @@ historic_data:
           max_year: []
           kind: []
           kind_he: []
-          
-
+          target_audience: []
+          subject: []
+          intervention: []
 
     - run: dump_to_path
       parameters:
