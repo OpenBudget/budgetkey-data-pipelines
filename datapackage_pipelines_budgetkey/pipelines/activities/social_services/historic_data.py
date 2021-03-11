@@ -14,13 +14,13 @@ SOURCES = [
                     headers=2
                 )
             ),
-            dict(
-                office='משרד הרווחה',
-                options=dict(
-                    sheet='רווחה',
-                    headers=2
-                )
-            ),
+            # dict(
+            #     office='משרד הרווחה',
+            #     options=dict(
+            #         sheet='רווחה',
+            #         headers=2
+            #     )
+            # ),
             dict(
                 office='משרד החינוך',
                 options=dict(
@@ -48,13 +48,13 @@ SOURCES = [
                     headers=1
                 )
             ),
-            dict(
-                office='משרד הרווחה',
-                options=dict(
-                    sheet='רווחה 2017 ',
-                    headers=1
-                )
-            ),
+            # dict(
+            #     office='משרד הרווחה',
+            #     options=dict(
+            #         sheet='רווחה 2017 ',
+            #         headers=1
+            #     )
+            # ),
             dict(
                 office='משרד החינוך',
                 options=dict(
@@ -86,19 +86,19 @@ SOURCES = [
             ),
         ]
     ),
-    dict(
-        year=2016,
-        filename='מיפוי שירותים חברתיים רווחה 2016.xlsx',
-        sheets=[
-            dict(
-                office='משרד הרווחה',
-                options=dict(
-                    sheet='רווחה',
-                    headers=1
-                )
-            ),
-        ]
-    ),
+    # dict(
+    #     year=2016,
+    #     filename='מיפוי שירותים חברתיים רווחה 2016.xlsx',
+    #     sheets=[
+    #         dict(
+    #             office='משרד הרווחה',
+    #             options=dict(
+    #                 sheet='רווחה',
+    #                 headers=1
+    #             )
+    #         ),
+    #     ]
+    # ),
     dict(
         year=2016,
         filename='מיפוי שירותים חברתיים חינוך 2016.xlsx',
@@ -220,7 +220,7 @@ def prepare():
 def flow(*_):
     prepare()
     yearly_fields = ['year', 'unit', 'subunit', 'subsubunit', 'allocated_budget', 'num_beneficiaries']
-    return DF.Flow(
+    DF.Flow(
         *[
             DF.load('tmp/' + resource_name + '/datapackage.json')
             for resource_name, _ in loads
@@ -241,8 +241,12 @@ def flow(*_):
         )),
         DF.add_field('kind', 'string', 'gov_social_service'),
         DF.add_field('kind_he', 'string', 'שירות חברתי'),
-        DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.printer(),
+        DF.dump_to_path('tmp/activities')
+    ).process()
+    return DF.Flow(
+        DF.load('tmp/activities/datapackage.json'),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 

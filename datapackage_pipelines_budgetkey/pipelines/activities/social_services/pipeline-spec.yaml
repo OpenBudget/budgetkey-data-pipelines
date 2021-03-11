@@ -1,6 +1,21 @@
 historic_data:
   pipeline:
     - flow: historic_data
+    - flow: historic_data_welfare
+    - run: concatenate
+      parameters:
+        fields:
+          publisher_name: []
+          activity_name: []
+          activity_description: []
+          history: []
+          min_year: []
+          max_year: []
+          kind: []
+          kind_he: []
+          
+
+
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/activities/social_services/historic_data
