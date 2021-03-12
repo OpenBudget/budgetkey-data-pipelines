@@ -16,7 +16,8 @@ def process_resource(res_):
                 prefixes.append(prefix)
                 prefixes.append('00' + prefix)
                 separated = [prefix[x:x+2] for x in range(0, len(prefix), 2)]
-                prefixes.append('.'.join(separated))
+                separated = '.'.join(separated)
+                prefixes.append(separated)
                 if len(separated) > 3:
                     prefixes.append(separated[:-2])
         row['nice-prefixes'] = sorted(set(prefixes))
