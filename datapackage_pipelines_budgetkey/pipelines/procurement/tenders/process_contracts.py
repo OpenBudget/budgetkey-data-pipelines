@@ -130,8 +130,8 @@ def process_row(row, *_):
         )
         for t in timestamps:
             erec['payments'][t][1] += payments[t]
-        erec['volume'] += contract.get('volume', 0)
-        erec['executed'] += contract.get('executed', 0)
+        erec['volume'] += contract.get('volume') or  0
+        erec['executed'] += contract.get('executed') or 0
         erec['count'] += 1
     ents = list(sorted(ents.values(), key=lambda x: (x['executed'], x['volume']), reverse=True))
     for e in ents:
