@@ -34,7 +34,7 @@ ENV DPP_PROCESSOR_PATH=/datapackage_pipelines_budgetkey/processors
 ENV DPP_REDIS_HOST=localhost
 ENV REDIS_USER=dpp
 ENV REDIS_GROUP=dpp
-ENV DPP_NUM_WORKERS=3
+ENV DPP_NUM_WORKERS=6
 
 WORKDIR /datapackage_pipelines_budgetkey/pipelines/
 
