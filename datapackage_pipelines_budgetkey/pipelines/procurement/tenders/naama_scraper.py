@@ -60,6 +60,7 @@ def flow(*_):
         DF.concatenate(fields=TENDER_MAPPING),
         DF.validate(),
         DF.set_type('supplier_id', type='string', transform=str),
+        DF.set_type('tender_id', type='string', transform=lambda v: v or 'none'),
         DF.set_type('.+_date', type='date', format='%d.%m.%Y', on_error=DF.schema_validator.clear),
         DF.set_type('subjects', type='array', transform=lambda v: list(x.strip() for x in v.split(',')) if v else []),
         DF.set_type('claim_date', type='datetime', 
