@@ -1,34 +1,11 @@
 all:
   title: Load all tenders data from data.gov.il to flat file
 
-  dependencies:
-    - pipeline: ./procurement/tenders/scraper
-
   pipeline:
     - run: add_metadata
       parameters:
         name: "procurement-tenders"
-    - run: add_sql_resource
-      parameters:
-        datapackage: /var/datapackages/procurement/tenders/scraper/datapackage.json
-        fields:
-          - name: claim_date
-            format: "%Y-%m-%dT%H:%M:%S"
-          - name: __last_updated_at
-            format: "%Y-%m-%dT%H:%M:%S"
-          - name: __last_modified_at
-            format: "%Y-%m-%dT%H:%M:%S"
-          - name: __created_at
-            format: '%Y-%m-%dT%H:%M:%S'
-        resource: tenders
-        table: procurement_tenders
-    - run: stream_remote_resources
-    - run: set_types
-      parameters:
-        types:
-          tender_id:
-            constraints:
-              required: true
+    - flow: naama_scraper
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/all
@@ -47,28 +24,15 @@ processed:
       parameters:
         url: /var/datapackages/procurement/tenders/all/datapackage.json
         resource: tenders
-    - run: delete_fields
-      parameters:
-        fields:
-          -  __last_updated_at
-          -  __last_modified_at
-          -  __created_at
-          -  __is_new
-          -  __is_stale
-          -  __staleness
-          -  __next_update_days
-          -  __hash
-    - run: process_contracts      
-    - run: extra_values      
-    - run: sample
-    # Fingerprint exemption suppliers
     - run: fingerprint
       parameters:
         resource-name: tenders
         source-field: supplier
         source-id-field: supplier_id
+    - run: process_contracts      
+    - run: extra_values      
+    - run: sample
     # Set types for ES
-    - run: set_types
     - run: set_types
       parameters:
         types:

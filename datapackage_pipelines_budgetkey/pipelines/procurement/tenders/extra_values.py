@@ -129,10 +129,6 @@ def modify_datapackage(dp, *_):
         name='awardees_text',
         type='string',
         **{'es:index': False}
-    ), dict(
-        name='tender_type_he',
-        type='string',
-        **{'es:keyword': True}
     ), {
         'name': 'actionable_tips',
         'type': 'array',

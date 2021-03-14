@@ -78,7 +78,7 @@ def fetch_tenders(**kw):
                start_date, claim_date, last_update_date, end_date,
                contact, contact_email,
                decision, description, reason, regulation, page_title, page_url,
-               publisher, publisher_id, 
+               publisher,
                entity_id, entity_kind, entity_name, volume, contract_volume
         FROM procurement_tenders_processed
         WHERE publication_id=:publication_id AND tender_id=:tender_id AND tender_type=:tender_type

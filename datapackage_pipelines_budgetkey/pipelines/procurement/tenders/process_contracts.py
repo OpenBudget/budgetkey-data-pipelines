@@ -87,6 +87,15 @@ def process_row(row, *_):
     row['contract_executed'] = sum(c.get('executed', 0) for c in all_contracts)
     timestamps = sorted(set(p['timestamp'] for c in all_contracts for p in c['payments']))
     ents = {}
+    if row.get('entity_id'):
+        all_contracts.append(dict(
+            entity_id=row['entity_id'],
+            entity_name=row['entity_name'],
+            entity_kind=row['entity_kind'],
+            payments=[],
+            contract_is_active=False,
+            volume=row['volume']
+        ))
     for contract in all_contracts:
         supplier = contract['entity_name']
         if not supplier:
