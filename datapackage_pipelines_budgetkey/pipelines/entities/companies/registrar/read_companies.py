@@ -67,7 +67,7 @@ def fix_values():
     return func
 
 
-tenders = {
+companies = {
     'dataset-name': 'ica_companies',
     'resource-name': 'רשימת החברות'
 }
