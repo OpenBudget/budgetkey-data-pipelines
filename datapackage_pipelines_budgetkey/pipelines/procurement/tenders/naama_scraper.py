@@ -75,7 +75,7 @@ def flow(*_):
         DF.add_field('contact_email', 'array', []),
         DF.validate(),
         DF.update_resource(-1, name='tenders', **{'dpp:streaming': True}),
-        DF.printer(tablefmt='html'),
+        DF.printer(),
     )
 
 if __name__ == '__main__':

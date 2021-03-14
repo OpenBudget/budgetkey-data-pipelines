@@ -3,8 +3,7 @@ from dataflows import (
     Flow, load, concatenate, update_resource,
     set_primary_key, set_type, printer
 )
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
-
+from datapackage_pipelines_budgetkey.processors import data_gov_il_resource
 
 
 # Map the original column headers (in Hebrew) to the new column names (in English)
@@ -14,6 +13,7 @@ COLUMN_HEADERS_MAPPER = {
     'שם באנגלית':'company_name_eng',
     'סוג תאגיד':'company_type',
     'סטטוס חברה':'company_status',
+    'תת סטטוס':'company_sub_status',
     'תאור חברה':'company_description',
     'מטרת החברה':'company_goal',
     'תאריך התאגדות':'company_registration_date',
@@ -56,21 +56,6 @@ def clear_bool_values(package):
     yield from package
 
 
-def fetch_rows():
-    params = dict(
-        offset=0,
-        limit=1000,
-        resource_id='f004176c-b85f-4542-8901-7b3176f9a054'
-    )
-    url = 'https://data.gov.il/api/action/datastore_search'
-    while True:
-        resp = requests.get(url, params=params).json()
-        if len(resp['result']['records']) == 0:
-            break
-        yield from resp['result']['records']
-        params['offset'] += 1000
-
-
 def fix_values():
     def func(row):
         row['מספר חברה'] = str(row['מספר חברה']) if row['מספר חברה'] is not None else row['מספר חברה']
@@ -82,12 +67,15 @@ def fix_values():
     return func
 
 
+tenders = {
+    'dataset-name': 'ica_companies',
+    'resource-name': 'רשימת החברות'
+}
+
+
 def flow(*_):
-    gcd = google_chrome_driver(wait=False)
-    download = gcd.download('https://data.gov.il/dataset/246d949c-a253-4811-8a11-41a137d3d613/resource/f004176c-b85f-4542-8901-7b3176f9a054/download/f004176c-b85f-4542-8901-7b3176f9a054.csv')
     return Flow(
-        # fetch_rows(),
-        load(download, cast_strategy=load.CAST_TO_STRINGS),
+        data_gov_il_resource.flow(companies),
         fix_values(),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
