@@ -50,16 +50,21 @@ TENDER_KINDS={
     'פרסום עקרונות הסכם מסגרת עם  החברה  הממשלתית': 'exemptions',
     'פרסום התקשרות המשטרה עם בעל רעיון יחודי': 'exemptions',
 }
-
+KEY = ('publication_id', 'tender_type', 'tender_id')
 
 
 def flow(*_):
     return DF.Flow(
         data_gov_il_resource.flow(tenders),
         data_gov_il_resource.flow(exemptions),
-        DF.concatenate(fields=TENDER_MAPPING),
+        DF.concatenate(fields=TENDER_MAPPING, target=dict(name='tenders')),
         DF.validate(),
         DF.filter_rows(lambda r: r['publication_id']),
+        DF.add_field('tender_type', 'string', lambda r: TENDER_KINDS[r['tender_type_he']], **{'es:keyword': True}),
+        DF.join_with_self('tenders', KEY, dict(
+            (k, dict(aggregate='last')) for k in list(TENDER_MAPPING.keys()) + ['tender_type']
+        )),
+
         DF.set_type('supplier_id', type='string', transform=str),
         DF.set_type('tender_id', type='string', transform=lambda v: v or 'none'),
         DF.set_type('.+_date', type='date', format='%d.%m.%Y', on_error=DF.schema_validator.clear),
@@ -68,7 +73,6 @@ def flow(*_):
                     transform=lambda v, field_name, row: datetime.datetime.combine(v, row['claim_time'] or datetime.time(0)) if v else None),
         DF.set_type('tender_type_he', **{'es:keyword': True}),
         DF.delete_fields(['claim_time']),
-        DF.add_field('tender_type', 'string', lambda r: TENDER_KINDS[r['tender_type_he']], **{'es:keyword': True}),
         DF.add_field('page_url', 'string', lambda r: f'https://mr.gov.il/ilgstorefront/he/p/{r["publication_id"]}'),
         DF.add_field('page_title', 'string', lambda r: r['description']),
         DF.add_field('reason', 'string', lambda r: r['regulation']),
@@ -76,7 +80,7 @@ def flow(*_):
         DF.add_field('contact', 'string'),
         DF.add_field('contact_email', 'string'),
         DF.validate(),
-        DF.update_resource(-1, name='tenders', **{'dpp:streaming': True}),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.printer(),
     )
 
