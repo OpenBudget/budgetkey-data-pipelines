@@ -50,7 +50,7 @@ TENDER_KINDS={
     'פרסום עקרונות הסכם מסגרת עם  החברה  הממשלתית': 'exemptions',
     'פרסום התקשרות המשטרה עם בעל רעיון יחודי': 'exemptions',
 }
-KEY = ('publication_id', 'tender_type', 'tender_id')
+KEY = ['publication_id', 'tender_type', 'tender_id']
 
 
 def flow(*_):
@@ -62,7 +62,8 @@ def flow(*_):
         DF.filter_rows(lambda r: r['publication_id']),
         DF.add_field('tender_type', 'string', lambda r: TENDER_KINDS[r['tender_type_he']], **{'es:keyword': True}),
         DF.join_with_self('tenders', KEY, dict(
-            (k, dict(aggregate='last')) for k in list(TENDER_MAPPING.keys()) + ['tender_type']
+            (k, dict(aggregate='last'))
+            for k in list(TENDER_MAPPING.keys()) + ['tender_type']
         )),
 
         DF.set_type('supplier_id', type='string', transform=str),
