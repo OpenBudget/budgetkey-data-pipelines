@@ -66,6 +66,7 @@ def flow(*_):
             for k in list(TENDER_MAPPING.keys()) + ['tender_type']
         )),
 
+        DF.set_type('publication_id', type='string', transform=str),
         DF.set_type('supplier_id', type='string', transform=str),
         DF.set_type('tender_id', type='string', transform=lambda v: v or 'none'),
         DF.set_type('.+_date', type='date', format='%d.%m.%Y', on_error=DF.schema_validator.clear),
