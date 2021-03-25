@@ -76,8 +76,8 @@ def process_row(row, *_):
     except:
         global match_errors
         match_errors.add(repr(key))
-        row['simple_decision'] = None
-        row['simple_decision_long'] = None
+        row['simple_decision'] = row['decision'] or row['status'] or None
+        row['simple_decision_long'] = row['simple_decision']
         row['extended_status'] = None
         row['actionable_tips'] = []
 
@@ -99,11 +99,12 @@ def process_row(row, *_):
     row['awardees_text'] = awardees_text
 
     # Hebrew tender type
-    row['tender_type_he'] = {
-      'office': 'מכרז משרדי',
-      'central': 'מכרז מרכזי',
-      'exemptions': 'בקשת פטור ממכרז',
-    }.get(row['tender_type'])    
+    if not row['tender_type_he']:
+        row['tender_type_he'] = {
+        'office': 'מכרז משרדי',
+        'central': 'מכרז מרכזי',
+        'exemptions': 'בקשת פטור ממכרז',
+        }.get(row['tender_type'])    
 
     return row
 
