@@ -136,7 +136,12 @@ tenders:
           - page_title
           - reason
         target-field: semantic_tags
-    - run: split_subject_list      
+    - run: split_subject_list    
+    - run: set_types
+      parameters:
+        types:
+          publication_id:
+            type: integer
   document-steps:
     - run: add_tender_timeline      
   date-range:
