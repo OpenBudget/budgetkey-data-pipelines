@@ -9,6 +9,11 @@ all:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          procurement_tenders_all:
+            resource-name: tenders
 
 processed:
   dependencies:
@@ -75,7 +80,6 @@ processed:
         tables:
           procurement_tenders_processed:
             resource-name: tenders
-            mode: update
     - run: dump_to_path
       parameters:
         out-path: /var/datapackages/procurement/tenders/processed
