@@ -56,9 +56,10 @@ def process_row(row, *_):
     else:
         key = 'tender_type'
         lookup = tender_conversion_table
+    row['decision'] = row['decision'] or row['status']
     key = (
         row[key] or '',
-        row['decision'] or row['status'] or '',
+        row['decision'] or '',
         has_awardees,
         has_active_awardees
     )
