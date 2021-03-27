@@ -37,7 +37,7 @@ def join_tenders(res):
                 t = tenders.get(i)
                 if t:
                     manof_excerpts.append(dict(
-                        (k, t[k])
+                        (k, t[k] if k != 'publication_id' else int(t[k]))
                         for k in FIELDS
                     ))
         row['manof_excerpts'] = manof_excerpts
@@ -56,13 +56,19 @@ def process_resources(resources):
 
 
 def process_datapackage(dp):
-    print('Here are the list of resources I have')
-    print(','.join(x['name'] for x in dp['resources']))
     tenders_res = next(iter(filter(
         lambda x: x['name'] == 'tenders',
         dp['resources']
     )))
     tenders_fields = tenders_res['schema']['fields']
+    tenders_fields = list(filter(
+        lambda x: x['name'] in FIELDS,
+        tenders_fields
+    ))
+    for tf in tenders_fields:
+        if tf['name'] == 'publication_id':
+            tf['type'] = 'integer'
+
     dp['resources'] = list(filter(
         lambda x: x['name'] != 'tenders',
         dp['resources']
@@ -77,10 +83,7 @@ def process_datapackage(dp):
             'type': 'array',
             'es:itemType': 'object',
             'es:schema': {
-                'fields': list(filter(
-                    lambda x: x['name'] in FIELDS,
-                    tenders_fields
-                ))
+                'fields': tenders_fields
             }
         }
     ])

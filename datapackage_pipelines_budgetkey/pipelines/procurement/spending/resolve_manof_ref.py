@@ -12,7 +12,7 @@ from fuzzywuzzy import process as fw_process, fuzz
 
 TK = 'tender_key'
 DISALLOWED = {'9999', '99999', '999999', '000000', '00000', '0000', '1111', 'TEST'}
-db_table = 'procurement_tenders'
+db_table = 'procurement_tenders_processed'
 connection_string = os.environ['DPP_DB_ENGINE']
 engine = create_engine(connection_string)
 
@@ -55,13 +55,10 @@ def process_row(row, *_):
     row[TK] = None
     row[TK + '_simple'] = None
     for mf in parts:
-        debug = '40/2011' in mf
         if mf not in failed:
             if mf not in DISALLOWED:
                 if mf in all_tenders_dict:
-                    if debug: logging.info('DEBUG: %r %r', mf, row)
                     options = all_tenders_dict[mf]
-                    if debug: logging.info('DEBUG: options: %r', options)
                     if len(options) == 1:
                         selected = options[0]
                     else:
@@ -69,12 +66,10 @@ def process_row(row, *_):
                         selected = options[0]
                         if publisher_name:
                             options = dict((k[3], k) for k in options if k[3])
-                            if debug: logging.info('DEBUG: publisher: %r %r', publisher_name, options)
                             publishers = list(options.keys())
                             if len(publishers) > 0:
                                 try:
                                     selected, score = fw_process.extractOne(publisher_name, publishers, scorer=fuzz.ratio)
-                                    if debug: logging.info('DEBUG: selected: %r %r', selected, score)
                                     if score < 60:
                                         logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
                                     selected = options[selected]
