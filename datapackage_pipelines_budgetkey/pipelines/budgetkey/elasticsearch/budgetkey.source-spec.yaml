@@ -238,7 +238,7 @@ gov_decisions:
 
 activities:
   kind: indexer
-  revision: 30
+  revision: 31
   dependent_pipeline: ./activities/all
   source_datapackage: /var/datapackages/activities/all/datapackage.json
   page-title-pattern: '{kind_he} של {publisher_name} - {activity_name}'
