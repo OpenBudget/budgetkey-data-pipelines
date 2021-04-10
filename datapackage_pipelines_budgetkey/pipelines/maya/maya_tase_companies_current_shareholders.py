@@ -29,42 +29,33 @@ def get_company_details(company_id):
             logging.error(f"Retry To get Company {company_id}  in {wait} seconds")
             continue
 
-        json = res.json()['CompanyDetails']
+        json = res.json()
+        company_json = json['CompanyDetails']
 
-        return {
-            "CompanyLongName": json["CompanyLongName"],
-            "CompanyName": json["CompanyName"],
-            "CorporateNo": json["CorporateNo"],
-            "Site": json["Site"]
+        details = {
+            "CompanyLongName": company_json["CompanyLongName"],
+            "CompanyName": company_json["CompanyName"],
+            "CorporateNo": company_json["CorporateNo"],
+            "Site": company_json["Site"]
         }
-    logging.error(f"FAILED To get Company {company_id}")
-    return {}
 
+        shareholders = json["ShareHolders"]["ShareHoldersList"]
+        return details,shareholders
+    logging.error(f"FAILED To get Company details {company_id}")
+    return None,[]
 
-def get_company_shareholders(company_id):
-    headers = {
-        "Accept": "application/json",
-        'Content-Length': '0',
-        "X-Maya-With": "allow"
-    }
-
-    session.cookies.clear()
-    res = session.post(f"https://mayaapi.tase.co.il/api/download/companyshareholders?companyId={company_id}", data="",headers=headers)
-
-    json = res.json()['Data']
-    sleep(10)
-    yield from json
 
 def process_companies(rows):
     for row in rows:
-        details = get_company_details(int(row['CompanyTaseId']))
-        for shareholders in get_company_shareholders(int(row['CompanyTaseId'])):
-            del shareholders['CompanyId']
+        company_id = int(row['CompanyTaseId'])
+        details, shareholders = get_company_details(company_id)
+        for shareholder in shareholders:
+            del shareholder['CompanyId']
             yield {
                 **row,
                 **details,
-                **shareholders,
-                "LastUpdateDate": dateutil.parser.parse(shareholders["LastUpdateDate"])
+                **shareholder,
+                "LastUpdateDate": dateutil.parser.parse(shareholder["LastUpdateDate"])
             }
 
 def flow(*_):
@@ -72,21 +63,19 @@ def flow(*_):
         update_resource(
             -1, name='maya_tase_companies_current_shareholders', path="data/maya_tase_companies_current_shareholders.csv",
         ),
+        add_field('CompanyName', 'string'),
         add_field('CompanyLongName', 'string'),
         add_field('CorporateNo', 'string'),
         add_field('Site', 'string'),
+
         add_field('CapitalPercent', 'number'),
         add_field('EndBalance', 'number'),
         add_field('HolderId', 'number'),
         add_field('HolderName', 'string'),
         add_field('IsTradeWritten', 'number'),
-
-        add_field('IsTradeWritten', 'number'),
         add_field('LastUpdateDate', 'date'),
         add_field('MarketValue', 'number'),
         add_field('Remark', 'string'),
-        add_field('IsTradeWritten', 'number'),
-
         add_field('SecurityId', 'number'),
         add_field('SecurityType', 'number'),
         add_field('SecurityName', 'string'),
