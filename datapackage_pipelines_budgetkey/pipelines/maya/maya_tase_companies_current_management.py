@@ -28,43 +28,36 @@ def get_company_details(company_id):
             logging.error(f"Retry To get Company {company_id}  in {wait} seconds")
             continue
 
-        json = res.json()['CompanyDetails']
+        json = res.json()
+        company_json = json['CompanyDetails']
 
-        return {
-            "CompanyLongName": json["CompanyLongName"],
-            "CompanyName": json["CompanyName"],
-            "CorporateNo": json["CorporateNo"],
-            "Site": json["Site"]
+        details = {
+            "CompanyLongName": company_json["CompanyLongName"],
+            "CompanyName": company_json["CompanyName"],
+            "CorporateNo": company_json["CorporateNo"],
+            "Site": company_json["Site"]
         }
-    logging.error(f"FAILED To get Company {company_id}")
-    return {}
+
+        management = json["ManagementDetails"]["ManagementAndSeniorExecutives"]
+        return details,management
+    logging.error(f"FAILED To get Company details {company_id}")
+    return None,[]
 
 
-def get_company_management(company_id):
-    headers = {
-        "Accept": "application/json",
-        'Content-Length': '0',
-        "X-Maya-With": "allow"
-    }
-
-    session.cookies.clear()
-    res = session.post(f"https://mayaapi.tase.co.il/api/download/companymanagement?companyId={company_id}", data="",headers=headers)
-
-    json = res.json()['Data']
-    sleep(10)
-    yield from json
 
 def process_companies(rows):
     for row in rows:
 
-        details = get_company_details(int(row['CompanyTaseId']))
-        for manager in get_company_management(int(row['CompanyTaseId'])):
+        details,management = get_company_details(int(row['CompanyTaseId']))
+        for manager in management:
             del manager["LastBalanceDate"]
             yield {
                 **row,
                 **details,
                 **manager
             }
+
+
 def flow(*_):
     return Flow(
         update_resource(
