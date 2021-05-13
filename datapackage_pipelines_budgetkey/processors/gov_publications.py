@@ -74,7 +74,7 @@ def flow(parameters, *_):
 
     def datetime_to_date(field):
         def f(row):
-            if field in row:
+            if row.get(field):
                 row[field] = row[field].date()
         return Flow(
             f, set_type(field, type='date'),
