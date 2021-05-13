@@ -52,7 +52,7 @@ def get_dataset_html(gcd, dataset_name):
     for resource in resources:
         resource = pq(resource)
         resource_page = get_page(gcd, 'https://data.gov.il' + pq(resource.find('a.heading')).attr('href'), lambda page: 'module-content' in page)
-        file_url = pq(resource_page.find('.module .module-content:first-child p.muted.ellipsis a.btn-primary')).attr('href')
+        file_url = pq(resource_page.find('a.resource-url-analytics')).attr('href')
         if not file_url.startswith('https://'):
             file_url = 'https://data.gov.il' + file_url
         results.append(dict(
