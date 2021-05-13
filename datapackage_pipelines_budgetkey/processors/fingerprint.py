@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-DIGITS = re.compile(r'\d+')
+DIGITS = re.compile(r'\d\d+')
 ENGLISH = re.compile('[a-zA-Z]+')
 
 CLEAN_WORDS = [ 'בע"מ',
