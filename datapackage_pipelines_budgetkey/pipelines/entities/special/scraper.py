@@ -80,10 +80,10 @@ def scrape():
         driver.find_element_by_id('btnHipus').click()
 
     for selection in options.keys():
-        prepare()
         if slugs.get(options[selection]) is None:
             logging.warning('SKIPPING option #%s (%s)', selection, options[selection])
             continue
+        prepare()
         select_option(selection)
         while True:
             try:
