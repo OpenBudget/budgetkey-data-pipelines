@@ -57,10 +57,11 @@ def scrape():
     def prepare():
         logging.info('PREPARING')
         driver.get("https://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
-        bakasha = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "RadioBakasha1"))
-        )
-        bakasha.click()
+        driver.execute_script('Display(1)');
+        # bakasha = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located((By.ID, "RadioBakasha1"))
+        # )
+        # bakasha.click()
 
     prepare()
 
@@ -77,7 +78,11 @@ def scrape():
         logging.info('OPTION %s (%s)', selection_, options[selection_])
         driver.find_element_by_css_selector('option[value="%s"]' % selection_).click()
         time.sleep(3)
-        driver.find_element_by_id('btnHipus').click()
+        search_button = driver.find_element_by_id('btnHipus')
+        hover = ActionChains(driver).move_to_element(search_button)\
+                            .move_to_element_with_offset(search_button, xoffset=10, yoffset=10)\
+                            .click()\
+                            .perform()
 
     for selection in options.keys():
         if slugs.get(options[selection]) is None:
