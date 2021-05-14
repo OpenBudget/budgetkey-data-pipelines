@@ -76,6 +76,7 @@ def scrape():
     def select_option(selection_):
         logging.info('OPTION %s (%s)', selection_, options[selection_])
         driver.find_element_by_css_selector('option[value="%s"]' % selection_).click()
+        time.sleep(3)
         driver.find_element_by_id('btnHipus').click()
 
     for selection in options.keys():
