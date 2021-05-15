@@ -167,10 +167,14 @@ def flow(parameters, *_):
     year = parameters['year']
     skip_if_exists = parameters.get('skip-if-exists')
     out_path = f'/var/datapackages/supports/yearly-{year}'
+    print('SKIP IF EXISTS?', skip_if_exists)
     if skip_if_exists:
         out_file = os.path.join(out_path, 'data', 'supports.csv')
+        print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
         if os.path.exists(out_file):
+            print('FILE SIZE', os.stat(out_file).st_size)
             if os.stat(out_file).st_size > 1024000:
+                print('SKIPPING')
                 return None
     return DF.Flow(
         DF.load(wrapper(year), format='csv', 
