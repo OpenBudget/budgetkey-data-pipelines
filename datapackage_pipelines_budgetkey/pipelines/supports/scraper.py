@@ -1,7 +1,7 @@
 import dataflows as DF
 import time
 import logging
-import csv
+import os
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
@@ -165,12 +165,19 @@ def scraper(gcd, selected_year):
 
 def flow(parameters, *_):
     year = parameters['year']
+    skip_if_exists = parameters.get('skip-if-exists')
+    out_path = f'/var/datapackages/supports/yearly-{year}'
+    if skip_if_exists:
+        out_file = os.path.join(out_path, 'data', 'supports.csv')
+        if os.path.exists(out_file):
+            if os.stat(out_file).st_size > 1024000:
+                return None
     return DF.Flow(
         DF.load(wrapper(year), format='csv', 
                 infer_strategy=DF.load.INFER_STRINGS,
                 cast_strategy=DF.load.CAST_DO_NOTHING),
         DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
-        DF.dump_to_path(f'/var/datapackages/supports/yearly-{year}')
+        DF.dump_to_path(out_path)
     )
 
 

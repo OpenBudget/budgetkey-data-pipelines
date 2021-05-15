@@ -3,84 +3,98 @@ supports-2004:
   - flow: scraper
     parameters:
       year: 2004
+      skip-if-exists: true
 
 supports-2005:
   pipeline:
   - flow: scraper
     parameters:
       year: 2005
+      skip-if-exists: true
 
 supports-2006:
   pipeline:
   - flow: scraper
     parameters:
       year: 2006
+      skip-if-exists: true
 
 supports-2007:
   pipeline:
   - flow: scraper
     parameters:
       year: 2007
+      skip-if-exists: true
 
 supports-2008:
   pipeline:
   - flow: scraper
     parameters:
       year: 2008
+      skip-if-exists: true
 
 supports-2009:
   pipeline:
   - flow: scraper
     parameters:
       year: 2009
+      skip-if-exists: true
 
 supports-2010:
   pipeline:
   - flow: scraper
     parameters:
       year: 2010
+      skip-if-exists: true
 
 supports-2011:
   pipeline:
   - flow: scraper
     parameters:
       year: 2011
+      skip-if-exists: true
 
 supports-2012:
   pipeline:
   - flow: scraper
     parameters:
       year: 2012
+      skip-if-exists: true
 
 supports-2013:
   pipeline:
   - flow: scraper
     parameters:
       year: 2013
+      skip-if-exists: true
 
 supports-2014:
   pipeline:
   - flow: scraper
     parameters:
       year: 2014
+      skip-if-exists: true
 
 supports-2015:
   pipeline:
   - flow: scraper
     parameters:
       year: 2015
+      skip-if-exists: true
 
 supports-2016:
   pipeline:
   - flow: scraper
     parameters:
       year: 2016
+      skip-if-exists: true
 
 supports-2017:
   pipeline:
   - flow: scraper
     parameters:
       year: 2017
+      skip-if-exists: true
 
 supports-2018:
   schedule:
