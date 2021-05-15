@@ -137,6 +137,7 @@ def scrape():
 
     gcd.teardown()
 
+
 datapackage['resources'].append({
     'name': 'special-entities',
     PROP_STREAMING: True,
