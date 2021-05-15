@@ -13,6 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.remote_connection import LOGGER
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.webdriver.support.ui import Select
 
 from pyquery import PyQuery as pq
 
@@ -51,19 +52,19 @@ scraped_ids = set()
 
 def scrape():
 
-    gcd = google_chrome_driver()
+    gcd = google_chrome_driver(wait=False)
     driver = gcd.driver
 
     def prepare():
         logging.info('PREPARING')
         driver.get("https://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
+        # time.sleep(3)
+        # driver.execute_script('Display(1)');
+        bakasha = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.ID, "RadioBakasha1"))
+        )
+        bakasha.click()
         time.sleep(3)
-        driver.execute_script('Display(1)');
-        time.sleep(3)
-        # bakasha = WebDriverWait(driver, 10).until(
-        #     EC.presence_of_element_located((By.ID, "RadioBakasha1"))
-        # )
-        # bakasha.click()
 
     prepare()
 
@@ -78,7 +79,9 @@ def scrape():
 
     def select_option(selection_):
         logging.info('OPTION %s (%s)', selection_, options[selection_])
-        driver.find_element_by_css_selector('option[value="%s"]' % selection_).click()
+        select = Select(driver.find_element_by_id('DropdownlistSugYeshut'))
+        select.select_by_value(selection_)
+        # driver.find_element_by_css_selector('option[value="%s"]' % selection_).click()
         time.sleep(3)
         search_button = driver.find_element_by_id('btnHipus')
         hover = ActionChains(driver).move_to_element(search_button)\
