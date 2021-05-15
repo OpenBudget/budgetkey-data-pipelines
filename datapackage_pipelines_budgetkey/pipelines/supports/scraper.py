@@ -173,7 +173,7 @@ def flow(parameters, *_):
         print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
         if os.path.exists(out_file):
             print('FILE SIZE', os.stat(out_file).st_size)
-            if os.stat(out_file).st_size > 1024000:
+            if os.stat(out_file).st_size > 102400:
                 print('SKIPPING')
                 return None
     return DF.Flow(
