@@ -1,6 +1,37 @@
+import os
+import requests
+from fuzzywuzzy import process
 import dataflows as DF
 
-filename = 'קטלוג לרווחה להעלאה למערכת הזנה.xlsx'
+JWT=os.environ['JWT']
+resp = requests.get('https://data-input.obudget.org/auth/authorize?service=etl-server&jwt=' + JWT).json()
+HEADERS = {
+    'X-Auth': resp['token']
+}
+session = requests.Session()
+session.headers = HEADERS
+
+def datarecords(kind):
+    records = session.get('https://data-input.obudget.org/api/datarecords/' + kind).json()['result']
+    # print(records)
+    return dict((x['name'], x) for x in map(lambda y: y['value'], records))
+
+options = dict()
+for k in ['target_audience', 'subject', 'intervention']:
+    options[k] = datarecords(k)
+
+def best_match(name, id, field='id'):
+    options_ = options[id]
+    best = process.extractOne(name, list(options_.keys()), score_cutoff=80)
+    assert best is not None, 'Failed to find match for {}:{}'.format(id, name)
+    return options_[best[0]][field]
+
+def clean(row, f):
+    if row.get(f):
+        return row[f].strip()
+    return None
+
+filename = 'קטלוג רווחה למערכת ההזנה 18.5.21.xlsx'
 
 
 FIELDS = [
@@ -13,10 +44,11 @@ FIELDS = [
 ]
 
 
-def splitter(f):
+def splitter(f, kind):
     def func(r):
         if r[f]:
-            return r[f].split('|')
+            names = r[f].split('|')
+            return [best_match(name, kind) for name in names]
         return []
     return func
 
@@ -30,14 +62,14 @@ def flow(*_):
         DF.add_field('history', 'array', lambda r: [
         dict(
             year=2019, 
-            unit=r['יחידה ארגונית נותנת השירות'].split('/')[0].strip(),
-            subunit=r['יחידה ארגונית נותנת השירות'].split('/')[1].strip(),
-            subsubunit=r['יחידה ארגונית נותנת השירות'].split('/')[1].strip(),
+            unit=clean(r, 'מינהל - שיוך ארגוני 1'),
+            subunit=clean(r, 'אגף - שיוך ארגוני 2'),
+            subsubunit=clean(r, 'יחידה - שיוך ארגוני 3'),
         ) 
         ]),
-        DF.add_field('target_audience', 'array', splitter('אוכלוסייה')),
-        DF.add_field('subject', 'array', splitter('תחום ההתערבות')),
-        DF.add_field('intervention', 'array', splitter('אופן התערבות')),
+        DF.add_field('target_audience', 'array', splitter('אוכלוסייה', 'target_audience')),
+        DF.add_field('subject', 'array', splitter('תחום ההתערבות', 'subject')),
+        DF.add_field('intervention', 'array', splitter('אופן התערבות', 'intervention')),
         DF.select_fields(FIELDS),
         DF.add_field('publisher_name', 'string', 'משרד הרווחה'),
         DF.add_field('min_year', 'integer', 2019),
