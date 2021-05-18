@@ -28,9 +28,15 @@ class DocParser(Parser):
 
 def get_explanations(url):
     logging.info('Connecting to %r', url)
-    gcl = google_chrome_driver()
-    archive = gcl.download(url)
-    gcl.teardown()
+    try:
+        resp = requests.get(url, stream=True, timeout=300).raw
+        outfile = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
+        shutil.copyfileobj(resp, outfile)
+        archive = outfile.name
+    except Exception:
+        gcl = google_chrome_driver()
+        archive = gcl.download(url)
+        gcl.teardown()
 
     if '.tar.gz' in url:
         t_archive = tarfile.open(name=archive, mode='r|gz')
