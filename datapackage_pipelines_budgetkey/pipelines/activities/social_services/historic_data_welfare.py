@@ -3,6 +3,7 @@ import requests
 from fuzzywuzzy import process
 import dataflows as DF
 
+
 JWT=os.environ['DATA_INPUT_JWT']
 resp = requests.get('https://data-input.obudget.org/auth/authorize?service=etl-server&jwt=' + JWT).json()
 HEADERS = {
