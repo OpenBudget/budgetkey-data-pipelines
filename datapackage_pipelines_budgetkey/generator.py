@@ -115,7 +115,7 @@ class Generator(GeneratorBase):
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
                 revision = parameters.get('revision', 0) + bumper
 
-                if doc_type != 'people':
+                if doc_type not in ('people', 'gov-decisions'):
                     all_pipelines.append(pipeline_id)
                     sitemap_params.append({
                         'kind': doc_type,
