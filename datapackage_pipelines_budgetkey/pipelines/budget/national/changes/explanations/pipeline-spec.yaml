@@ -8,31 +8,31 @@ all:
         resource:
           name: explanation-history
           path: data/explanation-history.csv
-        url: https://www.dropbox.com/s/3sfjno7l2v3lkpy/explanations.tar.gz?dl=1
+        url: https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/yearly-budgets/explanations.tar.gz
     - run: explanation_fetcher
       parameters:
         resource:
           name: explanation-2017
           path: data/explanation-2017.csv
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2017.zip
+        url: https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_explain_2017.zip
     - run: explanation_fetcher
       parameters:
         resource:
           name: explanation-2018
           path: data/explanation-2018.csv
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2018.zip
+        url: https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_explain_2018.zip
     - run: explanation_fetcher
       parameters:
         resource:
           name: explanation-2019
           path: data/explanation-2019.csv
-        url: https://www.gov.il/BlobFolder/generalpage/budget-changes-past/he/BudgetChanges_past_approv_explain_2019.zip
-    - run: explanation_fetcher
-      parameters:
-        resource:
-          name: explanation-2020
-          path: data/explanation-2020.csv
-        url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
+        url: https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_explain_2019.zip
+    # - run: explanation_fetcher
+    #   parameters:
+    #     resource:
+    #       name: explanation-2020
+    #       path: data/explanation-2020.csv
+    #     url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
     # - run: explanation_fetcher
     #   parameters:
     #     resource:
