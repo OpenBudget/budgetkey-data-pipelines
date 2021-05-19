@@ -81,7 +81,6 @@ def flow(*_):
     return DF.Flow(
         get_updated_sources(),
         DF.concatenate(fields=TENDER_MAPPING, target=dict(name='tenders')),
-        DF.validate(),
         DF.filter_rows(lambda r: r['publication_id']),
         DF.add_field('tender_type', 'string', lambda r: TENDER_KINDS[r['tender_type_he']], **{'es:keyword': True}),
         DF.join_with_self('tenders', KEY, dict(
