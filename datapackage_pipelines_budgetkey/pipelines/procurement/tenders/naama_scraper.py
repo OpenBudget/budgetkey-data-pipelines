@@ -66,7 +66,7 @@ def get_updated_sources():
         href = anchor.attr('href')
         if '.zip' in href:
             sources.add(href + '#.xlsx')
-    sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0) for source in sources]
+    sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING) for source in sources]
     if len(sources) != 2:
         return DF.Flow(
             data_gov_il_resource.flow(tenders),
