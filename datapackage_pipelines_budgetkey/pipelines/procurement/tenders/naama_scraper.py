@@ -93,6 +93,7 @@ def flow(*_):
         DF.set_type('tender_id', type='string', transform=lambda v: v or 'none'),
         DF.set_type('.+_date', type='date', format='%d.%m.%Y', on_error=DF.schema_validator.clear),
         DF.set_type('subjects', type='string', transform=lambda v: ';'.join(x.strip() for x in v.split(',')) if v else ''),
+        DF.validate(),
         DF.set_type('claim_date', type='datetime', 
                     transform=lambda v, field_name, row: datetime.datetime.combine(v, row['claim_time'] or datetime.time(0)) if v else None),
         DF.set_type('tender_type_he', **{'es:keyword': True}),
@@ -103,7 +104,6 @@ def flow(*_):
         DF.add_field('documents', 'array', []),
         DF.add_field('contact', 'string'),
         DF.add_field('contact_email', 'string'),
-        DF.validate(),
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.printer(),
     )
