@@ -57,7 +57,7 @@ def get_updated_sources():
     import requests
     from pyquery import PyQuery as pq
     URL = 'https://mr.gov.il/ilgstorefront/he/news/details/230920201036'
-    sources = []
+    sources = set()
 
     page = pq(requests.get(URL).text)
     anchors = page.find('a')
@@ -65,7 +65,7 @@ def get_updated_sources():
         anchor = pq(anchor)
         href = anchor.attr('href')
         if '.zip' in href:
-            sources.append(href + '#.xlsx')
+            sources.add(href + '#.xlsx')
     sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0) for source in sources]
     if len(sources) != 2:
         return DF.Flow(
