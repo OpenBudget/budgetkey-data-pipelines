@@ -24,7 +24,7 @@ def flow(*_):
     return DF.Flow(
         datarecords('social_service'),
         DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', ]),
-        DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword', True}),
+        DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
         splitter('subject'),
         splitter('intervention'),
