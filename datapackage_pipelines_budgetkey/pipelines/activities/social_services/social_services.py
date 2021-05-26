@@ -70,7 +70,7 @@ def flow(*_):
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
         DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
         DF.update_resource(-1, **{'dpp:streaming': True}),
-        DF.dump_to_path('/var/datapackages/activities/all'),
+        DF.dump_to_path('/var/datapackages/activities/social_services'),
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
         ))
