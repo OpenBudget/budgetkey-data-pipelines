@@ -1,4 +1,5 @@
 import dataflows as DF
+from decimal import Decimal
 
 def datarecords(kind):
     return map(
@@ -18,6 +19,20 @@ def splitter(field_name):
         func,
         DF.set_type(field_name, **{'es:keyword': True})
     )
+
+def floater(field):
+    def func(row):
+        val = row.get(field)
+        if val and isinstance(val, list):
+            n = []
+            for i in val:
+                n.append(dict(
+                    (k, float(v) if isinstance(v, Decimal) else v)
+                    for k, v in i.items()
+                ))
+            row[field] = n
+    return func
+
 #  beneficiaries budgetItems complete description id intervention manualBudget name office subject subsubunit subunit suppliers target_age_group target_audience tenders unit virtue_of_table
 
 def flow(*_):
@@ -28,6 +43,9 @@ def flow(*_):
         splitter('target_audience'),
         splitter('subject'),
         splitter('intervention'),
+        floater('beneficiaries'),
+        floater('budgetItems'),
+        floater('manualBudget'),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
         DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
