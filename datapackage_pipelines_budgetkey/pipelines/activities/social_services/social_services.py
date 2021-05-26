@@ -32,6 +32,7 @@ def flow(*_):
         DF.add_field('max_year', 'integer', 2020),
         DF.add_field('kind', 'string', 'gov_social_service'),
         DF.add_field('kind_he', 'string', 'שירות חברתי'),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 
