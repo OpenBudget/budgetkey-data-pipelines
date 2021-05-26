@@ -16,7 +16,7 @@ def splitter(field_name):
         row[field_name] = [codelist[i] for i in row[field_name]]
     return DF.Flow(
         func,
-        DF.set_type(field_name, **{'es:keyword', True})
+        DF.set_type(field_name, **{'es:keyword': True})
     )
 #  beneficiaries budgetItems complete description id intervention manualBudget name office subject subsubunit subunit suppliers target_age_group target_audience tenders unit virtue_of_table
 
