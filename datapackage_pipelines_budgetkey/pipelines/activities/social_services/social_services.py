@@ -20,7 +20,7 @@ def splitter(field_name):
     )
 #  beneficiaries budgetItems complete description id intervention manualBudget name office subject subsubunit subunit suppliers target_age_group target_audience tenders unit virtue_of_table
 
-def flow():
+def flow(*_):
     return DF.Flow(
         datarecords('social_service'),
         DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', ]),
