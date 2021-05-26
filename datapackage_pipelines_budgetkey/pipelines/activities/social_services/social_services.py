@@ -30,9 +30,16 @@ def flow(*_):
         splitter('intervention'),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
-        DF.add_field('kind', 'string', 'gov_social_service'),
-        DF.add_field('kind_he', 'string', 'שירות חברתי'),
+        DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
+        DF.add_field('kind_he', 'string', 'שירות חברתי', **{'es:keyword': True, 'es:exclude': True}),
+        DF.set_type('name',  **{'es:title': True}),
+        DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
+        DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
         DF.update_resource(-1, **{'dpp:streaming': True}),
+        DF.dump_to_path('/var/datapackages/activities/all'),
+        DF.dump_to_sql(dict(
+            activities={'resource-name': 'activities'}
+        ))
     )
 
 

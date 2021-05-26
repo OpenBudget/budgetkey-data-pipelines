@@ -3,7 +3,7 @@ import dataflows as DF
 
 def flow(*_):
     return DF.Flow(
-        DF.load('/var/datapackages/activities/social_services/historic_data/datapackage.json'),
+        DF.load('/var/datapackages/activities/social_services/social_services/datapackage.json'),
         DF.concatenate(
             dict(
                 kind=[], kind_he=[],

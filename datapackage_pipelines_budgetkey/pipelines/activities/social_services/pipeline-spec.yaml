@@ -20,7 +20,3 @@ social_services:
           target_audience: []
           subject: []
           intervention: []
-
-    - run: dump_to_path
-      parameters:
-        out-path: /var/datapackages/activities/social_services/historic_data

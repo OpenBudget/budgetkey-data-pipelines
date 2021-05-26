@@ -1,5 +1,0 @@
-all:
-  dependencies:
-    - pipeline: ./activities/social_services/social_services
-  pipeline:
-    - flow: all_activities
