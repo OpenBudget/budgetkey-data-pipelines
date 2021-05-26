@@ -9,12 +9,18 @@ def datarecords(kind):
         ).results()[0][0]
     )
 
-def splitter(field_name):
-    codelist = datarecords(field_name)
+def fetch_codelist(dr_name):
+    codelist = datarecords(dr_name)
     codelist = dict((x.pop('id'), x.pop('name')) for x in codelist)
+    return codelist
+
+
+def splitter(field_name, dr_name=None):
+    dr_name = dr_name or field_name
+    codelist = fetch_codelist(dr_name)
     print(field_name, codelist)
     def func(row):
-        row[field_name] = [codelist[i] for i in row[field_name]]
+        row[field_name] = [codelist[i] for i in row[field_name] or []]
     return DF.Flow(
         func,
         DF.set_type(field_name, **{'es:keyword': True})
@@ -33,7 +39,13 @@ def floater(field):
             row[field] = n
     return func
 
-#  beneficiaries budgetItems complete description id intervention manualBudget name office subject subsubunit subunit suppliers target_age_group target_audience tenders unit virtue_of_table
+def fix_suppliers():
+    geo = fetch_codelist('geo_region')
+    def func(row):
+        for v in row.get('suppliers') or []:
+            v['geo'] = [geo[i] for i in v.get('geo', [])]
+    return func
+
 
 def flow(*_):
     return DF.Flow(
@@ -43,9 +55,13 @@ def flow(*_):
         splitter('target_audience'),
         splitter('subject'),
         splitter('intervention'),
+        splitter('target_age_group'),
         floater('beneficiaries'),
         floater('budgetItems'),
         floater('manualBudget'),
+        floater('tenders'),
+        floater('suppliers'),
+        fix_suppliers(),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
         DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
