@@ -6,17 +6,3 @@ social_services:
     # - flow: historic_data
     # - flow: historic_data_welfare
     - flow: social_services
-    - run: concatenate
-      parameters:
-        fields:
-          publisher_name: []
-          activity_name: []
-          activity_description: []
-          history: []
-          min_year: []
-          max_year: []
-          kind: []
-          kind_he: []
-          target_audience: []
-          subject: []
-          intervention: []

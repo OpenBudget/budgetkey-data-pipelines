@@ -238,13 +238,24 @@ gov_decisions:
 
 activities:
   kind: indexer
-  revision: 32
+  revision: 33
   dependent_pipeline: ./activities/social_services/social_services
   source_datapackage: /var/datapackages/activities/social_services/datapackage.json
   page-title-pattern: '{kind_he} של {office} - {name}'
   key-fields:
     - kind
     - id
+
+units:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./units/social_services/social_services
+  source_datapackage: /var/datapackages/units/social_services/datapackage.json
+  page-title-pattern: '{kind_he} / {breadcrumbs}'
+  key-fields:
+    - kind
+    - id
+
   # extra-steps:
   #   - flow: activity_add_nice_org_hierarchy
   # document-steps:
