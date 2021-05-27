@@ -4,4 +4,9 @@ social_services:
     crontab: "0 0 * * *"
 
   pipeline:
+    - run: add_metadata
+      parameters:
+        name: social_services
+        title: Fetch social services from data input
+        revision: '2021-05'
     - flow: social_services
