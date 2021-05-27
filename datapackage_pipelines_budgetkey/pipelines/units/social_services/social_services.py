@@ -20,7 +20,7 @@ def traverse(node, path):
 
 def all_units():
     hierarchies = datarecords('hierarchy')
-    yield dict(path=['משרדי הממשלה'])
+    yield dict(path=[])
     for node in hierarchies:
         yield from traverse(node, [])
 
@@ -32,8 +32,8 @@ def flow(*_):
         DF.add_field('unit', 'string', lambda r: r['path'][1] if len(r['path']) > 1 else None, **{'es:keyword': True}),
         DF.add_field('subunit', 'string', lambda r: r['path'][2] if len(r['path']) > 2 else None, **{'es:keyword': True}),
         DF.add_field('subsubunit', 'string', lambda r: r['path'][3] if len(r['path']) > 3 else None, **{'es:keyword': True}),
-        DF.add_field('breadcrumbs', 'string', lambda r: '/'.join(r['path']), **{'es:exclude': True}),
-        DF.add_field('id', 'string', lambda r: '__'.join(r['path']), **{'es:exclude': True}),
+        DF.add_field('breadcrumbs', 'string', lambda r: '/'.join(r['path']) or 'משרדי הממשלה', **{'es:exclude': True}),
+        DF.add_field('id', 'string', lambda r: '__'.join(r['path']) or 'main', **{'es:exclude': True}),
         DF.delete_fields(['path', ]),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
