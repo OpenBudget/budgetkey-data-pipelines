@@ -20,6 +20,7 @@ def traverse(node, path):
 
 def all_units():
     hierarchies = datarecords('hierarchy')
+    yield dict(path=['משרדי הממשלה'])
     for node in hierarchies:
         yield from traverse(node, [])
 
