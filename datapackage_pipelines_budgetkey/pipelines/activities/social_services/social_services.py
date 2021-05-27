@@ -64,6 +64,7 @@ def flow(*_):
         floater('manualBudget'),
         floater('tenders'),
         floater('suppliers'),
+        floater('virtue_of_table'),
         fix_suppliers(),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
