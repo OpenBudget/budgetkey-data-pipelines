@@ -69,6 +69,7 @@ def flow(*_):
         DF.set_type('name',  **{'es:title': True}),
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
         DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
+        DF.set_primary_key(['kind', 'id']),
         DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
         DF.dump_to_sql(dict(
