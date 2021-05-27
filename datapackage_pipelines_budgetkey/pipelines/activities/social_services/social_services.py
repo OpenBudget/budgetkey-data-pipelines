@@ -55,6 +55,12 @@ def fix_suppliers():
             v['geo'] = [geo[i] for i in v.get('geo', [])]
     return func
 
+def get_score(r):
+    mb = r.get('manualBudget')
+    if mb and len(mb):
+        if mb[0]['approved']:
+            return mb[0]['approved']/1000
+    return 1000
 
 def flow(*_):
     return DF.Flow(
@@ -78,7 +84,7 @@ def flow(*_):
         DF.add_field('kind_he', 'string', 'שירות חברתי', **{'es:keyword': True, 'es:exclude': True}),
         DF.set_type('name',  **{'es:title': True}),
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
-        DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
+        DF.add_field('score', 'number', get_score, **{'es:score-column': True}),
         DF.set_primary_key(['kind', 'id']),
         DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
