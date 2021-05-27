@@ -1,8 +1,7 @@
 social_services:
+  title: Fetch social services from data input
   schedule:
     crontab: "0 0 * * *"
 
   pipeline:
-    # - flow: historic_data
-    # - flow: historic_data_welfare
     - flow: social_services
