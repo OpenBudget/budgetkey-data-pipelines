@@ -9,6 +9,12 @@ def datarecords(kind):
         ).results()[0][0]
     )
 
+def services():
+    for k in datarecords('social_service'):
+        for f in ['target_audience', 'target_age_group', 'intervention', 'subject']:
+            k.setdefault(f, [])
+        yield k
+
 def fetch_codelist(dr_name):
     codelist = datarecords(dr_name)
     codelist = dict((x.pop('id'), x.pop('name')) for x in codelist)
@@ -52,7 +58,7 @@ def fix_suppliers():
 
 def flow(*_):
     return DF.Flow(
-        datarecords('social_service'),
+        services(),
         DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', ]),
         DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
