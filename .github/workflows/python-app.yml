@@ -19,13 +19,13 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
+    - name: Build
+      run: |
+        ./ci.sh script
     - name: Test
       run: |
         docker build -t budgetkey-data-pipelines-tests tests
         docker run -v `pwd`/tests:/testenv/tests budgetkey-data-pipelines-tests
-    - name: Build
-      run: |
-        ./ci.sh script
     - name: Deploy
       run: |
         ./ci.sh deploy
