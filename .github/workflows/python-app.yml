@@ -26,6 +26,7 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         GITHUB_TOKEN: ${{ secrets.K8S_GITHUB_TOKEN }}
       run: |
+        ./ci.sh install
         ./ci.sh script
     - name: Test
       run: |
