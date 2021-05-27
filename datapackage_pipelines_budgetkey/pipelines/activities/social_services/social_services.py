@@ -23,7 +23,7 @@ def splitter(field_name, dr_name=None):
         row[field_name] = [codelist[i] for i in row[field_name] or []]
     return DF.Flow(
         func,
-        DF.set_type(field_name, **{'es:keyword': True})
+        DF.set_type(field_name, **{'es:keyword': True, 'es:itemType': 'string'})
     )
 
 def floater(field):
@@ -37,7 +37,10 @@ def floater(field):
                     for k, v in i.items()
                 ))
             row[field] = n
-    return func
+    return DF.Flow(
+        func,
+        DF.set_type(field, **{'es:itemType': 'object', 'es:index': False})
+    )
 
 def fix_suppliers():
     geo = fetch_codelist('geo_region')
