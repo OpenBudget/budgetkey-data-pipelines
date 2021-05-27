@@ -94,12 +94,13 @@ entities.associations.guidestar.scraper
 "association_proper_management": "יש אישור",
 "association_registration_date": "2010-02-03",
 "association_title": "ארגון לתת - סיוע הומניטרי ישראלי (ע\"ר)",
-"association_top_salaries": [
-{"role": "נשיא", "salary": 612433.0},
-{"role": "מנכ\"ל", "salary": 512674.0}, 
-{"role": "מנהל כספים/גזבר",  "salary": 368814.0}, 
-{"role": "עו\"ד/יועץ משפטי", "salary": 344559.0}, 
-{"role": "מנהלת מחלקת גיוס", "salary": 342322.0}],
+"association_top_salaries":  [
+    {"role": "נשיא", "salary": 566754.0},
+    {"role": "מנכ\"ל", "salary": 510798.0},
+    {"role": "מנהל כספים/גזבר", "salary": 386894.0},
+    {"role": "עו"ד/יועץ משפטי", "salary": 362184.0},
+    {"role": "מנהלת מחלקת גיוס", "salary": 350297.0}
+],
 "association_year_established": 1982,
 "id": "580012805",
 "association_last_report_year": 2019,
