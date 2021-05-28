@@ -12,9 +12,8 @@ def datarecords(kind):
 def traverse(node, path):
     children = node.get('children')
     name = node.get('name')
-    if not children:
-        yield dict(path=path + [name])
-    else:
+    yield dict(path=path + [name])
+    if children:
         for child in children:
             yield from traverse(child, path + [name])
 
