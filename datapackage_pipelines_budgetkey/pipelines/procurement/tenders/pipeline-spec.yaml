@@ -1,5 +1,7 @@
 all:
   title: Load all tenders data from data.gov.il to flat file
+  schedule:
+    crontab: "0 0 * * *"
 
   pipeline:
     - run: add_metadata
