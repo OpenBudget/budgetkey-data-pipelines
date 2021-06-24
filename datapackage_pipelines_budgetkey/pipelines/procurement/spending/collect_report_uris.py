@@ -47,6 +47,8 @@ def get_all():
                 continue
             for f in r.pop('File'):
                 f.update(r)
+                if f['FileName'].endswith('pdf'):
+                    continue
                 yield {
                     'report-url': f'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/{base}/he/{f["FileName"]}',
                     'report-title': f['Title'],
