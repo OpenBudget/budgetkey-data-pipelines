@@ -105,10 +105,17 @@ try:
             obj_name = os.path.join('spending-reports', obj_name)
             if not object_storage.exists(obj_name):
                 tmp = tempfile.NamedTemporaryFile()
-                try:
-                    stream = requests.get(url_to_use, stream=True, verify=False).raw
-                except:
-                    logging.exception('Failed to load data from %s', url_to_use)
+                stream = None
+                for _ in range(3):
+                    try:
+                        stream = requests.get(url_to_use, stream=True, verify=False).raw
+                        break
+                    except Exception as e:
+                        logging.error('Failed to load data from %s; %s', url_to_use, e)
+                        time.sleep(3)
+                if stream is None:
+                    logging.error('SKIPPING LOADING FILE %s', url_to_use)
+                    continue
                 stream.read = functools.partial(stream.read, decode_content=True)
                 shutil.copyfileobj(stream, tmp)
                 tmp.flush()
