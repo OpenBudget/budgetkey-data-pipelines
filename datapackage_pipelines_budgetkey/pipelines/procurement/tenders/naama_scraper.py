@@ -63,7 +63,7 @@ def get_updated_sources():
     anchors = page.find('a')
     for anchor in anchors:
         anchor = pq(anchor)
-        href = anchor.attr('href')
+        href = anchor.attr('href').strip()
         if '.zip' in href:
             sources.add(href + '#.xlsx')
     sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING) for source in sources]
