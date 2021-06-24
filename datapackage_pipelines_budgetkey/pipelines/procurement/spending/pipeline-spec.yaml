@@ -7,17 +7,17 @@ quarterly-contract-spending-report-uris:
         name: quarterly-contract-spending-report-uris
         title: Quarterly Contact Spending Report URIs
         revision: 2019-02
-    - run: collect_report_uris
+    - flow: collect_report_uris
       runner: tzabar
       parameters:
         target-resource:
           name: quarterly-contract-spending-report-uris
           path: data/quarterly-contract-spending-report-uris.csv
     - run: add-report-metadata
-    - run: collect_report_pages
-      runner: tzabar
-      parameters:
-        resource-name: quarterly-contract-spending-report-uris
+    # - run: collect_report_pages
+    #   runner: tzabar
+    #   parameters:
+    #     resource-name: quarterly-contract-spending-report-uris
     - run: set_types
     - run: sample
     - run: dump.to_path

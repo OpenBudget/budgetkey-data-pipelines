@@ -1,66 +1,73 @@
-from itertools import chain
+# from itertools import chain
 
 import requests
-import logging
+import json
 
-from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from pyquery import PyQuery as pq
 
-from datapackage_pipelines.wrapper import ingest, spew
+import dataflows as DF
 
-parameters, datapackage, res_iter = ingest()
-
-URL = "https://foi.gov.il/he/search/site?page={0}&f[0]=im_field_mmdtypes%3A368"
-
-
-def get_all_reports():
-    page = 0
-    session = requests.session()
-    done = False
-    while not done:
-        results = session.get(URL.format(page), verify=False).text
-        results = pq(results)
-        results = results.find('.search-result')
-        for result in results:
-            result = pq(result).find('li')
-            rec = {
-                'node-url': pq(result[0].find('a')).attr('href'),
-                'report-title': pq(result[0].find('a')).text(),
-                'report-publisher': pq(result[1]).text(),
-                'report-date': pq(result[2]).text()
-            }
-            logging.info(rec)
-            yield rec
-        if len(results) == 0:
-            done = True
-        page += 1
+def get_offices():
+    url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
+    text=requests.get(url).text
+    page = pq(text)
+    el=page.find('form')[0]
+    cfg = el.attrib['ng-init']
+    cfg = json.loads(cfg.split("','',10,'',")[1].split(",'MultiAutoComplete')")[0])
+    cfg = cfg[1]
+    assert cfg['Name'] == 'Office'
+    cfg = cfg['MultiChoiseValues']['Values']
+    return dict(
+        (c['Key'], c['Value'])
+        for c in cfg
+    )
 
 
-resource = parameters['target-resource']
-resource[PROP_STREAMING] = True
-resource['schema'] = {
-    'fields': [
-        {
-            'name': 'report-date',
-            'type': 'date',
-            'format': '%d.%m.%Y'
-        },
-        {
-            'name': 'report-title',
-            'type': 'string'
-        },
-        {
-            'name': 'report-publisher',
-            'type': 'string'
-        },
-        {
-            'name': 'node-url',
-            'type': 'string',
-            'format': 'uri'
-        }
-    ]
-}
-datapackage['resources'].append(resource)
+def get_all():
+    total = 100000
+    skip = 0
+    offices = get_offices()
+    while skip < total:
+        payload = dict(
+            DynamicTemplateID='8132e331-eb58-474d-abe2-085d3f08c400',
+            QueryFilters=dict(
+                skip=dict(
+                    Query=skip
+                ),
+                Info=dict(Query='1')
+            ),
+            From=skip
+        )
+        resp = requests.post('https://www.gov.il/he/api/DynamicCollector', json=payload).json()
+        results = resp['Results']
+        for r in results:
+            base = r['UrlName']
+            r = r['Data']
+            if 'File' not in r:
+                continue
+            for f in r.pop('File'):
+                f.update(r)
+                yield {
+                    'report-url': f'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/{base}/he/{f["FileName"]}',
+                    'report-title': f['Title'],
+                    'report-publisher': offices[f['Office'][0]],
+                    'report-date': f.get('Date')
+                }
+        skip += len(results)
+        total = resp['TotalResults']
 
-logging.info(datapackage)
-spew(datapackage, chain(res_iter, [get_all_reports()]))
+
+def flow(parameters, *_):
+    return DF.Flow(
+        get_all(),
+        DF.set_type('report-date', type='date', format='%Y-%m-%dT%H:%M:%SZ'),
+        DF.update_resource(-1, **parameters['target-resource']),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
+    )
+
+
+if __name__ == '__main__':
+    DF.Flow(
+        flow({'target-resource': {'name': 'boop'}}),
+        DF.printer()
+    ).process()
