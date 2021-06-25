@@ -72,11 +72,11 @@ def get_decision_list():
                 'policy_type': result['PolicyTypeDesc'][0] if result.get('PolicyTypeDesc') else '',
                 'procedure_number': result['ProcedureNumberNumeric'],
                 'procedure_number_str': result['ProcedureNumber'],
-                'publish_date': result['PublishDate'],
-                'publish_date_prod': result['PublishProd'],
+                'publish_date': result['DocPublishedDate'],
+                # 'publish_date_prod': result['PublishProd'],
                 'title': result['Title'],
                 'unit': result['UnitsDesc'][0] if result.get('UnitsDesc') else (result.get('Units')[0] if result.get('Units') else None),
-                'update_date': result['UpdateDate'],
+                'update_date': result['DocUpdateDate'],
                 'url_id': result['UrlName'],
                 'score': 1
             }
@@ -107,7 +107,7 @@ schema = {
         {'name': 'procedure_number', 'type': 'integer'},
         {'name': 'procedure_number_str', 'type': 'string', 'es:keyword': True},
         {'name': 'publish_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
-        {'name': 'publish_date_prod', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
+        # {'name': 'publish_date_prod', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
         {'name': 'title', 'type': 'string', 'es:title': True},
         {'name': 'unit', 'type': 'string'},
         {'name': 'update_date', 'type': 'datetime', 'format': '%Y-%m-%dT%H:%M:%SZ'},
