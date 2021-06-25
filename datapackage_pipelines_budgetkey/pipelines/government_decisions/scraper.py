@@ -11,7 +11,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
-SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=1000"
+SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=10"
 
 SITE_URL = 'https://www.gov.il'
 TIMEOUT = 60
@@ -50,6 +50,7 @@ def get_links(content, session):
 
 
 def get_decision_list():
+    found = set()
     session = requests.Session()
     session.headers['User-Agent'] = 'datagov-external-client'
     response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0), timeout=TIMEOUT).json()
@@ -61,12 +62,17 @@ def get_decision_list():
             links = get_links(result['Content'], session)
             content_pq = sanitize_html(content_pq)
 
+            uniqueId = result['ItemUniqueId']
+            if uniqueId in found:
+                continue
+            found.add(uniqueId)
+
             yield {
                 'text': content_pq,
                 'linked_docs': links,
                 'doc_published_date': result['DocPublishedDate'],
                 'doc_update_date': result['DocUpdateDate'],
-                'id': result['ItemUniqueId'],
+                'id': uniqueId,
                 'office': result['ConnectedOffices'][0]["Title"] if result.get('ConnectedOffices') else '',
                 'government': result['PmoGovernmentDesc'][0] if result.get('PmoGovernmentDesc') else (result.get('PmoGovernment')[0] if result.get('PmoGovernment') else None),
                 'policy_type': result['PolicyTypeDesc'][0] if result.get('PolicyTypeDesc') else '',
@@ -82,7 +88,7 @@ def get_decision_list():
             }
             count += 1
         response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count), timeout=TIMEOUT).json()
-        results = response['results']
+        results = response.get('results')
         if not results or len(results) == 0:
             return
 
