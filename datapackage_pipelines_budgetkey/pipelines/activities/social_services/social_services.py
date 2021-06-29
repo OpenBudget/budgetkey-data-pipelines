@@ -62,6 +62,17 @@ def get_score(r):
             return mb[0]['approved']/1000
     return 1000
 
+def add_current_budget():
+    def func(row):
+        if row.get('manualBudget') and len(row.get('manualBudget')) > 0:
+            row['current_budget'] = row['manualBudget'][0]['approved']
+
+    return DF.Flow(
+        DF.add_field('current_budget', 'number'),
+        func
+    )
+
+
 def flow(*_):
     return DF.Flow(
         services(),
@@ -78,6 +89,7 @@ def flow(*_):
         floater('suppliers'),
         floater('virtue_of_table'),
         fix_suppliers(),
+        add_current_budget(),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
         DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
