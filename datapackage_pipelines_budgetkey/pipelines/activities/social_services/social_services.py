@@ -1,9 +1,15 @@
 import dataflows as DF
 from decimal import Decimal
 
+def get_service(r):
+    r = r['value']
+    for k in ['manualBudget']:
+        r.setdefault(k, None)
+    return r
+
 def datarecords(kind):
     return map(
-        lambda r: r['value'],
+        get_service,
         DF.Flow(
             DF.load(f'https://data-input.obudget.org/api/datarecords/{kind}', format='json', property='result')
         ).results()[0][0]
