@@ -52,12 +52,32 @@ def floater(field):
 def fix_suppliers():
     geo = fetch_codelist('geo_region')
     def func(row):
+        kinds = set()
         for v in row.get('suppliers') or []:
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             start_year = v.get('year_activity_start') or 2020
             end_year = v.get('year_activity_start') or 2020
             v['activity_years'] = list(range(start_year, end_year+1))
-    return func
+            ekind = v['entity_kind']
+            if ekind == 'company':
+                kinds.add('עסקי')
+            elif ekind in ('association', 'ottoman-association', 'cooperative'):
+                kinds.add('מגזר שלישי')
+            elif ekind in ('municipality'):
+                kinds.add('רשויות מקומיות')
+            else:
+                kinds.add('אחר')
+        if len(kinds) == 0:
+            row['supplier_kinds'] = None
+        if len(kinds) == 1:
+            row['supplier_kinds'] = kinds.pop()
+        else:
+            row['supplier_kinds'] = 'משולב'
+
+    return DF.Flow(
+        DF.add_field('supplier_kinds', 'string'),
+        func
+    )
 
 def get_score(r):
     mb = r.get('manualBudget')
