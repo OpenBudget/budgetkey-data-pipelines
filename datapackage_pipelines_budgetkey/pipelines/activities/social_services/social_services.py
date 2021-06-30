@@ -54,6 +54,9 @@ def fix_suppliers():
     def func(row):
         for v in row.get('suppliers') or []:
             v['geo'] = [geo[i] for i in v.get('geo', [])]
+            start_year = v.get('year_activity_start') or 2020
+            end_year = v.get('year_activity_start') or 2020
+            v['activity_years'] = list(range(start_year, end_year+1))
     return func
 
 def get_score(r):
