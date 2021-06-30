@@ -53,7 +53,8 @@ def fix_suppliers():
     geo = fetch_codelist('geo_region')
     def func(row):
         kinds = set()
-        for v in row.get('suppliers') or []:
+        suppliers = row.get('suppliers') or []
+        for v in suppliers:
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             start_year = v.get('year_activity_start') or 2020
             end_year = v.get('year_activity_start') or 2020
@@ -69,12 +70,21 @@ def fix_suppliers():
                 kinds.add('אחר')
         if len(kinds) == 0:
             row['supplier_kinds'] = None
-        if len(kinds) == 1:
+        elif len(kinds) == 1:
             row['supplier_kinds'] = kinds.pop()
         else:
             row['supplier_kinds'] = 'משולב'
+        if len(suppliers) == 0:
+            row['supplier_count_category'] = None
+        elif len(suppliers) == 1:
+            row['supplier_count_category'] = '1'
+        elif 2 <= len(suppliers) <= 5:
+            row['supplier_count_category'] = '2-5'
+        else:
+            row['supplier_count_category'] = '6+'
 
     return DF.Flow(
+        DF.add_field('supplier_count_category', 'string'),
         DF.add_field('supplier_kinds', 'string'),
         func
     )
