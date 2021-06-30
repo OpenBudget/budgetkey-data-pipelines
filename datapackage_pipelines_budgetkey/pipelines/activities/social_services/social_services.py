@@ -64,7 +64,7 @@ def fix_suppliers():
                 kinds.add('עסקי')
             elif ekind in ('association', 'ottoman-association', 'cooperative'):
                 kinds.add('מגזר שלישי')
-            elif ekind in ('municipality'):
+            elif ekind == 'municipality':
                 kinds.add('רשויות מקומיות')
             else:
                 kinds.add('אחר')
