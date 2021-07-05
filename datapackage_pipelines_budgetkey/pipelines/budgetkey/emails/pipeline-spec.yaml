@@ -2,7 +2,7 @@ emails:
   schedule:
     crontab: "1 5 fri * *"
 
-  title: Send periodic emails (1)
+  title: Send periodic emails
 
   pipeline:
     - run: fetch_subscriptions
