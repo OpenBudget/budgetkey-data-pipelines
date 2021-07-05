@@ -55,20 +55,37 @@ def fix_suppliers():
     def func(row):
         kinds = set()
         suppliers = row.get('suppliers') or []
+        eids = set()
+        eids_association = set()
+        eids_company = set()
+        eids_municipality = set()
+        geos = set()
         for v in suppliers:
             v['geo'] = [geo[i] for i in v.get('geo', [])]
+            geos.update(v['geo'])
             start_year = v.get('year_activity_start') or 2020
             end_year = v.get('year_activity_start') or 2020
             v['activity_years'] = list(range(start_year, end_year+1))
+            eid = v['entity_id']
+            eids.add(eid)
             ekind = v['entity_kind']
             if ekind == 'company':
                 kinds.add('עסקי')
+                eids_company.add(eid)
             elif ekind in ('association', 'ottoman-association', 'cooperative'):
                 kinds.add('מגזר שלישי')
+                eids_association.add(eid)
             elif ekind == 'municipality':
                 kinds.add('רשויות מקומיות')
+                eids_municipality.add(eid)
             else:
                 kinds.add('אחר')
+        row['supplier_count'] = len(eids)
+        row['supplier_count_company'] = len(eids_company)
+        row['supplier_count_association'] = len(eids_association)
+        row['supplier_count_municipality'] = len(eids_municipality)
+        row['geo_coverage'] = 'ארצי' if 'ארצי' in geos or len(geos) >= 4 else 'מקומי'
+
         if len(kinds) == 0:
             row['supplier_kinds'] = None
         elif len(kinds) == 1:
@@ -87,6 +104,11 @@ def fix_suppliers():
     return DF.Flow(
         DF.add_field('supplier_count_category', 'string'),
         DF.add_field('supplier_kinds', 'string'),
+        DF.add_field('supplier_count', 'integer'),
+        DF.add_field('supplier_count_company', 'integer'),
+        DF.add_field('supplier_count_association', 'integer'),
+        DF.add_field('supplier_count_municipality', 'integer'),
+        DF.add_field('geo_coverage', 'string'),
         func
     )
 
@@ -104,6 +126,21 @@ def add_current_budget():
 
     return DF.Flow(
         DF.add_field('current_budget', 'number'),
+        func
+    )
+
+def add_current_beneficiaries():
+    kinds = fetch_codelist('beneficiary_kind')
+    def func(row):
+        if row.get('beneficiaries') and len(row.get('beneficiaries')) > 0:
+            for b in row.get('beneficiaries'):
+                if b.get('num_beneficiaries'):
+                    row['current_beneficiaries'] =  b.get('num_beneficiaries')
+                    break
+
+    return DF.Flow(
+        DF.add_field('current_beneficiaries', 'integer'),
+        DF.add_field('beneficiary_kind_name', 'string', lambda r: kinds.get(r['beneficiary_kind'], 'אנשים')),
         func
     )
 
@@ -126,6 +163,7 @@ def flow(*_):
         floater('virtue_of_table'),
         fix_suppliers(),
         add_current_budget(),
+        add_current_beneficiaries(),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2020),
         DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
