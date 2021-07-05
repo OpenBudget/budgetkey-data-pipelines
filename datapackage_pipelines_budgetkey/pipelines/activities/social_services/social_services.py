@@ -14,6 +14,7 @@ def services():
     for k in datarecords('social_service'):
         for f in ['target_audience', 'target_age_group', 'intervention', 'subject', 'manualBudget']:
             k.setdefault(f, [])
+        k.setdefault('deleted', False)
         yield k
 
 def fetch_codelist(dr_name):
@@ -110,7 +111,8 @@ def add_current_budget():
 def flow(*_):
     return DF.Flow(
         services(),
-        DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', ]),
+        DF.filter_rows(lambda r: not r['deleted']),
+        DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', 'deleted']),
         DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
         splitter('subject'),
