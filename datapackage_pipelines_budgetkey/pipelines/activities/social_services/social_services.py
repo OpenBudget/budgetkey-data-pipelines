@@ -88,7 +88,7 @@ def fix_tenders():
                 elif 'מימוש זכות ברירה' in reg:
                     tender['sub_kind_he'] = 'מימוש אופציה'
                 elif 'מיזם משותף' in reg or any(org in reg for org in orgs):
-                    tender['sub_kind_he'] = 'מימוש אופציה'
+                    tender['sub_kind_he'] = 'מיזם משותף'
                 elif 'רשות מקומית' in reg:
                     tender['sub_kind_he'] = 'התקשרות עם רשות מקומית'
                 else:
