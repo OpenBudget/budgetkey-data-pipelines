@@ -59,7 +59,7 @@ def fix_tenders():
             option_duration = tender.get('option_duration')
             if end_date and option_duration:
                 option_duration = int(option_duration)
-                end_date = datetime.datetime.strptime('%Y-%m-%d', end_date)
+                end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
                 end_date_extended = datetime.date(end_date.year + option_duration, end_date.month, end_date.day)
                 tender['end_date_extended'] = end_date_extended.isoformat()
 
