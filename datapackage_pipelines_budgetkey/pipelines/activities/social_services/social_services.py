@@ -76,8 +76,9 @@ def fix_suppliers():
         eids_municipality = set()
         geos = set()
         for v in suppliers:
-            v['entity_name'] = v['entity_name'].replace('<em>', '').replace('</em>', '')
-            v['entity_id'] = v['entity_id'].replace('<em>', '').replace('</em>', '')
+            for f in ['entity_id', 'entity_name']:
+                if v.get(f):
+                    v[f] = v[f].replace('<em>', '').replace('</em>', '')
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             geos.update(v['geo'])
             start_year = v.get('year_activity_start') or 2020
