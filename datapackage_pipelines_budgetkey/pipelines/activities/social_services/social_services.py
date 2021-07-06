@@ -102,7 +102,7 @@ def fix_suppliers():
         row['supplier_count_company'] = len(eids_company)
         row['supplier_count_association'] = len(eids_association)
         row['supplier_count_municipality'] = len(eids_municipality)
-        row['geo_coverage'] = 'ארצי' if 'ארצי' in geos or len(geos) >= 4 else 'מקומי'
+        row['geo_coverage'] = 'ארצי' if 'ארצי' in geos else 'אזורי'
 
         if len(kinds) == 0:
             row['supplier_kinds'] = None
