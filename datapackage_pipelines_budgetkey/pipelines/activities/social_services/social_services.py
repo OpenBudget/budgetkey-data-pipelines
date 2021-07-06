@@ -62,6 +62,32 @@ def fix_tenders():
                 end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
                 end_date_extended = datetime.date(end_date.year + option_duration, end_date.month, end_date.day)
                 tender['end_date_extended'] = end_date_extended.isoformat()
+            tender['sub_kind_he'] = 'אחר'
+            if tender.get('sub_kind'):
+                tender['sub_kind_he'] = dict(
+                    regular='מכרז רגיל',
+                    closed='מכרז סגור',
+                    frame='מכרז מסגרת',
+                    pool='מכרז מאגר',
+                )[tender.get('sub_kind')]
+            elif tender.get('regulation'):
+                reg = tender.get('regulation')
+                orgs = [
+                    'הקרן הקיימת לישראל',
+                    "ג'וינט ישראל",
+                    'ההסתדרות הציונית',
+                    'הסוכנות היהודית',
+                ]
+                if 'תקנה 3(4)(ב)(3)' in reg or 'התקשרות המשך' in reg:
+                    tender['sub_kind_he'] = 'התקשרות המשך'
+                elif 'מימוש זכות ברירה' in reg:
+                    tender['sub_kind_he'] = 'מימוש אופציה'
+                elif 'מיזם משותף' in reg or any(org in reg for org in orgs):
+                    tender['sub_kind_he'] = 'מימוש אופציה'
+                elif 'רשות מקומית' in reg:
+                    tender['sub_kind_he'] = 'התקשרות עם רשות מקומית'
+                else:
+                    print('REGREG', reg)
 
     return func
 
