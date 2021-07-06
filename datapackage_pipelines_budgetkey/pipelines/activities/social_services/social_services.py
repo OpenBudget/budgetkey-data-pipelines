@@ -69,6 +69,7 @@ def fix_tenders():
                     closed='מכרז סגור',
                     frame='מכרז מסגרת',
                     pool='מכרז מאגר',
+                    na='אחר'
                 )[tender.get('sub_kind')]
             elif tender.get('regulation'):
                 reg = tender.get('regulation')
@@ -78,8 +79,12 @@ def fix_tenders():
                     'ההסתדרות הציונית',
                     'הסוכנות היהודית',
                 ]
-                if 'תקנה 3(4)(ב)(3)' in reg or 'התקשרות המשך' in reg:
+                if 'תקנה 3(4)(ב)' in reg or 'התקשרות המשך' in reg:
                     tender['sub_kind_he'] = 'התקשרות המשך'
+                elif 'מכרז סגור' in reg:
+                    tender['sub_kind_he'] = 'מכרז סגור'
+                elif 'ספק יחיד' in reg:
+                    tender['sub_kind_he'] = 'ספק יחיד'
                 elif 'מימוש זכות ברירה' in reg:
                     tender['sub_kind_he'] = 'מימוש אופציה'
                 elif 'מיזם משותף' in reg or any(org in reg for org in orgs):
