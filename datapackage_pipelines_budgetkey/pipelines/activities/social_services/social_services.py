@@ -1,5 +1,6 @@
 import dataflows as DF
 from decimal import Decimal
+import datetime
 
 
 def datarecords(kind):
@@ -49,6 +50,20 @@ def floater(field):
         func,
         DF.set_type(field, **{'es:itemType': 'object', 'es:index': False})
     )
+
+def fix_tenders():
+    def func(row):
+        tenders = row.get('tenders') or []
+        for tender in tenders:
+            end_date = tender.get('end_date')
+            option_duration = tender.get('option_duration')
+            if end_date and option_duration:
+                option_duration = int(option_duration)
+                end_date = datetime.datetime.strptime('%Y-%m-%d', end_date)
+                end_date_extended = datetime.date(end_date.year + option_duration, end_date.month, end_date.day)
+                tender['end_date_extended'] = end_date_extended.isoformat()
+
+    return func
 
 def fix_suppliers():
     geo = fetch_codelist('geo_region')
@@ -162,6 +177,7 @@ def flow(*_):
         floater('suppliers'),
         floater('virtue_of_table'),
         fix_suppliers(),
+        fix_tenders(),
         add_current_budget(),
         add_current_beneficiaries(),
         DF.add_field('min_year', 'integer', 2020),
