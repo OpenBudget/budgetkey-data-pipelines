@@ -112,8 +112,11 @@ def fix_suppliers():
                     v[f] = v[f].replace('<em>', '').replace('</em>', '')
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             geos.update(v['geo'])
+            for f in ('year_activity_start', 'year_activity_end'):
+                if f in v and not v[f]:
+                    del v[f]
             start_year = v.get('year_activity_start') or 2020
-            end_year = v.get('year_activity_start') or 2020
+            end_year = v.get('year_activity_end') or 2020
             v['activity_years'] = list(range(start_year, end_year+1))
             eid = v['entity_id']
             eids.add(eid)
