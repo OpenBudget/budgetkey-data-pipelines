@@ -342,6 +342,8 @@ entities:
           fingerprint:
             es:boost: true
             es:index: true
+          soproc_supplier:
+            es:index: true
 
     # And dump it
     - run: dump.to_path
