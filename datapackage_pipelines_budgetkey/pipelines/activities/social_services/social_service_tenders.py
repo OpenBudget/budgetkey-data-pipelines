@@ -5,10 +5,13 @@ def unwind():
         for row in rows:
             if row.get('tenders'):
                 for tender in row['tenders']:
+                    key = tender['tender_key']
+                    publication_id, tender_type, tender_id = key.split(':')
                     yield dict(
-                        tender_id=tender['tender_id'],
-                        tender_type=tender['tender_type'],
-                        publication_id=tender['publication_id'],
+                        tender_id=tender_id,
+                        tender_type=tender_type,
+                        publication_id=publication_id,
+                        tender_key = key,
                         soproc_tender=True,
                     )
     return func
@@ -19,6 +22,7 @@ def flow(*_):
         DF.add_field('tender_id', 'string'),
         DF.add_field('publication_id', 'string'),
         DF.add_field('tender_type', 'string'),
+        DF.add_field('tender_key', 'string'),
         DF.add_field('soproc_tender', 'boolean'),
         unwind(),
         DF.select_fields(['tender_id', 'publication_id', 'tender_type', 'soproc_supplier']),
