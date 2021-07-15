@@ -26,6 +26,6 @@ def flow(*_):
         DF.add_field('tender_key', 'string'),
         DF.add_field('soproc_tender', 'boolean'),
         unwind(),
-        DF.select_fields(['tender_id', 'publication_id', 'tender_type', 'tender_key', 'soproc_supplier']),
+        DF.select_fields(['tender_id', 'publication_id', 'tender_type', 'tender_key', 'soproc_tender']),
         DF.dump_to_path('/var/datapackages/activities/social_services_tenders'),
     )
