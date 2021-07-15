@@ -20,17 +20,43 @@ all:
 processed:
   dependencies:
     - pipeline: ./procurement/tenders/all
+    - pipeline: ./activities/social_services/social_service_tenders
 
   pipeline:
     - run: add_metadata
       parameters:
         name: procurement-tenders-processed
         title: כל המכרזים ובקשות הפטור ממכרז
+    # Load soproc indicator
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/activities/social_services_tenders/datapackage.json
+        resource: activities
     # Load scraped tenders
     - run: load_resource
       parameters:
         url: /var/datapackages/procurement/tenders/all/datapackage.json
         resource: tenders
+
+    - run: join
+      parameters:
+        source:
+          name: activities
+          key:
+            - tender_id
+            - publication_id
+            - tender_type
+          delete: true
+        target:
+          name: tenders
+          key:
+            - tender_id
+            - publication_id
+            - tender_type
+          full: true
+        fields:
+          soproc_tender: null
+
     - run: fingerprint
       parameters:
         resource-name: tenders
