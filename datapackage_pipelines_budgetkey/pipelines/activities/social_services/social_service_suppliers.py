@@ -5,10 +5,11 @@ def unwind():
         for row in rows:
             if row.get('suppliers'):
                 for supplier in row['suppliers']:
-                    yield dict(
-                        entity_id=supplier['entity_id'],
-                        soproc_supplier=True,
-                    )
+                    if supplier['entity_id']:
+                        yield dict(
+                            entity_id=supplier['entity_id'],
+                            soproc_supplier=True,
+                        )
     return func
 
 def flow(*_):

@@ -6,14 +6,15 @@ def unwind():
             if row.get('tenders'):
                 for tender in row['tenders']:
                     key = tender['tender_key']
-                    publication_id, tender_type, tender_id = key.split(':')
-                    yield dict(
-                        tender_id=tender_id,
-                        tender_type=tender_type,
-                        publication_id=publication_id,
-                        tender_key = key,
-                        soproc_tender=True,
-                    )
+                    if key:
+                        publication_id, tender_type, tender_id = key.split(':')
+                        yield dict(
+                            tender_id=tender_id,
+                            tender_type=tender_type,
+                            publication_id=publication_id,
+                            tender_key = key,
+                            soproc_tender=True,
+                        )
     return func
 
 def flow(*_):
