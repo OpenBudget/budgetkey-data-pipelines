@@ -189,6 +189,7 @@ entities:
   dependencies:
     - pipeline: ./procurement/spending/spending-by-entity
     - pipeline: ./supports/supports-by-entity
+    - pipeline: ./activities/social_services/social_service_suppliers
     - pipeline: ./entities/all
 
   pipeline:
@@ -269,13 +270,34 @@ entities:
             aggregate: max
 
 
+    # Load soproc indicator
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/activities/social_services_suppliers/datapackage.json
+        resource: activities
+
     # Load entities
     - run: load_resource
       parameters:
         url: /var/datapackages/entities/all/datapackage.json
         resource: entities
 
-    # Load scores into entity table
+    # Load scores & soproc indicator into entity table
+    - run: join
+      parameters:
+        source:
+          name: activities
+          key:
+            - entity_id
+          delete: true
+        target:
+          name: entities
+          key:
+            - id
+          full: true
+        fields:
+          soproc_supplier: null
+
     - run: join
       parameters:
         source:
