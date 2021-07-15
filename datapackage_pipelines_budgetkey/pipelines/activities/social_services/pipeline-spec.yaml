@@ -10,3 +10,15 @@ social_services:
         title: Fetch social services from data input
         revision: '2021-07.6'
     - flow: social_services
+
+social_service_suppliers:
+  dependencies:
+    - pipeline: ./activities/social_services/social_services
+  pipeline:
+    - flow: social_service_suppliers
+
+social_service_tenders:
+  dependencies:
+    - pipeline: ./activities/social_services/social_services
+  pipeline:
+    - flow: social_service_tenders
