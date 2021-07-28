@@ -6,6 +6,7 @@ all:
     - pipeline: ./entities/cooperatives/cooperatives
     - pipeline: ./entities/ottoman/ottoman-association-registry
     - pipeline: ./entities/endowments/endowments
+    - pipeline: ./entities/partnerships/partnerships
   pipeline:
     - run: add_metadata
       parameters:
@@ -42,6 +43,10 @@ all:
         url: /var/datapackages/entities/endowments/datapackage.json
     - run: load_resource
       parameters:
+        resource: partnerships
+        url: /var/datapackages/entities/partnerships/datapackage.json
+    - run: load_resource
+      parameters:
         resource: company-details
         url: /var/datapackages/entities/companies/registrar/details/datapackage.json
     - run: compact_entities
@@ -71,6 +76,11 @@ all:
           id-column: id
           name-column: name
         endowments:
+          kind-column: kind
+          kind-he-column: kind_he
+          id-column: id
+          name-column: name
+        partnerships:
           kind-column: kind
           kind-he-column: kind_he
           id-column: id

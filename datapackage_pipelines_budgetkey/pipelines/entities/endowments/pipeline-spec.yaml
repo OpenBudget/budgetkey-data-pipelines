@@ -12,11 +12,6 @@ endowments:
           - operation: constant
             target: kind
             with: "endowment"
-    - run: set_types
-      parameters:
-        types:
-          id:
-            type: string
     - run: dump.to_path
       parameters:
           out-path: /var/datapackages/entities/endowments/
