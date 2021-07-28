@@ -5,6 +5,7 @@ all:
     - pipeline: ./entities/special/registry
     - pipeline: ./entities/cooperatives/cooperatives
     - pipeline: ./entities/ottoman/ottoman-association-registry
+    - pipeline: ./entities/endowments/endowments
   pipeline:
     - run: add_metadata
       parameters:
@@ -37,6 +38,10 @@ all:
         url: /var/datapackages/entities/ottoman/datapackage.json
     - run: load_resource
       parameters:
+        resource: endowments
+        url: /var/datapackages/entities/endowments/datapackage.json
+    - run: load_resource
+      parameters:
         resource: company-details
         url: /var/datapackages/entities/companies/registrar/details/datapackage.json
     - run: compact_entities
@@ -63,6 +68,11 @@ all:
         ottoman-association-registry:
           kind-column: kind
           kind-he: אגודה עותמנית
+          id-column: id
+          name-column: name
+        endowments:
+          kind-column: kind
+          kind-he-column: kind_he
           id-column: id
           name-column: name
         cooperatives:

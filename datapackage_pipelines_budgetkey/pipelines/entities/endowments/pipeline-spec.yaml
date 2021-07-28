@@ -1,0 +1,27 @@
+endowments:
+  title: רשימת הקדשים
+  pipeline:
+    - run: update_package
+      parameters:
+        name: endowments-registry
+        title: רשימת הקדשים
+    - flow: endowments
+    - run: add_computed_field
+      parameters:
+        fields:
+          - operation: constant
+            target: kind
+            with: "endowment"
+    - run: set_types
+      parameters:
+        types:
+          id:
+            type: string
+    - run: dump.to_path
+      parameters:
+          out-path: /var/datapackages/entities/endowments/
+    - run: dump.to_sql
+      parameters:
+        tables:
+          endowments:
+            resource-name: endowments
