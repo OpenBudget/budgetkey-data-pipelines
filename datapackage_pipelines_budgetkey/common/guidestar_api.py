@@ -62,7 +62,7 @@ class GuidestarApi():
         for i in range(5):
             try:
                 data = requests.post('https://www.guidestar.org.il/apexremote', 
-                                     json=self.body, headers=self.HEADERS).json()
+                                     json=self.body, headers=self.HEADERS, timeout=30).json()
                 break
             except Exception as e:
                 logging.exception('Failed to fetch data %r: %r', e, self.body[0]['data'])
