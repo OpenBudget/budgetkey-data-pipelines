@@ -131,9 +131,14 @@ rules = [
 # - address_lines
 
 def scrape_guidestar(ass_recs):
+    diluter = datetime.date.today().isocalendar()[1] % 13
+
     for i, ass_rec in enumerate(ass_recs):
 
         if not ass_rec['__is_stale']:
+            continue
+
+        if i % 13 != diluter:
             continue
 
         assert 'Association_Number' in ass_rec

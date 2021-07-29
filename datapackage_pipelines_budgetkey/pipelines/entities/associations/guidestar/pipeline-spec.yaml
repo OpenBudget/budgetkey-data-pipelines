@@ -1,6 +1,6 @@
 guidestar-scraper:
   schedule:
-    crontab: "0 0 * * *"
+    crontab: "0 0 * * 5"
   pipeline:
     - run: add_metadata
       parameters:
