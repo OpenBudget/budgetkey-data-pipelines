@@ -130,15 +130,14 @@ rules = [
 # TODO:
 # - address_lines
 
-def scrape_guidestar(ass_recs):
-    diluter = datetime.date.today().isocalendar()[1] % 13
+def scrape_guidestar(ass_recs, diluter=None):
 
     for i, ass_rec in enumerate(ass_recs):
 
         if not ass_rec['__is_stale']:
             continue
 
-        if i % 13 != diluter:
+        if diluter is not None and i % 13 != diluter:
             continue
 
         assert 'Association_Number' in ass_rec
@@ -178,9 +177,9 @@ def scrape_guidestar(ass_recs):
         yield rec
 
 
-def process_resources(res_iter_):
+def process_resources(res_iter_, dilute=False):
     first = next(res_iter_)
-    yield scrape_guidestar(first)
+    yield scrape_guidestar(first, datetime.date.today().isocalendar()[1] % 13 if dilute else None)
 
     for res in res_iter_:
         yield res
@@ -188,6 +187,8 @@ def process_resources(res_iter_):
 
 if __name__ == '__main__':
     parameters, datapackage, res_iter = ingest()
+
+    dilute = parameters.pop('dilute', False)
 
     resource = datapackage['resources'][0]
     resource.update(parameters)
@@ -220,4 +221,4 @@ if __name__ == '__main__':
     ])
     resource['schema']['missingValues'] = ['', "לא קיים דיווח מקוון"]
 
-    spew(datapackage, process_resources(res_iter))
+    spew(datapackage, process_resources(res_iter, dilute))

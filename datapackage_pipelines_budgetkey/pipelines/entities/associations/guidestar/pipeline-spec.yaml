@@ -41,6 +41,7 @@ guidestar-scraper:
       parameters:
         name: guidestar
         path: data/guidestar.csv
+        dilute: yes
     - run: manage-revisions
       parameters:
         resource-name: guidestar
