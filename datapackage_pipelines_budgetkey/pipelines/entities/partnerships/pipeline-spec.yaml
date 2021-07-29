@@ -12,9 +12,6 @@ partnerships:
           - operation: constant
             target: kind
             with: "partnership"
-          - operation: constant
-            target: kind_he
-            with: "שותפות"
     - run: dump.to_path
       parameters:
           out-path: /var/datapackages/entities/partnerships/

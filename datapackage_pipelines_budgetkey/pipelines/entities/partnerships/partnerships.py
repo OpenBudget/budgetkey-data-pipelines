@@ -13,6 +13,7 @@ def flow(*_):
         DF.set_type('partnership_pob', type='string', transform=str),
         DF.set_type('partnership_country', type='string'),
         DF.set_type('partnership_located_at', type='string', transform=str),
+        DF.add_field('kind_he', type='string', default='שותפות'),
         DF.update_resource(-1, **{'name': 'partnerships'}),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )

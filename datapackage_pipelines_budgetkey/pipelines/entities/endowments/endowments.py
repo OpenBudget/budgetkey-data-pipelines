@@ -11,6 +11,7 @@ def flow(*_):
         DF.set_type('endowment_size', type='number'),
         DF.set_type('last_report_year', type='integer'),
         DF.set_type('management_method', type='string'),
+        DF.set_type('kind_he', type='string'),
         DF.update_resource(-1, **{'name': 'endowments'}),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )
