@@ -159,7 +159,7 @@ def do_query():
 
         for i, _ in enumerate(ws.columns, 1):
             ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
-            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = None
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 0
 
         wb.save(base_path + filename)
         wb.close()
