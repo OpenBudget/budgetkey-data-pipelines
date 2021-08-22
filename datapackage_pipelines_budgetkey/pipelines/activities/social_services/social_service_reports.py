@@ -157,9 +157,9 @@ def do_query():
         ws = wb[sheetname]
         ws.sheet_view.rightToleft = True
 
-        column_letters = tuple(openpyxl.utils.get_column_letter(col_number + 1) for col_number in range(ws.max_column))
-        for column_letter in column_letters:
-            ws.column_dimensions[column_letter].bestFit = True
+        for i, _ in enumerate(ws.columns, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = None
 
         wb.save(base_path + filename)
         wb.close()
