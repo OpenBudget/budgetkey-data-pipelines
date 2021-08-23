@@ -25,11 +25,11 @@ social_service_tenders:
 
 social_service_reports:
   dependencies:
+    - pipeline: ./activities/social_services/social_services
+  pipeline:
     - run: add_metadata
       parameters:
         name: social_service_reports
         title: social services report
         revision: '2021-08'
-    - pipeline: ./activities/social_services/social_services
-  pipeline:
     - flow: social_service_reports
