@@ -31,5 +31,5 @@ social_service_reports:
       parameters:
         name: social_service_reports
         title: social services report
-        revision: '2021-08.01'
+        revision: '2021-08.02'
     - flow: social_service_reports

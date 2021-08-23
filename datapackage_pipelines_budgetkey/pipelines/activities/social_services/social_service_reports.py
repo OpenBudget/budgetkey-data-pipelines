@@ -161,6 +161,7 @@ def do_query():
 
         wb.save(base_path + filename)
         wb.close()
+        del wb
 
         DF.Flow(
             DF.load('env://DPP_DB_ENGINE', query=query),
