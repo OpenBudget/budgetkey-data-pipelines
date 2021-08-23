@@ -22,6 +22,8 @@ COLUMN_HEADERS_MAPPER = {
     'מפרה':'company_is_mafera',
     'שנה אחרונה של דוח שנתי (שהוגש)':'company_last_report_year',
     'שם עיר':'company_city',
+    'שם רחוב':'company_street',
+    'מספר בית':'company_street_number',
     'מיקוד':'company_postal_code',
     'ת.ד.':'company_pob',
     'מדינה':'company_country',

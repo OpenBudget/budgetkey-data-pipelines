@@ -8,9 +8,9 @@ def process_row(row, *_):
             row.get('company_city'):
         row['company_address_lines'].append('{company_street} {company_street_number}, {company_city}'.format(**row))
     elif row.get('company_pob') and \
-            row.get('company_pob_city') and \
-            row.get('company_pob_postal_code'):
-        row['company_address_lines'].append('ת.ד.' + '{company_pob} {company_pob_city} {company_pob_postal_code}'.format(**row))
+            row.get('company_city') and \
+            row.get('company_postal_code'):
+        row['company_address_lines'].append('ת.ד.' + '{company_pob} {company_city} {company_postal_code}'.format(**row))
     if row.get('company_located_at'):
         row['company_address_lines'].append('אצל: ' + '{company_located_at}'.format(**row))
 
