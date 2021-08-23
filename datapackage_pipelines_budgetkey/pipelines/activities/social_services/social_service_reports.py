@@ -146,6 +146,8 @@ def do_query():
             wb = openpyxl.load_workbook(base_path + filename)
         except:
             wb = openpyxl.Workbook()
+            for s in wb.worksheets:
+                wb.remove(s)
         try:
             ws = wb[sheetname]
         except:
@@ -154,6 +156,7 @@ def do_query():
         ws.sheet_view.rightToleft = True
 
         for i, _ in enumerate(ws.columns, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 90
             ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
 
         wb.save(base_path + filename)
