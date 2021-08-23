@@ -159,7 +159,6 @@ def do_query():
 
         for i, _ in enumerate(ws.columns, 1):
             ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
-            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].width = 0
 
         wb.save(base_path + filename)
         wb.close()
@@ -171,7 +170,8 @@ def flow(*_):
     return DF.Flow(
         [dict(office=office, kind=kind) for office in offices for kind in report_kinds],
         do_query(),
-        DF.printer()
+        DF.printer(),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 
