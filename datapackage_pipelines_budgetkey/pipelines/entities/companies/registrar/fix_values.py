@@ -11,6 +11,8 @@ def process_row(row, *_):
             row.get('company_city') and \
             row.get('company_postal_code'):
         row['company_address_lines'].append('ת.ד.' + '{company_pob} {company_city} {company_postal_code}'.format(**row))
+    if row.get('company_country') and row['company_country'] != 'ישראל':
+        row['company_address_lines'].append(row['company_country'])
     if row.get('company_located_at'):
         row['company_address_lines'].append('אצל: ' + '{company_located_at}'.format(**row))
 
