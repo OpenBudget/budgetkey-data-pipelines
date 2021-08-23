@@ -139,6 +139,26 @@ def do_query():
         filename = kind['filename'].format(office=office['name'])
         sheetname = kind['sheet']
         query = kind['query'].format(office=office['selector'])
+
+        import openpyxl
+
+        try:
+            wb = openpyxl.load_workbook(base_path + filename)
+        except:
+            wb = openpyxl.Workbook()
+        try:
+            ws = wb[sheetname]
+        except:
+            ws = wb.create_sheet(sheetname)
+
+        ws.sheet_view.rightToleft = True
+
+        for i, _ in enumerate(ws.columns, 1):
+            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
+
+        wb.save(base_path + filename)
+        wb.close()
+
         DF.Flow(
             DF.load('env://DPP_DB_ENGINE', query=query),
             DF.update_resource(-1, name=sheetname, path=filename),
@@ -150,18 +170,6 @@ def do_query():
                 )
             )
         ).process()
-
-        import openpyxl
-
-        wb = openpyxl.load_workbook(base_path + filename)
-        ws = wb[sheetname]
-        ws.sheet_view.rightToleft = True
-
-        for i, _ in enumerate(ws.columns, 1):
-            ws.column_dimensions[openpyxl.utils.get_column_letter(i)].bestFit = True
-
-        wb.save(base_path + filename)
-        wb.close()
 
     return func
 
