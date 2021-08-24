@@ -81,6 +81,7 @@ def flow(*_):
         fix_values(),
         concatenate(_get_columns_mapping_dict(), target=dict(name='company-details')),
         set_type('id', type='string'),
+        set_type('company_street_number', type='string'),
         set_type('company_registration_date', type='date', format='%d/%m/%Y'),
         set_type('company_is_government', type='boolean', falseValues=['לא'], trueValues=['כן']),
         set_type('company_is_mafera', type='boolean', falseValues=['לא'], trueValues=['מפרה', 'התראה']),
