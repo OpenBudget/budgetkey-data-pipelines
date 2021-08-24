@@ -15,6 +15,7 @@ def services():
     for k in datarecords('social_service'):
         for f in ['target_audience', 'target_age_group', 'intervention', 'subject', 'manualBudget']:
             k.setdefault(f, [])
+        k.setdefault('catalog_number', None)
         k.setdefault('deleted', False)
         yield k
 
