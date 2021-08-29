@@ -65,7 +65,7 @@ def fix_tenders():
                 end_date_extended = datetime.date(end_date.year + option_duration, end_date.month, end_date.day)
                 tender['end_date_extended'] = end_date_extended.isoformat()
             if date_range and len(date_range) > 10 and not end_date:
-                row['end_date'] = date_range[-10:]
+                tender['end_date'] = date_range[-10:]
             tender['sub_kind_he'] = 'אחר'
             if tender.get('sub_kind'):
                 tender['sub_kind_he'] = dict(
