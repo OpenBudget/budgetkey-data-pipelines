@@ -203,7 +203,7 @@ def add_current_beneficiaries():
 
     return DF.Flow(
         DF.add_field('current_beneficiaries', 'integer'),
-        DF.add_field('beneficiary_kind_name', 'string', lambda r: kinds.get(r['beneficiary_kind'], 'אנשים')),
+        DF.add_field('beneficiary_kind_name', 'string', lambda r: kinds.get(r['beneficiary_kind'], 'מקבלי שירות').replace('אנשים', 'מקבלי שירות')),
         func
     )
 
