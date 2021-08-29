@@ -179,9 +179,16 @@ def add_current_budget():
     def func(row):
         if row.get('manualBudget') and len(row.get('manualBudget')) > 0:
             row['current_budget'] = row['manualBudget'][0]['approved']
+        utilization = None
+        for item in row['manualBudget']:
+            if item['approved'] and item['executed']:
+                utilization = item['executed']/item['approved']*100
+                break
+        row['budget_utilization'] = utilization
 
     return DF.Flow(
         DF.add_field('current_budget', 'number'),
+        DF.add_field('budget_utilization', 'number'),
         func
     )
 
