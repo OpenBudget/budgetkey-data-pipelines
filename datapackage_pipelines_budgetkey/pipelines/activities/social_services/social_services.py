@@ -235,6 +235,7 @@ def flow(*_):
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
         DF.add_field('score', 'number', get_score, **{'es:score-column': True}),
         DF.set_primary_key(['kind', 'id']),
+        DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
         DF.dump_to_sql(dict(
             all_activities={'resource-name': 'activities'}
         )),
@@ -244,7 +245,6 @@ def flow(*_):
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
         )),
-        DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
     )
 
 
