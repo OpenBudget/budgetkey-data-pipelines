@@ -211,8 +211,7 @@ def add_current_beneficiaries():
 def flow(*_):
     return DF.Flow(
         services(),
-        DF.filter_rows(lambda r: not r['deleted']),
-        DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes', 'deleted']),
+        DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes']),
         DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
         splitter('subject'),
@@ -236,11 +235,16 @@ def flow(*_):
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
         DF.add_field('score', 'number', get_score, **{'es:score-column': True}),
         DF.set_primary_key(['kind', 'id']),
-        DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
+        DF.dump_to_sql(dict(
+            all_activities={'resource-name': 'activities'}
+        )),
+        DF.filter_rows(lambda r: not r['deleted']),
+        DF.delete_fields(['deleted']),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
-        ))
+        )),
+        DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
     )
 
 
