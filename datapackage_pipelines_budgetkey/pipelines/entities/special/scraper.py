@@ -60,11 +60,18 @@ def scrape():
         driver.get("https://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
         # time.sleep(3)
         # driver.execute_script('Display(1)');
-        bakasha = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "RadioBakasha1"))
-        )
-        bakasha.click()
-        time.sleep(3)
+        while True:
+            try:
+                bakasha = WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.ID, "RadioBakasha1"))
+                )
+                bakasha.click()
+                time.sleep(3)
+                return
+            except TimeoutException:
+                logging.warning('Failed to find radio button, retrying in a few')
+                time.sleep(180)
+
 
     prepare()
 
