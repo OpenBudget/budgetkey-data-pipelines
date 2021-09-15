@@ -101,6 +101,9 @@ def scrape():
                     EC.presence_of_element_located((By.CSS_SELECTOR, "#dgReshima tr.row1"))
                 )
             except TimeoutException:
+                logging.warning('FAILED TO GET ROWS, RETRYING OPTION')
+                time.sleep(10)
+                prepare()
                 select_option(selection)
                 continue
 
