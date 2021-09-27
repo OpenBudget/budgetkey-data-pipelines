@@ -2,14 +2,20 @@
 
 import requests
 import json
+import time
 
 from pyquery import PyQuery as pq
 
 import dataflows as DF
 
 def get_offices():
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) ' +
+                        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+                        'Chrome/54.0.2840.87 Safari/537.36'
+    }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text=requests.get(url).text
+    text=requests.get(url, headers=headers).text
     page = pq(text)
     el=page.find('form')[0]
     cfg = el.attrib['ng-init']
@@ -26,7 +32,14 @@ def get_offices():
 def get_all():
     total = 100000
     skip = 0
-    offices = get_offices()
+    while True:
+        try:
+            print('Getting offices...')
+            offices = get_offices()
+            break
+        except Exception as e:
+            print('Failed to get offices...', e)
+            time.sleep(180)
     while skip < total:
         payload = dict(
             DynamicTemplateID='8132e331-eb58-474d-abe2-085d3f08c400',
