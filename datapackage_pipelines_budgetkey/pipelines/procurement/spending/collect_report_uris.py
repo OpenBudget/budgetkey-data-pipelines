@@ -17,7 +17,11 @@ def get_offices():
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
     text=requests.get(url, headers=headers).text
     page = pq(text)
-    el=page.find('form')[0]
+    forms = page.find('form')
+    if len(forms) == 0:
+        print('PAGE:', text[:1000])
+        raise Exception('No forms found')
+    el = forms[0]
     cfg = el.attrib['ng-init']
     cfg = json.loads(cfg.split("','',10,'',")[1].split(",'MultiAutoComplete')")[0])
     cfg = cfg[1]
