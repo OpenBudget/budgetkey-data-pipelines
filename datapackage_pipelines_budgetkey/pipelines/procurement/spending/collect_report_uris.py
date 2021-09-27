@@ -1,5 +1,6 @@
 # from itertools import chain
 
+from datapackage_pipelines_budgetkey.common.cookie_monster import cookie_monster_get
 import requests
 import json
 import time
@@ -15,7 +16,8 @@ def get_offices():
                         'Chrome/54.0.2840.87 Safari/537.36'
     }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text=requests.get(url, headers=headers).text
+    text = cookie_monster_get(url).decode('utf8')
+    # text=requests.get(url, headers=headers).text
     page = pq(text)
     forms = page.find('form')
     if len(forms) == 0:
