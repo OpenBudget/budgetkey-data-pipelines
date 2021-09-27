@@ -55,22 +55,22 @@ def scrape():
     gcd = google_chrome_driver(wait=False)
     driver = gcd.driver
 
-    def prepare():
+    def prepare(msg=''):
         logging.info('PREPARING')
         driver.get("https://www.misim.gov.il/mm_lelorasham/firstPage.aspx")
         # time.sleep(3)
         # driver.execute_script('Display(1)');
         while True:
             try:
-                bakasha = WebDriverWait(driver, 10).until(
+                bakasha = WebDriverWait(driver, 60).until(
                     EC.presence_of_element_located((By.ID, "RadioBakasha1"))
                 )
                 bakasha.click()
                 time.sleep(3)
                 return
             except TimeoutException:
-                logging.warning('Failed to find radio button, retrying in a few')
-                time.sleep(180)
+                logging.warning('Failed to find radio button, retrying in a few (%s)', msg)
+                time.sleep(600)
 
 
     prepare()
@@ -100,7 +100,8 @@ def scrape():
         if slugs.get(options[selection]) is None:
             logging.warning('SKIPPING option #%s (%s)', selection, options[selection])
             continue
-        prepare()
+        logging.info('TRYING option #%s (%s)', selection, options[selection])
+        prepare('#%s (%s)' % (selection, options[selection]))
         select_option(selection)
         while True:
             try:
