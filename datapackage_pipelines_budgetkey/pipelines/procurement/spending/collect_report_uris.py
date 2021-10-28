@@ -68,12 +68,13 @@ def get_all():
                 f.update(r)
                 if 'xls' not in f['FileName'].lower():
                     continue
-                yield {
-                    'report-url': f'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/{base}/he/{f["FileName"]}',
-                    'report-title': f['Title'],
-                    'report-publisher': offices[f['Office'][0]],
-                    'report-date': f.get('Date')
-                }
+                if 'Title' in f and f['Title']:
+                    yield {
+                        'report-url': f'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/{base}/he/{f["FileName"]}',
+                        'report-title': f['Title'],
+                        'report-publisher': offices[f['Office'][0]],
+                        'report-date': f.get('Date')
+                    }
         skip += len(results)
         total = resp['TotalResults']
 
