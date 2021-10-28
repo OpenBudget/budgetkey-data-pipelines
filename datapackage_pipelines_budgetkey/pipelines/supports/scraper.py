@@ -8,8 +8,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.remote_connection import ChromeRemoteConnection
-ChromeRemoteConnection.set_timeout(300)
+from selenium.webdriver.chromium.remote_connection import ChromiumRemoteConnection
+ChromiumRemoteConnection.set_timeout(300)
 
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
