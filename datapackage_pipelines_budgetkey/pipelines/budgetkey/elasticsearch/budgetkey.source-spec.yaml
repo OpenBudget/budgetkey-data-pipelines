@@ -248,7 +248,7 @@ activities:
 
 units:
   kind: indexer
-  revision: 1
+  revision: 2
   dependent_pipeline: ./units/social_services/social_services
   source_datapackage: /var/datapackages/units/social_services/datapackage.json
   page-title-pattern: '{kind_he} / {breadcrumbs}'

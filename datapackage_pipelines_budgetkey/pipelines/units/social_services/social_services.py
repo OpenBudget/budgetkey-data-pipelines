@@ -48,9 +48,9 @@ def flow(*_):
 
 
         DF.dump_to_path('/var/datapackages/units/social_services'),
-        # DF.dump_to_sql(dict(
-        #     units={'resource-name': 'units'}
-        # ))
+        DF.dump_to_sql(dict(
+            units={'resource-name': 'units'}
+        ))
     )
 
 
