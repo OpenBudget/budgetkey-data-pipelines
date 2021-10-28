@@ -28,7 +28,7 @@ def get_gcd():
 def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
     resource_id = resource_name = None
-    if 'resource_name' in parameters:
+    if 'resource-name' in parameters:
         resource_name = str(parameters['resource-name'])
     else:
         resource_id = str(parameters['resource-id'])
