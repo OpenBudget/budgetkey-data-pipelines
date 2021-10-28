@@ -229,3 +229,4 @@ docker-compose up -d kibana
 Kibana should be available at http://localhost:15601/ (It might take some time to start up properly)
 
 Index name is `budgetkey`
+
