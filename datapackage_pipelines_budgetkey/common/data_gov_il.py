@@ -64,6 +64,22 @@ def get_dataset_html(gcd, dataset_name):
 
     return dict(resources=results)
 
+def get_resource_by_id(dataset_id, resource_id, extension='csv'):
+    url = f'https://data.gov.il/dataset/{dataset_id}/resource/{resource_id}/download/{resource_id}.{extension}'
+    with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=os.path.basename(url)) as downloaded:
+        resp = requests.get(url, stream=True, headers=HEADERS)
+        amount = 0
+        for chunk in resp.iter_content(chunk_size=8192):
+            if chunk:
+                downloaded.write(chunk)
+                amount += len(chunk)
+        downloaded.close()
+        data = open(downloaded.name, 'rb').read()
+        assert data[:5] != b'<html'
+        # logging.info('%s/%s -> %s %d bytes (%r...%r)',
+        #              dataset_name, resource_name, downloaded.name,
+        #              amount, data[:256], data[-256:])
+        return url, downloaded.name
 
 def get_resource(gcd, dataset_name, resource_name):
     try:

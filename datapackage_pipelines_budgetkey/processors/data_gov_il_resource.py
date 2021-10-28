@@ -6,7 +6,7 @@ from dataflows import Flow, load, update_resource
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
 
-from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource
+from datapackage_pipelines_budgetkey.common.data_gov_il import get_resource, get_resource_by_id
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
@@ -27,7 +27,11 @@ def get_gcd():
 
 def flow(parameters):
     dataset_name = str(parameters['dataset-name'])
-    resource_name = str(parameters['resource-name'])
+    resource_id = resource_name = None
+    if 'resource_name' in parameters:
+        resource_name = str(parameters['resource-name'])
+    else:
+        resource_id = str(parameters['resource-id'])
     resource = parameters.get('resource', {})
     resource.update({
         'dpp:streaming': True,
@@ -37,10 +41,13 @@ def flow(parameters):
         gcd = parameters['gcd']
     else:
         gcd = get_gcd
-    url, path = get_resource(gcd, dataset_name, resource_name)
+    if resource_id is not None:
+        url, path = get_resource_by_id(dataset_name, resource_id)
+    else:
+        url, path = get_resource(gcd, dataset_name, resource_name)
 
     args = {
-        'name': resource_name,
+        'name': resource_name or dataset_name,
         'http_timeout': 30
     }
     args.update(parameters.get('options', {}))

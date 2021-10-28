@@ -71,7 +71,8 @@ def fix_values():
 
 companies = {
     'dataset-name': 'ica_companies',
-    'resource-name': 'רשימת החברות'
+    # 'resource-name': 'רשימת החברות'
+    'resource-id': 'f004176c-b85f-4542-8901-7b3176f9a054'
 }
 
 
