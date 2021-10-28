@@ -41,10 +41,16 @@ def flow(*_):
         DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
         DF.set_primary_key(['kind', 'id']),
         DF.update_resource(-1, name='units', **{'dpp:streaming': True}),
+
+        # Ensure we only have the main offices
+        DF.filter_rows(lambda r: r['unit'] is None),
+        DF.filter_rows(lambda r: r['office'] != 'משרד העליה והקליטה'),
+
+
         DF.dump_to_path('/var/datapackages/units/social_services'),
-        DF.dump_to_sql(dict(
-            units={'resource-name': 'units'}
-        ))
+        # DF.dump_to_sql(dict(
+        #     units={'resource-name': 'units'}
+        # ))
     )
 
 
