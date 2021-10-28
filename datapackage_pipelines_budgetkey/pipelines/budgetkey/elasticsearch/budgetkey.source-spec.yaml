@@ -251,7 +251,7 @@ units:
   revision: 3
   dependent_pipeline: ./units/social_services/social_services
   source_datapackage: /var/datapackages/units/social_services/datapackage.json
-  page-title-pattern: '{kind_he} / {breadcrumbs}'
+  page-title-pattern: 'מפתח לרכש החברתי / {breadcrumbs}'
   key-fields:
     - kind
     - id
