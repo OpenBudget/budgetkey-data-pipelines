@@ -8,6 +8,7 @@ import logging
 import collections
 import datetime
 import json
+import time
 
 
 def id(x):
@@ -76,6 +77,7 @@ class DumpToElasticSearch(dump_to_es):
             yield dict((k, formatters.get(k, id)(v)) for k, v in row.items())
 
     def finalize(self):
+        time.sleep(10)
         for index_name, configs in self.index_to_resource.items():
             for config in configs:
                 if 'revision' in config:
