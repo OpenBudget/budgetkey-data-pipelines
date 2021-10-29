@@ -75,7 +75,7 @@ def get_resource_by_id(dataset_id, resource_id, extension='csv'):
                 amount += len(chunk)
         downloaded.close()
         data = open(downloaded.name, 'rb').read()
-        assert data[:5] != b'<html'
+        assert data[:5] != b'<html', 'GOT HTML RESPONSE FOR URL %s: %r' % (url, data)
         # logging.info('%s/%s -> %s %d bytes (%r...%r)',
         #              dataset_name, resource_name, downloaded.name,
         #              amount, data[:256], data[-256:])
