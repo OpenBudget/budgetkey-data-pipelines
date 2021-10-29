@@ -31,12 +31,12 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ''')
             for did, last_modified, _ in batch:
-                if last_modified and last_modified.isoformat() > '2019-01-20':
+                if last_modified and last_modified.isoformat() > '2021-01-01':
                     last_modified = last_modified.isoformat()[:10]
                     last_modified = '<lastmod>{}</lastmod>'\
                                     .format(last_modified)
                 else:
-                    last_modified = '<lastmod>2019-01-20</lastmod>'
+                    last_modified = '<lastmod>2021-01-01</lastmod>'
                 did = did.replace('&', '&amp;')
                 out.write('''   <url>
       <loc>https://next.obudget.org/i/{}</loc>{}

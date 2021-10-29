@@ -97,8 +97,6 @@ supports-2017:
       skip-if-exists: true
 
 supports-2018:
-  schedule:
-    crontab: "0 15 * * *"
   pipeline:
   - flow: scraper
     parameters:
@@ -127,6 +125,15 @@ supports-2021:
   - flow: scraper
     parameters:
       year: 2021
+
+supports-2022:
+  schedule:
+    crontab: "0 19 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2022
+
 
 all:
   dependencies:
