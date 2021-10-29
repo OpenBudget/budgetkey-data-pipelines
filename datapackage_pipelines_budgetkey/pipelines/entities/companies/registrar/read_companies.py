@@ -77,6 +77,7 @@ companies = {
 
 
 def flow(*_):
+    print('reading companies...')
     return Flow(
         data_gov_il_resource.flow(companies),
         fix_values(),
