@@ -77,7 +77,9 @@ def get_resource_by_id(dataset_id, resource_id, extension='csv'):
         data = open(downloaded.name, 'rb').read()
         if data[:5] == b'<html':
             print('DDD1')
-            print('DDD', 'GOT HTML RESPONSE FOR URL %s: %r' % (url, data))
+            data = data.decode('utf-8')
+            data = data.replace('<', '&lt;').replace('>', '&gt;')
+            print('DDD', 'GOT HTML RESPONSE FOR URL %s: %s' % (url, data))
             logging.error('GOT HTML RESPONSE FOR URL %s: %r', url, data)
             raise ValueError()
         # logging.info('%s/%s -> %s %d bytes (%r...%r)',
