@@ -196,7 +196,7 @@ try:
                                 v = [Decimal(sample_row[k]) if sample_row[k] is not None else 0
                                      for k in headers_row
                                      if k.startswith('ביצוע') or k.startswith('ערך')]
-                                assert all(sample_row[k] in ['כן', 'לא', '', 'ערך היסטורי', None]
+                                assert all(sample_row[k].strip() in ['כן', 'לא', '', 'ערך היסטורי', None]
                                            for k in headers_row if k.startswith('הזמנה רגישה'))
                             except Exception as e:
                                 logging.info('BAD SAMPLE ROW in %s:\n%r', report['report-url'], sample_row)

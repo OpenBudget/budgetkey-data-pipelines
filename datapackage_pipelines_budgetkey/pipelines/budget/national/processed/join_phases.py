@@ -43,7 +43,7 @@ phases = {
     'מקורי': 'allocated',
     'מאושר': 'revised',
     'ביצוע': 'executed'
-}
+}   
 
 
 resource = datapackage['resources'][0]
