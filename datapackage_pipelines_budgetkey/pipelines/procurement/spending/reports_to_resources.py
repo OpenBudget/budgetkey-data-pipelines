@@ -74,7 +74,19 @@ url_to_fixed_file = {
         'file://manual_fixes/ב 2016 מתוקן.xlsx',
     'https://foi.gov.il/sites/default/files/%D7%93%D7%95%D7%97%20%D7%94%D7%AA%D7%A7%D7%A9%D7%A8%D7%95%D7%99%D7%95%D7%AA%20%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%AA%D7%97%D7%91%D7%95%D7%A8%D7%94%20%D7%95%D7%94%D7%A9%D7%9E%D7%98%20%D7%A8%D7%91%D7%A2%D7%95%D7%9F%20%D7%A9%D7%9C%D7%99%D7%A9%D7%99%202017%20%D7%9C%D7%A4%D7%A8%D7%A1%D7%95%D7%9D.xlsx':
 	    'file://manual_fixes/2017-3-משרד התחבורה והבטיחות בדרכים-משרד התחבורה והבטיחות בדרכים-2017-11-14-f0fd.xlsx',
+
+
+    'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/rabanot_3_2021/he/rabanot_3.xlsx':
+        'https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/manual-spending-reports/manual-spending-reports/rabanot_3.xlsx',
+    'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/moc_21_3_4/he/repository-of-answers_ministry-of-communications_%D7%A2%D7%95%D7%AA%D7%A7%20%D7%A9%D7%9C%20%D7%93%D7%95%D7%97%20%D7%A8%D7%9B%D7%A9%20%D7%97%D7%95%D7%A7%20%D7%97%D7%95%D7%A4%D7%A9%20%D7%94%D7%9E%D7%99%D7%93%D7%A2%20%20%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%AA%D7%A7%D7%A9%D7%95%D7%A8%D7%AA%20%D7%A8%D7%91%D7%A2%D7%95%D7%9F%203%202021%20(002).xlsx':
+        'https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/manual-spending-reports/manual-spending-reports/repository-of-answers_ministry-of-%20%20%20%D7%A8%D7%91%D7%A2%D7%95%D7%9F%203%202021%20%28002%29.xlsx',
+    
+
 }
+
+to_skip = [
+    
+]
 
 stats = {'bad-reports': 0}
 loading_results = []
@@ -96,6 +108,9 @@ try:
         if url_to_use in url_to_fixed_file:
             url_to_use = url_to_fixed_file[url_to_use]
             logging.info("Using fixed file: %s", url_to_use)
+        if url_to_use in to_skip:
+            logging.info("SKIPPING: %s", url_to_use)
+            continue
         if url_to_use.startswith('http'):
             hash = hashlib.md5(report['report-title'].encode('utf8')).hexdigest()[:4]
             obj_name = "{report-year}-{report-period}-{report-publisher}-{report-subunit}-{report-date}".format(**report)
