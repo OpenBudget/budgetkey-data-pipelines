@@ -300,7 +300,7 @@ with-extras:
   pipeline:
     - run: add_metadata
       parameters:
-        title: תקציב מדינת ישראל, 1997-2020
+        title: תקציב מדינת ישראל, 1997-2022
         name: processed-national-budget-with-extras
         readme: התקציב השנתי של ממשלת ישראל, כפי שמפורסם על ידי אגף התקציבים - ועוד קצת עיבודים שלנו.
     - run: load_resource

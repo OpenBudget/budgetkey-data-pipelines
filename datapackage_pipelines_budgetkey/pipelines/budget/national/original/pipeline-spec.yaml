@@ -155,6 +155,18 @@ national-budgets:
         sheet: 1
         force_strings: true
         name: budget2020
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2021.xlsx
+        sheet: 1
+        force_strings: true
+        name: budget2021
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2022.xlsx
+        sheet: 1
+        force_strings: true
+        name: budget2022
     - flow: only_years
     - run: concatenate
       parameters:
