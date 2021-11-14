@@ -28,9 +28,11 @@ def process_row(row, *_):
             except ValueError:
                 continue
 
-    bc = row['budget_code'].strip()
+    bc = row['budget_code']
+    if not bc:
+        return
+    bc = bc.strip()
     if len(bc) == 0:
-        logging.error('BAD row %r', row)
         return
     bc = '0' * (8-len(bc)) + bc
     row['budget_code'] = bc
