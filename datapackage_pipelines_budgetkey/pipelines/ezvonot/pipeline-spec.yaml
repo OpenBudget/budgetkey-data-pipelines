@@ -271,7 +271,7 @@ ezvonot_decisions:
     - run: data_gov_il_resource
       parameters:
         dataset-name: ezvonot2018
-        resource-name: 'קובץ החלטות וועדה '
+        resource-name: קובץ החלטות וועדה
         resource:
           name: decisions
     - run: concatenate
