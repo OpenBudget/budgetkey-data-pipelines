@@ -62,7 +62,7 @@ def scrape():
         # driver.execute_script('Display(1)');
         while True:
             try:
-                bakasha = WebDriverWait(driver, 60).until(
+                bakasha = WebDriverWait(driver, 10).until(
                     EC.presence_of_element_located((By.ID, "RadioBakasha1"))
                 )
                 bakasha.click()
@@ -70,7 +70,7 @@ def scrape():
                 return
             except TimeoutException:
                 logging.warning('Failed to find radio button, retrying in a few (%s)', msg)
-                time.sleep(600)
+                time.sleep(3600)
 
 
     prepare()
