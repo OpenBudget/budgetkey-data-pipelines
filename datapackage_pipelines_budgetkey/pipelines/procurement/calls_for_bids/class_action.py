@@ -23,7 +23,7 @@ def scrape():
     for row in rows:
         _row = [
             pq(td)
-            for td in pq(row).find('td')
+            for td in pq(row).find('td, th')
         ] 
         if len(_row) == 0:
             continue
