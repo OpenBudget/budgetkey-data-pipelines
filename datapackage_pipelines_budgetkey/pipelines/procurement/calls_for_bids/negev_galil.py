@@ -22,6 +22,7 @@ def scraper():
             page_url='https://negev-galil.gov.il' + page_url,
             page_title=page_title,
             publisher='משרד פיתוח הפריפריה, הנגב והגליל',
+            tender_id='0',
             tender_type='call_for_bids',
             tender_type_he='קול קורא',
             publication_id=None,
