@@ -93,5 +93,5 @@ def flow(*_):
 
 if __name__ == '__main__':
     DF.Flow(
-        flow(), DF.printer(max_cell_size=10)
+        flow(), DF.printer(max_cell_size=40, num_rows=10000)
     ).process()
