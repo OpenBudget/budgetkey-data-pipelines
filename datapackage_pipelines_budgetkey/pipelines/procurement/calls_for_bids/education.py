@@ -31,6 +31,23 @@ def extract_budget_code(row, field):
             return code
 
 
+def enumerate_titles(rows):
+    if rows.res.name == 'education':
+        titles = set()
+        for row in rows:
+            orig_title = row['page_title']
+            title = orig_title
+            count = 2
+            while title in titles:
+                title = f'{orig_title} ({count})'
+                count += 1
+            titles.add(title)
+            row['page_title'] = title
+            yield row
+        else:
+            yield from rows
+        
+
 def flow(*_):
     return DF.Flow(
         DF.load(URL, format='json', property='jData', name='education'),
@@ -47,6 +64,7 @@ def flow(*_):
             att_title=['PobCreteriaLink_description'],
             att_url=['PobCreteriaLink_url'],
         ), resources=-1, target=dict(name='education')),
+        enumerate_titles,
         DF.add_field('page_url', 'string', PAGE_URL, resources=-1),
         DF.add_field('publisher', 'string', 'משרד החינוך', resources=-1),
         DF.add_field('tender_type', 'string', 'call_for_bids', resources=-1),
