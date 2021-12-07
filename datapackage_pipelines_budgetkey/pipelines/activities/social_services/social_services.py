@@ -2,6 +2,7 @@ import dataflows as DF
 from decimal import Decimal
 import datetime
 
+CURRENT_YEAR = 2020
 
 def datarecords(kind):
     return map(
@@ -120,7 +121,7 @@ def fix_suppliers():
                 if f in v and not v[f]:
                     del v[f]
             start_year = v.get('year_activity_start') or 2020
-            end_year = v.get('year_activity_end') or 2020
+            end_year = v.get('year_activity_end') or CURRENT_YEAR
             v['activity_years'] = list(range(start_year, end_year+1))
             eid = v['entity_id']
             eids.add(eid)
@@ -169,19 +170,22 @@ def fix_suppliers():
     )
 
 def get_score(r):
-    mb = r.get('manualBudget')
-    if mb and len(mb):
-        if mb[0]['approved']:
-            return mb[0]['approved']/1000
+    mb = r.get('current_budget')
+    if mb:
+        return mb/1000
     return 1000
 
 def add_current_budget():
     def func(row):
+        row['current_budget'] = None
         if row.get('manualBudget') and len(row.get('manualBudget')) > 0:
-            row['current_budget'] = row['manualBudget'][0]['approved']
+            for entry in row['manualBudget']:
+                if entry.get('approved') and entry['approved'] > 0 and entry['year'] <= CURRENT_YEAR:
+                    row['current_budget'] = entry['approved']
+                    break
         utilization = None
         for item in row['manualBudget']:
-            if item['approved'] and item['executed']:
+            if item['approved'] and item['executed'] and item['year'] <= CURRENT_YEAR:
                 utilization = item['executed']/item['approved']*100
                 break
         row['budget_utilization'] = utilization
@@ -197,7 +201,7 @@ def add_current_beneficiaries():
     def func(row):
         if row.get('beneficiaries') and len(row.get('beneficiaries')) > 0:
             for b in row.get('beneficiaries'):
-                if b.get('num_beneficiaries'):
+                if b.get('num_beneficiaries') and b['year'] <= CURRENT_YEAR:
                     row['current_beneficiaries'] =  b.get('num_beneficiaries')
                     break
 
@@ -228,7 +232,7 @@ def flow(*_):
         add_current_budget(),
         add_current_beneficiaries(),
         DF.add_field('min_year', 'integer', 2020),
-        DF.add_field('max_year', 'integer', 2020),
+        DF.add_field('max_year', 'integer', CURRENT_YEAR),
         DF.add_field('kind', 'string', 'gov_social_service', **{'es:keyword': True, 'es:exclude': True}),
         DF.add_field('kind_he', 'string', 'שירות חברתי', **{'es:keyword': True, 'es:exclude': True}),
         DF.set_type('name',  **{'es:title': True}),
