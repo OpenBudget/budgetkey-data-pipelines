@@ -130,6 +130,7 @@ offices = [
     dict(name='משרד הבריאות', selector="='משרד הבריאות'"),
     dict(name='משרד החינוך', selector="='משרד החינוך'"),
     dict(name='משרד הרווחה', selector="='משרד הרווחה'"),
+    dict(name='כלל משרדי הממשלה', selector=" is not null"),
 ]
 
 def do_query():
