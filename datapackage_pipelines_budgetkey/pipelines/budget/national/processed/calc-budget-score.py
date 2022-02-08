@@ -19,12 +19,6 @@ def process_row(row, *_):
     if amount is None:
         logging.warning('net_revised is None: %r', row)
         amount = 0
-    # Account for relevance
-    # year_score = 2**abs(curyear - row['year'])
-    # amount /= year_score
-    # # Account for depth
-    # depth = len(row['code'])/2
-    # amount /= depth
     row['score'] = max(1, amount / 1000)
     code = row.get('code', '')
     if code.startswith('0000') or code.startswith('C8'):

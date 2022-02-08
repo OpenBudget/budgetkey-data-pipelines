@@ -90,11 +90,6 @@ def update_equiv(e1, e2):
 
 def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete, unmatched_db):
 
-    # rows = list(rows)
-    # logging.info('cur_year: %r, num rows = %d, prev_year=%d', cur_year, len(rows), len(list(connected_items.iterator())))
-    # logging.info('connected_items: %r', connected_items)
-    # logging.info('new_connected_items: %r', new_connected_items)
-
     mapped_levels = {}
     unmatched_count = 0
 
@@ -200,7 +195,6 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
         if row is not None:
             assert len(equivs) > 0
             new_history = {}
-            # logging.info(', '.join(x['code'] for x in equivs))
             codes = set()
             for equiv in equivs:
                 if equiv['code'] in codes:
@@ -299,11 +293,6 @@ dp['resources'] = [
         'path': 'data/budget.csv',
         'schema': schema
     },
-    # {
-    #     'name': 'unmatched',
-    #     'path': 'data/unmatched.csv',
-    #     'schema': schema
-    # }
 ]
 
 spew(dp, process_resources(res_iter))

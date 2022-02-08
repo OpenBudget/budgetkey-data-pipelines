@@ -57,8 +57,6 @@ def get_spending_analysis(id):
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
     results = sorted(results, key=lambda x: -x['amount'])
-    # detailed = [x for x in results if x['payer'] != 'all']
-    # aggregated = [x for x in results if x['payer'] == 'all']
     return results
     
 

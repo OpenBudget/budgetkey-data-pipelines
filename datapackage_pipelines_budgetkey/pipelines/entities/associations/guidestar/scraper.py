@@ -91,9 +91,9 @@ rules = [
     getter('address_zip_code', 0, 'result.addressZipCode', []),
     getter('address_city', 0, 'result.city', []),
 
-    getter('activity_region_list', 0, 'result.cities', [],
+    getter('activity_region_list', 0, 'result.malkarDistricts', [],
             {'type':'array', 'es:itemType': 'string'}),
-    getter('activity_region', 0, 'result.cities', [commaJoiner]),
+    getter('activity_region', 0, 'result.malkarDistricts', [commaJoiner]),
     getter('activity_region_national', 0, 'result.malkarLocationIsNational', [],
             dict(type='boolean')),
 
@@ -202,7 +202,7 @@ if __name__ == '__main__':
             'type': 'string'
         },
         {
-               'name': 'association_address_lines',
+            'name': 'association_address_lines',
             'type': 'array',
             'es:itemType': 'string'
         },
