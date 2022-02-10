@@ -221,4 +221,5 @@ if __name__ == '__main__':
     ])
     resource['schema']['missingValues'] = ['', "לא קיים דיווח מקוון"]
 
+
     spew(datapackage, process_resources(res_iter, dilute))
