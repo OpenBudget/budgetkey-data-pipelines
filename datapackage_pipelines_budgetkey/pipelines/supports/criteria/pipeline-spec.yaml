@@ -6,8 +6,10 @@ support-criteria-doj:
       parameters:
         name: support-criteria
         title: רשימת מבחני תמיכה ומסמכים רלוונטיים מאתר משרד המשפטים
-    - flow: guidestar_scraper
-      runner: tzabar
+    # the guidestar page stopped working... need to check why
+    # Might need to bring it from here: https://www.gov.il/he/Departments/DynamicCollectors/test-servies?skip=0
+    # - flow: guidestar_scraper
+    #   runner: tzabar
     - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: dump_to_path
       parameters:
