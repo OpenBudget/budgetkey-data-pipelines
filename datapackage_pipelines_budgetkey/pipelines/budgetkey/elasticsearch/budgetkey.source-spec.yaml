@@ -47,7 +47,7 @@ national-budget-changes:
 
 entities:
   kind: indexer
-  revision: 37
+  revision: 38
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   page-title-pattern: '{name} ({kind_he})'
