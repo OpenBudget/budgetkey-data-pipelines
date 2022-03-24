@@ -91,6 +91,8 @@ rules = [
     getter('address_zip_code', 0, 'result.addressZipCode', []),
     getter('address_city', 0, 'result.city', []),
 
+    getter('activity_cities_list', 0, 'result.cities', [],
+            {'type':'array', 'es:itemType': 'string'}),
     getter('activity_region_list', 0, 'result.malkarDistricts', [],
             {'type':'array', 'es:itemType': 'string'}),
     getter('activity_region', 0, 'result.malkarDistricts', [commaJoiner]),

@@ -30,6 +30,7 @@ entities.associations.guidestar.scraper
             "path": "registry.csv",
             "schema":
                 {"fields": [
+                    {"name": "association_activity_cities_list", "type": "array", "es:itemType": "string"},
                     {"name": "association_activity_region", "type": "string"},
                     {"name": "association_activity_region_list", "type": "array", "es:itemType": "string"},
                     {"name": "association_activity_region_national", "type": "boolean"},
@@ -75,7 +76,9 @@ entities.associations.guidestar.scraper
     ]
 }
 --
-{"association_activity_region": "ירושלים",
+{
+"association_activity_cities_list": ["ירושלים"],
+"association_activity_region": "ירושלים",
 "association_activity_region_list": ["ירושלים"],
 "association_address": "רבקה 11, ירושלים 9346117",
 "association_address_lines": ["רבקה 11, ירושלים 9346117"],

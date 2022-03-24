@@ -30,6 +30,7 @@ entities.associations.guidestar.scraper
             "path": "registry.csv",
             "schema":
                 {"fields": [
+                    {"name": "association_activity_cities_list", "type": "array", "es:itemType": "string"},
                     {"name": "association_activity_region", "type": "string"},
                     {"name": "association_activity_region_list", "type": "array", "es:itemType": "string"},
                     {"name": "association_activity_region_national", "type": "boolean"},
@@ -75,7 +76,9 @@ entities.associations.guidestar.scraper
     ]
 }
 --
-{"association_address": "המסגר 44, תל אביב - יפו 6721412",
+{
+"association_activity_cities_list": ["תל אביב - יפו"],
+"association_address": "המסגר 44, תל אביב - יפו 6721412",
 "association_field_of_activity": "סיוע לנזקקים",
 "association_fields_of_activity": ["סיוע לנזקקים"],
 "association_primary_field_of_activity": "שירותי רווחה",
