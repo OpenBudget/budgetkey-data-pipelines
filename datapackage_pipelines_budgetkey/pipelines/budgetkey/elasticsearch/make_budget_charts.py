@@ -272,24 +272,87 @@ def process_resource(res_):
                 }
             )
         change_charts = []
-        chart, layout = history_chart(row)
-        if chart is not None:
-            change_charts.append(
-                {
-                    'title': 'נומינלית',
-                    'long_title': 'ערכי התקציב לאורך השנים (כפי שהופיעו בספרי התקציב)',
-                    'type': 'plotly',
-                    'chart': chart,
-                    'layout': layout
-                }
-            )
-        if row['code'].startswith('C') or len(row['code']) <= 4:
+        if not row['code'].startswith('0000'):
+            chart, layout = history_chart(row)
+            if chart is not None:
+                change_charts.append(
+                    {
+                        'title': 'נומינלית',
+                        'long_title': 'ערכי התקציב לאורך השנים (כפי שהופיעו בספרי התקציב)',
+                        'type': 'plotly',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
+            if row['code'].startswith('C') or len(row['code']) <= 4:
+                chart, layout = history_chart(row, normalisation=totals)
+                if chart is not None:
+                    change_charts.append(
+                        {
+                            'title': 'באחוזים מכלל התקציב',
+                            'long_title': 'ערכי התקציב לאורך השנים כאחוז מכלל התקציב',
+                            'type': 'plotly',
+                            'chart': chart,
+                            'layout': layout
+                        }
+                    )
+                chart, layout = history_chart(row, normalisation=gdp)
+                if chart is not None:
+                    change_charts.append(
+                        {
+                            'title': 'לעומת התוצר המקומי הגולמי',
+                            'long_title': 'ערכי התקציב לאורך השנים כאחוז מהתוצר הלאומי הגולמי',
+                            'type': 'plotly',
+                            'chart': chart,
+                            'layout': layout
+                        }
+                    )
+                chart, layout = history_chart(row, normalisation=inflation, normalisation_unit='מחירי 2016')
+                if chart is not None:
+                    change_charts.append(
+                        {
+                            'title': 'בערכים ריאליים',
+                            'long_title': 'ערכי התקציב לאורך השנים, מותאמים לאינפלציה (במחירי 2016)',
+                            'type': 'plotly',
+                            'chart': chart,
+                            'layout': layout
+                        }
+                    )
+                chart, layout = history_chart(row, normalisation=infl_pop, normalisation_unit='תקציב לתושב, מחירי 2016')
+                if chart is not None:
+                    change_charts.append(
+                        {
+                            'title': 'תקציב ריאלי לתושב',
+                            'long_title': 'ערכי התקציב לאורך השנים, מנורמלים לפי גודל האוכלוסיה ומותאמים לאינפלציה (במחירי 2016)',
+                            'type': 'plotly',
+                            'chart': chart,
+                            'layout': layout
+                        }
+                    )
+            if change_charts:
+                row['charts'].append({
+                    'title': 'שינויי תקציב',
+                    'long_title': 'איך התקציב בסעיף זה השתנה לאורך השנים?',
+                    'subcharts': change_charts
+                })
+        else:
+            chart, layout = history_chart(row)
+            if chart is not None:
+                change_charts.append(
+                    {
+                        'title': 'נומינלית',
+                        'long_title': 'ערכי ההכנסה לאורך השנים (כפי שהופיעו בספרי התקציב)',
+                        'type': 'plotly',
+                        'chart': chart,
+                        'layout': layout
+                    }
+                )
             chart, layout = history_chart(row, normalisation=totals)
             if chart is not None:
                 change_charts.append(
                     {
                         'title': 'באחוזים מכלל התקציב',
-                        'long_title': 'ערכי התקציב לאורך השנים כאחוז מכלל התקציב',
+                        'long_title': 'ערכי ההכנסה לאורך השנים כאחוז מכלל התקציב',
                         'type': 'plotly',
                         'chart': chart,
                         'layout': layout
@@ -300,41 +363,18 @@ def process_resource(res_):
                 change_charts.append(
                     {
                         'title': 'לעומת התוצר המקומי הגולמי',
-                        'long_title': 'ערכי התקציב לאורך השנים כאחוז מהתוצר הלאומי הגולמי',
+                        'long_title': 'ערכי ההכנסה לאורך השנים כאחוז מהתוצר הלאומי הגולמי',
                         'type': 'plotly',
                         'chart': chart,
                         'layout': layout
                     }
                 )
-            chart, layout = history_chart(row, normalisation=inflation, normalisation_unit='מחירי 2016')
-            if chart is not None:
-                change_charts.append(
-                    {
-                        'title': 'בערכים ריאליים',
-                        'long_title': 'ערכי התקציב לאורך השנים, מותאמים לאינפלציה (במחירי 2016)',
-                        'type': 'plotly',
-                        'chart': chart,
-                        'layout': layout
-                    }
-                )
-            chart, layout = history_chart(row, normalisation=infl_pop, normalisation_unit='תקציב לתושב, מחירי 2016')
-            if chart is not None:
-                change_charts.append(
-                    {
-                        'title': 'תקציב ריאלי לתושב',
-                        'long_title': 'ערכי התקציב לאורך השנים, מנורמלים לפי גודל האוכלוסיה ומותאמים לאינפלציה (במחירי 2016)',
-                        'type': 'plotly',
-                        'chart': chart,
-                        'layout': layout
-                    }
-                )
-        if change_charts:
-            row['charts'].append({
-                'title': 'שינויי תקציב',
-                'long_title': 'איך התקציב בסעיף זה השתנה לאורך השנים?',
-                'subcharts': change_charts
-            })
-
+            if change_charts:
+                row['charts'].append({
+                    'title': 'שינויי הכנסה',
+                    'long_title': 'איך ההכנסה בסעיף זה השתנה לאורך השנים?',
+                    'subcharts': change_charts
+                })
         chart = category_sankey(row, 'total_econ_cls_', ECON_TRANSLATIONS)
         if chart is not None:
             row['charts'].append(
