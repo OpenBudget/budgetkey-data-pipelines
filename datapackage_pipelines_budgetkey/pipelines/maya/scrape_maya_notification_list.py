@@ -69,6 +69,7 @@ def _get_maya_filter_request(date_from, date_to, page_num):
                "IsBreakingAnnouncement":False,
                "IsForTaseMember":False,
                "IsSpecificFund":False,
+               "IsTradeHalt":False,
                "QOpt":1,
                "ViewPage":2}
 
@@ -78,6 +79,9 @@ def _get_maya_headers():
         'X-Maya-With': "allow",
         'Content-Type': "application/json;charset=UTF-8",
         'Accept': "application/json, text/plain, */*",
+        'Origin': "https://maya.tase.co.il",
+        'Referer': "https://maya.tase.co.il",
+        'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
     }
 
 
@@ -88,6 +92,7 @@ def _maya_api_call(session, date_from, date_to, page_num):
         res = session.post(url, json=_get_maya_filter_request(date_from, date_to, page_num), headers=_get_maya_headers())
         return res.json()
     except Exception as e:
+        logging.error("Full Response code: {} body: {}".format(res.status_code, res.text));
         raise Exception("Failed to Call Maya API for date_from:{} date_to:{} page_num:{}".format(date_from, date_to, page_num)) from e
 
 def _split_period(date_from, date_to):
