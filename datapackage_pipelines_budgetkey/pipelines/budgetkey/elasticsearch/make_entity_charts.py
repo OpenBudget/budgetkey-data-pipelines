@@ -369,7 +369,7 @@ def get_municipality_charts(fn, spending_analysis_chart):
             long_title='מאפייני הרשות במרחב',
             subcharts=[
                 get_municipality_graph(fn, 'שטח השיפוט', 'קמ״ר', [
-                    ('שטח השיפוט', 'שימושי קרקע - סך הכל שטח שיפוט - בקמ"ר'),
+                    ('שטח השיפוט', '(סך הכל שטח (קמ"ר'),
                 ]),
                 get_municipality_graph(fn, 'צפיפות אוכלוסיה', 'נפשות לקמ״ר', [
                     ('צפיפות בשטח בנוי', 'צפיפות אוכלוסייה לשטח בנוי (נפשות לקמ"ר)'),
