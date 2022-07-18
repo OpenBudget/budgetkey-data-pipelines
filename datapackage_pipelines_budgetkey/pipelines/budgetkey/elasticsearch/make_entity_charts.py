@@ -310,7 +310,7 @@ def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
             headers = [name]
         headers = format_str_list(headers)
         query = '''
-            select year, value::numeric as value from lamas_muni where name in ({}) and header in ({}) group by 1, 2 order by year
+            select year, value::numeric as value from lamas_muni where name in ({}) and header in ({}) group by 1, 2 order by 1 asc
         '''.format(formatted_names, headers)
         rows = hit_datacity_api(query)
         for r in rows:
