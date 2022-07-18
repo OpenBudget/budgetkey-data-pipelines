@@ -322,9 +322,14 @@ def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
             logging.warning('Duplicate years for {}: {!r}'.format(name, x))
             continue
         y = [r['value'] for r in rows if r['value'] is not None]        
-        charts.append((name, x, y))
+        charts.append((name, x, dict(zip(x, y))))
     if len(charts) == 0:
         return None
+    all_years = sorted(set(sum((x for _, x, _ in charts), [])))
+    charts = [
+        (name, all_years, [d.get(x) for x in all_years])
+        for name, _, d in charts
+    ]
     return dict(
         type='plotly',
         title=title,
