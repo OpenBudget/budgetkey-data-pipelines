@@ -310,16 +310,21 @@ def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
             headers = [name]
         headers = format_str_list(headers)
         query = '''
-            select year, value from lamas_muni where name in ({}) and header in ({}) order by year
+            select year, value::numeric as value from lamas_muni where name in ({}) and header in ({}) group by 1, 2 order by year
         '''.format(formatted_names, headers)
         rows = hit_datacity_api(query)
         for r in rows:
             r['value'] = float(r['value']) if r['value'] else None
         x = [r['year'] for r in rows if r['value'] is not None]
-        assert len(x) > 0, 'No data for {}'.format(name)
-        assert len(x) == len(set(x)), 'Duplicate years for {}: {!r}'.format(name, x)
+        if len(x) == 0:
+            continue
+        if len(x) != len(set(x)):
+            logging.warning('Duplicate years for {}: {!r}'.format(name, x))
+            continue
         y = [r['value'] for r in rows if r['value'] is not None]        
         charts.append((name, x, y))
+    if len(charts) == 0:
+        return None
     return dict(
         type='plotly',
         title=title,
@@ -337,6 +342,10 @@ def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
             for series_name, x, y in charts
         ]
     )
+
+
+def prune(l):
+    return [x for x in l if x is not None]
 
 
 def get_municipality_charts(fn, spending_analysis_chart):
@@ -367,19 +376,19 @@ def get_municipality_charts(fn, spending_analysis_chart):
         dict(
             title='גיאוגרפיה',
             long_title='מאפייני הרשות במרחב',
-            subcharts=[
+            subcharts=prune([
                 get_municipality_graph(fn, 'שטח השיפוט', 'קמ״ר', [
-                    ('שטח השיפוט', '(סך הכל שטח (קמ"ר'),
+                    ('שטח השיפוט', 'סך הכל שטח (קמ"ר)'),
                 ]),
                 get_municipality_graph(fn, 'צפיפות אוכלוסיה', 'נפשות לקמ״ר', [
-                    ('צפיפות בשטח בנוי', 'צפיפות אוכלוסייה לשטח בנוי (נפשות לקמ"ר)'),
+                    ('צפיפות בשטח בנוי', 'צפיפות אוכלוסייה (נפשות לקמ"ר)'),
                     ('צפיפות בשטח בנוי למגורים', 'צפיפות אוכלוסייה לשטח בנוי למגורים (נפשות לקמ"ר)'),
                 ]),
                 get_municipality_graph(fn, 'דירות למגורים', 'מספר דירות למגורים', [
                     ('לפי חיובי ארנונה', 'מספר דירות למגורים לפי חיובי ארנונה'),
                     ('לפי מרשם מבנים ודירות', 'מספר דירות למגורים לפי מרשם מבנים ודירות'),
                 ]),
-            ]
+            ])
         ),
         dict(
             title='כספים',
