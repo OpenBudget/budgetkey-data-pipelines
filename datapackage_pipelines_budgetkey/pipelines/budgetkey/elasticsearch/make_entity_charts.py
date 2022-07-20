@@ -223,7 +223,7 @@ MUNICIPALITY_DETAILS_CONFIG = [
     ('status_year', 'שנת קבלת מעמד מוניציפלי', 'שנת קבלת מעמד מוניציפלי'),
     ('socioeconomic_cluster', 'מדד חברתי-כלכלי - אשכול', 'מדד חברתי-כלכלי - אשכול (1 הנמוך ביותר)'),
     ('socioeconomic_rating', 'מדד חברתי-כלכלי - דירוג', 'מדד חברתי-כלכלי - דירוג (1 הנמוך ביותר)'),
-    ('residents', 'מספר תושבים', 'סה"כ אוכלוסייה (אלפים)'),
+    ('residents', 'מספר תושבים', 'סה"כ אוכלוסייה'),
     ('pct_jews_other', 'יהודים ואחרים', 'יהודים ואחרים (אחוז)'),
     ('pct_arabs', 'ערבים', 'ערבים (אחוז)'),
     ('pct_65_plus', 'מעל גיל 65', 'אחוז בני 65 ומעלה באוכלוסייה'),
@@ -293,10 +293,42 @@ def get_municipality_details(row):
             )
     if len(details) - 3 != len(MUNICIPALITY_DETAILS_CONFIG):
         logging.info('Missing data for {}: {!r}'.format(names, set(c[0] for c in MUNICIPALITY_DETAILS_CONFIG) - set(details.keys())))
-    return formatted_names, dict(extended=details)
+    return names, dict(extended=details)
+
+def get_municipality_comparison(muni_names, title, header, **kwargs):
+    header = header.replace("'", r"''")
+    all_munis_query = '''
+           select * from (select name, year, value, 
+           row_number() over (partition by header order by year desc) as row_number
+           from lamas_muni where header='{}') as a where row_number=1 order by value::numeric desc
+    '''.format(header)
+    all_munis_values = hit_datacity_api(all_munis_query)
+    all_names = [x['name'] for x in all_munis_values]
+    idx = None
+    while len(muni_names) > 0:
+        idx = all_names.index(muni_names.pop(0))
+        if idx is not None:
+            break
+    assert idx is not None
+    return dict(
+        title=title,
+        type='adamkey',
+        chart=dict(
+            values=[
+                dict(
+                    label=x['name'],
+                    amount=float(x['value']),
+                    amount_fmt='{:.1f}%'.format(float(x['value']))
+                )
+                for x in all_munis_values
+            ],
+            selected=idx
+        ),
+        **kwargs
+    )
 
 
-def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
+def get_municipality_graph(formatted_names, title, units, series, mode='lines', **kwargs):
     chart_options = dict()
     if mode == 'lines':
         chart_options=dict(mode='lines+markers')
@@ -345,7 +377,8 @@ def get_municipality_graph(formatted_names, title, units, series, mode='lines'):
                 **chart_options
             )
             for series_name, x, y in charts
-        ]
+        ],
+        **kwargs
     )
 
 
@@ -353,11 +386,12 @@ def prune(l):
     return [x for x in l if x is not None]
 
 
-def get_municipality_charts(fn, spending_analysis_chart):
+def get_municipality_charts(names, spending_analysis_chart):
+    fn = format_str_list(names)
     charts = [
         dict(
             title='דמוגרפיה',
-            long_title='מספר התושבים',
+            long_title='מי גר פה?',
             subcharts=[
                 get_municipality_graph(fn, 'מספר התושבים ברשות', 'תושבים', [
                     ('סה"כ אוכלוסיה', 'סה"כ אוכלוסייה'),
@@ -373,9 +407,22 @@ def get_municipality_charts(fn, spending_analysis_chart):
                     ('בני 60-64', 'אחוז בני 60-64 באוכלוסייה'),
                     ('בני 65 ומעלה', 'אחוז בני 65 ומעלה באוכלוסייה'),
                 ], mode='stacked-100'),
+                get_municipality_comparison(
+                    names, 'השוואת אחוז עולים חדשים', 'עולי 1990+ (אחוז)', 
+                    long_title='השוואת אחוז העולים החדשים באוכלוסיה בין הרשויות השונות',
+                    description='עולים חדשים מאז שנת 1990',
+                ),
+                get_municipality_comparison(
+                    names, 'השוואת אחוז מבוגרים', 'אחוז בני 65 ומעלה באוכלוסייה', 
+                    long_title='השוואת אחוז המבוגרים מעל לגיל 65 באוכלוסיה בין הרשויות השונות',
+                ),
+                get_municipality_comparison(
+                    names, 'השוואת אחוז צעירים', 'אחוז בני 0-17 באוכלוסייה', 
+                    long_title='השוואת אחוז הצעירים מתחת לגיל 17 באוכלוסיה בין הרשויות השונות',
+                ),
                 get_municipality_graph(fn, 'עולים חדשים', 'אחוז', [
                     ('אחוז עולי 1990+ מכלל האוכלוסיה', 'עולי 1990+ (אחוז)'),
-                ]),
+                ], description='עולים חדשים מאז שנת 1990'),
             ]
         ),
         dict(
@@ -510,11 +557,12 @@ def process_row(row, *_):
         charts = get_association_charts(row, spending_analysis_chart)
     elif kind == 'municipality':
         try:
-            formatted_names, details = get_municipality_details(row)
+            names, details = get_municipality_details(row)
             row['details'].update(details)
-            charts = get_municipality_charts(formatted_names, spending_analysis_chart)
+            charts = get_municipality_charts(names, spending_analysis_chart)
         except Exception as e:
             logging.info('Error getting municipality details for {}: {}'.format(row['name'], e))
+            raise
     else:
         if spending_analysis_chart:
             charts = [spending_analysis_chart]
