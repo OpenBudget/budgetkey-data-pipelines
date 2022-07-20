@@ -309,7 +309,9 @@ def get_municipality_comparison(muni_names, title, header, **kwargs):
         if x in all_names:
             idx = all_names.index(x)
             break
-    assert idx is not None, 'Couldn\'t find {} in {}'.format(muni_names, all_names)
+    if idx is None:
+        print('Couldn\'t find {} in {}'.format(muni_names, all_names))
+        return None
     return dict(
         title=title,
         type='adamkey',
@@ -393,7 +395,7 @@ def get_municipality_charts(names, spending_analysis_chart):
         dict(
             title='דמוגרפיה',
             long_title='מי גר פה?',
-            subcharts=[
+            subcharts=prune([
                 get_municipality_graph(fn, 'מספר התושבים ברשות', 'תושבים', [
                     ('סה"כ אוכלוסיה', 'סה"כ אוכלוסייה'),
                 ]),
@@ -424,7 +426,7 @@ def get_municipality_charts(names, spending_analysis_chart):
                 get_municipality_graph(fn, 'עולים חדשים', 'אחוז', [
                     ('אחוז עולי 1990+ מכלל האוכלוסיה', 'עולי 1990+ (אחוז)'),
                 ], description='עולים חדשים מאז שנת 1990'),
-            ]
+            ])
         ),
         dict(
             title='גיאוגרפיה',
