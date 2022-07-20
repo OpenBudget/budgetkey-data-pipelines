@@ -299,17 +299,17 @@ def get_municipality_comparison(muni_names, title, header, **kwargs):
     header = header.replace("'", r"''")
     all_munis_query = '''
            select * from (select name, year, value, 
-           row_number() over (partition by header order by year desc) as row_number
+           row_number() over (partition by name order by year desc) as row_number
            from lamas_muni where header='{}') as a where row_number=1 order by value::numeric desc
     '''.format(header)
     all_munis_values = hit_datacity_api(all_munis_query)
     all_names = [x['name'] for x in all_munis_values]
     idx = None
-    while len(muni_names) > 0:
-        idx = all_names.index(muni_names.pop(0))
-        if idx is not None:
+    for x in muni_names:
+        if x in all_names:
+            idx = all_names.index(x)
             break
-    assert idx is not None
+    assert idx is not None, 'Couldn\'t find {} in {}'.format(muni_names, all_names)
     return dict(
         title=title,
         type='adamkey',
@@ -321,6 +321,7 @@ def get_municipality_comparison(muni_names, title, header, **kwargs):
                     amount_fmt='{:.1f}%'.format(float(x['value']))
                 )
                 for x in all_munis_values
+                if x['value']
             ],
             selected=idx
         ),
@@ -562,7 +563,6 @@ def process_row(row, *_):
             charts = get_municipality_charts(names, spending_analysis_chart)
         except Exception as e:
             logging.info('Error getting municipality details for {}: {}'.format(row['name'], e))
-            raise
     else:
         if spending_analysis_chart:
             charts = [spending_analysis_chart]
