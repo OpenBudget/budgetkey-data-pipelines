@@ -207,7 +207,12 @@ def hit_datacity_api(query):
     params = dict(
         query=query
     )
-    resp = requests.get(url, params=params).json()
+    for i in range(3):
+        try:
+            resp = requests.get(url, params=params, timeout=30).json()
+        except:
+            continue
+        break
     if resp.get('error'):
         assert False, resp['error']
     if len(resp['rows']) == 0:

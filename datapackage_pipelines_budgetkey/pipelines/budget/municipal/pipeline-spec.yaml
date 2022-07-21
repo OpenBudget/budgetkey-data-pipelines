@@ -1,0 +1,9 @@
+fetcher:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-municipal-budgets
+        title: All Municipal Budgets
+    - flow: datacity-budget-fetcher
