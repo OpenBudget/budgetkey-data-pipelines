@@ -220,6 +220,7 @@ def hit_datacity_api(query):
     return resp['rows']
 
 
+
 MUNICIPALITY_DETAILS_CONFIG = [
     ('symbol', 'סמל הרשות', 'סמל הרשות'),
     ('district', 'מחוז', 'מחוז'),
