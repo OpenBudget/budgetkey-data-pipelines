@@ -21,8 +21,7 @@ def flow(*_):
                 revised=float(row['revised']) if row['revised'] else None,
                 executed=float(row['executed']) if row['executed'] else None,
                 allocated=float(row['allocated']) if row['allocated'] else None,
-            ),
-            **{'es:itemType': 'object', 'es:index': False}),
+            )),
         DF.sort_rows('{year}'),
         DF.join_with_self('muni_budgets', ['code', 'title', 'muni_code'], dict(
             muni_code=None,
@@ -49,6 +48,7 @@ def flow(*_):
         DF.set_type('executed', type='number'),
         DF.set_type('title', **{'es:title': True}),
         DF.set_type('muni_name', **{'es:boost': True}),
+        DF.set_type('history', **{'es:itemType': 'object', 'es:index': False})
         DF.add_field('score', 'number', get_score, **{'es:score-column': True}),
         DF.set_primary_key(['muni_code', 'code', 'year']),
         DF.update_resource(-1, **{'dpp:streaming': True}),
