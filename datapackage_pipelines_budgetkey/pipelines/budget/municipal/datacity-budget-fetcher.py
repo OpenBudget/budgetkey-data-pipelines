@@ -18,12 +18,13 @@ def flow(*_):
         DF.add_field('history', 'object', 
             lambda row: dict(
                 year=row['year'],
+                title=row['title'],
                 revised=float(row['revised']) if row['revised'] else None,
                 executed=float(row['executed']) if row['executed'] else None,
                 allocated=float(row['allocated']) if row['allocated'] else None,
             )),
         DF.sort_rows('{year}'),
-        DF.join_with_self('muni_budgets', ['code', 'title', 'muni_code'], dict(
+        DF.join_with_self('muni_budgets', ['code', 'muni_code'], dict(
             muni_code=None,
             muni_name=dict(aggregate='last'),
             code=None,
