@@ -210,7 +210,7 @@ def hit_datacity_api(query):
     for i in range(3):
         try:
             resp = requests.get(url, params=params, timeout=30).json()
-        except:
+        except requests.exceptions.RequestException:
             continue
         break
     if resp.get('error'):
@@ -236,7 +236,7 @@ MUNICIPALITY_DETAILS_CONFIG = [
     ('pct_immigrants', 'עולי 1990+', 'עולי 1990+ (אחוז)'),
     ('compactness_cluster', 'מדד קומפקטיות', 'מדד קומפקטיות - אשכול (1 הקומפקטי ביותר)'),
     ('peripheriality_cluster', 'מדד פריפריאליות', 'מדד פריפריאליות - אשכול (1 הפריפריאלי ביותר)'),
-    ('num_settlements', 'מספר יישובים במועצה', 'סה"כ יישובים במועצה'),
+    ('num_settlements', 'מספר יישובים במועצה', 'יישובים במועצות אזוריות - סה"כ יישובים במועצה'),
     ('building_committee_name', 'שם ועדת תכנון ובנייה', 'שם ועדת תכנון ובנייה'),
 ]
 
@@ -308,6 +308,8 @@ def get_municipality_comparison(muni_names, title, header, **kwargs):
            from lamas_muni where header='{}') as a where row_number=1 order by value::numeric desc
     '''.format(header)
     all_munis_values = hit_datacity_api(all_munis_query)
+    max_year = max(v['year'] for v in all_munis_values)
+    all_munis_values = [v for v in all_munis_values if v['year'] == max_year]
     all_names = [x['name'] for x in all_munis_values]
     idx = None
     for x in muni_names:
