@@ -41,6 +41,7 @@ def flow(*_):
             executed=dict(aggregate='last'),
             history=dict(aggregate='array'),
         )),
+        lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),
         DF.set_type('.*name', type='string'),
         DF.set_type('title', type='string'),
