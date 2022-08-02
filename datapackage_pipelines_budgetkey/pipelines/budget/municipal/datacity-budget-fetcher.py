@@ -54,6 +54,12 @@ def flow(*_):
         DF.set_primary_key(['muni_code', 'code', 'year']),
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/budget/municipal/datacity-budgets'),
+        DF.dump_to_sql(dict(
+            muni_budgets={
+                'resource-name': 'muni_budgets',
+                'indexes_fields': [['muni_code', 'code', 'year']],
+            }
+        ))
     )
 
 if __name__ == '__main__':
