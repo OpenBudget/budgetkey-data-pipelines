@@ -8,6 +8,7 @@ from datapackage_pipelines_budgetkey.common.format_number import format_number
 import logging
 
 engine = create_engine(os.environ['DPP_DB_ENGINE'])
+conn = engine.connect()
 
 UNREPORTED_TURNOVER_ASSOCIATIONS_QUERY = """
 SELECT count(1) as count
@@ -37,7 +38,7 @@ unreported_turnover_associations_ = {}
 def unreported_turnover_associations(foa):
     if unreported_turnover_associations_.get(foa) is None:
         query = UNREPORTED_TURNOVER_ASSOCIATIONS_QUERY.format(foa=foa)
-        results = engine.execute(query)
+        results = conn.execute(query)
         unreported_turnover_associations_[foa] = int(dict(list(results)[0])['count'])
 
     return unreported_turnover_associations_[foa]
@@ -47,7 +48,7 @@ reported_turnover_associations_ = {}
 def reported_turnover_associations(foa):
     if reported_turnover_associations_.get(foa) is None:
         query = REPORTED_TURNOVER_ASSOCIATIONS_QUERY.format(foa=foa)
-        results = engine.execute(query)
+        results = conn.execute(query)
         reported_turnover_associations_[foa] = [dict(r) for r in results]
 
     return reported_turnover_associations_[foa]
@@ -55,7 +56,7 @@ def reported_turnover_associations(foa):
 
 def get_spending_analysis(id):
     query = SPENDING_ANALYSIS_FOR_ID.format(id=id)
-    results = engine.execute(query)
+    results = conn.execute(query)
     results = [dict(r) for r in results]
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
@@ -264,7 +265,7 @@ def get_municipality_names(row):
     if len(names) > 1:
         logging.info('Multiple names for {}: {}'.format(municipality_name, names))
     assert len(names) > 0, 'Couldn\'t resolve municipality {}'.format(municipality_name)
-    return names, all_names_query[-1]['year']
+    return symbol, names, all_names_query[-1]['year']
 
 
 def format_str_list(lst):
@@ -274,7 +275,7 @@ def format_str_list(lst):
 
 
 def get_municipality_details(row):
-    names, latest_year = get_municipality_names(row)
+    symbol, names, latest_year = get_municipality_names(row)
     formatted_names = format_str_list(names)
 
     query = '''
@@ -298,7 +299,7 @@ def get_municipality_details(row):
             )
     if len(details) - 3 != len(MUNICIPALITY_DETAILS_CONFIG):
         logging.info('Missing data for {}: {!r}'.format(names, set(c[0] for c in MUNICIPALITY_DETAILS_CONFIG) - set(details.keys())))
-    return names, dict(extended=details)
+    return symbol, names, dict(extended=details)
 
 def get_municipality_comparison(muni_names, title, header, **kwargs):
     header = header.replace("'", r"''")
@@ -542,6 +543,56 @@ def get_municipality_charts(names, spending_analysis_chart):
     ]
     return charts
 
+def get_muni_budgets(symbol):
+    query = f'''
+        SELECT title, code, year, allocated, revised, executed
+        from muni_budgets where muni_code='{symbol}' and func_2_code is null;
+    '''
+    results = conn.execute(query)
+    results = [dict(r) for r in results]
+    return dict(
+        (i['code'], i) for i in results
+    )
+
+
+def select_muni_budgets(details, budgets):
+    items = []
+    for code, name in [
+        ('81','חינוך'),
+        ('82','תרבות'),
+        ('83','בריאות'),
+        ('84','רווחה'),
+        ('85','שירותי דת'),
+        ('86','קליטת עליה'),
+        ('87','איכות הסביבה'),
+        ('71','תברואה'),
+        ('72','שמירה ובטחון'),
+        ('75','חגיגות ואירועים'),
+    ]:
+        if code in budgets:
+            bi = budgets[code]
+            v = None
+            if bi['executed']:
+                v = dict(
+                    value=bi['executed'],
+                    value_kind='ביצוע',
+                )
+            elif bi['revised']:
+                v = dict(
+                    value=bi['revised'],
+                    value_kind='עריכה',
+                )
+            elif bi['allocated']:
+                v = dict(
+                    value=bi['allocated'],
+                    value_kind='הקצאה',
+                )
+            if v is not None:
+                bi.update(v)
+                bi['name'] = name
+                items.append(bi)
+    details['select_budgets'] = items
+
 
 def process_row(row, *_):
     id = row['id']
@@ -577,8 +628,10 @@ def process_row(row, *_):
         charts = get_association_charts(row, spending_analysis_chart)
     elif kind == 'municipality':
         try:
-            names, details = get_municipality_details(row)
+            symbol, names, details = get_municipality_details(row)
             row['details'].update(details)
+            muni_budgets = get_muni_budgets(symbol)
+            select_muni_budgets(row['details'], muni_budgets)
             charts = get_municipality_charts(names, spending_analysis_chart)
         except Exception as e:
             logging.info('Error getting municipality details for {}: {}'.format(row['name'], e))
