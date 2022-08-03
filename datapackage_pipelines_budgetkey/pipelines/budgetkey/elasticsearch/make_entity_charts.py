@@ -557,18 +557,24 @@ def get_muni_budgets(symbol):
 
 def select_muni_budgets(details, budgets):
     items = []
-    for code, name in [
-        ('81','חינוך'),
-        ('82','תרבות'),
-        ('83','בריאות'),
-        ('84','רווחה'),
-        ('85','שירותי דת'),
-        ('86','קליטת עליה'),
-        ('87','איכות הסביבה'),
-        ('71','תברואה'),
-        ('72','שמירה ובטחון'),
-        ('75','חגיגות ואירועים'),
+    for code, name, *icon in [
+        ('1', 'ארנונה ואגרות'),
+        ('2', 'שירותים עירוניים'),
+        ('3', 'הכנסות ממשלתיות'),
+        ('4', 'מפעלים (מים, ביוב...)'),
+        ('5', 'הכנסות אחרות'),
+        ('81','חינוך', 'fa-graduation-cap'),
+        ('82','תרבות', 'fa-university'),
+        ('83','בריאות', 'fa-medkit'),
+        ('84','רווחה', 'fa-wheelchair'),
+        ('85','שירותי דת', 'fa-book'),
+        ('86','קליטת עליה', 'fa-plane'),
+        ('87','איכות הסביבה', 'fa-globe'),
+        ('71','תברואה', 'fa-trash'),
+        ('72','שמירה ובטחון', 'fa-shield'),
+        ('75','חגיגות ואירועים', 'fa-birthday-cake'),
     ]:
+        icon = icon[0] if icon else None
         if code in budgets:
             bi = budgets[code]
             v = None
@@ -589,7 +595,9 @@ def select_muni_budgets(details, budgets):
                 )
             if v is not None:
                 bi.update(v)
-                bi['name'] = name
+                bi.update(dict(
+                    name=name, icon=icon
+                ))
                 items.append(bi)
     details['select_budgets'] = items
 
