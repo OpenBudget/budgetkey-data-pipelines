@@ -29,6 +29,7 @@ def get_offices():
     cfg = cfg[1]
     assert cfg['Name'] == 'Office'
     cfg = cfg['MultiChoiseValues']['Values']
+    print(f'GOT {len(cfg)} offices')
     return dict(
         (c['Key'], c['Value'])
         for c in cfg
@@ -69,10 +70,15 @@ def get_all():
                 if 'xls' not in f['FileName'].lower():
                     continue
                 if 'Title' in f and f['Title']:
+                    title = f['Title']
+                    if 'Office' in f:
+                        office = offices[f['Office'][0]]
+                    else:
+                        office = title.split('-')[-1].strip()
                     yield {
                         'report-url': f'https://www.gov.il/BlobFolder/dynamiccollectorresultitem/{base}/he/{f["FileName"]}',
-                        'report-title': f['Title'],
-                        'report-publisher': offices[f['Office'][0]],
+                        'report-title': title,
+                        'report-publisher': office,
                         'report-date': f.get('Date')
                     }
         skip += len(results)
