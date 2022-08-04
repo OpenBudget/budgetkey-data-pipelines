@@ -75,7 +75,7 @@ def flow(*_):
                     parent3entry=dict(name='entry')
                 )
         ),
-        DF.add_field('breadcrumbs', 'array', default=lambda row: [x for x in (row[f'parent{x}entry'] for x in (1,2,3)) if x]),
+        DF.add_field('breadcrumbs', 'array', default=lambda row: [x for x in (row[f'parent{x}entry'] for x in (3,2,1)) if x]),
         DF.delete_fields(['parent.+']),
 
         DF.add_field('history', 'object', 
