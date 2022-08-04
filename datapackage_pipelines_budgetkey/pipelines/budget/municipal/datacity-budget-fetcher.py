@@ -124,7 +124,7 @@ def flow(*_):
         lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),
         DF.set_type('.*name', type='string'),
-        DF.set_type('title', type='string'),
+        DF.set_type('title', type='string', transform=lambda v, row: v if v else f'סעיף {row["code"]}'),
         DF.set_type('direction', type='string'),
         DF.set_type('allocated', type='number'),
         DF.set_type('revised', type='number'),
