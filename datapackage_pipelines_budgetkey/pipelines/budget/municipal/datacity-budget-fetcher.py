@@ -94,6 +94,7 @@ def flow(*_):
             code=None,
             title=None,
             year=dict(aggregate='last'),
+            direction=dict(aggregate='last'),
             breadcrumbs=dict(aggregate='last'),
             func_1_code=dict(aggregate='last'),
             func_1_name=dict(aggregate='last'),
