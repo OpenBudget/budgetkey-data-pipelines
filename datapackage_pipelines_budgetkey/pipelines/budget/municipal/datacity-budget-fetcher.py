@@ -75,7 +75,7 @@ def flow(*_):
                     parent3entry=dict(name='entry')
                 )
         ),
-        DF.add_field('breadcrumbs', 'array', default=lambda row: [row[f'parent{x}entry'] for x in (1,2,3)]),
+        DF.add_field('breadcrumbs', 'array', default=lambda row: [x for x in (row[f'parent{x}entry'] for x in (1,2,3)) if x]),
         DF.delete_fields(['parent.+']),
 
         DF.add_field('history', 'object', 
@@ -112,6 +112,7 @@ def flow(*_):
         DF.set_type('.*code', type='string'),
         DF.set_type('.*name', type='string'),
         DF.set_type('title', type='string'),
+        DF.set_type('direction', type='string'),
         DF.set_type('allocated', type='number'),
         DF.set_type('revised', type='number'),
         DF.set_type('executed', type='number'),
