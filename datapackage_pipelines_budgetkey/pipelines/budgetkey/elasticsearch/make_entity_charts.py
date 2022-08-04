@@ -539,6 +539,7 @@ def get_muni_budgets(symbol):
     )
 
 
+
 def select_muni_budgets(details, budgets):
     items = []
     for code, name, *extra in [
@@ -561,6 +562,8 @@ def select_muni_budgets(details, budgets):
         ('7','שירותים עירוניים'),
         ('8','שירותים ממלכתיים'),
         ('9','מפעלים והוצאות אחרות'),
+        ('EXPENDITURE', ''),
+        ('REVENUE', ''),
     ]:
         use = extra[0] if extra else None
         icon = extra[1] if use == 'selected' else None
