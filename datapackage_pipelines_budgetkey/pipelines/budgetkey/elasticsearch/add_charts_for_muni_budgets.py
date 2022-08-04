@@ -9,6 +9,7 @@ def add_charts():
     def func(row):
         code = row['code']
         history = row['history']
+        row['charts'] = []
         if history and len(history) > 0:
             history = sorted(history, key=lambda x: x['year'])
             layout = dict(
@@ -49,7 +50,7 @@ def add_charts():
 
 def flow(*_):
     return DF.Flow(
-        DF.add_field('charts', 'array', default=[], **{'es:itemType': 'object', 'index': False}),
+        DF.add_field('charts', 'array', **{'es:itemType': 'object', 'index': False}),
         add_charts(),
     )
 
@@ -59,4 +60,6 @@ if __name__ == '__main__':
         flow(),
         DF.printer()
     ).results()[0][0][1000]
-    print(sample)
+    print('AAA', sample['charts'])
+    print('BBB', sample['charts'][0])
+    print('CCC', len(sample['charts']))
