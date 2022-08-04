@@ -541,24 +541,29 @@ def get_muni_budgets(symbol):
 
 def select_muni_budgets(details, budgets):
     items = []
-    for code, name, *icon in [
-        ('1', 'ארנונה ואגרות'),
-        ('2', 'שירותים עירוניים'),
-        ('3', 'הכנסות ממשלתיות'),
-        ('4', 'מפעלים (מים, ביוב...)'),
-        ('5', 'הכנסות אחרות'),
-        ('81','חינוך', 'fa-graduation-cap'),
-        ('82','תרבות', 'fa-university'),
-        ('83','בריאות', 'fa-medkit'),
-        ('84','רווחה', 'fa-wheelchair'),
-        ('85','שירותי דת', 'fa-book'),
-        ('86','קליטת עליה', 'fa-plane'),
-        ('87','איכות הסביבה', 'fa-globe'),
-        ('71','תברואה', 'fa-trash'),
-        ('72','שמירה ובטחון', 'fa-shield'),
-        ('75','חגיגות ואירועים', 'fa-birthday-cake'),
+    for code, name, *extra in [
+        ('1', 'ארנונה ואגרות', 'income-pie'),
+        ('2', 'שירותים עירוניים', 'income-pie'),
+        ('3', 'הכנסות ממשלתיות', 'income-pie'),
+        ('4', 'מפעלים (מים, ביוב...)', 'income-pie'),
+        ('5', 'הכנסות אחרות', 'income-pie'),
+        ('81','חינוך', 'selected', 'fa-graduation-cap'),
+        ('82','תרבות', 'selected', 'fa-university'),
+        ('83','בריאות', 'selected', 'fa-medkit'),
+        ('84','רווחה', 'selected', 'fa-wheelchair'),
+        ('85','שירותי דת', 'selected', 'fa-book'),
+        ('86','קליטת עליה', 'selected', 'fa-plane'),
+        ('87','איכות הסביבה', 'selected', 'fa-globe'),
+        ('71','תברואה', 'selected', 'fa-trash'),
+        ('72','שמירה ובטחון', 'selected', 'fa-shield'),
+        ('75','חגיגות ואירועים', 'selected', 'fa-birthday-cake'),
+        ('6','הנהלה כללית'),
+        ('7','שירותים עירוניים'),
+        ('8','שירותים ממלכתיים'),
+        ('9','מפעלים והוצאות אחרות'),
     ]:
-        icon = icon[0] if icon else None
+        use = extra[0] if extra else None
+        icon = extra[1] if use == 'selected' else None
         if code in budgets:
             bi = budgets[code]
             v = None
@@ -580,7 +585,7 @@ def select_muni_budgets(details, budgets):
             if v is not None:
                 bi.update(v)
                 bi.update(dict(
-                    name=name, icon=icon
+                    name=name, icon=icon, use=use
                 ))
                 items.append(bi)
     details['select_budgets'] = items
