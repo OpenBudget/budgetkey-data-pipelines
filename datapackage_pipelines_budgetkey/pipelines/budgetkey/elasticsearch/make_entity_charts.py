@@ -4,6 +4,7 @@ import requests
 
 from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.format_number import format_number
+from datapackage_pipelines_budgetkey.common.datacity_api import hit_datacity_api
 
 import logging
 
@@ -202,23 +203,6 @@ def get_association_charts(row, spending_analysis_chart):
                     'selected': selected_index
                 }
         })
-
-def hit_datacity_api(query):
-    url = 'https://api.datacity.org.il/api/query'
-    params = dict(
-        query=query
-    )
-    for i in range(3):
-        try:
-            resp = requests.get(url, params=params, timeout=30).json()
-        except requests.exceptions.RequestException:
-            continue
-        break
-    if resp.get('error'):
-        assert False, resp['error']
-    if len(resp['rows']) == 0:
-        logging.info('EMPTY QUERY %s', query)
-    return resp['rows']
 
 
 MUNICIPALITY_DETAILS_CONFIG = [

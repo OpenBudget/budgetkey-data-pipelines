@@ -5,6 +5,16 @@ from decimal import Decimal
 
 DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
 
+def get_code_to_entity_id_map():
+    rows = DF.Flow(
+        DF.load('https://next.obudget.org/datapackages/lamas-municipal-data/datapackage.json'),
+        DF.select_fields(['symbol_municipality_2015', 'entity_id'])
+    ).results()[0][0]
+    return dict(
+        (row['symbol_municipality_2015'], row['entity_id'])
+        for row in rows
+    )
+
 
 def get_score(row):
     return (row['revised'] or row['executed'] or row['allocated'] or Decimal(1000)) / Decimal(1000.0)
@@ -27,6 +37,7 @@ def flow(*_):
         DF.set_type('.*code', type='string'),
         DF.dump_to_path('/var/datapackages/budget/municipal/datacity-budgets-raw'),
     ).process()
+    eid_map = get_code_to_entity_id_map()
     DF.Flow(
         DF.load('/var/datapackages/budget/municipal/datacity-budgets-raw/datapackage.json'),
         DF.add_field('parent', 'string', default=lambda row: parent(row['code'])),
@@ -107,6 +118,8 @@ def flow(*_):
             executed=dict(aggregate='last'),
             history=dict(aggregate='array'),
         )),
+        DF.add_field('entity_id', 'string', default=lambda row: eid_map.get(row['muni_code'])),
+        DF.add_field('entity_doc_id', 'string', default=lambda row: f'org/municipality/{row["entity_id"]}'),
         DF.add_field('children', 'array'),
         lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),
