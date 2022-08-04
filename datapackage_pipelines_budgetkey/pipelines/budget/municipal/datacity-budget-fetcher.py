@@ -9,14 +9,6 @@ DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
 def get_score(row):
     return (row['revised'] or row['executed'] or row['allocated'] or Decimal(1000)) / Decimal(1000.0)
 
-def codetitle(cts):
-    ret = []
-    for ct in cts:
-        if ct is None:
-            continue
-        code, title = ct.split(':', 1)
-        ret.append(dict(code=code, title=title))
-    return ret
 
 def parent(code):
     if code in ('EXPENDITURE', 'REVENUE', None):
@@ -38,8 +30,14 @@ def flow(*_):
     DF.Flow(
         DF.load('/var/datapackages/budget/municipal/datacity-budgets-raw/datapackage.json'),
         DF.add_field('parent', 'string', default=lambda row: parent(row['code'])),
-        DF.add_field('code_title', 'string', default=lambda row: '{}:{}'.format(row['code'], row['title'])),
-        DF.select_fields(['parent', 'code_title', 'code', 'muni_code', 'year']),
+        DF.add_field('entry', 'object', default=lambda row: dict(
+            code=row['code'],
+            title=row['title'],
+            allocated=float(row['allocated']) if row['allocated'] else None,
+            revised=float(row['revised']) if row['revised'] else None,
+            executed=float(row['executed']) if row['executed'] else None,
+        )),
+        DF.select_fields(['parent', 'entry', 'code', 'muni_code', 'year']),
         DF.update_resource(-1, name='hierarchy'),
         DF.dump_to_path('/var/datapackages/budget/municipal/datacity-budgets-hierarchy'),
     ).process()
@@ -49,7 +47,7 @@ def flow(*_):
         DF.join('hierarchy', ['parent', 'muni_code', 'year'], 
                 'muni_budgets', ['code', 'muni_code', 'year'],
                 dict(
-                    children=dict(name='code_title', aggregate='array')
+                    children=dict(name='entry', aggregate='array')
                 ),
                 source_delete=False
         ),
@@ -60,33 +58,33 @@ def flow(*_):
         DF.join('hierarchy', ['code', 'muni_code', 'year'], 
                 'muni_budgets', ['parent1code', 'muni_code', 'year'],
                 dict(
-                    parent1codetitle=dict(name='code_title')
+                    parent1entry=dict(name='entry')
                 ),
                 source_delete=False
         ),
         DF.join('hierarchy', ['code', 'muni_code', 'year'], 
                 'muni_budgets', ['parent2code', 'muni_code', 'year'],
                 dict(
-                    parent2codetitle=dict(name='code_title')
+                    parent2entry=dict(name='entry')
                 ),
                 source_delete=False
         ),
         DF.join('hierarchy', ['code', 'muni_code', 'year'], 
                 'muni_budgets', ['parent3code', 'muni_code', 'year'],
                 dict(
-                    parent3codetitle=dict(name='code_title')
+                    parent3entry=dict(name='entry')
                 )
         ),
-        DF.add_field('breadcrumbs', 'array', default=lambda row: codetitle([row[f'parent{x}codetitle'] for x in (1,2,3)])),
+        DF.add_field('breadcrumbs', 'array', default=lambda row: [row[f'parent{x}entry'] for x in (1,2,3)]),
         DF.delete_fields(['parent.+']),
 
         DF.add_field('history', 'object', 
             lambda row: dict(
                 year=row['year'],
                 title=row['title'],
+                allocated=float(row['allocated']) if row['allocated'] else None,
                 revised=float(row['revised']) if row['revised'] else None,
                 executed=float(row['executed']) if row['executed'] else None,
-                allocated=float(row['allocated']) if row['allocated'] else None,
                 children=row.get('children'),
             )),
         DF.sort_rows('{year}'),
