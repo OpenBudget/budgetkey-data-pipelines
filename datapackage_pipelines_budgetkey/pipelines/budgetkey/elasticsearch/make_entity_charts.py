@@ -203,6 +203,7 @@ def get_association_charts(row, spending_analysis_chart):
                     'selected': selected_index
                 }
         })
+    return charts
 
 
 MUNICIPALITY_DETAILS_CONFIG = [
