@@ -258,7 +258,7 @@ units:
 
 muni_budgets:
   kind: indexer
-  revision: 3
+  revision: 5
   dependent_pipeline: ./budget/municipal/fetcher
   source_datapackage: /var/datapackages/budget/municipal/datacity-budgets/datapackage.json
   page-title-pattern: 'תקציב {title} ב{muni_name}'
@@ -268,6 +268,7 @@ muni_budgets:
     - year
   document-steps:
     - flow: add_redirects_for_muni_budgets
+    - flow: add_charts_for_muni_budgets
 
   # extra-steps:
   #   - flow: activity_add_nice_org_hierarchy
