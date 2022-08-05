@@ -387,7 +387,7 @@ def get_municipality_charts(names, spending_analysis_chart):
     charts = [
         dict(
             title='דמוגרפיה',
-            long_title='מי גר פה?',
+            long_title='תושבי הרשות',
             subcharts=prune([
                 get_municipality_graph(fn, 'מספר התושבים ברשות', 'תושבים', [
                     ('סה"כ אוכלוסיה', 'סה"כ אוכלוסייה'),
