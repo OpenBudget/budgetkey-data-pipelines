@@ -4,6 +4,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 parameters, dp, res_iter = ingest()
 
 key_pattern = parameters['page-title-pattern']
+index = parameters['page-title-index']
 
 
 def process_resource(res):
@@ -20,7 +21,7 @@ def process_resources(res_iter_):
 
 if 'page_title' not in key_pattern:
     dp['resources'][0]['schema']['fields'].append(
-        {'name': 'page_title', 'type': 'string', 'es:index': False}
+        {'name': 'page_title', 'type': 'string', 'es:index': index}
     )
 
 spew(dp, process_resources(res_iter))

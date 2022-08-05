@@ -109,6 +109,7 @@ class Generator(GeneratorBase):
                     source_datapackage = source_datapackage.replace("/var/datapackages", "http://next.obudget.org/datapackages")
                 key_fields = parameters.get('key-fields', [])
                 page_title_pattern = parameters.get('page-title-pattern')
+                page_title_index = parameters.get('page-title-index', False)
                 key_pattern = '/'.join([doc_type] + ['{%s}' % f for f in key_fields])
                 key_pattern = parameters.get('key-pattern', key_pattern)
                 pipeline_id = os.path.join(base, 'index_{}'.format(snake_doc_type))
@@ -167,7 +168,8 @@ class Generator(GeneratorBase):
                         'doc-id-pattern': key_pattern
                     }),
                     ('add_page_title', {
-                        'page-title-pattern': page_title_pattern
+                        'page-title-pattern': page_title_pattern,
+                        'page-title-index': page_title_index
                     }),
                     ('add_date_range', date_range_parameters)
                 ]) + parameters.get('pre-indexing', []) + steps(*[

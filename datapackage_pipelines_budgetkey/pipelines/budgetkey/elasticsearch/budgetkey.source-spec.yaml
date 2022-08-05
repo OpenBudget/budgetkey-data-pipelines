@@ -262,6 +262,7 @@ muni_budgets:
   dependent_pipeline: ./budget/municipal/fetcher
   source_datapackage: /var/datapackages/budget/municipal/datacity-budgets/datapackage.json
   page-title-pattern: 'תקציב {title} ב{muni_name}'
+  page-title-index: true
   key-fields:
     - muni_code
     - code
