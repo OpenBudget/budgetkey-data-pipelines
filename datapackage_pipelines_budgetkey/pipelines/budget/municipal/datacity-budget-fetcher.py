@@ -30,6 +30,34 @@ def parent(code):
     return code[1:4]
     
 
+def nice_code(row):
+    code = row['code']
+    if len(code) < 4:
+        return code
+    else:
+        return code[1:-3] + '.' + code[-3:]
+
+
+def nice_breadcrumbs(row):
+    items = []
+    history = row['history']
+    if history and len(history) > 0:
+        if len(history) > 1:
+            items.append('{} - {}'.format(
+                history[0]['year'], history[-1]['year']
+            ))
+        else:
+            items.append(str(history[0]['year']))
+    bc = row['breadcrumbs']
+    if bc and len(bc) > 0:
+        items.extend(i['title'] for i in bc)
+    items = [x for x in items if x]
+    if len(items):
+        return ' / '.join(items)
+    return ''
+
+
+
 def flow(*_):
     QUERY = Path(__file__).with_name('query.sql').read_text()
     DF.Flow(
@@ -120,6 +148,11 @@ def flow(*_):
         )),
         DF.add_field('entity_id', 'string', default=lambda row: eid_map.get(row['muni_code'])),
         DF.add_field('entity_doc_id', 'string', default=lambda row: f'org/municipality/{row["entity_id"]}'),
+
+        DF.add_field('nice-category', 'string', default=lambda row: row['func_1_name'] or 'סעיף ראשי'),
+        DF.add_field('nice-code', 'string', default=nice_code),
+        DF.add_field('nice-breadcrumbs', 'string', default=nice_breadcrumbs),
+
         DF.add_field('children', 'array'),
         lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),

@@ -41,9 +41,3 @@ SELECT muni_code, muni_name, func_1_code AS code, func_1_name AS title, YEAR, di
        sum(allocated) AS allocated, sum(revised) AS revised, sum(executed) AS executed
 FROM combined
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
-UNION ALL
-SELECT muni_code, muni_name, direction AS code, 'סה״כ תקציב' AS title, YEAR, direction,
-       NULL AS func_1_code, NULL AS func_1_name, NULL AS func_2_code, NULL AS func_2_name, NULL AS func_3_name, NULL AS func_3_code,
-       sum(allocated) AS allocated, sum(revised) AS revised, sum(executed) AS executed
-FROM combined
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
