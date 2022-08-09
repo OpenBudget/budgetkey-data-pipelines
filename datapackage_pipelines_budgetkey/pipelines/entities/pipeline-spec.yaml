@@ -294,7 +294,7 @@ entities:
     - run: load_resource
       parameters:
         url: /var/datapackages/activities/social_services_suppliers/datapackage.json
-        resource: activities
+        resource: soproc_suppliers
 
     # Load entities
     - run: load_resource
@@ -306,7 +306,7 @@ entities:
     - run: join
       parameters:
         source:
-          name: activities
+          name: soproc_suppliers
           key:
             - entity_id
           delete: true
