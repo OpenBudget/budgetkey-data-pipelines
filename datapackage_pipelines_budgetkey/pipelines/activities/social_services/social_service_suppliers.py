@@ -28,6 +28,7 @@ def flow(parameters, *_):
         DF.add_field('soproc_supplier', 'boolean', True),
         DF.select_fields(['entity_id', 'soproc_supplier', 'services']),
         DF.dump_to_path('/var/datapackages/activities/social_services_suppliers'),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 if __name__=='__main__':
