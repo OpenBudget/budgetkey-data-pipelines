@@ -6,7 +6,7 @@ CURRENT_YEAR = 2020
 
 def datarecords(kind):
     return map(
-        lambda r: r['value'],
+        lambda r: dict(r['value'], created_at=r['created_at'], updated_at=r['updated_at']),
         DF.Flow(
             DF.load(f'https://data-input.obudget.org/api/datarecords/{kind}', format='json', property='result')
         ).results()[0][0]
@@ -215,6 +215,8 @@ def add_current_beneficiaries():
 def flow(*_):
     return DF.Flow(
         services(),
+        DF.set_type('created_at', 'datetime'),
+        DF.set_type('updated_at', 'datetime'),
         DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes']),
         DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
