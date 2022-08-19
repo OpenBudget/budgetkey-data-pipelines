@@ -1,3 +1,4 @@
+import datetime
 import dataflows as DF
 
 def unwind():
@@ -9,12 +10,14 @@ def unwind():
                         yield dict(
                             entity_id=supplier['entity_id'],
                             services=row['id'],
+                            updated_at=row['updated_at'],
                         )
     return func
 
 def flow(parameters, *_):
     prod = not parameters.get('debug', False)
     source = '/var/datapackages/activities/social_services/datapackage.json' if prod else 'https://next.obudget.org/datapackages/activities/social_services/datapackage.json'
+    now = datetime.datetime.now()
     return DF.Flow(
         DF.load(source),
         DF.add_field('entity_id', 'string'),
@@ -24,9 +27,18 @@ def flow(parameters, *_):
         DF.join_with_self('soproc_suppliers', ['entity_id'], dict(
             entity_id=None,
             services=dict(aggregate='set'),
+            updated_at=dict(aggregate='max')
         )),
         DF.add_field('soproc_supplier', 'boolean', True),
-        DF.select_fields(['entity_id', 'soproc_supplier', 'services']),
+        DF.select_fields(['entity_id', 'soproc_supplier', 'services', 'updated_at']),
+        
+        DF.duplicate('soproc_suppliers', 'new_soproc_suppliers'),
+        DF.update_resource(-1, path='new_soproc_suppliers.csv'),
+        DF.filter_rows(lambda row: (now - row['updated_at']).days < 14, resources='new_soproc_suppliers'),
+
+        DF.dump_to_path('/var/datapackages/activities/social_services_suppliers', format='json'),
+
+        DF.delete_resource('new_soproc_suppliers'),
         DF.dump_to_path('/var/datapackages/activities/social_services_suppliers'),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )

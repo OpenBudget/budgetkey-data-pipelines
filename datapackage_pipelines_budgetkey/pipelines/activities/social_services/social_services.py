@@ -213,6 +213,8 @@ def add_current_beneficiaries():
 
 
 def flow(*_):
+    now = datetime.datetime.now()
+
     return DF.Flow(
         services(),
         DF.set_type('created_at', type='datetime', transform=lambda x: datetime.datetime.strptime(x[:19], '%Y-%m-%dT%H:%M:%S')),
@@ -241,16 +243,23 @@ def flow(*_):
         DF.set_type('description', **{'es:itemType': 'string', 'es:boost': True}),
         DF.add_field('score', 'number', get_score, **{'es:score-column': True}),
         DF.set_primary_key(['kind', 'id']),
-        DF.update_resource(-1, name='activities', **{'dpp:streaming': True}),
+        DF.update_resource(-1, name='activities', path='activities.csv'),
         DF.dump_to_sql(dict(
             all_activities={'resource-name': 'activities'}
         )),
         DF.filter_rows(lambda r: not r['deleted']),
         DF.delete_fields(['deleted']),
+
+        DF.duplicate('activities', 'new_activities'),
+        DF.filter_rows(lambda r: (now - r['updated_at']).days < 14, resources='new_activities'),
+
+        DF.dump_to_path('/var/datapackages/activities/social_services', format='json'),
+        DF.delete_resources(['new_activities']),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
         )),
+        DF.update_resource(None, **{'dpp:streaming': True}),
     )
 
 
