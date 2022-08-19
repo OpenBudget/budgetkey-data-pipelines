@@ -254,7 +254,7 @@ def flow(*_):
         DF.filter_rows(lambda r: (now - r['updated_at']).days < 14, resources='new_activities'),
 
         DF.dump_to_path('/var/datapackages/activities/social_services', format='json'),
-        DF.delete_resources(['new_activities']),
+        DF.delete_resource(['new_activities']),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
