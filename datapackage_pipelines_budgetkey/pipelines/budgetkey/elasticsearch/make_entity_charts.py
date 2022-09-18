@@ -628,7 +628,7 @@ def process_row(row, *_):
     if kind == 'association':
         charts = get_association_charts(row, spending_analysis_chart)
 
-    elif kind == 'municipality' and id == '500264007':
+    elif kind == 'municipality':
         try:
             symbol, names, details = get_municipality_details(row)
             row['details'].update(details)
