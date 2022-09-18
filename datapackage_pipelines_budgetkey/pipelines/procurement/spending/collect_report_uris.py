@@ -19,7 +19,7 @@ def get_offices():
     text = cookie_monster_get(url).decode('utf8')
     # text=requests.get(url, headers=headers).text
     page = pq(text)
-    forms = page.find('form')
+    forms = page.find('div[name=form]')
     if len(forms) == 0:
         print('PAGE:', text[:1000])
         raise Exception('No forms found')
