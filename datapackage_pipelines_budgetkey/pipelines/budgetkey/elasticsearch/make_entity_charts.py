@@ -159,7 +159,7 @@ def get_association_charts(row, spending_analysis_chart):
         parts.append({
                         'type': 'comparatron',
                         'title': 'שכר השנתי הגבוה בארגון בשנת {}'.format(last_report_year),
-                        'description': '*הנתונים מבוססים ומחושבים על בסיס המידע הזמין ומוצג ב<a href="http://www.guidestar.org.il/he/organization/{}" target="_blank">אתר גיידסטאר</a>'.format(id),
+                        'description': '*הנתונים מבוססים ומחושבים על בסיס המידע הזמין ומוצג ב<a href="http://www.guidestar.org.il/organization/{}" target="_blank">אתר גיידסטאר</a>'.format(id),
                         'chart': {
                             'main': {
                                 'amount': top_salary,

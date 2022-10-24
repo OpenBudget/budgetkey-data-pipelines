@@ -19,7 +19,7 @@ def process_resource(rows):
                     sources=[
                             dict(
                                 source='guidestar',
-                                proof_url='https://www.guidestar.org.il/he/organization/{}/people'.format(id),
+                                proof_url='https://www.guidestar.org.il/organization/{}/people'.format(id),
                             )
                         ]
                     )

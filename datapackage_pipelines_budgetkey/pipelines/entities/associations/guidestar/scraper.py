@@ -145,7 +145,7 @@ def scrape_guidestar(ass_recs, diluter=None):
         assert 'Association_Number' in ass_rec
         anum = ass_rec['Association_Number']
 
-        api = GuidestarApi('https://www.guidestar.org.il/he/organization/{}'.format(anum))
+        api = GuidestarApi('https://www.guidestar.org.il/organization/{}'.format(anum))
 
         data = api.prepare()\
             .method('getMalkarDetails', [anum], 39)\
