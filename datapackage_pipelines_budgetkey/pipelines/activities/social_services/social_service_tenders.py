@@ -28,4 +28,5 @@ def flow(*_):
         unwind(),
         DF.select_fields(['tender_id', 'publication_id', 'tender_type', 'tender_key', 'soproc_tender']),
         DF.dump_to_path('/var/datapackages/activities/social_services_tenders'),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
