@@ -29,9 +29,12 @@ jobs:
         ./ci.sh install
         ./ci.sh script
     - name: Test
+      env:
+        GUIDESTAR_USERNAME: ${{ secrets.GUIDESTAR_USERNAME }}
+        GUIDESTAR_PASSWORD: ${{ secrets.GUIDESTAR_PASSWORD }}
       run: |
         docker build -t budgetkey-data-pipelines-tests tests
-        docker run -v `pwd`/tests:/testenv/tests budgetkey-data-pipelines-tests
+        docker run -e GUIDESTAR_USERNAME=$GUIDESTAR_USERNAME -e GUIDESTAR_PASSWORD=$GUIDESTAR_PASSWORD -v `pwd`/tests:/testenv/tests budgetkey-data-pipelines-tests
     - name: Deploy
       env:
         TRAVIS_CI_OPERATOR: "1"
