@@ -16,7 +16,7 @@ setup(
     version=version,
     packages=find_packages(exclude=["tests", "test.*"]),
     install_requires=['pyquery',
-                      'demjson',
+                    #   'demjson',
                       'requests',
                       'selenium<4.3',
                       'fuzzywuzzy[speedup]',
