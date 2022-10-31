@@ -1,11 +1,7 @@
-import re
-import requests
-import time
-import logging
 import datetime
 
 from datapackage_pipelines.wrapper import ingest, spew
-from datapackage_pipelines_budgetkey.common.guidestar_api import GuidestarApi
+from datapackage_pipelines_budgetkey.common.guidestar_api import GuidestarAPI
 
 
 def lineSplitter(x):
@@ -44,10 +40,9 @@ def salariesExtractor(x):
     ]
 
 
-def getter(out_field, entry, path, processors, options={'type': 'string'}):
+def getter(out_field, path, processors, options={'type': 'string'}):
     out_field = 'association_' + out_field
     def _f(data, out):
-        data = data[entry]['result']
         parts = path.split('.')
         for p in parts:
             if isinstance(data, list):
@@ -77,62 +72,58 @@ def getter(out_field, entry, path, processors, options={'type': 'string'}):
 
 
 rules = [
-    getter('founders', 0, 'result.founderNames', [lineSplitter], 
-            {'type':'array', 'es:itemType': 'string'}),
-    getter('year_established', 0, 'result.orgYearFounded', [],
-            dict(type='integer')),
-
-    getter('guidestar_title', 0, 'result.Name', []),
-    getter('org_status', 0, 'result.isStatusActiveText', []),
-    getter('org_kind', 0, 'result.sugHitagdut', []),
-
-    getter('address_house_num', 0, 'result.addressHouseNum', []),
-    getter('address_street', 0, 'result.addressStreet', []),
-    getter('address_zip_code', 0, 'result.addressZipCode', []),
-    getter('address_city', 0, 'result.city', []),
-
-    getter('activity_cities_list', 0, 'result.cities', [],
-            {'type':'array', 'es:itemType': 'string'}),
-    getter('activity_region_list', 0, 'result.malkarDistricts', [],
-            {'type':'array', 'es:itemType': 'string'}),
-    getter('activity_region', 0, 'result.malkarDistricts', [commaJoiner]),
-    getter('activity_region_national', 0, 'result.malkarLocationIsNational', [],
-            dict(type='boolean')),
-
-    getter('email', 0, 'result.greenInfo.email', []),
-    getter('facebook', 0, 'result.greenInfo.facebookUrl', []),
-    getter('website', 0, 'result.greenInfo.websiteUrl', []),
-    getter('logo_url', 0, 'result.logoUrl', []),
-
-    getter('proper_management', 0, 'result.hasProperManagement', [boolToCred]),
-    getter('has_article_46', 0, 'result.approval46', [boolToCred]),
-
-    getter('field_of_activity', 0, 'result.tchumPeilutSecondary', [pickFirst]),
-    getter('fields_of_activity', 0, 'result.tchumPeilutSecondary', [],
-            {'type':'array', 'es:itemType': 'string'}),
-    getter('primary_field_of_activity', 0, 'result.tchumPeilutMain', []),
-
-    getter('objective', 0, 'result.orgGoal', [newlineRemover]),
-
-    getter('yearly_turnover', 0, 'result.turnover', [],
+    getter('num_of_employees', 'employeesNum', [],
             dict(type='number')),
-    getter('num_of_employees', 0, 'result.employees', [],
+    getter('num_of_volunteers', 'volunteersNum', [],
             dict(type='number')),
-    getter('num_of_volunteers', 0, 'result.volunteers', [],
+    getter('yearly_turnover', 'turnover', [],
             dict(type='number')),
-
-    getter('top_salaries', 1, 'result.0.Data', [salariesExtractor],
-            {'type':'array', 'es:itemType': 'object', 'es:index': False}),
-
-    getter('last_report_year', 0, 'result.lastAddDataYear', [int],
+    getter('website', 'website', []),
+    getter('email', 'email', []),
+    getter('objective', 'orgGoal', [newlineRemover]),
+    getter('year_established', 'orgYearFounded', [],
             dict(type='integer')),
-    getter('online_data_update_year', 0, 'result.InactiveMenu.people', [timestampYearParser],
+    getter('org_kind', 'malkarType', []),
+    getter('proper_management', 'hasNihulTakin', [boolToCred]),
+    getter('guidestar_title', 'name', []),
+    getter('address', 'fullAddress', []),
+    getter('address_city', 'addressCity', []),
+
+    getter('ceo', 'ceoName', []),
+    getter('last_report_year', 'lastFinancialReportYear', [int],
             dict(type='integer')),
+    getter('field_of_activity', 'secondaryClassifications', [pickFirst]),
+    getter('fields_of_activity', 'secondaryClassifications', [],
+            {'type':'array', 'es:itemType': 'string'}),
+    getter('primary_field_of_activity', 'primaryClassifications', [pickFirst]),
+    getter('org_status', 'malkarStatus', []),
+    getter('activity_region_list', 'activityAreas', [],
+            {'type':'array', 'es:itemType': 'string'}),
+    getter('activity_region', 'activityAreas', [commaJoiner]),
+
+    # getter('founders', 'result.founderNames', [lineSplitter], 
+    #         {'type':'array', 'es:itemType': 'string'}),
+
+    # getter('activity_region_national', 'result.malkarLocationIsNational', [],
+    #         dict(type='boolean')),
+
+    # getter('facebook', 'result.greenInfo.facebookUrl', []),
+    # getter('logo_url', 'result.logoUrl', []),
+
+    # getter('has_article_46', 'result.approval46', [boolToCred]),
+
+    # getter('top_salaries', 'result.0.Data', [salariesExtractor],
+    #         {'type':'array', 'es:itemType': 'object', 'es:index': False}),
+
+    # getter('online_data_update_year', 'result.InactiveMenu.people', [timestampYearParser],
+    #         dict(type='integer')),
 ]
 # TODO:
 # - address_lines
 
 def scrape_guidestar(ass_recs, diluter=None):
+
+    api = GuidestarAPI()
 
     for i, ass_rec in enumerate(ass_recs):
 
@@ -145,13 +136,7 @@ def scrape_guidestar(ass_recs, diluter=None):
         assert 'Association_Number' in ass_rec
         anum = ass_rec['Association_Number']
 
-        api = GuidestarApi('https://www.guidestar.org.il/organization/{}'.format(anum))
-
-        data = api.prepare()\
-            .method('getMalkarDetails', [anum], 39)\
-            .method('getMalkarWageEarners', [anum], 39)\
-            .method('getMalkarDonations', [anum], 39)\
-            .run()
+        data = api.organization(anum)
 
         if data is None:
             continue
@@ -163,18 +148,7 @@ def scrape_guidestar(ass_recs, diluter=None):
         rec['id'] = ass_rec['Association_Number']
         rec['association_registration_date'] = ass_rec['Association_Registration_Date']
         rec['association_title'] = ass_rec['Association_Name']
-
-        address = ''
-        if rec.get('association_address_street'):
-            address += rec['association_address_street']
-        if rec.get('association_address_house_num'):
-            address += ' ' + rec['association_address_house_num']
-        if rec.get('association_address_city'):
-            address += ', ' + rec['association_address_city']
-        if rec.get('association_address_zip_code'):
-            address += ' ' + rec['association_address_zip_code']
-        rec['association_address_lines'] = [ address ]
-        rec['association_address'] = ' '.join(rec['association_address_lines'])
+        rec['association_address_lines'] = [ rec['association_address'] ]
 
         yield rec
 
@@ -199,10 +173,6 @@ if __name__ == '__main__':
         for field, options, _ in sorted(rules, key=lambda r:r[0])
     ]
     resource['schema']['fields'].extend([
-        {
-            'name': 'association_address',
-            'type': 'string'
-        },
         {
             'name': 'association_address_lines',
             'type': 'array',
