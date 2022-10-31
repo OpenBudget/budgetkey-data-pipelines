@@ -19,26 +19,8 @@ def commaJoiner(x):
 def boolToCred(x):
     return 'יש אישור' if x else 'אין אישור'
 
-
-def timestampParser(x):
-    return datetime.datetime.fromtimestamp(x/1000)
-
-
-def timestampYearParser(x):
-    return 1 if x else 0
-
 def newlineRemover(x):
     return x.replace('\n', '')
-
-def salariesExtractor(x):
-    return [
-        dict(
-            role=xx['MainLabel'],
-            salary=xx['Amount']
-        )
-        for xx in x
-    ]
-
 
 def getter(out_field, path, processors, options={'type': 'string'}):
     out_field = 'association_' + out_field
@@ -100,26 +82,7 @@ rules = [
     getter('activity_region_list', 'activityAreas', [],
             {'type':'array', 'es:itemType': 'string'}),
     getter('activity_region', 'activityAreas', [commaJoiner]),
-
-    # getter('founders', 'result.founderNames', [lineSplitter], 
-    #         {'type':'array', 'es:itemType': 'string'}),
-
-    # getter('activity_region_national', 'result.malkarLocationIsNational', [],
-    #         dict(type='boolean')),
-
-    # getter('facebook', 'result.greenInfo.facebookUrl', []),
-    # getter('logo_url', 'result.logoUrl', []),
-
-    # getter('has_article_46', 'result.approval46', [boolToCred]),
-
-    # getter('top_salaries', 'result.0.Data', [salariesExtractor],
-    #         {'type':'array', 'es:itemType': 'object', 'es:index': False}),
-
-    # getter('online_data_update_year', 'result.InactiveMenu.people', [timestampYearParser],
-    #         dict(type='integer')),
 ]
-# TODO:
-# - address_lines
 
 def scrape_guidestar(ass_recs, diluter=None):
 
