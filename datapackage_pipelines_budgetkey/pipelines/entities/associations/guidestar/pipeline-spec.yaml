@@ -38,7 +38,6 @@ guidestar-scraper:
         hash-fields: []
         max-staleness: 7
     - run: scraper
-      runner: tzabar
       parameters:
         name: guidestar
         path: data/guidestar.csv
