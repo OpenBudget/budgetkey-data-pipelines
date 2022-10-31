@@ -1,5 +1,5 @@
 import os
-from time import time
+import logging
 import requests
 
 GUIDESTAR_USERNAME = os.environ['GUIDESTAR_USERNAME']
@@ -28,9 +28,14 @@ class GuidestarAPI():
         return self._headers
 
     def organization(self, regNum):
-        row = requests.get(f'{self.BASE}/organizations/{regNum}', headers=self.headers(), timeout=self.TIMEOUT).json()
-        if row.get('errorMsg') is not None:
-            errorMsg = row['errorMsg']
-            print(f'GUIDESTAR ERROR FETCHING ORGANIZATION {regNum}: {errorMsg}')
-            return None
-        return row
+        try:
+            resp = requests.get(f'{self.BASE}/organizations/{regNum}', headers=self.headers(), timeout=self.TIMEOUT)
+            if resp.status_code == 200:
+                row = resp.json()
+                if row.get('errorMsg') is None:
+                    return row
+                else:
+                    errorMsg = row['errorMsg']
+                    logging.error(f'GUIDESTAR ERROR FETCHING ORGANIZATION {regNum}: {errorMsg}')
+        except Exception as e:
+            logging.error(f'GUIDESTAR EXCEPTION FETCHING ORGANIZATION {regNum}: {e}')
