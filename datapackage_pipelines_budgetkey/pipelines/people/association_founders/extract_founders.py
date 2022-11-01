@@ -3,7 +3,7 @@ from datapackage_pipelines.wrapper import spew, ingest
 
 def process_resource(rows):
     for row in rows:
-        founders = row.get('association_founders')
+        founders = [row.get('association_ceo')]
         registration_date = row.get('association_registration_date')
         association_name = row.get('association_title')
         id = row['id']
@@ -13,7 +13,7 @@ def process_resource(rows):
                     company=association_name,
                     full_name=founder,
                     event='founder',
-                    title='{} מן המייסדים של {}'.format(founder, association_name),
+                    title='{} המנכ״ל.ית של {}'.format(founder, association_name),
                     when=registration_date,
                     doc_id='/org/association/{}'.format(id),
                     sources=[
