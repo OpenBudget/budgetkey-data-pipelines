@@ -14,22 +14,50 @@ SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
 HAS_STOCKS_IN_THE_COMPANY_MAPPING = {
     'מחזיק': True,
     'אינו מחזיק': False,
+    'holds': True,
+    'does not hold': False,
     '_________': None
 }
 
 RELATIVE_OF_ANOTHER_VIP_MAPPING = {
     'הינו':True,
     'הנו':True,
-    'אינו':False
+    'אינו':False,
+    'is not': False,
+    'is': True
+}
+
+HAS_STOCK_IN_SUBSIDIARY_COMPANY_MAPPING = {
+    '_________' : None,
+    'hold': True,
+    'does not hold': False,
+    'אינו מחזיק': False,
+    'מחזיק': True
+}
+
+EMPLOYED_IN_CONNECTED_COMPANY = {
+    'אינו ממלא':False,
+    'ממלא':True,
+    'holds':True,
+    'does not hold': False,
+}
+
+IS_BOTH_DIRECTOR_AND_CEO_MAPPING = {
+    '_________': None,
+    'כן':True,
+    'לא':False
+}
+
+CITIZENSHIP_MAPPING = {
+    {
+        'אדם פרטי ללא אזרחות ישראלית': False,
+        'אדם פרטי עם אזרחות ישראלית' :True,
+        'Individual who holds Israeli citizenship' :True,
+        'Individual who does not hold Israeli citizenship' :False
+    }
 }
 EMPTY_STRING = '_________'
 
-FIELD_CONVERSION = {
-    'IsIsraeli': (lambda val: ( 'אדם פרטי עם אזרחות ישראלית' in val ) or ('Individual who holds Israeli citizenship' in val) ),
-    'IsBothDirectorAndCeoOrRelativeOfCeo': (lambda val: True if 'כן' == val else (False if 'לא' == val else None) ),
-    'EmployedAtAnotherJobConnectedToTheCompany': (lambda val: 'ממלא' == val) ,
-    'HasStocksInSubsidiaryOrConnectedCompany': (lambda val: True if 'מחזיק' == val else (False if 'אינו מחזיק' == val else None) )
-}
 
 RENAME_FIELDS = {
     'Shem': 'FullName',
@@ -87,16 +115,12 @@ FIELDS = [
 def validate(rows):
     for row in rows:
         verify_row_count(row, FIELDS, 1)
-        verify_row_values(row, 'IsIsraeli', {
-            'אדם פרטי ללא אזרחות ישראלית', 'אדם פרטי עם אזרחות ישראלית',
-            'Individual who holds Israeli citizenship',
-            'Individual who does not hold Israeli citizenship'
-        })
-        verify_row_values(row, 'IsBothDirectorAndCeoOrRelativeOfCeo', {'_________', 'כן', 'לא'})
-        verify_row_values(row, 'EmployedAtAnotherJobConnectedToTheCompany', {'אינו ממלא', 'ממלא'})
+        verify_row_values(row, 'IsIsraeli', CITIZENSHIP_MAPPING)
+        verify_row_values(row, 'IsBothDirectorAndCeoOrRelativeOfCeo', IS_BOTH_DIRECTOR_AND_CEO_MAPPING)
+        verify_row_values(row, 'EmployedAtAnotherJobConnectedToTheCompany', EMPLOYED_IN_CONNECTED_COMPANY)
         verify_row_values(row, 'RelativeOfAnotherVip', RELATIVE_OF_ANOTHER_VIP_MAPPING)
         verify_row_values(row, 'HasStocksInTheCompany', HAS_STOCKS_IN_THE_COMPANY_MAPPING)
-        verify_row_values(row, 'HasStocksInSubsidiaryOrConnectedCompany', {'_________', 'אינו מחזיק', 'מחזיק'})
+        verify_row_values(row, 'HasStocksInSubsidiaryOrConnectedCompany', HAS_STOCK_IN_SUBSIDIARY_COMPANY_MAPPING)
         verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         yield row
 
@@ -139,15 +163,15 @@ def parse_document(rows):
         for field in FIELDS:
             row[field] = (doc.get(field, None) or [""])[0]
 
-        for field, convert_value in FIELD_CONVERSION.items():
-            row[field] = convert_value(row[field])
-
         row['PreviousPositions'] = previous_jobs_at_the_company
         row['Positions'] = job_titles
         row['RelativeOfAnotherVip'] = RELATIVE_OF_ANOTHER_VIP_MAPPING[row['RelativeOfAnotherVip']]
         row['HasStocksInTheCompany'] = HAS_STOCKS_IN_THE_COMPANY_MAPPING[row['HasStocksInTheCompany']]
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
-
+        row['HasStocksInSubsidiaryOrConnectedCompany'] = HAS_STOCK_IN_SUBSIDIARY_COMPANY_MAPPING[row['HasStocksInSubsidiaryOrConnectedCompany']]
+        row['EmployedAtAnotherJobConnectedToTheCompany'] = EMPLOYED_IN_CONNECTED_COMPANY[row['EmployedAtAnotherJobConnectedToTheCompany']]
+        row['IsBothDirectorAndCeoOrRelativeOfCeo'] = IS_BOTH_DIRECTOR_AND_CEO_MAPPING[row['IsBothDirectorAndCeoOrRelativeOfCeo']]
+        row['IsIsraeli'] = CITIZENSHIP_MAPPING[row['IsIsraeli']]
         yield row
 
 
