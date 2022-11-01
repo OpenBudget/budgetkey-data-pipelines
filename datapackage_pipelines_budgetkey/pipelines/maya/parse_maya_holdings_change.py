@@ -91,7 +91,11 @@ YES_NO_VALUES = {'כן': True, 'לא': False}
 ENTITY_TYPES = {'התאגד בישראל': 'Israeli Corporation',
  'אדם פרטי עם אזרחות ישראלית': 'Israeli Citizen',
  'אדם פרטי ללא אזרחות ישראלית': 'Foreign Citizen',
- 'התאגד בחו"ל': 'Foreign Corporation'}
+ 'Individual who holds Israeli citizenship':'Israeli Citizen',
+ 'Individual who does not hold Israeli citizenship':'Foreign Citizen',
+ 'התאגד בחו"ל': 'Foreign Corporation',
+
+}
 
 def filter_by_type(rows):
     for row in rows:
