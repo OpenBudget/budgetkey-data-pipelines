@@ -92,24 +92,9 @@ guidestar:
           association_num_of_employees: { type: number }
           association_year_established: { type: integer }
           association_last_report_year: { type: integer }
-          association_online_data_update_year: { type: integer }
           association_registration_date: { type: date }
-          association_founders:
-            es:itemType: string
-            type: array
           association_address_lines:
             es:itemType: string
-            type: array
-          association_top_salaries:
-            es:itemType: object
-            es:schema: 
-              fields:
-                - 
-                  name: role
-                  type: string
-                -
-                  name: salary
-                  type: number
             type: array
     - run: fix_values
     - run: limit_last_years
