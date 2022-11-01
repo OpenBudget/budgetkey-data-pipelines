@@ -25,7 +25,7 @@ RELATIVE_OF_ANOTHER_VIP_MAPPING = {
 EMPTY_STRING = '_________'
 
 FIELD_CONVERSION = {
-    'IsIsraeli': (lambda val: 'אדם פרטי עם אזרחות ישראלית' in val),
+    'IsIsraeli': (lambda val: ( 'אדם פרטי עם אזרחות ישראלית' in val ) or ('Individual who holds Israeli citizenship' in val) ),
     'IsBothDirectorAndCeoOrRelativeOfCeo': (lambda val: True if 'כן' == val else (False if 'לא' == val else None) ),
     'EmployedAtAnotherJobConnectedToTheCompany': (lambda val: 'ממלא' == val) ,
     'HasStocksInSubsidiaryOrConnectedCompany': (lambda val: True if 'מחזיק' == val else (False if 'אינו מחזיק' == val else None) )
@@ -87,7 +87,11 @@ FIELDS = [
 def validate(rows):
     for row in rows:
         verify_row_count(row, FIELDS, 1)
-        verify_row_values(row, 'IsIsraeli', {'אדם פרטי ללא אזרחות ישראלית', 'אדם פרטי עם אזרחות ישראלית'})
+        verify_row_values(row, 'IsIsraeli', {
+            'אדם פרטי ללא אזרחות ישראלית', 'אדם פרטי עם אזרחות ישראלית',
+            'Individual who holds Israeli citizenship',
+            'Individual who does not hold Israeli citizenship'
+        })
         verify_row_values(row, 'IsBothDirectorAndCeoOrRelativeOfCeo', {'_________', 'כן', 'לא'})
         verify_row_values(row, 'EmployedAtAnotherJobConnectedToTheCompany', {'אינו ממלא', 'ממלא'})
         verify_row_values(row, 'RelativeOfAnotherVip', RELATIVE_OF_ANOTHER_VIP_MAPPING)
