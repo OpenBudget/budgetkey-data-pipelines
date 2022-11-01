@@ -66,20 +66,7 @@ FIELD_FIXES = {
 }
 
 def process_row(row, row_index, *_):
-    association_activity_region_districts = set()
-    for city in row['association_activity_cities_list']:
-        district = None
-        if city in cache:
-            district = cache[city]
-        else:
-            best = fw_process.extract(city, districts.keys())
-            if len(best)>0:
-                best = best[0][0]
-                district = districts[best]
-                cache[city] = district
-        if district is not None:
-            association_activity_region_districts.add(district)
-    row['association_activity_region_districts'] = list(association_activity_region_districts)
+    row['association_activity_region_districts'] = row['association_activity_region_list']
     row['association_activity_region_all_country'] = len(row['association_activity_region_districts']) >= 6 or 'ארצי' in row['association_activity_region_list']
     if row['association_field_of_activity']:
         foa = row['association_field_of_activity']
