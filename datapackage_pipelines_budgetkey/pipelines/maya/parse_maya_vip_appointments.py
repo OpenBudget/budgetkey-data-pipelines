@@ -49,12 +49,10 @@ IS_BOTH_DIRECTOR_AND_CEO_MAPPING = {
 }
 
 CITIZENSHIP_MAPPING = {
-    {
-        'אדם פרטי ללא אזרחות ישראלית': False,
-        'אדם פרטי עם אזרחות ישראלית' :True,
-        'Individual who holds Israeli citizenship' :True,
-        'Individual who does not hold Israeli citizenship' :False
-    }
+    'אדם פרטי ללא אזרחות ישראלית': False,
+    'אדם פרטי עם אזרחות ישראלית' :True,
+    'Individual who holds Israeli citizenship' :True,
+    'Individual who does not hold Israeli citizenship' :False
 }
 EMPTY_STRING = '_________'
 
