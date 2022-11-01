@@ -5,7 +5,9 @@ from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import ren
 import csv
 
 SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
+                            'ID no.':'id_number',
                             'מספר דרכון': 'passport_number',
+                            'Passport no.': 'passport_number',
                             'מספר ביטוח לאומי':'social_security_number',
                             'מספר זיהוי לא ידוע': 'unknown'
                             }

@@ -5,7 +5,9 @@ from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import ver
     fix_fields, add_fields, rename_fields, verify_row_values
 
 SUG_MISPAR_ZIHUY_MAPPING = {'מספר ת.ז.': 'id_number',
+                            'ID no.':'id_number',
                             'מספר דרכון': 'passport_number',
+                            'Passport no.': 'passport_number',
                             'מספר ביטוח לאומי':'Social Security Number',
                             'מספר זיהוי לא ידוע': 'unknown'
                             }
