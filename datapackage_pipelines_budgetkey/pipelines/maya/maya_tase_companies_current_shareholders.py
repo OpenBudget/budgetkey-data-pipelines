@@ -17,9 +17,11 @@ def get_company_details(company_id):
         headers= {
             "accept": "application/json, text/plain, */*",
             "accept-language": "he-IL",
-            "X-Maya-With": "allow"
+            "x-maya-with": "allow",
+            'Origin': "https://maya.tase.co.il",
+            'Referer': "https://maya.tase.co.il",
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36"
         }
-
         session.cookies.clear()
         res = session.get(f"https://mayaapi.tase.co.il/api/company/alldetails?companyId={company_id}", headers=headers)
         sleep(wait)

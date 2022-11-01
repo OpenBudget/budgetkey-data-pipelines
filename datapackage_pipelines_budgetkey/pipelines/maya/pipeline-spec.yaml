@@ -293,7 +293,7 @@ scrape-maya-tase-companies:
 
 maya-tase-companies-current-shareholders:
   dependencies:
-    - pipeline: ./maya/maya-complete-notification-list
+    - pipeline: ./maya/scrape-maya-tase-companies
   pipeline:
     - run: load
       parameters:
@@ -309,7 +309,7 @@ maya-tase-companies-current-shareholders:
 
 maya-tase-companies-current-management:
   dependencies:
-    - pipeline: ./maya/maya-complete-notification-list
+    - pipeline: ./maya/scrape-maya-tase-companies
   pipeline:
     - run: load
       parameters:
