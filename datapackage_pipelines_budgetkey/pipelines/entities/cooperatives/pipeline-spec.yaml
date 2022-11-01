@@ -12,7 +12,6 @@ cooperatives:
           - title: אתר משרד הכלכלה
             path: https://apps.moital.gov.il/CooperativeSocieties/
     - run: cooperatives_scraper
-      runner: tzabar
       parameters:
         resource-name: cooperatives
     - run: set_types

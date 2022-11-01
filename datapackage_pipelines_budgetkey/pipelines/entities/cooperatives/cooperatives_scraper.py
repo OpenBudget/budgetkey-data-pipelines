@@ -1,11 +1,12 @@
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 import requests, logging, datetime, os
+import json
 
 
 class CooperativesScraper(object):
 
-    BASE_URL = "https://apps.moital.gov.il/CooperativeSocieties/api/Agudot/GetAgudotInfo" \
+    BASE_URL = "https://govapps.economy.gov.il/CooperativeSocieties/api/Agudot/SearchData" \
                "?N_AGUDA=&C_STATUS_MISHPATI=&C_YESHUV=&C_SUG=&SHEM_AGUDA=" \
                "&FromRowNum={FromRowNum}&quantity={quantity}"
 
@@ -20,27 +21,30 @@ class CooperativesScraper(object):
 
     def parse_cooperatives(self, cooperatives):
         for cooperative in cooperatives:
-            yield {"id": self.parse_integer(cooperative["N_AGUDA"]),
-                   "name": cooperative["SHEM_AGUDA"],
-                   "cooperative_registration_date": cooperative["D_RISHUM_AGUDA"],
-                   "phone": cooperative["TELEPHON1"],
-                   "primary_type_id": self.parse_integer(cooperative["C_SUG_RASHI"]),
-                   "primary_type": cooperative["TEUR_SUG_RASHI"],
-                   "secondary_type_id": self.parse_integer(cooperative["C_SUG_MISHNI"]),
-                   "secondary_type": cooperative["TEUR_SUG_MISHNEI"],
-                   "legal_status_id": self.parse_integer(cooperative["C_STATUS_MISHPATI"]),
-                   "legal_status": cooperative["TEUR_STATUS_MISHPATI"],
-                   "last_status_date": cooperative["DateStatusLast"],
-                   "type": cooperative["TEUR_SUG_TNUA"],
-                   "municipality_id": self.parse_integer(cooperative["C_YESHUV"]),
-                   "municipality": cooperative["shem_yeshuv"],
-                   "inspector": cooperative["ShemMefakeach"],
-                   "address": cooperative["Ktovet"],}
+            yield {"id": self.parse_integer(cooperative.pop("Identity", None)),
+                   "name": cooperative.pop("Name", None),
+                   "cooperative_registration_date": cooperative.pop("RegistrationDate", None),
+                   "primary_type_id": self.parse_integer(cooperative.pop("PrimaryTypeId", None)),
+                   "primary_type": cooperative.pop("PrimaryTypeDesc", None),
+                   "address": cooperative.pop("Address", None),
+                   "legal_status": cooperative.pop("StatusDesc", None),
+                   "inspector": cooperative.pop("InspectorName", None),
+                   "phone": cooperative.pop("Phone", None),
+                   "municipality_id": self.parse_integer(cooperative.pop("TownId", None)),
+                #    "secondary_type_id": self.parse_integer(cooperative["C_SUG_MISHNI"]),
+                #    "secondary_type": cooperative["TEUR_SUG_MISHNEI"],
+                #    "legal_status_id": self.parse_integer(cooperative["C_STATUS_MISHPATI"]),
+                #    "last_status_date": cooperative["DateStatusLast"],
+                #    "type": cooperative["TEUR_SUG_TNUA"],
+                #    "municipality": cooperative["shem_yeshuv"],
+                   }
+            cooperative.pop('Id', None)
+            assert(len(list(cooperative.keys())) == 0), str(list(cooperative.keys()))
 
     def requests_get(self, url):
         res = requests.get(url, headers={'Content-type': 'application/json'})
         res.raise_for_status()
-        return res.json()
+        return json.loads(res.json())
 
     def get_cooperatives(self):
         results_per_page = 15
@@ -63,18 +67,18 @@ class CooperativesScraper(object):
                 "path": resource_name+".csv",
                 "schema": {"fields": [{'name': 'id', 'type': 'string'},
                                       {'name': 'name', 'type': 'string'},
-                                      {'name': 'cooperative_registration_date', 'type': 'datetime', 'format': '%d/%m/%Y %H:%M:%S'},
+                                      {'name': 'cooperative_registration_date', 'type': 'datetime', 'format': '%d/%m/%Y'},
                                       {'name': 'phone', 'type': 'string'},
                                       {'name': 'primary_type_id', 'type': 'integer'},
                                       {'name': 'primary_type', 'type': 'string'},
-                                      {'name': 'secondary_type_id', 'type': 'integer'},
-                                      {'name': 'secondary_type', 'type': 'string'},
-                                      {'name': 'legal_status_id', 'type': 'integer'},
+                                    #   {'name': 'secondary_type_id', 'type': 'integer'},
+                                    #   {'name': 'secondary_type', 'type': 'string'},
+                                    #   {'name': 'legal_status_id', 'type': 'integer'},
                                       {'name': 'legal_status', 'type': 'string'},
-                                      {'name': 'last_status_date', 'type': 'datetime', 'format': '%d/%m/%Y %H:%M:%S'},
-                                      {'name': 'type', 'type': 'string'},
+                                    #   {'name': 'last_status_date', 'type': 'datetime', 'format': '%d/%m/%Y %H:%M:%S'},
+                                    #   {'name': 'type', 'type': 'string'},
                                       {'name': 'municipality_id', 'type': 'integer'},
-                                      {'name': 'municipality', 'type': 'string'},
+                                    #   {'name': 'municipality', 'type': 'string'},
                                       {'name': 'inspector', 'type': 'string'},
                                       {'name': 'address', 'type': 'string'},],
                            "primaryKey": ["id"]}}
