@@ -475,8 +475,8 @@ WHERE apm='יש אישור'
 # FROM a
 # JOIN b USING (association_field_of_activity)
 # WHERE aha='יש אישור'
-"""
-    ),
+# """
+# ),
     Enricher('85905: Association median top salary by field of activity',
         'association', ('field_of_activity', ),
         [
