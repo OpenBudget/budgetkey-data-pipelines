@@ -6,7 +6,7 @@ from tests.common import assert_doc_conforms_to_schema
 class MockCooperativesScraper(CooperativesScraper):
 
     def requests_get(self, url):
-        if url == "https://apps.moital.gov.il/CooperativeSocieties/api/Agudot/GetAgudotInfo?N_AGUDA=&C_STATUS_MISHPATI=&C_YESHUV=&C_SUG=&SHEM_AGUDA=&FromRowNum=1&quantity=15":
+        if url == "https://govapps.economy.gov.il/CooperativeSocieties/api/Agudot/SearchData?N_AGUDA=&C_STATUS_MISHPATI=&C_YESHUV=&C_SUG=&SHEM_AGUDA=&FromRowNum=1&quantity=15":
             filename = "GetAgudotInfo_1.json"
         else:
             raise Exception("unknown url: {}".format(url))
@@ -16,7 +16,7 @@ class MockCooperativesScraper(CooperativesScraper):
                 data = super(MockCooperativesScraper, self).requests_get(url)
                 json.dump(data, f)
         with open(filename) as f:
-            return json.load(f)
+            return json.loads(json.load(f))
 
 
 def test_cooperatives():
@@ -24,19 +24,14 @@ def test_cooperatives():
     resource_descriptor = scraper.get_resource_descriptor("cooperatives")
     cooperative = next(scraper.get_cooperatives())
     assert_doc_conforms_to_schema(cooperative, resource_descriptor["schema"])
-    assert cooperative == {'address': 'דופקר ++++',
-                           'id': '570000018',
-                           'inspector': 'צוק חיים',
-                           'last_status_date': '29/01/1970 12:00:00',
-                           'legal_status': 'הודעה שניה על מחיקה',
-                           'legal_status_id': '23',
-                           'municipality': '',
-                           'municipality_id': None,
-                           'name': 'נחלת ישראל רמה אגודה שתופית בע"מ (במחיקה)',
-                           'phone': '',
-                           'primary_type': 'שיכון',
-                           'primary_type_id': '43',
-                           'cooperative_registration_date': '06/02/1921 00:00:00',
-                           'secondary_type': 'שיכון',
-                           'secondary_type_id': '61',
-                           'type': 'התאחדות האיכרים'}
+    assert cooperative == {'address': 'השבעה 77 צפת 1323530 ת.ד: ת.ד. 5423',
+                           'cooperative_registration_date': '19/10/2021',
+                           'id': '570066829',
+                           'inspector': 'טל מור',
+                           'legal_status': 'פעילה - מאושרת',
+                           'municipality_id': 8000,
+                           'name': 'ליובאוויטש אגודה שיתופית בע"מ',
+                           'phone': None,
+                           'primary_type': 'שרותים',
+                           'primary_type_id': 10,
+                         }

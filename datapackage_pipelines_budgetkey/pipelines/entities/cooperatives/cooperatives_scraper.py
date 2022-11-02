@@ -21,7 +21,7 @@ class CooperativesScraper(object):
 
     def parse_cooperatives(self, cooperatives):
         for cooperative in cooperatives:
-            yield {"id": self.parse_integer(cooperative.pop("Identity", None)),
+            ret = {"id": self.parse_integer(cooperative.pop("Identity", None)),
                    "name": cooperative.pop("Name", None),
                    "cooperative_registration_date": cooperative.pop("RegistrationDate", None),
                    "primary_type_id": self.parse_integer(cooperative.pop("PrimaryTypeId", None)),
@@ -40,6 +40,8 @@ class CooperativesScraper(object):
                    }
             cooperative.pop('Id', None)
             assert(len(list(cooperative.keys())) == 0), str(list(cooperative.keys()))
+            ret = dict((k, v.strip() if isinstance(v, str) else v) for k, v in ret.items())
+            yield ret
 
     def requests_get(self, url):
         res = requests.get(url, headers={'Content-type': 'application/json'})
