@@ -92,7 +92,7 @@ def get_association_charts(row, spending_analysis_chart):
         selected_index = selected_index[0]
     else:
         selected_index = None
-    salaries = row['details']['top_salaries']
+    salaries = None #row['details']['top_salaries']
     if salaries:
         top_salary = salaries[0]['salary']
     else:
