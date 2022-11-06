@@ -10,6 +10,8 @@ FIELDS = (
     'publication_id', 
     'regulation', 
     'description',
+    'soproc_id',
+    'soproc_name',
 )
 key_fields = ('publication_id', 'tender_type', 'tender_id')
 
