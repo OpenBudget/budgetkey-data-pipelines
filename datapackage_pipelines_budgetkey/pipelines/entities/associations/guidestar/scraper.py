@@ -93,9 +93,6 @@ def scrape_guidestar(ass_recs, diluter=None):
         if not ass_rec['__is_stale']:
             continue
 
-        if diluter is not None and i % 13 != diluter:
-            continue
-
         assert 'Association_Number' in ass_rec
         anum = ass_rec['Association_Number']
 
