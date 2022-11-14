@@ -31,6 +31,8 @@ registry:
           'Association_Registration_Date':
             type: date
             format: '%d/%m/%Y'
+          'Association_Number':
+            type: string
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/registrar/
