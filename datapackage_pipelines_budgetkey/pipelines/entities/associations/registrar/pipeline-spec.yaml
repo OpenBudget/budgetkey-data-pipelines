@@ -8,18 +8,29 @@ registry:
       parameters:
         name: association-registry
         title: עמותות פעילות מרשם העמותות
-    - run: m_of_justice_resource
-      runner: tzabar
+    - run: data_gov_il_resource
       parameters:
-        key: Association
-        url-key: Associations
-        resource-name: association-registry
+        dataset-name: moj-amutot
+        resource-id: 'be5b7935-3922-45d4-9638-08871b17ec95'
+        resource:
+          name: association-registry-aux
+    - run: concatenate
+      parameters:
+        target:
+          name: association-registry
+        fields:
+          Association_Number:
+            - מספר עמותה
+          Association_Registration_Date:
+            - תאריך רישום עמותה
+          Association_Name:
+            - שם עמותה בעברית
     - run: set_types
       parameters:
         types:
           'Association_Registration_Date':
             type: date
-            format: '%Y-%m-%d %H:%M:%S'
+            format: '%d/%m/%Y'
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/associations/registrar/
