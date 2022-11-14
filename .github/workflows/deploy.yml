@@ -1,0 +1,39 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+  
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Build
+      env:
+        TRAVIS_CI_OPERATOR: "1"
+        DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        GITHUB_TOKEN: ${{ secrets.K8S_GITHUB_TOKEN }}
+      run: |
+        ./ci.sh install
+        ./ci.sh script
+    - name: Deploy
+      env:
+        TRAVIS_CI_OPERATOR: "1"
+        DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        GITHUB_TOKEN: ${{ secrets.K8S_GITHUB_TOKEN }}
+      run: |
+        ./ci.sh deploy
+        ./ci.sh bump
