@@ -6,7 +6,7 @@ guidestar-scraper:
       parameters:
         name: guidestar
         title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
-        revision: 2022.03.24
+        revision: 2022.11.14
     - run: load_resource
       parameters:
         resource: association-registry
