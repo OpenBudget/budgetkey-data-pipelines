@@ -35,7 +35,7 @@ def flow(*_):
         DF.add_field('id', 'string', lambda r: '__'.join(r['path']) or 'main', **{'es:exclude': True}),
         DF.delete_fields(['path', ]),
         DF.add_field('min_year', 'integer', 2020),
-        DF.add_field('max_year', 'integer', 2020),
+        DF.add_field('max_year', 'integer', 2021),
         DF.add_field('kind', 'string', 'gov_social_service_unit', **{'es:keyword': True, 'es:exclude': True}),
         DF.add_field('kind_he', 'string', 'שירותים חברתיים במיקור חוץ', **{'es:keyword': True, 'es:exclude': True}),
         DF.add_field('score', 'number', 1000, **{'es:score-column': True}),
