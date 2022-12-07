@@ -6,4 +6,5 @@ fetcher:
       parameters:
         name: all-municipal-budgets
         title: All Municipal Budgets
+        revision: 2022.12.07
     - flow: datacity-budget-fetcher
