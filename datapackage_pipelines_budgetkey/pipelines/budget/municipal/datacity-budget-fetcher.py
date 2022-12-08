@@ -17,10 +17,10 @@ def get_code_to_entity_id_map():
 
 
 def get_score(row):
-    val = float(row['revised'] or row['executed'] or row['allocated'] or 0)
+    val = float(row['revised'] or row['executed'] or row['allocated'] or 1000)/1000
     if val < 0:
         val = -val
-    return (val or Decimal(1000)) / Decimal(1000.0)
+    return Decimal(val)
 
 
 def parent(code):
