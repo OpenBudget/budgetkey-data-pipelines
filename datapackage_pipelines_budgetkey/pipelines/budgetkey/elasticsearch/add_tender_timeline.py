@@ -54,8 +54,8 @@ def process_row(row, *_):
                 major = False,
                 priority = 1
             ))
-    executed = float(row['contract_executed'])
-    volume = float(row['contract_volume'])
+    executed = float(row.get('contract_executed') or 0)
+    volume = float(row.get('contract_volume') or 0)
     payments = sorted((p for a in row.get('awardees', []) for p in a.get('payments', [])), key=lambda t: t[0])
     paid = 0
     for period, payments in itertools.groupby(payments, lambda t: t[0]):

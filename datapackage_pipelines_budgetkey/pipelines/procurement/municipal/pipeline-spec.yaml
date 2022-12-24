@@ -1,0 +1,10 @@
+fetcher:
+  schedule:
+    crontab: 0 0 * * *
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-municipal-tenders
+        title: All Municipal Tenders
+        revision: 2022.12.25
+    - flow: datacity-tender-fetcher

@@ -271,6 +271,19 @@ muni_budgets:
     - flow: add_charts_for_muni_budgets
     - flow: add_redirects_for_muni_budgets
 
+muni_tenders:
+  kind: indexer
+  revision: 9
+  dependent_pipeline: ./procurement/municipal/fetcher
+  source_datapackage: /var/datapackages/procurement/municipal/datacity-tenders/datapackage.json
+  page-title-pattern: '{snippet}'
+  key-fields:
+    - tender_type
+    - publication_id
+    - tender_id
+  document-steps:
+    - run: add_tender_timeline      
+
   # extra-steps:
   #   - flow: activity_add_nice_org_hierarchy
   # document-steps:
