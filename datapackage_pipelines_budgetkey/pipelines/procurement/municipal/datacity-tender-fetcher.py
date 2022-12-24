@@ -40,6 +40,9 @@ def flow(*_):
         DF.add_field('publication_id', 'string', '0'),
 
         DF.add_field('score', 'number', 10),
+
+        DF.set_primary_key(['tender_id', 'tender_type', 'publication_id']),
+
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/procurement/municipal/datacity-tenders'),
         # DF.dump_to_sql(dict(
