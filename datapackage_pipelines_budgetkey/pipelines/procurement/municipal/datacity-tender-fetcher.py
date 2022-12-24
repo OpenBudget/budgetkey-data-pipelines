@@ -26,7 +26,7 @@ def calc_doc_id(row):
 def flow(*_):
     QUERY = 'select * from muni_procurement'
     return DF.Flow(
-        DF.load(DATACITY_DB, query=QUERY, name='muni_procurement'),
+        DF.load(DATACITY_DB, query=QUERY, name='muni_tenders'),
         DF.set_type('.*date', type='date'),
 
         DF.rename_fields(MAPPING),
