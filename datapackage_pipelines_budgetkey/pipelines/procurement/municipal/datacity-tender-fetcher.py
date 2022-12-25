@@ -5,7 +5,7 @@ from hashlib import md5
 DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
 
 MAPPING = {
-    'process-code': 'tender_id',
+    'process-code': 'regulation',
     'process-title': 'description',
     'municipality-name': 'publisher',
     'process-procurer-unit-name': 'publisher_unit',
@@ -20,11 +20,9 @@ MAPPING = {
 }
 
 def calc_doc_id(row):
-    tender_id = row.get('tender_id') or ''
+    tender_id = row.get('regulation') or ''
     publisher = row.get('publisher') or ''
     description = row.get('description') or ''
-    if tender_id and len(tender_id) >= 4:
-        return '{}/{}'.format(publisher, tender_id)
     params = [tender_id, description, publisher]
     return md5(''.join(params).encode('utf-8')).hexdigest()[:8]
 
@@ -43,8 +41,7 @@ def flow(*_):
         DF.select_fields(MAPPING.values()),
 
         DF.add_field('page_title', 'string', lambda r: 'מכרז של {publisher}: {description}'.format(**r)),
-
-        DF.set_type('tender_id', transform=lambda v, row: calc_doc_id(row)),
+        DF.add_field('tender_id', 'string', default=calc_doc_id),
         DF.add_field('tender_type', 'string', 'office'),
         DF.add_field('tender_type_he', 'string', 'מכרז מוניציפלי'),
         DF.add_field('publication_id', 'string', '0'),
