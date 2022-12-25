@@ -39,7 +39,7 @@ def flow(*_):
 
         DF.add_field('page_title', 'string', lambda r: 'מכרז של {publisher}: {description}'.format(**r)),
 
-        DF.set_type('tender_id', transform=lambda v, row: calc_doc_id(row)),
+        DF.set_type('tender_id', transform=lambda v, row: '{publisher}/{tender_id}'.format(**row)),
         DF.add_field('tender_type', 'string', 'office'),
         DF.add_field('tender_type_he', 'string', 'מכרז מוניציפלי'),
         DF.add_field('publication_id', 'string', '0'),

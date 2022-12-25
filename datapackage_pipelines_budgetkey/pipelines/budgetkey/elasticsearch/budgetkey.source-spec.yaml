@@ -273,7 +273,7 @@ muni_budgets:
 
 muni_tenders:
   kind: indexer
-  revision: 12
+  revision: 13
   dependent_pipeline: ./procurement/municipal/fetcher
   source_datapackage: /var/datapackages/procurement/municipal/datacity-tenders/datapackage.json
   page-title-pattern: '{page_title}'

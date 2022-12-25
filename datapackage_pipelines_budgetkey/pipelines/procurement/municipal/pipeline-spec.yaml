@@ -6,5 +6,5 @@ fetcher:
       parameters:
         name: all-municipal-tenders
         title: All Municipal Tenders
-        revision: 2022.12.25.01
+        revision: 2022.12.25.02
     - flow: datacity-tender-fetcher
