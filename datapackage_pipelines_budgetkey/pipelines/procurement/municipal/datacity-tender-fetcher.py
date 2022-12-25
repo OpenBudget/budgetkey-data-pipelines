@@ -27,6 +27,11 @@ def flow(*_):
     QUERY = 'select * from muni_procurement'
     return DF.Flow(
         DF.load(DATACITY_DB, query=QUERY, name='muni_tenders'),
+        *[
+            DF.set_type(k, type='string')
+            for k in MAPPING.keys()
+            if not k.endswith('-date')
+        ],
         DF.set_type('.*date', type='date'),
 
         DF.rename_fields(MAPPING),
