@@ -50,11 +50,11 @@ def flow(*_):
 
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/procurement/municipal/datacity-tenders'),
-        # DF.dump_to_sql(dict(
-        #     muni_tenders={
-        #         'resource-name': 'muni_procurement',
-        #     }
-        # ))
+        DF.dump_to_sql(dict(
+            muni_tenders={
+                'resource-name': 'muni_tenders',
+            }
+        ))
     )
 
 if __name__ == '__main__':
