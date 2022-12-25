@@ -20,7 +20,12 @@ MAPPING = {
 }
 
 def calc_doc_id(row):
-    params = [row.get(x) or '' for x in ('tender_id', 'description', 'publisher')]
+    tender_id = row.get('tender_id') or ''
+    publisher = row.get('publisher') or ''
+    description = row.get('description') or ''
+    if tender_id and len(tender_id) >= 4:
+        return '{}/{}'.format(publisher, tender_id)
+    params = [tender_id, description, publisher]
     return md5(''.join(params).encode('utf-8')).hexdigest()[:8]
 
 def flow(*_):
@@ -39,7 +44,7 @@ def flow(*_):
 
         DF.add_field('page_title', 'string', lambda r: 'מכרז של {publisher}: {description}'.format(**r)),
 
-        DF.set_type('tender_id', transform=lambda v, row: '{publisher}/{tender_id}'.format(**row)),
+        DF.set_type('tender_id', transform=lambda v, row: calc_doc_id(row)),
         DF.add_field('tender_type', 'string', 'office'),
         DF.add_field('tender_type_he', 'string', 'מכרז מוניציפלי'),
         DF.add_field('publication_id', 'string', '0'),
