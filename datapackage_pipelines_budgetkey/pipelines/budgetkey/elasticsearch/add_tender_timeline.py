@@ -12,9 +12,9 @@ def process_row(row, *_):
         ('exemptions', 'claim_date', 'תאריך אחרון להגשת השגות', 2),
         ('central', 'claim_date', 'מועד אחרון להגשה', 2),
 
-        ('office', 'start_date', 'תאריך פרסום המכרז', 0),
+        ('office', 'publication_date', 'תאריך פרסום המכרז', 0),
         ('exemptions', 'start_date', 'תחילת תקופת התקשרות', 0),
-        ('central', 'start_date', 'תאריך פרסום המכרז', 0),
+        ('central', 'publication_date', 'תאריך פרסום המכרז', 0),
 
         ('exemptions', 'end_date', 'תום תקופת ההתקשרות', 2),
         ('central', 'end_date', 'תאריך סיום תוקף מכרז', 2),
