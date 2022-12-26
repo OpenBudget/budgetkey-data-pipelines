@@ -26,7 +26,12 @@ RUN pip install -U -r /requirements-dev.txt
 
 RUN apt-get install -y sudo unzip wget libglib2.0-0 && wget https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
-    chmod +x chromedriver && mv chromedriver /usr/local/bin/ 
+    chmod +x chromedriver && \
+    mv chromedriver /usr/local/bin/ && \
+    cp /certs/* /usr/local/share/ca-certificates/ && \
+    rm -rf /certs/ && \
+    cd /usr/local/share/ca-certificates/ && for i in `ls `; do ln -s $i /etc/ssl/certs/$i; done && \
+    update-ca-certificates --fresh
 
 USER dpp
 
