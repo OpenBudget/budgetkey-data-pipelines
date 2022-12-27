@@ -123,27 +123,38 @@ national-budget-changes:
         tabulator:
           encoding: windows-1255
           headers: 4
-    # - run: resource_without_excel_formulas
-    #   parameters:
-    #     url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
-    #     resource:
-    #       name: changes_2020
-    #       path: data/changes_2020.csv
-    #     tabulator:
-    #       encoding: windows-1255
-    #       headers: 3
-    # - run: resource_without_excel_formulas
-    #   parameters:
-    #     url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
-    #     resource:
-    #       name: pending_changes_2020
-    #       path: data/pending_changes.csv
-    #     tabulator:
-    #       encoding: windows-1255
-    #       headers: 3
+    - run: resource_without_excel_formulas
+      parameters:
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2021.csv
+        resource:
+          name: changes_2021
+          path: data/changes_2021.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 4
+    - run: resource_without_excel_formulas
+      runner: tzabar
+      parameters:
+        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+        resource:
+          name: changes_2022
+          path: data/changes_2022.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 4
+    - run: resource_without_excel_formulas
+      runner: tzabar
+      parameters:
+        url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
+        resource:
+          name: pending_changes_2022
+          path: data/pending_changes.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 4
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2021
+        pending-resource-name: pending_changes_2022
     - run: concatenate
       parameters:
         target:
@@ -253,7 +264,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2021
+          - year: 2022
     - run: filter
       parameters:
         out:
