@@ -1,5 +1,6 @@
 import datetime
 import logging
+from decimal import Decimal
 
 from datapackage_pipelines.wrapper import process
 
@@ -40,8 +41,11 @@ def process_row(row, *_):
     for amount in amounts:
         if isinstance(row[amount], str):
             row[amount] = row[amount].replace(',', '') + '000'
-        else:
+        elif isinstance(row[amount], (float, Decimal)):
             row[amount] *= 1000
+        else:
+            logging.warning('INVALID ROW: %r' % row)
+            row[amount] = 0
 
     return row
 
