@@ -133,9 +133,8 @@ national-budget-changes:
           encoding: windows-1255
           headers: 4
     - run: resource_without_excel_formulas
-      runner: tzabar
       parameters:
-        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2022.csv
         resource:
           name: changes_2022
           path: data/changes_2022.csv
@@ -145,16 +144,26 @@ national-budget-changes:
     - run: resource_without_excel_formulas
       runner: tzabar
       parameters:
+        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+        resource:
+          name: changes_2023
+          path: data/changes_2023.csv
+        tabulator:
+          encoding: windows-1255
+          headers: 4
+    - run: resource_without_excel_formulas
+      runner: tzabar
+      parameters:
         url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
         resource:
-          name: pending_changes_2022
+          name: pending_changes_2023
           path: data/pending_changes.csv
         tabulator:
           encoding: windows-1255
           headers: 4
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2022
+        pending-resource-name: pending_changes_2023
     - run: concatenate
       parameters:
         target:
