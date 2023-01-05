@@ -54,7 +54,7 @@ def floater(field):
     )
 
 def fix_tenders():
-    today = datetime.date.today()
+    today = datetime.date.today().isoformat()
 
     def func(row):
         tenders = row.get('tenders') or []
@@ -101,6 +101,7 @@ def fix_tenders():
                     tender['sub_kind_he'] = 'התקשרות עם רשות מקומית'
                 else:
                     print('REGREG', reg)
+            end_date = tender.get('end_date')
             if tender.get('tender_type') == 'exemptions' and tender.get('active') is None and end_date:
                 tender['active'] = 'yes' if end_date > today else 'no'
 
