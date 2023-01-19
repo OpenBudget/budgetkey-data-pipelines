@@ -121,28 +121,29 @@ def fix_suppliers():
             for f in ['entity_id', 'entity_name']:
                 if v.get(f):
                     v[f] = v[f].replace('<em>', '').replace('</em>', '')
-            v['geo'] = [geo[i] for i in v.get('geo', [])]
-            geos.update(v['geo'])
             for f in ('year_activity_start', 'year_activity_end'):
                 if f in v and not v[f]:
                     del v[f]
             start_year = v.get('year_activity_start') or 2020
             end_year = v.get('year_activity_end') or CURRENT_YEAR
             v['activity_years'] = list(range(start_year, end_year+1))
-            eid = v['entity_id']
-            eids.add(eid)
-            ekind = v['entity_kind']
-            if ekind == 'company':
-                kinds.add('עסקי')
-                eids_company.add(eid)
-            elif ekind in ('association', 'ottoman-association', 'cooperative'):
-                kinds.add('מגזר שלישי')
-                eids_association.add(eid)
-            elif ekind == 'municipality':
-                kinds.add('רשויות מקומיות')
-                eids_municipality.add(eid)
-            else:
-                kinds.add('אחר')
+            v['geo'] = [geo[i] for i in v.get('geo', [])]
+            if v.get('year_activity_end') is None: # still active, so counted
+                geos.update(v['geo'])
+                eid = v['entity_id']
+                eids.add(eid)
+                ekind = v['entity_kind']
+                if ekind == 'company':
+                    kinds.add('עסקי')
+                    eids_company.add(eid)
+                elif ekind in ('association', 'ottoman-association', 'cooperative'):
+                    kinds.add('מגזר שלישי')
+                    eids_association.add(eid)
+                elif ekind == 'municipality':
+                    kinds.add('רשויות מקומיות')
+                    eids_municipality.add(eid)
+                else:
+                    kinds.add('אחר')
         row['supplier_count'] = len(eids)
         row['supplier_count_company'] = len(eids_company)
         row['supplier_count_association'] = len(eids_association)
