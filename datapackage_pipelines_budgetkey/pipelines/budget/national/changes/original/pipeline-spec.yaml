@@ -273,7 +273,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2022
+          - year: 2023
     - run: filter
       parameters:
         out:

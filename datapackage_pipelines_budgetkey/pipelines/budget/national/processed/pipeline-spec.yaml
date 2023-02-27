@@ -119,7 +119,7 @@ aggregated-yearly:
 
     - run: join_phases
       parameters:
-        last-completed-year: 2021
+        last-completed-year: 2022
 
     - run: topical_sums
     - run: join_categories
