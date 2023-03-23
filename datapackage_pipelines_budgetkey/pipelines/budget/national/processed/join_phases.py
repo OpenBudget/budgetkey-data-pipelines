@@ -129,15 +129,16 @@ def process_row(row, phase_key):
     else:
         hierarchy = []
     for i, (code_key, title_key) in enumerate(codes_and_titles):
-        expected_length = i*2 + 4
-        row.update(fixed_amounts if expected_length < 10 else row_amounts)
-        row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
-        row['title'] = save[title_key] or 'לא ידוע'
-        row['hierarchy'] = hierarchy
-        row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
-        row['depth'] = i+1
-        yield row
-        hierarchy.append([row['code'], row['title']])
+        if code_key in save:
+            expected_length = i*2 + 4
+            row.update(fixed_amounts if expected_length < 10 else row_amounts)
+            row['code'] = '0'*(expected_length-len(save[code_key])) + save[code_key]
+            row['title'] = save[title_key] or 'לא ידוע'
+            row['hierarchy'] = hierarchy
+            row['parent'] = None if len(hierarchy) == 0 else hierarchy[-1][0]
+            row['depth'] = i+1
+            yield row
+            hierarchy.append([row['code'], row['title']])
 
     row['parent'] = None
     row['hierarchy'] = []
