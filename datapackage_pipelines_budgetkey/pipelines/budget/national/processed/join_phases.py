@@ -115,6 +115,8 @@ def process_row(row, phase_key):
 
     save = {}
     for code_key, title_key in codes_and_titles:
+        if row[code_key] is None:
+            continue
         save[code_key] = row[code_key]
         if len(save[code_key]) % 2 == 1:
             save[code_key] = '0' + save[code_key]
