@@ -140,7 +140,7 @@ FOR 4) AS extra,
 sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
-AND length(code)=10
+AND length(code)=8
 AND YEAR={}
 GROUP BY 1, 2"""
 
@@ -152,7 +152,7 @@ sum(net_revised) AS amount
 FROM raw_budget
 WHERE func_cls_title_1->>0='{}'
 AND func_cls_title_2->>0='{}'
-AND length(code)=10
+AND length(code)=8
 AND YEAR={}
 GROUP BY 1, 2"""
 
