@@ -42,7 +42,7 @@ class CooperativesScraper(object):
             cooperative.pop('Id', None)
             assert(len(list(cooperative.keys())) == 0), str(list(cooperative.keys()))
             ret = dict((k, v.strip() if isinstance(v, str) else v) for k, v in ret.items())
-            if ret["id"] not in added:
+            if ret["id"] not in added and isinstance(ret["id"], str) and len(ret["id"]) == 9:
                 added.add(ret["id"])
                 yield ret
 
