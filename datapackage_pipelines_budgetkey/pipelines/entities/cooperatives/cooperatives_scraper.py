@@ -20,6 +20,7 @@ class CooperativesScraper(object):
 
 
     def parse_cooperatives(self, cooperatives):
+        added = set()
         for cooperative in cooperatives:
             ret = {"id": self.parse_integer(cooperative.pop("Identity", None)),
                    "name": cooperative.pop("Name", None),
@@ -41,7 +42,9 @@ class CooperativesScraper(object):
             cooperative.pop('Id', None)
             assert(len(list(cooperative.keys())) == 0), str(list(cooperative.keys()))
             ret = dict((k, v.strip() if isinstance(v, str) else v) for k, v in ret.items())
-            yield ret
+            if ret["id"] not in added:
+                added.add(ret["id"])
+                yield ret
 
     def requests_get(self, url):
         res = requests.get(url, headers={'Content-type': 'application/json'})

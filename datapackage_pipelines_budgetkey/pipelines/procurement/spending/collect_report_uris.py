@@ -25,10 +25,13 @@ def get_offices():
         raise Exception('No forms found')
     el = forms[0]
     cfg = el.attrib['ng-init']
-    cfg = json.loads(cfg.split("','',10,'',")[1].split(",'MultiAutoComplete')")[0])
-    cfg = cfg[1]
-    assert cfg['Name'] == 'Office'
-    cfg = cfg['MultiChoiseValues']['Values']
+    cfg = cfg.split('OfficeMultiChoiseValues": ')[1]
+    cfg = cfg.split(']')[0]
+    cfg += ']}'
+    cfg = json.loads(cfg)
+    cfg = cfg['Values']
+    # assert cfg['Name'] == 'Office'
+    # cfg = cfg['MultiChoiseValues']['Values']
     print(f'GOT {len(cfg)} offices')
     return dict(
         (c['Key'], c['Value'])
