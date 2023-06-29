@@ -187,12 +187,12 @@ def add_current_budget():
         row['current_budget'] = None
         if row.get('manualBudget') and len(row.get('manualBudget')) > 0:
             for entry in row['manualBudget']:
-                if entry.get('approved') and entry['approved'] > 0 and entry['year'] <= CURRENT_YEAR:
+                if entry.get('approved') and entry['approved'] > 0 and entry['year'] == CURRENT_YEAR:
                     row['current_budget'] = entry['approved']
                     break
         utilization = None
         for item in row['manualBudget']:
-            if item['approved'] and item['executed'] and item['year'] <= CURRENT_YEAR:
+            if item['approved'] and item['executed'] and item['year'] == CURRENT_YEAR:
                 utilization = item['executed']/item['approved']*100
                 break
         row['budget_utilization'] = utilization
