@@ -185,6 +185,20 @@ def process_row(row, phase_key):
         row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
         row['depth'] = -1
         yield row
+    else:
+        row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
+        row['title'] = '%s' % (row['func_cls_title_1'],)
+        row['hierarchy'] = []
+        row['depth'] = -2
+        yield row
+
+        row['parent'] = row['code']
+        row['hierarchy'].append([row['code'], row['title']])
+        row['code'] = 'C%d%02d' % (int(row['func_cls_code_1']), int(row['func_cls_code_2']))
+        row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
+        row['depth'] = -1
+        yield row
+
 
 
 
