@@ -124,8 +124,8 @@ def fix_suppliers():
             for f in ('year_activity_start', 'year_activity_end'):
                 if f in v and not v[f]:
                     del v[f]
-            start_year = v.get('year_activity_start') or 2020
-            end_year = v.get('year_activity_end') or CURRENT_YEAR
+            start_year = max(v.get('year_activity_start') or 2020, row['min_activity_year'])
+            end_year = min(v.get('year_activity_end') or CURRENT_YEAR, row['max_activity_year'])
             v['activity_years'] = list(range(start_year, end_year+1))
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             if v.get('year_activity_end') is None: # still active, so counted
@@ -189,6 +189,8 @@ def add_current_budget():
             for entry in row['manualBudget']:
                 if entry.get('approved') and entry['approved'] > 0 and entry['year'] == CURRENT_YEAR:
                     row['current_budget'] = entry['approved']
+                    row['min_activity_year'] = min(entry['year'], row.get('min_activity_year', entry['year']))
+                    row['max_activity_year'] = max(entry['year'], row.get('max_activity_year', entry['year']))
                     break
         utilization = None
         for item in row['manualBudget']:
@@ -200,6 +202,8 @@ def add_current_budget():
     return DF.Flow(
         DF.add_field('current_budget', 'number'),
         DF.add_field('budget_utilization', 'number'),
+        DF.add_field('min_activity_year', 'number'),
+        DF.add_field('max_activity_year', 'number'),
         func
     )
 
@@ -238,9 +242,9 @@ def flow(*_):
         floater('tenders'),
         floater('suppliers'),
         floater('virtue_of_table'),
+        add_current_budget(),
         fix_suppliers(),
         fix_tenders(),
-        add_current_budget(),
         add_current_beneficiaries(),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', CURRENT_YEAR),
