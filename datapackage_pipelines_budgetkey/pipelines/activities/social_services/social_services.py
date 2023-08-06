@@ -117,6 +117,7 @@ def fix_suppliers():
         eids_company = set()
         eids_municipality = set()
         geos = set()
+        actual_suppliers = []
         for v in suppliers:
             for f in ['entity_id', 'entity_name']:
                 if v.get(f):
@@ -127,6 +128,9 @@ def fix_suppliers():
             start_year = max(v.get('year_activity_start') or 2020, row['min_activity_year'])
             end_year = min(v.get('year_activity_end') or CURRENT_YEAR, row['max_activity_year'])
             v['activity_years'] = list(range(start_year, end_year+1))
+            if len(v['activity_years']) == 0:
+                continue
+            actual_suppliers.append(v)
             v['geo'] = [geo[i] for i in v.get('geo', [])]
             if v.get('year_activity_end') is None: # still active, so counted
                 geos.update(v['geo'])
@@ -144,6 +148,7 @@ def fix_suppliers():
                     eids_municipality.add(eid)
                 else:
                     kinds.add('אחר')
+        row['suppliers'] = actual_suppliers
         row['supplier_count'] = len(eids)
         row['supplier_count_company'] = len(eids_company)
         row['supplier_count_association'] = len(eids_association)
