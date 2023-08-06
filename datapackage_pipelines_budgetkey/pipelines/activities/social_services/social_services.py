@@ -125,8 +125,10 @@ def fix_suppliers():
             for f in ('year_activity_start', 'year_activity_end'):
                 if f in v and not v[f]:
                     del v[f]
-            start_year = max(v.get('year_activity_start') or 2020, row['min_activity_year'])
-            end_year = min(v.get('year_activity_end') or CURRENT_YEAR, row['max_activity_year'])
+            start_year = v.get('year_activity_start') or 2020
+            start_year = max(start_year, row['min_activity_year'] or start_year)
+            end_year = v.get('year_activity_end') or CURRENT_YEAR
+            end_year = min(end_year, row['max_activity_year'] or end_year)
             v['activity_years'] = list(range(start_year, end_year+1))
             if len(v['activity_years']) == 0:
                 continue
