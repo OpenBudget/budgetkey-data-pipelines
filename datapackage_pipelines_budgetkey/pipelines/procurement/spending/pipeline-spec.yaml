@@ -305,6 +305,8 @@ latest-contract-spending:
           payments:
             name: payment
             aggregate: array
+          publisher-key:
+            aggregate: last
     - run: join_tenders_and_contracts
     - run: rename_resource
       parameters:
@@ -399,7 +401,7 @@ latest-contract-spending:
         contract-spending:
           - order_id
           - budget_code
-          - publisher_name
+          - publisher-key
     - run: sample
     - run: set_types
       parameters:
