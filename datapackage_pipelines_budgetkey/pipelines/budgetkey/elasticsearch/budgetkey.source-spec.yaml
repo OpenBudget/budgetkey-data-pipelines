@@ -72,7 +72,7 @@ contract-spending:
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
   key-fields:
-    - publisher-key
+    - publisher_key
     - order_id
     - budget_code
   extra-steps:

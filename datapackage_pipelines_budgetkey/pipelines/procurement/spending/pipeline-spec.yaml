@@ -244,7 +244,7 @@ latest-contract-spending:
           key:
             - order_id
             - budget_code
-            - publisher-key
+            - publisher_key
           delete: true
         target:
           name: quarterly-contract-spending-reports
@@ -305,7 +305,7 @@ latest-contract-spending:
           payments:
             name: payment
             aggregate: array
-          publisher-key:
+          publisher_key:
             aggregate: last
     - run: join_tenders_and_contracts
     - run: rename_resource
@@ -401,7 +401,7 @@ latest-contract-spending:
         contract-spending:
           - order_id
           - budget_code
-          - publisher-key
+          - publisher_key
     - run: sample
     - run: set_types
       parameters:

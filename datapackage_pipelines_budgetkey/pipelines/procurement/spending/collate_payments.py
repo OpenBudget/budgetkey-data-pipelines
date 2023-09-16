@@ -20,7 +20,7 @@ def process_row(row, row_index,
             'executed': float(row['executed']) if row['executed'] is not None else None,
             'volume': float(row['volume']) if row['volume'] is not None else None,
         }
-        row['publisher-key'] = row['purchasing_unit'] or row['publisher'] or row['report-publisher']
+        row['publisher_key'] = row['purchasing_unit'] or row['publisher'] or row['report-publisher']
     return row
 
 
@@ -32,7 +32,7 @@ def modify_datapackage(dp, parameters, stats):
                 'type': 'object'
             })
             resource['schema']['fields'].append({
-                'name': 'publisher-key',
+                'name': 'publisher_key',
                 'type': 'string'
             })
     return dp
