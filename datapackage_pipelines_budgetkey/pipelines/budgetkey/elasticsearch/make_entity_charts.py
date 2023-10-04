@@ -208,7 +208,7 @@ def get_association_charts(row, spending_analysis_chart):
 
 MUNICIPALITY_DETAILS_CONFIG = [
     ('symbol', 'סמל הרשות', 'כללי - סמל הרשות'),
-    ('district', 'מחוז', 'כללי - מחוז (משתנה נומינלי)'),
+    ('district', 'מחוז', 'כללי - מחוז)'),
     ('status', 'מעמד מוניציפלי', 'כללי - מעמד מוניציפלי'),
     ('council_member_count', 'מספר חברי מועצה', 'כללי - מספר חברי מועצה'),
     ('status_year', 'שנת קבלת מעמד מוניציפלי', 'כללי - שנת קבלת מעמד מוניציפלי'),
