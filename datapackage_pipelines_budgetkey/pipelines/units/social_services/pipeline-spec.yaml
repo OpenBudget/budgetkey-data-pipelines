@@ -5,4 +5,10 @@ social_services:
   pipeline:
     # - flow: historic_data
     # - flow: historic_data_welfare
+    - run: add_metadata
+      parameters:
+        name: social_services_units
+        title: Fetch social service units from data input
+        revision: '2023-10.09'
+
     - flow: social_services

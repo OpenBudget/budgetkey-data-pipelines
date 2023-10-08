@@ -23,16 +23,23 @@ def all_units():
     for node in hierarchies:
         yield from traverse(node, [])
 
+EN = {
+    'משרד הרווחה': 'welfare',
+    'משרד הבריאות': 'health',
+    'משרד החינוך': 'education',
+}
+
 
 def flow(*_):
     return DF.Flow(
         all_units(),
         DF.add_field('office', 'string', lambda r: r['path'][0] if len(r['path']) > 0 else None, **{'es:keyword': True}),
+        DF.add_field('office_en', 'string', lambda r: EN.get(r['office']), **{'es:keyword': True}),
         DF.add_field('unit', 'string', lambda r: r['path'][1] if len(r['path']) > 1 else None, **{'es:keyword': True}),
         DF.add_field('subunit', 'string', lambda r: r['path'][2] if len(r['path']) > 2 else None, **{'es:keyword': True}),
         DF.add_field('subsubunit', 'string', lambda r: r['path'][3] if len(r['path']) > 3 else None, **{'es:keyword': True}),
         DF.add_field('breadcrumbs', 'string', lambda r: '/'.join(r['path']) or 'משרדי הממשלה', **{'es:exclude': True}),
-        DF.add_field('id', 'string', lambda r: '__'.join(r['path']) or 'main', **{'es:exclude': True}),
+        DF.add_field('id', 'string', lambda r: r['office_en'] or 'main', **{'es:exclude': True}),
         DF.delete_fields(['path', ]),
         DF.add_field('min_year', 'integer', 2020),
         DF.add_field('max_year', 'integer', 2021),
