@@ -24,7 +24,10 @@ def process_row(row, row_index,
             'volume': float(row['volume']) if row['volume'] is not None else None,
         }
         row['publisher_key'] = row['purchasing_unit'] or row['publisher'] or row['report-publisher']
-        row['publisher_key'] = '_'.join(HEBREW_WORD.findall(row['publisher_key']))
+        if row['publisher_key']:
+            row['publisher_key'] = '_'.join(HEBREW_WORD.findall(row['publisher_key']))
+        else:
+            return None
     return row
 
 
