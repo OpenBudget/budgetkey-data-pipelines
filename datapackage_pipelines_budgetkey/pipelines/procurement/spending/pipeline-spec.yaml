@@ -329,6 +329,8 @@ latest-contract-spending:
             type: date
           budget_code:
             es:keyword: true
+          publisher_key:
+            es:keyword: true
           company_id:
             es:keyword: true
           order_id:
