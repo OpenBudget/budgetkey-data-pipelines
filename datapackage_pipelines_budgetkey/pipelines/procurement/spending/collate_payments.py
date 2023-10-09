@@ -1,6 +1,9 @@
 import datetime
+import re
 
 from datapackage_pipelines.wrapper import process
+
+HEBREW_WORD = re.compile('[א-ת]+')
 
 
 def process_row(row, row_index,
@@ -21,6 +24,7 @@ def process_row(row, row_index,
             'volume': float(row['volume']) if row['volume'] is not None else None,
         }
         row['publisher_key'] = row['purchasing_unit'] or row['publisher'] or row['report-publisher']
+        row['publisher_key'] = '_'.join(HEBREW_WORD.findall(row['publisher_key']))
     return row
 
 
