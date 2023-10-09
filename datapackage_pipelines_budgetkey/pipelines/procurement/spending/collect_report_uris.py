@@ -61,7 +61,13 @@ def get_all():
             ),
             From=skip
         )
-        resp = requests.post('https://www.gov.il/he/api/DynamicCollector', json=payload).json()
+        for i in range(5):
+            try:
+                resp = requests.post('https://www.gov.il/he/api/DynamicCollector', json=payload).json()
+                break
+            except Exception as e:
+                print('Failed to get', str(e), payload)
+                time.sleep(60)
         results = resp['Results']
         for r in results:
             base = r['UrlName']

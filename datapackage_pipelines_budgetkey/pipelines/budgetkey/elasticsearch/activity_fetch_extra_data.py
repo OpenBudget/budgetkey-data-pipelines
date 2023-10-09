@@ -56,7 +56,7 @@ def fetch_spending(budget_code):
         SELECT volume, executed, currency,
                min_year, max_year,
                purpose,
-               'contract-spending/' || publisher_name || '/' || order_id || '/' || budget_code AS cs_item_id,
+               'contract-spending/' || publisher_key || '/' || order_id || '/' || budget_code AS cs_item_id,
                case when entity_name is null then supplier_name->>0 else entity_name end as supplier, 
                case when entity_id is null 
                then ('s?q=' || (supplier_name->>0))
