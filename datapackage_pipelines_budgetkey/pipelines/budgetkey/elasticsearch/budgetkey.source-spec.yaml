@@ -67,7 +67,7 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 16
+  revision: 17
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
