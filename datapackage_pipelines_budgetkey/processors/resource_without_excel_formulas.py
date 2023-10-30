@@ -27,7 +27,8 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0'
         }
         download = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
-        shutil.copyfileobj(requests.get(url, stream=True, headers=headers   ).raw, download)
+        resp = requests.get(url, stream=True, headers=headers)
+        shutil.copyfileobj(resp.raw, download)
         download.close()
         download = download.name
         content = open(download, 'rb').read()
@@ -44,6 +45,7 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         out.flush()
 
         logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:10000])
+        assert resp.status_code == 200
 
         datapackage['resources'].append(resource)
 
