@@ -142,7 +142,7 @@ national-budget-changes:
           encoding: windows-1255
           headers: 4
     - run: resource_without_excel_formulas
-      runner: tzabar
+      # runner: tzabar
       parameters:
         url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
         resource:
@@ -152,7 +152,7 @@ national-budget-changes:
           encoding: windows-1255
           headers: 4
     - run: resource_without_excel_formulas
-      runner: tzabar
+      # runner: tzabar
       parameters:
         url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
         resource:
