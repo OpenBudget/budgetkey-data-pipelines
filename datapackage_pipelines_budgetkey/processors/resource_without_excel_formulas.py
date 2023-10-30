@@ -43,7 +43,7 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         out.write(content)
         out.flush()
 
-        logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:1000])
+        logging.info('downloaded from %s %d bytes: %r', url, len(content), content[:10000])
 
         datapackage['resources'].append(resource)
 
