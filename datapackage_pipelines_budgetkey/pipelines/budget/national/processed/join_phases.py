@@ -163,8 +163,7 @@ def process_row(row, phase_key):
         yield row
 
     if (
-        (not
-            (row['code'].startswith('0000') or
+        (not (
              row['code'].startswith('0089') or
              row['code'].startswith('0091') or 
              row['code'].startswith('0094') or 
@@ -185,7 +184,7 @@ def process_row(row, phase_key):
         row['title'] = '%s / %s' % (row['func_cls_title_1'], row['func_cls_title_2'])
         row['depth'] = -1
         yield row
-    else:
+    elif row['code'].startswith('0000'):
         row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
         row['title'] = '%s' % (row['func_cls_title_1'],)
         row['hierarchy'] = []
