@@ -30,6 +30,10 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         content = open(download, 'rb').read()
         os.unlink(download)
 
+        if content.startswith(b'\x1f\x8b'):
+            import gzip
+            content = gzip.decompress(content)
+
         content = content.replace(b'\n="', b'\n"')
         content = content.replace(b',="', b',"')
 
