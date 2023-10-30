@@ -23,8 +23,11 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         # gcl = google_chrome_driver()
         # download = gcl.download(url)
         # gcl.teardown()
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0'
+        }
         download = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
-        shutil.copyfileobj(requests.get(url, stream=True).raw, download)
+        shutil.copyfileobj(requests.get(url, stream=True, headers=headers   ).raw, download)
         download.close()
         download = download.name
         content = open(download, 'rb').read()
