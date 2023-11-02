@@ -4,10 +4,10 @@ import requests
 cookie_re = re.compile("document.cookie='([^=]+)=([^;]+); path=/'")
 
 
-def cookie_monster_iter(url, chunk=1024*1024):
+def cookie_monster_iter(url, chunk=1024*1024, headers={}):
 
     session = requests.Session()
-    headers = {'range': 'bytes=0-400'}
+    headers.update({'range': 'bytes=0-400'})
     content_length = None
     accept_ranges = False
 
@@ -49,8 +49,8 @@ def cookie_monster_iter(url, chunk=1024*1024):
         yield resp.content
 
 
-def cookie_monster_get(url):
+def cookie_monster_get(url, headers={}):
     data = b''
-    for content in cookie_monster_iter(url):
+    for content in cookie_monster_iter(url, headers=headers):
         data += content
     return data

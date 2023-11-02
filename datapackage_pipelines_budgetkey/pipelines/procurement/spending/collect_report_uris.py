@@ -14,7 +14,7 @@ def get_offices():
         'User-Agent': 'kz-data-reader'
     }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text = cookie_monster_get(url).decode('utf8')
+    text = cookie_monster_get(url, headers).decode('utf8')
     # text=requests.get(url, headers=headers).text
     page = pq(text)
     forms = page.find('div[name=form]')
