@@ -8,7 +8,6 @@ scraper:
         title: Government Decisions Scraper
         homepage: https://www.gov.il/he/Departments/policies
     - run: scraper
-      runner: tzabar
       parameters:
         resource:
           name: gov_decisions
