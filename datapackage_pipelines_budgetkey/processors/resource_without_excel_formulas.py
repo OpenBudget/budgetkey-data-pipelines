@@ -24,7 +24,7 @@ with tempfile.NamedTemporaryFile(suffix='.csv') as out:
         # download = gcl.download(url)
         # gcl.teardown()
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:120.0) Gecko/20100101 Firefox/120.0'
+            'User-Agent': 'kz-data-reader'
         }
         download = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
         resp = requests.get(url, stream=True, headers=headers)

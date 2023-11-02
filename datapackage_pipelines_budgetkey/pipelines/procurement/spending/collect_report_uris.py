@@ -11,9 +11,7 @@ import dataflows as DF
 
 def get_offices():
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) ' +
-                        'AppleWebKit/537.36 (KHTML, like Gecko) ' +
-                        'Chrome/54.0.2840.87 Safari/537.36'
+        'User-Agent': 'kz-data-reader'
     }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
     text = cookie_monster_get(url).decode('utf8')
