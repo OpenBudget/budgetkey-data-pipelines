@@ -14,7 +14,7 @@ def get_offices():
         'User-Agent': 'kz-data-reader'
     }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text = requests.get(url, headers).text
+    text = requests.get(url, headers=headers).text
     # text=requests.get(url, headers=headers).text
     page = pq(text)
     forms = page.find('div[name=form]')
@@ -40,6 +40,7 @@ def get_offices():
 def get_all():
     total = 100000
     skip = 0
+    retries = 5
     while True:
         try:
             print('Getting offices...')
@@ -48,6 +49,8 @@ def get_all():
         except Exception as e:
             print('Failed to get offices...', e)
             time.sleep(180)
+            retries -= 1
+        assert retries > 0
     while skip < total:
         payload = dict(
             DynamicTemplateID='8132e331-eb58-474d-abe2-085d3f08c400',
