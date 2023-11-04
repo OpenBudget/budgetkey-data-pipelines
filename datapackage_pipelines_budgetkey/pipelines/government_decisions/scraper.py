@@ -15,7 +15,7 @@ parameters, datapackage, res_iter = ingest()
 SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=100"
 
 SITE_URL = 'https://www.gov.il'
-TIMEOUT = 60
+TIMEOUT = 180
 
 
 def get_links(content, session):
