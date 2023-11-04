@@ -58,6 +58,7 @@ def get_decision_list():
     results = response['results']
     count = 0
     while True:
+        got = False
         for result in results:
             content_pq = pq(result['Content']) if result['Content'] else None
             links = get_links(result['Content'], session)
@@ -68,6 +69,7 @@ def get_decision_list():
                 continue
             found.add(uniqueId)
 
+            got = True
             yield {
                 'text': content_pq,
                 'linked_docs': links,
@@ -89,6 +91,9 @@ def get_decision_list():
             }
             count += 1
         retries= 5
+
+        if not got:
+            return
         while retries > 0:
             try:
                 response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count, limit=count+10), timeout=TIMEOUT).json()
@@ -100,8 +105,6 @@ def get_decision_list():
                 retries -= 1
                 time.sleep(60)
             assert retries > 0
-        if not results or len(results) == 0:
-            return
 
 
 resource = parameters['resource']
