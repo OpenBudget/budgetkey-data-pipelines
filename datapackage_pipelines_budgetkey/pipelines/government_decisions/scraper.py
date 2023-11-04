@@ -12,7 +12,7 @@ from datapackage_pipelines.wrapper import ingest, spew
 
 parameters, datapackage, res_iter = ingest()
 
-SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit=100"
+SEARCH_PAGE_RESULTS_URL = "https://www.gov.il/he/api/PolicyApi/Index?PmoMinistersComittee=&skip={skip}&limit={limit}"
 
 SITE_URL = 'https://www.gov.il'
 TIMEOUT = 180
@@ -54,7 +54,7 @@ def get_decision_list():
     found = set()
     session = requests.Session()
     session.headers['User-Agent'] = 'kz-data-reader'
-    response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0), timeout=TIMEOUT).json()
+    response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=0, limit=10), timeout=TIMEOUT).json()
     results = response['results']
     count = 0
     while True:
@@ -91,7 +91,7 @@ def get_decision_list():
         retries= 5
         while retries > 0:
             try:
-                response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count), timeout=TIMEOUT).json()
+                response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count, limit=count+10), timeout=TIMEOUT).json()
                 results = response.get('results')
                 if not results or len(results) == 0:
                     return
