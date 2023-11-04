@@ -9,12 +9,15 @@ from pyquery import PyQuery as pq
 
 import dataflows as DF
 
+
+HEADERS = {
+    'User-Agent': 'kz-data-reader'
+}
+
+
 def get_offices():
-    headers = {
-        'User-Agent': 'kz-data-reader'
-    }
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text = requests.get(url, headers=headers).text
+    text = requests.get(url, headers=HEADERS).text
     # text=requests.get(url, headers=headers).text
     page = pq(text)
     forms = page.find('div[name=form]')
@@ -64,7 +67,7 @@ def get_all():
         )
         for i in range(5):
             try:
-                resp = requests.post('https://www.gov.il/he/api/DynamicCollector', json=payload).json()
+                resp = requests.post('https://www.gov.il/he/api/DynamicCollector', json=payload, headers=HEADERS).json()
                 break
             except Exception as e:
                 print('Failed to get', str(e), payload)
