@@ -1,5 +1,6 @@
 # coding=utf-8
 import requests
+import time
 from itertools import chain
 from datapackage_pipelines_budgetkey.common.object_storage import object_storage
 from datapackage_pipelines_budgetkey.common.sanitize_html import sanitize_html
@@ -87,8 +88,18 @@ def get_decision_list():
                 'score': 1
             }
             count += 1
-        response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count), timeout=TIMEOUT).json()
-        results = response.get('results')
+        retries= 5
+        while retries > 0:
+            try:
+                response = session.get(SEARCH_PAGE_RESULTS_URL.format(skip=count), timeout=TIMEOUT).json()
+                results = response.get('results')
+                if not results or len(results) == 0:
+                    return
+                break
+            except:
+                retries -= 1
+                time.sleep(60)
+            assert retries > 0
         if not results or len(results) == 0:
             return
 
