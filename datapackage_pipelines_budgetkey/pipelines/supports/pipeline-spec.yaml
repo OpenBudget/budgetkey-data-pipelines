@@ -298,6 +298,8 @@ with-entities:
         tables:
           raw_supports:
             resource-name: supports
+            indexes_fields: [['entity_id']]
+
 
 by-payment-year:
   dependencies:
