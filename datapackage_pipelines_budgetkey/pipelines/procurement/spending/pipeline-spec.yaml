@@ -217,7 +217,7 @@ latest-contract-spending:
         title: התקשרויות רכש ממשלתיות
         description: >
           אנו סוכמים מידע מתוך הדוחות הרבעוניים לתוך טבלה המכילה את המידע העדכני ביותר.
-        revision: 2022-11-06
+        revision: 2023-11-23
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
