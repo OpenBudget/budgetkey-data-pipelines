@@ -1,6 +1,6 @@
 scrape-maya-notification-list:
   schedule:
-    crontab: 0 0 * * *
+    crontab: 0 0 * * 0
   pipeline:
     - flow: scrape_maya_notification_list
     - run: dump_to_path
@@ -281,7 +281,7 @@ maya-reported-work-record:
 
 scrape-maya-tase-companies:
   schedule:
-    crontab: 0 0 * * *
+    crontab: 0 0 * * 0
   pipeline:
     - flow: scrape_maya_tase_companies
     - run: dump_to_path
