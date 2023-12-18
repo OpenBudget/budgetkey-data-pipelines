@@ -366,6 +366,7 @@ by-payment-year:
         tables:
           supports_by_payment_year:
             resource-name: supports
+            indexes_fields: [['budget_code']]
 
 by-request-year:
   dependencies:
