@@ -25,7 +25,7 @@ if __name__ == '__main__':
     e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL'])
     r = map(dict,
             e.execute("""
-with a as (select users.email as email, items.title, url, properties, max(send_time) as last_send_time
+with a as (select users.email as email, items.title, url, items.properties as properties, max(send_time) as last_send_time
 from items join lists on(items.list_id=lists.id) 
 join users on(lists.user_id=users.id) 
 left join sendlog on (sendlog.email=users.email)
