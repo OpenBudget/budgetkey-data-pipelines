@@ -32,6 +32,8 @@ class CooperativesScraper(object):
                    "inspector": cooperative.pop("InspectorName", None),
                    "phone": cooperative.pop("Phone", None),
                    "municipality_id": self.parse_integer(cooperative.pop("TownId", None)),
+                   "status": cooperative.pop("StatusId", None),
+                   "mailing_address": cooperative.pop("MailingAddress", None),
                 #    "secondary_type_id": self.parse_integer(cooperative["C_SUG_MISHNI"]),
                 #    "secondary_type": cooperative["TEUR_SUG_MISHNEI"],
                 #    "legal_status_id": self.parse_integer(cooperative["C_STATUS_MISHPATI"]),
