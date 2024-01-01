@@ -87,7 +87,10 @@ class CooperativesScraper(object):
                                       {'name': 'municipality_id', 'type': 'integer'},
                                     #   {'name': 'municipality', 'type': 'string'},
                                       {'name': 'inspector', 'type': 'string'},
-                                      {'name': 'address', 'type': 'string'},],
+                                      {'name': 'address', 'type': 'string'},
+                                      {'name': 'status', 'type': 'string'},
+                                      {'name': 'mailing_address', 'type': 'string'}
+                                    ],
                            "primaryKey": ["id"]}}
 
 if __name__ == "__main__":
