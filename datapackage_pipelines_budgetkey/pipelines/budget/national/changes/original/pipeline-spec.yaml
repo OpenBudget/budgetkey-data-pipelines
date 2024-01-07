@@ -142,30 +142,39 @@ national-budget-changes:
           encoding: windows-1255
           headers: 4
     - run: resource_without_excel_formulas
-      # runner: tzabar
       parameters:
-        # url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/approv_data.csv
-        url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+        url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2023.csv
         resource:
           name: changes_2023
           path: data/changes_2023.csv
         tabulator:
           encoding: windows-1255
           headers: 4
+    # - run: resource_without_excel_formulas
+    #   # runner: tzabar
+    #   parameters:
+    #     # url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/approv_data.csv
+    #     url: https://www.gov.il/files/mof/Budgetchanges/approv_data.csv
+    #     resource:
+    #       name: changes_2024
+    #       path: data/changes_2024.csv
+    #     tabulator:
+    #       encoding: windows-1255
+    #       headers: 4
     - run: resource_without_excel_formulas
       # runner: tzabar
       parameters:
         # url: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/vaada_data.csv
         url: https://www.gov.il/files/mof/Budgetchanges/vaada_data.csv
         resource:
-          name: pending_changes_2023
+          name: pending_changes_2024
           path: data/pending_changes.csv
         tabulator:
           encoding: windows-1255
           headers: 4
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2023
+        pending-resource-name: pending_changes_2024
     - run: concatenate
       parameters:
         target:
@@ -275,7 +284,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2023
+          - year: 2024
     - run: filter
       parameters:
         out:

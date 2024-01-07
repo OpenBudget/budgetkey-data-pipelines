@@ -136,23 +136,31 @@ supports-2022:
 
 supports-2023:
   schedule:
-    crontab: "0 19 * * *"
+    crontab: "0 20 * * *"
   pipeline:
   - flow: scraper
     parameters:
       year: 2023
 
+supports-2024:
+  schedule:
+    crontab: "0 21 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2024
+
 
 all:
   dependencies:
-    - pipeline: ./supports/supports-2023
+    - pipeline: ./supports/supports-2024
 
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
-        revision: '2023-08-1'
+        revision: '2024-01-1'
 
     - run: load
       parameters:
@@ -214,6 +222,9 @@ all:
     - run: load
       parameters:
         from: /var/datapackages/supports/yearly-2023/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2024/datapackage.json
 
     - run: concatenate
       parameters:
