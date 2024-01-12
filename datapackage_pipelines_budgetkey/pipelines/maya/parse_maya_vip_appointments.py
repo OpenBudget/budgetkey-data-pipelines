@@ -30,7 +30,11 @@ RELATIVE_OF_ANOTHER_VIP_MAPPING = {
 HAS_STOCK_IN_SUBSIDIARY_COMPANY_MAPPING = {
     '_________' : None,
     'hold': True,
+    'Hold': True,
+    'holds':True,
+    'Holds':True,
     'does not hold': False,
+    'Does not hold': False,
     'אינו מחזיק': False,
     'מחזיק': True
 }
@@ -38,8 +42,12 @@ HAS_STOCK_IN_SUBSIDIARY_COMPANY_MAPPING = {
 EMPLOYED_IN_CONNECTED_COMPANY = {
     'אינו ממלא':False,
     'ממלא':True,
+    'hold': True,
+    'Hold': True,
     'holds':True,
+    'Holds':True,
     'does not hold': False,
+    'Does not hold': False,
 }
 
 IS_BOTH_DIRECTOR_AND_CEO_MAPPING = {
