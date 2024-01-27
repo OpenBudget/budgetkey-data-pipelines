@@ -133,6 +133,23 @@ maya-company-vip-appointments:
         out-path: /var/datapackages/maya/maya_company_vip_appointments
         max-rows: 25000
 
+maya-company-director-appointments:
+  dependencies:
+    - pipeline: ./maya/maya-complete-notification-list
+  pipeline:
+    - run: load_big
+      parameters:
+        from: /var/datapackages/maya/maya_complete_notification_list/datapackage.json
+        resource: maya_complete_notification_list
+    - flow: parse_maya_director_appointments
+    - run: dump_to_path
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_director_appointments
+    - run: dump_to_json
+      parameters:
+        out-path: /var/datapackages/maya/maya_company_director_appointments
+        max-rows: 25000
+
 maya-bonds-and-options-holdings-changes:
   dependencies:
     - pipeline: ./maya/maya-complete-notification-list
