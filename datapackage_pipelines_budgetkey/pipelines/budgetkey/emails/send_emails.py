@@ -69,9 +69,9 @@ def query_url(term, filters):
 e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
 
 
-def update_db(email):
-    t = sqlalchemy.sql.text("insert into sendlog (email, send_time) values (:email, :send_time)")
-    e.execute(t, email=email, send_time=datetime.datetime.now())
+def update_db(email, result):
+    t = sqlalchemy.sql.text("insert into sendlog (email, send_time, result) values (:email, :send_time, :result)")
+    e.execute(t, email=email, send_time=datetime.datetime.now(), result=result)
 
 
 def process_row(row, row_index,
@@ -113,8 +113,7 @@ def process_row(row, row_index,
             sections=sections,
             email=row['email']
         )
-        logging.info('DATAS: %r', ret)
-        update_db(row['email'])
+        logging.info('DATAS: #%s - %r', row_index, ret)
         for retry in range(2):
             try:
                 result = requests.post('http://budgetkey-emails:8000/',
@@ -124,6 +123,7 @@ def process_row(row, row_index,
                     stats.setdefault('sent', 0)
                     stats['sent'] += 1
                     result = result.json()
+                    update_db(row['email'], json.dumps(result))
                     logging.info('RESULT #%d: %r', retry, result)
                     break
                 else:
