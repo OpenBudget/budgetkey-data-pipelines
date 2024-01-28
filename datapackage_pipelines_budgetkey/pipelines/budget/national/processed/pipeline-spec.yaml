@@ -14,6 +14,7 @@ aggregated-yearly:
       parameters:
         title: National Budget (Processed)
         name: processed-national-budget-aggregated-yearly
+        revision: '2024.01'
     - run: load_resource
       parameters:
         resource: national-budget
