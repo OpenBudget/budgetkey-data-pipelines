@@ -112,7 +112,8 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
 
             test_value = sum(
                 abs(row[f])
-                for f in ('net_allocated','gross_allocated','net_revised','commitment_allocated','net_used')
+                for f in ('net_allocated','gross_allocated','net_revised','gross_revised',
+                          'commitment_allowance_allocated','commitment_allowance_revised','net_used')
                 if row.get(f) is not None
             )
             non_repeating = row.get('non_repeating', [])
