@@ -7,7 +7,9 @@ def flt(x):
 
 
 def process_row(row, *_):
-    fields = ['net_allocated', 'net_revised', 'net_executed']
+    fields = ['net_allocated', 'net_revised', 'net_executed',
+              'commitment_allowance_allocated', 'commitment_allowance_revised',
+              'gross_allocated', 'gross_revised']
     s = sum(flt(row.get(f, 0))**2 for f in fields)
     s += sum(
         sum(flt(h.get(f, 0))**2 for f in fields)
