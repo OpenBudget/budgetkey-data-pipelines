@@ -217,8 +217,7 @@ def parse_document(rows):
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
         row['IsDirectorEmployedAtCompanyOrConnectedCompany'] = YES_NO_MAPPING[row['IsDirectorEmployedAtCompanyOrConnectedCompany']]
         row['IsBothDirectorAndCeoOrRelativeOfCeo'] = YES_NO_MAPPING[row['IsBothDirectorAndCeoOrRelativeOfCeo']]
-        if ('EmployedAtAnotherJobConnectedToTheCompany' in row):
-            row['EmployedAtAnotherJobConnectedToTheCompany'] = YES_NO_MAPPING[row['EmployedAtAnotherJobConnectedToTheCompany']]
+        row['EmployedAtAnotherJobConnectedToTheCompany'] = YES_NO_MAPPING[row.get('EmployedAtAnotherJobConnectedToTheCompany','_________')]
         row['RelativeOfAnotherVip'] = YES_NO_MAPPING[row['RelativeOfAnotherVip']]
         row['IsMemberInBoardCommittee'] = YES_NO_MAPPING[row['IsMemberInBoardCommittee']]
         row['DirectorHoldsCompanyStocks'] = YES_NO_MAPPING[row['DirectorHoldsCompanyStocks']]
