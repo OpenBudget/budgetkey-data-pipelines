@@ -100,7 +100,6 @@ FIELDS = [
     'CompanyNameEn',
     'Citizenship',
     'IsIsraeli',
-    'AppointmentApprovalDate',
     'Comments',
     'IsDirectorInAnotherCompany',
     'DirectorAtAnotherCompanyExplanation',
@@ -128,6 +127,7 @@ FIELDS = [
     'NeyarotErechReshumim',
     'PumbiLoPumbi']
 
+OPTIONAL_FIELDS =  ['AppointmentApprovalDate',]
 TABLE_FIELDS = [    'JobTitle',
                     'PreviousPositions',
                     'StockVotingPower',
@@ -136,6 +136,7 @@ TABLE_FIELDS = [    'JobTitle',
 def validate(rows):
     for row in rows:
         verify_row_count(row, FIELDS, 1)
+        verify_row_count(row, OPTIONAL_FIELDS, 1, is_required=False)
         verify_row_values(row, 'IsIsraeli', CITIZENSHIP_MAPPING)
         verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         verify_row_values(row, 'IsDirectorInAnotherCompany', YES_NO_MAPPING)
@@ -168,7 +169,10 @@ def parse_document(rows):
         doc = row['document']
 
         for field in FIELDS:
-            row[field] = (doc.get(field, None) or [""])[0]
+            row[field] = doc.get(field, [""])[0]
+
+        for field in OPTIONAL_FIELDS:
+            row[field] = doc.get(field, [None])[0]
 
         previous_jobs_at_the_company = []
         for title1, title2 in zip(doc.get('TafkidKodem', []), doc.get('TafkidKodemAher', [])):
