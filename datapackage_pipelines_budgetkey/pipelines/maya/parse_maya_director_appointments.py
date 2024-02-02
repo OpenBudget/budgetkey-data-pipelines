@@ -117,7 +117,6 @@ FIELDS = [
     'DirectorHoldsStocksInSubsidiaryOrConnectedCompany',
 
     'HasAccountingExpertise',
-    'IsIndependentDirector',
     'HeaderMisparBaRasham',
     'HeaderSemelBursa',
     'KodSugYeshut',
@@ -126,7 +125,11 @@ FIELDS = [
     'NeyarotErechReshumim',
     'PumbiLoPumbi']
 
-OPTIONAL_FIELDS =  ['AppointmentApprovalDate','EmployedAtAnotherJobConnectedToTheCompany', 'EmployedAtAnotherJobConnectedToTheCompanyExplanation',]
+OPTIONAL_FIELDS =  ['AppointmentApprovalDate',
+                    'EmployedAtAnotherJobConnectedToTheCompany',
+                    'EmployedAtAnotherJobConnectedToTheCompanyExplanation',
+                    'IsIndependentDirector']
+
 TABLE_FIELDS = [    'JobTitle',
                     'PreviousPositions',
                     'StockVotingPower',
@@ -217,12 +220,19 @@ def parse_document(rows):
         row['SugMisparZihuy'] = SUG_MISPAR_ZIHUY_MAPPING[row['SugMisparZihuy']]
         row['IsDirectorEmployedAtCompanyOrConnectedCompany'] = YES_NO_MAPPING[row['IsDirectorEmployedAtCompanyOrConnectedCompany']]
         row['IsBothDirectorAndCeoOrRelativeOfCeo'] = YES_NO_MAPPING[row['IsBothDirectorAndCeoOrRelativeOfCeo']]
-        if 'EmployedAtAnotherJobConnectedToTheCompany' in row and row['EmployedAtAnotherJobConnectedToTheCompany'] is not None:
-            row['EmployedAtAnotherJobConnectedToTheCompany'] = YES_NO_MAPPING[row['EmployedAtAnotherJobConnectedToTheCompany']]
         row['RelativeOfAnotherVip'] = YES_NO_MAPPING[row['RelativeOfAnotherVip']]
         row['IsMemberInBoardCommittee'] = YES_NO_MAPPING[row['IsMemberInBoardCommittee']]
         row['DirectorHoldsCompanyStocks'] = YES_NO_MAPPING[row['DirectorHoldsCompanyStocks']]
         row['DirectorHoldsStocksInSubsidiaryOrConnectedCompany'] = YES_NO_MAPPING[row['DirectorHoldsStocksInSubsidiaryOrConnectedCompany']]
+
+        row['IsCEOOrCEORelative'] = YES_NO_MAPPING[row['IsCEOOrCEORelative']]
+
+        if 'EmployedAtAnotherJobConnectedToTheCompany' in row and row['EmployedAtAnotherJobConnectedToTheCompany'] is not None:
+            row['EmployedAtAnotherJobConnectedToTheCompany'] = YES_NO_MAPPING[row['EmployedAtAnotherJobConnectedToTheCompany']]
+        if 'IsIndependentDirector' in row and row['IsIndependentDirector'] is not None:
+            row['IsIndependentDirector'] = YES_NO_MAPPING[row['IsIndependentDirector']]
+
+
         yield row
 
 
