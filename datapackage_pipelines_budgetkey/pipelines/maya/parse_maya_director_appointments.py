@@ -105,7 +105,7 @@ FIELDS = [
     'DirectorAtAnotherCompanyExplanation',
     'IsDirectorEmployedAtCompanyOrConnectedCompany',
     'DirectorEmployedAtConnectedCompanyExplanation',
-    'EmployedAtAnotherJobConnectedToTheCompanyExplanation',
+
     'BirthDate',
     'IsBothDirectorAndCeoOrRelativeOfCeo',
     'IsTemporaryReplacmentOf',
@@ -126,7 +126,7 @@ FIELDS = [
     'NeyarotErechReshumim',
     'PumbiLoPumbi']
 
-OPTIONAL_FIELDS =  ['AppointmentApprovalDate','EmployedAtAnotherJobConnectedToTheCompany']
+OPTIONAL_FIELDS =  ['AppointmentApprovalDate','EmployedAtAnotherJobConnectedToTheCompany', 'EmployedAtAnotherJobConnectedToTheCompanyExplanation',]
 TABLE_FIELDS = [    'JobTitle',
                     'PreviousPositions',
                     'StockVotingPower',
