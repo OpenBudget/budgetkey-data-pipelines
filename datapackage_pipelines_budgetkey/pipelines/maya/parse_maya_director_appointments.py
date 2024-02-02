@@ -142,7 +142,6 @@ def validate(rows):
         verify_row_values(row, 'IsIsraeli', CITIZENSHIP_MAPPING)
         verify_row_values(row, 'SugMisparZihuy', SUG_MISPAR_ZIHUY_MAPPING)
         verify_row_values(row, 'IsDirectorInAnotherCompany', YES_NO_MAPPING)
-        verify_row_values(row, 'IsCEOOrCEORelative', YES_NO_MAPPING)
         verify_row_values(row, 'IsDirectorEmployedAtCompanyOrConnectedCompany', YES_NO_MAPPING)
         verify_row_values(row, 'EmployedAtAnotherJobConnectedToTheCompany', YES_NO_MAPPING)
 
@@ -224,9 +223,6 @@ def parse_document(rows):
         row['IsMemberInBoardCommittee'] = YES_NO_MAPPING[row['IsMemberInBoardCommittee']]
         row['DirectorHoldsCompanyStocks'] = YES_NO_MAPPING[row['DirectorHoldsCompanyStocks']]
         row['DirectorHoldsStocksInSubsidiaryOrConnectedCompany'] = YES_NO_MAPPING[row['DirectorHoldsStocksInSubsidiaryOrConnectedCompany']]
-
-        row['IsCEOOrCEORelative'] = YES_NO_MAPPING[row['IsCEOOrCEORelative']]
-
         if 'EmployedAtAnotherJobConnectedToTheCompany' in row and row['EmployedAtAnotherJobConnectedToTheCompany'] is not None:
             row['EmployedAtAnotherJobConnectedToTheCompany'] = YES_NO_MAPPING[row['EmployedAtAnotherJobConnectedToTheCompany']]
         if 'IsIndependentDirector' in row and row['IsIndependentDirector'] is not None:
