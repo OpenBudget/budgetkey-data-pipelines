@@ -105,7 +105,6 @@ FIELDS = [
     'DirectorAtAnotherCompanyExplanation',
     'IsDirectorEmployedAtCompanyOrConnectedCompany',
     'DirectorEmployedAtConnectedCompanyExplanation',
-    'EmployedAtAnotherJobConnectedToTheCompany',
     'EmployedAtAnotherJobConnectedToTheCompanyExplanation',
     'BirthDate',
     'IsBothDirectorAndCeoOrRelativeOfCeo',
@@ -127,7 +126,7 @@ FIELDS = [
     'NeyarotErechReshumim',
     'PumbiLoPumbi']
 
-OPTIONAL_FIELDS =  ['AppointmentApprovalDate',]
+OPTIONAL_FIELDS =  ['AppointmentApprovalDate','EmployedAtAnotherJobConnectedToTheCompany']
 TABLE_FIELDS = [    'JobTitle',
                     'PreviousPositions',
                     'StockVotingPower',
@@ -232,7 +231,7 @@ def flow(*_):
     return Flow(
         filter_by_type,
         rename_fields(RENAME_FIELDS),
-        add_fields(FIELDS, 'string'),
+        add_fields(FIELDS + OPTIONAL_FIELDS, 'string'),
         add_fields(TABLE_FIELDS, 'string'),
         validate,
         parse_document,
