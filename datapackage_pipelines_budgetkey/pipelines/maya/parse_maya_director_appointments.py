@@ -1,5 +1,7 @@
 # coding=utf-8
 from dataflows import Flow, printer, delete_fields, load
+from datetime import datetime
+
 import csv
 from datapackage_pipelines_budgetkey.pipelines.maya.maya_parser_utils import verify_row_count, \
     fix_fields, add_fields, rename_fields, verify_row_values
@@ -155,8 +157,8 @@ def validate(rows):
 
 def filter_by_type(rows):
     for row in rows:
-        # 'NoseMisraBechira3' indicates that this is a new format >2005 where the type holdings is indicated
-        if row['type'] == 'ת093' and 'NoseMisraBechira3'  in row['document']:
+        # 'TaarichIdkunMivne' do not try to parse documents from 2008 or before
+        if row['type'] == 'ת093' and datetime.strptime(row.get('TaarichIdkunMivne','01/01/1970'), '%d/%m/%Y').year > 2008:
             yield row
 
 
