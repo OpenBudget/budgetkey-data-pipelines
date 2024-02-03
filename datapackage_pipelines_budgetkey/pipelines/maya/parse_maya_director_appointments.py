@@ -157,11 +157,11 @@ def validate(rows):
 
 def filter_by_type(rows):
     for row in rows:
-        # Document Date
-        document_format_date = datetime.strptime(row['document']['TaarichIdkunMivne'][0], '%d/%m/%Y')
         # 'TaarichIdkunMivne' do not try to parse documents from 2008 or before
-        if row['type'] == 'ת093' and document_format_date.year > 2008:
-            yield row
+        if row['type'] == 'ת093' and 'TaarichIdkunMivne' in row['document']:
+            document_format_date = datetime.strptime(row['document']['TaarichIdkunMivne'][0], '%d/%m/%Y')
+            if document_format_date.year > 2008:
+                yield row
 
 
 def _is_null_string(string):
