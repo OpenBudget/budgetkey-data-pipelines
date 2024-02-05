@@ -217,7 +217,10 @@ def add_current_budget():
         DF.add_field('min_activity_year', 'number'),
         DF.add_field('max_activity_year', 'number'),
         func,
-        DF.add_field('currently_active', 'boolean', lambda r: r['min_activity_year'] <= CURRENT_YEAR and r['max_activity_year'] >= CURRENT_YEAR),
+        DF.add_field('currently_active', 'boolean',
+                    lambda r: (
+                        (r['min_activity_year'] and r['min_activity_year'] <= CURRENT_YEAR) and 
+                        (r['max_activity_year'] and r['max_activity_year'] >= CURRENT_YEAR))),
     )
 
 def add_current_beneficiaries():
