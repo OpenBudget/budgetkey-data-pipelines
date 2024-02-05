@@ -197,9 +197,13 @@ def add_current_budget():
                 if entry.get('approved') and entry['approved'] > 0 and entry['year'] == CURRENT_YEAR:
                     row['current_budget'] = entry['approved']
                     break
+                if entry.get('executed') and entry['executed'] > 0 and entry['year'] == CURRENT_YEAR:
+                    row['current_budget'] = entry['executed']
+                    break
             for entry in row['manualBudget']:
-                row['min_activity_year'] = min(entry['year'], row.get('min_activity_year') or entry['year'])
-                row['max_activity_year'] = max(entry['year'], row.get('max_activity_year') or entry['year'])
+                if entry.get('executed') or entry.get('approved'):
+                    row['min_activity_year'] = min(entry['year'], row.get('min_activity_year') or entry['year'])
+                    row['max_activity_year'] = max(entry['year'], row.get('max_activity_year') or entry['year'])
         utilization = None
         for item in row['manualBudget']:
             if item['approved'] and item['executed'] and item['year'] == CURRENT_YEAR:
