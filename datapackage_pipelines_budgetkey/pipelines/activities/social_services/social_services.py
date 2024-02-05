@@ -212,7 +212,8 @@ def add_current_budget():
         DF.add_field('budget_utilization', 'number'),
         DF.add_field('min_activity_year', 'number'),
         DF.add_field('max_activity_year', 'number'),
-        func
+        func,
+        DF.add_field('currently_active', 'boolean', lambda r: r['min_activity_year'] <= CURRENT_YEAR and r['max_activity_year'] >= CURRENT_YEAR),
     )
 
 def add_current_beneficiaries():
@@ -266,7 +267,7 @@ def flow(*_):
         DF.dump_to_sql(dict(
             all_activities={'resource-name': 'activities'}
         )),
-        DF.filter_rows(lambda r: not r['deleted']),
+        DF.filter_rows(lambda r: r['currently_active']),
         DF.delete_fields(['deleted']),
 
         DF.duplicate('activities', 'new_activities'),
