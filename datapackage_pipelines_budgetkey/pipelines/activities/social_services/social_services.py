@@ -104,6 +104,12 @@ def fix_tenders():
             end_date = tender.get('end_date')
             if tender.get('tender_type') == 'exemptions' and tender.get('active') is None and end_date:
                 tender['active'] = 'yes' if end_date > today else 'no'
+            if tender.get('tender_type') == 'exemptions' and tender.get('entity_id') and tender.get('supplier') and tender.get('entity_kind'):
+                tender['suppliers'] = [dict(
+                    entity_id=tender['entity_id'],
+                    entity_name=tender['supplier'],
+                    entity_kind=tender['entity_kind'],
+                )
 
     return func
 
