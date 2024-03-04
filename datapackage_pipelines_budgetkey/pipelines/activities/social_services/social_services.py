@@ -109,7 +109,7 @@ def fix_tenders():
                     entity_id=tender['entity_id'],
                     entity_name=tender['supplier'],
                     entity_kind=tender['entity_kind'],
-                )
+                )]
 
     return func
 
