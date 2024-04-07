@@ -101,6 +101,8 @@ def calc_fingerprint(name):
 
         options.append(tgt)
 
+        digits = DIGITS.findall(tgt)
+
         tgt = DIGITS.sub('', tgt)
         options.append(tgt)
 
@@ -115,6 +117,9 @@ def calc_fingerprint(name):
                     tgt = opt.strip()
                     break
         
+        if len(tgt) < 20 and len(digits) > 0:
+            tgt = tgt + ' ' + ' '.join(sorted(digits))
+
         if tgt is not None:
             tgt = ' '.join(sorted(tgt[:30].split()))
 
