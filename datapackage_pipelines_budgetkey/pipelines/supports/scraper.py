@@ -105,11 +105,11 @@ def get_results_for_column(driver, column):
 def scraper(gcd, selected_year):
     # Open main page
     driver: Chrome = gcd.driver
-    driver.get('https://www.tmichot.gov.il/IlgTmihotSite/shell.html?x-ua-compatible=Edge')
-    # driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
-    WebDriverWait(driver, 90).until(
-        EC.presence_of_element_located((By.ID, "__cell0"))
-    )
+    # driver.get('https://www.tmichot.gov.il/IlgTmihotSite/shell.html?x-ua-compatible=Edge')
+    # # driver.get('http://tmichot.gov.il/IlgTmihotSite/index.html?x-ua-compatible=Edge')
+    # WebDriverWait(driver, 90).until(
+    #     EC.presence_of_element_located((By.ID, "__cell0"))
+    # )
     # WebDriverWait(driver, 30).until(
     #     EC.presence_of_element_located((By.ID, "idd1"))
     # )
@@ -123,11 +123,12 @@ def scraper(gcd, selected_year):
     #                     .move_to_element(el)\
     #                     .click()\
     #                     .perform()
-    driver.execute_script('''
-        var bundle = sap.ui.getCore().getModel("i18n").getResourceBundle();
-        $.ajax({url: bundle.getText("URLTokenGenerator"), dataType: 'text', async: false, 
-                success: function(resp){window.location.href = bundle.getText("UrlBO") + resp;} });
-    ''')
+    # driver.execute_script('''
+    #     var bundle = sap.ui.getCore().getModel("i18n").getResourceBundle();
+    #     $.ajax({url: bundle.getText("URLTokenGenerator"), dataType: 'text', async: false, 
+    #             success: function(resp){window.location.href = bundle.getText("UrlBO") + resp;} });
+    # ''')
+    driver.get('https://merkava.mrp.gov.il/bo_dohot?doh=https://www.tmichot.gov.il/BOE/OpenDocument/opendoc/openDocument.jsp?iDocID=AeuXP4v4fllCg0wfVfr73Rk&sIDType=CUID&noDetailsPanel=true')
     time.sleep(60)
     # Switch to charts tab
     # charts_wh = set(driver.window_handles)
