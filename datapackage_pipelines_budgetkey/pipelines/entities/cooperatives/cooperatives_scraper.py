@@ -89,7 +89,7 @@ class CooperativesScraper(object):
                                     #   {'name': 'municipality', 'type': 'string'},
                                       {'name': 'inspector', 'type': 'string'},
                                       {'name': 'address', 'type': 'string'},
-                                      {'name': 'status', 'type': 'integer'},
+                                    #   {'name': 'status', 'type': 'integer'},
                                       {'name': 'mailing_address', 'type': 'string'}
                                     ],
                            "primaryKey": ["id"]}}
