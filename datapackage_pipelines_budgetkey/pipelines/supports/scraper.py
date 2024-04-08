@@ -129,6 +129,9 @@ def scraper(gcd, selected_year):
     #             success: function(resp){window.location.href = bundle.getText("UrlBO") + resp;} });
     # ''')
     driver.get('https://merkava.mrp.gov.il/bo_dohot?doh=https://www.tmichot.gov.il/BOE/OpenDocument/opendoc/openDocument.jsp?iDocID=AeuXP4v4fllCg0wfVfr73Rk&sIDType=CUID&noDetailsPanel=true')
+    WebDriverWait(driver, 120).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "g.v-m-main"))
+    )
     time.sleep(60)
     # Switch to charts tab
     # charts_wh = set(driver.window_handles)
