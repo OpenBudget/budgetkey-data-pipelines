@@ -27,7 +27,7 @@ def wrapper(year):
 
 def get_chart(driver):
     # Switch to results page & iframe
-    frame = WebDriverWait(driver, 120).until(
+    frame = WebDriverWait(driver, 121).until(
         EC.presence_of_element_located((By.ID, "openDocChildFrame"))
     )
     driver.switch_to.frame(frame)
