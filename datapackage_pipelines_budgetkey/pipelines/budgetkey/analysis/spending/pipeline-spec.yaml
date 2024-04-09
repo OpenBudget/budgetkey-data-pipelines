@@ -7,7 +7,7 @@ united:
       parameters:
         name: united_spending
         title: All Spending data
-        revision: '2023-11'
+        revision: '2024-04'
     - run: add_sql_resource
       parameters:
         datapackage: /var/datapackages/supports/with-entities/datapackage.json
