@@ -449,60 +449,60 @@ JOIN b USING (association_field_of_activity)
 WHERE apm='יש אישור'
 """
     ),
-#     Enricher('85297: Pct has article 46 by field of activity',
-#         'association', ('field_of_activity', ),
-#         [
-#             {
-#                 'name': 'pct_has_article_46_in_field_of_activity',
-#                 'type': 'integer'
-#             }
-#         ],     
-#         """
-# WITH a AS
-#   (SELECT association_field_of_activity,
-#           association_has_article_46 AS aha,
-#           count(1) AS cnt
-#    FROM guidestar_processed
-#    GROUP BY 1,
-#             2),
-#      b AS
-#   (SELECT association_field_of_activity,
-#           count(1) AS cnt
-#    FROM guidestar_processed
-#    GROUP BY 1)
-# SELECT association_field_of_activity AS field_of_activity,
-#        (100*a.cnt)/b.cnt AS pct_has_article_46_in_field_of_activity
-# FROM a
-# JOIN b USING (association_field_of_activity)
-# WHERE aha='יש אישור'
-# """
-# ),
-#     Enricher('85905: Association median top salary by field of activity',
-#         'association', ('field_of_activity', ),
-#         [
-#             {
-#                 'name': 'median_top_salary',
-#                 'type': 'number'
-#             }
-#         ],     
-#     """
-# WITH a AS
-#   (SELECT association_field_of_activity AS foa,
-#           ((association_top_salaries->>0)::jsonb->>'salary')::numeric AS top_salary
-#    FROM guidestar_processed
-#    WHERE association_status_active
-#      AND jsonb_array_length(association_top_salaries)>0
-#    ORDER BY 2),
-#      b AS
-#   (SELECT foa,
-#           array_agg(top_salary) AS top_salaries
-#    FROM a
-#    GROUP BY 1)
-# SELECT foa as field_of_activity,
-#        top_salaries[ceil(array_length(top_salaries, 1)/2)+1] AS median_top_salary
-# FROM b
-# """
-#     ),
+    Enricher('85297: Pct has article 46 by field of activity',
+        'association', ('field_of_activity', ),
+        [
+            {
+                'name': 'pct_has_article_46_in_field_of_activity',
+                'type': 'integer'
+            }
+        ],     
+        """
+WITH a AS
+  (SELECT association_field_of_activity,
+          association_has_article_46 AS aha,
+          count(1) AS cnt
+   FROM guidestar_processed
+   GROUP BY 1,
+            2),
+     b AS
+  (SELECT association_field_of_activity,
+          count(1) AS cnt
+   FROM guidestar_processed
+   GROUP BY 1)
+SELECT association_field_of_activity AS field_of_activity,
+       (100*a.cnt)/b.cnt AS pct_has_article_46_in_field_of_activity
+FROM a
+JOIN b USING (association_field_of_activity)
+WHERE aha='יש אישור'
+"""
+),
+    Enricher('85905: Association median top salary by field of activity',
+        'association', ('field_of_activity', ),
+        [
+            {
+                'name': 'median_top_salary',
+                'type': 'number'
+            }
+        ],     
+    """
+WITH a AS
+  (SELECT association_field_of_activity AS foa,
+          ((association_top_salaries->>0)::jsonb->>'salary')::numeric AS top_salary
+   FROM guidestar_processed
+   WHERE association_status_active
+     AND jsonb_array_length(association_top_salaries)>0
+   ORDER BY 2),
+     b AS
+  (SELECT foa,
+          array_agg(top_salary) AS top_salaries
+   FROM a
+   GROUP BY 1)
+SELECT foa as field_of_activity,
+       top_salaries[ceil(array_length(top_salaries, 1)/2)+1] AS median_top_salary
+FROM b
+"""
+    ),
 ]
 
 
