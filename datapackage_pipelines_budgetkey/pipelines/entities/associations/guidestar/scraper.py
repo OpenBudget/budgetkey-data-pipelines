@@ -82,6 +82,7 @@ rules = [
     getter('activity_region_list', 'activityAreas', [],
             {'type':'array', 'es:itemType': 'string'}),
     getter('activity_region', 'activityAreas', [commaJoiner]),
+    getter('has_article_46', 'approval46', [boolToCred])
 ]
 
 def scrape_guidestar(ass_recs, diluter=None):
