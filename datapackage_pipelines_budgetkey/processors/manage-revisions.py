@@ -220,6 +220,7 @@ def main():
                                existing_ids,
                                prefix,
                                max_staleness))
+    existing_ids.close()
 
 
 main()
