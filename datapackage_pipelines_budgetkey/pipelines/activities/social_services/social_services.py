@@ -2,7 +2,7 @@ import dataflows as DF
 from decimal import Decimal
 import datetime
 
-CURRENT_YEAR = 2021
+CURRENT_YEAR = 2023
 
 def datarecords(kind):
     return map(
