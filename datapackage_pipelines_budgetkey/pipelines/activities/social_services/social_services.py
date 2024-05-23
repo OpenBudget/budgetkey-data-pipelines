@@ -18,6 +18,8 @@ def services():
             k.setdefault(f, [])
         k.setdefault('catalog_number', None)
         k.setdefault('deleted', False)
+        if k.get('keepPrivate'):
+            continue
         yield k
 
 def fetch_codelist(dr_name):
