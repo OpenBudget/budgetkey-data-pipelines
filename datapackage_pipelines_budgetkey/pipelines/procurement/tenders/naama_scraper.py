@@ -71,10 +71,12 @@ def get_updated_sources():
         if href.startswith('https://drive.google.com/file'):
             file_id = href.split('/')[-2]
             href = f'https://drive.google.com/uc?export=download&id={file_id}'
-            r = requests.head(href, allow_redirects=True)
-            if r.status_code == 200:
-                filename = r.headers['Content-Disposition'].split('filename=')[1].strip('"')    
-        if '.zip' in filename:
+            r = requests.get(href, allow_redirects=True)
+            filename = r.headers['Content-Disposition'].split('filename=')[1].strip('"')
+            with open(filename, 'wb') as f:
+                f.write(r.content)
+            href = filename
+        elif '.zip' in filename:
             href = href + '#.xlsx'
         sources.add(href)
     print('SOURCES:', sources)
