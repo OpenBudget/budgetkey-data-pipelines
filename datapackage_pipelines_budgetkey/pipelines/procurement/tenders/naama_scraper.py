@@ -50,6 +50,7 @@ TENDER_KINDS={
     'פרסום מיזם ללא כוונת רווח': 'exemptions',
     'פרסום עקרונות הסכם מסגרת עם  החברה  הממשלתית': 'exemptions',
     'פרסום התקשרות המשטרה עם בעל רעיון יחודי': 'exemptions',
+    'פרסום עקרונות הסכם מסגרת עם החברה הממשלתית': 'exemptions',
 }
 KEY = ['publication_id', 'tender_type', 'tender_id']
 
