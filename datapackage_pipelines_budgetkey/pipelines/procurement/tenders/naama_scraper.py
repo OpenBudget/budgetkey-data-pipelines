@@ -60,12 +60,25 @@ def get_updated_sources():
     sources = set()
 
     page = pq(requests.get(URL).text)
-    anchors = page.find('a')
+    anchors = page.find('.links-container a')
     for anchor in anchors:
         anchor = pq(anchor)
         href = anchor.attr('href').strip()
-        if '.zip' in href:
-            sources.add(href + '#.xlsx')
+        filename = href.split('/')[-1]
+        r = requests.head(href, allow_redirects=True)
+        if r.status_code == 200:
+            href = r.url
+        if href.startswith('https://drive.google.com/file'):
+            file_id = href.split('/')[-2]
+            href = f'https://drive.google.com/uc?export=download&id={file_id}'
+            r = requests.head(href, allow_redirects=True)
+            if r.status_code == 200:
+                filename = r.headers['Content-Disposition'].split('filename=')[1].strip('"')    
+        if '.zip' in filename:
+            href = href + '#.xlsx'
+        sources.add(href)
+    print('SOURCES:', sources)
+    
     sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING) for source in sources]
     if len(sources) != 2:
         return DF.Flow(
