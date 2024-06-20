@@ -13,7 +13,7 @@ RUN adduser --disabled-password --home /home/dpp dpp && adduser dpp dpp && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
 RUN mkdir -p /usr/share/man/man1 && apt-get install -y antiword poppler-utils libmagic1 default-jre-headless
 
-RUN pip install numpy && pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py paramiko boto3
+RUN pip install "numpy<2" && pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py paramiko boto3
 
 ADD ./ /
 
