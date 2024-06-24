@@ -43,7 +43,7 @@ PARAMETERS = dict(
     budget_items_data=dict(
         source='/var/datapackages/budget/national/processed/with-extras',
         # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
-        details='''
+        description='''
             סעיפי התקציב מספר תקציב המדינה.
             המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
         ''',
