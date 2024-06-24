@@ -1,3 +1,6 @@
+
+import json
+
 import dataflows as DF
 
 def clean_lines(text: str):
@@ -25,10 +28,21 @@ def filtered_budget_code(code):
         code = code[2:]
     return ret[:-1]
 
+def get_filter(func, field_name):
+    def filter_func(row):
+        value = row.get(field_name)
+        return func(value)
+    return filter_func
+
+def debug_source(source, debug):
+    if debug:
+        return source.replace('/var/datapackages/', 'https://next.obudget.org/datapackages/', )
+    return source
 
 PARAMETERS = dict(
     budget_items_data=dict(
         source='/var/datapackages/budget/national/processed/with-extras',
+        # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
         details='''
             סעיפי התקציב מספר תקציב המדינה.
             המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
@@ -116,17 +130,42 @@ PARAMETERS = dict(
                 sample_values=[1, 2, 3, 4],
                 type='integer',
                 default=lambda row: len(row['code'].split('.'))
-            )
+            ),
+            dict(
+                name='functional_class_primary',
+                description='',
+                sample_values=[1, 2, 3, 4],
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[1],
+            ),
+            dict(
+                name='functional_class_main',
+                description='',
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[3],
+            ),
+            dict(
+                name='economic_class_primary',
+                description='',
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[1],
+            ),
+            dict(
+                name='economic_class_main',
+                description='',
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
+            ),
         ]
     )
 )
 
-def get_flow(table, params):
+def get_flow(table, params, debug=False):
     steps = []
-    source = params['source']
+    source = debug_source(params['source'], debug)
     details = clean_lines(params['details'])
     fields = params['fields']
-    steps.append(DF.load(f'{source}/datapackage.json'))
+    steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, details=details, name=table))
     
     field_names = []
@@ -143,12 +182,15 @@ def get_flow(table, params):
             steps.append(DF.set_type(field_name, transform=transform))
         if 'filter' in field:
             filter_func = field.pop('filter')
-            steps.append(DF.filter_rows(lambda row: filter_func(row.get(field_name))))
+            steps.append(DF.filter_rows(get_filter(filter_func, field_name)))
         steps.append(DF.set_type(field_name, details=field))
 
     steps.append(DF.select_fields(field_names))
-    steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
-    steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
+    if not debug:
+        steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
+        steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
+    else:
+        steps.append(DF.printer())
     return DF.Flow(*steps)
 
 def flow(parameters, *_):
@@ -158,3 +200,10 @@ def flow(parameters, *_):
         [dict(done=True)],
         DF.update_resource(-1, **{'dpp:streaming': True}),    
     )
+
+
+if __name__ == '__main__':
+    params = PARAMETERS['budget_items_data']
+    DF.Flow(
+        get_flow('budget_items_data', params, debug=True),
+    ).process()
