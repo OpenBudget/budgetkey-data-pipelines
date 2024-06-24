@@ -1,5 +1,5 @@
 process_simple_dbs:
   schedule:
-    crontab: "0 0 * * 0"
+    crontab: "0 0 * * 1"
   pipeline:
     - flow: datapackage_pipelines_budgetkey.pipelines.simpledb.process
