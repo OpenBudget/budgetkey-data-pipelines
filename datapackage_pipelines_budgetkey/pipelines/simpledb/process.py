@@ -145,5 +145,6 @@ def flow(parameters, *_):
     for table, params in PARAMETERS.items():
         get_flow(table, params).process()
     return DF.Flow(
-        [dict(done=True)]
+        [dict(done=True)],
+        DF.update_resource(-1, **{'dpp:streaming': True}),    
     )
