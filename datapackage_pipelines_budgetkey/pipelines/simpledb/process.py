@@ -138,8 +138,8 @@ def get_flow(table, params):
 
     steps.append(DF.select_fields(field_names))
     steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
-    steps.append(DF.dump_to_sql({table: {'resource-name': table}})
-)
+    steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
+    return DF.Flow(*steps)
 
 def flow(parameters, *_):
     for table, params in PARAMETERS.items():
