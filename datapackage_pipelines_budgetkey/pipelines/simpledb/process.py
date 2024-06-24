@@ -1,5 +1,14 @@
 import dataflows as DF
 
+def clean_lines(text: str):
+    prefix = ''
+    while text and text[0] in [' ', '\t', '\n']:
+        prefix += text[0]
+        text = text[1:]
+    if prefix and prefix.startswith('\n'):
+        text = text.replace(prefix, '\n')
+    return text.strip()
+
 def filtered_budget_code(code):
     if not code:
         return None
@@ -115,13 +124,14 @@ PARAMETERS = dict(
 def get_flow(table, params):
     steps = []
     source = params['source']
-    details = params['details']
+    details = clean_lines(params['details'])
     fields = params['fields']
     steps.append(DF.load(f'{source}/datapackage.json'))
     steps.append(DF.update_resource(-1, details=details, name=table))
     
     field_names = []
     for field in fields:
+        field['description'] = clean_lines(field['description'])
         field_name = field.pop('name')
         field_names.append(field_name)
         if 'default' in field:
