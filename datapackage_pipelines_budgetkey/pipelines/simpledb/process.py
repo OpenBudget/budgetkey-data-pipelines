@@ -52,6 +52,7 @@ PARAMETERS = dict(
                 name='code',
                 description='''
                     קוד הסעיף התקציבי.
+                    לסעיפים תקציביים מבנה היררכי.
                     קבוצות של שתי ספרות מופרדות על ידי נקודה.
                     ככל שהקוד יותר ארוך, כך הסעיף יותר מפורט, למשל:
                     - 20: תקציב משרד החינוך
@@ -133,40 +134,97 @@ PARAMETERS = dict(
             ),
             dict(
                 name='functional_class_primary',
-                description='',
-                sample_values=[1, 2, 3, 4],
+                description='''
+                    הקטגוריה הנושאית הראשית של תקנה תקציבית (functional classification).
+                    קטגוריות אלו מגדירות את סוג הפעילות של התקנה התקציבית, לפי המטרה שעבורה היא משמשת.
+                    בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה functional_class_secondary.
+                ''',
+                possible_values=[
+                    'שירותים חברתיים',
+                    'החזרי חוב',
+                    'בטחון וסדר ציבורי',
+                    'תשתיות',
+                    'משרדי מטה',
+                    'הוצאות אחרות',
+                    'ענפי משק'
+                ],
                 type='string',
                 default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[1],
             ),
             dict(
-                name='functional_class_main',
-                description='',
+                name='functional_class_secondary',
+                description='''
+                    הקטגוריה הנושאית המשנית של תקנה תקציבית.
+                ''',
                 type='string',
+                sample_values=[
+                    'קרן',
+                    'בטחון',
+                    'חינוך',
+                    'בריאות',
+                    'ריבית',
+                    'העברות לביטוח הלאומי',
+                    'תחבורה',
+                    'רשות מקרקעי ישראל',
+                    'בטחון פנים',
+                ],
                 default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[3],
             ),
             dict(
                 name='economic_class_primary',
-                description='',
+                description='''
+                    הקטגוריה הכלכלית הראשית של תקנה תקציבית (economic classification).
+                    קטגוריות אלו מגדירות את אופן השימוש בתקציב בתקנה התקציבית.
+                    בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה economic_class_secondary.
+                ''',
+                sample_values=[
+                    'העברות',
+                    'החזר חוב - קרן',
+                    'שכר',
+                    'קניות',
+                    'החזר חוב - ריבית',
+                    'השקעה',
+                    'הכנסות מיועדות',
+                    'מתן אשראי',
+                    'הוצאות הון',
+                    'רזרבות',
+                    'חשבונות מעבר',
+                    'העברות פנים תקציביות',                    
+                ],
                 type='string',
                 default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[1],
             ),
             dict(
-                name='economic_class_main',
-                description='',
+                name='economic_class_secondary',
+                description='''
+                    הקטגוריה הכלכלית המשנית של תקנה תקציבית.
+                ''',
                 type='string',
                 default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
             ),
-        ]
+        ],
+        search=dict(
+            index='budget',
+            field_map={
+                'code': 'nice-code',
+                'title': 'title',
+                'year': 'year',
+                'amount_allocated': 'net_allocated',
+                'amount_revised': 'net_revised',
+                'amount_used': 'net_executed',
+            }
+        )
     )
 )
 
 def get_flow(table, params, debug=False):
     steps = []
     source = debug_source(params['source'], debug)
-    details = clean_lines(params['details'])
+    description = clean_lines(params['description'])
     fields = params['fields']
+    search = params.get('search')
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
-    steps.append(DF.update_resource(-1, details=details, name=table))
+    steps.append(DF.update_resource(-1, description=description, name=table, search=search))
     
     field_names = []
     for field in fields:
