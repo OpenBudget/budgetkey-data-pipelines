@@ -18,7 +18,7 @@ def filtered_budget_code(code):
 
 
 PARAMETERS = dict(
-    budget=dict(
+    budget_items_data=dict(
         source='/var/datapackages/budget/national/processed/with-extras',
         details='''
             סעיפי התקציב מספר תקציב המדינה.
@@ -118,7 +118,7 @@ def get_flow(table, params):
     details = params['details']
     fields = params['fields']
     steps.append(DF.load(f'{source}/datapackage.json'))
-    DF.update_resource(-1, details=details)
+    steps.append(DF.update_resource(-1, details=details, name=table))
     
     field_names = []
     for field in fields:
@@ -131,13 +131,15 @@ def get_flow(table, params):
         elif 'transform' in field:
             transform = field.pop('transform')
             steps.append(DF.set_type(field_name, transform=transform))
-        if steps['filter']:
+        if 'filter' in field:
             filter_func = field.pop('filter')
             steps.append(DF.filter_rows(lambda row: filter_func(row.get(field_name))))
         steps.append(DF.set_type(field_name, details=field))
 
     steps.append(DF.select_fields(field_names))
     steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
+    steps.append(DF.dump_to_sql({table: {'resource-name': table}})
+)
 
 def flow(parameters, *_):
     for table, params in PARAMETERS.items():
