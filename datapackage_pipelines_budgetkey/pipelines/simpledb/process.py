@@ -47,6 +47,7 @@ PARAMETERS = dict(
             סעיפי התקציב מספר תקציב המדינה.
             המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
             חיפוש טקסט חופשי - לפי שמות הסעיפים *בלבד*!
+            השתמש בשדה code בשליפות ב-db ולא בשדה title.
         ''',
         fields=[
             dict(
@@ -77,7 +78,7 @@ PARAMETERS = dict(
                 name='title',
                 description='''
                     כותרת הסעיף התקציבי.
-                    כותרת זו מתארת את תכנית התקציב של הסעיף.
+                    כותרת זו מתארת את מהות ההוצאה התקציבית.
                     הכותרת בדרך כלל קצרה ולא מאוד תיאורית.
                 ''',
                 sample_values=['תמיכה בתנועות נוער', 'מלוות סחירים', 'קורונה - אבטלה']
@@ -213,9 +214,162 @@ PARAMETERS = dict(
                 'amount_allocated': 'net_allocated',
                 'amount_revised': 'net_revised',
                 'amount_used': 'net_executed',
+            },
+            filters={
+                'func_cls_title_1__not': 'הכנסות',
+                'depth__gt': 0
             }
         )
-    )
+    ),
+    income_items_data=dict(
+        source='/var/datapackages/budget/national/processed/with-extras',
+        # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
+        description='''
+            סעיפי הכנסות המדינה מתוך ספר תקציב המדינה.
+            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
+            חיפוש טקסט חופשי - לפי שמות הסעיפים *בלבד*!
+            השתמש בשדה code בשליפות ב-db ולא בשדה title.
+        ''',
+        fields=[
+            dict(
+                name='code',
+                description='''
+                    קוד סעיף ההכנסה.
+                    לסעיפים ההכנסה מבנה היררכי.
+                    קבוצות של שתי ספרות מופרדות על ידי נקודה.
+                    ככל שהקוד יותר ארוך, כך הסעיף יותר מפורט, למשל:
+                    - 00: כלל ההכנסות
+                    - 00.01: מס הכנסה
+                    - 00.01.03: מס הכנסה סקטור עסקי
+                    - 00.01.03.01: מס הכנסה חברות
+                ''',
+                sample_values=['00', '00.01', '00.01.03', '00.01.03.01'],
+                transform=filtered_budget_code_income,
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='title',
+                description='''
+                    כותרת סעיף ההכנסה.
+                    כותרת זו מתארת את מהות ההכנסה.
+                    הכותרת בדרך כלל קצרה ולא מאוד תיאורית.
+                ''',
+                sample_values=['מס רכישה', 'דיוידנדים מחברות ממשלתי', 'גביית ריבית']
+            ),
+            dict(
+                name='year',
+                description='''
+                    שנת התקציב.
+                    שנת התקציב ממנו נלקח הסעיף.
+                ''',
+                sample_values=[2017, 2023, 2024]
+            ),
+            dict(
+                name='amount_allocated',
+                description='''
+                    סכום ההכנסה המתוכננת בשקלים.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('net_allocated')
+            ),
+            dict(
+                name='amount_revised',
+                description='''
+                    סכום ההכנסה המתוקנת בשקלים, לאחר שינויים במהלך השנה.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('net_revised', row.get('net_allocated'))
+            ),
+            dict(
+                name='amount_used',
+                description='''
+                    ההכנסה בפועל בשקלים.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('net_executed')
+            ),
+            dict(
+                name='level',
+                description='''
+                    רמת סעיף ההכנסה.
+                    1 מייצג את סעיף כלל ההכנסות (00)
+                    4 מייצג סעיפים ברמה המפורטת ביותר
+                ''',
+                sample_values=[1, 2, 3, 4],
+                type='integer',
+                default=lambda row: len(row['code'].split('.'))
+            ),
+            dict(
+                name='functional_class',
+                description='''
+                    הקטגוריה הנושאית הראשית של תקנה תקציבית (functional classification).
+                    קטגוריות אלו מגדירות את סוג הפעילות של התקנה התקציבית, לפי המטרה שעבורה היא משמשת.
+                    בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה functional_class_secondary.
+                ''',
+                possible_values=[
+                    'אגרות',
+                    'הכנסות אחרות',
+                    'הכנסות למימון גירעון',
+                    'מסים ישירים',
+                    'מסים עקיפים',
+                ],
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[3],
+            ),
+            dict(
+                name='economic_class_primary',
+                description='''
+                    הקטגוריה הכלכלית הראשית של ההכנסה (economic classification).
+                    בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה economic_class_secondary.
+                ''',
+                sample_values=[
+                    'הכנסות המדינה - מענקים',
+                    'הכנסות המדינה - מילוות',
+                    'הכנסות המדינה - הכנסות',
+                    'הכנסות המדינה - בנק ישראל',
+                ],
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[1],
+            ),
+            dict(
+                name='economic_class_secondary',
+                description='''
+                    הקטגוריה הכלכלית המשנית של ההכנסה.
+                ''',
+                sample_values=[
+                    'בנק ישראל',
+                    'הכנסות אחרות',
+                    'הכנסות הון',
+                    'הכנסות ממיסים',
+                    'מילוות זרים',
+                    'מילוות מקומיים',
+                    'מענקים אזרחיים',
+                    'מענקים בטחוניים',
+                ],
+                type='string',
+                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
+            ),
+        ],
+        search=dict(
+            index='budget',
+            field_map={
+                'code': 'nice-code',
+                'title': 'title',
+                'year': 'year',
+                'amount_allocated': 'net_allocated',
+                'amount_revised': 'net_revised',
+                'amount_used': 'net_executed',
+            },
+            filters={
+                'func_cls_title_1': 'הכנסות',
+                'depth__gt': 1
+            }
+        )
+    ),
+
 )
 
 def get_flow(table, params, debug=False):
