@@ -28,6 +28,18 @@ def filtered_budget_code(code):
         code = code[2:]
     return ret[:-1]
 
+def filtered_budget_code_income(code):
+    if not code:
+        return None
+    if not code.startswith('0000'):
+        return None
+    code = code[2:]
+    ret = ''
+    while code:
+        ret += code[:2] + '.'
+        code = code[2:]
+    return ret[:-1]
+
 def get_filter(func, field_name):
     def filter_func(row):
         value = row.get(field_name)
