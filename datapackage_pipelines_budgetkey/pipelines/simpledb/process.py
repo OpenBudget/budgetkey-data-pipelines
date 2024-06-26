@@ -434,7 +434,7 @@ PARAMETERS = dict(
                     'תמיכה כלכלית',
                     'בקשת תמיכה לפרט',
                 ],
-            )
+            ),
             dict(
                 name='value_kind',
                 description='''
