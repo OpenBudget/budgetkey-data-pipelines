@@ -381,7 +381,141 @@ PARAMETERS = dict(
             }
         )
     ),
-
+    supports_data=dict(
+        source='/var/datapackages/supports/with-entities',
+        description='''
+            נתוני תמיכות תקציביות בחברות ועמותות.
+            תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
+            המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2024).
+            חיפוש טקסט חופשי - לפי שם המשרדו, מטרת התמיכה *בלבד*!
+            השתמש בשדות budget_code ו entity_id בשליפות ב-db ולא בשדה entity_name או support_title.
+        ''',
+        fields=[
+            dict(
+                name='budget_code',
+                description='''
+                    קוד הסעיף התקציבי ממנו משולמת התמיכה.
+                    קבוצות של שתי ספרות מופרדות על ידי נקודות.
+                ''',
+                sample_values=['26.13.01.07', '20.67.01.42', '19.42.02.26'],
+                transform=filtered_budget_code,
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='purpose',
+                description='''
+                    מטרת התמיכה התקציבית.
+                    שדה זה בדרך כלל קצר ולא מאוד תיאורי.
+                ''',
+                sample_values=['פסטיבלים לתרבות ואומנות - תמיכה', 'סל לתרבות עירונית', 'חוק הפיקדון - תמיכהברשויות'],
+                type='string',
+                default=lambda row: row.get('support_title')
+            ),
+            dict(
+                name='supporting_ministry',
+                description='''
+                    שם המשרד שמבצע את התמיכה.
+                    חשוב לשים לב ששמות המשרדים משתנים ועשויים להפויע בצורות שונות בתמיכות שונות.
+                ''',
+                sample_values=['משרד התרבות והספורט', 'משרד הפנים', 'משרד החינוך'],
+            ),
+            dict(
+                name='request_type',
+                description='''
+                    הסיווג הכלכלי/חוקי של התמיכה
+                ''',
+                possible_values=[
+	                'בקשת תמיכה אחרים',
+                    'תמיכה לרשות מקומית',
+                    'מענקים על פי נוסחה',
+                    'א3',
+                    'הקצבות',
+                    'תמיכה דרך מוסד',
+                    'תמיכה כלכלית',
+                    'בקשת תמיכה לפרט',
+                ],
+            )
+            dict(
+                name='value_kind',
+                description='''
+                    האם שורה זו מציינת תקציב מאושר או תשלום בפועל.
+                ''',
+                possible_values=['approval', 'payment'],
+                type='string',
+                default=lambda row: 'payment' if row.get('year_paid') else 'approval',
+            ),
+            dict(
+                name='year',
+                description='''
+                    שנת אישור התמיכה (או ביצוע התשלום, לפי value_kind).
+                ''',
+                sample_values=[2017, 2023, 2024]
+            ),
+            dict(
+                name='amount',
+                description='''
+                    הסכום שאושר או ששולם בפועל במסגרת התמיכה.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('amount_approved') if row['value_kind'] == 'approval' else row.get('amount_total'),
+                filter=lambda x: x is not None and x > 0
+            ),
+            dict(
+                name='recipient_entity_name',
+                description='''
+                    השם הרשמי של מקבל התמיכה (יכול להיות השם של חברה פרטית, עמותה, רשות מקומית וכד׳)
+                ''',
+                sample_values=['מ. א. מנשה', 'שירותי בריאות כללית', 'עירית אשקלון', 'מעון שירת הרך בע"מ'],
+                type='string',
+                default=lambda row: row.get('entity_name', row.get('recipient')),
+                fiilter=lambda x: x is not None
+            ),
+            dict(
+                name='recipient_entity_id',
+                description='''
+                    מספר התאגיד של מקבל התמיכה.
+                    יכול להיות ריק אם מקבל התמיכה הוא אדם פרטי
+                ''',
+                sample_values=['570053512', '589906114', '513705699'],
+                type='string',
+                default=lambda row: row.get('entity_id')
+            ),
+            dict(
+                name='recipient_entity_kind',
+                description='''
+                    סוג הארגון שמקבל את התמיכה.
+                ''',
+                most_common_values=[
+                    'municipality',
+                    'company',
+                    'association',
+                    'ottoman-association',
+                    'provident_fund',
+                    'cooperative',
+                    'private_person',
+                ],
+                type='string',
+                default=lambda row: row.get('entity_kind') or 'private_person'
+            ),
+        ],
+        search=dict(
+            index='supports',
+            field_map={
+                'budget_code': 'nice-code',
+                'purpose': 'support_title',
+                'supporting_ministry': 'supporting_ministry',
+                'request_type': 'request_type',
+                'receiver_entity_name': ['entity_name', 'recipient'],
+                'recipient_entity_id': 'entity_id',
+                'recipient_entity_kind': 'entity_kind',
+                '__approval_year': 'year_requested',
+                '__last_payment_year': 'last_payment_year',
+                '__total_paid_amount': 'amount_total',
+            },
+            filters={}
+        )
+    ),
 )
 
 def get_flow(table, params, debug=False):
