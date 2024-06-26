@@ -285,6 +285,7 @@ with-entities:
       parameters:
         name: all-supports
         title: All support data with entities
+        revision: '2024-06-26'
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/all/datapackage.json
