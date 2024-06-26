@@ -442,7 +442,7 @@ PARAMETERS = dict(
                 ''',
                 possible_values=['approval', 'payment'],
                 type='string',
-                default=lambda row: 'payment' if row.get('year_paid') else 'approval',
+                default=lambda row: ('payment' if row.get('year_paid') else 'approval'),
             ),
             dict(
                 name='year',
@@ -451,7 +451,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[2017, 2023, 2024],
                 type='integer',
-                default=lambda row: row.get('year_requested') if row['value_kind'] == 'approval' else row.get('year_paid'),
+                default=lambda row: (row.get('year_requested') if row['value_kind'] == 'approval' else row.get('year_paid')),
             ),
             dict(
                 name='amount',
@@ -460,7 +460,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[1000000, 5000000, 10000000],
                 type='number',
-                default=lambda row: row.get('amount_approved') if row['value_kind'] == 'approval' else row.get('amount_total'),
+                default=lambda row: (row.get('amount_approved') if row['value_kind'] == 'approval' else row.get('amount_total')),
                 filter=lambda x: x is not None and x > 0
             ),
             dict(
@@ -498,7 +498,7 @@ PARAMETERS = dict(
                     'private_person',
                 ],
                 type='string',
-                default=lambda row: row.get('entity_kind') or 'private_person'
+                default=lambda row: (row.get('entity_kind') or 'private_person')
             ),
         ],
         search=dict(
@@ -519,6 +519,11 @@ PARAMETERS = dict(
         )
     ),
 )
+
+def print_descriptor(package: DF.PackageWrapper):
+    print(json.dumps(package.pkg.descriptor, indent=2))
+    yield package.pkg
+    yield from package
 
 def get_flow(table, params, debug=False):
     steps = []
@@ -548,6 +553,7 @@ def get_flow(table, params, debug=False):
 
     steps.append(DF.select_fields(field_names))
     if not debug:
+        steps.append(print_descriptor)
         steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
         steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
     else:
