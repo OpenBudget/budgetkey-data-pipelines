@@ -449,7 +449,9 @@ PARAMETERS = dict(
                 description='''
                     שנת אישור התמיכה (או ביצוע התשלום, לפי value_kind).
                 ''',
-                sample_values=[2017, 2023, 2024]
+                sample_values=[2017, 2023, 2024],
+                type='integer',
+                default=lambda row: row.get('year_requested') if row['value_kind'] == 'approval' else row.get('year_paid'),
             ),
             dict(
                 name='amount',
