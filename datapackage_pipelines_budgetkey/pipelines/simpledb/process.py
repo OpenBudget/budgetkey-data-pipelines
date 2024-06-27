@@ -562,7 +562,7 @@ def get_flow(table, params, debug=False):
     return DF.Flow(*steps)
 
 def flow(parameters, *_):
-    for table, params in PARAMETERS.items():
+    for table, params in reversed(PARAMETERS.items()):
         get_flow(table, params).process()
     return DF.Flow(
         [dict(done=True)],
