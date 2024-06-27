@@ -521,7 +521,8 @@ PARAMETERS = dict(
 )
 
 def print_descriptor(package: DF.PackageWrapper):
-    print(json.dumps(package.pkg.descriptor, indent=2))
+    import pprint
+    pprint.pprint(package.pkg.descriptor)
     yield package.pkg
     yield from package
 
