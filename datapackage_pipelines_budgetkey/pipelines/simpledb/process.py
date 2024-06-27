@@ -390,6 +390,7 @@ PARAMETERS = dict(
             חיפוש טקסט חופשי - לפי שם המשרדו, מטרת התמיכה *בלבד*!
             השתמש בשדות budget_code ו entity_id בשליפות ב-db ולא בשדה entity_name או support_title.
             לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
+            שים לב שאתה מתייחס בצורה נכונה לשדה value_kind - כדי לא לסכום תקציבים ותשלומים באופן שגוי.
         ''',
         fields=[
             dict(
@@ -626,6 +627,7 @@ def get_flow(table, params, debug=False):
     search = params.get('search')
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
+    steps.append(DF.set_primary_key(None))
     
     field_names = []
     for field in fields:
