@@ -471,7 +471,7 @@ PARAMETERS = dict(
                 sample_values=['מ. א. מנשה', 'שירותי בריאות כללית', 'עירית אשקלון', 'מעון שירת הרך בע"מ'],
                 type='string',
                 default=lambda row: row.get('entity_name', row.get('recipient')),
-                fiilter=lambda x: x is not None
+                filter=lambda x: x is not None
             ),
             dict(
                 name='recipient_entity_id',
@@ -554,7 +554,7 @@ def get_flow(table, params, debug=False):
 
     steps.append(DF.select_fields(field_names))
     if not debug:
-        steps.append(print_descriptor)
+        # steps.append(print_descriptor)
         steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
         steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
     else:
