@@ -617,8 +617,9 @@ def remove_pk(package: DF.PackageWrapper):
     yield package.pkg
     for res in package:
         res: DF.ResourceWrapper
-        if res.res.descriptor.get('primaryKey'):
-            res.res.descriptor.pop('primaryKey')
+        schema = res.res.descriptor.get('schema')
+        if schema and 'primaryKey' in schema:
+            schema.pop('primaryKey')
         yield res
 
 def get_flow(table, params, debug=False):
@@ -629,7 +630,6 @@ def get_flow(table, params, debug=False):
     search = params.get('search')
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
-    steps.append(DF.set_primary_key(None))
     
     field_names = []
     for field in fields:
