@@ -505,7 +505,7 @@ PARAMETERS = dict(
         search=dict(
             index='supports',
             field_map={
-                'budget_code': 'nice-code',
+                'budget_code': 'nice-budget-code',
                 'purpose': 'support_title',
                 'supporting_ministry': 'supporting_ministry',
                 'request_type': 'request_type',

@@ -105,6 +105,7 @@ supports:
         resource: supports
         source-field: budget_code
         target-field: 'nice-budget-code'
+    - run: add_support_helpers
   # keep-history:
   #   -
   #     key: payments
