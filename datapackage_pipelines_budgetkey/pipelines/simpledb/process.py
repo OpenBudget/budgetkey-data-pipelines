@@ -613,11 +613,13 @@ PARAMETERS = dict(
     ),
 )
 
-def print_descriptor(package: DF.PackageWrapper):
-    import pprint
-    pprint.pprint(package.pkg.descriptor)
+def remove_pk(package: DF.PackageWrapper):
     yield package.pkg
-    yield from package
+    for res in package:
+        res: DF.ResourceWrapper
+        if res.res.descriptor.get('primaryKey'):
+            res.res.descriptor.pop('primaryKey')
+        yield res
 
 def get_flow(table, params, debug=False):
     steps = []
@@ -648,7 +650,7 @@ def get_flow(table, params, debug=False):
 
     steps.append(DF.select_fields(field_names))
     if not debug:
-        # steps.append(print_descriptor)
+        steps.append(remove_pk)
         steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
         steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
     else:
