@@ -614,13 +614,12 @@ PARAMETERS = dict(
 )
 
 def remove_pk(package: DF.PackageWrapper):
+    for res in package.pkg.descriptor['resources']:
+        schema = res.get('schema', {})
+        if 'primaryKey' in schema:
+            del schema['primaryKey']
     yield package.pkg
-    for res in package:
-        res: DF.ResourceWrapper
-        schema = res.res.descriptor.get('schema')
-        if schema and 'primaryKey' in schema:
-            schema.pop('primaryKey')
-        yield res
+    yield from package
 
 def get_flow(table, params, debug=False):
     steps = []
