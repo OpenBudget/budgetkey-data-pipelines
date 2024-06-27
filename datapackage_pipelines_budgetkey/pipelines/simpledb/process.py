@@ -389,6 +389,7 @@ PARAMETERS = dict(
             המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2024).
             חיפוש טקסט חופשי - לפי שם המשרדו, מטרת התמיכה *בלבד*!
             השתמש בשדות budget_code ו entity_id בשליפות ב-db ולא בשדה entity_name או support_title.
+            לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
         ''',
         fields=[
             dict(
