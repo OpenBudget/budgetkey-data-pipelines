@@ -519,6 +519,97 @@ PARAMETERS = dict(
             filters={}
         )
     ),
+    entities_data=dict(
+        source='/var/datapackages/entities/scored',
+        description='''
+            נתונים על תאגידים בישראל -
+            חברות, עמותות, רשויות מקומיות ועוד.
+        ''',
+        fields=[
+            dict(
+                name='entity_id',
+                description='''
+                    מספר מזהה ייחודי של התאגיד.
+                ''',
+                sample_values=['570053512', '589906114', '513705699'],
+                type='string',
+                default=lambda row: row.get('id'),
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='entity_name',
+                description='''
+                    שם התאגיד הרשמי.
+                ''',
+                sample_values=['מ. א. מנשה', 'שירותי בריאות כללית', 'עירית אשקלון', 'מעון שירת הרך בע"מ'],
+                type='string',
+                default=lambda row: row.get('name'),
+                filter=lambda x: x is not None
+            ),
+            dict(
+                name='entity_name__en',
+                description='''
+                    שם התאגיד באנגלית, אם קיים.
+                ''',
+                type='string',
+                default=lambda row: row.get('name_en'),
+            ),
+            dict(
+                name='entity_kind',
+                description='''
+                    סוג הארגון שמקבל את התמיכה (מזהה הסוג)
+                ''',
+                sample_values=[
+                    'municipality',
+                    'company',
+                    'association',
+                    'ottoman-association',
+                    'provident_fund',
+                    'cooperative',
+                    'law_mandated_organization',
+                ],
+                type='string',
+                default=lambda row: (row.get('kind'))
+            ),
+            dict(
+                name='entity_kind__he',
+                description='''
+                    סוג הארגון שמקבל את התמיכה (שם בעברית)
+                ''',
+                sample_values=[
+                    'רשות מקומית',
+                    'חברה פרטית',
+                    'עמותה',
+                    'אגודה עותמנית',
+                    'קופת גמל',
+                    'אגודה שיתופית',
+                    'תאגיד סטטוטורי',
+                ],
+                type='string',
+                default=lambda row: (row.get('kind_he'))
+            ),
+
+            dict(
+                name='received_amount',
+                description='''
+                    כמה כספים קיבל הארגון מהמדינה בשלוש השנים האחרונות, בין אם כתמיכה תקציבית או בהתקשרות רכש.
+                ''',
+                sample_values=[0, 1000, 12998431556.76],
+            ),
+        ],
+        search=dict(
+            index='entities',
+            field_map={
+                'entity_id': 'id',
+                'entity_name': 'name',
+                'entity_kind': 'kind',
+                'entity_kind__he': 'kind_he',
+                'received_amount': 'received_amount',
+                'entity_name__en': 'name_en',
+            },
+            filters={}
+        )
+    ),
 )
 
 def print_descriptor(package: DF.PackageWrapper):
