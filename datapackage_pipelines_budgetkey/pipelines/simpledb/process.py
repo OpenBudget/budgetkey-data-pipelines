@@ -387,8 +387,8 @@ PARAMETERS = dict(
             נתוני תמיכות תקציביות בחברות ועמותות.
             תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
             המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2024).
-            חיפוש טקסט חופשי - לפי שם המשרדו, מטרת התמיכה *בלבד*!
-            השתמש בשדות budget_code ו entity_id בשליפות ב-db ולא בשדה entity_name או support_title.
+            חיפוש טקסט חופשי - לפי שם המשרד, ומטרת התמיכה *בלבד*!
+            השתמש בשדות budget_code ו recipient_entity_id בשליפות ב-db ולא בשדה recipient_entity_name או purpose.
             לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
             שים לב שאתה מתייחס בצורה נכונה לשדה value_kind - כדי לא לסכום תקציבים ותשלומים באופן שגוי.
         ''',
@@ -607,6 +607,162 @@ PARAMETERS = dict(
                 'entity_kind__he': 'kind_he',
                 'received_amount': 'received_amount',
                 'entity_name__en': 'name_en',
+            },
+            filters={}
+        )
+    ),
+    contracts_data=dict(
+        source='/var/datapackages/procurement/spending/latest-contract-spending',
+        description='''
+            נתוני התקשרויות רכש עם חברות, עמותות וספקים אחרים.
+            התקשרויות רכש משמשות לקניית מוצרים ושירותים.
+            המידע הוא לכלל שנות התקציב מאז 2016 ועד השנה הנוכחית (2024).
+            חיפוש טקסט חופשי - לפי שם המשרד, ומטרת ההתקשרות *בלבד*!
+            השתמש בשדות budget_code ו supplier_entity_id בשליפות ב-db ולא בשדה supplier_entity_name או purpose.
+            לפני סינון לפי שדה purchasing_ministry או purchasing_method, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
+        ''',
+        fields=[
+            dict(
+                name='budget_code',
+                description='''
+                    קוד הסעיף התקציבי ממנו בוצע הרכש.
+                    קבוצות של שתי ספרות מופרדות על ידי נקודות.
+                ''',
+                sample_values=['26.13.01.07', '20.67.01.42', '19.42.02.26'],
+                transform=filtered_budget_code,
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='purpose',
+                description='''
+                    מטרת התקשרות הרכש.
+                    שדה זה יכול להיות די קצר ולא מאוד תיאורי.
+                ''',
+                sample_values=['פסטיבלים לתרבות ואומנות - תמיכה', 'סל לתרבות עירונית', 'חוק הפיקדון - תמיכהברשויות'],
+                type='string',
+            ),
+            dict(
+                name='purchasing_ministry',
+                description='''
+                    שם המשרד שביצע את הרכש.
+                    חשוב לשים לב ששמות המשרדים משתנים ועשויים להפויע בצורות שונות ההתקשרויות שונות.
+                ''',
+                sample_values=['משרד התרבות והספורט', 'משרד הפנים', 'משרד החינוך'],
+                default=lambda row: row.get('publisher_name')
+            ),
+            dict(
+                name='purchasing_method',
+                description='''
+                    אופן הרכישה - האם היא נעשתה במכרז פתוח, בפטור ממכרז או בכל דרך אחרת.
+                ''',
+                sample_values=[
+                    'פטור ממכרז',
+                    'תקנה 14ב - מכרז מרכזי',
+                    'תקנה 1ב - מכרז פומבי רגיל',
+                    'התקשרות עם גופים ממשלתיים',
+                    'מינוי חברים בועדות',
+                    'תשלומי חשמל/מים/ארנונה/כבישי אגרה',
+                    'תקנה 5א(ב)(1) - התקשרות עם מתכננים',
+                    'מענקים לרשויות מקומיות',
+                    'אחר',
+                 ],
+            ),
+            dict(
+                name='order_date',
+                description='''
+                    תאריך ביצוע ההזמנה המקורית
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                type='date',                
+            ),
+            dict(
+                name='end_date',
+                description='''
+                    תאריך סיום ההתקשרות.
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                type='date',                
+            ),
+            dict(
+                name='is_active',
+                description='''
+                    האם ההתקשרות פעילה כיום.
+                ''',
+                sample_values=[True, False],
+                type='boolean',
+                default=lambda row: row.get('contract_is_active')
+            ),
+            dict(
+                name='volume',
+                description='''
+                    הסכום הכולל שאושר עבור ההתקשרות.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                filter=lambda x: x is not None and x > 0
+            ),
+            dict(
+                name='executed',
+                description='''
+                    הסכום הכולל ששולם עד כה עבור ההתקשרות.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                filter=lambda x: x is not None and x > 0
+            ),
+            dict(
+                name='supplier_entity_name',
+                description='''
+                    השם הרשמי של הספק (יכול להיות השם של חברה פרטית, עמותה, רשות מקומית וכד׳)
+                ''',
+                sample_values=['מ. א. מנשה', 'שירותי בריאות כללית', 'עירית אשקלון', 'מעון שירת הרך בע"מ'],
+                type='string',
+                default=lambda row: row.get('entity_name', (row.get('supplier') or [None])[0]),
+                filter=lambda x: x is not None
+            ),
+            dict(
+                name='supplier_entity_id',
+                description='''
+                    מספר התאגיד של הספק.
+                    יכול להיות ריק אם הספק הוא אדם פרטי
+                ''',
+                sample_values=['570053512', '589906114', '513705699'],
+                type='string',
+                default=lambda row: row.get('entity_id')
+            ),
+            dict(
+                name='supplier_entity_kind',
+                description='''
+                    סוג הארגון של הספק.
+                ''',
+                most_common_values=[
+                    'municipality',
+                    'company',
+                    'association',
+                    'ottoman-association',
+                    'provident_fund',
+                    'cooperative',
+                    'private_person',
+                ],
+                type='string',
+                default=lambda row: (row.get('entity_kind') or 'private_person')
+            ),
+        ],
+        search=dict(
+            index='contract-spending',
+            field_map={
+                'budget_code': 'nice-budget-code',
+                'purpose': 'purpose',
+                'purchasing_ministry': 'publisher_name',
+                'purchasing_method': 'purchase_method',
+                'volume': 'volume',
+                'executed': 'executed',
+                'order_date': 'order_date',
+                'end_date': 'end_date',
+                'is_active': 'contract_is_active',
+                'supplier_entity_name': ['entity_name', 'supplier_name'],
+                'supplier_entity_id': 'entity_id',
+                'supplier_entity_kind': 'entity_kind',
             },
             filters={}
         )

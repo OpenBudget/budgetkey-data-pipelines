@@ -82,6 +82,11 @@ contract-spending:
         source-fields:
           - purpose
         target-field: semantic_tags
+    - run: add_nice_budget_code
+      parameters:
+        resource: contract-spending
+        source-field: budget_code
+        target-field: 'nice-budget-code'
   date-range:
     type: date-range
     from-field: order_date
