@@ -665,7 +665,8 @@ PARAMETERS = dict(
                     'תקנה 5א(ב)(1) - התקשרות עם מתכננים',
                     'מענקים לרשויות מקומיות',
                     'אחר',
-                 ],
+                ],
+                default=lambda row: (row.get('purchase_method') or [None])[0]
             ),
             dict(
                 name='order_date',
