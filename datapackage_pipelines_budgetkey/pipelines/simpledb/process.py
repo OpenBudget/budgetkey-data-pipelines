@@ -648,6 +648,7 @@ PARAMETERS = dict(
                     חשוב לשים לב ששמות המשרדים משתנים ועשויים להפויע בצורות שונות ההתקשרויות שונות.
                 ''',
                 sample_values=['משרד התרבות והספורט', 'משרד הפנים', 'משרד החינוך'],
+                type='string',
                 default=lambda row: row.get('publisher_name')
             ),
             dict(
@@ -666,6 +667,7 @@ PARAMETERS = dict(
                     'מענקים לרשויות מקומיות',
                     'אחר',
                 ],
+                type='string',
                 default=lambda row: (row.get('purchase_method') or [None])[0]
             ),
             dict(
@@ -709,7 +711,6 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[1000000, 5000000, 10000000],
                 type='number',
-                filter=lambda x: x is not None and x > 0
             ),
             dict(
                 name='supplier_entity_name',
