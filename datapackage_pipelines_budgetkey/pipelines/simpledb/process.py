@@ -18,7 +18,7 @@ def filtered_budget_code(code):
     if code.startswith('0000'):
         return None
     if code == '00':
-        return None
+        return ''
     if code.startswith('C'):
         return None
     code = code[2:]
@@ -81,8 +81,10 @@ PARAMETERS = dict(
                     - 20.67.01.42: תמיכה בתנועות נוער
                         סעיפים ברמה זו נקראים גם ״תקנות תקציביות״
                         נקראים גם סעיפי 8 ספרות
+
+                    בשורה הכוללת את סך תקציב המדינה, ערך זה יהיה מחרוזת ריקה.
                 ''',
-                sample_values=['20', '20.67', '20.67.01', '20.67.01.42'],
+                sample_values=['20', '20.67', '20.67.01', '20.67.01.42', ''],
                 transform=filtered_budget_code,
                 filter=lambda x: x is not None,
             ),
