@@ -18,6 +18,7 @@ def filtered_budget_code(code):
     if code.startswith('0000'):
         return None
     if code == '00':
+        print('TOTAL ROW')
         return ''
     if code.startswith('C'):
         return None
@@ -791,6 +792,9 @@ def get_flow(table, params, debug=False):
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
     
+    if not debug:
+        steps.append(remove_pk)
+
     field_names = []
     for field in fields:
         field['description'] = clean_lines(field['description'])
@@ -810,7 +814,6 @@ def get_flow(table, params, debug=False):
 
     steps.append(DF.select_fields(field_names))
     if not debug:
-        steps.append(remove_pk)
         steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
         steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
     else:
