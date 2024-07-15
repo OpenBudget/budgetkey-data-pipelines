@@ -485,7 +485,7 @@ by-request-year:
           - budget_code
           - year_requested
           - recipient_key
-          - request_type
+          - support_title
 
     - run: sample
     - run: dump.to_path
