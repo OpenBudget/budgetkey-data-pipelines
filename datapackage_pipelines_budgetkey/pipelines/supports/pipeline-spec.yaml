@@ -473,10 +473,11 @@ by-request-year:
     - run: calc-support-score
     - run: set_types
       parameters:
-        payments:
-          type: array
-          es:itemType: object
-          es:index: false
+        types:
+          payments:
+            type: array
+            es:itemType': object
+            es:index: false
             
     - run: set_types
     - run: set_primary_key
