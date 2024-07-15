@@ -18,7 +18,7 @@ def filtered_budget_code(code):
     if code.startswith('0000'):
         return None
     if code == '00':
-        return 'T'
+        return ''
     if code.startswith('C'):
         return None
     code = code[2:]
@@ -60,6 +60,7 @@ PARAMETERS = dict(
             המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
             חיפוש טקסט חופשי - לפי שמות הסעיפים *בלבד*!
             השתמש בשדה code בשליפות ב-db ולא בשדה title.
+            מידע על כלל תקציב המדינה יש לקבל על ידי שליפה של code="".
         ''',
         fields=[
             dict(
@@ -82,7 +83,7 @@ PARAMETERS = dict(
                         סעיפים ברמה זו נקראים גם ״תקנות תקציביות״
                         נקראים גם סעיפי 8 ספרות
 
-                    לכל שנה תקציבית קיימת שורה אחת המכילה את המידע על סך תקציב המדינה. בשורה זו, ערך שדה זה יהיה "T".
+                    קוד ריק (מחרוזת ריקה) מייצג את כלל תקציב המדינה.
                 ''',
                 sample_values=['20', '20.67', '20.67.01', '20.67.01.42', ''],
                 transform=filtered_budget_code,
@@ -817,7 +818,7 @@ def get_flow(table, params, debug=False):
     return DF.Flow(*steps)
 
 def flow(parameters, *_):
-    for table, params in reversed(PARAMETERS.items()):
+    for table, params in PARAMETERS.items():
         get_flow(table, params).process()
     return DF.Flow(
         [dict(done=True)],
