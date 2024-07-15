@@ -95,7 +95,7 @@ contract-spending:
 
 supports:
   kind: indexer
-  revision: 12
+  revision: 13
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
   page-title-pattern: 'תמיכה תקציבית ב{recipient}'
