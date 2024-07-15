@@ -442,6 +442,7 @@ by-request-year:
         fields:
           budget_code: null
           year_requested: null
+          recipient_key: null
           recipient: null
           support_title: null
           request_type: null
