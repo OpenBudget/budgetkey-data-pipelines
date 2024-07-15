@@ -410,6 +410,11 @@ by-request-year:
       parameters:
         resource: supports
         field: payments
+        key-field: recipient_key
+        key-field-sources:
+          - entity_id
+          - recipient_entity_id
+          - recipient
         fields: 
           - resolved_budget_codes
           - support_title
@@ -428,8 +433,7 @@ by-request-year:
           key:
             - budget_code
             - year_requested
-            - recipient
-            - entity_id
+            - recipient_key
             - support_title
           delete: true
         target:
@@ -479,7 +483,7 @@ by-request-year:
         supports:
           - budget_code
           - year_requested
-          - recipient
+          - recipient_key
           - request_type
 
     - run: sample
