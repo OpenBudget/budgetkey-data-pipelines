@@ -150,6 +150,7 @@ def process_row(row, phase_key):
             (row['code'].startswith('0000') or
              row['code'].startswith('0089') or
              row['code'].startswith('0091') or 
+             row['code'].startswith('0093') or 
              row['code'].startswith('0094') or 
              row['code'].startswith('0095') or
              row['code'].startswith('0098') 
@@ -165,6 +166,7 @@ def process_row(row, phase_key):
         (not (
              row['code'].startswith('0089') or
              row['code'].startswith('0091') or 
+             row['code'].startswith('0093') or 
              row['code'].startswith('0094') or 
              row['code'].startswith('0095') or
              row['code'].startswith('0098')
