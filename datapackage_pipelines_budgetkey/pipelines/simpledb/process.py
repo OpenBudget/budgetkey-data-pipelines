@@ -18,8 +18,7 @@ def filtered_budget_code(code):
     if code.startswith('0000'):
         return None
     if code == '00':
-        print('TOTAL ROW')
-        return ''
+        return 'TOTAL'
     if code.startswith('C'):
         return None
     code = code[2:]
@@ -61,7 +60,7 @@ PARAMETERS = dict(
             המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
             חיפוש טקסט חופשי - לפי שמות הסעיפים *בלבד*!
             השתמש בשדה code בשליפות ב-db ולא בשדה title.
-            מידע על כלל תקציב המדינה יש לקבל על ידי שליפה של code="".
+            מידע על כלל תקציב המדינה יש לקבל על ידי שליפה של code="TOTAL".
         ''',
         fields=[
             dict(
@@ -84,7 +83,7 @@ PARAMETERS = dict(
                         סעיפים ברמה זו נקראים גם ״תקנות תקציביות״
                         נקראים גם סעיפי 8 ספרות
 
-                    קוד ריק (מחרוזת ריקה) מייצג את כלל תקציב המדינה.
+                    הערך המיוחד "TOTAL" מייצג את כלל תקציב המדינה.
                 ''',
                 sample_values=['20', '20.67', '20.67.01', '20.67.01.42', ''],
                 transform=filtered_budget_code,
@@ -145,10 +144,11 @@ PARAMETERS = dict(
                     רמת הסעיף התקציבי.
                     1 מייצג סעיפים ברמה הגבוהה ביותר (כמו משרדים ראשיים).
                     4 מייצג סעיפים ברמה הנמוכה ביותר (תקנות תקציביות).
+                    הערך 0 מייצג את כלל תקציב המדינה.
                 ''',
-                sample_values=[1, 2, 3, 4],
+                sample_values=[0, 1, 2, 3, 4],
                 type='integer',
-                default=lambda row: len(row['code'].split('.'))
+                default=lambda row: 0 if row['code'] == 'TOTAL' else len(row['code'].split('.'))
             ),
             dict(
                 name='functional_class_primary',
