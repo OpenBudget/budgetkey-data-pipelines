@@ -406,6 +406,21 @@ by-request-year:
           support_title:
             es:title: true
 
+    - run: collate_payments
+      parameters:
+        resource: supports
+        field: payments
+        fields: 
+          - resolved_budget_codes
+          - support_title
+          - amount_paid
+          - amount_approved
+          - recipient_entity_id
+          - year_paid
+          - supporting_ministry
+          - amount_advance
+          - amount_total
+
     - run: join
       parameters:
         source:
@@ -414,7 +429,8 @@ by-request-year:
             - budget_code
             - year_requested
             - recipient
-            - request_type
+            - entity_id
+            - support_title
           delete: true
         target:
           name: supports
@@ -423,76 +439,40 @@ by-request-year:
           budget_code: null
           year_requested: null
           recipient: null
+          support_title: null
           request_type: null
           entity_name: null
           entity_id: null
           entity_kind: null
-          supporting_ministry: null
-          year_paid: null
-          support_title: null
+          supporting_ministry:
+            aggregate: last          
           recipient_entity_id: null
-          amount_approved: null
-          amount_paid: null
-          amount_advance: null
-          amount_total: null
+          amount_approved:
+            aggregate: max
+          amount_paid:
+            aggregate: sum
+          amount_total:
+            aggregate: sum
           resolved_budget_codes: null
           last_payment_year:
             name: year_paid
-            aggregate: last
+            aggregate: max
           last_payment_amount:
             name: amount_paid
             aggregate: last
-
-    - run: collate
-      parameters:
-        resource: supports
-        key:
-          - budget_code
-          - year_requested
-          - recipient
-          - request_type
-          - entity_name
-          - entity_id
-          - entity_kind
-          - last_payment_year
-          - last_payment_amount
-        collated-field-name: payments
-
-    - run: join
-      parameters:
-        source:
-          name: supports
-          key:
-            - budget_code
-            - year_requested
-            - recipient
-            - request_type
-            - entity_name
-            - entity_id
-            - entity_kind
-            - last_payment_year
-            - last_payment_amount
-          delete: true
-        target:
-          name: supports
-          key: null
-        fields:
-          budget_code: null
-          year_requested: null
-          recipient: null
-          request_type: null
-          entity_name: null
-          entity_id: null
-          entity_kind: null
-          last_payment_year: null
-          last_payment_amount: null
           payments:
             aggregate: array
 
     # - run: match_criteria
     - run: fix_values_by_request_year
-    - run: collate_schema
     - run: calc-support-score
+    - run: set_types
+      parameters:
+        payments:
+          type: array
+          es:itemType: object
+          es:index: false
+            
     - run: set_types
     - run: set_primary_key
       parameters:
