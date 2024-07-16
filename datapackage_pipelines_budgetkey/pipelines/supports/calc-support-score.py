@@ -15,10 +15,7 @@ def modify_datapackage(dp, *_):
 
 
 def process_row(row, *_):
-    amount = row.get('amount_total', 0)
-    if amount is None:
-        logging.warning('amount_total is None: %r', row)
-        amount = 0
+    amount = row.get('amount_approved') or 0
     # Account for relevance
     row['score'] = max(1, amount / 1000)
     return row

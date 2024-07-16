@@ -476,7 +476,7 @@ by-request-year:
         types:
           payments:
             type: array
-            es:itemType': object
+            es:itemType: object
             es:index: false
             
     - run: set_types
