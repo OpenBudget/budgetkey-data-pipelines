@@ -1,7 +1,12 @@
+import csv
+
+csv.field_size_limit(2*1024*1024)
 
 import json
 
 import dataflows as DF
+
+
 
 def clean_lines(text: str):
     prefix = ''
