@@ -2,4 +2,7 @@ process_simple_dbs:
   schedule:
     crontab: "0 0 * * 1"
   pipeline:
+    - run: update_package
+      parameters:
+        revision: 2024.07.16-1
     - flow: datapackage_pipelines_budgetkey.pipelines.simpledb.process
