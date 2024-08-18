@@ -549,6 +549,15 @@ PARAMETERS = dict(
                 type='date',                
             ),
             dict(
+                name='year',
+                description='''
+                    שנת ביצוע ההזמנה המקורית
+                ''',
+                sample_values=[2017, 2020, 2024],
+                type='integer',
+                default=lambda row: row.get('order_date').year if row.get('order_date') else None
+            ),
+            dict(
                 name='end_date',
                 description='''
                     תאריך סיום ההתקשרות.
