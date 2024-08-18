@@ -555,7 +555,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[2017, 2020, 2024],
                 type='integer',
-                default=lambda row: row.get('order_date').year if row.get('order_date') else None
+                default=lambda row: row.get('min_year')
             ),
             dict(
                 name='end_date',
@@ -640,6 +640,7 @@ PARAMETERS = dict(
                 'executed': 'executed',
                 'order_date': 'order_date',
                 'end_date': 'end_date',
+                'year': 'min_year',
                 'is_active': 'contract_is_active',
                 'supplier_entity_name': ['entity_name', 'supplier_name'],
                 'supplier_entity_id': 'entity_id',
@@ -710,7 +711,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[2017, 2023, 2024],
                 type='integer',
-                default=lambda row: row.get('year_requested'),
+                default=lambda row: row.get('order_year'),
             ),
             dict(
                 name='amount_approved',
