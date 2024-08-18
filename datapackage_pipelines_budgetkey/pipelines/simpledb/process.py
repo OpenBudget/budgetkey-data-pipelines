@@ -711,7 +711,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[2017, 2023, 2024],
                 type='integer',
-                default=lambda row: row.get('order_year'),
+                default=lambda row: row.get('year_requested'),
             ),
             dict(
                 name='amount_approved',
