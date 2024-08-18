@@ -1,7 +1,7 @@
 from pyquery import PyQuery as pq
-import lxml.html.clean
+import lxml_html_clean
 
-cleaner = lxml.html.clean.Cleaner()
+cleaner = lxml_html_clean.Cleaner()
 
 
 def sanitize_html(container_el):

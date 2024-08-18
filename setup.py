@@ -31,7 +31,8 @@ setup(
                       'boto3',
                       'paramiko',
                       'dataflows>=0.1.6',
-                      'lxml[html_clean]'
+                      'lxml',
+                      'lxml_html_clean'
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}
