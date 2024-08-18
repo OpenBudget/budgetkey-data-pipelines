@@ -549,13 +549,22 @@ PARAMETERS = dict(
                 type='date',                
             ),
             dict(
-                name='year',
+                name='order_year',
                 description='''
                     שנת ביצוע ההזמנה המקורית
                 ''',
                 sample_values=[2017, 2020, 2024],
                 type='integer',
                 default=lambda row: row.get('min_year')
+            ),
+            dict(
+                name='last_active_year',
+                description='''
+                    השנה האחרונה בה ההתקשרות הייתה פעילה.
+                ''',
+                sample_values=[2017, 2020, 2024],
+                type='integer',
+                default=lambda row: row.get('max_year')
             ),
             dict(
                 name='end_date',
@@ -590,6 +599,24 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[1000000, 5000000, 10000000],
                 type='number',
+            ),
+            dict(
+                name='volume_per_year',
+                description='''
+                    הסכום הכולל שאושר עבור ההתקשרות מנורמל לפי תקופת ההתקשרות.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: (row.get('volume') or 0) / (row.get('max_year') - row.get('min_year') + 1) if row.get('max_year') and row.get('min_year') else None
+            ),
+            dict(
+                name='executed_per_year',
+                description='''
+                    הסכום הכולל ששולם עבור ההתקשרות בכל שנה בממוצע.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: (row.get('executed') or 0) / (row.get('max_year') - row.get('min_year') + 1) if row.get('max_year') and row.get('min_year') else None
             ),
             dict(
                 name='supplier_entity_name',
@@ -640,7 +667,8 @@ PARAMETERS = dict(
                 'executed': 'executed',
                 'order_date': 'order_date',
                 'end_date': 'end_date',
-                'year': 'min_year',
+                'order_year': 'min_year',
+                'last_active_year': 'max_year',
                 'is_active': 'contract_is_active',
                 'supplier_entity_name': ['entity_name', 'supplier_name'],
                 'supplier_entity_id': 'entity_id',
