@@ -4,5 +4,5 @@ process_simple_dbs:
   pipeline:
     - run: update_package
       parameters:
-        revision: 2024.08.18-1
+        revision: 2024.08.23-1
     - flow: datapackage_pipelines_budgetkey.pipelines.simpledb.process
