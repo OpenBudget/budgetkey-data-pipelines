@@ -549,18 +549,18 @@ PARAMETERS = dict(
                 type='date',                
             ),
             dict(
-                name='order_year',
+                name='start_year',
                 description='''
-                    שנת ביצוע ההזמנה המקורית
+                    שנת תחילת ההתקשרות
                 ''',
                 sample_values=[2017, 2020, 2024],
                 type='integer',
                 default=lambda row: row.get('min_year')
             ),
             dict(
-                name='last_active_year',
+                name='end_year',
                 description='''
-                    השנה האחרונה בה ההתקשרות הייתה פעילה.
+                    שנת סוף ההתקשרות (או שנת הפעילות האחרונה של ההתקשרות).
                 ''',
                 sample_values=[2017, 2020, 2024],
                 type='integer',
@@ -667,8 +667,8 @@ PARAMETERS = dict(
                 'executed': 'executed',
                 'order_date': 'order_date',
                 'end_date': 'end_date',
-                'order_year': 'min_year',
-                'last_active_year': 'max_year',
+                'start_year': 'min_year',
+                'end_year': 'max_year',
                 'is_active': 'contract_is_active',
                 'supplier_entity_name': ['entity_name', 'supplier_name'],
                 'supplier_entity_id': 'entity_id',
