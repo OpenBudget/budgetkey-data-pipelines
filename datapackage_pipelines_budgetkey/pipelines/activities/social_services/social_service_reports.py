@@ -105,7 +105,7 @@ tenders_query = '''
         tender->'end_date' as "תוקף",
         tender->'option_num' as "מספר אופציות",
         tender->'option_duration' as "סך משך האופציות",
-        case tender->>'pricing_model'
+        case tender->>'pricing'
             when 'fixed' then 'מחיר קבוע'
             when 'proposal' then 'הצעת מחיר'
             when 'combined' then 'משולב'

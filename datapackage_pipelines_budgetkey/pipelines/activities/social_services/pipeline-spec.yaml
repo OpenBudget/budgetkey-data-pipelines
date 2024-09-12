@@ -8,7 +8,7 @@ social_services:
       parameters:
         name: social_services
         title: Fetch social services from data input
-        revision: '2024-06.20-1'
+        revision: '2024-09-12.1'
     - flow: social_services
 
 social_service_suppliers:
