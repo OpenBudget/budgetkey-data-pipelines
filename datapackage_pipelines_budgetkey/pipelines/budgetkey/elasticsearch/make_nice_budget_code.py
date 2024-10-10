@@ -14,6 +14,10 @@ def process_resource(res_):
             nice_code += '.'+code[:2]
             code = code[2:]
         row['nice-code'] = nice_code
+        years = [row['year'], *row.get('history', {}).keys()]
+        years = [int(y) for y in years]
+        years = sorted(years)
+        row['year-range'] = '{} - {}'.format(years[0], years[-1])
         yield row
 
 
@@ -31,6 +35,11 @@ dp['resources'][0]['schema']['fields'].extend([
     },
     {
         'name': 'simple-code',
+        'type': 'string',
+        'es:keyword': True
+    },
+    {
+        'name': 'year-range',
         'type': 'string',
         'es:keyword': True
     }

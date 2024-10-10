@@ -263,7 +263,7 @@ PARAMETERS = dict(
             field_map={
                 'code': 'nice-code',
                 'title': 'title',
-                'year': 'year',
+                'year-range': 'year-range',
                 'amount_allocated': 'net_allocated',
                 'amount_revised': 'net_revised',
                 'amount_used': 'net_executed',
