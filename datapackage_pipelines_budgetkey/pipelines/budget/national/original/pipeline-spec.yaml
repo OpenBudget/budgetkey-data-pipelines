@@ -179,6 +179,12 @@ national-budgets:
         sheet: 1
         force_strings: true
         name: budget2024
+    - run: load
+      parameters:
+        from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/tableau_BudgetData2025.xlsx
+        sheet: 1
+        force_strings: true
+        name: budget2025
     - flow: only_years
     - run: concatenate
       parameters:
