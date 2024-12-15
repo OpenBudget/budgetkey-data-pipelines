@@ -6,8 +6,8 @@ import json
 
 import dataflows as DF
 
-def lowest_level(row):
-    return row['level'] == 4 or (row['level'] == 3 and row['is_proposal'])
+def lowest_level(row, max_level=4):
+    return row['level'] == max_level or (row['level'] == max_level-1 and row['is_proposal'])
 
 def clean_lines(text: str):
     prefix = ''
@@ -378,7 +378,7 @@ PARAMETERS = dict(
                     'מסים עקיפים',
                 ],
                 type='string',
-                default=lambda row: None if not lowest_level(row) else json.loads(row['func_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row, 3) else json.loads(row['func_cls_json'][0])[3],
             ),
             dict(
                 name='economic_class_primary',
@@ -393,7 +393,7 @@ PARAMETERS = dict(
                     'הכנסות המדינה - בנק ישראל',
                 ],
                 type='string',
-                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[1],
+                default=lambda row: None if not lowest_level(row, 3) else json.loads(row['econ_cls_json'][0])[1],
             ),
             dict(
                 name='economic_class_secondary',
@@ -411,7 +411,7 @@ PARAMETERS = dict(
                     'מענקים בטחוניים',
                 ],
                 type='string',
-                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row, 3) else json.loads(row['econ_cls_json'][0])[3],
             ),
         ],
         search=dict(
