@@ -129,6 +129,8 @@ def process_row(row, phase_key):
         del row[code_key]
         del row[title_key]
 
+    row['is_proposal'] = row['year'] == proposal_year
+
     if int(save[codes_and_titles[0][0]]) != 0:
         hierarchy = [['00', 'המדינה']]
     else:
@@ -147,7 +149,6 @@ def process_row(row, phase_key):
 
     row['parent'] = None
     row['hierarchy'] = []
-    row['is_proposal'] = row['year'] == proposal_year
 
     row.update(fixed_amounts)
 
