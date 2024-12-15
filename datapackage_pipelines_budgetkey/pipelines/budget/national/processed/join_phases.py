@@ -9,6 +9,7 @@ from decimal import Decimal
 parameters, datapackage, res_iter = ingest()
 
 last_completed_year = parameters['last-completed-year']
+proposal_year = parameters.get('proposal-year')
 
 amounts = [
     'net',
@@ -67,6 +68,10 @@ new_fields = [{
     {
         'name': 'depth',
         'type': 'integer'
+    },
+    {
+        'name': 'is_proposal',
+        'type': 'boolean'
     }
 ]
 for field in fields:
@@ -142,6 +147,7 @@ def process_row(row, phase_key):
 
     row['parent'] = None
     row['hierarchy'] = []
+    row['is_proposal'] = row['year'] == proposal_year
 
     row.update(fixed_amounts)
 

@@ -6,7 +6,8 @@ import json
 
 import dataflows as DF
 
-
+def lowest_level(row):
+    return row['level'] == 4 or (row['level'] == 3 and row['is_proposal'])
 
 def clean_lines(text: str):
     prefix = ''
@@ -39,7 +40,7 @@ def filtered_budget_code_income(code):
     if not code.startswith('0000'):
         return None
     if code == '0000':
-        return 'TOTAL'    
+        return 'TOTAL'
     code = code[4:]
     ret = ''
     while code:
@@ -182,7 +183,7 @@ PARAMETERS = dict(
                     'ענפי משק'
                 ],
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[1],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['func_cls_json'][0])[1],
             ),
             dict(
                 name='functional_class_detailed',
@@ -228,7 +229,7 @@ PARAMETERS = dict(
                     'תקשורת',
                     'רזרבה',
                 ],
-                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['func_cls_json'][0])[3],
             ),
             dict(
                 name='economic_class_primary',
@@ -253,7 +254,7 @@ PARAMETERS = dict(
                     'העברות פנים תקציביות',                    
                 ],
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[1],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[1],
             ),
             dict(
                 name='economic_class_secondary',
@@ -262,7 +263,7 @@ PARAMETERS = dict(
                     מוגדר רק עבור שורות בהן level=4.
                 ''',
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[3],
             ),
         ],
         search=dict(
@@ -377,7 +378,7 @@ PARAMETERS = dict(
                     'מסים עקיפים',
                 ],
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['func_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['func_cls_json'][0])[3],
             ),
             dict(
                 name='economic_class_primary',
@@ -392,7 +393,7 @@ PARAMETERS = dict(
                     'הכנסות המדינה - בנק ישראל',
                 ],
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[1],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[1],
             ),
             dict(
                 name='economic_class_secondary',
@@ -410,7 +411,7 @@ PARAMETERS = dict(
                     'מענקים בטחוניים',
                 ],
                 type='string',
-                default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
+                default=lambda row: None if not lowest_level(row) else json.loads(row['econ_cls_json'][0])[3],
             ),
         ],
         search=dict(
