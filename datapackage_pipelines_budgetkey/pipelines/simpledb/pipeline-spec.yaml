@@ -1,6 +1,9 @@
 process_simple_dbs:
   schedule:
     crontab: "0 0 * * 1"
+  dependencies:
+    - pipeline: ./budget/national/processed/with-extras
+
   pipeline:
     - run: update_package
       parameters:
