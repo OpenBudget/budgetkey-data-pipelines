@@ -38,7 +38,9 @@ def filtered_budget_code_income(code):
         return None
     if not code.startswith('0000'):
         return None
-    code = code[2:]
+    if code == '0000':
+        return 'TOTAL'    
+    code = code[4:]
     ret = ''
     while code:
         ret += code[:2] + '.'
@@ -298,12 +300,12 @@ PARAMETERS = dict(
                     לסעיפים ההכנסה מבנה היררכי.
                     קבוצות של שתי ספרות מופרדות על ידי נקודה.
                     ככל שהקוד יותר ארוך, כך הסעיף יותר מפורט, למשל:
-                    - 00: כלל ההכנסות
-                    - 00.01: מס הכנסה
-                    - 00.01.03: מס הכנסה סקטור עסקי
-                    - 00.01.03.01: מס הכנסה חברות
+                    - TOTAL: כלל ההכנסות
+                    - 01: מס הכנסה
+                    - 01.03: מס הכנסה סקטור עסקי
+                    - 01.03.01: מס הכנסה חברות
                 ''',
-                sample_values=['00', '00.01', '00.01.03', '00.01.03.01'],
+                sample_values=['TOTAL', '01', '01.03', '01.03.01'],
                 transform=filtered_budget_code_income,
                 filter=lambda x: x is not None,
             ),
