@@ -168,6 +168,7 @@ PARAMETERS = dict(
                     הקטגוריה הנושאית הכללית של תקנה תקציבית (functional classification).
                     קטגוריות אלו מגדירות את סוג הפעילות הכללית של התקנה התקציבית, לפי המטרה שעבורה היא משמשת.
                     בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה functional_class_detailed.
+                    מוגדר רק עבור שורות בהן level=4.
                 ''',
                 possible_values=[
                     'שירותים חברתיים',
@@ -187,6 +188,7 @@ PARAMETERS = dict(
                     הקטגוריה הנושאית (functional classification) המפורטת של תקנה תקציבית.
                     קטגוריות אלו מגדירות את סוג הפעילות המפורטת של התקנה התקציבית, לפי המטרה שעבורה היא משמשת.
                     ניתן לסכום את כל הסעיפים לפי השדה הזה כדי לדעת כמה כסף הושקע בנושא כלשהו.
+                    מוגדר רק עבור שורות בהן level=4.
                 ''',
                 type='string',
                 sample_values=[
@@ -232,6 +234,7 @@ PARAMETERS = dict(
                     הקטגוריה הכלכלית הראשית של תקנה תקציבית (economic classification).
                     קטגוריות אלו מגדירות את אופן השימוש בתקציב בתקנה התקציבית.
                     בתוך כל קטגוריה יש קטגוריות משנה, המצויות בשדה economic_class_secondary.
+                    מוגדר רק עבור שורות בהן level=4.
                 ''',
                 sample_values=[
                     'העברות',
@@ -254,6 +257,7 @@ PARAMETERS = dict(
                 name='economic_class_secondary',
                 description='''
                     הקטגוריה הכלכלית המשנית של תקנה תקציבית.
+                    מוגדר רק עבור שורות בהן level=4.
                 ''',
                 type='string',
                 default=lambda row: None if row['level'] != 4 else json.loads(row['econ_cls_json'][0])[3],
