@@ -158,7 +158,8 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                     if id in ids:
                         res = ids[id]
                     else:
-                        results = conn.execute(query.format('id', row[src_id_field])).fetchall()
+                        repl = row[src_id_field].replace("'", "''")
+                        results = conn.execute(query.format('id', repl)).fetchall()
                         if len(results) > 0:
                             res = tuple(results[0])
                             ids[id] = res
