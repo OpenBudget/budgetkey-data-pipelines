@@ -4,7 +4,8 @@ import logging
 import tempfile
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
-from textract.parsers.doc_parser import Parser
+from textract.parsers.utils import ShellParser
+from textract.parsers.docx_parser import Parser as DocxParser
 from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -13,12 +14,17 @@ parameters, dp, res_iter = ingest()
 logging.getLogger().setLevel(logging.INFO)
 
 
-class DocParser(Parser):
+class DocParser(ShellParser):
     def decode(self, text):
         return text.decode('utf-8', errors='ignore')
 
     def encode(self, text, encoding):
         return text
+    
+    def extract(self, filename, **kwargs):
+        stdout, stderr = self.run(['/usr/bin/antiword', filename])
+        return stdout
+
 
 
 def get_explanations(res_iter_):
@@ -29,11 +35,21 @@ def get_explanations(res_iter_):
             with tempfile.NamedTemporaryFile(mode='wb', suffix=orig_name) as tmp:
                 tmp.write(base64.b64decode(row['contents'].encode('ascii')))
                 filename = tmp.name
-                try:
-                    text = DocParser().process(filename, '')
-                except ShellError:
-                    logging.exception('Error with filename %s', orig_name)
-                    text = ''
+                if filename.endswith('.docx'):
+                    parsers = [DocxParser(), DocParser()]
+                else:
+                    parsers = [DocParser(), DocxParser()]
+                text = None
+                exceptions = []
+                for parser in parsers:
+                    try:
+                        text = parser.process(filename, '')
+                        break
+                    except Exception as e:
+                        exceptions.append(e)
+                if text is None:
+                    logging.error('Failed to parse filename %s', orig_name)
+                    logging.error('Exceptions: %s', exceptions)
 
                 lines = text.split('\n')
                 lines = itertools.takewhile(
