@@ -50,6 +50,7 @@ def get_explanations(res_iter_):
                 if text is None:
                     logging.error('Failed to parse filename %s', orig_name)
                     logging.error('Exceptions: %s', exceptions)
+                    text = ''
 
                 lines = text.split('\n')
                 lines = itertools.takewhile(
