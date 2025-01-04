@@ -2,10 +2,10 @@ import base64
 import itertools
 import logging
 import tempfile
+import docx2txt
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.utils import ShellParser
-from textract.parsers.docx_parser import Parser as DocxParser
 from textract.exceptions import ShellError
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -25,6 +25,11 @@ class DocParser(ShellParser):
         stdout, stderr = self.run(['/usr/bin/antiword', filename])
         return stdout
 
+
+class DocxParser():
+
+    def process(self, filename, encoding):
+        return docx2txt.process(filename)
 
 
 def get_explanations(res_iter_):
