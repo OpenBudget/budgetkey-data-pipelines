@@ -58,6 +58,7 @@ def get_explanations(res_iter_):
                     text = ''
 
                 lines = text.split('\n')
+                lines = [line for line in lines if line.strip()]
                 lines = itertools.takewhile(
                     lambda line: all(x not in line
                                      for x in ['בברכה', 'בכבוד רב']),
