@@ -25,7 +25,7 @@ def flow(parameters):
 
     return Flow(
         add_field('doc_id', 'string', get_doc_id(key_pattern), **{'es:index': False}),
-        add_field('item-url', 'string', get_item_link(key_pattern), **{'es:index': False}),
+        add_field('item-url', 'string', get_item_url(key_pattern), **{'es:index': False}),
     )
 
 
