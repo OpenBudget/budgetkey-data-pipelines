@@ -69,6 +69,23 @@ def item_url(kind, fields):
         default=lambda row: f'https://next.obudget.org/i/{kind}/' + '/'.join([str(row[f]) for f in fields])
     )
 
+def convert_request_summary(row):
+    ret = dict()
+    summary = row.get('summary') or dict()
+    for f in ['to', 'from']:
+        if f in summary:
+            items = [
+                dict(
+                    code=code,
+                    office=office,
+                    amount=amount
+                )
+                for code, amount, office in summary[f]
+            ]
+            ret[f] = items
+    return ret
+
+
 PARAMETERS = dict(
     budget_items_data=dict(
         source='/var/datapackages/budget/national/processed/with-extras',
@@ -911,6 +928,160 @@ PARAMETERS = dict(
                 '__total_paid_amount': 'amount_total',
             },
             filters={}
+        )
+    ),
+    budgetary_change_requests_data=dict(
+        # source='/var/datapackages/budget/national/changes/with-transaction-id',
+        
+        description='''
+            פרטי בקשות לשינויים בתקציב במהלך השנה.
+            (נקראות גם ״פניות תקציביות״).
+            אלו פניות (בקשות) אשר נשלחות לוועדת הכספים של הכנסת, לאישור או ליידוע.
+            במאגר זה יש מידע על פניות שאושרו על ידי וועדת הכספים, כמו גם פניות אשר עדיין ממתינות לאישור.
+        ''',
+        fields=[
+            item_url('national-budget-changes', ['transaction_id']),
+            dict(
+                name='year',
+                description='''
+                    השנה בה נשלחה הבקשה לוועדת הכספים.
+                ''',
+                sample_values=[2017, 2020, 2024],
+                type='integer',
+                default=lambda row: row.get('year')
+            ),
+            dict(
+                name='transaction_id',
+                description='''
+                    מזהה ייחודי של הבקשה.
+                ''',
+                sample_values=['2005/01-001', '2017/60-003', '2011/18-028'],
+                type='string',
+                default=lambda row: row.get('transaction_id')
+            ),
+            dict(
+                name='change_type',
+                description='''
+                    סוג הבקשה לשינוי בתקציב.
+                    ניתן להשתמש במזהה הזה על מנת לקבל פרטים נוספים על הבקשה הספציפית ממאגר budgetary_change_details_data.
+                ''',
+                possible_values=[
+                    'שינוי פנימי',
+                    'לרזרבה כללית',
+                    'עודפים',
+                    'מרזרבה כללית',
+                    'העברה לרזרבה',
+                    'בין משרדים',
+                    'קיצוץ לרזרבה',
+                    'הקצאות מהרזרבה הכללית',
+                    'הגדלה רגילה',
+                    'קיצוץ',
+                    'תקציב נוסף',
+                    'המרת עב"צ לשכ"א',
+                    'המרת עב"צ לשכ"א מהרזרבה הכללית',
+                    'בין סעיפים',
+                ],
+                type='string',
+                default=lambda row: ('בין משרדים' if len(row['change_title']) > 1 else row['change_title'][0]) if row.get('change_title') else None
+            ),
+            dict(
+                name='approval_type',
+                description='''
+                    סוג האישור הנדרש לבקשה.
+                    לעיתים וועדת הכספים בכנסת נדרשת לאשר את הבקשה.
+                    במקרים אחרים, הוועדה מיודעת אך יכולה לדחות בקשה במידת הצורך.
+                    בשאר המקרים השינוי מאושר על ידי אגף התקציבים במשרד האוצר, והוועדה רק מיודעת על השינוי שבוצע..
+                ''',
+                possible_values=[
+                    'אישור ועדה',
+                    'הודעה לועדה',
+                    'אישור אגף',
+                ],
+                type='string',
+                default=lambda row: row.get('change_type_name')[0]
+            ),
+            dict(
+                name='is_pending',
+                description='''
+                    האם הבקשה עדיין ממתינה לאישור.
+                ''',
+                possible_values=[True, False],
+                type='boolean',
+                default=lambda row: row.get('pending')[0]
+            ),
+            dict(
+                name='request_title',
+                description='''
+                    כותרת הבקשה לשינוי בתקציב.
+                ''',
+                sample_values=['עודפים מחוייבים', 'יישום החלטת ממשלה 1364', 'קיצוץ רוחבי דרוזים'],
+                type='string',
+                default=lambda row: ', '.join(row.get('req_title') or [])
+            ),
+            dict(
+                name='request_explanation',
+                description='''
+                    פירוט הבקשה לשינוי בתקציב.
+                ''',
+                type='string',
+                default=lambda row: row.get('explanation')
+            ),
+            dict(
+                name='request_summary',
+                description='''
+                    מתצית השינויים המבוקשים, מסוכמים לרמת משרד.
+                    לקבלת מידע מפורט יותר, יש לתשאל את מאגר budgetary_change_details_data עם המזהה הייחודי של הבקשה.
+                ''',
+                type='object',
+                sample_values=[
+                    {
+                        'from': [{
+                            'code': '23',
+                            'office': 'משרד הבריאות',
+                            'amount': -1000000,
+                        }],
+                        'to': [{
+                            'code': '20',
+                            'office': 'משרד החינוך',
+                            'amount': 1000000,
+                        }],
+                    }
+                ],
+                default=convert_request_summary
+            ),
+            dict(
+                name='appproval_date',
+                description='''
+                    תאריך אישור הבקשה, במידה והיא אושרה.
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                type='date',
+                default=lambda row: row.get('date')
+            ),
+            dict(
+                name='committee_ids',
+                description='''
+                    המזהים הייחודיים של הפניות לוועדת הכספים, במידה והשינויים כללו כאלו.
+                ''',
+                sample_values=[[9002], [67, 68], [1001, 1002]],
+                type='array',
+                default=lambda row: row.get('committee_id') or []
+            ),
+        ],
+        search=dict(
+            index='national-budget-changes',
+            field_map={
+                'year': 'year',
+                'transaction_id': 'transaction_id',
+                'change_type': 'change_title',
+                'approval_type': 'change_type_name',
+                'is_pending': 'is_pending',
+                'request_title': 'req_title',
+                'request_explanation': 'explanation',
+                'request_summary': 'summary',
+                'approval_date': 'date',
+                'committee_ids': 'committee_id',
+            },
         )
     ),
 )

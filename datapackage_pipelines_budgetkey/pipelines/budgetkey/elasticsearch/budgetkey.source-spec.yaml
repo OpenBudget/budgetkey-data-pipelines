@@ -2,7 +2,7 @@ bumper: 2
 
 budget:
   kind: indexer
-  revision: 38
+  revision: 39
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: 'תקציב {title} ({nice-code})'
@@ -30,7 +30,7 @@ budget:
 
 national-budget-changes:
   kind: indexer
-  revision: 9
+  revision: 10
   dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
   page-title-pattern: '{req_title[0]}'
@@ -47,7 +47,7 @@ national-budget-changes:
 
 entities:
   kind: indexer
-  revision: 50
+  revision: 51
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   page-title-pattern: '{name} ({kind_he})'
@@ -67,7 +67,7 @@ entities:
 
 contract-spending:
   kind: indexer
-  revision: 19
+  revision: 20
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
@@ -92,10 +92,9 @@ contract-spending:
     from-field: order_date
     to-field: end_date
 
-
 supports:
   kind: indexer
-  revision: 13
+  revision: 14
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
   page-title-pattern: 'תמיכה תקציבית ב{recipient}'
@@ -122,10 +121,9 @@ supports:
     type: year
     field: year_requested
 
-
 tenders:
   kind: indexer
-  revision: 28
+  revision: 29
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'
@@ -209,8 +207,6 @@ support_criteria:
     from-field: start_date
     to-field: claim_date
 
-
-
 people:
   kind: indexer
   revision: 5
@@ -219,7 +215,6 @@ people:
   page-title-pattern: 'מידע על {key}'
   key-fields:
     - key
-
 
 reports:
   kind: indexer
@@ -238,7 +233,7 @@ reports:
 
 gov_decisions:
   kind: indexer
-  revision: 2
+  revision: 3
   dependent_pipeline: ./government_decisions/government_decisions
   source_datapackage: /var/datapackages/government_decisions/datapackage.json
   page-title-pattern: 'פרסומי הממשלה - {title}'
@@ -250,7 +245,7 @@ gov_decisions:
 
 activities:
   kind: indexer
-  revision: 34
+  revision: 35
   dependent_pipeline: ./activities/social_services/social_services
   source_datapackage: /var/datapackages/activities/social_services/datapackage.json
   page-title-pattern: '{kind_he} של {office} - {name}'
