@@ -6,7 +6,7 @@ national-budget-changes:
       parameters:
         name: national-budget-changes
         title: National Budget Amendments
-        revision: 2024.04-09
+        revision: 2025.01-01
     - run: load
       parameters:
         from: https://budgetkey-files.ams3.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_data_2005.xlsx
