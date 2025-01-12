@@ -1100,8 +1100,8 @@ def get_flow(table, params, debug=False):
     description = clean_lines(params['description'])
     fields = params['fields']
     search = params.get('search')
-    if search:
-        search['fieldmap']['item-url'] = 'item-url'
+    if search and search.get('field_map'):
+        search['field_map']['item-url'] = 'item-url'
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
     
