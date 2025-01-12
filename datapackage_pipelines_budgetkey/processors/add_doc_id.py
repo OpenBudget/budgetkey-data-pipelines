@@ -15,12 +15,17 @@ def get_doc_id(key_pattern):
         return ret
     return func
 
+def get_item_url(key_pattern):
+    def func(row):
+        return 'https://next.obudget.org/i/' + key_pattern.format(**row)
+    return func
 
 def flow(parameters):
     key_pattern = parameters['doc-id-pattern']
 
     return Flow(
         add_field('doc_id', 'string', get_doc_id(key_pattern), **{'es:index': False}),
+        add_field('item-url', 'string', get_item_link(key_pattern), **{'es:index': False}),
     )
 
 

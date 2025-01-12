@@ -59,6 +59,16 @@ def debug_source(source, debug):
         return source.replace('/var/datapackages/', 'https://next.obudget.org/datapackages/', )
     return source
 
+def item_url(kind, fields):
+    return dict(
+        name='item-url',
+        description='''
+            קישור לעמוד הפריט באתר מפתח התקציב.
+        ''',
+        type='string',
+        default=lambda row: f'https://next.obudget.org/i/{kind}/' + '/'.join([str(row[f]) for f in fields])
+    )
+
 PARAMETERS = dict(
     budget_items_data=dict(
         source='/var/datapackages/budget/national/processed/with-extras',
@@ -79,6 +89,7 @@ PARAMETERS = dict(
             - לסינון נושאים כלליים השתמש בשדה functional_class_detailed.
         ''',
         fields=[
+            item_url('budget', ['code', 'year']),
             dict(
                 name='code',
                 description='''
@@ -300,6 +311,7 @@ PARAMETERS = dict(
             השתמש בשדה code בשליפות ב-db ולא בשדה title.
         ''',
         fields=[
+            item_url('budget', ['code', 'year']),
             dict(
                 name='code',
                 description='''
@@ -443,6 +455,7 @@ PARAMETERS = dict(
             חברות, עמותות, רשויות מקומיות ועוד.
         ''',
         fields=[
+            item_url('entities', ['id']),
             dict(
                 name='entity_id',
                 description='''
@@ -544,6 +557,7 @@ PARAMETERS = dict(
             בשביל לדעת אילו התקשרויות או ספקים היו פעילים בשנה מסוימת, חובה להשתמש בשדות start_year ו end_year
         ''',
         fields=[
+            item_url('contract-spending', ['publisher_key', 'order_id', 'budget_code']),
             dict(
                 name='budget_code',
                 description='''
@@ -754,6 +768,7 @@ PARAMETERS = dict(
             לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
         ''',
         fields=[
+            item_url('supports', ['budget_code', 'year_requested', 'short_id', 'request_type']),
             dict(
                 name='budget_code',
                 description='''
@@ -914,6 +929,8 @@ def get_flow(table, params, debug=False):
     description = clean_lines(params['description'])
     fields = params['fields']
     search = params.get('search')
+    if search:
+        search['fieldmap']['item-url'] = 'item-url'
     steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
     
