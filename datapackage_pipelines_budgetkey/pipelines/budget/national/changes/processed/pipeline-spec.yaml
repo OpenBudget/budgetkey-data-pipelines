@@ -74,6 +74,11 @@ national-budget-changes-aggregated:
         resources: national-budget-changes
         out:
           - transaction_id: null
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/budget/national/changes/with-transaction-id
+
     - run: set_types
       parameters:
         resources: national-budget-changes
@@ -88,14 +93,6 @@ national-budget-changes-aggregated:
           -
             operation: sum
             target: amount
-            source:
-              - net_expense_diff
-              - gross_expense_diff
-              - allocated_income_diff
-              - commitment_limit_diff
-          -
-            operation: sum
-            target: transferred_amount
             source:
               - net_expense_diff
               - gross_expense_diff
