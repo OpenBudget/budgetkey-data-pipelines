@@ -932,7 +932,7 @@ PARAMETERS = dict(
     ),
     budgetary_change_requests_data=dict(
         # source='/var/datapackages/budget/national/changes/with-transaction-id',
-        
+        source='/var/datapackages/budget/national/changes/full',
         description='''
             פרטי בקשות לשינויים בתקציב במהלך השנה.
             (נקראות גם ״פניות תקציביות״).
