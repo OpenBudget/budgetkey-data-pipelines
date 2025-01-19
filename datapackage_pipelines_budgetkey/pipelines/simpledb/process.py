@@ -1103,7 +1103,7 @@ PARAMETERS = dict(
                     קישור לעמוד הפריט באתר מפתח התקציב.
                 ''',
                 type='string',
-                default=lambda row: f'https://next.obudget.org/dashboards/budget-transfers/budget/{rpw["budget_code"]}/{row["year"]}'
+                default=lambda row: f'https://next.obudget.org/dashboards/budget-transfers/budget/{row["budget_code"]}/{row["year"]}'
             ),
             dict(
                 name='year',
