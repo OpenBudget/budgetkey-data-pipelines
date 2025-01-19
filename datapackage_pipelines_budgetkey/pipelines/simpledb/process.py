@@ -1056,7 +1056,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
                 type='date',
-                default=lambda row: row.get('date')
+                default=lambda row: (row.get('date') or [None])[0]
             ),
             dict(
                 name='committee_ids',
