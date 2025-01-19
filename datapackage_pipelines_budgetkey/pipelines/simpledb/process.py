@@ -18,6 +18,16 @@ def clean_lines(text: str):
         text = text.replace(prefix, '\n')
     return text.strip()
 
+def clean_budget_code(code):
+    if not code:
+        return None
+    code = code[2:]
+    ret = ''
+    while code:
+        ret += code[:2] + '.'
+        code = code[2:]
+    return ret[:-1]
+
 def filtered_budget_code(code):
     if not code:
         return None
@@ -27,12 +37,7 @@ def filtered_budget_code(code):
         return 'TOTAL'
     if code.startswith('C'):
         return None
-    code = code[2:]
-    ret = ''
-    while code:
-        ret += code[:2] + '.'
-        code = code[2:]
-    return ret[:-1]
+    return clean_budget_code(code)
 
 def filtered_budget_code_income(code):
     if not code:
@@ -41,12 +46,8 @@ def filtered_budget_code_income(code):
         return None
     if code == '0000':
         return 'TOTAL'
-    code = code[4:]
-    ret = ''
-    while code:
-        ret += code[:2] + '.'
-        code = code[2:]
-    return ret[:-1]
+    code = code[2:]
+    return clean_budget_code(code)
 
 def get_filter(func, field_name):
     def filter_func(row):
@@ -1084,6 +1085,106 @@ PARAMETERS = dict(
             },
         )
     ),
+    budgetary_change_transactions_data=dict(
+        source='/var/datapackages/budget/national/changes/with-transaction-id',
+        resources='national-budget-changes',
+        # source='/var/datapackages/budget/national/changes/full',
+        description='''
+            פרטי השינויים הפרטניים בסעיפי תקציב במהלך השנה.
+            כל בקשה לשינוי כוללת מספר שינויים ספציפיים.
+            (הבקשות עצמן מתוארות במאגר budgetary_change_requests_data).
+            במאגר זה יש מידע על שינויים שכבר אושרו על ידי וועדת הכספים, כמו גם שינויים אשר עדיין ממתינים לאישור.
+            כל שינוי מקושר לבקשה בו הוא מופיע דרך השדה transaction_id.
+        ''',
+        fields=[
+            dict(
+                name='item-url',
+                description='''
+                    קישור לעמוד הפריט באתר מפתח התקציב.
+                ''',
+                type='string',
+                default=lambda row: f'https://next.obudget.org/dashboards/budget-transfers/budget/{rpw["budget_code"]}/{row["year"]}'
+            ),
+            dict(
+                name='year',
+                description='''
+                    השנה בה נשלחה לוועדת הכספים הבקשה שכוללת את השינוי הזה.
+                ''',
+                sample_values=[2017, 2020, 2024],
+                type='integer',
+                default=lambda row: row.get('year')
+            ),
+            dict(
+                name='code',
+                description='''
+                    מזהה הסעיף התקציבי שבו נעשה השינוי.
+                ''',
+                sample_values=['20.67.01', '26.13.01', '19.42.02'],
+                type='string',
+                default=lambda row: clean_budget_code(row.get('budget_code'))
+            ),
+            dict(
+                name='title',
+                description='''
+                    כותרת הסעיף התקציבי שבו נעשה השינוי.
+                ''',
+                sample_values=['תכנון ובנייה', 'משרד הבריאות', 'משרד החינוך'],
+                type='string',
+                default=lambda row: row.get('budget_title')
+            ),
+            dict(
+                name='transaction_id',
+                description='''
+                    מזהה ייחודי של הבקשה בה מופיע השינוי.
+                ''',
+                sample_values=['2005/01-001', '2017/60-003', '2011/18-028'],
+                type='string',
+                default=lambda row: row.get('transaction_id')
+            ),
+            dict(
+                name='is_pending',
+                description='''
+                    האם השינוי עדיין ממתין לאישור.
+                ''',
+                possible_values=[True, False],
+                type='boolean',
+                default=lambda row: row.get('pending')[0]
+            ),
+            dict(
+                name='appproval_date',
+                description='''
+                    תאריך אישור השינוי, במידה והוא אושר.
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                type='date',
+                default=lambda row: (row.get('date') or [None])[0]
+            ),
+            dict(
+                name='diff__amount_allocated',
+                description='''
+                    השינוי בתקציב שהוקצה לסעיף.
+                ''',
+                sample_values=[1000000, -5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('net_expense_diff')
+            ),
+        ],
+        search=dict(
+            index='national-budget-changes',
+            field_map={
+                'year': 'year',
+                'transaction_id': 'transaction_id',
+                'change_type': 'change_title',
+                'approval_type': 'change_type_name',
+                'is_pending': 'is_pending',
+                'request_title': 'req_title',
+                'request_explanation': 'explanation',
+                'request_summary': 'summary',
+                'approval_date': 'date',
+                'committee_ids': 'committee_id',
+            },
+        )
+    ),
 )
 
 def remove_pk(package: DF.PackageWrapper):
@@ -1102,7 +1203,8 @@ def get_flow(table, params, debug=False):
     search = params.get('search')
     if search and search.get('field_map'):
         search['field_map']['item-url'] = 'item-url'
-    steps.append(DF.load(f'{source}/datapackage.json', limit_rows=10000 if debug else None))
+    resources = params.get('resources')
+    steps.append(DF.load(f'{source}/datapackage.json', resources=resources, limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
     
     if not debug:
