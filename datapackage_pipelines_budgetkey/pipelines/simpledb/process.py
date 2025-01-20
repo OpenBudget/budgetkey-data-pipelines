@@ -1148,7 +1148,7 @@ PARAMETERS = dict(
                 ''',
                 possible_values=[True, False],
                 type='boolean',
-                default=lambda row: row.get('pending')[0]
+                default=lambda row: row.get('pending')
             ),
             dict(
                 name='appproval_date',
