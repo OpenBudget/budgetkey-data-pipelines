@@ -1157,7 +1157,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
                 type='date',
-                default=lambda row: (row.get('date') or [None])[0]
+                default=lambda row: row.get('date')
             ),
             dict(
                 name='diff__amount_allocated',
@@ -1245,7 +1245,7 @@ def flow(parameters, *_):
 
 
 if __name__ == '__main__':
-    params = PARAMETERS['budget_items_data']
+    params = PARAMETERS['budgetary_change_transactions_data']
     DF.Flow(
-        get_flow('budget_items_data', params, debug=True),
+        get_flow('budgetary_change_transactions_data', params, debug=True),
     ).process()
