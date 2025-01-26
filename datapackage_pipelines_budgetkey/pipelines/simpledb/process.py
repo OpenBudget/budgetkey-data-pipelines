@@ -1193,7 +1193,7 @@ def get_flow(table, params, debug=False):
     description = clean_lines(params['description'])
     fields = params['fields']
     search = params.get('search')
-    if search and search.get('field_map'):
+    if search and isinstance(search, dict) and search.get('field_map'):
         search['field_map']['item_url'] = 'item-url'
     resources = params.get('resources')
     steps.append(DF.load(f'{source}/datapackage.json', resources=resources, limit_rows=10000 if debug else None))
