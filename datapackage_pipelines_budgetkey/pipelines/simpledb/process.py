@@ -62,7 +62,7 @@ def debug_source(source, debug):
 
 def item_url(kind, fields):
     return dict(
-        name='item-url',
+        name='item_url',
         description='''
             קישור לעמוד הפריט באתר מפתח התקציב.
         ''',
@@ -1100,7 +1100,7 @@ PARAMETERS = dict(
         ''',
         fields=[
             dict(
-                name='item-url',
+                name='item_url',
                 description='''
                     קישור לעמוד הפריט באתר מפתח התקציב.
                 ''',
@@ -1208,7 +1208,7 @@ def get_flow(table, params, debug=False):
     fields = params['fields']
     search = params.get('search')
     if search and search.get('field_map'):
-        search['field_map']['item-url'] = 'item-url'
+        search['field_map']['item_url'] = 'item-url'
     resources = params.get('resources')
     steps.append(DF.load(f'{source}/datapackage.json', resources=resources, limit_rows=10000 if debug else None))
     steps.append(DF.update_resource(-1, description=description, name=table, search=search))
