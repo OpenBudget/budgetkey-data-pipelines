@@ -986,12 +986,13 @@ PARAMETERS = dict(
                 default=lambda row: ('בין משרדים' if len(row['change_title']) > 1 else row['change_title'][0]) if row.get('change_title') else None
             ),
             dict(
-                name='approval_type',
+                name='committee_procedure',
                 description='''
                     סוג האישור הנדרש לבקשה.
                     לעיתים וועדת הכספים בכנסת נדרשת לאשר את הבקשה.
                     במקרים אחרים, הוועדה מיודעת אך יכולה לדחות בקשה במידת הצורך.
-                    בשאר המקרים השינוי מאושר על ידי אגף התקציבים במשרד האוצר, והוועדה רק מיודעת על השינוי שבוצע..
+                    בשאר המקרים השינוי מאושר על ידי אגף התקציבים במשרד האוצר, והוועדה רק מיודעת על השינוי שבוצע.
+                    אם לא התבקש במפורש סוג אישור מסוים, אין לסנן לפי שדה זה.
                 ''',
                 possible_values=[
                     'אישור ועדה',
@@ -1075,7 +1076,7 @@ PARAMETERS = dict(
                 'year': 'year',
                 'transaction_id': 'transaction_id',
                 'change_type': 'change_title',
-                'approval_type': 'change_type_name',
+                'committee_procedure': 'change_type_name',
                 'is_pending': 'is_pending',
                 'request_title': 'req_title',
                 'request_explanation': 'explanation',
