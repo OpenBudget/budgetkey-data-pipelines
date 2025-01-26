@@ -93,7 +93,7 @@ PARAMETERS = dict(
         # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
         description='''
             סעיפי התקציב מספר תקציב המדינה.
-            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
+            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2025).
             בנוסף זמינה גם הצעת התקציב לשנת 2025.
 
             אופן ביצוע שאילתות database:
@@ -154,7 +154,7 @@ PARAMETERS = dict(
                     שנת התקציב.
                     שנת התקציב ממנו נלקח הסעיף.
                 ''',
-                sample_values=[2017, 2023, 2024]
+                sample_values=[2017, 2023, 2025]
             ),
             dict(
                 name='amount_allocated',
@@ -342,7 +342,7 @@ PARAMETERS = dict(
         # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
         description='''
             סעיפי הכנסות המדינה מתוך ספר תקציב המדינה.
-            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2024).
+            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2025).
             בנוסף זמינה גם הערכת ההכנסות לתקציב לשנת 2025.
 
             חיפוש טקסט חופשי - לפי שמות הסעיפים *בלבד*!
@@ -381,7 +381,7 @@ PARAMETERS = dict(
                     שנת התקציב.
                     שנת התקציב ממנו נלקח הסעיף.
                 ''',
-                sample_values=[2017, 2023, 2024]
+                sample_values=[2017, 2023, 2025]
             ),
             dict(
                 name='amount_allocated',
@@ -584,7 +584,7 @@ PARAMETERS = dict(
         description='''
             נתוני התקשרויות רכש עם חברות, עמותות וספקים אחרים.
             התקשרויות רכש משמשות לקניית מוצרים ושירותים.
-            המידע הוא לכלל שנות התקציב מאז 2016 ועד השנה הנוכחית (2024).
+            המידע הוא לכלל שנות התקציב מאז 2016 ועד השנה הנוכחית (2025).
             
             חיפוש טקסט חופשי - לפי שם המשרד, ומטרת ההתקשרות *בלבד*!
             בשאילתות database:
@@ -663,7 +663,7 @@ PARAMETERS = dict(
                 description='''
                     תאריך ביצוע ההזמנה המקורית
                 ''',
-                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
                 type='date',                
             ),
             dict(
@@ -671,7 +671,7 @@ PARAMETERS = dict(
                 description='''
                     שנת תחילת ההתקשרות
                 ''',
-                sample_values=[2017, 2020, 2024],
+                sample_values=[2017, 2020, 2025],
                 type='integer',
                 default=lambda row: row.get('min_year')
             ),
@@ -680,7 +680,7 @@ PARAMETERS = dict(
                 description='''
                     שנת סוף ההתקשרות (או שנת הפעילות האחרונה של ההתקשרות).
                 ''',
-                sample_values=[2017, 2020, 2024],
+                sample_values=[2017, 2020, 2025],
                 type='integer',
                 default=lambda row: row.get('max_year')
             ),
@@ -689,7 +689,7 @@ PARAMETERS = dict(
                 description='''
                     תאריך סיום ההתקשרות.
                 ''',
-                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
                 type='date',                
             ),
             dict(
@@ -800,7 +800,7 @@ PARAMETERS = dict(
         description='''
             נתוני תמיכות תקציביות בחברות ועמותות.
             תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
-            המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2024).
+            המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2025).
             חיפוש טקסט חופשי - לפי שם המשרד, ומטרת התמיכה *בלבד*!
             השתמש בשדות budget_code ו recipient_entity_id בשליפות ב-db ולא בשדה recipient_entity_name או purpose.
             לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
@@ -874,7 +874,7 @@ PARAMETERS = dict(
                 description='''
                     שנת  אישור התמיכה
                 ''',
-                sample_values=[2017, 2023, 2024],
+                sample_values=[2017, 2023, 2025],
                 type='integer',
                 default=lambda row: row.get('year_requested'),
             ),
@@ -967,7 +967,7 @@ PARAMETERS = dict(
                 description='''
                     השנה בה נשלחה הבקשה לוועדת הכספים.
                 ''',
-                sample_values=[2017, 2020, 2024],
+                sample_values=[2017, 2020, 2025],
                 type='integer',
                 default=lambda row: row.get('year')
             ),
@@ -1076,7 +1076,7 @@ PARAMETERS = dict(
                 description='''
                     תאריך אישור הבקשה, במידה והיא אושרה.
                 ''',
-                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
                 type='date',
                 default=lambda row: (row.get('date') or [None])[0]
             ),
@@ -1132,7 +1132,7 @@ PARAMETERS = dict(
                 description='''
                     השנה בה נשלחה לוועדת הכספים הבקשה שכוללת את השינוי הזה.
                 ''',
-                sample_values=[2017, 2020, 2024],
+                sample_values=[2017, 2020, 2025],
                 type='integer',
                 default=lambda row: row.get('year')
             ),
@@ -1181,7 +1181,7 @@ PARAMETERS = dict(
                 description='''
                     תאריך אישור השינוי, במידה והוא אושר.
                 ''',
-                sample_values=['2021-01-01', '2023-12-31', '2024-02-29'],
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
                 type='date',
                 default=lambda row: row.get('date')
             ),
