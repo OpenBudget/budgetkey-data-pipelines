@@ -189,6 +189,24 @@ PARAMETERS = dict(
                 default=lambda row: row.get('net_executed')
             ),
             dict(
+                name='personnel_allocated',
+                description='''
+                    שיא כח אדם - מספר תקני כח האדם (המשרות) שהוקצו לסעיף, כפי שהופיעו בתקציב המקורי.
+                ''',
+                sample_values=[15, 128, 405],
+                type='number',
+                default=lambda row: row.get('personnel_allocated')
+            ),
+            dict(
+                name='personnel_revised',
+                description='''
+                    שיא כח אדם - מספר תקני כח האדם (המשרות) שהוקצו לסעיף, לאחר שינויים במהלך השנה.
+                ''',
+                sample_values=[15, 128, 405],
+                type='number',
+                default=lambda row: row.get('personnel_revised')
+            ),
+            dict(
                 name='level',
                 description='''
                     רמת הסעיף התקציבי.
@@ -310,6 +328,8 @@ PARAMETERS = dict(
                 'amount_allocated': 'net_allocated',
                 'amount_revised': 'net_revised',
                 'amount_used': 'net_executed',
+                'personnel_allocated': 'personnel_allocated',
+                'personnel_revised': 'personnel_revised',
             },
             filters={
                 'func_cls_title_1__not': 'הכנסות',
