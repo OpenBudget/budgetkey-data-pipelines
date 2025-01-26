@@ -955,6 +955,7 @@ PARAMETERS = dict(
                 name='transaction_id',
                 description='''
                     מזהה ייחודי של הבקשה.
+                    חובה לבקש את השדה הזה בכל שאילתה בכדי שתוכל לקבל פרטים נוספים על הבקשה ממאגר budgetary_change_transactions_data.
                 ''',
                 sample_values=['2005/01-001', '2017/60-003', '2011/18-028'],
                 type='string',
@@ -964,7 +965,6 @@ PARAMETERS = dict(
                 name='change_type',
                 description='''
                     סוג הבקשה לשינוי בתקציב.
-                    ניתן להשתמש במזהה הזה על מנת לקבל פרטים נוספים על הבקשה הספציפית ממאגר budgetary_change_details_data.
                 ''',
                 possible_values=[
                     'שינוי פנימי',
@@ -1032,7 +1032,7 @@ PARAMETERS = dict(
                 name='request_summary',
                 description='''
                     מתצית השינויים המבוקשים, מסוכמים לרמת משרד.
-                    לקבלת מידע מפורט יותר, יש לתשאל את מאגר budgetary_change_details_data עם המזהה הייחודי של הבקשה.
+                    לקבלת מידע מפורט יותר, יש לתשאל את מאגר budgetary_change_transactions_data עם השדה transaction_id של הבקשה.
                 ''',
                 type='object',
                 sample_values=[
@@ -1063,7 +1063,7 @@ PARAMETERS = dict(
             dict(
                 name='committee_ids',
                 description='''
-                    המזהים הייחודיים של הפניות לוועדת הכספים, במידה והשינויים כללו כאלו.
+                    מספרי הפניות לוועדת הכספים, במידה והשינויים כללו כאלו.
                 ''',
                 sample_values=[[9002], [67, 68], [1001, 1002]],
                 type='array',
@@ -1228,7 +1228,7 @@ def get_flow(table, params, debug=False):
     return DF.Flow(*steps)
 
 def flow(parameters, *_):
-    for table, params in PARAMETERS.items():
+    for table, params in reversed(PARAMETERS.items()):
         get_flow(table, params).process()
     return DF.Flow(
         [dict(done=True)],
