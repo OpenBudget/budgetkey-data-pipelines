@@ -1175,21 +1175,7 @@ PARAMETERS = dict(
                 default=lambda row: row.get('net_expense_diff')
             ),
         ],
-        search=dict(
-            index='national-budget-changes',
-            field_map={
-                'year': 'year',
-                'transaction_id': 'transaction_id',
-                'change_type': 'change_title',
-                'approval_type': 'change_type_name',
-                'is_pending': 'is_pending',
-                'request_title': 'req_title',
-                'request_explanation': 'explanation',
-                'request_summary': 'summary',
-                'approval_date': 'date',
-                'committee_ids': 'committee_id',
-            },
-        )
+        search='n/a'
     ),
 )
 
