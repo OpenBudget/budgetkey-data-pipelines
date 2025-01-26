@@ -101,38 +101,35 @@ supports-2018:
   - flow: scraper
     parameters:
       year: 2018
+      skip-if-exists: true
 
 supports-2019:
-  schedule:
-    crontab: "0 16 * * *"
   pipeline:
   - flow: scraper
     parameters:
       year: 2019
+      skip-if-exists: true
 
 supports-2020:
-  schedule:
-    crontab: "0 17 * * *"
   pipeline:
   - flow: scraper
     parameters:
       year: 2020
+      skip-if-exists: true
 
 supports-2021:
-  schedule:
-    crontab: "0 18 * * *"
   pipeline:
   - flow: scraper
     parameters:
       year: 2021
+      skip-if-exists: true
 
 supports-2022:
-  schedule:
-    crontab: "0 19 * * *"
   pipeline:
   - flow: scraper
     parameters:
       year: 2022
+      skip-if-exists: true
 
 supports-2023:
   schedule:
@@ -150,17 +147,25 @@ supports-2024:
     parameters:
       year: 2024
 
+supports-2025:
+  schedule:
+    crontab: "0 22 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2025
+
 
 all:
   dependencies:
-    - pipeline: ./supports/supports-2024
+    - pipeline: ./supports/supports-2025
 
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
-        revision: '2024-01-1'
+        revision: '2025-01-1'
 
     - run: load
       parameters:
@@ -225,6 +230,9 @@ all:
     - run: load
       parameters:
         from: /var/datapackages/supports/yearly-2024/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2025/datapackage.json
 
     - run: concatenate
       parameters:
