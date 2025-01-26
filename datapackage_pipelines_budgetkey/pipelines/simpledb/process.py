@@ -1102,7 +1102,7 @@ PARAMETERS = dict(
             dict(
                 name='item_url',
                 description='''
-                    קישור לעמוד הפריט באתר מפתח התקציב.
+                    קישור לדו״ח מפורט על התכניתה התקציבית באתר מפתח התקציב.
                 ''',
                 type='string',
                 default=lambda row: f'https://next.obudget.org/dashboards/budget-transfers/budget/{row["budget_code"]}/{row["year"]}'
