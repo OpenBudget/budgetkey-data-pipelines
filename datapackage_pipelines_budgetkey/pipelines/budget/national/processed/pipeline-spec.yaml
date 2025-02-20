@@ -14,7 +14,7 @@ aggregated-yearly:
       parameters:
         title: National Budget (Processed)
         name: processed-national-budget-aggregated-yearly
-        revision: '2024.12.15'
+        revision: '2025.02.20'
     - run: load_resource
       parameters:
         resource: national-budget
@@ -120,7 +120,7 @@ aggregated-yearly:
 
     - run: join_phases
       parameters:
-        last-completed-year: 2023
+        last-completed-year: 2024
         proposal-year: 2025
 
     - run: topical_sums
