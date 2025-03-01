@@ -392,6 +392,7 @@ latest-contract-spending:
     - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: calc-min-max-years
     - run: calc-spending-score
+    - run: fix-pii-purpose
     - run: limit_last_years
       parameters:
         year_column: max_year
