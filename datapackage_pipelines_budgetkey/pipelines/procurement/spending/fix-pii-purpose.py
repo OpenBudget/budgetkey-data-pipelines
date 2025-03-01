@@ -12,7 +12,7 @@ def process_row(row, *_):
     purpose = row.get('purpose')
     if purpose and 'איש קשר' in purpose:
         purpose = purpose.split('איש קשר')[0]
-        row['purpose'] = purpose
+        row['purpose'] = purpose + " ()"
     return row
 
 
