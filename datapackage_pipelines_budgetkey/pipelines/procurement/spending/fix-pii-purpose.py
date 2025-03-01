@@ -10,11 +10,9 @@ def modify_datapackage(dp, *_):
 
 def process_row(row, *_):
     purpose = row.get('purpose')
-    publisher_name = row.get('publisher_name')
-    if purpose:
-        if publisher_name == 'שירות בתי הסוהר':
-            purpose = purpose.split('איש קשר')[0]
-            row['purpose'] = purpose
+    if purpose and 'איש קשר' in purpose:
+        purpose = purpose.split('איש קשר')[0]
+        row['purpose'] = purpose
     return row
 
 
