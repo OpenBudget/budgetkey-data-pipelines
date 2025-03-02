@@ -82,7 +82,7 @@ class DumpToElasticSearch(dump_to_es):
             for config in configs:
                 if 'revision' in config:
                     revision = config['revision']
-                    logging.info('DELETING from "%s", iitems with revision < %d',
+                    logging.info('DELETING from "%s", items with revision < %d',
                                 index_name, revision)
                     ret = self.engine.delete_by_query(
                         index_name,

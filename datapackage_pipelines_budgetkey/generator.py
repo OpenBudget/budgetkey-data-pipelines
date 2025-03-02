@@ -15,6 +15,7 @@ SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/budgetkey_spec_schema.json')
 REF_DATE = datetime.date(year=2019, month=3, day=1)
 INDEX_NAME = os.environ.get('INDEX_NAME', 'budgetkey')
+DOCS_REVISION = (datetime.date.today() - REF_DATE).days
 
 
 class Generator(GeneratorBase):
@@ -185,7 +186,7 @@ class Generator(GeneratorBase):
                         'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
                     })                    
                 ]) + parameters.get('document-steps', []) + steps(*[                   
-                    ('convert_to_key_value'
+                    ('convert_to_key_value', {'revision': DOCS_REVISION}
                     ),
                     ('dump_to_es', {
                         'indexes': {
