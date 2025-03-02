@@ -79,7 +79,7 @@ def get_decision_list():
                 'office': result['ConnectedOffices'][0]["Title"] if result.get('ConnectedOffices') else '',
                 'government': result['PmoGovernmentDesc'][0] if result.get('PmoGovernmentDesc') else (result.get('PmoGovernment')[0] if result.get('PmoGovernment') else None),
                 'policy_type': result['PolicyTypeDesc'][0] if result.get('PolicyTypeDesc') else '',
-                'procedure_number': result['ProcedureNumberNumeric'],
+                'procedure_number': result['ProcedureNumberNumeric'] if result.get('ProcedureNumberNumeric') and result.get('ProcedureNumberNumeric') < 4*1024*1024*1024 else None,
                 'procedure_number_str': result['ProcedureNumber'],
                 'publish_date': result['DocPublishedDate'],
                 # 'publish_date_prod': result['PublishProd'],
