@@ -8,7 +8,7 @@ def process_resources(res_iter_):
         for row in res:
             yield {
                 'key': row['doc_id'],
-                'value': dict(row)
+                'value': dict(row),
                 '__revision': parameters['revision'],
             }
 
