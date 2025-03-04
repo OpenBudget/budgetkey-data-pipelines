@@ -526,6 +526,7 @@ connected-items-explained:
       parameters:
         title: National Budget (Joined with category-explanations)
         name: connected-items-explained
+        revision: '2025.03.04'
     - run: load_resource
       parameters:
         url: dependency://./budget/national/processed/category-explanations
