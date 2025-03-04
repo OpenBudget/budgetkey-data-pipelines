@@ -382,6 +382,7 @@ connected-national-budgets:
         fields:
           current: []
           previous: []
+    - run: sample
     - run: set_types
       parameters:
         types:
