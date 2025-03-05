@@ -9,7 +9,7 @@ from datapackage_pipelines.generators import (
     GeneratorBase, steps
 )
 
-GLOBAL_BUMP = 3
+GLOBAL_BUMP = 4
 ROOT_PATH = os.path.join(os.path.dirname(__file__), '..')
 SCHEMA_FILE = os.path.join(
     os.path.dirname(__file__), 'schemas/budgetkey_spec_schema.json')
