@@ -184,8 +184,9 @@ class Generator(GeneratorBase):
                     }),
                     ('dpdumper', {
                         'out-path': '/var/datapackages/budgetkey/{}'.format(doc_type)
-                    })                    
-                ]) + parameters.get('document-steps', []) + steps(*[                   
+                    }),
+                ]) + parameters.get('document-steps', []) + steps(*[
+                    ('add_redirects_for_item_urls', {}),
                     ('convert_to_key_value', {'revision': DOCS_REVISION}
                     ),
                     ('dump_to_es', {

@@ -1,5 +1,6 @@
 
 import logging
+import hashlib
 
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
@@ -15,9 +16,11 @@ def get_doc_id(key_pattern):
         return ret
     return func
 
-def get_item_url(key_pattern):
+def get_item_url():
     def func(row):
-        return 'https://next.obudget.org/i/' + key_pattern.format(**row)
+        doc_id = row['doc_id']
+        hashed_id = hashlib.md5(doc_id.encode('utf8')).hexdigest()[:12]
+        return 'https://next.obudget.org/i/' + hashed_id
     return func
 
 def flow(parameters):
@@ -25,7 +28,7 @@ def flow(parameters):
 
     return Flow(
         add_field('doc_id', 'string', get_doc_id(key_pattern), **{'es:index': False}),
-        add_field('item-url', 'string', get_item_url(key_pattern), **{'es:index': False}),
+        add_field('item-url', 'string', get_item_url(), **{'es:index': False}),
     )
 
 
