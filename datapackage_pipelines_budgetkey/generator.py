@@ -192,7 +192,10 @@ class Generator(GeneratorBase):
                     ('dump_to_es', {
                         'indexes': {
                             INDEX_NAME + '__docs': [
-                                {'resource-name': 'document'}
+                                {
+                                    'resource-name': 'document',
+                                    'revision': DOCS_REVISION - 365
+                                }
                             ]
                         }
                     }),
