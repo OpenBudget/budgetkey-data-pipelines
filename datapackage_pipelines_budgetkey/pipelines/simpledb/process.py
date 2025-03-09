@@ -1,4 +1,5 @@
 import csv
+import hashlib
 
 csv.field_size_limit(2*1024*1024)
 
@@ -67,7 +68,7 @@ def item_url(kind, fields):
             קישור לעמוד הפריט באתר מפתח התקציב.
         ''',
         type='string',
-        default=lambda row: f'https://next.obudget.org/i/{kind}/' + '/'.join([str(row[f]) for f in fields])
+        default=lambda row: 'https://next.obudget.org/i/' + hashlib.md5((f'{kind}/' + '/'.join([str(row[f]) for f in fields])).encode('utf8')).hexdigest()[:12]
     )
 
 def convert_request_summary(row):
