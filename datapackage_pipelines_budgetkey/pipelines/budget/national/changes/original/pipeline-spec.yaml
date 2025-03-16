@@ -294,7 +294,7 @@ current-year-fixes:
     - run: filter
       parameters:
         in:
-          - year: 2024
+          - year: 2025
     - run: filter
       parameters:
         out:
