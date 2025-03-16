@@ -176,7 +176,7 @@ PARAMETERS = dict(
                 ''',
                 sample_values=[1000000, 5000000, 10000000],
                 type='number',
-                default=lambda row: row.get('net_revised', row.get('net_allocated'))
+                default=lambda row: row.get('net_revised', row.get('net_allocated')) if not row.get('is_proposal') else None
             ),
             dict(
                 name='amount_used',
