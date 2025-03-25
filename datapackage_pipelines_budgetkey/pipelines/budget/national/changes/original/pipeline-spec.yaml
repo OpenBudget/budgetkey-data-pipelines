@@ -345,6 +345,12 @@ current-year-fixes:
         out-path: /var/datapackages/budget/national/changes/current-year-fixes
 
 
+committee-zipfile:
+  schedule:
+    crontab: "0 0 * * *"
+  pipeline:
+    - flow: committee-zipfile
+
 #fake-grouping:
 #  dependencies:
 #    - pipeline: ./budget/national/changes/original/national-budget-changes
