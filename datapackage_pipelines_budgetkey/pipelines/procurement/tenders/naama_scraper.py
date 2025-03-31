@@ -89,6 +89,7 @@ def get_updated_sources():
             data_gov_il_resource.flow(exemptions),
         )
     else:
+        print('DOWNLOADING SOURCES:', sources)
         return DF.Flow(*sources)
 
 
