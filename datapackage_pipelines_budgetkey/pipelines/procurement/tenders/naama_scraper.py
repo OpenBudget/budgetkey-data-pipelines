@@ -82,15 +82,20 @@ def get_updated_sources():
         sources.add(href)
     print('SOURCES:', sources)
     
-    sources = [DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING) for source in sources]
+    steps = [
+        DF.Flow(
+            DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING),
+            DF.update_resource(-1, name=f'source{i}', path=f'source{i}.csv'),
+        )
+        for i, source in enumerate(sources)
+    ]
     if len(sources) != 2:
         return DF.Flow(
             data_gov_il_resource.flow(tenders),
             data_gov_il_resource.flow(exemptions),
         )
     else:
-        print('DOWNLOADING SOURCES:', sources)
-        return DF.Flow(*sources)
+        return DF.Flow(*steps)
 
 
 
