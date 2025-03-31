@@ -95,7 +95,7 @@ def get_updated_sources():
             data_gov_il_resource.flow(exemptions),
         )
     else:
-        return DF.Flow(DF.update_package(sourceUrls=sources), *steps)
+        return DF.Flow(DF.update_package(sourceUrls=list(sources)), *steps)
 
 
 
