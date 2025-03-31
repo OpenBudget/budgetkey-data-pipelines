@@ -7,6 +7,7 @@ all:
     - run: add_metadata
       parameters:
         name: "procurement-tenders"
+        revision: '2025-03-31'
     - flow: naama_scraper
     - run: dump.to_path
       parameters:

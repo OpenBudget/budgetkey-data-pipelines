@@ -85,7 +85,7 @@ def get_updated_sources():
     steps = [
         DF.Flow(
             DF.load(source, format='excel-xml', encoding='utf8', bytes_sample_size=0, cast_strategy=DF.load.CAST_DO_NOTHING),
-            DF.update_resource(-1, name=f'source{i}', path=f'source{i}.csv', originSource=source),
+            DF.update_resource(-1, name=f'source{i}', path=f'source{i}.csv'),
         )
         for i, source in enumerate(sources)
     ]
@@ -95,7 +95,7 @@ def get_updated_sources():
             data_gov_il_resource.flow(exemptions),
         )
     else:
-        return DF.Flow(*steps)
+        return DF.Flow(DF.update_package(sources=sources), *steps)
 
 
 
