@@ -1,5 +1,5 @@
 all:
-  title: Load all tenders data from data.gov.il to a flat file
+  title: Load all tenders data from data.gov.il/procurement agency to a flat file
   schedule:
     crontab: "0 0 * * *"
 
