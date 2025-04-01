@@ -1,18 +1,18 @@
 from datapackage_pipelines.wrapper import ingest, spew
+from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
 
 parameters, dp, res_iter = ingest()
+
 
 def process_resource(res_):
     for row in res_:
         yield row
-        if not row.get('__redirect') and row.get('item-url'):
-            doc_id = row['doc_id']
-            item_url = row['item-url']
-            short_item_id = item_url.split('/')[-1]
-            yield dict(
-                doc_id=short_item_id,
-                __redirect=doc_id
-            )
+        doc_id = row['doc_id']
+        _, short_item_id = calc_short_doc_id(doc_id)
+        yield dict(
+            doc_id=short_item_id,
+            __redirect=doc_id
+        )
 
 
 def process_resources(res_iter_):

@@ -1,9 +1,9 @@
 
 import logging
-import hashlib
 
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
+from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
 
 from dataflows import Flow, add_field
 
@@ -19,8 +19,8 @@ def get_doc_id(key_pattern):
 def get_item_url():
     def func(row):
         doc_id = row['doc_id']
-        hashed_id = hashlib.md5(doc_id.encode('utf8')).hexdigest()[:12]
-        return 'https://next.obudget.org/i/' + hashed_id
+        url, _ = calc_short_doc_id(doc_id)
+        return url
     return func
 
 def flow(parameters):

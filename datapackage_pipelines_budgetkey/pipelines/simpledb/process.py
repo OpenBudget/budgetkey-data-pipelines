@@ -1,6 +1,8 @@
 import csv
 import hashlib
 
+from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
+
 csv.field_size_limit(2*1024*1024)
 
 import json
@@ -68,7 +70,7 @@ def item_url(kind, fields):
             קישור לעמוד הפריט באתר מפתח התקציב.
         ''',
         type='string',
-        default=lambda row: 'https://next.obudget.org/i/' + hashlib.md5((f'{kind}/' + '/'.join([str(row[f]) for f in fields])).encode('utf8')).hexdigest()[:12]
+        default=lambda row: calc_short_doc_id(f'{kind}/' + '/'.join([str(row[f]) for f in fields]))
     )
 
 def convert_request_summary(row):
