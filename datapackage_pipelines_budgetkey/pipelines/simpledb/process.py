@@ -213,8 +213,10 @@ PARAMETERS = dict(
                 name='level',
                 description='''
                     רמת הסעיף התקציבי.
-                    1 מייצג סעיפים ברמה הגבוהה ביותר (כמו משרדים ראשיים).
-                    4 מייצג סעיפים ברמה הנמוכה ביותר (תקנות תקציביות).
+                    1 מייצג סעיפים ברמה הגבוהה ביותר (כמו משרדים ראשיים), עם קוד בעל שתי ספרות (למשל 20,40,50)
+                    2 מייצג תחומים, עם קוד בעל 4 ספרות (למשל 20.67, 47.01, 60.21)
+                    3 מייצג תכניות תקציביות, עם קוד בעל 6 ספרות (למשל 20.67.01, 47.01.02, 60.21.03)
+                    4 מייצג את הסעיפים ברמה הנמוכה ביותר - תקנות תקציביות, עם קוד בעל 8 ספרות (למשל 20.49.05.01)
                     הערך 0 מייצג את כלל תקציב המדינה.
                 ''',
                 sample_values=[0, 1, 2, 3, 4],
@@ -328,11 +330,6 @@ PARAMETERS = dict(
                 'code': 'nice-code',
                 'title': 'title',
                 'year-range': 'year-range',
-                # 'amount_allocated': 'net_allocated',
-                # 'amount_revised': 'net_revised',
-                # 'amount_used': 'net_executed',
-                # 'personnel_allocated': 'personnel_allocated',
-                # 'personnel_revised': 'personnel_revised',
             },
             filters={
                 'func_cls_title_1__not': 'הכנסות',
@@ -479,10 +476,6 @@ PARAMETERS = dict(
                 'code': 'nice-code',
                 'title': 'title',
                 'year-range': 'year-range',
-                # 'year': 'year',
-                # 'amount_allocated': 'net_allocated',
-                # 'amount_revised': 'net_revised',
-                # 'amount_used': 'net_executed',
             },
             filters={
                 'func_cls_title_1': 'הכנסות',
