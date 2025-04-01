@@ -70,7 +70,7 @@ def item_url(kind, fields):
             קישור לעמוד הפריט באתר מפתח התקציב.
         ''',
         type='string',
-        default=lambda row: calc_short_doc_id(f'{kind}/' + '/'.join([str(row[f]) for f in fields]))
+        default=lambda row: calc_short_doc_id(f'{kind}/' + '/'.join([str(row[f]) for f in fields]))[0]
     )
 
 def convert_request_summary(row):
