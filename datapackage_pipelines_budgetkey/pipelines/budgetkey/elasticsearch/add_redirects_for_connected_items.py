@@ -1,5 +1,7 @@
 from datapackage_pipelines.wrapper import ingest, spew
 
+from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
+
 parameters, dp, res_iter = ingest()
 
 def process_resource(res_):
@@ -9,13 +11,16 @@ def process_resource(res_):
             for code_title in rec.get('code_titles', []):
                 code, title = code_title.split(':', 1)
                 doc_id = 'budget/{}/{}'.format(code, year)
-                yield dict(
+                short_url, _ = calc_short_doc_id(doc_id)
+                ret = dict(
                     code=code,
                     title=title,
                     year=int(year),
                     doc_id=doc_id,
                     __redirect=row['doc_id']
                 )
+                ret['item-url'] = short_url
+                yield ret
 
 
 def process_resources(res_iter_):

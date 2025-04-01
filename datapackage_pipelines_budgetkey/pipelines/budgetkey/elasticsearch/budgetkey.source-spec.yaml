@@ -2,7 +2,7 @@ bumper: 4
 
 budget:
   kind: indexer
-  revision: 39
+  revision: 40
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: 'תקציב {title} ({nice-code})'
