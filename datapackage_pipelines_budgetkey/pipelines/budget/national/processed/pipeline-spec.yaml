@@ -121,7 +121,7 @@ aggregated-yearly:
     - run: join_phases
       parameters:
         last-completed-year: 2024
-        proposal-year: 2025
+        proposal-year: null
 
     - run: topical_sums
     - run: join_categories
