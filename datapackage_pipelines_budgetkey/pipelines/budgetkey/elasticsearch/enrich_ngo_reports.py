@@ -65,6 +65,8 @@ def process_resource(res_):
     for row in res_:
         if row['key'].startswith('ngo-district-report'):
             district = row['details']['district']
+            if district not in di:
+                continue
             details = row['details']
             for k, v in di[district].items():
                 details[k] = float(v)
