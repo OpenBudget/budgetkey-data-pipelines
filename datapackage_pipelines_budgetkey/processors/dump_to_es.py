@@ -60,7 +60,6 @@ class DumpToElasticSearch(dump_to_es):
         engine = Elasticsearch(
             os.environ['DATAFLOWS_ELASTICSEARCH'],
             basic_auth=('elastic', os.environ['ELASTIC_PASSWORD']),
-            use_ssl=True, verify_certs=True,
             ca_certs=os.environ['ELASTICSEARCH_CA_CRT'], request_timeout=30,
         )
         super().__init__(
