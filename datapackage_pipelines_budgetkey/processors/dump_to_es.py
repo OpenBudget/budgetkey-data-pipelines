@@ -103,13 +103,11 @@ class DumpToElasticSearch(dump_to_es):
                     logging.info('DELETING from "%s", items with revision < %d',
                                 index_name, revision)
                     ret = self.engine.delete_by_query(
-                        index_name,
-                        {
-                            "query": {
-                                "range": {
-                                    "__revision": {
-                                        "lt": revision
-                                    }
+                        index=index_name,
+                        query={
+                            "range": {
+                                "__revision": {
+                                    "lt": revision
                                 }
                             }
                         },
