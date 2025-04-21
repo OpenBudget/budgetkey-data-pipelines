@@ -4,9 +4,9 @@ from dataflows_elasticsearch import dump_to_es
 from tableschema_elasticsearch.mappers import MappingGenerator
 import dataflows as DF
 
+from elasticsearch import Elasticsearch
 import logging
-import collections
-import datetime
+import os
 import json
 import time
 
@@ -23,6 +23,18 @@ class BoostingMappingGenerator(MappingGenerator):
     @classmethod
     def _convert_type(cls, schema_type, field, prefix):
         prop = super(BoostingMappingGenerator, cls)._convert_type(schema_type, field, prefix)
+        if field['name'] == 'chunks':
+            return {
+                'type': 'nested', 
+                'properties': {
+                    'embeddings': {
+                        'type': 'dense_vector',
+                        'dims': 1536,
+                        'index': True,
+                        'similarity': 'cosine'
+                    }
+                }
+            }
         if field.get('es:keyword'):
             prop['type'] = 'keyword'
         elif schema_type == 'string':
@@ -45,7 +57,14 @@ class BoostingMappingGenerator(MappingGenerator):
 class DumpToElasticSearch(dump_to_es):
 
     def __init__(self, indexes):
+        engine = Elasticsearch(
+            os.environ['DATAFLOWS_ELASTICSEARCH'],
+            basic_auth=('elastic', os.environ['ELASTIC_PASSWORD']),
+            use_ssl=True, verify_certs=True,
+            ca_certs=os.environ['ELASTICSEARCH_CA_CRT'], request_timeout=30,
+        )
         super().__init__(
+            engine=engine,
             indexes=indexes,
             mapper_cls=BoostingMappingGenerator,
             index_settings={
@@ -103,8 +122,6 @@ def flow(parameters):
     return DF.Flow(
         DumpToElasticSearch(parameters['indexes'])
     )
-
-
 
 if __name__ == '__main__':
     try:

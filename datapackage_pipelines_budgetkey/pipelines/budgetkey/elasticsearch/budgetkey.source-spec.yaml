@@ -233,7 +233,7 @@ reports:
 
 gov_decisions:
   kind: indexer
-  revision: 3
+  revision: 4
   dependent_pipeline: ./government_decisions/government_decisions
   source_datapackage: /var/datapackages/government_decisions/datapackage.json
   page-title-pattern: 'פרסומי הממשלה - {title}'
