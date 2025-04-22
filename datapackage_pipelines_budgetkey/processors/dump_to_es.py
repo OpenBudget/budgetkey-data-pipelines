@@ -22,7 +22,6 @@ class BoostingMappingGenerator(MappingGenerator):
 
     @classmethod
     def _convert_type(cls, schema_type, field, prefix):
-        prop = super(BoostingMappingGenerator, cls)._convert_type(schema_type, field, prefix)
         if field['name'] == 'chunks':
             return {
                 'type': 'nested', 
@@ -35,6 +34,7 @@ class BoostingMappingGenerator(MappingGenerator):
                     }
                 }
             }
+        prop = super(BoostingMappingGenerator, cls)._convert_type(schema_type, field, prefix)
         if field.get('es:keyword'):
             prop['type'] = 'keyword'
         # elif schema_type == 'string':
