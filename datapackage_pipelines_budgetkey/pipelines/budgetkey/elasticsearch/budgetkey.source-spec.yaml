@@ -6,6 +6,8 @@ budget:
   dependent_pipeline: ./budget/national/processed/connected-items-explained
   source_datapackage: /var/datapackages/budget/national/processed/connected-items-explained/datapackage.json
   page-title-pattern: 'תקציב {title} ({nice-code})'
+  chunker:
+    - 'הסעיף "{title}" בתקציב המדינה'
   key-fields:
     - code
     - year
@@ -51,6 +53,8 @@ entities:
   dependent_pipeline: ./entities/entities
   source_datapackage: /var/datapackages/entities/scored/datapackage.json
   page-title-pattern: '{name} ({kind_he})'
+  chunker:
+    - '{kind_he}: "{name}"'
   key-fields:
     - id
   key-pattern: 'org/{kind}/{id}'
@@ -71,6 +75,8 @@ contract-spending:
   dependent_pipeline: ./procurement/spending/latest-contract-spending
   source_datapackage: /var/datapackages/procurement/spending/latest-contract-spending/datapackage.json
   page-title-pattern: '{purpose}'
+  chunker:
+    - 'התקשרות רכש של {publisher_name} עם {entity_name} עבור "{purpose}"'
   key-fields:
     - publisher_key
     - order_id
@@ -97,7 +103,9 @@ supports:
   revision: 14
   dependent_pipeline: ./supports/by-request-year
   source_datapackage: /var/datapackages/supports/by-request-year/datapackage.json
-  page-title-pattern: 'תמיכה תקציבית ב{recipient}'
+  page-title-pattern: 'תמיכה תקציבית של {supporting_ministry} ל-{recipient} עבור "{support_title}"'
+  chunker:
+    - 'תמיכה תקציבית של {supporting_ministry} ל-{recipient} עבור "{support_title}"'
   key-fields:
     - budget_code
     - year_requested
@@ -127,6 +135,8 @@ tenders:
   dependent_pipeline: ./procurement/tenders/processed
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'
+  chunker:
+    - '{tender_type_he} של {publisher_name} עבור "{description}"'
   key-fields:
     - tender_type
     - publication_id
@@ -237,6 +247,10 @@ gov_decisions:
   dependent_pipeline: ./government_decisions/government_decisions
   source_datapackage: /var/datapackages/government_decisions/datapackage.json
   page-title-pattern: 'פרסומי הממשלה - {title}'
+  chunker:
+    - 'החלטת ממשלה: {title}'
+    - field: text
+      method: chunk
   key-fields:
     - id
   date-range:
@@ -249,6 +263,8 @@ activities:
   dependent_pipeline: ./activities/social_services/social_services
   source_datapackage: /var/datapackages/activities/social_services/datapackage.json
   page-title-pattern: '{kind_he} של {office} - {name}'
+  chunker:
+    - '{kind_he} של {office}: "{name}"'
   key-fields:
     - kind
     - id
