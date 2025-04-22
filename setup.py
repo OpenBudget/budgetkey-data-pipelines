@@ -34,6 +34,7 @@ setup(
                       'lxml',
                       'lxml_html_clean',
                       'elasticsearch>=8.0.0<9.0.0',
+                      'openai',
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}

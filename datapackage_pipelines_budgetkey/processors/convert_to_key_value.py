@@ -6,6 +6,7 @@ parameters, dp, res_iter = ingest()
 def process_resources(res_iter_):
     for res in res_iter_:
         for row in res:
+            row.pop('chunks', None)
             yield {
                 'key': row['doc_id'],
                 'value': dict(row),

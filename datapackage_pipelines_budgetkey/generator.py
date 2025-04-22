@@ -133,6 +133,14 @@ class Generator(GeneratorBase):
                         cls.history_steps(doc_type, key_fields, kh['fields'], kh.get('key'))
                     )
                 date_range_parameters = parameters.get('date-range', {})
+                chunker_steps = []
+                if parameters.get('chunker', False):
+                    chunker_steps = steps(*[
+                        ('chunker', {
+                            'resource': doc_type,
+                            'config': parameters.get('chunker'),
+                        })
+                    ])
 
                 pipeline_steps = steps(*[
                     ('update_package', {
@@ -173,7 +181,7 @@ class Generator(GeneratorBase):
                         'page-title-index': page_title_index
                     }),
                     ('add_date_range', date_range_parameters)
-                ]) + parameters.get('pre-indexing', []) + steps(*[
+                ]) + parameters.get('pre-indexing', []) + chunker_steps + steps(*[
                     ('dump_to_es', {
                         'indexes': {
                             INDEX_NAME + '__' + doc_type: [
