@@ -135,12 +135,15 @@ class Generator(GeneratorBase):
                 date_range_parameters = parameters.get('date-range', {})
                 chunker_steps = []
                 if parameters.get('chunker', False):
-                    chunker_steps = steps(*[
-                        ('chunker', {
-                            'resource': doc_type,
-                            'config': parameters.get('chunker'),
-                        })
-                    ])
+                    chunker_steps = [
+                        dict(
+                            flow='chunker',
+                            parameters=dict(
+                                resource=doc_type,
+                                config=parameters.get('chunker'),
+                            )
+                        )
+                    ]
 
                 pipeline_steps = steps(*[
                     ('update_package', {
