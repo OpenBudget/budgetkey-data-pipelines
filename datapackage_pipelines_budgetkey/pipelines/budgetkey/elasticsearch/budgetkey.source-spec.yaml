@@ -259,7 +259,7 @@ gov_decisions:
 
 activities:
   kind: indexer
-  revision: 35
+  revision: 36
   dependent_pipeline: ./activities/social_services/social_services
   source_datapackage: /var/datapackages/activities/social_services/datapackage.json
   page-title-pattern: '{kind_he} של {office} - {name}'
