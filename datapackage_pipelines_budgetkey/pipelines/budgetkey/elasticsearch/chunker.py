@@ -85,7 +85,8 @@ def flow(parameters, *_):
     config = parameters['config']
     return DF.Flow(
         DF.add_field('chunks', 'array'),
-        chunker(config),   
+        chunker(config),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 if __name__ == '__main__':
