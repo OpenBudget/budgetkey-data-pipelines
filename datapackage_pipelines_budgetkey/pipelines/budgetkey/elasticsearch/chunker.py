@@ -72,12 +72,13 @@ def chunker(config):
                     if hit:
                         hits += 1
                     total += 1
-                    if total % 10000 == 0:
-                        hit_pct = hits / total * 100
+                    if total % 10000 == 1:
+                        hit_pct = hits / total * 100 if total > 0 else 0
                         print(f"Chunker: Processed {total} chunks, {hit_pct:.2f}% cache hits")
             row['chunks'] = vectors
             yield row
-        hit_pct = hits / total * 100
+        # Print final stats
+        hit_pct = hits / total * 100 if total > 0 else 0
         print(f"Chunker: Processed {total} chunks, {hit_pct:.2f}% hits")
     return func
 
