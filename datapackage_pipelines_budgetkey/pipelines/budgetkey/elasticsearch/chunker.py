@@ -51,12 +51,13 @@ def get_text(c, row):
         yield c.format(**row)
     elif isinstance(c, dict):
         text = row.get(c['field'])
-        if c.get('method') == 'chunk':
-            chunk_size = c.get('chunk_size') or 512
-            chunk_overlap = c.get('chunk_overlap') or 0
-            while len(text) > 0:
-                yield text[:chunk_size]
-                text = text[chunk_size - chunk_overlap:]
+        if text:
+            if c.get('method') == 'chunk':
+                chunk_size = c.get('chunk_size') or 512
+                chunk_overlap = c.get('chunk_overlap') or 0
+                while len(text) > 0:
+                    yield text[:chunk_size]
+                    text = text[chunk_size - chunk_overlap:]
 
 def chunker(config):
     client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
