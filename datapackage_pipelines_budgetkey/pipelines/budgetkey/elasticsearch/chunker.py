@@ -85,7 +85,7 @@ def chunker(config):
 def flow(parameters, *_):
     config = parameters['config']
     return DF.Flow(
-        DF.add_field('chunks', 'array', **{'es:itemType': 'object'}),
+        DF.add_field('chunks', 'array', **{'es:itemType': 'object', 'es:schema': dict(fields=[])}),
         chunker(config),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )
