@@ -68,6 +68,8 @@ def explain():
 
         if not row.get('change_list'):
             return row
+        if row.get('year') < 2020:
+            return row
         change_list = row['change_list']            
         for cli in change_list:
             try:
