@@ -18,7 +18,7 @@ def get_text(c, row):
                     text = text[chunk_size - chunk_overlap:]
 
 def chunker(config, resource=None):
-    matcher = ResourceMatcher(resource)
+    matcher = ResourceMatcher(resource, None)
     def func(rows: DF.ResourceWrapper):
         if not matcher.match(rows.res.name):
             yield from rows
