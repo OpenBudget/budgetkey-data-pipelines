@@ -181,6 +181,8 @@ national-budget-changes-aggregated:
     - run: calc-transaction-score
     # Summarize
     - run: summarize
+    # Describe individual changes
+    - flow: ai-describe-changes
     # Set types
     - run: set_types
       parameters:
