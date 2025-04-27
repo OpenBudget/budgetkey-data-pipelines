@@ -1,4 +1,5 @@
 import dataflows as DF
+from dataflows.helpers.resource_matcher import ResourceMatcher
 from pathlib import Path
 
 from datapackage_pipelines_budgetkey.common.cached_openai import embed
@@ -16,8 +17,12 @@ def get_text(c, row):
                     yield text[:chunk_size]
                     text = text[chunk_size - chunk_overlap:]
 
-def chunker(config):
-    def func(rows):
+def chunker(config, resource=None):
+    matcher = ResourceMatcher(resource)
+    def func(rows: DF.ResourceWrapper):
+        if not matcher.match(rows.res.name):
+            yield from rows
+            return
         hits = 0
         total = 0
         for row in rows:
