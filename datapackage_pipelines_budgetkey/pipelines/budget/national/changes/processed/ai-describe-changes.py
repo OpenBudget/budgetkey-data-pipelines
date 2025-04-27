@@ -76,10 +76,11 @@ def explain():
                 return        
 
             _, content = complete(prompt, structured=True)
-            print('PROMPT:', prompt)
             cli['ai_change_explanation'] = content['explanation']
             cli['ai_budget_item_description'] = content['description']
+            print('PROMPT:', prompt)
             print('EXPLANATION:', content['explanation'])
+            print('DESCRIPTION:', content['description'])
             if cli['ai_budget_item_description'] == 'UNAVAILABLE':
                 cli['ai_budget_item_description'] = ''
             else:
