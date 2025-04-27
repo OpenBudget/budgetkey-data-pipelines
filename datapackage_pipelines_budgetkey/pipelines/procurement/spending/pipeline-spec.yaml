@@ -88,6 +88,7 @@ quarterly-contract-spending-reports:
           order_id:
             - הזמנת רכש
             - מספר הזמנה
+            - מסמך רכש	
           currency:
             - מטבע
             - מטבע חשבונית
