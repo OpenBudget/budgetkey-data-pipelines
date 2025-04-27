@@ -22,6 +22,11 @@ quarterly-contract-spending-report-uris:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/procurement/spending/quarterly-contract-spending-report-uris
+    - run: dump.to_sql
+      parameters:
+        tables:
+          quarterly_contract_spending_report_uris:
+            resource-name: quarterly-contract-spending-report-uris
 
 
 quarterly-contract-spending-reports:
