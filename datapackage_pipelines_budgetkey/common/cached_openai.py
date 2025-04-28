@@ -56,7 +56,7 @@ def complete(text, structured=False):
         return True, cached
 
     completion = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "user",

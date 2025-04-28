@@ -206,7 +206,26 @@ national-budget-changes-aggregated:
             es:keyword: true
           change_list:
             es:itemType: object
-            es:index: false
+            es:schema:
+              fields:
+                - name: budget_code_title
+                  type: string
+                  es:keyword: true
+                - name: net_expense_diff
+                  type: number
+                - name: gross_expense_diff
+                  type: number
+                - name: allocated_income_diff
+                  type: number
+                - name: commitment_limit_diff
+                  type: number
+                - name: personnel_max_diff
+                  type: number
+                - name: ai_change_explanation
+                  type: string
+                - name: ai_budget_item_description
+                  type: string
+
           date:
             es:itemType: date
           pending:
