@@ -136,7 +136,7 @@ tenders:
   source_datapackage: /var/datapackages/procurement/tenders/processed/datapackage.json
   page-title-pattern: '{snippet}'
   chunker:
-    - '{tender_type_he} של {publisher_name} עבור "{description}"'
+    - '{tender_type_he} של {publisher} עבור "{description}"'
   key-fields:
     - tender_type
     - publication_id
