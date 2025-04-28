@@ -29,7 +29,6 @@ The details of the budget change request are:
 The explanatory notes that were provided with the request are:
 {row['explanation']}
 """
-    change_list = row['change_list'][0]
     change_list_prompt = []
     for k, v in change_list.items():
         if 'diff' in k and v != 0:
@@ -103,6 +102,7 @@ if __name__ == '__main__':
         DF.load(CHANGES_EXPLANATIONS_SOURCE_DATAPACKAGE),
         DF.checkpoint('ai-describe-changes'),
         DF.filter_rows(lambda row: row['year'] == 2024),
+        DF.filter_rows(lambda row: row['transaction_id'] == '2024/51-018'),
     ).results()[0][0]
     import pprint
     pprint.pprint(explain()(rows[0]))
