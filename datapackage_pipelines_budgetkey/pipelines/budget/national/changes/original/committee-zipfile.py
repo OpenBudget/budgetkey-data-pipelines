@@ -1,7 +1,7 @@
 import dataflows as DF
 import requests
 
-YEAR = 2024
+YEAR = 2025
 WEIRD_ZIP_FILE = f'https://main.knesset.gov.il/Activity/committees/Finance/Documents/p{YEAR}.zip'
 OUT = '/var/datapackages/budget/national/changes/finance-committee.zip'
 
