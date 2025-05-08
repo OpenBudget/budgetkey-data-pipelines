@@ -1,0 +1,10 @@
+facilities_labor:
+  schedule:
+    crontab: "0 0 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: facilities_labor
+        revision: '2025-05'
+    - flow: mol

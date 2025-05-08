@@ -1,0 +1,10 @@
+facilities_welfare:
+  schedule:
+    crontab: "0 0 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: facilities_welfare
+        revision: '2025-05'
+    - flow: welfare
