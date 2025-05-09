@@ -339,7 +339,7 @@ def scrape(prefix='/var/datapackages'):
         dedupe(),
         DF.update_resource(-1, name='all-facilities', path='all-facilities.csv'),
         DF.printer()
-    ).process()
+    )
 
 def flow(*_):
     return DF.Flow(
