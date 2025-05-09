@@ -96,8 +96,7 @@ def scrape():
         DF.add_field('welfare_coord_y', 'integer', lambda r: r['GisY']),
         DF.add_field('_id', 'string', lambda r: f'welfare-{r["welfare_symbol"]}'),
         DF.select_fields(['_id', 'welfare_.+', 'coord_.+']),
-        DF.update_resource(-1, name='welfare'),
-        DF.dump_to_path('out/welfare'),
+        DF.update_resource(-1, name='welfare', path='welfare.csv'),
         DF.printer()
     )
 

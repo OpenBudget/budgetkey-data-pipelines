@@ -59,7 +59,7 @@ def scrape():
         DF.add_field('lab_admission_committee', 'boolean', lambda r: bool(r['IsThereAdmissionsCommittee'])),
         DF.add_field('_id', 'string', lambda r: f'mol-{r["FrameId"]}'),
         DF.select_fields(['_id', 'lab_.+']),
-        DF.update_resource(-1, name='mol'),
+        DF.update_resource(-1, name='mol', path='mol.csv'),
         DF.printer()
     )
 

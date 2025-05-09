@@ -45,7 +45,7 @@ def scrape():
         DF.filter_rows(lambda r: r['moe_license_status'] != 'מעון סגור'),
         DF.add_field('_id', 'string', lambda r: f'moe-{r["moe_symbol"]}'),
         DF.select_fields(['_id', 'moe_.+']),
-        DF.update_resource(-1, name='moe'),
+        DF.update_resource(-1, name='moe', path='moe.csv'),
         DF.printer()
     )
 
