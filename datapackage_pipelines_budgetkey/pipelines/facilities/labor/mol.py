@@ -69,7 +69,7 @@ def flow(*_):
         scrape(),
         DF.dump_to_path('/var/datapackages/facilities/labor'),
         DF.dump_to_sql(dict(
-            facilities_labor={'resource-name': 'labor'}
+            facilities_labor={'resource-name': 'mol'}
         )),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )
