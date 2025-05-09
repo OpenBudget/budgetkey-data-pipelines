@@ -76,7 +76,7 @@ def scrape():
     return DF.Flow(
         get_data(),
         DF.checkpoint('welfare'),
-        DF.update_schema(-1, missingValues=['לא ידוע', 'לא משויך', 'אחר', 0, '']),
+        DF.update_schema(-1, missingValues=['לא ידוע', 'לא משויך', 'אחר', '0', '']),
         DF.validate(),
         # DF.filter_rows(lambda r: r['Status_des'] == 'פעילה'),
         DF.add_field('welfare_symbol', 'string', lambda r: str(r['Misgeret_Id'])),
