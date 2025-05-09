@@ -1,0 +1,12 @@
+facilities_all:
+  dependencies:
+    - pipeline: ./facilities/education/facilities_education
+    - pipeline: ./facilities/welfare/facilities_welfare
+    - pipeline: ./facilities/labor/facilities_labor
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: facilities_all
+        revision: '2025-05'
+    - flow: all_facilities
