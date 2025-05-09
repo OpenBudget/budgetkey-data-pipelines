@@ -117,7 +117,7 @@ def govmap_geocode():
                         print('ERROR', address, resp)
             if update:
                 row['formatted_address'] = update['formatted_address']
-                row['city'] = row['formatted_address'].split(',')[-1].strip()
+                row['city'] = re.split('[,|]', row['formatted_address'])[-1].strip()
                 row['record']['coord_x'] = update['coord_x']
                 row['record']['coord_y'] = update['coord_y']
             if not hit:
