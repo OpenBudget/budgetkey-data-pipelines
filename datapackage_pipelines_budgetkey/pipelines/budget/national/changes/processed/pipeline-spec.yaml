@@ -255,7 +255,7 @@ national-budget-changes-aggregated:
         out: /var/datapackages/budget/national/changes/raw-budget-changes-enriched
     - run: set_primary_key
       parameters:
-        national-budget-changes: []
+        national-budget-changes: null
     - run: dump.to_sql
       parameters:
         tables:
