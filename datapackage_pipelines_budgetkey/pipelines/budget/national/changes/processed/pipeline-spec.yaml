@@ -253,3 +253,9 @@ national-budget-changes-aggregated:
     - flow: unwind_individual_changes
       parameters:
         out: /var/datapackages/budget/national/changes/with-transaction-id
+    - run: dump.to_sql
+      parameters:
+        tables:
+          raw_budget_changes_enriched:
+            resource-name: national-budget-changes
+            mode: update
