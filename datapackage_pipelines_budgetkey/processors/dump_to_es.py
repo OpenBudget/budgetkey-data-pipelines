@@ -62,7 +62,7 @@ class DumpToElasticSearch(dump_to_es):
             basic_auth=('elastic', os.environ['ELASTIC_PASSWORD']),
             ca_certs=os.environ['ELASTICSEARCH_CA_CRT'], request_timeout=300,
         )
-        print(f'Elasticsearch: {os.environ["DATAFLOWS_ELASTICSEARCH"]}, auth: {os.environ["ELASTIC_PASSWORD"][:2]}, ca_certs: {os.environ["ELASTICSEARCH_CA_CRT"]}')
+        print(f'Elasticsearch: {os.environ["DATAFLOWS_ELASTICSEARCH"]}, auth: {os.environ["ELASTIC_PASSWORD"][:2]}..{os.environ["ELASTIC_PASSWORD"][-2:]}, ca_certs: {os.environ["ELASTICSEARCH_CA_CRT"]}')
         assert engine.ping(), 'Elasticsearch is not reachable'
         super().__init__(
             engine=engine,
