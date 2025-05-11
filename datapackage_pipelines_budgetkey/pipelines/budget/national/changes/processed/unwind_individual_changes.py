@@ -68,5 +68,6 @@ def flow(params, *_):
     return DF.Flow(
         unwind(),
         DF.dump_to_path(out_path),
+        DF.set_primary_key(None),
         DF.update_resource(-1, **{'dpp:streaming': True}),    
     )
