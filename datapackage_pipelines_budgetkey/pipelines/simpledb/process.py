@@ -962,6 +962,7 @@ PARAMETERS = dict(
                 name='year',
                 description='''
                     השנה בה נשלחה הבקשה לוועדת הכספים.
+                    השנה הנוכחית היא 2025.
                 ''',
                 sample_values=[2017, 2020, 2025],
                 type='integer',
@@ -1155,6 +1156,25 @@ PARAMETERS = dict(
                 default=lambda row: row.get('budget_title')
             ),
             dict(
+                name='budget_item_description',
+                description='''
+                    תיאור הסעיף התקציבי שבו נעשה השינוי.
+                    (נקרא גם ״תיאור התכנית התקציבית״).
+                    כשמציגים את רשימת השינויים בבקשת העברה, יש להציג תמיר את השדה הזה, במידה והוא קיים.
+                ''',
+                type='string',
+                default=lambda row: row.get('budget_item_description')
+            ),
+            dict(
+                name='change_explanation',
+                description='''
+                    הסבר על השינוי שבוצע בסעיף התקציב.
+                ''',
+                sample_values=['העברה בין סעיפים לטובת הסכמים קואליציונים', 'העברה בין משרדים עבור מימון של רכבת'],
+                type='string',
+                default=lambda row: row.get('change_explanation')
+            ),
+            dict(
                 name='transaction_id',
                 description='''
                     מזהה ייחודי של הבקשה בה מופיע השינוי.
@@ -1176,6 +1196,7 @@ PARAMETERS = dict(
                 name='appproval_date',
                 description='''
                     תאריך אישור השינוי, במידה והוא אושר.
+                    תאריך העלאת הבקשה לוועדת הכספים במידה והוא לא אושר.
                 ''',
                 sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
                 type='date',

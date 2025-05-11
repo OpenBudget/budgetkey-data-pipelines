@@ -80,10 +80,6 @@ national-budget-changes-aggregated:
         out:
           - transaction_id: null
 
-    - run: dump.to_path
-      parameters:
-        out-path: /var/datapackages/budget/national/changes/with-transaction-id
-
     - run: set_types
       parameters:
         resources: national-budget-changes
@@ -254,3 +250,6 @@ national-budget-changes-aggregated:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/full
+    - flow: unwind_individual_changes
+      parameters:
+        out: /var/datapackages/budget/national/changes/with-transaction-id
