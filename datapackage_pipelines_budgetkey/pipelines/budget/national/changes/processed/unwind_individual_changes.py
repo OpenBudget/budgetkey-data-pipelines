@@ -48,7 +48,7 @@ def unwind():
             'change_type_name',
             'committee_id',
             'date',
-            'pending'
+            'pending',
             'budget_code',
             'budget_title',
             'budget_item_description',
