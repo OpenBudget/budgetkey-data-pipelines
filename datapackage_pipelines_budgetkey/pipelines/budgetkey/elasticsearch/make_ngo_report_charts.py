@@ -31,7 +31,7 @@ select distinct(association_field_of_activity) as x from guidestar_processed ord
 def get_spending_analysis(foa):
     query = SPENDING_ANALYSIS_FOR_FOA.format(foa=foa)
     results = engine.execute(text(query))
-    results = [dict(r) for r in results]
+    results = [r._asdict() for r in results]
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
     results = sorted(results, key=lambda x: -x['amount'])

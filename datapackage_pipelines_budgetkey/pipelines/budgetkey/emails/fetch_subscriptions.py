@@ -23,7 +23,7 @@ if __name__ == '__main__':
     dp['resources'][0][PROP_STREAMING] = True
     
     e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
-    r = map(dict,
+    r = map(lambda x: x._asdict(),
             e.execute(sqlalchemy.text("""
 with a as (select users.email as email, items.title, url, items.properties as properties, max(send_time) as last_send_time
 from items join lists on(items.list_id=lists.id) 
