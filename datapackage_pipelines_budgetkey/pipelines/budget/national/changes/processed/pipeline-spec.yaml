@@ -229,13 +229,13 @@ national-budget-changes-aggregated:
 #    - run: sample
 #      parameters:
 #        resource: national-budget-changes
-    - run: manage-revisions
-      parameters:
-        resource-name: national-budget-changes
-        db-table: budget_changes
-        prefix: chg
-        key-fields:
-          - transaction_id
+    # - run: manage-revisions
+    #   parameters:
+    #     resource-name: national-budget-changes
+    #     db-table: budget_changes
+    #     prefix: chg
+    #     key-fields:
+    #       - transaction_id
     - run: set_primary_key
       parameters:
         national-budget-changes:
@@ -246,7 +246,7 @@ national-budget-changes-aggregated:
         tables:
           budget_changes:
             resource-name: national-budget-changes
-            mode: update
+            # mode: update
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/budget/national/changes/full
