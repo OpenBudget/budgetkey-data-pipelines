@@ -7,7 +7,7 @@ from kvfile import KVFile
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines_budgetkey.common.line_selector import LineSelector
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError, OperationalError
 
 now = datetime.datetime.now()
@@ -38,12 +38,12 @@ def calc_hash(row, hash_fields):
 
 def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_NAMES):
     db_fields = key_fields + STATUS_FIELD_NAMES
-    stmt = ' '.join([
+    stmt = text(' '.join([
         'select',
         ','.join(db_fields),
         'from',
         db_table
-    ])
+    ]))
 
     with create_engine(connection_string).connect() as engine:
         ret = KVFile()

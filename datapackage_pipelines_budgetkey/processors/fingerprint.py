@@ -2,7 +2,7 @@ import re
 import os
 import logging
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from datapackage_pipelines.wrapper import ingest, spew
 
@@ -159,7 +159,7 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                         res = ids[id]
                     else:
                         repl = row[src_id_field].replace("'", "''")
-                        results = conn.execute(query.format('id', repl)).fetchall()
+                        results = conn.execute(text(query.format('id', repl))).fetchall()
                         if len(results) > 0:
                             res = tuple(results[0])
                             ids[id] = res
@@ -168,7 +168,7 @@ def fingerprint(rows, src_field, tgt_field, src_id_field, unique_fingerprints):
                 if fp in fps:
                     res = fps[fp]
                 else:
-                    results = conn.execute(query.format('fingerprint', fp)).fetchall()
+                    results = conn.execute(text(query.format('fingerprint', fp))).fetchall()
                     if len(results) > 0:
                         res = tuple(results[0])
                         fps[fp] = res
