@@ -14,7 +14,7 @@ def get_connection_string():
 
 
 def get_all_existing_ids():
-    engine = create_engine(get_connection_string())
+    engine = create_engine(get_connection_string()).connect()
     ret = set()
     try:
         rows = engine.execute("SELECT s3_object_name FROM maya_notification_list where is_parse_error is not TRUE")

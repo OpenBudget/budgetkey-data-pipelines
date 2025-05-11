@@ -28,7 +28,7 @@ def get_connection_string():
 def get_all_existing_ids():
     ret = set()
     try:
-        engine = create_engine(get_connection_string())
+        engine = create_engine(get_connection_string()).connect()
         rows = engine.execute(text("SELECT s3_object_name FROM maya_notifications where parser_version=:v"), v=PARSER_VERSION)
         ret.update(row['s3_object_name'] for row in rows)
     except (OperationalError, ProgrammingError) as e:

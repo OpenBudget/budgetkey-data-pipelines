@@ -5,7 +5,7 @@ import logging
 from decimal import Decimal
 from collections import Counter
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 class Enricher:

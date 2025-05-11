@@ -45,23 +45,23 @@ def get_all_existing_ids(connection_string, db_table, key_fields, STATUS_FIELD_N
         db_table
     ])
 
-    engine = create_engine(connection_string)
-    ret = KVFile()
-    
-    try:
-        rows = engine.execute(stmt)
-        for row in rows:
-            rec = dict(zip(db_fields, row))
-            existing_id = dict(
-                (k, v) for k, v in rec.items()
-                if k in STATUS_FIELD_NAMES
-            )
-            key = calc_key(rec, key_fields)
-            ret.set(key, existing_id)
-    except ProgrammingError:
-        logging.exception('Failed to fetch existing keys')
-    except OperationalError:
-        logging.exception('Failed to fetch existing keys')
+    with create_engine(connection_string).connect() as engine:
+        ret = KVFile()
+        
+        try:
+            rows = engine.execute(stmt)
+            for row in rows:
+                rec = dict(zip(db_fields, row))
+                existing_id = dict(
+                    (k, v) for k, v in rec.items()
+                    if k in STATUS_FIELD_NAMES
+                )
+                key = calc_key(rec, key_fields)
+                ret.set(key, existing_id)
+        except ProgrammingError:
+            logging.exception('Failed to fetch existing keys')
+        except OperationalError:
+            logging.exception('Failed to fetch existing keys')
 
     return ret
 

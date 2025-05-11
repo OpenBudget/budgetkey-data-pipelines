@@ -29,7 +29,7 @@ errors_db_table = parameters['error-db-table']
 
 REVISION = 2
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 try:
     rp = engine.execute("""SELECT "report-url" from {} 
                         where "load-error" is not null

@@ -34,20 +34,21 @@ MAPPINGS = {
 
 def expand_mappings(mappings):
     ret = []
-    for mapping in mappings:
-        TITLE_QUERY = text('SELECT title from raw_budget where code=:code and year=:year')
-        mapping['title'] = engine.execute(TITLE_QUERY, **mapping).fetchone().title
-        ITEMS_QUERY = text('SELECT year, code, title, net_allocated, net_revised, net_executed from raw_budget where code=:code and title=:title and net_revised > 0')
-        for r in engine.execute(ITEMS_QUERY, **mapping).fetchall():
-            ret.append(dict(
-                code=r.code,
-                year=r.year,
-                title=r.title,
-                net_allocated=r.net_allocated,
-                net_revised=r.net_revised,
-                net_executed=r.net_executed,
-                part=mapping['part']
-            ))
+    with engine.connect() as conn:
+        for mapping in mappings:
+            TITLE_QUERY = text('SELECT title from raw_budget where code=:code and year=:year')
+            mapping['title'] = conn.execute(TITLE_QUERY, **mapping).fetchone().title
+            ITEMS_QUERY = text('SELECT year, code, title, net_allocated, net_revised, net_executed from raw_budget where code=:code and title=:title and net_revised > 0')
+            for r in conn.execute(ITEMS_QUERY, **mapping).fetchall():
+                ret.append(dict(
+                    code=r.code,
+                    year=r.year,
+                    title=r.title,
+                    net_allocated=r.net_allocated,
+                    net_revised=r.net_revised,
+                    net_executed=r.net_executed,
+                    part=mapping['part']
+                ))
     return ret
 
 
@@ -69,7 +70,7 @@ def fetch_spending(budget_code):
                WHERE budget_code=:code
                ORDER BY volume desc nulls last
     ''')
-    return [dict(r) for r in engine.execute(SPENDING, code=budget_code).fetchall()]
+    return [dict(r) for r in engine.connect().execute(SPENDING, code=budget_code).fetchall()]
 
 
 def fetch_tenders(**kw):
@@ -83,7 +84,7 @@ def fetch_tenders(**kw):
         FROM procurement_tenders_processed
         WHERE publication_id=:publication_id AND tender_id=:tender_id AND tender_type=:tender_type
     ''')
-    return dict(engine.execute(TENDER, **kw).fetchone())
+    return dict(engine.connect().execute(TENDER, **kw).fetchone())
 
 def format_date(x):
     if x:

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     )
     dp['resources'][0][PROP_STREAMING] = True
     
-    e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL'])
+    e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
     r = map(dict,
             e.execute("""
 with a as (select users.email as email, items.title, url, items.properties as properties, max(send_time) as last_send_time

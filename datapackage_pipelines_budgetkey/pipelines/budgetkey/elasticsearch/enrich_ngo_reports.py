@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 parameters, dp, res_iter = ingest()
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 DISTRICT_INFO = '''

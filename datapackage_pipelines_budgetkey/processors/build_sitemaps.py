@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 
 
 def generate_sitemap(kind, db_table, doc_id, page_title):
-    engine = create_engine(os.environ['DPP_DB_ENGINE'])
+    engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
     index = 0
     offset = 0
     logging.info('Kind %s', kind)

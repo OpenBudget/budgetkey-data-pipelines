@@ -54,7 +54,7 @@ def process(table_name):
         pk = package.pkg.descriptor['resources'][0]['schema']['primaryKey']
         creation_dates = {}
         try:
-            engine = create_engine(os.environ['DPP_DB_ENGINE'])
+            engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
             sql = "select " + ','.join('"%s"' % k for k in pk) + ",__created_at from " + table_name
             creation_dates = map(dict, engine.execute(sql))
             creation_dates = dict((tuple(r[k] for k in pk), r['__created_at']) for r in creation_dates)

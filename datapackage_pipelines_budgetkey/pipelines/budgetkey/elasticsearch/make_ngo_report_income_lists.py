@@ -9,7 +9,7 @@ from sqlalchemy.exc import ProgrammingError
 
 parameters, dp, res_iter = ingest()
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 INCOME_SUFFIXES = ['', '_contracts', '_supports']

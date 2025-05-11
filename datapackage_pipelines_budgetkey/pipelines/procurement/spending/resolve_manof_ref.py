@@ -14,7 +14,7 @@ TK = 'tender_key'
 DISALLOWED = {'9999', '99999', '999999', '000000', '00000', '0000', '1111', 'TEST'}
 db_table = 'procurement_tenders_processed'
 connection_string = os.environ['DPP_DB_ENGINE']
-engine = create_engine(connection_string)
+engine = create_engine(connection_string).connect()
 
 key_fields = ('publication_id', 'tender_type', 'tender_id', 'publisher')
 to_select = ','.join(key_fields)

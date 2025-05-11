@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.format_number import format_number
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 SPENDING_ANALYSIS_FOR_FOA = """

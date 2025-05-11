@@ -156,7 +156,7 @@ AND length(code)=8
 AND YEAR={}
 GROUP BY 1, 2"""
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 def query_based_charts(row):
