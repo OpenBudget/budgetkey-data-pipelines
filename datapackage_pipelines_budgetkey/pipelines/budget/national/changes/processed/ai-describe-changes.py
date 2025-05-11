@@ -77,16 +77,17 @@ def explain():
                 return        
 
             _, content = complete(prompt, structured=True)
-            cli['ai_change_explanation'] = content['explanation']
-            cli['ai_budget_item_description'] = content['description']
+            description = content.get('description') or 'UNAVAILABLE'
+            cli['ai_change_explanation'] = content.get('explanation')
+            cli['ai_budget_item_description'] = description
             print('PROMPT:', prompt)
-            print('EXPLANATION:', content['explanation'])
-            print('DESCRIPTION:', content['description'])
+            print('EXPLANATION:', cli['ai_change_explanation'])
+            print('DESCRIPTION:', description)
             if cli['ai_budget_item_description'] == 'UNAVAILABLE':
                 cli['ai_budget_item_description'] = ''
             else:
-                if content['description'] not in prompt:
-                    print('ROUGE DESCRIPTION:', content['description'])
+                if description not in prompt:
+                    print('ROUGE DESCRIPTION:', description)
         return row
     return func
 
