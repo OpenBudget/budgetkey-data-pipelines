@@ -83,7 +83,7 @@ def unwind():
                 year=row.get('year'),
                 transaction_id=row.get('transaction_id'),
                 date=row.get('date'),
-                pending=item.get('is_pending'),
+                pending=row.get('is_pending'),
             )
             for item in row.get('change_list', []):
                 budget_code_title = item.get('budget_code_title')
