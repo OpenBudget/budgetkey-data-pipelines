@@ -1104,7 +1104,7 @@ PARAMETERS = dict(
         )
     ),
     budgetary_change_transactions_data=dict(
-        source='/var/datapackages/budget/national/changes/with-transaction-id',
+        source='/var/datapackages/budget/national/changes/raw-budget-changes-enriched',
         resources='national-budget-changes',
         # source='/var/datapackages/budget/national/changes/full',
         description='''
@@ -1134,7 +1134,7 @@ PARAMETERS = dict(
                 default=lambda row: row.get('year')
             ),
             dict(
-                name='code',
+                name='budget_item_code',
                 description='''
                     מזהה הסעיף התקציבי שבו נעשה השינוי.
                     (נקרא גם ״קוד התכנית התקציבית״).
@@ -1145,7 +1145,7 @@ PARAMETERS = dict(
                 default=lambda row: clean_budget_code(row.get('budget_code'))
             ),
             dict(
-                name='title',
+                name='budget_item_title',
                 description='''
                     כותרת הסעיף התקציבי שבו נעשה השינוי.
                     (נקרא גם ״שם התכנית התקציבית״).

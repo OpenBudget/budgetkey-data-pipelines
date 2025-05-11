@@ -258,4 +258,3 @@ national-budget-changes-aggregated:
         tables:
           raw_budget_changes_enriched:
             resource-name: national-budget-changes
-            mode: update
