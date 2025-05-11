@@ -1,5 +1,6 @@
 from datapackage_pipelines.wrapper import ingest
 from datapackage_pipelines.utilities.flow_utils import spew_flow
+from datapackage_pipelines.utilities.extended_json import LazyJsonLine
 from dataflows_elasticsearch import dump_to_es
 from tableschema_elasticsearch.mappers import MappingGenerator
 import dataflows as DF
@@ -72,6 +73,11 @@ class DumpToElasticSearch(dump_to_es):
                 'index.mapping.coerce': True
             }
           )
+
+    def normalize(self, row, resource):
+        if isinstance(row, LazyJsonLine):
+            row = row._evaluate()
+        return super().normalize(row, resource)
 
     def normalizer(self, resource: DF.ResourceWrapper):
         formatters = {}

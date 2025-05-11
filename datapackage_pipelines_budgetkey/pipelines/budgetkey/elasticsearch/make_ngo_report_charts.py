@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from datapackage_pipelines.wrapper import process
 from datapackage_pipelines_budgetkey.common.format_number import format_number
@@ -30,7 +30,7 @@ select distinct(association_field_of_activity) as x from guidestar_processed ord
 
 def get_spending_analysis(foa):
     query = SPENDING_ANALYSIS_FOR_FOA.format(foa=foa)
-    results = engine.execute(query)
+    results = engine.execute(text(query))
     results = [dict(r) for r in results]
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
@@ -39,7 +39,7 @@ def get_spending_analysis(foa):
 
 
 def get_distinct_list(query):
-    results = engine.execute(query)
+    results = engine.execute(text(query))
     results = [dict(r)['x'] for r in results]
     return results
 

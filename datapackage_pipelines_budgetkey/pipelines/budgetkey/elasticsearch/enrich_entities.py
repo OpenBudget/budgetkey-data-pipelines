@@ -1,5 +1,5 @@
 from datapackage_pipelines.wrapper import process
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import os
 import logging
 from decimal import Decimal
@@ -16,7 +16,7 @@ class Enricher:
         self.target_fields = target_fields
         self.kind_filter = kind_filter
         self.descriprtion = descriprtion
-        result = engine.execute(query)
+        result = engine.execute(text(query))
         data = list(dict(r) for r in result)
         self.data = dict(
             (tuple(x.pop(k) for k in self.key_fields), self.normalize(x)) for x in data
