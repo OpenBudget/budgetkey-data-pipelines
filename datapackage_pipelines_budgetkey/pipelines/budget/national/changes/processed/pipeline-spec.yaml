@@ -252,7 +252,7 @@ national-budget-changes-aggregated:
         out-path: /var/datapackages/budget/national/changes/full
     - flow: unwind_individual_changes
       parameters:
-        out: /var/datapackages/budget/national/changes/with-transaction-id
+        out: /var/datapackages/budget/national/changes/raw-budget-changes-enriched
     - run: dump.to_sql
       parameters:
         tables:
