@@ -74,7 +74,7 @@ class DumpToElasticSearch(dump_to_es):
             }
           )
 
-    def normalize(self, row, resource):
+    def normalize(self, row, resource=None):
         if isinstance(row, LazyJsonLine):
             row = row._evaluate()
         return super().normalize(row, resource)

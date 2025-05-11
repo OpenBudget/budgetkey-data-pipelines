@@ -30,7 +30,7 @@ select entity_name, entity_id, entity_kind, executed, volume, supplier_name, pay
        jsonb_array_elements_text(tender_key) as tender_key, order_date  from contract_spending
 """)
 for r in conn.execute(query):
-    r = dict(r)
+    r = r._asdict()
     key = r['tender_key']
     contracts.setdefault(key, []).append(r)
 
