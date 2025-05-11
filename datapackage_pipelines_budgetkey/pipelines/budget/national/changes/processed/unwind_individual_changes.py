@@ -118,7 +118,7 @@ def unwind():
     )
 
 
-def flow(params):
+def flow(params, *_):
     out_path = params['out']
 
     return DF.Flow(
