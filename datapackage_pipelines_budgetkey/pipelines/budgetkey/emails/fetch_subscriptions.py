@@ -24,7 +24,7 @@ if __name__ == '__main__':
     
     e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
     r = map(dict,
-            e.execute("""
+            e.execute(sqlalchemy.text("""
 with a as (select users.email as email, items.title, url, items.properties as properties, max(send_time) as last_send_time
 from items join lists on(items.list_id=lists.id) 
 join users on(lists.user_id=users.id) 
@@ -34,8 +34,7 @@ group by 1,2,3,4)
 select * from a 
 where (last_send_time is null or current_timestamp > last_send_time + interval '5 days')
 order by email
-"""
-        ))
+""")))
 
     r = (dict(email=email, items=list(items))
          for email, items in itertools.groupby(r, lambda x: x['email']))

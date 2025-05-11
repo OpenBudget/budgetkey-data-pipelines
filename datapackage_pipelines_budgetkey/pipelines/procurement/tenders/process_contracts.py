@@ -16,11 +16,11 @@ contracts = {}
 
 distinct_tender_keys = set([
     dict(r)['tender_key'] 
-    for r in conn.execute('''
+    for r in conn.execute(text('''
         select jsonb_array_elements_text(tender_key) as tender_key 
         from contract_spending
         group by 1
-    ''')
+    '''))
 ])
 logging.info('Found %d distinct tender keys (in contracts)', 
              len(distinct_tender_keys))
