@@ -68,6 +68,7 @@ def explain():
         HITS = 0
         ERRORS = 0
         SKIPPED = 0
+        print('EXPLAINING CHANGES')
         for row in rows:
             TOTAL += 1
             if not row.get('change_list'):
@@ -80,15 +81,15 @@ def explain():
             for cli in change_list:
                 try:
                     prompt = get_prompt(row, cli)
+                    hit, content = complete(prompt, structured=True)
+                    if hit:
+                        HITS += 1
                 except Exception as e:
                     if ERRORS < 50:
                         print('ERROR:', e)
                     ERRORS += 1
-                    return   
+                    continue   
 
-                hit, content = complete(prompt, structured=True)
-                if hit:
-                    HITS += 1
                 description = content.get('description') or 'UNAVAILABLE'
                 cli['ai_change_explanation'] = content.get('explanation')
                 cli['ai_budget_item_description'] = description
@@ -105,9 +106,6 @@ def explain():
         print('HITS:', HITS)
         print('ERRORS:', ERRORS)
         print('SKIPPED:', SKIPPED)
-        print('HITS %:', HITS / TOTAL * 100)
-        print('SKIPPED %:', SKIPPED / TOTAL * 100)
-        print('ERRORS %:', ERRORS / TOTAL * 100)
     return func
 
 def flow(*_):
