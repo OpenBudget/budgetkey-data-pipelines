@@ -45,7 +45,7 @@ def process_row(codes):
 def flow(*_):
     engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
     result = engine.execute(text(query))
-    data = (dict(r) for r in result)
+    data = (r._asdict() for r in result)
     codes = dict(
         (i['code'], i) for i in data
     )
