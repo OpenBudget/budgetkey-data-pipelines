@@ -63,32 +63,51 @@ Do not include any other information, embellishments or explanations, but only t
     return PROMPT    
 
 def explain():
-    def func(row):
+    def func(rows):
+        TOTAL = 0
+        HITS = 0
+        ERRORS = 0
+        SKIPPED = 0
+        for row in rows:
+            TOTAL += 1
+            if not row.get('change_list'):
+                SKIPPED += 1
+                return row
+            if row.get('year') < 2020:
+                SKIPPED += 1
+                return row
+            change_list = row['change_list']            
+            for cli in change_list:
+                try:
+                    prompt = get_prompt(row, cli)
+                except Exception as e:
+                    if ERRORS < 50:
+                        print('ERROR:', e)
+                    ERRORS += 1
+                    return   
 
-        if not row.get('change_list'):
-            return row
-        if row.get('year') < 2020:
-            return row
-        change_list = row['change_list']            
-        for cli in change_list:
-            try:
-                prompt = get_prompt(row, cli)
-            except Exception as e:
-                return        
-
-            _, content = complete(prompt, structured=True)
-            description = content.get('description') or 'UNAVAILABLE'
-            cli['ai_change_explanation'] = content.get('explanation')
-            cli['ai_budget_item_description'] = description
-            print('PROMPT:', prompt)
-            print('EXPLANATION:', cli['ai_change_explanation'])
-            print('DESCRIPTION:', description)
-            if cli['ai_budget_item_description'] == 'UNAVAILABLE':
-                cli['ai_budget_item_description'] = ''
-            else:
-                if description not in prompt:
-                    print('ROUGE DESCRIPTION:', description)
-        return row
+                hit, content = complete(prompt, structured=True)
+                if hit:
+                    HITS += 1
+                description = content.get('description') or 'UNAVAILABLE'
+                cli['ai_change_explanation'] = content.get('explanation')
+                cli['ai_budget_item_description'] = description
+                print('PROMPT:', prompt)
+                print('EXPLANATION:', cli['ai_change_explanation'])
+                print('DESCRIPTION:', description)
+                if cli['ai_budget_item_description'] == 'UNAVAILABLE':
+                    cli['ai_budget_item_description'] = ''
+                else:
+                    if description not in prompt:
+                        print('ROUGE DESCRIPTION:', description)
+            yield row
+        print('TOTAL:', TOTAL)
+        print('HITS:', HITS)
+        print('ERRORS:', ERRORS)
+        print('SKIPPED:', SKIPPED)
+        print('HITS %:', HITS / TOTAL * 100)
+        print('SKIPPED %:', SKIPPED / TOTAL * 100)
+        print('ERRORS %:', ERRORS / TOTAL * 100)
     return func
 
 def flow(*_):
