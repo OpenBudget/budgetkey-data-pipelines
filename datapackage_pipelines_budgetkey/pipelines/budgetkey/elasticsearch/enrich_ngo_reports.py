@@ -2,7 +2,7 @@ import os
 
 from datapackage_pipelines.wrapper import ingest, spew
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 parameters, dp, res_iter = ingest()
 
@@ -39,7 +39,7 @@ FROM a'''
 
 def get_district_info():
     query = DISTRICT_INFO
-    result = engine.execute(query)
+    result = engine.execute(text(query))
     result = list(r._asdict() for r in result)
     result = dict((x.pop('district'), x) for x in result)
     return result
@@ -47,10 +47,10 @@ def get_district_info():
 
 def get_field_of_activity_info():
     query = ACTIVITY_FIELD_AVG
-    result = engine.execute(query)
+    result = engine.execute(text(query))
     avg_field_received = dict(next(iter(result)))['avg_field_received']
     query = ACTIVITY_FIELD_INFO
-    result = engine.execute(query)
+    result = engine.execute(text(query))
     result = list(r._asdict() for r in result)
     result = dict((x.pop('association_field_of_activity'), x) for x in result)
     for x in result.values():
