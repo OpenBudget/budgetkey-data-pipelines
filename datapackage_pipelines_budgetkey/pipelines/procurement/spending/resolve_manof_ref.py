@@ -73,7 +73,7 @@ def process_row(row, row_index, *_):
                                     selected, score = fw_process.extractOne(publisher_name, publishers, scorer=fuzz.ratio)
                                     if score < 60:
                                         if row_index % 100 == 0:
-                                            logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
+                                            logging.info('(sampled: row %d) Failed to find publisher match for %r: %r', row_index, publisher_name, list(options.values()))
                                     selected = options[selected]
                                 except:
                                     logging.exception('Failed to extract: %r %r %r', row, publisher_name, options)
