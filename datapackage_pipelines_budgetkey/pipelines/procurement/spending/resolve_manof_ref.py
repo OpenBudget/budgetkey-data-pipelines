@@ -5,7 +5,7 @@ import re
 
 from datapackage_pipelines.wrapper import process
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError, OperationalError
 
 from fuzzywuzzy import process as fw_process, fuzz
@@ -20,7 +20,7 @@ key_fields = ('publication_id', 'tender_type', 'tender_id', 'publisher')
 to_select = ','.join(key_fields)
 
 all_tenders = set()
-for result in engine.execute(f'select {to_select} from {db_table}'):
+for result in engine.execute(text(f'select {to_select} from {db_table}')):
     all_tenders.add(tuple(str(result[k]).strip() for k in key_fields))
 all_tenders_dict = dict(
     [(t[0], [t]) for t in all_tenders if t[0] and len(t[0]) > 4]
