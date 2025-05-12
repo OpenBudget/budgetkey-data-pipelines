@@ -40,7 +40,7 @@ def get_spending_analysis(foa):
 
 def get_distinct_list(query):
     results = engine.execute(text(query))
-    results = [dict(r)['x'] for r in results]
+    results = [r._asdict()['x'] for r in results]
     return results
 
 
