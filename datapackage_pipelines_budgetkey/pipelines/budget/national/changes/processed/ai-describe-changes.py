@@ -68,6 +68,7 @@ def explain():
         HITS = 0
         ERRORS = 0
         SKIPPED = 0
+        MISSES = 0
         print('EXPLAINING CHANGES')
         for row in rows:
             TOTAL += 1
@@ -79,13 +80,17 @@ def explain():
                 SKIPPED += 1
                 yield row
                 continue
-            change_list = row['change_list']            
+            change_list = row['change_list']
+            row['change_list'] = []
             for cli in change_list:
+                row['change_list'].append(cli)
                 try:
                     prompt = get_prompt(row, cli)
                     hit, content = complete(prompt, structured=True)
                     if hit:
                         HITS += 1
+                    else:
+                        MISSES += 1
                 except Exception as e:
                     if ERRORS < 50:
                         print('ERROR:', e)
@@ -104,10 +109,11 @@ def explain():
                     if description not in prompt:
                         print('ROUGE DESCRIPTION:', description)
             yield row
-        print('TOTAL:', TOTAL)
-        print('HITS:', HITS)
-        print('ERRORS:', ERRORS)
-        print('SKIPPED:', SKIPPED)
+        print(f'TOTAL: {TOTAL}')
+        print(f'HITS: {HITS}')
+        print(f'MISSES: {MISSES}')
+        print(f'ERRORS: {ERRORS}')
+        print(f'SKIPPED: {SKIPPED}')
     return func
 
 def flow(*_):
