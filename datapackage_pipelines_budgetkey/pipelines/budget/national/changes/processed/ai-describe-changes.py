@@ -73,10 +73,12 @@ def explain():
             TOTAL += 1
             if not row.get('change_list'):
                 SKIPPED += 1
-                return row
+                yield row
+                continue
             if row.get('year') < 2020:
                 SKIPPED += 1
-                return row
+                yield row
+                continue
             change_list = row['change_list']            
             for cli in change_list:
                 try:
@@ -111,6 +113,8 @@ def explain():
 def flow(*_):
     return DF.Flow(
         explain(),
+        DF.printer(),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 if __name__ == '__main__':

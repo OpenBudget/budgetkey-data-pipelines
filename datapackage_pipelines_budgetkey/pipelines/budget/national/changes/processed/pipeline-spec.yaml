@@ -179,7 +179,7 @@ national-budget-changes-aggregated:
     - run: summarize
     # Describe individual changes
     - flow: ai-describe-changes
-    - run: sample
+    # - run: sample
     # Set types
     - run: set_types
       parameters:
