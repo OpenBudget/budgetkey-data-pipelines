@@ -21,6 +21,7 @@ to_select = ','.join(key_fields)
 
 all_tenders = set()
 for result in engine.execute(text(f'select {to_select} from {db_table}')):
+    result = result._asdict()
     all_tenders.add(tuple(str(result[k]).strip() for k in key_fields))
 all_tenders_dict = dict(
     [(t[0], [t]) for t in all_tenders if t[0] and len(t[0]) > 4]
