@@ -45,7 +45,7 @@ def modify_datapackage(dp, *_):
 
 splitter = re.compile('[-/0-9]{4,}')
 failed = set()
-def process_row(row, *_):
+def process_row(row, row_index, *_):
     if TK in row:
         del row[TK]
     manof_ref = row['manof_ref']
@@ -72,7 +72,8 @@ def process_row(row, *_):
                                 try:
                                     selected, score = fw_process.extractOne(publisher_name, publishers, scorer=fuzz.ratio)
                                     if score < 60:
-                                        logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
+                                        if row_index % 100 == 0:
+                                            logging.info('Failed to find publisher match for %r: %r', publisher_name, list(options.values()))
                                     selected = options[selected]
                                 except:
                                     logging.exception('Failed to extract: %r %r %r', row, publisher_name, options)
