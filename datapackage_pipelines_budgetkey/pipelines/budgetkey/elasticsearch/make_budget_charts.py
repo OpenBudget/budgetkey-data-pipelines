@@ -6,7 +6,7 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 parameters, dp, res_iter = ingest()
 
@@ -172,8 +172,8 @@ def query_based_charts(row):
                 row['func_cls_title_1'][0],
                 row['year']
             )
-        result = engine.execute(query)
-        result = list(dict(r) for r in result)
+        result = engine.execute(text(query))
+        result = list(r._asdict() for r in result)
         chart = budget_sankey(row, result)
         yield 'חלוקה למשרדים', 'אילו משרדים ממשלתיים מטפלים בנושא זה?', 'פירוט הסעיפים התקציביים הראשיים הקשורים לנושא זה ', chart
 

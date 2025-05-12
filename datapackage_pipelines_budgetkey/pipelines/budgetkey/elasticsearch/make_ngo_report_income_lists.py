@@ -4,7 +4,7 @@ import logging
 from datapackage_pipelines.wrapper import ingest, spew
 from decimal import Decimal
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError
 
 parameters, dp, res_iter = ingest()
@@ -41,8 +41,8 @@ def make_income_list(foa, suffix):
     )
     result = []
     try:
-        result = engine.execute(query)
-        result = list(dict(r) for r in result)
+        result = engine.execute(text(query))
+        results = [r._asdict() for r in results]
         for r in result:
             for k, v in r.items():
                 if isinstance(v, Decimal):
@@ -57,8 +57,8 @@ def make_income_total(foa, suffix):
     )
     result = []
     try:
-        result = engine.execute(query)
-        result = list(dict(r) for r in result)[0]['amount']
+        result = engine.execute(text(query))
+        result = list(r._asdict() for r in result)[0]['amount']
         if not result:
             result = 0
         return float(result)

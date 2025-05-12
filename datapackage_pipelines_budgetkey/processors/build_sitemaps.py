@@ -4,7 +4,7 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 import os
 import logging
 import itertools
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 
 def generate_sitemap(kind, db_table, doc_id, page_title):
@@ -13,10 +13,10 @@ def generate_sitemap(kind, db_table, doc_id, page_title):
     offset = 0
     logging.info('Kind %s', kind)
     while True:
-        rows = (dict(r)
-                for r in engine.execute('select * from {} order by __hash '
-                                        'limit 10000 offset {}'
-                                        .format(db_table, offset)))
+        rows = (r._asdict()
+                for r in engine.execute(text('select * from {} order by __hash '
+                                             'limit 10000 offset {}'
+                                            .format(db_table, offset))))
         batch = [(doc_id.format(**r),
                   r['__last_modified_at'],
                   page_title.format(**r))

@@ -17,7 +17,7 @@ class Enricher:
         self.kind_filter = kind_filter
         self.descriprtion = descriprtion
         result = engine.execute(text(query))
-        data = list(dict(r) for r in result)
+        data = list(r._asdict() for r in result)
         self.data = dict(
             (tuple(x.pop(k) for k in self.key_fields), self.normalize(x)) for x in data
         )

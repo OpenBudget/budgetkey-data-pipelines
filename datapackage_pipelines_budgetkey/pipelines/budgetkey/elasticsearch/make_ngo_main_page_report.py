@@ -1,6 +1,6 @@
 import os
 import json
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines_budgetkey.common.format_number import format_number
@@ -9,8 +9,8 @@ engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
 
 
 def get_single_result(query):
-    results = engine.execute(query)
-    results = [dict(r)['x'] for r in results][0]
+    results = engine.execute(text(query))
+    results = [r._asdict()['x'] for r in results][0]
     return results
 
 
@@ -80,8 +80,8 @@ FROM
    FROM e) r
 where rank<=3
 order by district, rank"""
-    results = engine.execute(foas_q)
-    results = [dict(r) for r in results]
+    results = engine.execute(text(foas_q))
+    results = [r._asdict() for r in results]
     ret = {}
     for r in results:
         ret.setdefault(r['district'], dict(totals=0, foas=[]))['foas'].append(r['foa'])
@@ -93,8 +93,8 @@ FROM guidestar_processed
 where association_status_active
 
 GROUP BY 1"""
-    results = engine.execute(totals_q)
-    results = [dict(r) for r in results]
+    results = engine.execute(text(totals_q))
+    results = [r._asdict() for r in results]
     for r in results:
         ret[r['district']]['totals'] = r['count']
     return ret
@@ -117,8 +117,8 @@ select payer, sum(amount) as amount from b group by 1 order by 2 desc
     # removed:
     # and association_status_active
 
-    results = engine.execute(q)
-    results = [dict(r) for r in results]
+    results = engine.execute(text(q))
+    results = [r._asdict() for r in results]
     return results    
 
 

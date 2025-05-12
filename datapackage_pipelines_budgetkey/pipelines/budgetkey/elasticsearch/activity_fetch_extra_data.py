@@ -70,7 +70,7 @@ def fetch_spending(budget_code):
                WHERE budget_code=:code
                ORDER BY volume desc nulls last
     ''')
-    return [dict(r) for r in engine.connect().execute(SPENDING, code=budget_code).fetchall()]
+    return [r._asdict() for r in engine.connect().execute(SPENDING, code=budget_code).fetchall()]
 
 
 def fetch_tenders(**kw):

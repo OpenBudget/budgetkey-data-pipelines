@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import requests
 
 from datapackage_pipelines.wrapper import process
@@ -49,16 +49,16 @@ reported_turnover_associations_ = {}
 def reported_turnover_associations(foa):
     if reported_turnover_associations_.get(foa) is None:
         query = REPORTED_TURNOVER_ASSOCIATIONS_QUERY.format(foa=foa)
-        results = conn.execute(query)
-        reported_turnover_associations_[foa] = [dict(r) for r in results]
+        results = conn.execute(text(query))
+        reported_turnover_associations_[foa] = [r._asdict() for r in results]
 
     return reported_turnover_associations_[foa]
 
 
 def get_spending_analysis(id):
     query = SPENDING_ANALYSIS_FOR_ID.format(id=id)
-    results = conn.execute(query)
-    results = [dict(r) for r in results]
+    results = conn.execute(text(query))
+    results = [r._asdict() for r in results]
     for r in results:
         r['amount'] = sum(x['amount'] for x in r['spending'])
     results = sorted(results, key=lambda x: -x['amount'])
@@ -533,8 +533,8 @@ def get_muni_budgets(symbol):
         SELECT title, code, year, allocated, revised, executed
         from muni_budgets where muni_code='{symbol}' and func_2_code is null;
     '''
-    results = conn.execute(query)
-    results = [dict(r) for r in results]
+    results = conn.execute(text(query))
+    results = [r._asdict() for r in results]
     return dict(
         (i['code'], i) for i in results
     )

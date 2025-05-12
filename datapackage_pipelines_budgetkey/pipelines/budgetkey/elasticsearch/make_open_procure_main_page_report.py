@@ -1,7 +1,7 @@
 import os
 import json
 import datetime
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines_budgetkey.common.format_number import format_number
@@ -17,8 +17,8 @@ last_year = datetime.datetime.now().year - 1
 
 def get_single_result(query, **options):
     q = query.format(last_year=last_year, **options)
-    results = engine.execute(q)
-    results = [dict(r)['x'] for r in results][0]
+    results = engine.execute(text(q))
+    results = [r._asdict()['x'] for r in results][0]
     return results
 
 total_spending_q = """

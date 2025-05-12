@@ -40,7 +40,7 @@ FROM a'''
 def get_district_info():
     query = DISTRICT_INFO
     result = engine.execute(query)
-    result = list(dict(r) for r in result)
+    result = list(r._asdict() for r in result)
     result = dict((x.pop('district'), x) for x in result)
     return result
 
@@ -51,7 +51,7 @@ def get_field_of_activity_info():
     avg_field_received = dict(next(iter(result)))['avg_field_received']
     query = ACTIVITY_FIELD_INFO
     result = engine.execute(query)
-    result = list(dict(r) for r in result)
+    result = list(r._asdict() for r in result)
     result = dict((x.pop('association_field_of_activity'), x) for x in result)
     for x in result.values():
         x['avg_field_received'] = avg_field_received
