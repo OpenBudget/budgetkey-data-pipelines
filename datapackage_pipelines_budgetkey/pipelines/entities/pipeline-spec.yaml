@@ -155,18 +155,18 @@ all:
               pattern: "[0-9]+"
           details:
             type: object
+    - flow: fix-entity-names
     - run: set_primary_key
       parameters:
         entities: ['id']
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/all
-    # TODO - RESTORE THIS
-    # - run: dump.to_sql
-    #   parameters:
-    #     tables:
-    #       entities:
-    #         resource-name: entities
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities:
+            resource-name: entities
 
 fingerprints:
   dependencies:
