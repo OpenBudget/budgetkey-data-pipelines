@@ -162,7 +162,8 @@ all:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/all
-    - run: dump.to_sql
+    - flow: dump-to-sql
+    # - run: dump_to_sql
       parameters:
         tables:
           entities:
