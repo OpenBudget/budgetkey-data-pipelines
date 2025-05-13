@@ -142,7 +142,7 @@ all:
             es:keyword: true
             es:exclude: true
             constraints:
-              pattern: "[a-z-_]+"
+              pattern: "[a-z_-]+"
           kind_he:
             es:keyword: true
             es:exclude: true
@@ -162,8 +162,8 @@ all:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/all
-    - flow: dump-to-sql
-    # - run: dump_to_sql
+    # - flow: dump-to-sql
+    - run: dump_to_sql
       parameters:
         tables:
           entities:
