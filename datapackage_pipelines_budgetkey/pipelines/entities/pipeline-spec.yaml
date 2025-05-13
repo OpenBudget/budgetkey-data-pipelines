@@ -161,11 +161,12 @@ all:
     - run: dump.to_path
       parameters:
         out-path: /var/datapackages/entities/all
-    - run: dump.to_sql
-      parameters:
-        tables:
-          entities:
-            resource-name: entities
+    # TODO - RESTORE THIS
+    # - run: dump.to_sql
+    #   parameters:
+    #     tables:
+    #       entities:
+    #         resource-name: entities
 
 fingerprints:
   dependencies:
@@ -370,12 +371,11 @@ entities:
       parameters:
         out-path: /var/datapackages/entities/scored
 
-    # TODO - RESTORE THIS
-    # - run: dump.to_sql
-    #   parameters:
-    #     tables:
-    #       entities_processed:
-    #         resource-name: entities
+    - run: dump.to_sql
+      parameters:
+        tables:
+          entities_processed:
+            resource-name: entities
 
 # Not used at the moment
 # geocode:
