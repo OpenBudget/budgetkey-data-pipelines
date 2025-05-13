@@ -370,11 +370,12 @@ entities:
       parameters:
         out-path: /var/datapackages/entities/scored
 
-    - run: dump.to_sql
-      parameters:
-        tables:
-          entities_processed:
-            resource-name: entities
+    # TODO - RESTORE THIS
+    # - run: dump.to_sql
+    #   parameters:
+    #     tables:
+    #       entities_processed:
+    #         resource-name: entities
 
 # Not used at the moment
 # geocode:

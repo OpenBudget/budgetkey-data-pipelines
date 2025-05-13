@@ -48,7 +48,7 @@ def get_district_info():
 def get_field_of_activity_info():
     query = ACTIVITY_FIELD_AVG
     result = engine.execute(text(query))
-    avg_field_received = dict(next(iter(result)))['avg_field_received']
+    avg_field_received = next(iter(result))._asdict()['avg_field_received']
     query = ACTIVITY_FIELD_INFO
     result = engine.execute(text(query))
     result = list(r._asdict() for r in result)
