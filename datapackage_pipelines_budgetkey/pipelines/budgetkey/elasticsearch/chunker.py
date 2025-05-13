@@ -34,7 +34,7 @@ def chunker(config, resource=None):
                     if hit:
                         hits += 1
                     total += 1
-                    if total % 10 == 0:
+                    if total % 1000 == 0:
                         hit_pct = hits / total * 100 if total > 0 else 0
                         print(f"Chunker: Processed {total} chunks, {hit_pct:.2f}% cache hits")
             row['chunks'] = vectors
