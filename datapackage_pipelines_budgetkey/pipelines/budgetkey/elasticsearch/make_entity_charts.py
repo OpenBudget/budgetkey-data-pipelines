@@ -40,7 +40,7 @@ def unreported_turnover_associations(foa):
     if unreported_turnover_associations_.get(foa) is None:
         query = UNREPORTED_TURNOVER_ASSOCIATIONS_QUERY.format(foa=foa)
         results = conn.execute(text(query))
-        unreported_turnover_associations_[foa] = int(dict(list(results)[0])['count'])
+        unreported_turnover_associations_[foa] = int(list(results)[0]._asdict()['count'])
 
     return unreported_turnover_associations_[foa]
 
