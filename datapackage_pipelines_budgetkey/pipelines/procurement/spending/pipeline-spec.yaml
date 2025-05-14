@@ -1,6 +1,6 @@
 quarterly-contract-spending-report-uris:
   schedule:
-    crontab: "0 23 * * *"
+    crontab: "0 6 * * 6"
   pipeline:
     - run: update_package
       parameters:
