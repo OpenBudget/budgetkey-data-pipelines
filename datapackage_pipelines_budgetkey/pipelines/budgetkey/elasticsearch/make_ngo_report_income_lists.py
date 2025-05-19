@@ -42,7 +42,7 @@ def make_income_list(foa, suffix):
     result = []
     try:
         result = engine.execute(text(query))
-        results = [r._asdict() for r in results]
+        result = [r._asdict() for r in result]
         for r in result:
             for k, v in r.items():
                 if isinstance(v, Decimal):
