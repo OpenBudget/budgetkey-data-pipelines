@@ -32,6 +32,7 @@ def scrape():
     return DF.Flow(
         DF.load(url, format='html', http_headers=headers),
         DF.checkpoint('moe'),
+        DF.add_field('source', 'string', 'moe'),
         DF.add_field('moe_name', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[0]),
         DF.add_field('moe_symbol', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[1]),
         DF.add_field('moe_mol_symbol', 'string', lambda r: f'mol-' + r['סמל זרוע העבודה']),

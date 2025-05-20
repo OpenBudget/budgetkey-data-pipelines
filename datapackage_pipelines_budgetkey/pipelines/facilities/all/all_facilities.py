@@ -263,20 +263,23 @@ def dedupe():
             )
             record = row['record']
             for k, v in record.items():
-                if v:
-                    if k == 'manager_name':
-                        key['people'].add(' '.join(sorted(v.split())))
-                    if k == 'address':
-                        key['places'].add(v)
-                    if k == 'phone':
-                        key['phones'].add(v)
-                    if k == 'name':
-                        key['names'].add(v)
-                    if k == 'mol_symbol':
-                        key['ids'].add(v)
-                    key['ids'].add(row['_id'])
-                    if row.get('formatted_address'):
-                        key['places'].add(row.get('formatted_address'))
+                if isinstance(v, str):
+                    v = v.strip()                    
+                    if v and len(v) > 2:
+                        if k == 'manager_name':
+                            key['people'].add(' '.join(sorted(v.split())))
+                        if k == 'address':
+                            key['places'].add(v)
+                        if k == 'phone':
+                            key['phones'].add(v)
+                        if k == 'name':
+                            key['names'].add(v)
+                        if k == 'mol_symbol':
+                            key['ids'].add(v)
+            if row['_id']:
+                key['ids'].add(row['_id'])
+            if row.get('formatted_address'):
+                key['places'].add(row.get('formatted_address'))
             for i, key_ in enumerate(keys):
                 if intersects(key, key_):
                     if i < 10:
