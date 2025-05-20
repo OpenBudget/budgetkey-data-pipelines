@@ -6,5 +6,5 @@ facilities_education:
     - run: add_metadata
       parameters:
         name: facilities_education
-        revision: '2025-05'
+        revision: '2025-05-20'
     - flow: moe

@@ -35,7 +35,7 @@ def scrape():
         DF.add_field('source', 'string', 'moe'),
         DF.add_field('moe_name', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[0]),
         DF.add_field('moe_symbol', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[1]),
-        DF.add_field('moe_mol_symbol', 'string', lambda r: f'mol-' + r['סמל זרוע העבודה']),
+        DF.add_field('moe_mol_symbol', 'string', lambda r: f'mol-' + r['סמל זרוע העבודה'] if r['סמל זרוע העבודה'] else None),
         DF.add_field('moe_owner', 'string', lambda r: r['בעלות']),
         DF.add_field('moe_sector', 'string', lambda r: r['מגזר']),
         DF.add_field('moe_license_status', 'string', lambda r: r['סטטוס הרישוי']),
