@@ -190,6 +190,7 @@ def add_to_obj(prefixes):
                     _k = k[len(prefix) + 1:]
                     row['record'][_k] = v
                     break
+        row['record']['source'] = row.get('source')
     return DF.Flow(
         DF.add_field('record', 'object'),
         func
