@@ -94,6 +94,7 @@ def scrape():
         DF.add_field('welfare_to_age', 'integer', lambda r: r['To_Age']),
         DF.add_field('welfare_coord_x', 'integer', lambda r: r['GisX']),
         DF.add_field('welfare_coord_y', 'integer', lambda r: r['GisY']),
+        DF.filter_rows(lambda r: bool(r['welfare_symbol'])),
         DF.add_field('_id', 'string', lambda r: f'welfare-{r["welfare_symbol"]}'),
         DF.select_fields(['_id', 'welfare_.+']),
         DF.add_field('source', 'string', 'welfare'),

@@ -6,5 +6,5 @@ facilities_labor:
     - run: add_metadata
       parameters:
         name: facilities_labor
-        revision: '2025-05-20'
+        revision: '2025-05-20-01'
     - flow: mol

@@ -57,6 +57,7 @@ def scrape():
         DF.add_field('lab_total_places_adults', 'integer', lambda r: r['NumOfApprovedAdultsPlaces']),
         DF.add_field('lab_available_places_adults', 'integer', lambda r: r['NumOfAvailableAdultsPlaces']),
         DF.add_field('lab_admission_committee', 'boolean', lambda r: bool(r['IsThereAdmissionsCommittee'])),
+        DF.filter_rows(lambda r: bool(r['lab_symbol'])),
         DF.add_field('_id', 'string', lambda r: f'mol-{r["lab_symbol"]}'),
         DF.select_fields(['_id', 'lab_.+']),
         DF.add_field('source', 'string', 'mol'),
