@@ -333,6 +333,7 @@ def fix_mol_symbol():
 def extract_city():
     def func(row):
         if not row['city']:
+            
             for record in row['records']:
                 if record.get('city'):
                     row['city'] = record['city']
