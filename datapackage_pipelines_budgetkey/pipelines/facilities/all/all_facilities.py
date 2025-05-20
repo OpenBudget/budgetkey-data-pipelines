@@ -326,6 +326,15 @@ def fix_mol_symbol():
         DF.add_field('records', 'array'),
     )
 
+def extract_city():
+    def func(row):
+        if not row['city']:
+            for record in row['records']:
+                if record.get('city'):
+                    row['city'] = record['city']
+                    break
+    return func
+
 def scrape(prefix='/var/datapackages'):
     flows = [
         DF.load(f'{prefix}/facilities/labor/datapackage.json'),
@@ -337,6 +346,7 @@ def scrape(prefix='/var/datapackages'):
         *flows,
         concatenate_lists(),
         dedupe(),
+        extract_city(),
         DF.update_resource(-1, name='all-facilities', path='all-facilities.csv'),
         DF.printer()
     )
