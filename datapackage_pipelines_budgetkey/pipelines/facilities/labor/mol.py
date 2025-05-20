@@ -41,7 +41,6 @@ def scrape():
     return DF.Flow(
         get_data(),
         DF.checkpoint('mol'),
-        DF.add_field('source', 'string', 'mol'),
         DF.add_field('lab_symbol', 'string', lambda r: str(r['FrameId'])),
         DF.add_field('lab_name', 'string', lambda r: r['FrameName']),
         DF.add_field('lab_city', 'string', lambda r: r['TownName']),
@@ -60,6 +59,7 @@ def scrape():
         DF.add_field('lab_admission_committee', 'boolean', lambda r: bool(r['IsThereAdmissionsCommittee'])),
         DF.add_field('_id', 'string', lambda r: f'mol-{r["lab_symbol"]}'),
         DF.select_fields(['_id', 'lab_.+']),
+        DF.add_field('source', 'string', 'mol'),
         DF.update_resource(-1, name='mol', path='mol.csv'),
         DF.printer()
     )

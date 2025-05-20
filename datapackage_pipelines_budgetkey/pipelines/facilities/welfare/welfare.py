@@ -79,7 +79,6 @@ def scrape():
         DF.update_schema(-1, missingValues=['לא ידוע', 'לא משויך', 'אחר', '0', '']),
         DF.validate(),
         # DF.filter_rows(lambda r: r['Status_des'] == 'פעילה'),
-        DF.add_field('source', 'string', 'welfare'),
         DF.add_field('welfare_symbol', 'string', lambda r: str(r['Misgeret_Id'])),
         DF.add_field('welfare_name', 'string', lambda r: s(r['Name'])),
         DF.add_field('welfare_facility_type', 'string', lambda r: s(r['Type_Descr'])),
@@ -97,6 +96,7 @@ def scrape():
         DF.add_field('welfare_coord_y', 'integer', lambda r: r['GisY']),
         DF.add_field('_id', 'string', lambda r: f'welfare-{r["welfare_symbol"]}'),
         DF.select_fields(['_id', 'welfare_.+']),
+        DF.add_field('source', 'string', 'welfare'),
         DF.update_resource(-1, name='welfare', path='welfare.csv'),
         DF.printer()
     )
