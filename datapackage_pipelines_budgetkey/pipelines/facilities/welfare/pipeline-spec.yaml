@@ -6,5 +6,5 @@ facilities_welfare:
     - run: add_metadata
       parameters:
         name: facilities_welfare
-        revision: '2025-05'
+        revision: '2025-05-20'
     - flow: welfare
