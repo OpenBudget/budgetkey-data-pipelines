@@ -43,6 +43,7 @@ def scrape():
         DF.add_field('moe_phone', 'string', lambda r: r['טלפון']),
         DF.add_field('moe_manager_name', 'string', lambda r: r['מנהל/ת המעון']),
         DF.filter_rows(lambda r: r['moe_license_status'] != 'מעון סגור'),
+        DF.filter_rows(lambda r: bool(r['moe_symbol'])),
         DF.add_field('_id', 'string', lambda r: f'moe-{r["moe_symbol"]}'),
         DF.select_fields(['_id', 'moe_.+']),
         DF.add_field('source', 'string', 'moe'),
