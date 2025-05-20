@@ -321,7 +321,7 @@ def dedupe():
 def fix_mol_symbol():
     def func(rows):
         for row in rows:
-            if 'mol_symbol' in row['record']:
+            if row['record'].get('mol_symbol'):
                 row['record']['mol_symbol'] = f'mol-{row["record"]["mol_symbol"]}'
         return rows
     return DF.Flow(
