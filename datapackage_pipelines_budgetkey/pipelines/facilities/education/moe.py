@@ -3,7 +3,7 @@
 
 import dataflows as DF
 
-url = 'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0=2025&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
+url = 'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0=2026&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0',
