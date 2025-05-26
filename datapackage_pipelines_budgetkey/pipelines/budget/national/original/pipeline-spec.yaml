@@ -5,6 +5,9 @@ national-budgets:
     It comes in XLS format, with one row per *TAKANA* and phase (original, approved, executed).    
     In this pipeline we create from each triplet a single row that has all the data.
 
+  schedule:
+    crontab: "0 0 sat * *"
+
   pipeline:
     - run: update_package
       parameters:
