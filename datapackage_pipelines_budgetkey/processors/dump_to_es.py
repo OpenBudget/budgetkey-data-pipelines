@@ -55,6 +55,15 @@ class BoostingMappingGenerator(MappingGenerator):
         super(BoostingMappingGenerator, self).generate_from_schema(schema)
         logging.info('GENERATED MAPPING: %s', json.dumps(self.get_mapping(), indent=2, ensure_ascii=False))
 
+class MyNode(elastic_transport.RequestsHttpNode):
+
+    def perform_request(self, method, *args, **kwargs):
+        headers = kwargs.get('headers') or {}
+        if method == 'HEAD':
+            print('HEAD request, setting Connection: close')
+            headers['Connection'] = 'close'
+        kwargs['headers'] = headers
+        return super().perform_request(*args, **kwargs)
 
 class DumpToElasticSearch(dump_to_es):
 
@@ -63,7 +72,7 @@ class DumpToElasticSearch(dump_to_es):
             os.environ['DATAFLOWS_ELASTICSEARCH'],
             basic_auth=('elastic', os.environ['ELASTIC_PASSWORD']),
             ca_certs=os.environ['ELASTICSEARCH_CA_CRT'], request_timeout=300,
-            node_class=elastic_transport.RequestsHttpNode
+            node_class=MyNode
         )
         print(f'Elasticsearch: {os.environ["DATAFLOWS_ELASTICSEARCH"]}, auth: {os.environ["ELASTIC_PASSWORD"][:2]}..{os.environ["ELASTIC_PASSWORD"][-2:]}, ca_certs: {os.environ["ELASTICSEARCH_CA_CRT"]}')
         assert engine.ping(), 'Elasticsearch is not reachable'
