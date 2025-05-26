@@ -6,6 +6,7 @@ from tableschema_elasticsearch.mappers import MappingGenerator
 import dataflows as DF
 
 from elasticsearch import Elasticsearch
+import elastic_transport
 import logging
 import os
 import json
@@ -62,6 +63,7 @@ class DumpToElasticSearch(dump_to_es):
             os.environ['DATAFLOWS_ELASTICSEARCH'],
             basic_auth=('elastic', os.environ['ELASTIC_PASSWORD']),
             ca_certs=os.environ['ELASTICSEARCH_CA_CRT'], request_timeout=300,
+            node_class=elastic_transport.RequestsHttpNode
         )
         print(f'Elasticsearch: {os.environ["DATAFLOWS_ELASTICSEARCH"]}, auth: {os.environ["ELASTIC_PASSWORD"][:2]}..{os.environ["ELASTIC_PASSWORD"][-2:]}, ca_certs: {os.environ["ELASTICSEARCH_CA_CRT"]}')
         assert engine.ping(), 'Elasticsearch is not reachable'
