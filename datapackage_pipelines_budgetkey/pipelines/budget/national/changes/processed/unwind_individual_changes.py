@@ -27,6 +27,7 @@ def unwind():
                     allocated_income_diff=item.get('allocated_income_diff'),
                     commitment_limit_diff=item.get('commitment_limit_diff'),
                     personnel_max_diff=item.get('personnel_max_diff'),
+                    change_id=item.get('change_id')
                 )
     return DF.Flow(
         DF.add_field(name='budget_code', type='string'),
@@ -38,6 +39,7 @@ def unwind():
         DF.add_field(name='allocated_income_diff', type='number'),
         DF.add_field(name='commitment_limit_diff', type='number'),
         DF.add_field(name='personnel_max_diff', type='number'),
+        DF.add_field(name='change_id', type='string'),
         DF.add_field(name='pending', type='boolean'),
         func,
         DF.select_fields([

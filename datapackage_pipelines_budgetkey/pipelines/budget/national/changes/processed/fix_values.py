@@ -15,6 +15,7 @@ def process_row(row, row_index,
                      'commitment_limit_diff',
                      'personnel_max_diff'}
         )
+        row['change_list']['change_id'] = '%02d-%03d' % (row['leading_item'], row['req_code'])
 
     return row
 
