@@ -58,12 +58,12 @@ class BoostingMappingGenerator(MappingGenerator):
 class MyNode(elastic_transport.RequestsHttpNode):
 
     def perform_request(self, method, *args, **kwargs):
-        # headers = kwargs.get('headers') or {}
+        headers = kwargs.get('headers') or {}
         if method == 'HEAD':
             method = 'GET'
-            # print('HEAD request, setting Connection: close')
-            # headers['Connection'] = 'close'
-        # kwargs['headers'] = headers
+            print('HEAD request, changing to GET')
+            headers['Connection'] = 'close'
+        kwargs['headers'] = headers
         return super().perform_request(method, *args, **kwargs)
 
 class DumpToElasticSearch(dump_to_es):
