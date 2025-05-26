@@ -17,7 +17,9 @@ parameters, dp, res_iter = ingest()
 
 # logging.getLogger().setLevel(logging.INFO)
 
-
+headers = {
+    'User-Agent': 'kz-data-reader'
+}
 class DocParser(Parser):
     def decode(self, text):
         return text.decode('utf-8', errors='ignore')
@@ -29,7 +31,7 @@ class DocParser(Parser):
 def get_explanations(url):
     logging.info('Connecting to %r', url)
     try:
-        resp = requests.get(url, stream=True, timeout=300).raw
+        resp = requests.get(url, stream=True, timeout=300, headers=headers).raw
         outfile = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
         shutil.copyfileobj(resp, outfile)
         archive = outfile.name

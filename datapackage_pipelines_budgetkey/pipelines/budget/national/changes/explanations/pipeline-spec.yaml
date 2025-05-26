@@ -1,4 +1,6 @@
 all:
+  schedule:
+    crontab: "0 0 fri * *"
   pipeline:
     - run: add_metadata
       parameters:
@@ -57,18 +59,18 @@ all:
           name: explanation-2024
           path: data/explanation-2024.csv
         url: https://budgetkey-files.ams3.cdn.digitaloceanspaces.com/yearly-budgets/BudgetChanges_past_approv_explain_2024.zip
-    # - run: explanation_fetcher
-    #   parameters:
-    #     resource:
-    #       name: explanation-2020
-    #       path: data/explanation-2020.csv
-    #     url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
-    # - run: explanation_fetcher
-    #   parameters:
-    #     resource:
-    #       name: explanation-pending
-    #       path: data/explanation-pending.csv
-    #     url: https://www.gov.il/files/mof/Budgetchanges/vaada_explain.zip
+    - run: explanation_fetcher
+      parameters:
+        resource:
+          name: explanation-2025
+          path: data/explanation-2025.csv
+        url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
+    - run: explanation_fetcher
+      parameters:
+        resource:
+          name: explanation-pending
+          path: data/explanation-pending.csv
+        url: https://www.gov.il/files/mof/Budgetchanges/vaada_explain.zip
     - run: explanation_extractor
       parameters:
         resource:
