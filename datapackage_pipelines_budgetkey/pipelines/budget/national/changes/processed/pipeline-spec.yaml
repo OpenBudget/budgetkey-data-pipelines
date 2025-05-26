@@ -208,6 +208,9 @@ national-budget-changes-aggregated:
                 - name: budget_code_title
                   type: string
                   es:keyword: true
+                - name: change_id
+                  type: string
+                  es:keyword: true
                 - name: net_expense_diff
                   type: number
                 - name: gross_expense_diff
