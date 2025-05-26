@@ -63,7 +63,7 @@ class MyNode(elastic_transport.RequestsHttpNode):
             print('HEAD request, setting Connection: close')
             headers['Connection'] = 'close'
         kwargs['headers'] = headers
-        return super().perform_request(*args, **kwargs)
+        return super().perform_request(method, *args, **kwargs)
 
 class DumpToElasticSearch(dump_to_es):
 
