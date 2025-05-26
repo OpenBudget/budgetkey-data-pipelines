@@ -18,7 +18,7 @@ setup(
     install_requires=['pyquery',
                     #   'demjson',
                       'requests',
-                      'selenium<4.3',
+                      'selenium',
                       'fuzzywuzzy[speedup]',
                       'plyvel',
                       'filemagic',
