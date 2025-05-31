@@ -299,22 +299,22 @@ def dedupe():
             ids = sorted(key['ids'])
             first_row = row_mapping[ids[0]]
             rec = dict(
-                _id='-'.join(ids),
+                _id=ids[0],
                 lat=first_row['lat'],
                 lng=first_row['lng'],
                 formatted_address=first_row['formatted_address'],
                 city=first_row['city'],
-                records=[],
+                official=[],
             )
             for id in ids:
                 if id in row_mapping:
-                    rec['records'].append(row_mapping[id]['record'])
+                    rec['official'].append(row_mapping[id]['record'])
                 else:
                     print(f"Couldn’t find record for ID: {id}")
-            assert len(rec['records']) > 0, str(rec)
+            assert len(rec['official']) > 0, str(rec)
             yield rec
     return DF.Flow(
-        DF.add_field('records', 'array'),
+        DF.add_field('official', 'array'),
         func,
         DF.delete_fields(['record']),
     )
@@ -333,8 +333,7 @@ def fix_mol_symbol():
 def extract_city():
     def func(row):
         if not row['city']:
-            
-            for record in row['records']:
+            for record in row['official']:
                 if record.get('city'):
                     row['city'] = record['city']
                     break
