@@ -110,21 +110,6 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
             logging.debug('%d/%r: ids: %r', cur_year, row['code'], ids)
             id = ids.pop(0)
 
-            test_value = sum(
-                abs(row[f])
-                for f in ('net_allocated','gross_allocated','net_revised','gross_revised',
-                          'commitment_allowance_allocated','commitment_allowance_revised','net_executed')
-                if row.get(f) is not None
-            )
-            non_repeating = row.get('non_repeating', [])
-            non_repeating = '1' in non_repeating and len(non_repeating) == 1
-            if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
-                if not row.get('code').startswith('C'):
-                    append_unmatched(row)
-                    unmatched_count += 1
-                    row = None
-                    break
-
             # Find curated record for id
             curated_items = curated.get((cur_year, id['code']))
             if curated_items is not None:
@@ -147,6 +132,21 @@ def calc_equivs(cur_year, rows, connected_items, new_connected_items, to_delete,
                     continue
                 else:
                     logging.warning('FOUND 0 CURATED ITEMS for %r', id)
+
+            test_value = sum(
+                abs(row[f])
+                for f in ('net_allocated','gross_allocated','net_revised','gross_revised',
+                          'commitment_allowance_allocated','commitment_allowance_revised','net_executed')
+                if row.get(f) is not None
+            )
+            non_repeating = row.get('non_repeating', [])
+            non_repeating = '1' in non_repeating and len(non_repeating) == 1
+            if (test_value == 0 and not row['code'].endswith('99')) or non_repeating:
+                if not row.get('code').startswith('C'):
+                    append_unmatched(row)
+                    unmatched_count += 1
+                    row = None
+                    break
 
             # Find connected item with same code and title
             connected_item = get(connected_items, id['code'])
