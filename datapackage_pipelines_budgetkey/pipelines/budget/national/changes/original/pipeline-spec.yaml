@@ -1,6 +1,6 @@
 national-budget-changes:
   schedule:
-    crontab: "0 0 fri * *"
+    crontab: "0 0 * * *"
   pipeline:
     - run: update_package
       parameters:
