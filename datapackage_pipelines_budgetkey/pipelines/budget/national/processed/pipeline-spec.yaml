@@ -356,7 +356,7 @@ connected-national-budgets:
       parameters:
         title: National Budget (Connected)
         name: connected-national-budget
-        revision: '2025.06.03.04'
+        revision: '2025.06.03.05'
     - run: add_resource
       parameters:
         name: curated2
