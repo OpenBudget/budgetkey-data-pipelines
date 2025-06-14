@@ -351,6 +351,7 @@ def scrape(prefix='/var/datapackages'):
         concatenate_lists(),
         dedupe(),
         extract_city(),
+        DF.add_field('facility_kind', 'string', 'education'),
         DF.update_resource(-1, name='all-facilities', path='all-facilities.csv'),
         DF.printer()
     )

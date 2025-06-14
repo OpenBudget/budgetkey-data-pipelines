@@ -3,7 +3,10 @@
 
 import dataflows as DF
 
-url = 'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0=2026&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
+YEAR = 2026
+HEB_YEAR = 'תשפ״ו'
+
+url = f'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0={YEAR}&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0',
@@ -33,6 +36,7 @@ def scrape():
         DF.load(url, format='html', http_headers=headers),
         DF.checkpoint('moe'),
         DF.add_field('moe_name', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[0]),
+        DF.add_field('moe_school_year', 'string', HEB_YEAR),
         DF.add_field('moe_symbol', 'string', lambda r: r['שם וסמל מעון'].rsplit('-', 1)[1]),
         DF.add_field('moe_mol_symbol', 'string', lambda r: f'mol-' + r['סמל זרוע העבודה'] if r['סמל זרוע העבודה'] else None),
         DF.add_field('moe_owner', 'string', lambda r: r['בעלות']),
