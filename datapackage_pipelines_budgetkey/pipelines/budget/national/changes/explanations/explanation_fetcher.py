@@ -31,26 +31,32 @@ class DocParser(Parser):
 def get_explanations(url):
     logging.info('Connecting to %r', url)
     try:
-        resp = requests.get(url, stream=True, timeout=300, headers=headers).raw
+        resp = requests.get(url, timeout=300, headers=headers).content
         outfile = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
-        shutil.copyfileobj(resp, outfile)
+        outfile.write(resp)
+        outfile.close()
         archive = outfile.name
     except Exception:
         gcl = google_chrome_driver()
         archive = gcl.download(url)
         gcl.teardown()
 
-    if '.tar.gz' in url:
-        t_archive = tarfile.open(name=archive, mode='r|gz')
-        files = ((os.path.basename(member.name), t_archive.extractfile(member))
-                    for member in t_archive
-                    if member is not None and member.isfile())
-    elif '.zip' in url:
-        z_archive = zipfile.ZipFile(archive)
-        files = ((os.path.basename(member.filename), z_archive.open(member))
-                    for member in z_archive.filelist)
-    else:
-        assert False
+    try:
+        if '.tar.gz' in url:
+            t_archive = tarfile.open(name=archive, mode='r|gz')
+            files = ((os.path.basename(member.name), t_archive.extractfile(member))
+                        for member in t_archive
+                        if member is not None and member.isfile())
+        elif '.zip' in url:
+            z_archive = zipfile.ZipFile(archive)
+            files = ((os.path.basename(member.filename), z_archive.open(member))
+                        for member in z_archive.filelist)
+        else:
+            assert False
+    except Exception as e:
+        logging.error('Failed to open archive %r: %s', archive, e)
+        os.unlink(archive)
+        raise
 
     for name, item in files:
         contents = base64.b64encode(item.read()).decode('ascii')
