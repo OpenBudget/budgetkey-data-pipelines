@@ -11,8 +11,8 @@ def get_text(c, row):
         text = row.get(c['field'])
         if text:
             if c.get('method') == 'chunk':
-                chunk_size = c.get('chunk_size') or 512
-                chunk_overlap = c.get('chunk_overlap') or 0
+                chunk_size = c.get('chunk_size') or 128
+                chunk_overlap = c.get('chunk_overlap') or 64
                 while len(text) > 0:
                     yield text[:chunk_size]
                     text = text[chunk_size - chunk_overlap:]

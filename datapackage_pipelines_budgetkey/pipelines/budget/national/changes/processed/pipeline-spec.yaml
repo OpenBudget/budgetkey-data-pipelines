@@ -20,7 +20,7 @@ transactions:
           raw_budget_changes_transactions:
             resource-name: transactions
     - run: aws.dump.to_s3
-      parameters:
+      parameters: 
         bucket: budgetkey-files
         path: 'national-budget-transactions/cheat-sheet'
         endpoint-url: https://ams3.digitaloceanspaces.com
