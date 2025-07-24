@@ -157,9 +157,9 @@ def group_analyze():
             if ret:
                 yield ret
     return DF.Flow(
-        DF.add_field('title', 'string'),
-        DF.add_field('supporting_ministry', 'string'),
-        DF.add_field('request_type', 'string'),
+        DF.add_field('title', 'string', **{'es:title': True}),
+        DF.add_field('supporting_ministry', 'string', **{'es:keyword': True}),
+        DF.add_field('request_type', 'string', **{'es:keyword': True}),
         DF.add_field('total_entities', 'integer'),
         DF.add_field('total_entity_kinds', 'integer'),
         DF.add_field('total_approved', 'number'),
@@ -169,12 +169,12 @@ def group_analyze():
         DF.add_field('max_year', 'integer'),
         DF.add_field('year_range', 'string'),
         DF.add_field('year_span', 'integer'),
-        DF.add_field('all_titles', 'array',),
-        DF.add_field('all_supporting_ministries', 'array',),
-        DF.add_field('budget_codes', 'array',),
-        DF.add_field('entities', 'array',),
-        DF.add_field('entity_kinds', 'array',),
-        DF.add_field('recipients', 'array',),
+        DF.add_field('all_titles', 'array', **{'es:itemType': 'string'}),
+        DF.add_field('all_supporting_ministries', 'array', **{'es:itemType': 'string'}),
+        DF.add_field('budget_codes', 'array', **{'es:index': False, 'es:itemType': 'object'}),
+        DF.add_field('entities', 'array', **{'es:index': False, 'es:itemType': 'object'}),
+        DF.add_field('entity_kinds', 'array', **{'es:index': False, 'es:itemType': 'object'}),
+        DF.add_field('recipients', 'array', **{'es:index': False, 'es:itemType': 'object'}),
         func,
         DF.select_fields([
             'program_key',

@@ -129,6 +129,21 @@ supports:
     type: year
     field: year_requested
 
+support_programs:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./support_programs/all-support-programs
+  source_datapackage: /var/datapackages/support-programs/all/datapackage.json
+  page-title-pattern: '{title} - תמיכה תקציבית של {supporting_ministry}'
+  chunker:
+    - 'תמיכה תקציבית של {supporting_ministry} עבור "{title}" בין השנים {min_year} ל{max_year}'
+  key-fields:
+    - program_key
+  date-range:
+    type: year-range
+    from-field: min_year
+    to-field: max_year
+
 tenders:
   kind: indexer
   revision: 29

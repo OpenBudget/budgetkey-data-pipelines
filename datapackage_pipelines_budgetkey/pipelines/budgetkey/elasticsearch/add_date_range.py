@@ -10,11 +10,17 @@ def get_no_date_range(row):
     return '1900-01-01', '2100-01-01', []
 
 
-def get_year_date_range(field, row):
-    year = row[field]
-    if isinstance(year, date):
-        year = year.year
-    return '{:04d}-01-01'.format(year), '{:04d}-12-31'.format(year), ["{:04d}-{:0>2}".format(year, i) for i in range(1,13)]
+def get_year_date_range(field_min, field_max, row):
+    year_min = row[field_min]
+    if isinstance(year_min, date):
+        year_min = year_min.year
+    if field_max:
+        year_max = row[field_max]
+        if isinstance(year_max, date):
+            year_max = year_max.year
+    else:
+        year_max = year_min
+    return '{:04d}-01-01'.format(year_min), '{:04d}-12-31'.format(year_max), ["{:04d}-{:0>2}".format(year, i) for year in range(year_min, year_max+1) for i in range(1,13)]
 
 
 def get_date_range(from_field, to_field, row):
@@ -36,8 +42,9 @@ def get_date_range(from_field, to_field, row):
 
 get_date_range_func = {
     'no-date-range': get_no_date_range,
-    'year': partial(get_year_date_range, parameters.get('field')),
-    'date-range': partial(get_date_range, parameters.get('from-field'), parameters.get('to-field'))
+    'year': partial(get_year_date_range, parameters.get('field'), None),
+    'year-range': partial(get_year_date_range, parameters.get('from-field'), parameters.get('to-field')),
+    'date-range': partial(get_date_range, parameters.get('from-field'), parameters.get('to-field')),
 }[parameters.get('type', 'no-date-range')]
 
 
