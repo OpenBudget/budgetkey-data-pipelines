@@ -1,0 +1,24 @@
+all-support-programs:
+  dependencies:
+    - pipeline: ./supports/with-entities
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-support-programs
+        title: All support programs with analyzed data
+    - run: load_resource
+      parameters:
+        url: /var/datapackages/supports/with-entities/datapackage.json
+        resource: supports
+
+    - flow: ./analyze
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/support-programs/all
+    - run: dump.to_sql
+      parameters:
+        tables:
+          support_programs:
+            resource-name: support_programs
+            indexes_fields: [['program_key']]
