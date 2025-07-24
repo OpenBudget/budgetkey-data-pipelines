@@ -285,9 +285,30 @@ all:
       parameters:
         out-path: /var/datapackages/supports/all
 
-with-entities:
+with-keys:
   schedule:
     crontab: "0 0 * * *"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: all-supports-with-keys
+        title: All support data with entities
+        revision: '2025-07-24'
+    - flow: assign_keys
+
+    - run: dump.to_path
+      parameters:
+        out-path: /var/datapackages/supports/with-keys
+    - run: dump.to_sql
+      parameters:
+        tables:
+          raw_supports_with_keys:
+            resource-name: supports
+
+
+with-entities:
+  dependencies:
+    - pipeline: ./supports/with-keys
   pipeline:
     - run: add_metadata
       parameters:
@@ -296,7 +317,7 @@ with-entities:
         revision: '2024-06-26'
     - run: load_resource
       parameters:
-        url: /var/datapackages/supports/all/datapackage.json
+        url: /var/datapackages/supports/with-keys/datapackage.json
         resource: supports
     - flow: datapackage_pipelines_budgetkey.processors.resolve_budget_codes
     - run: fingerprint
