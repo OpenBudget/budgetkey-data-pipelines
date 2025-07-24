@@ -204,6 +204,7 @@ def analyze(debug=False):
         DF.filter_rows(lambda row: row.get('program_key') is not None),
         DF.sort_rows('{program_key}'),
         group_analyze(),
+        DF.update_resource(-1, name='support_programs', **{'dpp:streaming': True}),
     )
 
 def flow(*_):
