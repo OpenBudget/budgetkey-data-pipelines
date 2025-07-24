@@ -11,7 +11,7 @@ all-support-programs:
         url: /var/datapackages/supports/with-entities/datapackage.json
         resource: supports
 
-    - flow: ./analyze
+    - flow: analyze
 
     - run: dump.to_path
       parameters:
