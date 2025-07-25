@@ -199,11 +199,23 @@ def group_analyze():
         ])
     )
 
+def score():
+
+    def func(row):
+        row['score'] = 1 + row.get('total_approved', 0) / 1000 / (row.get('year_span', 1) ** 0.5)
+        return row
+
+    return DF.Flow(
+        DF.add_field('score', 'number', default=0),
+        func,
+    )
+
 def analyze(debug=False):
     return DF.Flow(
         DF.filter_rows(lambda row: row.get('program_key') is not None),
         DF.sort_rows('{program_key}'),
         group_analyze(),
+        score(),
         DF.update_resource(-1, name='support_programs', **{'dpp:streaming': True}),
     )
 

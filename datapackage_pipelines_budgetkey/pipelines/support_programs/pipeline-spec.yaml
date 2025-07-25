@@ -6,7 +6,7 @@ all-support-programs:
       parameters:
         name: all-support-programs
         title: All support programs with analyzed data
-        revision: 2025-24-07-01
+        revision: 2025-25-07-01
     - run: load_resource
       parameters:
         url: /var/datapackages/supports/with-entities/datapackage.json
