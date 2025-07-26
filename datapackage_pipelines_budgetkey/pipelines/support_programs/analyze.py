@@ -28,11 +28,13 @@ def group_analyze():
         ## Supporting Ministries
         all_supporting_ministries = dict()
         for row in rows:
-            sm = row.get('supporting_ministry')
+            sm = row.get['supporting_ministry']
             if sm:                
                 all_supporting_ministries.setdefault(sm, set()).add(row.get('year_requested'))
+            else:
+                print(f'No supporting ministry for row: {row}')
         all_supporting_ministries = [
-            (min(years), max(years), sm) for sm, years in all_supporting_ministries.items()
+            [min(years), max(years), sm] for sm, years in all_supporting_ministries.items()
         ]
         all_supporting_ministries.sort(key=lambda x: x[1])
         supporting_ministry = all_supporting_ministries[0][2] if all_supporting_ministries else None
@@ -127,7 +129,6 @@ def group_analyze():
             'all_supporting_ministries': all_supporting_ministries,
             'total_entities': len(all_recipients),
             'total_entity_kinds': len(all_entity_kinds),
-            'entities': list(all_entity_kinds.values()),
             'entity_kinds': list(all_entity_kinds.values()),
             'total_approved': total_approved,
             'total_paid': total_paid,
@@ -172,7 +173,6 @@ def group_analyze():
         DF.add_field('all_titles', 'array', **{'es:itemType': 'string'}),
         DF.add_field('all_supporting_ministries', 'array', **{'es:itemType': 'string'}),
         DF.add_field('budget_codes', 'array', **{'es:index': False, 'es:itemType': 'object'}),
-        DF.add_field('entities', 'array', **{'es:index': False, 'es:itemType': 'object'}),
         DF.add_field('entity_kinds', 'array', **{'es:index': False, 'es:itemType': 'object'}),
         DF.add_field('recipients', 'array', **{'es:index': False, 'es:itemType': 'object'}),
         func,
@@ -193,7 +193,6 @@ def group_analyze():
             'all_titles',
             'all_supporting_ministries',
             'budget_codes',
-            'entities',
             'entity_kinds',
             'recipients',
         ])
