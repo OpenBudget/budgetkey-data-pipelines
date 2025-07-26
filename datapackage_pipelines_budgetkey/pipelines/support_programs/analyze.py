@@ -162,8 +162,6 @@ def group_analyze():
                 yield ret
     return DF.Flow(
         DF.add_field('title', 'string', **{'es:title': True}),
-        DF.add_field('supporting_ministry', 'string', **{'es:keyword': True}),
-        DF.add_field('request_type', 'string', **{'es:keyword': True}),
         DF.add_field('total_entities', 'integer'),
         DF.add_field('total_entity_kinds', 'integer'),
         DF.add_field('total_approved', 'number'),
@@ -198,7 +196,9 @@ def group_analyze():
             'budget_codes',
             'entity_kinds',
             'recipients',
-        ])
+        ]),
+        DF.set_type('supporting_ministry', **{'es:keyword': True}),
+        DF.set_type('request_type', **{'es:keyword': True}),
     )
 
 def score():
