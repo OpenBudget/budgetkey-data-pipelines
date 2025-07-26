@@ -28,11 +28,14 @@ def group_analyze():
         ## Supporting Ministries
         all_supporting_ministries = dict()
         for row in rows:
-            sm = row.get['supporting_ministry']
-            if sm:                
-                all_supporting_ministries.setdefault(sm, set()).add(row.get('year_requested'))
-            else:
-                print(f'No supporting ministry for row: {row}')
+            try:
+                sm = row['supporting_ministry']
+                if sm:
+                    all_supporting_ministries.setdefault(sm, set()).add(row.get('year_requested'))
+                else:
+                    print(f'No supporting ministry for row: {row}')
+            except KeyError as e:
+                print(f'Missing key {e} in row: {row}')
         all_supporting_ministries = [
             [min(years), max(years), sm] for sm, years in all_supporting_ministries.items()
         ]
