@@ -15,7 +15,7 @@ def group_analyze():
             (min(years), max(years), title) for title, years in all_titles.items()
         ]
         all_titles.sort(key=lambda x: x[1])
-        title = all_titles[0][2] if all_titles else None
+        title = all_titles[-1][2] if all_titles else None
 
         ## Budget Codes
         all_budget_codes = set()
@@ -40,7 +40,7 @@ def group_analyze():
             [min(years), max(years), sm] for sm, years in all_supporting_ministries.items()
         ]
         all_supporting_ministries.sort(key=lambda x: x[1])
-        supporting_ministry = all_supporting_ministries[0][2] if all_supporting_ministries else None
+        supporting_ministry = all_supporting_ministries[-1][2] if all_supporting_ministries else None
 
         ## Request Types
         all_request_types = set()
