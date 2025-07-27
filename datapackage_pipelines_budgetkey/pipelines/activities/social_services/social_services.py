@@ -251,7 +251,7 @@ def flow(*_):
         services(),
         DF.set_type('created_at', type='datetime', transform=lambda x: datetime.datetime.strptime(x[:19], '%Y-%m-%dT%H:%M:%S')),
         DF.set_type('updated_at', type='datetime', transform=lambda x: datetime.datetime.strptime(x[:19], '%Y-%m-%dT%H:%M:%S')),
-        DF.set_type('catalog_number', type='integer'),
+        DF.set_type('catalog_number', type='string'),
         DF.delete_fields(['__tab', 'complete', 'non_suppliers', 'non_tenders', 'notes']),
         DF.add_field('publisher_name', 'string', lambda r: r['office'], **{'es:keyword': True}),
         splitter('target_audience'),
