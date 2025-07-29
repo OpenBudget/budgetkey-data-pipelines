@@ -53,7 +53,7 @@ class Clusterer():
         for k in candidate_keys:
             v = self.clusters.get(k, [])
             for o in v:
-                if o['year'] == year:
+                if o['year'] == year and (o['title'] != support_title or o['code'][:4] != budget_code[:4]):
                     continue
                 score = 0
                 if o['code'] == budget_code:
