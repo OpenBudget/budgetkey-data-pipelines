@@ -52,7 +52,7 @@ def get_history_charts(row):
                         mode='lines+markers',
                         name='מיצוי התמיכות הממוצע',
                         x=[year for year in range(row['min_year'], row['max_year'] + 1)],
-                        y=[row['per_year'].get(year, {}).get('utilization', 0)
+                        y=[row['per_year'].get(year, {}).get('average_utilization', 0)
                         for year in range(row['min_year'], row['max_year'] + 1)],
                         yaxis='y2',
                     )
@@ -75,7 +75,7 @@ def get_history_charts(row):
                         mode='lines+markers',
                         name='{}'.format(x['name']),
                         x=[year for year in range(row['min_year'], row['max_year'] + 1)],
-                        y=[x['per_year'].get(year, {}).get('approved', 0)
+                        y=[x['per_year'].get(year, {}).get('total_approved', 0)
                         for year in range(row['min_year'], row['max_year'] + 1)],
                     )
                     for x in top_recipients
