@@ -6,7 +6,7 @@ def group_analyze():
         """Analyze a group of rows with the same key."""
         if not rows:
             return None
-        
+
         ## Analyze titles
         all_titles = dict()
         for row in rows:
@@ -84,6 +84,27 @@ def group_analyze():
             entity['average_utilization'] for entity in all_recipients.values()
         ) / len(all_recipients) if all_recipients else 0
 
+        ## Analyze years
+        per_year = dict()
+        for row in rows:
+            year = row.get('year_requested')
+            if year:
+                py = per_year.setdefault(year, dict(
+                    approved=0,
+                    paid=0,
+                ))
+                py['approved'] += row.get('amount_approved', 0)
+                py['paid'] += row.get('amount_paid', 0)
+        for year, py in per_year.items():
+            entity_utilization_year = [
+                e['per_year'].get(year, {}).get('utilization')
+                for e in all_recipients.values()
+            ]
+            entity_utilization_year = [
+                u for u in entity_utilization_year if u is not None
+            ]
+            py['average_utilization'] = sum(entity_utilization_year) / len(entity_utilization_year) if entity_utilization_year else 0
+
         ## Analyze entity kinds
         all_entity_kinds = dict()
         for row in rows:
@@ -136,6 +157,7 @@ def group_analyze():
             'total_approved': total_approved,
             'total_paid': total_paid,
             'average_utilization': average_utilization,
+            'per_year': per_year,
             'min_year': min_year,
             'max_year': max_year,
             'year_range': f'{min_year}-{max_year}' if min_year < max_year else str(min_year),
@@ -167,6 +189,7 @@ def group_analyze():
         DF.add_field('total_approved', 'number'),
         DF.add_field('total_paid', 'number'),
         DF.add_field('average_utilization', 'number'),
+        DF.add_field('per_year', 'object', **{'es:index': False}),
         DF.add_field('min_year', 'integer'),
         DF.add_field('max_year', 'integer'),
         DF.add_field('year_range', 'string'),
@@ -187,6 +210,7 @@ def group_analyze():
             'total_approved',
             'total_paid',
             'average_utilization',
+            'per_year',
             'min_year',
             'max_year',
             'year_range',

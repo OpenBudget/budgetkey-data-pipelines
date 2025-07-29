@@ -11,7 +11,49 @@ import logging
 
 
 def get_history_charts(row):
-    ...
+    return dict(
+        title='ניתוח היסטורי',
+        long_title='היסטוריית התמיכות בתכנית בהיבטי כספים שאושרו, שולמו ומיצוי התמיכות',
+        type='plotly',
+        layout=dict(
+            xaxis=dict(title='שנה', type='category'),
+            yaxis=dict(
+                title='סכום (₪)',
+                separatethousands=True,
+                rangemode='tozero'
+            ),
+            yaxis2=dict(
+                title='מיצוי התמיכות',
+                overlaying='y',
+                side='right',
+                tickformat='%'
+            )
+        ),
+        chart=[
+            dict(
+                mode='lines+markers',
+                name='סכום שאושר',
+                x=[year for year in range(row['min_year'], row['max_year'] + 1)],
+                y=[row['per_year'].get(year, {}).get('approved', 0)
+                   for year in range(row['min_year'], row['max_year'] + 1)],
+            ),
+            dict(
+                mode='lines+markers',
+                name='סכום ששולם',
+                x=[year for year in range(row['min_year'], row['max_year'] + 1)],
+                y=[row['per_year'].get(year, {}).get('paid', 0)
+                   for year in range(row['min_year'], row['max_year'] + 1)],
+            ),
+            dict(
+                mode='lines+markers',
+                name='מיצוי התמיכות הממוצע',
+                x=[year for year in range(row['min_year'], row['max_year'] + 1)],
+                y=[row['per_year'].get(year, {}).get('utilization', 0)
+                   for year in range(row['min_year'], row['max_year'] + 1)],
+                yaxis='y2',
+            )
+        ],
+    )
 
 def get_entity_charts(row):
     charts = dict(
@@ -41,7 +83,7 @@ def get_entity_charts(row):
 
 def process_row(row, *_):
     row['charts'] = [
-        # get_history_charts(row),
+        get_history_charts(row),
         get_entity_charts(row),
     ]
     return row
