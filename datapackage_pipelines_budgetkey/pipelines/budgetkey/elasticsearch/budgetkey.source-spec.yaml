@@ -131,7 +131,7 @@ supports:
 
 support_programs:
   kind: indexer
-  revision: 1
+  revision: 2
   dependent_pipeline: ./support_programs/all-support-programs
   source_datapackage: /var/datapackages/support-programs/all/datapackage.json
   page-title-pattern: '{title} - תמיכה תקציבית של {supporting_ministry}'
@@ -139,6 +139,8 @@ support_programs:
     - 'תמיכה תקציבית של {supporting_ministry} עבור "{title}" בין השנים {min_year} ל{max_year}'
   key-fields:
     - program_key
+  document-steps:
+    - run: make_support_program_charts
   date-range:
     type: year-range
     from-field: min_year
