@@ -33,7 +33,7 @@ def entity_kinds_mapper(entries, field):
     return out
 
 def get_history_charts(row):
-    top_recipients = sorted(row['recipients'], key=lambda x: x['total_approved'], reverse=True)[:10]
+    top_recipients = sorted(row['recipients'], key=lambda x: x['total_paid'], reverse=True)[:10]
     entity_kinds_approved = entity_kinds_mapper(row['recipients'], 'total_approved')
     entity_kinds_paid = entity_kinds_mapper(row['recipients'], 'total_paid')
     entity_kinds_count = entity_kinds_mapper(row['recipients'], 'count')
@@ -87,7 +87,7 @@ def get_history_charts(row):
             dict(
                 title='מקבלי התמיכה העיקריים בתכנית זו',
                 long_title='התמיכות במקבלי התמיכה העיקריים בתכנית זו, לאורך כל השנים',
-                description='הסכום המוצג הוא סך התמיכות שאושרו בכל שנה בתכנית זו',
+                description='הסכום המוצג הוא סך התמיכות ששולמו בכל שנה בתכנית זו לעשרת מקבלי התמיכה העיקריים בתכנית זו',
                 type='plotly',
                 layout=dict(
                     xaxis=dict(title='שנה', type='category'),
@@ -102,7 +102,7 @@ def get_history_charts(row):
                         mode='lines+markers',
                         name='{}'.format(x['name']),
                         x=[year for year in range(row['min_year'], row['max_year'] + 1)],
-                        y=[x['per_year'].get(str(year), {}).get('approved', 0)
+                        y=[x['per_year'].get(str(year), {}).get('paid', 0)
                         for year in range(row['min_year'], row['max_year'] + 1)],
                     )
                     for x in top_recipients
@@ -110,7 +110,7 @@ def get_history_charts(row):
             ),
             dict(
                 title='סוגי מקבלי התמיכה בתכנית זו',
-                description='סך התמיכות שאושרו בכל שנה בתכנית זו, לפי סוג מקבל התמיכה',
+                long_title='סך התמיכות בכל שנה בתכנית זו, לפי סוג מקבל התמיכה',
                 type='plotly',
                 layout=dict(
                     grid=dict(rows=1, columns=3)
@@ -122,6 +122,7 @@ def get_history_charts(row):
                         labels=[x[0] for x in entity_kinds_approved],
                         values=[x[1] for x in entity_kinds_approved],
                         name='סך הכספים שאושרו',
+                        domain=dict(row=0, column=0)
                     ),
                     dict(
                         type='pie',
@@ -129,6 +130,7 @@ def get_history_charts(row):
                         labels=[x[0] for x in entity_kinds_paid],
                         values=[x[1] for x in entity_kinds_paid],
                         name='סך הכספים ששולמו',
+                        domain=dict(row=0, column=1)
                     ),
                     dict(
                         type='pie',
@@ -136,6 +138,7 @@ def get_history_charts(row):
                         labels=[x[0] for x in entity_kinds_count],
                         values=[x[1] for x in entity_kinds_count],
                         name='סך מקבלי התמיכה',
+                        domain=dict(row=0, column=2)
                     )
                 ]
             )
