@@ -22,7 +22,7 @@ setup(
                       'fuzzywuzzy[speedup]',
                       'plyvel',
                       'filemagic',
-                      'dataflows-elasticsearch>=0.1.2',
+                      'dataflows-elasticsearch>=2.1.3',
                       'datapackage-pipelines-aws',
                       'textract==1.5.0',  # later versions of textract introduce unnecessary dependency on swig
                                           # see this issue - https://github.com/deanmalmgren/textract/issues/159
@@ -30,11 +30,13 @@ setup(
                       'geocoder',
                       'boto3',
                       'paramiko',
-                      'dataflows>=0.1.6',
+                      'dataflows>=0.5.12',
                       'lxml',
                       'lxml_html_clean',
                       'elasticsearch>=8.0.0<9.0.0',
                       'openai',
+                      'kvfile>=1.1.2',
+                      'pyproj'
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}

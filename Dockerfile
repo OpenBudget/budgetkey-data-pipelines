@@ -22,7 +22,7 @@ RUN mv /datapackage_pipelines_budgetkey/pipelines/.dpp-runners.tzabar /datapacka
 
 RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
-RUN pip install -U -r /requirements-dev.txt
+# RUN pip install -U -r /requirements-dev.txt
 
 RUN apt-get install -y sudo unzip wget libglib2.0-0 && wget https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip && \
