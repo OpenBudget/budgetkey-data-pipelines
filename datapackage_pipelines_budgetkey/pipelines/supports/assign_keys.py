@@ -101,6 +101,7 @@ def add_keys(local=False, clusterer=None):
         DF.load(SOURCE),
         DF.sort_rows('{year_requested}{budget_code}'),
         DF.filter_rows(lambda row: row.get('amount_approved') > 0),
+        DF.filter_rows(lambda row: row.get('support_title') not in (None, '', 'אינו מוקצה')),
         lambda row: clusterer.process_row(row),
     ).process()
     return DF.Flow(
