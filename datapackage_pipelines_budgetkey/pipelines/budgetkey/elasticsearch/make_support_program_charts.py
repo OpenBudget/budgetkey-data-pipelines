@@ -62,6 +62,7 @@ def get_history_charts(row):
             dict(
                 title='מקבלי התמיכה העיקריים בתכנית זו',
                 long_title='התמיכות במקבלי התמיכה העיקריים בתכנית זו, לאורך כל השנים',
+                description='הסכום המוצג הוא סך התמיכות שאושרו בכל שנה בתכנית זו',
                 type='plotly',
                 layout=dict(
                     xaxis=dict(title='שנה', type='category'),
@@ -76,7 +77,7 @@ def get_history_charts(row):
                         mode='lines+markers',
                         name='{}'.format(x['name']),
                         x=[year for year in range(row['min_year'], row['max_year'] + 1)],
-                        y=[x['per_year'].get(str(year), {}).get('total_approved', 0)
+                        y=[x['per_year'].get(str(year), {}).get('approved', 0)
                         for year in range(row['min_year'], row['max_year'] + 1)],
                     )
                     for x in top_recipients
