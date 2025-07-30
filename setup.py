@@ -34,7 +34,7 @@ setup(
                       'dataflows>=0.5.12',
                       'lxml',
                       'lxml_html_clean',
-                      'elasticsearch>=8.0.0<9.0.0',
+                      'elasticsearch<9.0.0',
                       'openai',
                       'kvfile>=1.1.2',
                       'pyproj'
