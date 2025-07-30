@@ -30,7 +30,8 @@ def get_history_charts(row):
                         title='מיצוי התמיכות',
                         overlaying='y',
                         side='right',
-                        tickformat='%'
+                        tickformat='%',
+                        rangemode='tozero'
                     )
                 ),
                 chart=[

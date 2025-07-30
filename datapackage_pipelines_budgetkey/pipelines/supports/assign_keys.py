@@ -50,6 +50,8 @@ class Clusterer():
             self.by_title.get(support_title_, set())
         )
 
+        score = 0
+        top_candidate = None
         for k in candidate_keys:
             v = self.clusters.get(k, [])
             for o in v:
@@ -63,12 +65,15 @@ class Clusterer():
                 if score > top_score:
                     top_score = score
                     top_key = k
+                    top_candidate = o
         if top_key is None:
             top_key = f'{budget_code}_{support_title_}'
             assert top_key not in self.clusters, f'Key {top_key} already exists in clusters, {dedup_key} -> {self.dedup}'
             self.clusters[top_key] = list()
             if len(self.clusters) % 100 == 0:
                 print(f'Processed {len(self.clusters)} clusters')
+        if top_key == '0030021910_השתתפותבהעסקתרו':
+            print('ADDED to DEBUG KEY', dedup_key, support_title, score, top_candidate)
         self.dedup[dedup_key] = top_key
         self.by_code.setdefault(budget_code, set()).add(top_key)
         self.by_title.setdefault(support_title_, set()).add(top_key)
