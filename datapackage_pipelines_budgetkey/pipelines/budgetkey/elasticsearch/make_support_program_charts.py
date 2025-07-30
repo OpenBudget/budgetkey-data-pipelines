@@ -119,7 +119,7 @@ def get_history_charts(row):
                 chart=[
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='label+percent+value',
                         labels=[x[0] for x in entity_kinds_approved],
                         values=[x[1] for x in entity_kinds_approved],
                         name='סך הכספים שאושרו',
@@ -131,7 +131,7 @@ def get_history_charts(row):
                     ),
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='label+percent+value',
                         labels=[x[0] for x in entity_kinds_paid],
                         values=[x[1] for x in entity_kinds_paid],
                         name='סך הכספים ששולמו',
@@ -143,7 +143,7 @@ def get_history_charts(row):
                     ),
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='label+percent+value',
                         labels=[x[0] for x in entity_kinds_count],
                         values=[x[1] for x in entity_kinds_count],
                         name='סך מקבלי התמיכה',
