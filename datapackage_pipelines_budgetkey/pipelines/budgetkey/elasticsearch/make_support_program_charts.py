@@ -118,27 +118,39 @@ def get_history_charts(row):
                 chart=[
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='name+label+percent',
                         labels=[x[0] for x in entity_kinds_approved],
                         values=[x[1] for x in entity_kinds_approved],
                         name='סך הכספים שאושרו',
-                        domain=dict(row=0, column=0)
+                        domain=dict(row=0, column=0),
+                        title=dict(
+                            text='סך הכספים שאושרו',
+                            position='bottom center'
+                        )
                     ),
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='name+label+percent',
                         labels=[x[0] for x in entity_kinds_paid],
                         values=[x[1] for x in entity_kinds_paid],
                         name='סך הכספים ששולמו',
-                        domain=dict(row=0, column=1)
+                        domain=dict(row=0, column=1),
+                        title=dict(
+                            text='סך הכספים ששולמו',
+                            position='bottom center'
+                        )
                     ),
                     dict(
                         type='pie',
-                        hoverinfo='label+percent',
+                        hoverinfo='name+label+percent',
                         labels=[x[0] for x in entity_kinds_count],
                         values=[x[1] for x in entity_kinds_count],
                         name='סך מקבלי התמיכה',
-                        domain=dict(row=0, column=2)
+                        domain=dict(row=0, column=2),
+                        title=dict(
+                            text='סך מקבלי התמיכה',
+                            position='bottom center'
+                        )
                     )
                 ]
             )
