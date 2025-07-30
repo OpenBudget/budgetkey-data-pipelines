@@ -9,9 +9,34 @@ import logging
 # engine = create_engine(os.environ['DPP_DB_ENGINE'])
 # conn = engine.connect()
 
+def entity_kinds_mapper(entries, field):
+    MAP = [
+        ('association', 'עמותות'),
+        ('company', 'חברות'),
+        ('municipality', 'רשויות מקומיות'),
+        ('other', 'פרטיים ולא מזוהה'),
+        ('rest', 'אחר')
+    ]
+    kinds = [x[0] for x in MAP]
+    out = [0.0] * len(MAP)
+    for entry in entries:
+        kind = entry.get('kind', 'rest')
+        if kind not in kinds:
+            kind = 'rest'
+        index = kinds.index(kind)
+        out[index] = (out[index] or 0) + (entry.get(field) or 0)
+    out = [
+        (MAP[i][1], out[i])
+        for i in range(len(MAP))
+        if out[i] > 0
+    ]
+    return out
 
 def get_history_charts(row):
     top_recipients = sorted(row['recipients'], key=lambda x: x['total_approved'], reverse=True)[:10]
+    entity_kinds_approved = entity_kinds_mapper(row['recipients'], 'total_approved')
+    entity_kinds_paid = entity_kinds_mapper(row['recipients'], 'total_paid')
+    entity_kinds_count = entity_kinds_mapper(row['recipients'], 'count')
     return dict(
         title='ניתוח היסטורי',
         subcharts=[
@@ -30,7 +55,7 @@ def get_history_charts(row):
                         title='מיצוי התמיכות',
                         overlaying='y',
                         side='right',
-                        tickformat='%',
+                        tickformat='.0%',
                         rangemode='tozero'
                     )
                 ),
@@ -81,6 +106,37 @@ def get_history_charts(row):
                         for year in range(row['min_year'], row['max_year'] + 1)],
                     )
                     for x in top_recipients
+                ]
+            ),
+            dict(
+                title='סוגי מקבלי התמיכה בתכנית זו',
+                description='סך התמיכות שאושרו בכל שנה בתכנית זו, לפי סוג מקבל התמיכה',
+                type='plotly',
+                layout=dict(
+                    grid=dict(rows=1, columns=3)
+                ),
+                chart=[
+                    dict(
+                        type='pie',
+                        hoverinfo='label+percent',
+                        labels=[x[0] for x in entity_kinds_approved],
+                        values=[x[1] for x in entity_kinds_approved],
+                        name='סך הכספים שאושרו',
+                    ),
+                    dict(
+                        type='pie',
+                        hoverinfo='label+percent',
+                        labels=[x[0] for x in entity_kinds_paid],
+                        values=[x[1] for x in entity_kinds_paid],
+                        name='סך הכספים ששולמו',
+                    ),
+                    dict(
+                        type='pie',
+                        hoverinfo='label+percent',
+                        labels=[x[0] for x in entity_kinds_count],
+                        values=[x[1] for x in entity_kinds_count],
+                        name='סך מקבלי התמיכה',
+                    )
                 ]
             )
         ]
