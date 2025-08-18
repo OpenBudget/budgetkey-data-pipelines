@@ -28,9 +28,17 @@ def flow(*_):
         print(href)
         year_index = gcl.html(PREFIX + href)
         year_index = pq(year_index)
-        all_anchors = year_index('table a')
-        for anchor in all_anchors:
-            href = anchor.attrib['href']
+        rows = year_index('tr')
+        for row in rows:
+            row = pq(row)
+            anchor = row.find('a')
+            date = row.find('.ComEthicsTdDate')
+            if not anchor or not date:
+                continue
+            if len(anchor) > 1 or len(date) > 1:
+                continue
+            date = pq(date).text().strip()
+            href = anchor.attr('href')
             if href.endswith('.pdf'):
                 # print('HHH', href)
                 # input('continue')
@@ -38,12 +46,13 @@ def flow(*_):
                     url = href
                 else:
                     url = PREFIX + href
-                title = anchor.text_content().strip()
+                title = anchor.text().strip()
                 filename = hashlib.md5(url.encode()).hexdigest()[:16] + '.pdf'
                 out.append(dict(
                     url=url,
                     title=title,
                     filename=filename,
+                    date=date,
                 ))
                 # print('HHH2', url, title, filename)
                 # input('continue')
