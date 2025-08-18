@@ -88,6 +88,14 @@ class google_chrome_driver():
         time.sleep(1)
         return json.loads(self.driver.find_element_by_css_selector('body > pre').text)
 
+    def html(self, url):
+        self.driver.get(url)
+        time.sleep(1)
+        return self.driver.execute_script("return document.documentElement.outerHTML;")
+
+    def curl(self, url, outfile):
+        _, stdout, stderr = self.client.exec_command(f'docker exec {self.docker_container} curl {url} -o /downloads/{outfile}')
+
     def list_downloads(self):
         cmd = f'docker exec {self.docker_container} ls -la /downloads/'
         _, stdout, _ = self.client.exec_command(cmd)
@@ -96,9 +104,11 @@ class google_chrome_driver():
         _, stdout, _ = self.client.exec_command(cmd)
         return stdout.read().decode('utf8').split('\n')
 
-    def download(self, url, any_file=False, format=''):
+    def download(self, url, any_file=False, format='', use_curl=False, outfile='downloaded_file'):
         expected = None
-        if not any_file:
+        if outfile:
+            expected = outfile
+        elif not any_file:
             expected = os.path.basename(url)
             expected = expected.split('?')[0]
         logging.info('EXPECTING: %r', expected)
@@ -108,9 +118,12 @@ class google_chrome_driver():
             downloads = []
             timeout = 0
             downloading = False
-            self.driver.get(url)
+            if use_curl:
+                self.curl(url, outfile)
+            else:
+                self.driver.get(url)
             while True:
-                time.sleep(60)
+                time.sleep(3 if use_curl else 60)
                 timeout += 1
 
                 downloads = self.list_downloads()
@@ -127,7 +140,7 @@ class google_chrome_driver():
 
                 if expected in downloads:
                     logging.info('found {} in {}'.format(expected, downloads))
-                    time.sleep(20)
+                    time.sleep(3 if use_curl else 20)
                     out = tempfile.NamedTemporaryFile(delete=False, suffix=expected + format)
                     url = f'http://{self.hostname}:{self.port+1}/{expected}'
                     response = requests.get(url, stream=True, timeout=30)
