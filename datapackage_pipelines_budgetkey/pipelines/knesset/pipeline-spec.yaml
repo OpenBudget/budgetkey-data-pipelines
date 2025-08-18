@@ -1,0 +1,3 @@
+ethics_committee_decisions:
+  pipeline:
+  - flow: ethics_committee_decisions
