@@ -26,6 +26,8 @@ def flow(*_):
     out = []
     for href in hrefs:
         print(href)
+        count = 0
+        existing = 0
         year_index = gcl.html(PREFIX + href)
         year_index = pq(year_index)
         rows = year_index('tr')
@@ -55,6 +57,7 @@ def flow(*_):
                     filename=filename,
                     date=date,
                 ))
+                count += 1
                 # print('HHH2', url, title, filename)
                 # input('continue')
                 if not os.path.exists(outpath):
@@ -63,7 +66,8 @@ def flow(*_):
                         with open(outpath, 'wb') as o:
                             shutil.copyfileobj(i, o)
                     print(out)
-
+                    existing += 1
+        print(f'{href}: GOT {count} documents (out of which, {count-existing} are new)')
     gcl.teardown()
 
     return DF.Flow(
