@@ -1,3 +1,6 @@
 ethics_committee_decisions:
+  schedule:
+    crontab: "0 20 * * 2"
+
   pipeline:
   - flow: ethics_committee_decisions

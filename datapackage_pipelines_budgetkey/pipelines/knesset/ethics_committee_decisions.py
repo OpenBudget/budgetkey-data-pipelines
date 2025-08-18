@@ -48,6 +48,7 @@ def flow(*_):
                     url = PREFIX + href
                 title = anchor.text().strip()
                 filename = hashlib.md5(url.encode()).hexdigest()[:16] + '.pdf'
+                outpath = os.path.join(OUTPUT_PATH, filename)
                 out.append(dict(
                     url=url,
                     title=title,
@@ -56,11 +57,12 @@ def flow(*_):
                 ))
                 # print('HHH2', url, title, filename)
                 # input('continue')
-                document = gcl.download(url, use_curl=True, outfile=filename)
-                with open(document, 'rb') as i:
-                    with open(os.path.join(OUTPUT_PATH, filename), 'wb') as o:
-                        shutil.copyfileobj(i, o)
-                print(out)
+                if not os.path.exists(outpath):
+                    document = gcl.download(url, use_curl=True, outfile=filename)
+                    with open(document, 'rb') as i:
+                        with open(outpath, 'wb') as o:
+                            shutil.copyfileobj(i, o)
+                    print(out)
 
     gcl.teardown()
 
