@@ -22,7 +22,7 @@ def flow(*_):
         href = anchor.attrib['href']
         if href.startswith('/Activity/committees/Ethics/pages/CommitteeDecisions'):
             print(href)
-            hrefs.add(href)
+            # hrefs.add(href)
     out = []
     for href in hrefs:
         print(href)
@@ -30,11 +30,11 @@ def flow(*_):
         existing = 0
         year_index = gcl.html(PREFIX + href)
         year_index = pq(year_index)
-        rows = year_index('tr')
+        rows = year_index('tr, .link-item')
         for row in rows:
             row = pq(row)
             anchor = row.find('a')
-            date = row.find('.ComEthicsTdDate')
+            date = row.find('.ComEthicsTdDate, .ComEthicsDivDate')
             if not anchor or not date:
                 continue
             if len(anchor) > 1 or len(date) > 1:
@@ -57,6 +57,8 @@ def flow(*_):
                     filename=filename,
                     date=date,
                 ))
+                # print('OUT', out)
+                # assert False
                 count += 1
                 # print('HHH2', url, title, filename)
                 # input('continue')
