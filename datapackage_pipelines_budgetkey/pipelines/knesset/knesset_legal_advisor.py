@@ -17,7 +17,6 @@ def flow(*_):
     out = []
     count = 0
     existing = 0
-    main_index = gcl.html(main_index)
     main_index = pq(main_index)
     anchors = main_index('a.LDDocLink')
     for anchor in anchors:
