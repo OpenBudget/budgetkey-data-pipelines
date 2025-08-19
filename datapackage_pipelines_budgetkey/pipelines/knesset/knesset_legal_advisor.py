@@ -40,7 +40,7 @@ def flow(*_):
             count += 1
             # print('HHH2', url, title, filename)
             # input('continue')
-            if not os.path.exists(outpath):
+            if not os.path.exists(outpath) or os.path.getsize(outpath) <= 1024:
                 document = gcl.download(url, use_curl=True, outfile=filename)
                 with open(document, 'rb') as i:
                     with open(outpath, 'wb') as o:
