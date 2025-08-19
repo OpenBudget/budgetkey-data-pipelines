@@ -22,7 +22,7 @@ def flow(*_):
         href = anchor.attrib['href']
         if href.startswith('/Activity/committees/Ethics/pages/CommitteeDecisions'):
             print(href)
-            # hrefs.add(href)
+            hrefs.add(href)
     out = []
     for href in hrefs:
         print(href)
