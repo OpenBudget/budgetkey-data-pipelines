@@ -94,7 +94,7 @@ class google_chrome_driver():
         return self.driver.execute_script("return document.documentElement.outerHTML;")
 
     def curl(self, url, outfile):
-        _, stdout, stderr = self.client.exec_command(f'docker exec {self.docker_container} curl {url} -o /downloads/{outfile}')
+        _, stdout, stderr = self.client.exec_command(f'docker exec {self.docker_container} curl "{url}" -o /downloads/{outfile}')
 
     def list_downloads(self):
         cmd = f'docker exec {self.docker_container} ls -la /downloads/'
