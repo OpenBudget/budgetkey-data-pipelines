@@ -5,7 +5,7 @@ ethics_committee_decisions:
   pipeline:
   - run: update_package
     parameters:
-      revision: 2025.08.19-00
+      revision: 2025.08.19-01
   - flow: ethics_committee_decisions
 
 knesset_legal_advisor:
