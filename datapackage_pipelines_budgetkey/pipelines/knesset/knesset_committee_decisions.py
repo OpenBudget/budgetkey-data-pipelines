@@ -4,6 +4,7 @@ import os
 import dataflows as DF
 
 OUTPUT_PATH = '/var/datapackages/knesset/knesset_committee_decisions'
+os.makedirs(OUTPUT_PATH, exist_ok=True)
 
 def flow(*_):
     out = []
