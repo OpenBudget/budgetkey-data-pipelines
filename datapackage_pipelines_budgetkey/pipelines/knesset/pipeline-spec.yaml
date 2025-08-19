@@ -7,3 +7,13 @@ ethics_committee_decisions:
     parameters:
       revision: 2025.08.19-00
   - flow: ethics_committee_decisions
+
+knesset_legal_advisor:
+  schedule:
+    crontab: "0 21 * * 2"
+
+  pipeline:
+  - run: update_package
+    parameters:
+      revision: 2025.08.19-00
+  - flow: knesset_legal_advisor  
