@@ -791,10 +791,10 @@ PARAMETERS = dict(
             filters={}
         )
     ),
-    supports_data=dict(
-        source='/var/datapackages/supports/by-request-year',
+    support_programs_data=dict(
+        source='/var/datapackages/support-programs/all',
         description='''
-            נתוני תמיכות תקציביות בחברות ועמותות.
+            נתוני תכניות תמיכה תקציבית בחברות ועמותות.
             תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
             המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2025).
             חיפוש טקסט חופשי - לפי שם המשרד, ומטרת התמיכה *בלבד*!
@@ -802,7 +802,167 @@ PARAMETERS = dict(
             לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
         ''',
         fields=[
+            item_url('support_programs', ['program_key']),
+            dict(
+                name='program_key',
+                description='''
+                    מזהה ייחודי של תכנית התמיכה.
+                    אפשר להשתמש בו אח״כ בשאילתות בשדות *program_key (בלבד).
+                ''',
+                type='string',
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='purpose',
+                description='''
+                    כותרת תכנית התמיכה התקציבית.
+                    שדה לרוב קצר ולא מאוד תיאורי.
+                ''',
+                most_common_values=[
+                    'מענק איזון לרשויות מקומיות',
+                    'מענק לאינטל',
+                    'תמיכה בקופות חולים בגין הסכמי ייצוב',
+                    'בנייה חדשה של כיתות לימוד - כללי',
+                    'תמיכה במוסדות תורניים',
+                    'מענק בירה',
+                    'תמיכה בקופות החולים בגין משבר הקורונה',
+                    'חרבות ברזל- מענקים ייעודיים לרשויות',
+                    'מעונות יום ומשפחתונים - סבסוד שהות ילדי',
+                    'תכנית לאומית לחיזוק הרפואה הציבורית',
+                    'סל נתצים - מאיץ',
+                    'מבחני תמיכה בקופות חולים',
+                    'סיוע בגין אי העלאת גיל פרישה',
+                    'מגזרי המיעוטים',
+                    'קרן לצמצום פערים ברשויות המקומיות',
+                    'בנייה חדשה של גני ילדים',
+                ],
+                type='string',
+                default=lambda row: row.get('title')
+            ),
+            dict(
+                name='supporting_ministry',
+                description='''
+                    שם המשרד שמבצע את התמיכה.
+                    חשוב לשים לב ששמות המשרדים משתנים ועשויים להפויע בצורות שונות בתמיכות שונות, לכדן כדאי להשתמש בשאילתת distinct לפני השימוש בשדה.
+                ''',
+                sample_values=['משרד התרבות והספורט', 'משרד הפנים', 'משרד החינוך'],
+            ),
+            dict(
+                name='budget_codes',
+                description='''
+                    קודי הסעיפים התקציביים בהם פעלה תכנית התמיכה הזו.
+                    רשימה של קודי סעיפים תקציביים מופרדים בפסיקים.
+                ''',
+                sample_value=['26.13.01.07,20.67.01.42,19.42.02.26'],
+                transform=lambda x: ','.join(filter(None, [c[1] for c in x])),
+            ),
+            dict(
+                name='request_type',
+                description='''
+                    הסיווג הכלכלי/חוקי של התמיכה
+                ''',
+                possible_values=[
+	                'בקשת תמיכה אחרים',
+                    'תמיכה לרשות מקומית',
+                    'מענקים על פי נוסחה',
+                    '3' + 'א',
+                    'הקצבות',
+                    'תמיכה דרך מוסד',
+                    'תמיכה כלכלית',
+                    'בקשת תמיכה לפרט',
+                ],
+                transform=lambda x: ('3' + 'א') if x == ('א' + '3') else x,
+            ),
+            dict(
+                name='min_year',
+                description='''
+                    שנת תחילת הפעילות של תכנית התמיכה
+                ''',
+                sample_values=[2017, 2023, 2025],
+                type='integer',
+            ),
+            dict(
+                name='max_year',
+                description='''
+                    שנת סיום הפעילות של תכנית התמיכה (או השנה הנוכחית אם התכנית עדיין פעילה)
+                ''',
+                sample_values=[2017, 2023, 2025],
+                type='integer',
+            ),
+            dict(
+                name='total_approved',
+                description='''
+                    הסכום הכולל שאושר במסגרת התמיכה לאורך כל שנות פעילותה.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                filter=lambda x: x is not None and x > 0
+            ),
+            dict(
+                name='total_paid',
+                description='''
+                    הסכום הכולל ששולם בפועל במסגרת התמיכה לאורך כל שנות פעילותה.
+                ''',
+                sample_values=[1000000, 5000000, 10000000],
+                type='number',
+                default=lambda row: row.get('amount_total') or 0,
+            ),
+            dict(
+                name='recipient_entity_kinds',
+                description='''
+                    סוגי הארגונים שזכו לתמיכה עד כה (בחלוקה לאחוזים).
+                    שדה אינפורמטיבי, לא משמש לשאילתות
+                ''',
+                type='string',
+                transform=lambda x: ', '.join('{}: {:.1f}%'.format(r['kind'], r['pct_approved'] * 100) for r in x),
+                default=lambda row: row.get('entity_kinds') or []
+            ),
+            dict(
+                name='top_10_recipients',
+                description='''
+                    עשרת מקבלי התמיכה הגדולים ביותר.
+                    שדה אינפורמטיבי, לא משמש לשאילתות
+                ''',
+                type='string',
+                transform=lambda x: ', '.join('{} ({})'.format(r['name'], r['id'] * 100) for r in x),
+                default=lambda row: row.get('recipients') or []
+            ),
+        ],
+        search=dict(
+            index='support_programs',
+            field_map={
+                'program_key': 'program_key',
+                'purpose': 'title',
+                'supporting_ministry': 'supporting_ministry',
+                'request_type': 'request_type',
+                'min_year': 'min_year',
+                'max_year': 'max_year',
+                'total_approved': 'total_approved',
+                'total_paid': 'total_paid'
+            },
+            filters={}
+        )
+    ),
+    supports_transactions_data=dict(
+        source='/var/datapackages/supports/by-request-year',
+        description='''
+            נתוני תשלומים במסגרת תמיכות תקציביות בחברות ועמותות.
+            תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
+            המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2025).
+            כדאי להתחיל בחיפוש טקסט חופשי במאגר support_programs_data ואז לסנן כאן לפי program_key
+            השתמש בשדות budget_code ו recipient_entity_id בשליפות ב-db ולא בשדה recipient_entity_name או purpose.
+            לפני סינון לפי שדה supporting_ministry, בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
+        ''',
+        fields=[
             item_url('supports', ['budget_code', 'year_requested', 'short_id', 'request_type']),
+            dict(
+                name='program_key',
+                description='''
+                    המזהה הייחודי של תוכנית התמיכה.
+                ''',
+                sample_values=['program_1', 'program_2', 'program_3'],
+                filter=lambda x: x is not None,
+            ),
             dict(
                 name='budget_code',
                 description='''
@@ -933,6 +1093,7 @@ PARAMETERS = dict(
         search=dict(
             index='supports',
             field_map={
+                'program_key': 'program_key',
                 'budget_code': 'nice-budget-code',
                 'purpose': 'support_title',
                 'supporting_ministry': 'supporting_ministry',

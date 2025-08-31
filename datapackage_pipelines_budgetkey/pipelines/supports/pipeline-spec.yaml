@@ -460,6 +460,7 @@ by-request-year:
         source:
           name: supports
           key:
+            - program_key
             - budget_code
             - year_requested
             - recipient_key
@@ -469,6 +470,7 @@ by-request-year:
           name: supports
           key: null
         fields:
+          program_key: null
           budget_code: null
           year_requested: null
           recipient_key: null
