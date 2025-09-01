@@ -849,6 +849,7 @@ PARAMETERS = dict(
             ),
             dict(
                 name='budget_codes',
+                type='string',
                 description='''
                     קודי הסעיפים התקציביים בהם פעלה תכנית התמיכה הזו.
                     רשימה של קודי סעיפים תקציביים מופרדים בפסיקים.
