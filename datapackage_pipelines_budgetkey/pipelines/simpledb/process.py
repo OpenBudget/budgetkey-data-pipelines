@@ -924,8 +924,7 @@ PARAMETERS = dict(
                     שדה אינפורמטיבי, לא משמש לשאילתות
                 ''',
                 type='string',
-                transform=lambda x: ', '.join('{} ({})'.format(r['name'], r['id'] * 100) for r in x),
-                default=lambda row: row.get('recipients') or []
+                default=lambda row: ', '.join('{} ({})'.format(r['name'], r['id'] * 100) for r in (row.get('recipients') or [])),
             ),
         ],
         search=dict(
