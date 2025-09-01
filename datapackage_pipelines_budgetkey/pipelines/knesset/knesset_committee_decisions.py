@@ -31,7 +31,8 @@ def flow(*_):
                     doc = dict(
                         url=document['FilePath'],
                         filename=f'{document["Id"]}.pdf',
-                        date=document['LastUpdatedDate']
+                        date=document['LastUpdatedDate'],
+                        knesset_num=committee['knesset_num']
                     )
                     out.append(doc)
                     outpath = os.path.join(OUTPUT_PATH, doc['filename'])

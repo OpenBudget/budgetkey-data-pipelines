@@ -4,10 +4,13 @@ from pyquery import PyQuery as pq
 import hashlib
 import os
 import shutil
+import re
 
 PREFIX = 'https://main.knesset.gov.il'
 CURRENT = '/Activity/committees/Ethics/pages/CommitteeDecisions25.aspx'
 OUTPUT_PATH = '/var/datapackages/knesset/ethics_committee_decisions'
+
+DIGITS = re.compile(r'\d+')
 
 os.makedirs(OUTPUT_PATH, exist_ok=True)
 
@@ -31,6 +34,7 @@ def flow(*_):
         year_index = gcl.html(PREFIX + href)
         year_index = pq(year_index)
         rows = year_index('tr, .link-item')
+        knesset_num = int(DIGITS.findall(href)[0])
         for row in rows:
             row = pq(row)
             anchor = row.find('a')
@@ -56,6 +60,7 @@ def flow(*_):
                     title=title,
                     filename=filename,
                     date=date,
+                    knesset_num=knesset_num
                 ))
                 # print('OUT', out)
                 # assert False
