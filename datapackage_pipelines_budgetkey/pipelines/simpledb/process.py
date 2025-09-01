@@ -915,8 +915,7 @@ PARAMETERS = dict(
                     שדה אינפורמטיבי, לא משמש לשאילתות
                 ''',
                 type='string',
-                transform=lambda x: ', '.join('{}: {:.1f}%'.format(r['kind'], r['pct_approved'] * 100) for r in x),
-                default=lambda row: row.get('entity_kinds') or []
+                default=lambda row: ', '.join('{}: {:.1f}%'.format(r['kind'], r['pct_approved'] * 100) for r in (row.get('entity_kinds') or [])),
             ),
             dict(
                 name='top_10_recipients',
