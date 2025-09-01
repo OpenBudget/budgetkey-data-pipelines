@@ -11,7 +11,7 @@ OUT = '/var/datapackages/budget/national/changes/finance-committee.zip'
 def flow(*_):
     # Download the zip file
     gcl = google_chrome_driver()
-    archive_ = gcl.download(WEIRD_ZIP_FILE)
+    archive_ = gcl.download(WEIRD_ZIP_FILE, outfile=f'p{YEAR}.zip')
     gcl.teardown()
 
     with open(OUT, 'wb') as f:
