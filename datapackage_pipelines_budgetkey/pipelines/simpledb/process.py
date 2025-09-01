@@ -848,8 +848,9 @@ PARAMETERS = dict(
                 sample_values=['משרד התרבות והספורט', 'משרד הפנים', 'משרד החינוך'],
             ),
             dict(
-                name='budget_codes',
+                name='related_budget_codes',
                 type='string',
+                default=lambda row: row.get('budget_codes') or [],
                 description='''
                     קודי הסעיפים התקציביים בהם פעלה תכנית התמיכה הזו.
                     רשימה של קודי סעיפים תקציביים מופרדים בפסיקים.
