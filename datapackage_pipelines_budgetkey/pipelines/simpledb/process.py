@@ -850,13 +850,12 @@ PARAMETERS = dict(
             dict(
                 name='related_budget_codes',
                 type='string',
-                default=lambda row: row.get('budget_codes') or [],
                 description='''
                     קודי הסעיפים התקציביים בהם פעלה תכנית התמיכה הזו.
                     רשימה של קודי סעיפים תקציביים מופרדים בפסיקים.
                 ''',
                 sample_value=['26.13.01.07,20.67.01.42,19.42.02.26'],
-                transform=lambda x: ','.join(filter(None, [c[1] for c in x])),
+                default=lambda row: ','.join(filter(None, [c[1] for c in row.get('budget_codes', [])])),
             ),
             dict(
                 name='request_type',
