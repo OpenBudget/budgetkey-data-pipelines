@@ -63,12 +63,10 @@ def debug_source(source, debug):
         return source.replace('/var/datapackages/', 'https://next.obudget.org/datapackages/', )
     return source
 
-def item_url(kind, fields):
+def item_url(kind, fields, key='item_url', description='קישור לעמוד הפריט באתר מפתח התקציב'):
     return dict(
-        name='item_url',
-        description='''
-            קישור לעמוד הפריט באתר מפתח התקציב.
-        ''',
+        name=key,
+        description=description,
         type='string',
         default=lambda row: calc_short_doc_id(f'{kind}/' + '/'.join([str(row[f]) for f in fields]))[0]
     )
@@ -794,7 +792,7 @@ PARAMETERS = dict(
     support_programs_data=dict(
         source='/var/datapackages/support-programs/all',
         description='''
-            נתוני תכניות תמיכה תקציבית בחברות ועמותות.
+            נתוני תכניות תמיכה (מבחני תמיכה) תקציבית בחברות ועמותות.
             תמיכות תקציביות הן לא התקשרויות רכש, אלא ניתנות תחת קריטריונים מוגדרים היטב (״מבחני תמיכה״)
             המידע הוא לכלל שנות התקציב מאז 2004 ועד השנה הנוכחית (2025).
             חיפוש טקסט חופשי - לפי שם המשרד, ומטרת התמיכה *בלבד*!
@@ -954,10 +952,12 @@ PARAMETERS = dict(
         ''',
         fields=[
             item_url('supports', ['budget_code', 'year_requested', 'short_id', 'request_type']),
+            item_url('support_programs', ['program_key'], key='support_program_item_url', description='קישור לעמוד של תכנית התמיכה באתר מפתח התקציב'),
             dict(
                 name='program_key',
                 description='''
-                    המזהה הייחודי של תוכנית התמיכה.
+                    המזהה הייחודי של תוכנית התמיכה (אליה שייכת הרשומה הנוכחית)
+                    משמש רק לשאילתות - אף פעם אין להציג למשתמש!
                 ''',
                 sample_values=['program_1', 'program_2', 'program_3'],
                 filter=lambda x: x is not None,
