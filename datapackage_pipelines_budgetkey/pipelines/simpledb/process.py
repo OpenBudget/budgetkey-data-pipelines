@@ -922,7 +922,7 @@ PARAMETERS = dict(
                     שדה אינפורמטיבי, לא משמש לשאילתות
                 ''',
                 type='string',
-                default=lambda row: ', '.join('{} ({})'.format(r['name'], r['id']) for r in (row.get('recipients') or [])),
+                default=lambda row: ', '.join('{} ({})'.format(r['name'], r['id']) for r in (row.get('recipients')[:10] or [])),
             ),
         ],
         search=dict(
