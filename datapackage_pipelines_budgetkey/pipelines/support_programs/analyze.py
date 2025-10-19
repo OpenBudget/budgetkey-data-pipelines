@@ -74,7 +74,8 @@ def group_analyze():
                     ))
                     py['approved'] += row.get('amount_approved')
                     py['paid'] += row.get('amount_paid')
-        for entity in all_recipients.values():
+        all_recipients = sorted(all_recipients.values(), key=lambda x: x['total_paid'] or -1, reverse=True)
+        for entity in all_recipients:
             for py in entity['per_year'].values():
                 py['utilization'] = py['paid'] / py['approved'] if py['approved'] else None
             utilizations = [
@@ -82,7 +83,7 @@ def group_analyze():
             ]
             entity['average_utilization'] = sum(utilizations) / len(utilizations) if utilizations else None
         entity_avg_utilizations = [
-            entity['average_utilization'] for entity in all_recipients.values() if entity['average_utilization'] is not None
+            entity['average_utilization'] for entity in all_recipients if entity['average_utilization'] is not None
         ]
         average_utilization = sum(entity_avg_utilizations) / len(entity_avg_utilizations) if entity_avg_utilizations else None
 
@@ -100,7 +101,7 @@ def group_analyze():
         for year, py in per_year.items():
             entity_utilization_year = [
                 e['per_year'].get(year, {}).get('utilization')
-                for e in all_recipients.values()
+                for e in all_recipients
             ]
             entity_utilization_year = [
                 u for u in entity_utilization_year if u is not None
@@ -165,7 +166,7 @@ def group_analyze():
             'max_year': max_year,
             'year_range': f'{min_year}-{max_year}' if min_year < max_year else str(min_year),
             'year_span': max_year - min_year + 1,
-            'recipients': list(all_recipients.values()),
+            'recipients': all_recipients,
         }
 
     def func(rows):

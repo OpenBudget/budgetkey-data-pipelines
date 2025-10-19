@@ -131,7 +131,7 @@ supports:
 
 support_programs:
   kind: indexer
-  revision: 13
+  revision: 14
   dependent_pipeline: ./support_programs/all-support-programs
   source_datapackage: /var/datapackages/support-programs/all/datapackage.json
   page-title-pattern: '{title} - תמיכה תקציבית של {supporting_ministry}'
