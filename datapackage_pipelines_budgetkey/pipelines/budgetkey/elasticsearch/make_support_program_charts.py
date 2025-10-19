@@ -79,7 +79,7 @@ def get_history_charts(row):
                         mode='lines+markers',
                         name='מיצוי התמיכות הממוצע',
                         x=[year for year in range(row['min_year'], row['max_year'] + 1)],
-                        y=[row['per_year'].get(str(year), {}).get('average_utilization', 0)
+                        y=[row['per_year'].get(str(year), {}).get('average_utilization', None)
                         for year in range(row['min_year'], row['max_year'] + 1)],
                         yaxis='y2',
                     )
@@ -172,7 +172,7 @@ def get_entity_charts(row):
                         amount=x[field],
                         amount_fmt=formatter(x[field]),
                     )
-                    for x in sorted(row['recipients'], key=lambda x: x[field], reverse=True)],
+                    for x in sorted(row['recipients'], key=lambda x: x[field] if x[field] is not None else -1, reverse=True)],
                     selected=0
                 )
             ) for title, field, formatter in [

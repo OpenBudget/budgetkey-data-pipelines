@@ -76,13 +76,15 @@ def group_analyze():
                     py['paid'] += row.get('amount_paid')
         for entity in all_recipients.values():
             for py in entity['per_year'].values():
-                py['utilization'] = py['paid'] / py['approved'] if py['approved'] else 0
-            entity['average_utilization'] = sum(
-                py['utilization'] for py in entity['per_year'].values()
-            ) / len(entity['per_year']) if entity['per_year'] else 0
-        average_utilization = sum(
-            entity['average_utilization'] for entity in all_recipients.values()
-        ) / len(all_recipients) if all_recipients else 0
+                py['utilization'] = py['paid'] / py['approved'] if py['approved'] else None
+            utilizations = [
+                py['utilization'] for py in entity['per_year'].values() if py['utilization'] is not None
+            ]
+            entity['average_utilization'] = sum(utilizations) / len(utilizations) if utilizations else None
+        entity_avg_utilizations = [
+            entity['average_utilization'] for entity in all_recipients.values() if entity['average_utilization'] is not None
+        ]
+        average_utilization = sum(entity_avg_utilizations) / len(entity_avg_utilizations) if entity_avg_utilizations else None
 
         ## Analyze years
         per_year = dict()
@@ -103,7 +105,7 @@ def group_analyze():
             entity_utilization_year = [
                 u for u in entity_utilization_year if u is not None
             ]
-            py['average_utilization'] = sum(entity_utilization_year) / len(entity_utilization_year) if entity_utilization_year else 0
+            py['average_utilization'] = sum(entity_utilization_year) / len(entity_utilization_year) if entity_utilization_year else None
 
         ## Analyze entity kinds
         all_entity_kinds = dict()
@@ -132,10 +134,11 @@ def group_analyze():
         total_paid = sum(ek['total_paid'] for ek in all_entity_kinds.values())
         for ek in all_entity_kinds.values():
             for py in ek['per_year'].values():
-                py['utilization'] = py['paid'] / py['approved'] if py['approved'] else 0
-            ek['average_utilization'] = sum(
-                py['utilization'] for py in ek['per_year'].values()
-            ) / len(ek['per_year']) if ek['per_year'] else 0
+                py['utilization'] = py['paid'] / py['approved'] if py['approved'] else None
+            utilizations = [
+                py['utilization'] for py in ek['per_year'].values() if py['utilization'] is not None
+            ]
+            ek['average_utilization'] = sum(utilizations) / len(utilizations) if utilizations else None
 
             ek['pct'] = ek['count'] / sum(x['count'] for x in all_entity_kinds.values()) if all_entity_kinds else 0
             ek['pct_approved'] = ek['total_approved'] / total_approved if total_approved else 0
