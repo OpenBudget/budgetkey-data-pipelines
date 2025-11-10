@@ -1,6 +1,6 @@
 jobiz-scraper:
-  schedule:
-    crontab: "0 15 * * *"
+  # schedule:
+  #   crontab: "0 15 * * *"
 
   pipeline:
     - run: add_metadata
@@ -154,7 +154,7 @@ calls-for-bids-moh:
 
 calls-for-bids-all:
   dependencies:
-    - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
+    # - pipeline: ./procurement/calls_for_bids/jobiz-calls-for-bids
     - pipeline: ./procurement/calls_for_bids/gov-publications
     - pipeline: ./procurement/calls_for_bids/gov-publications2
     - pipeline: ./procurement/calls_for_bids/gov-publications-ministry-of-immigration
@@ -185,9 +185,9 @@ calls-for-bids-all:
     - run: load
       parameters:
         from: /var/datapackages/publications/gov/calls-for-bids-immigration/datapackage.json
-    - run: load
-      parameters:
-        from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
+    # - run: load
+    #  parameters:
+    #    from: /var/datapackages/publications/jobiz-calls-for-bids/datapackage.json
     # - run: load
     #   parameters:
     #     from: /var/datapackages/publications/joint/calls_for_bids/datapackage.json
