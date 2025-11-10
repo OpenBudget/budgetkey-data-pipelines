@@ -54,7 +54,7 @@ def scrape():
             page_title=title['description'],
             page_url=URL
         ))
-        details = item.find('span')
+        details = item.find('div.details').find('span')
         for detail in details:
             detail = pq(detail)
             kind = pq(detail.children('label')).text().strip()
@@ -71,10 +71,25 @@ def scrape():
             if not kind:
                 continue
             ret[kind] = value
+
+        moed = item.find('span.toolbar').find('div').find('span.itemStatus').find('span.moed')[0]
+        kind = pq(moed).children('label').text().strip()
+        if not kind:
+            # No claim_date in item???
+            continue
+        value = pq(moed).text().replace(kind, '')
+        kind = {
+            'מועד אחרון להגשה:': 'claim_date',
+        }.get(kind)
+        if not kind:
+            # No claim_date in item???
+            continue
+        ret[kind] = value
+
         for x in ('reason', 'target_audience'):
             if x in ret:
                 ret['subject_list_keywords'].append(ret.pop(x))
-        if ret['claim_date'].split(' ') == 1:
+        if len(ret['claim_date'].split(' ')) == 1:
             ret['claim_date'] += ' 00:00'
         yield ret
 
@@ -85,7 +100,7 @@ def flow(*_):
         DF.update_resource(-1, **{'dpp:streaming': True, 'name': 'btl'}),
         DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M', resources=-1),
         DF.set_type('start_date', type='date', format='%d/%m/%Y', resources=-1),
-        DF.filter_rows(lambda r: r['publication_id']),
+        # DF.filter_rows(lambda r: r['publication_id']),
         calculate_publication_id(7),
     )
 
