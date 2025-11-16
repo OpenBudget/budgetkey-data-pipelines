@@ -1,5 +1,6 @@
 import dataflows as DF
 import re
+import pyquery
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 URL = 'https://pob.education.gov.il/umbraco/api/content/GetKolKore?a=1&israshut=0&rdo=0&length=0&page=0&pagesize=20&id=0'
@@ -8,7 +9,13 @@ PAGE_URL = 'https://pob.education.gov.il/kolotkorim/kolkore/'
 HE = re.compile('[א-ת]+')
 EMAIL = re.compile('[a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+')
 NUMBERS = re.compile('[0-9]+')
+# Get the text component of an anchor element
+TEXT=re.compile('<a[^>]+>(.*?)</a')
 
+
+def extract_text_from_anchor(row, field):
+    if row.get(field):
+        return ' '.join(TEXT.findall(row[field])[:1])
 
 def extract_hebrew(row, field):
     if row.get(field):
@@ -77,8 +84,7 @@ def flow(*_):
         DF.add_field('tender_type_he', 'string', 'קול קורא', resources=-1),
         # DF.add_field('publication_id', 'integer', 0, resources=-1),
         DF.add_field('tender_id', 'string', '0', resources=-1),
-        DF.add_field('tender_type_he', 'string', 'קול קורא', resources=-1),
-        DF.add_field('contact', 'string', lambda row: extract_hebrew(row, 'email'), resources=-1),
+        DF.add_field('contact', 'string', lambda row: extract_text_from_anchor(row, 'email'), resources=-1),
         DF.add_field('target_audience', 'string', lambda row: extract_hebrew(row, 'target_audience_x'), resources=-1),
         DF.add_field('contact_email', 'string', lambda row: extract_email(row, 'email'), resources=-1),
         DF.add_field('publishing_unit', 'string', lambda row: row['publishing_unit_x'], resources=-1),
@@ -100,5 +106,7 @@ def flow(*_):
 if __name__ == '__main__':
     DF.Flow(
         flow(),
-        DF.printer(max_cell_size=40, num_rows=10000),
+        DF.printer(max_cell_size=40, num_rows=10000,
+        #           tablefmt='pipe',
+        ),
     ).process()
