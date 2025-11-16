@@ -22,7 +22,11 @@ def extract_email(row, field):
 
 def extract_budget_code(row, field):
     if row.get(field):
-        code = ''.join(NUMBERS.findall(row[field].split(',')[0]))
+        codes = [c for c in row[field].split(',') if 'מרכז קרנות' not in c]
+        if len(codes) != 1:
+            # Something is wrong
+            return None
+        code = ''.join(NUMBERS.findall(codes[0]))
         if len(code) == 6:
             code = '20' + code
         if len(code) == 8:
