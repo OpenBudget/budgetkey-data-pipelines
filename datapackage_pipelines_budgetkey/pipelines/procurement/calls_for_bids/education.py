@@ -2,8 +2,8 @@ import dataflows as DF
 import re
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
-URL = 'https://pob.education.gov.il/KolotKorim/_layouts/15/Edu.Pob.SharePoint.Portal/Pages/POBSPHandler.aspx?FunctionName=GetKolKore&ListUrl=/Lists/KolKore&NumOfItem=0'
-PAGE_URL = 'https://pob.education.gov.il/KolotKorim/Pages/KolKore.aspx'
+URL = 'https://pob.education.gov.il/umbraco/api/content/GetKolKore?a=1&israshut=0&rdo=0&length=0&page=0&pagesize=20&id=0'
+PAGE_URL = 'https://pob.education.gov.il/kolotkorim/kolkore/'
 
 HE = re.compile('[א-ת]+')
 EMAIL = re.compile('[a-zA-Z0-9_.]+@[a-zA-Z0-9_.]+')
@@ -22,13 +22,14 @@ def extract_email(row, field):
 
 def extract_budget_code(row, field):
     if row.get(field):
-        code = ''.join(NUMBERS.findall(row[field]))
+        code = ''.join(NUMBERS.findall(row[field].split(',')[0]))
         if len(code) == 6:
             code = '20' + code
         if len(code) == 8:
             code = '00' + code
         if len(code) == 10:
             return code
+    
 
 
 def enumerate_titles(rows):
@@ -50,48 +51,50 @@ def enumerate_titles(rows):
 
 def flow(*_):
     return DF.Flow(
-        DF.load(URL, format='json', property='jData', name='education'),
+        DF.load(URL, format='json', name='education'),
         # DF.checkpoint('education'),
         DF.concatenate(dict(
-            page_title=['Title'],
-            start_date=['PobKKPublishingDate'],
-            claim_date=['PobLastDate'],
-            target_audience_x=['PobBudgetEntitties'],
-            description=['PobTaktzir'],
-            email=['PobPedagogyContactHtml'],
-            publishing_unit_x=['PobYechida'],
-            budget_code_x=['PobTakanaTaktzivitString'],
-            att_title=['PobCreteriaLink_description'],
-            att_url=['PobCreteriaLink_url'],
+            page_title=['name'],
+            start_date=['taarichPirsum'],
+            claim_date=['taarichLast'],
+            target_audience_x=['gufim'],
+            description=['summary'],
+            email=['ishKesherPedagogi'],
+            publishing_unit_x=['yechida'],
+            budget_code_x=['takana'],
+            # att_title=['name'],
+            att_url=['linkCriteria'],
+            publication_id=['id']
         ), resources=-1, target=dict(name='education')),
         enumerate_titles,
         DF.add_field('page_url', 'string', PAGE_URL, resources=-1),
         DF.add_field('publisher', 'string', 'משרד החינוך', resources=-1),
         DF.add_field('tender_type', 'string', 'call_for_bids', resources=-1),
         DF.add_field('tender_type_he', 'string', 'קול קורא', resources=-1),
-        DF.add_field('publication_id', 'integer', 0, resources=-1),
+        # DF.add_field('publication_id', 'integer', 0, resources=-1),
         DF.add_field('tender_id', 'string', '0', resources=-1),
         DF.add_field('tender_type_he', 'string', 'קול קורא', resources=-1),
         DF.add_field('contact', 'string', lambda row: extract_hebrew(row, 'email'), resources=-1),
         DF.add_field('target_audience', 'string', lambda row: extract_hebrew(row, 'target_audience_x'), resources=-1),
         DF.add_field('contact_email', 'string', lambda row: extract_email(row, 'email'), resources=-1),
-        DF.add_field('publishing_unit', 'string', lambda row: row['publishing_unit_x'][0]['PobYechida'], resources=-1),
+        DF.add_field('publishing_unit', 'string', lambda row: row['publishing_unit_x'], resources=-1),
         DF.add_field('budget_code', 'string', lambda row: extract_budget_code(row, 'budget_code_x'), resources=-1),
-        DF.set_type('start_date', type='date', format='%d/%m/%Y %H:%M:%S'),
-        DF.set_type('claim_date', type='datetime', format='%d/%m/%Y %H:%M:%S'),
+        DF.set_type('start_date', type='date', format='%d-%m-%Y'),
+        DF.set_type('claim_date', type='date', format='%d-%m-%Y'),
         DF.add_field('documents', 'array',
                      lambda row: [dict(
-                         description=row['att_title'],
+                         description=row['page_title'],
                          link=row['att_url'],
                          update_time=str(row['start_date'])
                      )], resources=-1),
-        DF.delete_fields(['email', 'publishing_unit_x', 'budget_code_x', 'att_title', 'att_url', 'target_audience_x'], resources=-1),
+        DF.delete_fields(['email', 'publishing_unit_x', 'budget_code_x', 'att_url', 'target_audience_x'], resources=-1),
         calculate_publication_id(6),
-        DF.update_resource(-1, **{'dpp:streaming': True})
+        DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
 
 if __name__ == '__main__':
     DF.Flow(
-        flow(), DF.printer(max_cell_size=40, num_rows=10000)
+        flow(),
+        DF.printer(max_cell_size=40, num_rows=10000),
     ).process()
