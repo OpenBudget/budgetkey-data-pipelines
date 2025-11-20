@@ -1,26 +1,17 @@
+import json
+import requests
+
 from pyquery import PyQuery as pq
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import dataflows as DF
-from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
-BASE = 'https://www.gov.il'
-URL = BASE + '/he/Departments/publications/reports/class_action_law'
-
+BASE = "https://www.gov.il/"
+URL = BASE + "ContentPageWebApi/api/content-pages/class_action_law?culture=he"
 
 def scrape():
-    gcd = google_chrome_driver()
-    driver = gcd.driver
-
-    driver.get(URL)
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.ID, "ReportContent"))
-    )
-    page = pq(driver.page_source)
-    rows = page.find('#ReportContent table.table tr')
-    for row in rows:
+    page = json.loads(requests.get(URL).text)
+    table = pq(page['contentMain']['htmlContents'][0]['sectionData'])
+    for row in table.find('table')[0].find('tbody'):
         _row = [
             pq(td)
             for td in pq(row).find('td, th')
@@ -50,7 +41,6 @@ def scrape():
             contact_email='keren27@justice.gov.il'
         ))
         yield ret
-    gcd.teardown()
 
 
 def flow(*_,):
