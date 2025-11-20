@@ -1,57 +1,43 @@
 import requests
-from pyquery import PyQuery as pq
-from dataflows import Flow, update_resource, printer
+import json
+
+import dataflows as DF
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines_budgetkey.common.publication_id import calculate_publication_id
 
 
-def m_tmicha_scraper():
-
-    url = 'https://www.health.gov.il/Subjects/Finance/Mtmicha/Pages/default.aspx'
-    s = requests.Session()
-    page = pq(s.get(url).text)
-
-    id_ = 'div#ctl00_PlaceHolderMain_GovXContentSectionPanel_ctl00__ControlWrapper_RichHtmlField'
-    data = page.find(id_)
-    rows = data.find('a')
-    total = 0
-
-    for row in rows:
-        row = pq(row)
-        link = row.attr('href')
-        if link.lower().endswith('pdf') or link.lower().endswith('docx'):
-            if not link.startswith('http'):
-                link = 'https://www.health.gov.il' + link
-            if 'health.gov' not in link:
-                continue
-            title = row.text()
-            if not title:
-                print('BAD ROW', row)
-                continue
-            draft = title.startswith('טיוט')
-            yield dict(
-                publication_id=0,
-                tender_id='0',
-                tender_type='support_criteria' if not draft else 'support_criteria_draft',
-                tender_type_he='מבחן תמיכה' if not draft else 'טיוטת מבחן תמיכה',
-
-                page_title=title,
-                page_url=url,
-                publisher='משרד הבריאות',
-
-                start_date=None,
-
-                documents=[dict(link=link, description=title)],
-            )
-            total += 1
-    assert total > 0
+def scraper():
+    URL = 'https://www.gov.il/CollectorsWebApi/api/DataCollector/GetResults?CollectorType=reports&CollectorType=rfp&CollectorType=drushim&CollectorType=publicsharing&officeId=104cb0f4-d65a-4692-b590-94af928c19c0&limit=30&Type=7159e036-77d5-44f9-a1bf-4500e6125bf1&Status=c8ed2e3c-e5a9-4101-93f5-bae798c4ac1d&culture=he'
+    results = json.loads(requests.get(URL).text)['results']
+    for result in results:
+        if 'תאריך אחרון להגשה' in result['tags']['promotedMetaData']:
+            claim_date = result['tags']['promotedMetaData']['תאריך אחרון להגשה'][0]['title']
+        else:
+            claim_date = None
+        yield dict(
+            page_url = 'https://gov.il' + result['url'],
+            page_title = result['title'],
+            publisher = 'משרד הבריאות',
+            tender_id = 0, # result['tags']['promotedMetaData']['מספר'][0]['title'],
+            tender_type='call_for_bids',
+            tender_type_he = 'קול קורא',
+            publication_id = None,
+            start_date = result['tags']['metaData']['תאריך פרסום'][0]['title'],
+            claim_date = claim_date,
+            description = result['description'],
+            documents = [],
+        )
 
 
 def flow(*args):
-    return Flow(
-        m_tmicha_scraper(),
-        calculate_publication_id(5),
-        update_resource(
+    return DF.Flow(
+        scraper(),
+        DF.set_type('start_date', type='date', format='%d.%m.%Y', resources=-1),
+        # some call_for_bids are missing a claim_date, they are preliminary
+        DF.set_type('claim_date', type='date', format='%d.%m.%Y', resources=-1, on_error=DF.schema_validator.clear),
+        calculate_publication_id(9),
+        DF.validate(),
+        DF.update_resource(
             -1, name='support_criteria_from_ministry_of_health',
             **{
                 PROP_STREAMING: True
@@ -60,6 +46,6 @@ def flow(*args):
     )
 
 if __name__ == '__main__':
-    Flow(
-        flow(), printer()
+    DF.Flow(
+        flow(), DF.printer()
     ).process()
