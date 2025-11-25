@@ -90,13 +90,16 @@ def flow(*_):
         DF.add_field('publishing_unit', 'string', lambda row: row['publishing_unit_x'], resources=-1),
         DF.add_field('budget_code', 'string', lambda row: extract_budget_code(row, 'budget_code_x'), resources=-1),
         DF.set_type('start_date', type='date', format='%d-%m-%Y'),
-        DF.set_type('claim_date', type='date', format='%d-%m-%Y'),
+        DF.set_type('claim_date', type='datetime', format='%d-%m-%Y'),
         DF.add_field('documents', 'array',
                      lambda row: [dict(
                          description=row['page_title'],
                          link=row['att_url'],
                          update_time=str(row['start_date'])
                      )], resources=-1),
+        DF.add_field('subject_list_keywords', 'array', default=[], resources=-1),
+        DF.add_field('ordering_units', 'array', default=[], resources=-1),
+        DF.add_field('required_documents', 'array', default=[], resources=-1),
         DF.delete_fields(['email', 'publishing_unit_x', 'budget_code_x', 'att_url', 'target_audience_x'], resources=-1),
         calculate_publication_id(6),
         DF.update_resource(-1, **{'dpp:streaming': True}),

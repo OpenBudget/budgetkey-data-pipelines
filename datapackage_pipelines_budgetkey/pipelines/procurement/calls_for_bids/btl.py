@@ -19,6 +19,9 @@ BASE = dict(
     subject_list_keywords=[],
     page_title=' ',
     page_url=URL,
+    documents = [],
+    ordering_units = [],
+    required_documents = [],
 )
 
 

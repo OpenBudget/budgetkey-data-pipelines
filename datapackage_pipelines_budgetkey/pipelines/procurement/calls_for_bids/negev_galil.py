@@ -23,6 +23,9 @@ def scraper():
             claim_date = result['tags']['promotedMetaData']['תאריך אחרון להגשה'][0]['title'],
             description = '',
             documents = [],
+            subject_list_keywords = [],
+            ordering_units = [],
+            required_documents = [],
         )
 
 
