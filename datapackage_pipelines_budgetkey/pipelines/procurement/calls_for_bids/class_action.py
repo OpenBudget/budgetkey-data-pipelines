@@ -38,7 +38,10 @@ def scrape():
             start_date=None,
             documents=documents,
             contact='מוחמד זחלקה',
-            contact_email='keren27@justice.gov.il'
+            contact_email='keren27@justice.gov.il',
+            subject_list_keywords=[],
+            ordering_units = [],
+            required_documents = [],
         ))
         yield ret
 
