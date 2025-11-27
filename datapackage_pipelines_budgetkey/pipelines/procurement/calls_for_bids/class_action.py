@@ -22,6 +22,9 @@ def scrape():
             ('tender_id', 'page_title', 'claim_date', 'description'),
             [td.text() for td in _row]
         ))
+        if not ret['tender_id']:
+            # Some rows are missing data, just skip them
+            continue
         ret['claim_date'] = ret['claim_date'].split(' ')[0] if ret['claim_date'] else None
         link = pq(_row[0].find('a')).attr('href')
         documents = []
