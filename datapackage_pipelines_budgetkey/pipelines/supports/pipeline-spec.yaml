@@ -155,17 +155,24 @@ supports-2025:
     parameters:
       year: 2025
 
+supports-2026:
+  schedule:
+    crontab: "0 23 * * *"
+  pipeline:
+  - flow: scraper
+    parameters:
+      year: 2026
 
 all:
   dependencies:
-    - pipeline: ./supports/supports-2025
+    - pipeline: ./supports/supports-2026
 
   pipeline:
     - run: add_metadata
       parameters:
         name: all-supports
         title: כלל נתוני התמיכות מאתר התמיכות הממשלתי
-        revision: '2025-01-1'
+        revision: '2026-01-1'
 
     - run: load
       parameters:
@@ -233,6 +240,9 @@ all:
     - run: load
       parameters:
         from: /var/datapackages/supports/yearly-2025/datapackage.json
+    - run: load
+      parameters:
+        from: /var/datapackages/supports/yearly-2026/datapackage.json
 
     - run: concatenate
       parameters:
@@ -293,7 +303,7 @@ with-keys:
       parameters:
         name: all-supports-with-keys
         title: All support data with entities
-        revision: '2025-07-30-02'
+        revision: '2025-12-01-01'
     - flow: assign_keys
 
     - run: dump.to_path
