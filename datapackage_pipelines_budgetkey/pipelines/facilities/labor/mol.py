@@ -20,14 +20,18 @@ def get_data():
 
     data = []
     current_year = datetime.datetime.now().year
-    for frame_type in range(1, 4):
-        post_data = {"Year":current_year,"FrameType":frame_type,"FrameId":""}
-        response = requests.post(url, headers=headers, json=post_data, timeout=30)
-        if response.status_code == 200:
-            frames_list = response.json()['Frames']
-            data.extend(frames_list)
-        else:
-            print("Request failed with status code:", response.status_code)
+    for _ in range(2):
+        for frame_type in range(1, 4):
+            post_data = {"Year":current_year,"FrameType":frame_type,"FrameId":""}
+            response = requests.post(url, headers=headers, json=post_data, timeout=30)
+            if response.status_code == 200:
+                frames_list = response.json()['Frames']
+                data.extend(frames_list)
+            else:
+                print("Request failed with status code:", response.status_code)
+        if data:
+            break
+        current_year -= 1
     return data
 
 def construct_address(record):
