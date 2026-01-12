@@ -4,7 +4,7 @@ import shutil
 
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
-YEAR = 2025
+YEAR = 2026
 WEIRD_ZIP_FILE = f'https://main.knesset.gov.il/Activity/committees/Finance/Documents/p{YEAR}.zip'
 OUT = '/var/datapackages/budget/national/changes/finance-committee.zip'
 

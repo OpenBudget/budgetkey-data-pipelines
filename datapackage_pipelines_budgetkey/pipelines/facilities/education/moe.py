@@ -1,9 +1,12 @@
 # Ministry of Education - Kindergartens
 # https://parents.education.gov.il/prhnet/gov-education/kindergarten/search-daycare
 
+from datetime import datetime
 import dataflows as DF
 
-YEAR = 2026
+
+# Year in 4 months from now
+YEAR = datetime.now().year + (1 if datetime.now().month >= 9 else 0)
 HEB_YEAR = 'תשפ״ו'
 
 url = f'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0={YEAR}&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'

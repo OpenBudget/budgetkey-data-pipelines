@@ -94,7 +94,7 @@ PARAMETERS = dict(
         # source='https://next.obudget.org/datapackages/budget/national/processed/with-extras',
         description='''
             סעיפי התקציב מספר תקציב המדינה.
-            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2025).
+            המידע הוא לכלל שנות התקציב מאז 1997 ועד השנה הנוכחית (2026).
 
             אופן ביצוע שאילתות database:
             - חיפוש סעיף תקציבי רק על פי קוד סעיף תקציבי.
