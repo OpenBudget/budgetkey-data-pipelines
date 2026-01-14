@@ -1,12 +1,12 @@
 guidestar-scraper:
   schedule:
-    crontab: "0 0 * * 5"
+    crontab: "0 0 thu * *"
   pipeline:
     - run: add_metadata
       parameters:
         name: guidestar
         title: נתונים פומביים על עמותות המופיעים באתר גיידסטאר
-        revision: 2022.11.14
+        revision: 2026.01.14
     - run: load_resource
       parameters:
         resource: association-registry
