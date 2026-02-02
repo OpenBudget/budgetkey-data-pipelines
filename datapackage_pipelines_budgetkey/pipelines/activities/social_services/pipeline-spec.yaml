@@ -1,14 +1,14 @@
 social_services:
   title: Fetch social services from data input
-  schedule:
-    crontab: "0 0 * * *"
+  # schedule:
+  #   crontab: "0 0 * * *"
 
   pipeline:
     - run: add_metadata
       parameters:
         name: social_services
         title: Fetch social services from data input
-        revision: '2025-07-24'
+        revision: '2026-02-02'
     - flow: social_services
 
 social_service_suppliers:
