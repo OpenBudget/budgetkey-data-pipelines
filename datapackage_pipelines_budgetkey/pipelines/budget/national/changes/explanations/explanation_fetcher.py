@@ -34,7 +34,7 @@ def get_explanations(url):
         resp = requests.get(url, timeout=300, headers=headers)
         assert resp.status_code < 400
         resp = resp.content
-        assert '<html>' not in resp.decode('utf-8', errors='ignore').lower()
+        assert '<html' not in resp.decode('utf-8', errors='ignore').lower()
         outfile = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
         outfile.write(resp)
         outfile.close()
