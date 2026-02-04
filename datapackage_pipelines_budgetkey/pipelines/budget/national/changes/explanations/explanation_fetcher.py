@@ -32,6 +32,7 @@ def get_explanations(url):
     logging.info('Connecting to %r', url)
     try:
         resp = requests.get(url, timeout=300, headers=headers).content
+        assert '<html>' not in resp.decode('utf-8', errors='ignore').lower()
         outfile = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.basename(url))
         outfile.write(resp)
         outfile.close()
