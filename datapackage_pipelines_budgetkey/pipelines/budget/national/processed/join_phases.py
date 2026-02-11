@@ -152,34 +152,13 @@ def process_row(row, phase_key):
 
     row.update(fixed_amounts)
 
-    if (
-        (not
-            (row['code'].startswith('0000') or
-             row['code'].startswith('0089') or
-             row['code'].startswith('0091') or 
-             row['code'].startswith('0093') or 
-             row['code'].startswith('0094') or 
-             row['code'].startswith('0095') or
-             row['code'].startswith('0098') 
-            )
-        ) and not (row['code'].startswith('0084') and row['econ_cls_code_2'] != '266')
-       ):
+    if (row['code'] >= '0001' and (row['code'] < '0084' or row['econ_cls_code_2'] == '266')):
         row['code'] = '00'
         row['title'] = 'המדינה'
         row['depth'] = 0
         yield row
 
-    if (
-        (not (
-             row['code'].startswith('0089') or
-             row['code'].startswith('0091') or 
-             row['code'].startswith('0093') or 
-             row['code'].startswith('0094') or 
-             row['code'].startswith('0095') or
-             row['code'].startswith('0098')
-            )
-        ) and not (row['code'].startswith('0084') and row['econ_cls_code_2'] != '266')
-       ):
+    if (row['code'] < '0084' or row['econ_cls_code_2'] == '266'):
         row['code'] = 'C%d' % (int(row['func_cls_code_1']),)
         row['title'] = '%s' % (row['func_cls_title_1'],)
         row['hierarchy'] = [['00', 'המדינה']]
