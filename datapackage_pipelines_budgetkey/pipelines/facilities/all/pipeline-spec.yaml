@@ -13,7 +13,7 @@ facilities_all:
 
 facilities_tamat:
   dependencies:
-    - pipeline: ./facilities/all
+    - pipeline: ./facilities/all/facilities_all 
 
   pipeline:
     - run: add_metadata
