@@ -10,3 +10,14 @@ facilities_all:
         name: facilities_all
         revision: '2025-05-31-01'
     - flow: all_facilities
+
+facilities_tamat:
+  dependencies:
+    - pipeline: ./facilities/all
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: facilities_tamat
+        revision: '2025-05-31-01'
+    - flow: tamat_facilities
