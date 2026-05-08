@@ -137,11 +137,12 @@ def scraper(gcd, selected_year):
     # time.sleep(15)
     # Click on all columns :)
     groups_selector = 'g.v-m-main g.v-datapoint[combination-column=true]'
-    rects_selector = groups_selector + ' rect'
+    # rects_selector = groups_selector + ' rect'
     label_selector = 'g.v-m-main g.v-m-xAxis g.v-m-axisBody text'
     chart = get_chart(driver)
     groups = chart.find_elements_by_css_selector(groups_selector)
-    rects = chart.find_elements_by_css_selector(rects_selector)
+    # rects = chart.find_elements_by_css_selector(rects_selector)
+    labels = chart.find_elements_by_css_selector(label_selector)
     first_label = chart.find_elements_by_css_selector(label_selector)[0]
     last_year = int(first_label.text)
     print('LAST YEAR', last_year)
@@ -149,14 +150,14 @@ def scraper(gcd, selected_year):
         year = last_year - i
         if year != selected_year:
             continue
-        if i >= len(rects):
+        if i >= len(labels):
             break
         # filename = '/Users/adam/Dropbox (Personal)/hasadna/PublicFiles/supports/%d.csv' % year
-        driver.execute_script(
-            "arguments[0].setAttribute('transform','translate(%d, 0)')" % (i * 30), groups[i]
-        )
-        driver.execute_script("arguments[0].setAttribute('height','50')", rects[i])
-        get_results_for_column(driver, rects[i])
+        # driver.execute_script(
+        #     "arguments[0].setAttribute('transform','translate(%d, 0)')" % (i * 30), groups[i]
+        # )
+        # driver.execute_script("arguments[0].setAttribute('height','50')", labels[i])
+        get_results_for_column(driver, labels[i])
         logging.info('Completed %r, %r', year, gcd.list_downloads())
         break
     time.sleep(20)
