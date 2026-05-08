@@ -161,7 +161,7 @@ def scraper(gcd, selected_year):
         logging.info('Completed %r, %r', year, gcd.list_downloads())
         break
     time.sleep(20)
-    return gcd.download('https://next.obudget.org/datapackages/' + gcd.list_downloads()[0])
+    return gcd.download('https://next.obudget.org/datapackages/', outfile=gcd.list_downloads()[0])
 
 
 def flow(parameters, *_):

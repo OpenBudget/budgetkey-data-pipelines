@@ -118,13 +118,16 @@ class google_chrome_driver():
             downloads = []
             timeout = 0
             downloading = False
-            if use_curl:
-                self.curl(url, outfile)
-            else:
-                self.driver.get(url)
+            already_downloaded = expected and expected not in current_downloads
+            if not already_downloaded:
+                if use_curl:
+                    self.curl(url, outfile)
+                else:
+                    self.driver.get(url)
             while True:
-                time.sleep(3 if use_curl else 60)
-                timeout += 1
+                if not already_downloaded:
+                    time.sleep(3 if use_curl else 60)
+                    timeout += 1
 
                 downloads = self.list_downloads()
                 logging.info('DOWNLOADS: %r', downloads)
