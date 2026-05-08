@@ -288,6 +288,7 @@ aggregated-yearly:
     - run: combine-immediate-children
       parameters:
         resource-name: immediate-children
+    - flow: add-hierarchy-columns
     - run: sample
     - run: dump.to_path
       parameters:
