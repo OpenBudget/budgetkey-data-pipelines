@@ -4,6 +4,7 @@ def add_hierarchy_columns(row):
     hierarchy = row.get('hierarchy')
     if not hierarchy:
         return row
+    hierarchy = [*hierarchy, (row['code'], row['title'])]
     for code, title in hierarchy:
         code = code[2:]
         if len(code) == 2:

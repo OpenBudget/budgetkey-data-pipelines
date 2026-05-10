@@ -72,6 +72,14 @@ new_fields = [{
     {
         'name': 'is_proposal',
         'type': 'boolean'
+    },
+    {
+        'name': 'budget_kind_code',
+        'type': 'string'
+    },
+    {
+        'name': 'budget_kind_title',
+        'type': 'string'
     }
 ]
 for field in fields:
@@ -117,6 +125,9 @@ def process_row(row, phase_key):
         if budget_fix and value and budget_fix.get(amount):
             fixed_amounts[key] = value + budget_fix.get(amount)
         del row[amount]
+
+    row['budget_kind_code'] = row['admin_cls_code_0']
+    row['budget_kind_title'] = row['admin_cls_title_0']
 
     save = {}
     for code_key, title_key in codes_and_titles:

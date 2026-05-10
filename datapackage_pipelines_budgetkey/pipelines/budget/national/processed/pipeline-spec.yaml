@@ -143,6 +143,8 @@ aggregated-yearly:
           hierarchy: null
           parent: null
           is_proposal: null
+          budget_kind_code: null
+          budget_kind_title: null
           func_cls_title_1:
             aggregate: set
           func_cls_title_2:
