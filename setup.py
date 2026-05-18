@@ -32,6 +32,7 @@ setup(
                       'boto3',
                       'paramiko',
                       'dataflows>=0.5.12',
+                      'dataflows-airtable',
                       'lxml',
                       'lxml_html_clean',
                       'elasticsearch<9.0.0',

@@ -42,7 +42,10 @@ def get_explanations(url):
     except Exception:
         logging.warning('Failed to download %r using requests, trying with google chrome', url)
         gcl = google_chrome_driver()
-        archive = gcl.download(url)
+        try:
+            archive = gcl.download(url)
+        except:
+            archive = gcl.download(url, use_curl=True)
         gcl.teardown()
 
     try:
