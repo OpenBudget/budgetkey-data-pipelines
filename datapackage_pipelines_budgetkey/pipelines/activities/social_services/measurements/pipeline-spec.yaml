@@ -1,0 +1,7 @@
+collect:
+  title: Collect tender measurements for social services
+  schedule:
+    crontab: "0 0 * * *"
+
+  pipeline:
+    - flow: collect
