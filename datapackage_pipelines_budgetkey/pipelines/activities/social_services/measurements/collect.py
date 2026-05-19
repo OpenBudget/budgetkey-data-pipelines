@@ -16,14 +16,17 @@ FIELD_MAP = {
     'ThirdPrintotSCORE': 'third_print_score',
     'FourthPrintotSCORE': 'fourth_print_score',
     'FifthPrintotSCORE': 'fifth_print_score',
-    'SixthPrintotSCORE': 'sixth_print_score'
+    'SixthPrintotSCORE': 'sixth_print_score',
+    'is_flag': 'is_flag',
 }
-all_fields = set(FIELD_MAP.values())
+all_fields = list(FIELD_MAP.values())
 
 def flow(*_):
     return DF.Flow(
         DFA.load_from_airtable(base='appkFwqZCU6MFquJh', table='מכרז דגל', view='RESULTS'),
         DFA.load_from_airtable(base='appkFwqZCU6MFquJh', table='מכרז בסיס', view='RESULTS'),
+        DF.add_field('is_flag', 'boolean', default=True, resources='מכרז דגל'),
+        DF.add_field('is_flag', 'boolean', default=False, resources='מכרז בסיס'),
         DF.rename_fields(FIELD_MAP),
         DF.concatenate(dict((f, []) for f in all_fields), dict(name='tender_measurement', path='tender_measurement.csv')),
         DF.dump_to_path('var/datapackages/activities/social_services_tender_measurements'),
