@@ -40,6 +40,8 @@ def flow(*_):
         DF.add_field('is_flag', 'boolean', default=False, resources='מכרז בסיס'),
         DF.rename_fields(FIELD_MAP),
         DF.concatenate(dict((f, []) for f in all_fields), dict(name='tender_measurement', path='tender_measurement.csv')),
+        DF.set_type('principle_score_.+', type='number', on_error=DF.schema_validator.clear),
+        # DF.dump_to_path('tmp_social_services_tender_measurements'),
         DF.dump_to_path('var/datapackages/activities/social_services_tender_measurements'),
         DF.dump_to_sql(dict(
             soproc_measurement={'resource-name': 'tender_measurement'}
