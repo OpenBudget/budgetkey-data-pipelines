@@ -28,6 +28,12 @@ FIELD_MAP = {
     'SixthPrin1SCORE': 'principle_score_6_1',
     'SixthPrin2SCORE': 'principle_score_6_2',
     'SixthPrin3SCORE': 'principle_score_6_3',
+    'Q35': 'core_aspect_score_1',
+    'Q67': 'core_aspect_score_2',
+    'Q74': 'core_aspect_score_3',
+    'Q91': 'core_aspect_score_4',
+    'Q103': 'core_aspect_score_5',
+    'Q117': 'core_aspect_score_6',
     'is_flag': 'is_flag',
 }
 all_fields = list(FIELD_MAP.values())
@@ -41,6 +47,7 @@ def flow(*_):
         DF.rename_fields(FIELD_MAP),
         DF.concatenate(dict((f, []) for f in all_fields), dict(name='tender_measurement', path='tender_measurement.csv')),
         DF.set_type('principle_score_.+', type='number', on_error=DF.schema_validator.clear),
+        DF.set_type('core_aspect_score_.+', type='number', on_error=DF.schema_validator.clear),
         # DF.dump_to_path('tmp_social_services_tender_measurements'),
         DF.dump_to_path('var/datapackages/activities/social_services_tender_measurements'),
         DF.dump_to_sql(dict(
