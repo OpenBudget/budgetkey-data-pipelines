@@ -9,6 +9,8 @@ from pyquery import PyQuery as pq
 
 import dataflows as DF
 
+from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+
 
 HEADERS = {
     'User-Agent': 'kz-data-reader'
@@ -17,13 +19,21 @@ HEADERS = {
 
 def get_offices():
     url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
-    text = requests.get(url, headers=HEADERS).text
-    # text=requests.get(url, headers=headers).text
-    page = pq(text)
-    forms = page.find('div[name=form]')
-    if len(forms) == 0:
-        print('PAGE:', text[:1000])
-        raise Exception('No forms found')
+    try:
+        text = requests.get(url, headers=HEADERS).text
+        # text=requests.get(url, headers=headers).text
+        page = pq(text)
+        forms = page.find('div[name=form]')
+        assert len(forms) > 0, 'No forms found'
+    except Exception as e:
+        gcd = google_chrome_driver(initial=url, wait=False)
+        gcd.driver.get(url)
+        page = gcd.driver.page_source
+        page = pq(text)
+        forms = page.find('div[name=form]')
+        if len(forms) == 0:
+            print('PAGE:', text[:1000])
+            raise Exception('No forms found')
     el = forms[0]
     cfg = el.attrib['ng-init']
     cfg = cfg.split('OfficeMultiChoiseValues": ')[1]
