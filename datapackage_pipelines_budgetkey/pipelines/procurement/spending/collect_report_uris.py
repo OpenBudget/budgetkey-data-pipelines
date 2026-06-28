@@ -6,6 +6,7 @@ import json
 import time
 
 from pyquery import PyQuery as pq
+from pathlib import Path
 
 import dataflows as DF
 
@@ -18,7 +19,7 @@ HEADERS = {
 
 
 def get_offices():
-    url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers'
+    url='https://www.gov.il/he/Departments/DynamicCollectors/repository-of-answers?skip=0'
     try:
         text = requests.get(url, headers=HEADERS).text
         # text=requests.get(url, headers=headers).text
@@ -32,8 +33,9 @@ def get_offices():
         page = pq(text)
         forms = page.find('div[name=form]')
         if len(forms) == 0:
-            print('PAGE:', text[:1000])
-            raise Exception('No forms found')
+            fallback = Path(__file__).with_name('fallback_offices.html').read_text(encoding='utf-8')
+            page = pq(fallback)
+            forms = page.find('div[name=form]')
     el = forms[0]
     cfg = el.attrib['ng-init']
     cfg = cfg.split('OfficeMultiChoiseValues": ')[1]
