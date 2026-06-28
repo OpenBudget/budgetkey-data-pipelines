@@ -33,7 +33,7 @@ def get_offices():
         page = pq(text)
         forms = page.find('div[name=form]')
         if len(forms) == 0:
-            fallback = Path(__file__).with_name('fallback_offices.html').read_text(encoding='utf-8')
+            fallback = Path(__file__).with_name('fallback-offices.html').read_text(encoding='utf-8')
             page = pq(fallback)
             forms = page.find('div[name=form]')
     el = forms[0]
