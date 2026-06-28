@@ -292,7 +292,7 @@ def flow(*_):
         DF.dump_to_sql(dict(
             activities={'resource-name': 'activities'}
         )),
-        # DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
+        DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
     )
 
 
