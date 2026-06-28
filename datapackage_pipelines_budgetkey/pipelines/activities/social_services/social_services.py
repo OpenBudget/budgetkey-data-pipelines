@@ -289,10 +289,10 @@ def flow(*_):
         DF.dump_to_path('/var/datapackages/activities/social_services', format='json'),
         DF.delete_resource(['new_activities']),
         DF.dump_to_path('/var/datapackages/activities/social_services'),
-        DF.dump_to_sql(dict(
-            activities={'resource-name': 'activities'}
-        )),
-        DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
+        # DF.dump_to_sql(dict(
+        #     activities={'resource-name': 'activities'}
+        # )),
+        # DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
     )
 
 

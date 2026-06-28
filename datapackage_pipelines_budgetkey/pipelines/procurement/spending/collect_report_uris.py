@@ -14,7 +14,7 @@ from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_d
 
 
 HEADERS = {
-    'User-Agent': 'kz-data-reader'
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:153.0) Gecko/20100101 Firefox/153.0'
 }
 
 
