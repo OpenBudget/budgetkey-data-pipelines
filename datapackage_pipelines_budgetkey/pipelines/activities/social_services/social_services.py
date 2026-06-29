@@ -244,7 +244,7 @@ def add_current_beneficiaries():
     )
 
 
-def flow(*_):
+def flow(*_, persist=True):
     now = datetime.datetime.now()
 
     return DF.Flow(
@@ -279,25 +279,25 @@ def flow(*_):
         DF.update_resource(-1, name='activities', path='activities.csv'),
         DF.dump_to_sql(dict(
             all_activities={'resource-name': 'activities'}
-        )),
+        )) if persist else None,
         DF.filter_rows(lambda r: r['currently_active']),
         DF.delete_fields(['deleted']),
 
         DF.duplicate('activities', 'new_activities'),
         DF.filter_rows(lambda r: (now - r['updated_at']).days < 14, resources='new_activities'),
 
-        DF.dump_to_path('/var/datapackages/activities/social_services', format='json'),
+        DF.dump_to_path('/var/datapackages/activities/social_services', format='json') if persist else None,
         DF.delete_resource(['new_activities']),
-        DF.dump_to_path('/var/datapackages/activities/social_services'),
-        # DF.dump_to_sql(dict(
-        #     activities={'resource-name': 'activities'}
-        # )),
-        # DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
+        DF.dump_to_path('/var/datapackages/activities/social_services') if persist else None,
+        DF.dump_to_sql(dict(
+            activities={'resource-name': 'activities'}
+        )) if persist else None,
+        DF.update_resource(None, **{'dpp:streaming': True}), # TODO: uncomment to enable
     )
 
 
 if __name__ == '__main__':
     DF.Flow(
-        flow(),
+        flow(persist=False),
         DF.printer(),
     ).process()
