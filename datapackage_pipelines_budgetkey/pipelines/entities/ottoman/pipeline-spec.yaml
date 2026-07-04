@@ -8,11 +8,11 @@ ottoman-association-registry:
         title: רשימת אגודות עותומניות
         sources:
           - title: אתר היחידה לחופש המידע
-            path: https://foi.gov.il/he/node/1908
+            path: https://www.gov.il/BlobFolder/dynamiccollectorresultitem/foi6364/he/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A4%D7%A0%D7%99%D7%9D%20-%20%D7%90%D7%92%D7%95%D7%93%D7%95%D7%AA%20%D7%A2%D7%95%D7%AA%D7%9E%D7%A0%D7%99%D7%95%D7%AA.xls
     - run: load
       runner: tzabar
       parameters:
-        from: "https://foi.gov.il/sites/default/files/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A4%D7%A0%D7%99%D7%9D%20-%20%D7%90%D7%92%D7%95%D7%93%D7%95%D7%AA%20%D7%A2%D7%95%D7%AA%D7%9E%D7%A0%D7%99%D7%95%D7%AA.xls"
+        from: "https://www.gov.il/BlobFolder/dynamiccollectorresultitem/foi6364/he/%D7%9E%D7%A9%D7%A8%D7%93%20%D7%94%D7%A4%D7%A0%D7%99%D7%9D%20-%20%D7%90%D7%92%D7%95%D7%93%D7%95%D7%AA%20%D7%A2%D7%95%D7%AA%D7%9E%D7%A0%D7%99%D7%95%D7%AA.xls"
         name: foi-response
         headers:
           - id
