@@ -1,4 +1,4 @@
-FROM frictionlessdata/datapackage-pipelines:latest-slim
+FROM ghcr.io/whiletrue-industries/datapackage-pipelines:latest-slim
 
 
 RUN apt-get update --fix-missing && apt-get install -y sudo curl ssh
