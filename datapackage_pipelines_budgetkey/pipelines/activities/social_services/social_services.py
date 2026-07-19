@@ -2,7 +2,7 @@ import dataflows as DF
 from decimal import Decimal
 import datetime
 
-CURRENT_YEAR = 2024
+CURRENT_YEAR = 2025
 
 def datarecords(kind):
     return map(
@@ -244,7 +244,7 @@ def add_current_beneficiaries():
     )
 
 
-def flow(*_, persist=False):
+def flow(*_, persist=True):
     now = datetime.datetime.now()
 
     return DF.Flow(
