@@ -25,7 +25,7 @@ FILE_KEYS = ['approv_data', 'approv_explain', 'vaada_data', 'vaada_explain']
 
 def test_page(page):
     assert 'שינויים בתקציב לשנה השוטפת המונחים על שולחן ועדת הכספים של הכנסת' in page, \
-        'Page content does not contain expected text " + page
+        'Page content does not contain expected text ' + page
 
 def get_page():
     try:
