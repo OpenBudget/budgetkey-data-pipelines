@@ -70,13 +70,13 @@ all:
         resource:
           name: explanation-2026
           path: data/explanation-2026.csv
-        url: https://www.gov.il/files/mof/Budgetchanges/approv_explain.zip
+        file_key: approv_explain
     - run: explanation_fetcher
       parameters:
         resource:
           name: explanation-pending
           path: data/explanation-pending.csv
-        url: https://www.gov.il/files/mof/Budgetchanges/vaada_explain.zip
+        file_key: vaada_explain
     - run: explanation_extractor
       parameters:
         resource:

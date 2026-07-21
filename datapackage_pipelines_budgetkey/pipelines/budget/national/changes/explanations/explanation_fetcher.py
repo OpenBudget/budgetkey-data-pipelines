@@ -12,6 +12,8 @@ from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from textract.parsers.doc_parser import Parser
 from datapackage_pipelines.wrapper import ingest, spew
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
+from datapackage_pipelines_budgetkey.pipelines.budget.national.changes.current_year_urls \
+    import get_current_year_urls
 
 parameters, dp, res_iter = ingest()
 
@@ -82,4 +84,6 @@ schema = {
 resource['schema'] = schema
 dp['resources'].append(resource)
 
-spew(dp, itertools.chain(res_iter, [get_explanations(parameters['url'])]))
+url = parameters.get('url') or get_current_year_urls()[parameters['file_key']]
+
+spew(dp, itertools.chain(res_iter, [get_explanations(url)]))
