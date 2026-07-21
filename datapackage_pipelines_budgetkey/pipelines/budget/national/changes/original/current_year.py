@@ -1,5 +1,4 @@
 import dataflows as DF
-import datetime
 
 from datapackage_pipelines.utilities.resources import PROP_STREAMING
 from datapackage_pipelines_budgetkey.processors.resource_without_excel_formulas_lib \
@@ -10,10 +9,9 @@ from datapackage_pipelines_budgetkey.pipelines.budget.national.changes.current_y
 # (resource name, discovered-url key) for the current-year data files. The URLs
 # are discovered from the gov.il page (see current_year_urls.py) rather than
 # hardcoded, since they carry a weekly-changing date.
-YEAR = datetime.datetime.now().year
 SOURCES = [
-    (f'changes_{YEAR}', 'approv_data'),
-    (f'pending_changes_{YEAR}', 'vaada_data'),
+    (f'changes_current', 'approv_data'),
+    (f'pending_changes_current', 'vaada_data'),
 ]
 
 TABULATOR = {'encoding': 'windows-1255', 'headers': 4}

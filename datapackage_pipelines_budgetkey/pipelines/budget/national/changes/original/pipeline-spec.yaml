@@ -172,7 +172,7 @@ national-budget-changes:
     - flow: current_year
     - run: set_pending
       parameters:
-        pending-resource-name: pending_changes_2026
+        pending-resource-name: pending_changes_current
     - run: concatenate
       parameters:
         target:
