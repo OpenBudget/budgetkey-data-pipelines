@@ -170,7 +170,6 @@ national-budget-changes:
           encoding: windows-1255
           headers: 4
     - flow: current_year
-      runner: tzabar
     - run: set_pending
       parameters:
         pending-resource-name: pending_changes_2026
