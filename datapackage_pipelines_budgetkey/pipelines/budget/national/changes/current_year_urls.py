@@ -1,4 +1,5 @@
 import logging
+import time
 
 import requests
 from pyquery import PyQuery as pq
@@ -32,13 +33,18 @@ def get_page():
         resp = requests.get(URL, headers=HEADERS, timeout=120)
         assert resp.status_code == 200, resp.status_code
         resp_text = resp.text
+        test_page(resp_text)
         return resp_text
     except Exception as e:
         logging.warning('Failed to fetch %s via requests (%s), trying google chrome', URL, e)
         gcd = google_chrome_driver(initial=URL, wait=False)
         try:
             gcd.driver.get(URL)
-            page = gcd.driver.page_source
+            time.sleep(20)
+            # Live DOM rather than page_source: the page is rendered client-side,
+            # so the original document has none of the links we're after.
+            page = gcd.driver.execute_script('return document.body.outerHTML;')
+            test_page(page)
             return page
         finally:
             gcd.teardown()
@@ -47,7 +53,6 @@ def get_page():
 def get_current_year_urls():
     """Discover the current-year file URLs. Returns {file_key: url}."""
     page = get_page()
-    test_page(page)
     links = pq(page).find('a')
     urls = [pq(a).attr('href') for a in links]
     urls = [u for u in urls if u]
