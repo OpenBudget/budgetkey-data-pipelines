@@ -24,8 +24,14 @@ RUN chown dpp.dpp /datapackage_pipelines_budgetkey -R
 RUN pip install -e /
 # RUN pip install -U -r /requirements-dev.txt
 
-RUN apt-get install -y sudo unzip wget libglib2.0-0 && wget https://chromedriver.storage.googleapis.com/88.0.4324.96/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip && \
+# Fallback only: google_chrome.py resolves a chromedriver matching whatever
+# Chrome the google-chrome-in-a-box container reports, and only falls back to
+# this one if that lookup fails. Keep it roughly in step with that image.
+ARG CHROMEDRIVER_VERSION=150.0.7871.124
+RUN apt-get install -y sudo unzip wget libglib2.0-0 && \
+    wget -q "https://storage.googleapis.com/chrome-for-testing-public/${CHROMEDRIVER_VERSION}/linux64/chromedriver-linux64.zip" && \
+    unzip -j chromedriver-linux64.zip 'chromedriver-linux64/chromedriver' && \
+    rm chromedriver-linux64.zip && \
     chmod +x chromedriver && \
     mv chromedriver /usr/local/bin/ && \
     cp /certs/* /usr/local/share/ca-certificates/ && \

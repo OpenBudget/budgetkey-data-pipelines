@@ -18,7 +18,9 @@ setup(
     install_requires=['pyquery',
                     #   'demjson',
                       'requests',
-                      'selenium<4.3',
+                      'selenium<4.3',  # 4.3 removed find_element_by_*, used across the scrapers,
+                                       # and 4.10 removed the positional executable_path argument
+
                       'fuzzywuzzy[speedup]',
                       'plyvel',
                       'filemagic',
