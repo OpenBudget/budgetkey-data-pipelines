@@ -1,20 +1,68 @@
 import paramiko
+import platform
 import random
+import stat
 import time
 import requests
 import socket
 import logging
+import io
 import json
 import os
 import shutil
 import tempfile
+import zipfile
 from selenium import webdriver
 import atexit
 
 
+CHROMEDRIVER_FEED = ('https://googlechromelabs.github.io/chrome-for-testing/'
+                     'latest-patch-versions-per-build-with-downloads.json')
+CHROMEDRIVER_CACHE = os.environ.get('CHROMEDRIVER_CACHE',
+                                    os.path.expanduser('~/.cache/chromedriver'))
+CHROMEDRIVER_FALLBACK = '/usr/local/bin/chromedriver'
+
+
+def _chromedriver_platform():
+    system, machine = platform.system(), platform.machine()
+    if system == 'Darwin':
+        return 'mac-arm64' if machine == 'arm64' else 'mac-x64'
+    return 'linux64'
+
+
+def resolve_chromedriver(browser_version, fallback=CHROMEDRIVER_FALLBACK):
+    """Fetch a chromedriver matching the Chrome inside the container.
+
+    chromedriver only drives a browser of its own major version, and the
+    browser lives in a separately built image (google-chrome-in-a-box) which
+    updates on its own schedule -- so a chromedriver baked in at build time
+    goes stale the moment either image is rebuilt. Resolving against the
+    version the container actually reports keeps the two in step.
+    """
+    try:
+        build = '.'.join(browser_version.split('.')[:3])
+        entry = requests.get(CHROMEDRIVER_FEED, timeout=60).json()['builds'][build]
+        target = os.path.join(CHROMEDRIVER_CACHE, entry['version'], 'chromedriver')
+        if not os.path.exists(target):
+            url = next(d['url'] for d in entry['downloads']['chromedriver']
+                       if d['platform'] == _chromedriver_platform())
+            archive = zipfile.ZipFile(io.BytesIO(requests.get(url, timeout=300).content))
+            member = next(n for n in archive.namelist() if n.endswith('/chromedriver'))
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with archive.open(member) as src, open(target, 'wb') as out:
+                shutil.copyfileobj(src, out)
+            os.chmod(target, os.stat(target).st_mode | stat.S_IEXEC)
+        logging.info('USING CHROMEDRIVER %s for Chrome %s', entry['version'], browser_version)
+        return target
+    except Exception:
+        logging.exception('Failed to resolve a chromedriver for Chrome %s, falling back to %s',
+                          browser_version, fallback)
+        return fallback
+
+
 class google_chrome_driver():
 
-    def __init__(self, wait=True, initial='https://data.gov.il', chromedriver='/usr/local/bin/chromedriver'):
+    def __init__(self, wait=True, initial='https://data.gov.il', chromedriver=None):
         if wait:
             time.sleep(random.randint(1, 600))
         self.hostname = 'tzabar.obudget.org'
@@ -43,7 +91,7 @@ class google_chrome_driver():
             logging.info('COUNTED %d running containers, waiting', running)
             time.sleep(60)
 
-        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} --add-host stats.tehila.gov.il:127.0.0.1 -d akariv/google-chrome-in-a-box {self.port} {self.port+1} {initial}'
+        cmd = f'docker run -p {self.port}:{self.port} -p {self.port+1}:{self.port+1} --add-host stats.tehila.gov.il:127.0.0.1 -d ghcr.io/whiletrue-industries/google-chrome-in-a-box {self.port} {self.port+1} {initial}'
         stdin, stdout, stderr = self.client.exec_command(cmd)
 
         while not self.docker_container:
@@ -63,7 +111,13 @@ class google_chrome_driver():
                 except Exception as e:
                     logging.error('Waiting %s (%s): %s', i, windows, e)
 
+            if chromedriver is None:
+                version = requests.get(f'http://{self.hostname_ip}:{self.port}/json/version').json()
+                chromedriver = resolve_chromedriver(version['Browser'].split('/')[-1])
+
             chrome_options = webdriver.ChromeOptions()
+            # By IP, not hostname: Chrome rejects devtools requests whose Host
+            # header is neither localhost nor an IP address.
             chrome_options.debugger_address = f'{self.hostname_ip}:{self.port}'
             self.driver = webdriver.Chrome(chromedriver, options=chrome_options)
         except Exception:

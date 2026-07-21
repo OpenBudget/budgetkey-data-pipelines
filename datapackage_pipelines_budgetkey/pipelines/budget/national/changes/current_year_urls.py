@@ -12,8 +12,7 @@ from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_d
 # Same content-page API used by procurement/calls_for_bids/class_action.py, with
 # the requests->browser fallback from procurement/spending/collect_report_uris.py
 # (the content API is behind Cloudflare, so plain requests are often blocked).
-URL = 'https://www.gov.il/ContentPageWebApi/api/content-pages/' \
-      'budget-changes-current-year?culture=he'
+URL = 'https://www.gov.il/he/pages/budget-changes-current-year'
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:153.0) '
@@ -24,18 +23,23 @@ HEADERS = {
 # changes, 'vaada' = pending changes (on the finance committee's table).
 FILE_KEYS = ['approv_data', 'approv_explain', 'vaada_data', 'vaada_explain']
 
+def test_page(page):
+    assert 'שינויים בתקציב לשנה השוטפת המונחים על שולחן ועדת הכספים של הכנסת' in page, \
+        'Page content does not contain expected text'
 
 def get_page():
     try:
         resp = requests.get(URL, headers=HEADERS, timeout=120)
         assert resp.status_code == 200, resp.status_code
-        assert 'html' not in resp.headers.get('content-type', '').lower()
-        return resp.json()
+        resp_text = resp.text
+        return resp_text
     except Exception as e:
         logging.warning('Failed to fetch %s via requests (%s), trying google chrome', URL, e)
         gcd = google_chrome_driver(initial=URL, wait=False)
         try:
-            return gcd.json(URL)
+            gcd.driver.get(URL)
+            page = gcd.driver.page_source
+            return page
         finally:
             gcd.teardown()
 
@@ -43,7 +47,8 @@ def get_page():
 def get_current_year_urls():
     """Discover the current-year file URLs. Returns {file_key: url}."""
     page = get_page()
-    links = pq(page['contentMain']['htmlContents'][0]['sectionData']).find('a')
+    test_page(page)
+    links = pq(page).find('a')
     urls = [pq(a).attr('href') for a in links]
     urls = [u for u in urls if u]
     result = {}
