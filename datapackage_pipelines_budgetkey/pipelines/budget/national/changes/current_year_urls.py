@@ -1,5 +1,5 @@
 import logging
-from time import time
+import time
 
 import requests
 from pyquery import PyQuery as pq
@@ -41,7 +41,9 @@ def get_page():
         try:
             gcd.driver.get(URL)
             time.sleep(20)
-            page = gcd.driver.page_source
+            # Live DOM rather than page_source: the page is rendered client-side,
+            # so the original document has none of the links we're after.
+            page = gcd.driver.execute_script('return document.body.outerHTML;')
             test_page(page)
             return page
         finally:
