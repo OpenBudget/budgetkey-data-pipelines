@@ -244,7 +244,7 @@ def add_current_beneficiaries():
     )
 
 
-def flow(*_, persist=True):
+def flow(*_, persist=False):
     now = datetime.datetime.now()
 
     return DF.Flow(
