@@ -1,5 +1,7 @@
 import logging
+from pathlib import Path
 import time
+import datetime
 
 import requests
 from pyquery import PyQuery as pq
@@ -24,11 +26,30 @@ HEADERS = {
 # changes, 'vaada' = pending changes (on the finance committee's table).
 FILE_KEYS = ['approv_data', 'approv_explain', 'vaada_data', 'vaada_explain']
 
+week_number = datetime.datetime.now().isocalendar()[1]
+year = datetime.datetime.now().year
+CACHE_FILE_NAME = Path(f'cache_{year}_{week_number}.html')
+
+def get_from_cache():
+    if CACHE_FILE_NAME.exists():
+        logging.info('Using cached page %s', CACHE_FILE_NAME)
+        page = CACHE_FILE_NAME.read_text(encoding='utf-8')
+        return page
+    return None
+
+def save_to_cache(page):
+    CACHE_FILE_NAME.write_text(page, encoding='utf-8')
+    logging.info('Saved page to cache %s', CACHE_FILE_NAME)
+
 def test_page(page):
     assert 'שינויים בתקציב לשנה השוטפת המונחים על שולחן ועדת הכספים של הכנסת' in page, \
         'Page content does not contain expected text ' + page
+    save_to_cache(page)
 
 def get_page():
+    page = get_from_cache()
+    if page:
+        return page
     try:
         resp = requests.get(URL, headers=HEADERS, timeout=120)
         assert resp.status_code == 200, resp.status_code
