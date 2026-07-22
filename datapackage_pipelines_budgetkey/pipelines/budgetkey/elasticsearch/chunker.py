@@ -4,6 +4,12 @@ from pathlib import Path
 
 from datapackage_pipelines_budgetkey.common.cached_openai import embed
 
+# Each chunk becomes a 1536-dim dense_vector, ~20KB of JSON once indexed.
+# Cap the chunks per document so a single pathological document can't grow
+# past Elasticsearch's http.max_content_length and fail the whole bulk write.
+MAX_CHUNKS_PER_DOC = 500
+
+
 def get_text(c, row):
     if isinstance(c, str):
         yield c.format(**row)
@@ -11,11 +17,20 @@ def get_text(c, row):
         text = row.get(c['field'])
         if text:
             if c.get('method') == 'chunk':
-                chunk_size = c.get('chunk_size') or 128
-                chunk_overlap = c.get('chunk_overlap') or 64
+                chunk_size = c.get('chunk_size') or 1000
+                chunk_overlap = c.get('chunk_overlap') or 200
+                stride = chunk_size - chunk_overlap
+                assert stride > 0, \
+                    'chunk_overlap (%d) must be smaller than chunk_size (%d)' % (chunk_overlap, chunk_size)
+                count = 0
                 while len(text) > 0:
+                    if count == MAX_CHUNKS_PER_DOC:
+                        print(f"Chunker: truncating {c['field']} after {count} chunks, "
+                              f"{len(text)} chars left unindexed")
+                        break
                     yield text[:chunk_size]
-                    text = text[chunk_size - chunk_overlap:]
+                    text = text[stride:]
+                    count += 1
 
 def chunker(config, resource=None):
     matcher = ResourceMatcher(resource, None)
