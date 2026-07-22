@@ -7,10 +7,27 @@ import dataflows as DF
 
 from elasticsearch import Elasticsearch
 import elastic_transport
+import tableschema_elasticsearch.storage
 import logging
 import os
 import json
 import time
+import functools
+
+
+# tableschema_elasticsearch calls streaming_bulk() with its defaults
+# (chunk_size=500, max_chunk_bytes=100MB), which matches ES's own
+# http.max_content_length of 100mb - so a full chunk gets rejected with a 413.
+# Indexes with embeddings (e.g. gov_decisions) have multi-MB documents and hit
+# this easily, so cap the bulk request size well below the server limit.
+BULK_CHUNK_SIZE = int(os.environ.get('ES_BULK_CHUNK_SIZE', 50))
+BULK_MAX_CHUNK_BYTES = int(os.environ.get('ES_BULK_MAX_CHUNK_BYTES', 10 * 1024 * 1024))
+
+tableschema_elasticsearch.storage.streaming_bulk = functools.partial(
+    tableschema_elasticsearch.storage.streaming_bulk,
+    chunk_size=BULK_CHUNK_SIZE,
+    max_chunk_bytes=BULK_MAX_CHUNK_BYTES,
+)
 
 
 def id(x):
