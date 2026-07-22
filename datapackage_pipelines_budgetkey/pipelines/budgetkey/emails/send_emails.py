@@ -71,7 +71,8 @@ e = sqlalchemy.create_engine(os.environ['PRIVATE_DATABASE_URL']).connect()
 
 def update_db(email, result):
     t = sqlalchemy.sql.text("insert into sendlog (email, send_time, result) values (:email, :send_time, :result)")
-    e.execute(t, email=email, send_time=datetime.datetime.now(), result=result)
+    e.execute(t, dict(email=email, send_time=datetime.datetime.now(), result=result))
+    e.commit()
 
 
 def process_row(row, row_index,
