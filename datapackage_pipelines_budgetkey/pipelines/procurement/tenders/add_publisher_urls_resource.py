@@ -15,7 +15,7 @@ def resource_filter(resource_data, parameters):
     existing_ids = set()
     if 'db-table' in parameters:
         db_table = parameters.pop('db-table')
-        connection_string = os.environ['DPP_DB_ENGINE'].replace('@postgres', '@data-next.obudget.org')
+        connection_string = os.environ['DPP_DB_ENGINE']#.replace('@postgres', '@data-next.obudget.org')
         engine = create_engine(connection_string).connect()
         try:
             existing_ids = set([
