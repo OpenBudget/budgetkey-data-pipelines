@@ -1,7 +1,8 @@
 from datapackage_pipelines.wrapper import spew, ingest
 import itertools
 import logging
-
+import json
+from pathlib import Path
 
 value_fields = [
     'net_expense_diff',
@@ -58,7 +59,23 @@ def get_changes(rows):
         yield row
 
 
+CACHE_FILE = Path('/var/datapackages/budget/national/changes/transactions/cache.json')
+CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+
 def get_transactions(changes):
+
+
+    def load_cache():
+        if CACHE_FILE.exists():
+            cache = json.loads(CACHE_FILE.read_text())
+            logging.info('Loaded %d cached transactions', len(cache))
+            return cache
+        return {}
+
+    def save_cache(cache):
+        CACHE_FILE.write_text(json.dumps(cache))
+        logging.info('Saved %d cached transactions', len(cache))
+
     def get_date(x):
         return x['date_kind']
 
@@ -131,6 +148,9 @@ def get_transactions(changes):
         return transactions, unmatched
 
     def find_groups(changes):
+
+        cache = load_cache()
+
         changes = [
             c for c in changes
             if c['leading_item'] != 47
@@ -156,6 +176,16 @@ def get_transactions(changes):
                 date_kind, len(date_reserve)
             ))
             rest_changes = date_reserve
+            rest_changes_trcodes = {c['trcode'] for c in rest_changes}
+            cached = cache.get(date_kind) or []
+            for group in cached:
+                if set(group).issubset(rest_changes_trcodes):
+                    yield group
+                    rest_changes = [
+                        c for c in rest_changes
+                        if c['trcode'] not in group
+                    ]
+                    rest_changes_trcodes = {c['trcode'] for c in rest_changes}
             for comb_size in range(2, min(len(date_reserve) + 1, 7)):
                 if len(rest_changes) < comb_size:
                     break
@@ -170,10 +200,17 @@ def get_transactions(changes):
                      ))
 
                 for transaction in transactions:
-                    yield set(x['trcode'] for x in transaction)
+                    result = set(x['trcode'] for x in transaction)
+                    cache.setdefault(date_kind, []).append(list(result))
+                    yield result
 
             for rest in rest_changes:
-                yield [rest['trcode']]
+                result = [rest['trcode']]
+                cache.setdefault(date_kind, []).append(result)
+                yield result
+
+        save_cache(cache)
+        
 
     def assign_transactions(groups, changes):
         # This allows to perform search ~10 times faster
