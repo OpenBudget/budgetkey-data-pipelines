@@ -209,7 +209,7 @@ def get_transactions(changes):
                 cache.setdefault(date_kind, []).append(result)
                 yield result
 
-        save_cache(cache)
+            save_cache(cache)
         
 
     def assign_transactions(groups, changes):
