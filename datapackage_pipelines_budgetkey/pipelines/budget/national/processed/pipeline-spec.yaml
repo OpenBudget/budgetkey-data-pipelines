@@ -9,6 +9,7 @@ aggregated-yearly:
 
   dependencies:
     - pipeline: ./budget/national/original/national-budgets
+    - pipeline: ./budget/national/changes/original/national-budget-changes
   pipeline:
     - run: add_metadata
       parameters:
