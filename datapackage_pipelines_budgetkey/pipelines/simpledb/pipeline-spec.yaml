@@ -3,9 +3,10 @@ process_simple_dbs:
     crontab: "0 0 * * 1"
   dependencies:
     - pipeline: ./budget/national/processed/with-extras
+    - pipeline: ./government_decisions/government_decisions
 
   pipeline:
     - run: update_package
       parameters:
-        revision: 2025.10.26-01
+        revision: 2026.07.30-01
     - flow: datapackage_pipelines_budgetkey.pipelines.simpledb.process
