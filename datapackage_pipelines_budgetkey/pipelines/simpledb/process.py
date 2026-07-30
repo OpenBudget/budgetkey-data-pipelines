@@ -1,5 +1,7 @@
 import csv
 import hashlib
+import re
+from html import unescape
 
 from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
 
@@ -70,6 +72,42 @@ def item_url(kind, fields, key='item_url', description='קישור לעמוד ה
         type='string',
         default=lambda row: calc_short_doc_id(f'{kind}/' + '/'.join([str(row[f]) for f in fields]))[0]
     )
+
+BLOCK_TAGS_RE = re.compile(r'</?(?:p|div|h[1-6]|li|tr|br|table|ul|ol|section)[^>]*>', re.IGNORECASE)
+TAG_RE = re.compile(r'<[^>]+>')
+GOVERNMENT_NUMBER_RE = re.compile(r'הממשלה ה-\s*(\d+)')
+
+def html_to_text(html):
+    if not html:
+        return None
+    text = BLOCK_TAGS_RE.sub('\n', html)
+    text = TAG_RE.sub(' ', text)
+    text = unescape(text).replace('\r', '\n').replace('\xa0', ' ')
+    lines = []
+    for line in text.split('\n'):
+        line = re.sub(r'[ \t]+', ' ', line).strip()
+        if line or (lines and lines[-1]):
+            lines.append(line)
+    return '\n'.join(lines).strip() or None
+
+def decision_number(row):
+    number = row.get('procedure_number')
+    if number:
+        return number
+    number = (row.get('procedure_number_str') or '').strip()
+    return int(number) if number.isdigit() else None
+
+def clean_government(government):
+    if not government or not GOVERNMENT_NUMBER_RE.search(government):
+        return None
+    return government
+
+def government_number(government):
+    match = GOVERNMENT_NUMBER_RE.search(government or '')
+    return int(match.group(1)) if match else None
+
+def to_date(dt):
+    return dt.date() if dt is not None and hasattr(dt, 'date') else dt
 
 def convert_request_summary(row):
     ret = dict()
@@ -1373,6 +1411,221 @@ PARAMETERS = dict(
             ),
         ],
         search='n/a'
+    ),
+    government_decisions_data=dict(
+        source='/var/datapackages/government_decisions',
+        resources='gov_decisions',
+        description='''
+            פרסומים רשמיים של גופי הממשלה, ובראשם החלטות ממשלה.
+            המאגר כולל גם נהלים והנחיות, חוזרי והוראות מנכ״ל, החלטות ועדת פטור,
+            מסמכי מדיניות, רישיונות ועוד - כפי שמתפרסמים באתר gov.il.
+            המידע כולל פרסומים משנת 2013 ועד השנה הנוכחית (2026).
+
+            אופן ביצוע שאילתות database:
+            - חיפוש טקסט חופשי - לפי כותרת הפרסום (title) ותוכנו (content) *בלבד*!
+            - כדי לקבל החלטות ממשלה בלבד, סנן עם publication_type='החלטות ממשלה'.
+            - לפני סינון לפי publication_type, office או unit,
+              בדוק את הערכים הזמינים (distinct query) כדי לבחור בצורה נכונה.
+            - מספר ההחלטה (עבור החלטות ממשלה) נמצא בשדה decision_number.
+            - השדה content יכול להיות ריק בפרסומים שתוכנם נמצא במסמכים המקושרים אליהם
+              (ראה linked_documents).
+        ''',
+        fields=[
+            item_url('gov_decisions', ['id']),
+            dict(
+                name='title',
+                description='''
+                    כותרת הפרסום.
+                    בהחלטות ממשלה זהו נושא ההחלטה.
+                ''',
+                sample_values=[
+                    'אשרור הסכם בדבר שיתוף פעולה בתחום החקלאות בין ממשלת מדינת ישראל לבין ממשלת גיאורגיה',
+                    'אישור מינוי חברים במועצה לענייני משק הגז הטבעי',
+                    'נוהל פתיחת מוטב לצהרונים',
+                ],
+                type='string',
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='publication_type',
+                description='''
+                    סוג הפרסום.
+                    חשוב לשים לב שרק חלק מהפרסומים הם החלטות ממשלה.
+                ''',
+                most_common_values=[
+                    'נהלים והנחיות',
+                    'החלטות ממשלה',
+                    'החלטות ועדת פטור',
+                    'החלטות',
+                    'חוזרים והוראות מנכ"ל',
+                    'רישיונות',
+                    'חוזרים ונהלים',
+                    'מסמכי מדיניות',
+                    'החלטות ועדת משנה',
+                    'החלטות הנהלה',
+                    'החלטות ועדת שירות המדינה',
+                    'נהלים רגולטוריים',
+                    'הודעות נציבות שירות המדינה',
+                    'נהלים כלליים',
+                    'פקודות והוראות',
+                    'הוראות ביצוע',
+                    'הסכמים',
+                    'ניירות עמדה',
+                ],
+                type='string',
+                default=lambda row: row.get('policy_type') or None
+            ),
+            dict(
+                name='office',
+                description='''
+                    שם הגוף הממשלתי שפרסם את המסמך (משרד ממשלתי, רשות וכד׳).
+                    בהחלטות ממשלה זהו בדרך כלל ״משרד ראש הממשלה״.
+                ''',
+                most_common_values=[
+                    'משרד ראש הממשלה',
+                    'משרד התחבורה והבטיחות בדרכים',
+                    'רשות מקרקעי ישראל',
+                    'משרד התקשורת',
+                    'משרד הבריאות',
+                    'נציבות שירות המדינה',
+                    'רשות החשמל',
+                    'רשות האוכלוסין וההגירה',
+                    'משרד הכלכלה והתעשייה',
+                    'רשות המסים בישראל',
+                ],
+                type='string',
+                transform=lambda x: x or None,
+            ),
+            dict(
+                name='unit',
+                description='''
+                    שם היחידה בתוך הגוף הממשלתי שפרסמה את המסמך, אם קיימת.
+                    בהחלטות ממשלה זהו בדרך כלל ״מזכירות הממשלה״.
+                ''',
+                sample_values=[
+                    'מזכירות הממשלה',
+                    'אישור רישום כלי רכב בישראל',
+                    'נציב שירות המדינה',
+                    'לשכה משפטית',
+                ],
+                type='string',
+                transform=lambda x: x or None,
+            ),
+            dict(
+                name='government',
+                description='''
+                    הממשלה שקיבלה את ההחלטה.
+                    מוגדר בעיקר עבור החלטות ממשלה, וריק בפרסומים אחרים.
+                ''',
+                sample_values=[
+                    'הממשלה ה- 37',
+                    'הממשלה ה- 36, נפתלי בנט',
+                    'הממשלה ה- 34, בנימין נתניהו',
+                ],
+                type='string',
+                transform=clean_government,
+            ),
+            dict(
+                name='government_number',
+                description='''
+                    מספר הממשלה שקיבלה את ההחלטה (למשל 37).
+                    מוגדר בעיקר עבור החלטות ממשלה, וריק בפרסומים אחרים.
+                ''',
+                sample_values=[34, 36, 37],
+                type='integer',
+                default=lambda row: government_number(row.get('government'))
+            ),
+            dict(
+                name='decision_number',
+                description='''
+                    מספר ההחלטה, כפי שמוכר בציבור (למשל ״החלטת ממשלה 2144״).
+                    מוגדר עבור החלטות ממשלה, וריק בחלק מהפרסומים האחרים.
+                ''',
+                sample_values=[2144, 1238, 4781],
+                type='integer',
+                default=decision_number
+            ),
+            dict(
+                name='publication_number',
+                description='''
+                    מספר הפרסום כפי שנתן לו הגוף המפרסם.
+                    לפרסומים שאינם החלטות ממשלה אין מבנה אחיד למספר זה.
+                ''',
+                sample_values=['2144', '01/2025', '26-0456'],
+                type='string',
+                default=lambda row: row.get('procedure_number_str') or None
+            ),
+            dict(
+                name='publication_date',
+                description='''
+                    תאריך הפרסום.
+                    בהחלטות ממשלה זהו תאריך קבלת ההחלטה.
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
+                type='date',
+                default=lambda row: to_date(row.get('doc_published_date'))
+            ),
+            dict(
+                name='year',
+                description='''
+                    שנת הפרסום (או שנת קבלת ההחלטה).
+                ''',
+                sample_values=[2017, 2023, 2025],
+                type='integer',
+                default=lambda row: row['doc_published_date'].year if row.get('doc_published_date') else None
+            ),
+            dict(
+                name='last_update_date',
+                description='''
+                    תאריך העדכון האחרון של הפרסום באתר gov.il.
+                ''',
+                sample_values=['2021-01-01', '2023-12-31', '2025-02-29'],
+                type='date',
+                default=lambda row: to_date(row.get('doc_update_date'))
+            ),
+            dict(
+                name='content',
+                description='''
+                    התוכן המלא של הפרסום, כטקסט.
+                    בהחלטות ממשלה זהו נוסח ההחלטה (כולל נושא ההחלטה ופירוט ההחלטות).
+                    שדה זה יכול להיות ארוך מאוד, ולכן אין לשלוף אותו בשאילתות מסכמות.
+                    השדה ריק בפרסומים שתוכנם נמצא רק במסמכים המקושרים אליהם (linked_documents).
+                ''',
+                type='string',
+                default=lambda row: html_to_text(row.get('text'))
+            ),
+            dict(
+                name='linked_documents',
+                description='''
+                    רשימת המסמכים המקושרים לפרסום (למשל נספחים או נוסח הנוהל המלא).
+                    כל פריט ברשימה כולל את כתובת המסמך (href) ואת שמו (title).
+                    שדה אינפורמטיבי, לא משמש לשאילתות.
+                ''',
+                sample_values=[
+                    [{'href': 'https://ams3.digitaloceanspaces.com/budgetkey-files/government_decisions/foreign_worker_employment_procedure',
+                      'title': 'נוהל העסקת עובד זר בסיעוד'}]
+                ],
+                type='array',
+                default=lambda row: row.get('linked_docs') or []
+            ),
+        ],
+        search=dict(
+            index='gov_decisions',
+            field_map={
+                'title': 'title',
+                'publication_type': 'policy_type',
+                'office': 'office',
+                'unit': 'unit',
+                'government': 'government',
+                'decision_number': 'procedure_number',
+                'publication_number': 'procedure_number_str',
+                'publication_date': 'doc_published_date',
+                'last_update_date': 'doc_update_date',
+                'content': 'text',
+                'linked_documents': 'linked_docs',
+            },
+            filters={}
+        )
     ),
 )
 
