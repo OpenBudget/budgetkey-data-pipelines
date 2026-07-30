@@ -115,6 +115,48 @@ def government_number(government):
 def to_date(dt):
     return dt.date() if dt is not None and hasattr(dt, 'date') else dt
 
+def join_values(values):
+    # some of the values contain commas, so a comma is not usable as a separator here
+    return ' | '.join(str(v) for v in (values or []) if v) or None
+
+def to_int(value):
+    return int(value) if value is not None else None
+
+def activity_budget_codes(row):
+    codes = []
+    for item in (row.get('budgetItems') or []):
+        code = filtered_budget_code(item.get('code'))
+        if code and code not in codes:
+            codes.append(code)
+    return ','.join(codes) or None
+
+def activity_supplier_ids(row):
+    ids = []
+    for supplier in (row.get('suppliers') or []):
+        entity_id = supplier.get('entity_id')
+        if entity_id and entity_id not in ids:
+            ids.append(entity_id)
+    return ','.join(ids) or None
+
+def activity_top_suppliers(row):
+    suppliers = [s for s in (row.get('suppliers') or []) if s.get('entity_name')]
+    # suppliers which are no longer operating the service are the least interesting ones
+    suppliers.sort(key=lambda s: s.get('active') != 'yes')
+    names = []
+    for supplier in suppliers:
+        name = '{} ({})'.format(supplier['entity_name'], supplier.get('entity_id') or '')
+        if name not in names:
+            names.append(name)
+    return ', '.join(names[:10]) or None
+
+def activity_legal_basis(row):
+    kinds = []
+    for item in (row.get('virtue_of_table') or []):
+        kind = item.get('kind')
+        if kind and kind != 'לא רלוונטי' and kind not in kinds:
+            kinds.append(kind)
+    return ', '.join(kinds) or None
+
 def convert_request_summary(row):
     ret = dict()
     summary = row.get('summary') or dict()
@@ -1629,6 +1671,364 @@ PARAMETERS = dict(
                 'last_update_date': 'doc_update_date',
                 'content': 'text',
                 'linked_documents': 'linked_docs',
+            },
+            filters={}
+        )
+    ),
+    social_services_data=dict(
+        source='/var/datapackages/activities/social_services',
+        resources='activities',
+        description='''
+            נתונים על שירותים חברתיים שהמדינה רוכשת מגופים מבצעים (חברות, עמותות ורשויות מקומיות).
+            אלו שירותי רווחה, חינוך, בריאות וקליטה הממומנים על ידי המדינה
+            ומופעלים בפועל על ידי ארגונים חיצוניים (מיקור חוץ).
+            המידע נאסף על ידי צוות ״מפתח התקציב״ ומתייחס לשנים 2020 ואילך.
+            המאגר מכיל מספר קטן של רשומות (מאות בודדות) - כל רשומה מתארת שירות שלם ולא התקשרות בודדת.
+
+            אופן ביצוע שאילתות database:
+            - חיפוש טקסט חופשי - לפי שם השירות (activity_name) ותיאורו (description).
+            - לסינון נושאי השתמש בשדות subjects, target_audiences, target_age_groups ו interventions.
+              אלו רשימות ערכים מופרדות בסימן |, ולכן יש לסנן אותן עם LIKE.
+            - כדי למצוא את השירותים שארגון מסוים מפעיל, סנן עם
+              supplier_entity_ids LIKE '%<entity_id>%'.
+            - השדה related_budget_codes מקשר את השירות לסעיפי התקציב שממנים אותו.
+        ''',
+        fields=[
+            item_url('activities', ['kind', 'id']),
+            dict(
+                name='activity_key',
+                description='''
+                    מזהה ייחודי של השירות החברתי.
+                ''',
+                sample_values=['mrkz-tqshvrt', 'mavnvt-yvm', 'tvkhnyt-mtmyd'],
+                type='string',
+                default=lambda row: row.get('id'),
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='activity_name',
+                description='''
+                    שם השירות החברתי.
+                ''',
+                sample_values=[
+                    'מרכז תקשורת לאנשים עם לקות שמיעה',
+                    'מעונות יום שיקומיים',
+                    'תוכנית מתמיד',
+                ],
+                type='string',
+                default=lambda row: row.get('name'),
+                filter=lambda x: x is not None,
+            ),
+            dict(
+                name='description',
+                description='''
+                    תיאור מפורט של השירות - מה הוא כולל ולמי הוא מיועד.
+                ''',
+                type='string',
+            ),
+            dict(
+                name='office',
+                description='''
+                    המשרד הממשלתי האחראי על השירות.
+                ''',
+                possible_values=[
+                    'משרד הרווחה',
+                    'משרד החינוך',
+                    'משרד הבריאות',
+                ],
+                type='string',
+            ),
+            dict(
+                name='unit',
+                description='''
+                    היחידה במשרד האחראית על השירות.
+                ''',
+                sample_values=[
+                    'של"ם',
+                    'חטיבת רפואה',
+                    'מינהל פדגוגי',
+                    'מוגבלויות',
+                    'שירותים אישיים וחברתיים',
+                    'אזרחים ותיקים',
+                ],
+                type='string',
+                transform=lambda x: (x or '').strip() or None,
+            ),
+            dict(
+                name='subunit',
+                description='''
+                    היחידה הפנימית (אגף או שירות) בתוך היחידה האחראית על השירות.
+                ''',
+                sample_values=[
+                    'הערכה הכרה ותוכניות / שירות ראיה, שמיעה וטכנולוגיה (רש"ט)',
+                    'אגף בכיר תכנון ובקרה',
+                ],
+                type='string',
+                default=lambda row: ' / '.join(
+                    v.strip() for v in [row.get('subunit'), row.get('subsubunit')] if v and v.strip()
+                ) or None
+            ),
+            dict(
+                name='subjects',
+                description='''
+                    תחומי התוכן של השירות.
+                    רשימת ערכים מופרדים בסימן | - יש לסנן עם LIKE.
+                ''',
+                possible_values=[
+                    'התנהגותי ורגשי',
+                    'חינוך והשכלה גבוהה',
+                    'תרבות, פנאי והעשרה',
+                    'תעסוקה והכשרה מקצועית',
+                    'בריאות הנפש',
+                    'קהילה והתנדבות',
+                    'דיור ומלונאות',
+                    'מקצועות הבריאות ופרא-רפואי',
+                    'רפואי וסיעודי',
+                    'משפט ועוברי חוק',
+                    'התמכרויות וגמילה',
+                ],
+                type='string',
+                default=lambda row: join_values(row.get('subject'))
+            ),
+            dict(
+                name='interventions',
+                description='''
+                    סוגי ההתערבות שהשירות מספק בפועל.
+                    רשימת ערכים מופרדים בסימן | - יש לסנן עם LIKE.
+                ''',
+                possible_values=[
+                    'הדרכה, הכוונה והכשרה',
+                    'פעילות פנאי, העשרה, הפגה והשתלבות בחברה',
+                    'טיפול אישי, זוגי, משפחתי וקבוצתי',
+                    'ניהול, טיפול וליווי אישי',
+                    'כוללני חוץ-ביתי (כגון מוסדות, מעונות, פנימיות, הוסטלים, מערכי דיור)',
+                    'סיוע ראשוני והתערבות בשעת חירום',
+                    'סנגור מיצוי זכויות',
+                    'אבחון',
+                    'פעילות קהילתית',
+                    'סיוע חומרי ומימון',
+                    'הסברה ופיתוח ידע',
+                    'דיור ואשפוז',
+                ],
+                type='string',
+                default=lambda row: join_values(row.get('intervention'))
+            ),
+            dict(
+                name='target_audiences',
+                description='''
+                    אוכלוסיות היעד של השירות.
+                    רשימת ערכים מופרדים בסימן | - יש לסנן עם LIKE.
+                ''',
+                possible_values=[
+                    'אוכלוסיה כללית',
+                    'אנשים עם מוגבלויות',
+                    'חברה ערבית',
+                    'חברה חרדית',
+                    'בני משפחה',
+                    'אנשי מקצוע, מעסיקים וארגונים',
+                    'זרים וחסרי מעמד',
+                    'קהילות ומתנדבים/ות',
+                ],
+                type='string',
+                default=lambda row: join_values(row.get('target_audience'))
+            ),
+            dict(
+                name='target_age_groups',
+                description='''
+                    קבוצות הגיל שהשירות מיועד להן.
+                    רשימת ערכים מופרדים בסימן | - יש לסנן עם LIKE.
+                ''',
+                possible_values=[
+                    'גיל רך (0-3)',
+                    'ילדים (4-11)',
+                    'נוער (12-18)',
+                    'צעירים (19-35)',
+                    'בוגרים (36-64)',
+                    'ותיקים (65+)',
+                    'כל הגילאים',
+                ],
+                type='string',
+                default=lambda row: join_values(row.get('target_age_group'))
+            ),
+            dict(
+                name='geo_coverage',
+                description='''
+                    האם השירות ניתן בכל הארץ או רק באזורים מסוימים.
+                ''',
+                possible_values=['ארצי', 'אזורי'],
+                type='string',
+            ),
+            dict(
+                name='legal_basis',
+                description='''
+                    מכוח מה ניתן השירות.
+                    ריק כאשר השירות אינו ניתן מכוח חוק, החלטת ממשלה או נוהל.
+                ''',
+                possible_values=['חוק', 'החלטת ממשלה', 'נוהל/חוזר משרדי'],
+                type='string',
+                default=activity_legal_basis
+            ),
+            dict(
+                name='current_budget',
+                description='''
+                    התקציב המאושר של השירות בשנת הפעילות האחרונה, בשקלים.
+                ''',
+                sample_values=[900000, 5282778, 3583425630],
+                type='number',
+            ),
+            dict(
+                name='budget_utilization',
+                description='''
+                    שיעור ניצול התקציב של השירות בשנת הפעילות האחרונה, באחוזים.
+                    ערך של 100 משמעו שכל התקציב המאושר נוצל.
+                ''',
+                sample_values=[75.5, 98.83, 100],
+                type='number',
+            ),
+            dict(
+                name='current_beneficiaries',
+                description='''
+                    מספר מקבלי השירות בשנת הפעילות האחרונה.
+                    יש לשים לב לשדה beneficiary_kind - לעיתים מדובר במספר הרשויות המקומיות ולא באנשים.
+                ''',
+                sample_values=[185, 785, 1589164],
+                type='integer',
+            ),
+            dict(
+                name='beneficiary_kind',
+                description='''
+                    סוג מקבלי השירות שנספרים בשדה current_beneficiaries.
+                ''',
+                possible_values=['מקבלי שירות', 'רשויות'],
+                type='string',
+                default=lambda row: row.get('beneficiary_kind_name')
+            ),
+            dict(
+                name='supplier_count',
+                description='''
+                    מספר הגופים המפעילים את השירות בפועל.
+                ''',
+                sample_values=[1, 5, 119],
+                type='integer',
+            ),
+            dict(
+                name='supplier_sector',
+                description='''
+                    המגזר אליו משתייכים הגופים המפעילים את השירות.
+                ''',
+                possible_values=['מגזר שלישי', 'עסקי', 'משולב', 'רשויות מקומיות', 'אחר'],
+                type='string',
+                default=lambda row: row.get('supplier_kinds')
+            ),
+            dict(
+                name='supplier_count_company',
+                description='''
+                    מספר החברות הפרטיות מבין הגופים המפעילים את השירות.
+                ''',
+                sample_values=[0, 3, 80],
+                type='integer',
+            ),
+            dict(
+                name='supplier_count_association',
+                description='''
+                    מספר העמותות מבין הגופים המפעילים את השירות.
+                ''',
+                sample_values=[0, 1, 55],
+                type='integer',
+            ),
+            dict(
+                name='supplier_count_municipality',
+                description='''
+                    מספר הרשויות המקומיות מבין הגופים המפעילים את השירות.
+                ''',
+                sample_values=[0, 2, 20],
+                type='integer',
+            ),
+            dict(
+                name='supplier_entity_ids',
+                description='''
+                    מספרי התאגיד של כל הגופים שהפעילו את השירות.
+                    רשימה מופרדת בפסיקים - כדי למצוא את השירותים שארגון מסוים מפעיל יש לסנן עם LIKE.
+                ''',
+                sample_values=['580002483', '580002483,513705699'],
+                type='string',
+                default=activity_supplier_ids
+            ),
+            dict(
+                name='top_suppliers',
+                description='''
+                    עד עשרה מהגופים המפעילים את השירות, כולל מספר התאגיד שלהם.
+                    שדה אינפורמטיבי, לא משמש לשאילתות.
+                ''',
+                sample_values=['מעגלי שמע (ע"ר) (580002483)'],
+                type='string',
+                default=activity_top_suppliers
+            ),
+            dict(
+                name='related_budget_codes',
+                description='''
+                    קודי הסעיפים התקציביים שמהם ממומן השירות.
+                    רשימה של קודי סעיפים תקציביים מופרדים בפסיקים.
+                ''',
+                sample_values=['23.07.22.72', '23.07.22.71,23.07.22.72'],
+                type='string',
+                default=activity_budget_codes
+            ),
+            dict(
+                name='tender_count',
+                description='''
+                    מספר המכרזים והתקשרויות הרכש שאותרו עבור השירות.
+                    שדה אינפורמטיבי, לא משמש לשאילתות.
+                ''',
+                sample_values=[0, 3, 47],
+                type='integer',
+                default=lambda row: len(row.get('tenders') or [])
+            ),
+            dict(
+                name='first_activity_year',
+                description='''
+                    השנה הראשונה בה ידוע לנו על הפעלת השירות.
+                ''',
+                sample_values=[2017, 2020, 2025],
+                type='integer',
+                default=lambda row: to_int(row.get('min_activity_year'))
+            ),
+            dict(
+                name='last_activity_year',
+                description='''
+                    השנה האחרונה בה ידוע לנו על הפעלת השירות.
+                ''',
+                sample_values=[2017, 2020, 2025],
+                type='integer',
+                default=lambda row: to_int(row.get('max_activity_year'))
+            ),
+        ],
+        search=dict(
+            index='activities',
+            field_map={
+                'activity_key': 'id',
+                'activity_name': 'name',
+                'description': 'description',
+                'office': 'office',
+                'unit': 'unit',
+                'subunit': 'subunit',
+                'subjects': 'subject',
+                'interventions': 'intervention',
+                'target_audiences': 'target_audience',
+                'target_age_groups': 'target_age_group',
+                'geo_coverage': 'geo_coverage',
+                'current_budget': 'current_budget',
+                'budget_utilization': 'budget_utilization',
+                'current_beneficiaries': 'current_beneficiaries',
+                'beneficiary_kind': 'beneficiary_kind_name',
+                'supplier_count': 'supplier_count',
+                'supplier_sector': 'supplier_kinds',
+                'supplier_count_company': 'supplier_count_company',
+                'supplier_count_association': 'supplier_count_association',
+                'supplier_count_municipality': 'supplier_count_municipality',
+                'related_budget_codes': 'budgetItems',
+                'first_activity_year': 'min_activity_year',
+                'last_activity_year': 'max_activity_year',
             },
             filters={}
         )
