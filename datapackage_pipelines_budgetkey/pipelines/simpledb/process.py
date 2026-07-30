@@ -90,12 +90,18 @@ def html_to_text(html):
             lines.append(line)
     return '\n'.join(lines).strip() or None
 
+MAX_INT = 2**31 - 1
+
 def decision_number(row):
     number = row.get('procedure_number')
-    if number:
-        return number
-    number = (row.get('procedure_number_str') or '').strip()
-    return int(number) if number.isdigit() else None
+    if not number:
+        number = (row.get('procedure_number_str') or '').strip()
+        number = int(number) if number.isdigit() else None
+    # some publications use a long numeric code which is not a decision number
+    # (and doesn't fit in an integer column) - the full value is in publication_number
+    if number is None or abs(number) > MAX_INT:
+        return None
+    return number
 
 def clean_government(government):
     if not government or not GOVERNMENT_NUMBER_RE.search(government):
