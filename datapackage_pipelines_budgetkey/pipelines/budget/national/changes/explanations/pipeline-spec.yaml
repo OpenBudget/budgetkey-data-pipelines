@@ -5,6 +5,7 @@ all:
     - run: add_metadata
       parameters:
         name: change-explanations
+        revision: '2026-08-02'
     - run: explanation_fetcher
       parameters:
         resource:
