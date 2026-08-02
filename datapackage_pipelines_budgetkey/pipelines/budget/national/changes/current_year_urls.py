@@ -81,7 +81,7 @@ def get_current_year_urls():
     for key in FILE_KEYS:
         for u in urls:
             if key in u:
-                print('Found %s URL: %s' % (key, u))
+                logging.info('Found %s URL: %s', key, u)
                 result[key] = u
                 break
     missing = [k for k in FILE_KEYS if k not in result]
