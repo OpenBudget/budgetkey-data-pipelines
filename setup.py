@@ -40,7 +40,10 @@ setup(
                       'elasticsearch<9.0.0',
                       'openai',
                       'kvfile>=1.1.2',
-                      'pyproj'
+                      'pyproj',
+                      'sqlalchemy<3',  # pulled in transitively via dataflows-tabulator, which only
+                                       # requires >=0.9.6 - pin so the next major can't arrive
+                                       # unannounced with the base image
 		     ],
     extras_require={'develop': ["tox", "datapackage-pipelines"]},
     entry_points={'console_scripts': ['budgetkey-dpp = datapackage_pipelines_budgetkey.cli:main']}

@@ -28,7 +28,7 @@ def filter_resource(rows, stmt, k_fields, v_fields):
             v_values = [row[v] for v in v_fields]
             if any(v in (None, '') for v in v_values):
                 continue
-            db_values = conn.execute(stmt, **params).first()
+            db_values = conn.execute(stmt, params).first()
             if db_values:
                 if all((db_value == v_value)
                        for db_value, v_value
