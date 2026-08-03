@@ -1,4 +1,4 @@
-bumper: 12
+bumper: 13
 
 budget:
   kind: indexer
@@ -32,12 +32,14 @@ budget:
 
 national-budget-changes:
   kind: indexer
-  revision: 12
+  revision: 13s
   dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
   page-title-pattern: '{req_title[0]}'
   key-fields:
     - transaction_id
+  chunker:
+    - '{explanation}'
   keep-history:
     -
       key: pending
@@ -192,6 +194,8 @@ calls_for_bids:
   dependent_pipeline: ./procurement/calls_for_bids/calls-for-bids-all
   source_datapackage: /var/datapackages/procurement/calls_for_bids_all/datapackage.json
   page-title-pattern: '{page_title}'
+  chunker:
+    - '{page_title}'
   key-fields:
     - tender_type
     - publication_id
@@ -216,6 +220,8 @@ support_criteria:
   dependent_pipeline: ./supports/criteria/support-criteria
   source_datapackage: /var/datapackages/support-criteria/datapackage.json
   page-title-pattern: '{page_title}'
+  chunker:
+    - '{page_title}'
   key-fields:
     - tender_type
     - publication_id
@@ -240,6 +246,8 @@ people:
   dependent_pipeline: ./people/aggregated
   source_datapackage: /var/datapackages/people/aggregated/datapackage.json
   page-title-pattern: 'מידע על {key}'
+  chunker:
+    - 'מידע על {key}'
   key-fields:
     - key
 
@@ -249,6 +257,8 @@ reports:
   dependent_pipeline: ./reports/all
   source_datapackage: /var/datapackages/reports/all/datapackage.json
   page-title-pattern: '{title}'
+  chunker:
+    - '{title}'
   key-fields:
     - key
   document-steps:
@@ -294,6 +304,8 @@ units:
   dependent_pipeline: ./units/social_services/social_services
   source_datapackage: /var/datapackages/units/social_services/datapackage.json
   page-title-pattern: 'מפתח לרכש החברתי / {breadcrumbs}'
+  chunker:
+    - 'שירותים חברתיים במיקור חוץ של {breadcrumbs}'
   key-fields:
     - kind
     - id
@@ -304,6 +316,8 @@ muni_budgets:
   dependent_pipeline: ./budget/municipal/fetcher
   source_datapackage: /var/datapackages/budget/municipal/datacity-budgets/datapackage.json
   page-title-pattern: 'תקציב {title} ב{muni_name}'
+  chunker:
+    - 'תקציב {title} ב{muni_name}'
   page-title-index: true
   key-fields:
     - muni_code
@@ -319,6 +333,8 @@ muni_tenders:
   dependent_pipeline: ./procurement/municipal/fetcher
   source_datapackage: /var/datapackages/procurement/municipal/datacity-tenders/datapackage.json
   page-title-pattern: '{page_title}'
+  chunker:
+    - '{page_title}'
   key-fields:
     - tender_type
     - publication_id
