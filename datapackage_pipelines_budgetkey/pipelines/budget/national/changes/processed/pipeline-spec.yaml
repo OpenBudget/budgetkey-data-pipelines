@@ -223,8 +223,10 @@ national-budget-changes-aggregated:
                   type: number
                 - name: ai_change_explanation
                   type: string
+                  es:hebrew: true
                 - name: ai_budget_item_description
                   type: string
+                  es:hebrew: true
 
           date:
             es:itemType: date
