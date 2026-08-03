@@ -32,7 +32,7 @@ budget:
 
 national-budget-changes:
   kind: indexer
-  revision: 13s
+  revision: 13
   dependent_pipeline: ./budget/national/changes/processed/national-budget-changes-aggregated
   source_datapackage: /var/datapackages/budget/national/changes/full/datapackage.json
   page-title-pattern: '{req_title[0]}'
