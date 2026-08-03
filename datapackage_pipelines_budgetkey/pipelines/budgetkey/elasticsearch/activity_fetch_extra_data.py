@@ -37,9 +37,9 @@ def expand_mappings(mappings):
     with engine.connect() as conn:
         for mapping in mappings:
             TITLE_QUERY = text('SELECT title from raw_budget where code=:code and year=:year')
-            mapping['title'] = conn.execute(TITLE_QUERY, **mapping).fetchone().title
+            mapping['title'] = conn.execute(TITLE_QUERY, mapping).fetchone().title
             ITEMS_QUERY = text('SELECT year, code, title, net_allocated, net_revised, net_executed from raw_budget where code=:code and title=:title and net_revised > 0')
-            for r in conn.execute(ITEMS_QUERY, **mapping).fetchall():
+            for r in conn.execute(ITEMS_QUERY, mapping).fetchall():
                 ret.append(dict(
                     code=r.code,
                     year=r.year,
@@ -70,7 +70,7 @@ def fetch_spending(budget_code):
                WHERE budget_code=:code
                ORDER BY volume desc nulls last
     ''')
-    return [r._asdict() for r in engine.connect().execute(SPENDING, code=budget_code).fetchall()]
+    return [r._asdict() for r in engine.connect().execute(SPENDING, dict(code=budget_code)).fetchall()]
 
 
 def fetch_tenders(**kw):
@@ -84,7 +84,7 @@ def fetch_tenders(**kw):
         FROM procurement_tenders_processed
         WHERE publication_id=:publication_id AND tender_id=:tender_id AND tender_type=:tender_type
     ''')
-    return dict(engine.connect().execute(TENDER, **kw).fetchone())
+    return engine.connect().execute(TENDER, kw).fetchone()._asdict()
 
 def format_date(x):
     if x:
