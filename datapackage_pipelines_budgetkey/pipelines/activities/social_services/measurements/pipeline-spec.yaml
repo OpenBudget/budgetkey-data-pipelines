@@ -4,4 +4,9 @@ collect:
     crontab: "0 0 * * *"
 
   pipeline:
+    - run: add_metadata
+      parameters:
+        name: social_services_tender_measurements
+        title: Fetch social services measurement data from data input
+        revision: '2026-08-03'
     - flow: collect
