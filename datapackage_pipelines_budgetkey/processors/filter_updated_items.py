@@ -34,13 +34,13 @@ def filter_resource(rows, stmt, k_fields, v_fields):
                        for db_value, v_value
                        in zip(db_values, v_values)):
                     continue
-                logging.info('queried with params %r', params)
-                logging.info('GOT %r', db_values)
-                logging.info('INCOMING %r', v_values)
-                logging.info('NEW %r != %r', db_values, v_values)
+                # logging.info('queried with params %r', params)
+                # logging.info('GOT %r', db_values)
+                # logging.info('INCOMING %r', v_values)
+                # logging.info('NEW %r != %r', db_values, v_values)
                 yield row
             else:
-                logging.info('NEW ROW %r', v_values)
+                # logging.info('NEW ROW %r', v_values)
                 yield row
         except Exception:
             logging.exception('Failure!')
