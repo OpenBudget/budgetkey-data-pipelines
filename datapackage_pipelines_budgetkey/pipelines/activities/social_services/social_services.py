@@ -126,6 +126,9 @@ def fix_suppliers():
         eids_municipality = set()
         geos = set()
         actual_suppliers = []
+        service_end_year = row['max_activity_year']
+        service_end_year = int(service_end_year) if service_end_year is not None else None
+        service_inactive = service_end_year is not None and service_end_year < CURRENT_YEAR
         for v in suppliers:
             for f in ['entity_id', 'entity_name']:
                 if v.get(f):
@@ -133,6 +136,13 @@ def fix_suppliers():
             for f in ('year_activity_start', 'year_activity_end'):
                 if f in v and not v[f]:
                     del v[f]
+            # counted below as it was when the service was last active
+            counted = v.get('year_activity_end') is None
+            if service_inactive:
+                # the service itself stopped being active, so no supplier can still be operating it
+                supplier_end_year = v.get('year_activity_end')
+                v['year_activity_end'] = service_end_year if supplier_end_year is None else min(int(supplier_end_year), service_end_year)
+                v['active'] = 'no'
             start_year = v.get('year_activity_start') or 2020
             start_year = max(start_year, row['min_activity_year'] or start_year)
             end_year = v.get('year_activity_end') or CURRENT_YEAR
@@ -142,7 +152,7 @@ def fix_suppliers():
                 continue
             actual_suppliers.append(v)
             v['geo'] = [geo[i] for i in v.get('geo', [])]
-            if v.get('year_activity_end') is None: # still active, so counted
+            if counted: # was active when the service was last active, so counted
                 geos.update(v['geo'])
                 eid = v['entity_id']
                 eids.add(eid)
