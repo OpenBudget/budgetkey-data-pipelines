@@ -128,7 +128,8 @@ def fix_suppliers():
         actual_suppliers = []
         service_end_year = row['max_activity_year']
         service_end_year = int(service_end_year) if service_end_year is not None else None
-        service_inactive = service_end_year is not None and service_end_year < CURRENT_YEAR
+        # a service with no budget records at all has no known end year to propagate
+        service_inactive = not row['currently_active'] and service_end_year is not None
         for v in suppliers:
             for f in ['entity_id', 'entity_name']:
                 if v.get(f):
