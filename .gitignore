@@ -17,6 +17,7 @@ dump.rdb
 ghostdriver.log
 temp
 /.env
+/.venv
 .vscode
 geckodriver.log
 docker-compose.override.yaml
