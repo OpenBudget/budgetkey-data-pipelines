@@ -92,14 +92,26 @@ Status fields worth reporting: `state`, `message`, `success`, `dirty`,
 `error_log` (a list; empty on success), `stats.count_of_rows`, and
 `queued` / `started` / `ended` as unix epoch seconds.
 
-On failure, `reason` holds the tail of the run's output, and the full log is:
+A run of the new code can succeed and still not be the result you expected —
+check `stats.count_of_rows` against the previous run before calling it good.
+
+On failure, `reason` holds the tail of the run's output. The full log is at
+`/api/log/<id>`, which returns **`{"text": [ ...lines... ]}`** — the key is
+`text`, not `log`:
 
 ```bash
-curl -s "https://pipelines.obudget.org/api/log/<id>"   # {"log": [ ...lines... ]}
+curl -s "https://pipelines.obudget.org/api/log/<id>" | python3 -c "
+import json,sys
+for l in json.load(sys.stdin)['text']:
+    if any(k in l for k in ('Loaded','PROCESSED','Processed','WARNING','ERROR')): print(l)"
 ```
 
-Airtable-backed pipelines log `Loaded N records for <base>/<table>` per table —
-a good early check that the source data is what you expected.
+Airtable-backed pipelines log `Loaded N records for <base>/<table>` per table.
+**Read those before blaming your code for a row-count change.** Airtable views
+are edited by people outside this repo, so the source can shrink between two
+runs — a count that moved because the `RESULTS` view changed looks exactly like
+a count that moved because your filter broke, and only the log tells them apart.
+Per-row `WARNING` lines from the flow appear here too.
 
 ## Verifying the data
 
@@ -129,9 +141,21 @@ landed yet, which doubles as the "is my change live?" check from Step 0.
 
 Worth checking after a scoring or schema change, beyond the row count:
 
-- the new columns exist and are populated (`count(*) filter (where col is null)`)
-- the value ranges are what the change intended
-- rows that should have moved, moved — compare against the numbers in the PR
+- the new columns exist and are populated
+- **value ranges**, which are the sharpest evidence a change is live: a column
+  that should now span 0–4 still reporting `min=1, max=5` means the old code is
+  running, whatever the status endpoint says
+- **invariants that should hold across every row** — two columns that are meant
+  to be NULL together, a ratio that must stay within 0–1. One query returning
+  all zeros is worth more than eyeballing a CSV
+- the effect the change was supposed to have, quantified. It may legitimately be
+  **zero** on current data (a rule that fires only on shapes no row has yet);
+  report that as a measured result, not as a failure
+
+Take the "before" snapshot *before* the deploy lands — the same query, run
+early, is what makes the after meaningful. If the source row count also moved,
+say so: a before/after average across a changed row population is not a
+like-for-like comparison, and presenting it as one is misleading.
 
 ## Reporting back
 
