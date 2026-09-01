@@ -8,5 +8,5 @@ collect:
       parameters:
         name: social_services_tender_measurements
         title: Fetch social services measurement data from data input
-        revision: '2026-09-01'
+        revision: '2026-09-01.2'
     - flow: collect
