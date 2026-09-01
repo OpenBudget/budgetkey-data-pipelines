@@ -10,6 +10,8 @@ import pytest
 from datapackage_pipelines_budgetkey.pipelines.activities.social_services.measurements.collect import (
     ANSWER_MAX,
     ANSWER_MIN,
+    COUNT_FIELDS,
+    SCORE_FIELDS,
     answer,
     combine,
     compute_scores,
@@ -166,14 +168,80 @@ def test_is_irrelevant_semantics():
     assert is_irrelevant(None) is False
 
 
-def test_q39_irrelevant_is_currently_ignored():
+def test_q39_irrelevant_drops_the_question():
     """
-    The spec does not define this branch, so behaviour is deliberately unchanged.
-    This test exists to make the decision visible rather than forgotten.
+    נספח ב' marks Q52, Q39 and Q81 as the three base questions offering
+    "לא רלוונטי"; section ב'/2 only writes the Q52 branch of FirstPrin_4MAX.
+    Q39 must drop the same way: the sub-principle becomes Q52 alone, out of 4.
     """
-    with_flag = compute_scores(row(5, **{'Q39 לא רלוונטי': ['x']}))
-    without = compute_scores(row(5))
-    assert with_flag['principle_score_1_4'] == without['principle_score_1_4']
+    scores = compute_scores(row(1, Q52=4, **{'Q39 לא רלוונטי': ['x']}))
+    assert scores['principle_score_1_4'] == pytest.approx(3.0 / 4.0)
+
+
+def test_q39_irrelevant_no_longer_sinks_the_whole_principle():
+    """
+    The regression this fixes: a Q39 marked NA is stored blank, so leaving it
+    in the sub-principle turned it into an unknown answer and principle 1 came
+    out None for the whole tender rather than being scored on Q52.
+    """
+    scores = compute_scores(row(5, Q39=None, **{'Q39 לא רלוונטי': ['x']}))
+    assert scores['principle_score_1_4'] == 1.0
+    assert scores['principle_score_1'] == 1.0
+
+
+def test_both_q52_and_q39_irrelevant_leaves_the_sub_principle_unscored():
+    scores = compute_scores(row(5, Q52=None, Q39=None,
+                                **{'Q52 לא רלוונטי': ['x'], 'Q39 לא רלוונטי': ['x']}))
+    assert scores['principle_score_1_4'] is None
+    assert scores['principle_score_1'] == 1.0, 'principle 1 falls back to the other three'
+
+
+# --- the cap on the top category -------------------------------------------
+
+def test_low_answer_count_counts_zeros_and_ones():
+    """0 and 1 count ('לא מתקיים כלל', 'מועטה'); 2 and up do not."""
+    scores = compute_scores(row(5, Q31=1, Q32=2, Q34=3))
+    assert scores['low_answer_count_1'] == 2
+
+
+def test_low_answer_count_is_zero_when_nothing_is_low():
+    scores = compute_scores(row(3))
+    assert [scores['low_answer_count_%d' % i] for i in range(1, 7)] == [0] * 6
+
+
+def test_low_answer_count_covers_every_question_in_the_principle():
+    scores = compute_scores(row(1))
+    assert scores['low_answer_count_1'] == 7, 'Q31 Q32 Q34 Q35 Q36 Q52 Q39'
+    assert scores['low_answer_count_2'] == 5, 'Q61 Q62 Q63 Q67 Q610'
+    assert scores['low_answer_count_3'] == 2, 'Q81 Q74'
+    assert scores['low_answer_count_4'] == 1, 'Q91'
+    assert scores['low_answer_count_5'] == 2, 'Q102 Q103'
+    assert scores['low_answer_count_6'] == 4, 'Q111 Q115 Q117 Q119'
+
+
+def test_low_answer_count_ignores_irrelevant_questions():
+    """A question marked NA cannot count against the tender."""
+    scores = compute_scores(row(5, Q81=None, **{'Q81 לא רלוונטי': ['x']}))
+    assert scores['low_answer_count_3'] == 0
+    low = compute_scores(row(1, Q81=None, **{'Q81 לא רלוונטי': ['x']}))
+    assert low['low_answer_count_3'] == 1, 'Q74 alone'
+
+
+def test_low_answer_count_is_unknown_when_an_answer_is():
+    """A lower bound must not be used to cap a score."""
+    scores = compute_scores(row(1, Q31=None))
+    assert scores['low_answer_count_1'] is None
+    assert scores['low_answer_count_2'] == 5, 'other principles still count'
+
+
+def test_a_high_scoring_principle_can_still_be_capped():
+    """
+    The case the rule exists for: two criteria at 0 or 1, yet the principle is
+    still over 70%. The score stays as it is - the consumer applies the cap.
+    """
+    scores = compute_scores(row(5, Q36=1, Q52=2))
+    assert scores['principle_score_1'] > 0.70
+    assert scores['low_answer_count_1'] == 2
 
 
 # --- core aspects -----------------------------------------------------------
@@ -212,6 +280,6 @@ def test_combine_propagates_unknown():
     assert combine((1.0, 4.0), (2.0, 8.0)) == (3.0, 12.0)
 
 
-def test_all_score_fields_are_present():
+def test_every_output_field_is_computed():
     scores = compute_scores(row(3))
-    assert len(scores) == 23
+    assert sorted(scores) == sorted(SCORE_FIELDS + COUNT_FIELDS)
