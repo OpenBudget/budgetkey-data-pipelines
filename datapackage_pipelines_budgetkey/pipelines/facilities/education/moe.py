@@ -7,7 +7,26 @@ import dataflows as DF
 
 # Year in 4 months from now
 YEAR = datetime.now().year + (1 if datetime.now().month >= 9 else 0)
-HEB_YEAR = 'תשפ״ו'
+
+
+def hebrew_year(year):
+    # Gregorian year in which the school year ends -> Hebrew year, e.g. 2027 -> תשפ״ז
+    n = (year + 3760) % 1000
+    letters = ''
+    for value, letter in [(400, 'ת'), (300, 'ש'), (200, 'ר'), (100, 'ק')]:
+        while n >= value:
+            letters += letter
+            n -= value
+    if n in (15, 16):
+        letters += 'ט' + ('ו' if n == 15 else 'ז')
+    else:
+        letters += ' יכלמנסעפצ'[n // 10].strip() + ' אבגדהוזחט'[n % 10].strip()
+    if len(letters) == 1:
+        return letters + '׳'
+    return letters[:-1] + '״' + letters[-1]
+
+
+HEB_YEAR = hebrew_year(YEAR)
 
 url = f'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0={YEAR}&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
 
