@@ -86,6 +86,7 @@ def flow(*_):
         DF.dump_to_sql(dict(
             facilities_education={'resource-name': 'moe'}
         )),
+        DF.dump_to_sql(dict([('facilities_education_%s' % YEAR, {'resource-name': 'moe'})])),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
