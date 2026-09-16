@@ -1,5 +1,6 @@
 # Ministry of Education - Kindergartens
 # https://parents.education.gov.il/prhnet/gov-education/kindergarten/search-daycare
+# https://parents.education.gov.il/api/data/meonot/GetMeonotExcel?year=2027&shemYeshuv=&shemRechov=&misparBait=&radius=0
 
 from datetime import datetime
 import dataflows as DF
@@ -28,7 +29,8 @@ def hebrew_year(year):
 
 HEB_YEAR = hebrew_year(YEAR)
 
-url = f'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0={YEAR}&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
+# url = f'https://parents.education.gov.il/prhnet/Api/MeonotController/GetExcel?0={YEAR}&1=0&2=0&3=0&4=0&5=0&csrt=4274816473439949448'
+url = f'https://parents.education.gov.il/api/data/meonot/GetMeonotExcel?year={YEAR}&shemYeshuv=&shemRechov=&misparBait=&radius=0'
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0',
