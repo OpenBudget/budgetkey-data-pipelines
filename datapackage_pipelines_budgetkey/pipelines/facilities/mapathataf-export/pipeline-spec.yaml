@@ -1,0 +1,10 @@
+mapathataf_export:
+  schedule:
+    crontab: "0 3 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: mapathataf_export
+        revision: '2026-09-18-01'
+    - flow: mapathataf_export
