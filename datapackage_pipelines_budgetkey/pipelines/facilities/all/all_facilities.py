@@ -18,6 +18,9 @@ GOVMAP_SEARCH_API = 'https://www.govmap.gov.il/api/search-service/api-search'
 GOVMAP_POINT_TYPES = ('address', 'poi')
 GOVMAP_POINT = re.compile(r'POINT \(([\d.]+) ([\d.]+)\)')
 DIGIT = re.compile(r'\d')
+DIGITS = re.compile(r'\d+')
+# A match in the wrong city is worse than a match for the wrong house in the right street
+SUSPICION_WEIGHTS = dict(city=2, house_number=1)
 
 os.makedirs('/var/datapackages/facilities/all/', exist_ok=True)
 
@@ -25,6 +28,27 @@ transformer = Transformer.from_crs('EPSG:2039', 'EPSG:4326', always_xy=True)
 
 def hasher(value: str):
     return hashlib.md5(value.encode()).hexdigest()[:12]
+
+def normalize(text):
+    # Ignore punctuation, spacing and spelling variants (e.g. 'מודיעין עלית' / 'מודיעין-עילית', 'בני ברק' / 'בניברק')
+    text = re.sub(r'[^0-9a-zא-ת]', '', (text or '').lower())
+    return re.sub('[יו]', '', text)
+
+def suspicious(record, *texts):
+    # Reasons to doubt that a geocoder's match (as described by `texts`) is really the record's address
+    reasons = []
+    texts = [t for t in texts if t]
+    city = normalize(record.get('city'))
+    if city and not any(city in normalize(t) for t in texts):
+        reasons.append('city')
+    house_number = DIGITS.search((record.get('address') or '').split(',')[0])
+    if house_number and int(house_number.group()) > 0:
+        if not any(house_number.group() in DIGITS.findall(t) for t in texts):
+            reasons.append('house_number')
+    return reasons
+
+def suspicion_score(reasons):
+    return sum(SUSPICION_WEIGHTS[r] for r in reasons)
 
 def to_wgs84():
     def func(row):
@@ -56,8 +80,11 @@ def govmap_geocode():
     cache = KVFile(location='/var/datapackages/facilities/all/govmap-cache.sqlite')
     session = govmap_session()
     def func(row):
-        address = row['record'].get('address')
-        if address and not row['record'].get('coord_x') and not row['record'].get('coord_y'):
+        record = row['record']
+        address = record.get('address')
+        if record.get('coord_x') and record.get('coord_y'):
+            row['geocode_source'] = 'source'
+        elif address and not record.get('coord_x') and not record.get('coord_y'):
             address_hash = hasher(address)
             hit = False
             cached = cache.get(address_hash, default=None)
@@ -84,6 +111,8 @@ def govmap_geocode():
                             coord_x=float(centroid.group(1)),
                             coord_y=float(centroid.group(2)),
                             formatted_address=result['text'],
+                            # 'text' might abbreviate the city's name ('ת.א', 'בש'), in which case this holds the full names
+                            original_text=result.get('originalText'),
                             # address ids may look like 'address|ADDR|<num>|<street>|<house>|<city>'
                             city=id_parts[5] if len(id_parts) == 6 else None,
                         )
@@ -95,8 +124,13 @@ def govmap_geocode():
                 else:
                     # Cached results of the old geocoding API
                     row['city'] = re.split('[,|]', row['formatted_address'])[-1].strip()
-                row['record']['coord_x'] = update['coord_x']
-                row['record']['coord_y'] = update['coord_y']
+                # The source's city is preferable, as govmap might abbreviate city names
+                row['city'] = record.get('city') or row['city']
+                record['coord_x'] = update['coord_x']
+                record['coord_y'] = update['coord_y']
+                row['geocode_source'] = 'govmap'
+                reasons = suspicious(record, update['formatted_address'], update.get('original_text'))
+                row['geocode_suspicious'] = ','.join(reasons) or None
             if not hit:
                 print(f"GOVMAP Address {address} -> {update}")
 
@@ -107,12 +141,17 @@ def govmap_geocode():
 def gmaps_geocode():
     cache = KVFile(location='/var/datapackages/facilities/all/google-geocode-cache.sqlite')
     def func(row):
-        address = row['record'].get('address')
+        record = row['record']
+        address = record.get('address')
         lat = row['lat']
         lng = row['lng']
         city = row['city']
         formatted_address = row['formatted_address']
-        if address and not lat and not lng and not city and not formatted_address:
+        not_geocoded = not lat and not lng and not city and not formatted_address
+        # A suspicious govmap match gets a second opinion
+        govmap_reasons = (row['geocode_suspicious'] or '').split(',') if row['geocode_source'] == 'govmap' else []
+        govmap_reasons = list(filter(None, govmap_reasons))
+        if address and (not_geocoded or govmap_reasons):
             address_hash = hasher(address)
             update = {}
             hit = False
@@ -153,7 +192,21 @@ def gmaps_geocode():
                         print('ERROR', address, result)
             if not hit:
                 print(f"Address {address} -> {update}")
+            reasons = suspicious(record, update.get('formatted_address'), update.get('city')) if 'lat' in update else None
+            if govmap_reasons:
+                # Google's match replaces govmap's only if it's an actual point and it's less suspicious
+                use_google = reasons is not None and suspicion_score(reasons) < suspicion_score(govmap_reasons)
+                print(f"SUSPICIOUS {address}: govmap {formatted_address!r} {govmap_reasons}, "
+                      f"google {update.get('formatted_address')!r} {reasons} -> {'google' if use_google else 'govmap'}")
+                if not use_google:
+                    return
+                # These are govmap's, google's location is only in lat / lng
+                del record['coord_x']
+                del record['coord_y']
             row.update(update)
+            if reasons is not None:
+                row['geocode_source'] = 'google'
+                row['geocode_suspicious'] = ','.join(reasons) or None
     return DF.Flow(
         func
     )
@@ -212,6 +265,8 @@ def concatenate_lists():
         fix_phone_numbers(),
         DF.add_field('formatted_address', 'string'),
         DF.add_field('city', 'string'),
+        DF.add_field('geocode_source', 'string'),
+        DF.add_field('geocode_suspicious', 'string'),
         govmap_geocode(),
         to_wgs84(),
         gmaps_geocode(),
@@ -281,6 +336,8 @@ def dedupe():
                 lng=first_row['lng'],
                 formatted_address=first_row['formatted_address'],
                 city=first_row['city'],
+                geocode_source=first_row['geocode_source'],
+                geocode_suspicious=first_row['geocode_suspicious'],
                 official=[],
             )
             for id in ids:
