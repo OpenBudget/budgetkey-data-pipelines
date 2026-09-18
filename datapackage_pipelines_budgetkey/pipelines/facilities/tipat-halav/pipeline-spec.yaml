@@ -1,0 +1,10 @@
+facilities_tipat_halav:
+  schedule:
+    crontab: "0 2 * * *"
+
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: facilities_tipat_halav
+        revision: '2026-09-18-01'
+    - flow: tipat_halav
