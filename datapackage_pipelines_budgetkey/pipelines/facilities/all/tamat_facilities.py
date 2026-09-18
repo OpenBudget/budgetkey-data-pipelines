@@ -93,7 +93,7 @@ def convert_to_spec():
         DF.add_field('last_updated', 'string'),
         DF.add_field('school_year', 'string'),
         func,
-        DF.delete_fields(['_id', 'formatted_address', 'lat', 'lng', 'official', 'facility_kind', 'city']),
+        DF.delete_fields(['_id', 'formatted_address', 'lat', 'lng', 'official', 'facility_kind', 'city', 'geocode_source', 'geocode_suspicious']),
     )
 
 def scrape(prefix='/var/datapackages'):
