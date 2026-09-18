@@ -2,7 +2,6 @@ import requests
 import re
 import os
 import hashlib
-import json
 
 from pyproj import Transformer
 
@@ -15,8 +14,9 @@ from kvfile.kvfile_sqlite import KVFileSQLite as KVFile
 GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
 GOVMAP_API_KEY = os.environ.get('GOVMAP_API_KEY')
 GOVMAP_REQUEST_ORIGIN = os.environ.get('GOVMAP_REQUEST_ORIGIN')
-GOVMAP_GEOCODE_API = os.environ.get('GOVMAP_GEOCODE_API')
-GOVMAP_AUTH_API = os.environ.get('GOVMAP_AUTH_API')
+GOVMAP_SEARCH_API = 'https://www.govmap.gov.il/api/search-service/api-search'
+GOVMAP_POINT_TYPES = ('address', 'poi')
+GOVMAP_POINT = re.compile(r'POINT \(([\d.]+) ([\d.]+)\)')
 DIGIT = re.compile(r'\d')
 
 os.makedirs('/var/datapackages/facilities/all/', exist_ok=True)
@@ -43,31 +43,14 @@ def to_wgs84():
     )
 
 def govmap_session():
-    try:
-        token = GOVMAP_API_KEY
-        auth_data = dict(
-            api_token=token, user_token='', domain=GOVMAP_REQUEST_ORIGIN, token=''
-        )
-        headers = dict(
-            auth_data=json.dumps(auth_data),
-            Origin=GOVMAP_REQUEST_ORIGIN,
-            Referer=GOVMAP_REQUEST_ORIGIN,
-        )
-
-        resp = requests.post(GOVMAP_AUTH_API,
-                        json=dict(),
-                        headers=headers)
-        headers = dict(
-            auth_data=json.dumps(resp.json()),
-            Origin=GOVMAP_REQUEST_ORIGIN,
-            Referer=GOVMAP_REQUEST_ORIGIN,
-        )
-    except Exception as e:
-        raise
-
     session = requests.Session()
-    session.headers.update(headers)
-    return session    
+    session.headers.update({
+        # Requests without a browser-like user agent are blocked (403)
+        'User-Agent': 'Mozilla/5.0',
+        # The API key is validated against the request's origin
+        'Origin': GOVMAP_REQUEST_ORIGIN,
+    })
+    return session
 
 def govmap_geocode():
     cache = KVFile(location='/var/datapackages/facilities/all/govmap-cache.sqlite')
@@ -83,41 +66,35 @@ def govmap_geocode():
                 hit = True
                 update = cached
             else:
-                geocode_req = dict(
-                    keyword=address, type=0,
+                search_req = dict(
+                    apiKey=GOVMAP_API_KEY, searchText=address,
                 )
-                resp = session.post(GOVMAP_GEOCODE_API, json=geocode_req)
-                if resp.status_code not in (200, 404):
-                    assert False
-                try:
-                    resp = resp.json()
-                except json.decoder.JSONDecodeError:
-                    resp = dict(status=None, errorCode=None)
-
-                if resp['status'] == 0 and resp['errorCode'] == 0:
-                    assert 'data' in resp and len(resp['data']) > 0, str(resp)
-                    resp = resp['data'][0]
-                    print(resp)
-                    assert resp['ResultType'] in (1, ), str(resp)
-                    accuracy = resp['DescLayerID'].replace('NEW', '').strip('_')
-                    if accuracy in ('POI_MID_POINT', 'ADDR_V1', 'ADDRESS_POINT', 'ADDRESS'):
-                        row['formatted_address'] = resp['ResultLable']
+                resp = session.post(GOVMAP_SEARCH_API, json=search_req)
+                assert resp.status_code == 200, f'{resp.status_code}: {resp.text[:200]}'
+                results = resp.json().get('results')
+                update = {}
+                if results:
+                    # Only the top result counts, and only if it's an actual point (not a street / settlement mid-point)
+                    result = results[0]
+                    print(result)
+                    centroid = GOVMAP_POINT.fullmatch(result.get('centroid') or '')
+                    if result['type'] in GOVMAP_POINT_TYPES and centroid:
+                        id_parts = result['id'].split('|')
                         update = dict(
-                            coord_x=resp['X'],
-                            coord_y=resp['Y'],
-                            formatted_address=resp['ResultLable'],
+                            coord_x=float(centroid.group(1)),
+                            coord_y=float(centroid.group(2)),
+                            formatted_address=result['text'],
+                            # address ids may look like 'address|ADDR|<num>|<street>|<house>|<city>'
+                            city=id_parts[5] if len(id_parts) == 6 else None,
                         )
-                        cache.set(address_hash, update)
-                    else:
-                        cache.set(address_hash, {})
-                else:
-                    if resp['message'] == 'כתובת לא נמצאה':
-                        cache.set(address_hash, {})
-                    else:
-                        print('ERROR', address, resp)
+                cache.set(address_hash, update)
             if update:
                 row['formatted_address'] = update['formatted_address']
-                row['city'] = re.split('[,|]', row['formatted_address'])[-1].strip()
+                if 'city' in update:
+                    row['city'] = update['city']
+                else:
+                    # Cached results of the old geocoding API
+                    row['city'] = re.split('[,|]', row['formatted_address'])[-1].strip()
                 row['record']['coord_x'] = update['coord_x']
                 row['record']['coord_y'] = update['coord_y']
             if not hit:
