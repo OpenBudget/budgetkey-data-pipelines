@@ -3,6 +3,7 @@
 Inside the pipelines the tables are in DPP_DB_ENGINE. Locally, with no engine set, the
 public query API is used instead, so the analysis code can be developed against live data.
 """
+import decimal
 import os
 
 import requests
@@ -26,12 +27,20 @@ def use_db():
     return url.startswith('postgres')
 
 
+def _plain(value):
+    # Postgres NUMERIC (e.g. any SUM) comes back as Decimal; the public API returns JSON numbers.
+    # Normalise so callers see the same types either way.
+    if isinstance(value, decimal.Decimal):
+        return int(value) if value == value.to_integral_value() else float(value)
+    return value
+
+
 def query(sql, max_rows=10000):
     if use_db():
         from sqlalchemy import text
         with _get_engine().connect() as conn:
             result = conn.execute(text(sql))
-            return [dict(r._mapping) for r in result.fetchmany(max_rows)]
+            return [{k: _plain(v) for k, v in r._mapping.items()} for r in result.fetchmany(max_rows)]
     rows = []
     page = 0
     while len(rows) < max_rows:
