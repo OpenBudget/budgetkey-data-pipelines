@@ -39,6 +39,7 @@ setup(
                       'lxml_html_clean',
                       'elasticsearch<9.0.0',
                       'openai',
+                      'google-genai',
                       'kvfile>=1.1.2',
                       'pyproj',
                       'sqlalchemy<3',  # pulled in transitively via dataflows-tabulator, which only

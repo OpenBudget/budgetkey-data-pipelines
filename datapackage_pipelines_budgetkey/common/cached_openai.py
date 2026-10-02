@@ -1,37 +1,17 @@
 import os
-import json
-from hashlib import sha256
-import pickle
-from pathlib import Path
 from openai import OpenAI
 
-CACHE_DIR = Path('/var/ai-cache')
+from .ai_cache import hash_text, get_from_cache, save_to_cache
 
-client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+_client = None
 
-def hash_text(text):
-    return sha256(text.encode('utf-8')).hexdigest()
 
-def path_for_hash(hash):
-    base = CACHE_DIR / hash[0:2] / hash[2:4] / hash[4:6]
-    base.mkdir(parents=True, exist_ok=True)
-    return base / hash[6:]
+def client():
+    global _client
+    if _client is None:
+        _client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+    return _client
 
-def get_from_cache(hash):
-    path = path_for_hash(hash)
-    if path.exists():
-        with path.open('rb') as f:
-            try:
-                return pickle.load(f)
-            except EOFError:
-                # Handle the case where the file is empty or corrupted
-                pass
-    return None
-
-def save_to_cache(hash, data):
-    path = path_for_hash(hash)
-    with path.open('wb') as f:
-        pickle.dump(data, f)
 
 def embed(text):
     hash = hash_text(text)
@@ -39,38 +19,28 @@ def embed(text):
     if cached:
         return True, cached
 
-    embedding = client.embeddings.create(
+    embedding = client().embeddings.create(
         model="text-embedding-3-small",
         input=text
     )
     embedding = embedding.data[0].embedding
     save_to_cache(hash, embedding)
-    
+
     return False, embedding
 
-def complete(text, structured=False):
-    hash = hash_text(text)
-    cached = get_from_cache(hash)
-    if cached:
-        print('CACHE HIT', hash, cached)
-        return True, cached
 
-    completion = client.chat.completions.create(
-        model="gpt-4.1",
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    { "type": "text", "text": text },
-                ],
-            }
-        ],
-        response_format=dict(type='json_object') if structured else dict(type='text'),
-    )
-
-    content = completion.choices[0].message.content
-    
-    if structured:
-        content = json.loads(content)
-    save_to_cache(hash, content)
-    return False, content
+def embed_many(texts, batch_size=256):
+    """Like embed(), for a list: cache misses are sent in batches. Returns a list of embeddings."""
+    hashes = [hash_text(t) for t in texts]
+    result = [get_from_cache(h) for h in hashes]
+    missing = [i for i, r in enumerate(result) if not r]
+    for start in range(0, len(missing), batch_size):
+        batch = missing[start:start + batch_size]
+        response = client().embeddings.create(
+            model="text-embedding-3-small",
+            input=[texts[i] for i in batch]
+        )
+        for i, item in zip(batch, response.data):
+            result[i] = item.embedding
+            save_to_cache(hashes[i], item.embedding)
+    return result

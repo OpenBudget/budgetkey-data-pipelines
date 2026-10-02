@@ -1,6 +1,6 @@
 import dataflows as DF
 
-from datapackage_pipelines_budgetkey.common.cached_openai import complete
+from datapackage_pipelines_budgetkey.common.llm import complete
 
 def get_prompt(row, change_list):
     PROMPT = """

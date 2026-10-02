@@ -1,0 +1,5 @@
+# Manual control over the analysis topic registry.
+# blocked: slugs that must never be published (and won't be proposed again).
+# extra: hand-written topics, added as-is (same fields as discovered topics).
+blocked: []
+extra: []

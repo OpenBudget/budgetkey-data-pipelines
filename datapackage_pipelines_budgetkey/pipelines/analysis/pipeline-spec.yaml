@@ -1,0 +1,14 @@
+# AI-generated analysis pages - see topics.py (discovery) and pages.py (generation).
+
+topics:
+  # Weekly, after the simpledb tables are rebuilt (process_simple_dbs runs Monday 00:00).
+  schedule:
+    crontab: "0 6 * * 2"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: analysis_topics
+        revision: '2026-10-02-01'
+    - flow: topics
+      parameters:
+        max-new: 20
