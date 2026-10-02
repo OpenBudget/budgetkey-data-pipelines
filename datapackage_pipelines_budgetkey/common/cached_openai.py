@@ -1,15 +1,18 @@
 import os
+import threading
 from openai import OpenAI
 
 from .ai_cache import hash_text, get_from_cache, save_to_cache
 
 _client = None
+_client_lock = threading.Lock()
 
 
 def client():
     global _client
-    if _client is None:
-        _client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
+    with _client_lock:
+        if _client is None:
+            _client = OpenAI(api_key=os.environ['OPENAI_API_KEY'])
     return _client
 
 

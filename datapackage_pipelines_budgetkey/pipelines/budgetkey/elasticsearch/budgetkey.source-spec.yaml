@@ -286,6 +286,21 @@ gov_decisions:
     type: year
     field: publish_date
 
+analysis:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./analysis/pages
+  source_datapackage: /var/datapackages/analysis/pages/datapackage.json
+  page-title-pattern: '{title}'
+  chunker:
+    - '{title}: {question}'
+    - field: text
+      method: chunk
+      chunk_size: 2000
+      chunk_overlap: 400
+  key-fields:
+    - slug
+
 activities:
   kind: indexer
   revision: 37

@@ -12,3 +12,18 @@ topics:
     - flow: topics
       parameters:
         max-new: 20
+
+pages:
+  # Runs after topic discovery: generates pages for new topics, regenerates stale ones (prompt changes, age,
+  # a new budget year, figures that no longer run) and re-renders the rest when their data changed.
+  dependencies:
+    - pipeline: ./analysis/topics
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: analysis_pages
+        revision: '2026-10-02-01'
+    - flow: pages
+      parameters:
+        max-generations: 25
+        parallel: 3
