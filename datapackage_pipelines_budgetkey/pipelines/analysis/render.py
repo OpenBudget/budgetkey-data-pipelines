@@ -65,6 +65,10 @@ def check_template(template, figures, url_ok):
     for s in REQUIRED_SECTIONS:
         if s not in present:
             problems.append('Missing required section "## %s".' % s)
+    repeated = sorted({s for s in present if present.count(s) > 1})
+    if repeated:
+        problems.append('Each section must appear once; repeated: %s. Start directly with the page, no preamble.'
+                        % ', '.join(repeated))
     unknown = [s for s in present if s not in REQUIRED_SECTIONS + OPTIONAL_SECTIONS]
     if unknown:
         problems.append('Unexpected sections (use only the skeleton headings): %s' % ', '.join(unknown))
@@ -192,6 +196,24 @@ def caption_html(caption):
     return out
 
 
+def drop_preamble(template):
+    """Removes a model preamble that repeats a heading: "## X / short text with no figures / ## X" -> "## X".
+
+    Seen as "## בקצרה / הנה עמוד הניתוח המבוקש… / ## בקצרה …".
+    """
+    sections = re.split(r'(?m)^(?=## )', template)
+    out = []
+    for section in sections:
+        heading = section.split('\n', 1)[0].strip()
+        if out and heading.startswith('## ') and out[-1].split('\n', 1)[0].strip() == heading:
+            body = out[-1].split('\n', 1)[1] if '\n' in out[-1] else ''
+            if len(body.strip()) < 300 and not PLACEHOLDER_RE.search(body):
+                out[-1] = section
+                continue
+        out.append(section)
+    return ''.join(out)
+
+
 def render(template, figures, results, captions=None):
     """Substitutes every placeholder with its rendered figure. captions: {chart name: [budget items]}."""
     by_name = {f['name']: f for f in figures}
@@ -202,9 +224,12 @@ def render(template, figures, results, captions=None):
         out = F.render_figure(fig, results[fig['name']])
         if captions.get(fig['name']):
             out += '\n\n' + caption_markdown(captions[fig['name']])
+        if fig['kind'] != 'value':
+            out = '\n\n%s\n\n' % out      # tables and charts are blocks: never glued to a neighbouring table
         return out
 
-    return PLACEHOLDER_RE.sub(substitute, template)
+    body = PLACEHOLDER_RE.sub(substitute, drop_preamble(template))
+    return re.sub(r'\n{3,}', '\n\n', body).strip()
 
 
 def charts(template, figures, results, captions=None):

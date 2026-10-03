@@ -46,3 +46,17 @@ def test_unlink_invalid_keeps_text():
 def test_caption_markdown():
     caption = dict(items=[dict(title='גננות', item_url='https://x/1', code='20.62.01.02')], notes=['הערה'])
     assert R.caption_markdown(caption) == '*הסעיפים התקציביים בתרשים:* [גננות](https://x/1) (20.62.01.02)\n\n*הערה*'
+
+
+def test_drop_preamble_and_block_spacing():
+    template = '## בקצרה\nהנה עמוד הניתוח המבוקש:\n\n## בקצרה\nטקסט {{value:total}}.\n{{table:programs}}\n{{table:programs}}'
+    assert R.drop_preamble(template).startswith('## בקצרה\nטקסט')
+    figs = [dict(kind='value', name='total', format='number', column='v'),
+            dict(kind='table', name='programs', columns=[dict(column='title', label='שם', link_column='item_url')])]
+    body = R.render(template, figs, {'total': [dict(v=5)], 'programs': [dict(title='א', item_url='u')]})
+    assert body.count('## בקצרה') == 1
+    assert '|\n\n|' in body                                # two tables separated by a blank line
+
+
+def test_repeated_sections_are_a_problem():
+    assert any('repeated' in p for p in R.check_template(GOOD + '\n## בקצרה\nעוד', FIGS, lambda u: True))

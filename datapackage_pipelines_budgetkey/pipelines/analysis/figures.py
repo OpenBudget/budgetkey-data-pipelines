@@ -146,7 +146,13 @@ def chart_descriptor(fig, rows):
     x = fig['x']
     if ctype == 'pie':
         s = fig['series'][0]
-        rows = sorted(rows, key=lambda r: -(_num(r[s['column']]) or 0))
+        merged = {}
+        for r in rows:
+            label = str(r[x])
+            merged[label] = (merged.get(label) or 0) + (_num(r[s['column']]) or 0)
+        # Same-label slices (e.g. two "other" rows) are one slice; empty and negative ones aren't slices at all.
+        rows = sorted(({x: label, s['column']: v} for label, v in merged.items() if v > 0),
+                      key=lambda r: -r[s['column']])
         if len(rows) > MAX_PIE_SLICES:
             head, tail = rows[:MAX_PIE_SLICES - 1], rows[MAX_PIE_SLICES - 1:]
             rows = head + [{x: 'אחר', s['column']: sum(_num(r[s['column']]) or 0 for r in tail)}]
@@ -196,8 +202,31 @@ def chart_markdown(descriptor):
     return '```plotly\n%s\n```' % json.dumps(descriptor, ensure_ascii=False, indent=1)
 
 
+IDENTIFIER_COLUMN_RE = re.compile(r'(number|(^|_)id$|code|^year$|_year$)', re.IGNORECASE)
+
+
+def _column_format(c):
+    """Identifiers (decision numbers, ids, codes, years) are never thousands-separated, whatever format was asked."""
+    fmt = c.get('format') or 'text'
+    if fmt == 'number' and IDENTIFIER_COLUMN_RE.search(c['column']):
+        return 'text'
+    return fmt
+
+
+def _empty_amount(v):
+    n = _num(v)
+    return n is None or n == 0
+
+
 def render_table(fig, rows):
-    columns = fig['columns']
+    columns = [dict(c, format=_column_format(c)) for c in fig['columns']]
+    money = [c for c in columns if c['format'] == 'currency']
+    if money:
+        # In a table about money, a row with no amounts and a column with no amounts say nothing.
+        rows = [r for r in rows if not all(_empty_amount(r.get(c['column'])) for c in money)] or rows
+        empty = {c['column'] for c in money if all(_empty_amount(r.get(c['column'])) for r in rows)}
+        if empty and len(empty) < len(columns):
+            columns = [c for c in columns if c['column'] not in empty]
     lines = []
     if fig.get('title'):
         lines.append('**%s**' % fig['title'])
@@ -207,7 +236,7 @@ def render_table(fig, rows):
     for r in rows[:MAX_TABLE_ROWS]:
         cells = []
         for c in columns:
-            text = format_value(r.get(c['column']), c.get('format') or 'text')
+            text = format_value(r.get(c['column']), c['format'])
             url = r.get(c['link_column']) if c.get('link_column') else None
             cells.append('[%s](%s)' % (_cell(text), url) if url else _cell(text))
         lines.append('| %s |' % ' | '.join(cells))

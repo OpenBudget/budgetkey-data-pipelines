@@ -78,3 +78,24 @@ def test_trend_notes_and_anomalies():
     assert F.KNOWN_GAPS[2020] in notes
     # the jump into 2020 is in the estimated years, and 2020's missing original budget is a known gap
     assert F.trend_anomalies(dict(title='T'), trend(), latest_year=2022) == []
+
+
+def test_pie_merges_labels_and_drops_empty_slices():
+    rows = [dict(name='משרדים אחרים', a=8e6), dict(name='משרדים אחרים', a=0.0), dict(name='א', a=5e6), dict(name='ב', a=None)]
+    trace = F.chart_descriptor(chart(chart_type='pie', x='name'), rows)['chart'][0]
+    assert trace['labels'] == ['משרדים אחרים', 'א'] and trace['values'] == [8e6, 5e6]
+
+
+def test_table_formatting_and_empty_amounts():
+    fig = dict(kind='table', name='t', columns=[
+        dict(column='title', label='שם', link_column='item_url'),
+        dict(column='decision_number', label='מספר', format='number'),
+        dict(column='approved', label='אושר', format='currency'),
+        dict(column='paid', label='שולם', format='currency'),
+    ])
+    rows = [dict(title='א', item_url='u1', decision_number=3406, approved=1e6, paid=0),
+            dict(title='ב', item_url='u2', decision_number=12, approved=0, paid=None)]
+    md = F.render_table(fig, rows)
+    assert '3406' in md and '3,406' not in md            # identifiers aren't thousands-separated
+    assert 'שולם' not in md                               # all-zero money column dropped
+    assert '[ב]' not in md                                # row with no amounts dropped

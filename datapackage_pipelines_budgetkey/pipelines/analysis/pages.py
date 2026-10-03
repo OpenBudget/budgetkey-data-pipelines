@@ -504,7 +504,7 @@ def render_doc(doc, results):
 PAGES_TABLE = 'analysis_pages'
 # Bump when rendering changes (charts, captions, methodology), so existing pages are re-rendered even when
 # their data didn't change.
-RENDER_VERSION = 2
+RENDER_VERSION = 3
 MAX_AGE_DAYS = 180              # regenerate pages older than this even if nothing else changed
 MAX_GENERATIONS_PER_RUN = 25    # cap on agent runs per pipeline run (cost); the rest wait for the next run
 JSON_FIELDS = ('figures', 'scope', 'charts', 'problems', 'review_notes', 'usage', 'budget_codes', 'evidence')
