@@ -11,7 +11,7 @@ topics:
         revision: '2026-10-02-01'
     - flow: topics
       parameters:
-        max-new: 20
+        max-new: 40
 
 pages:
   # Runs after topic discovery: generates pages for new topics, regenerates stale ones (prompt changes, age,
