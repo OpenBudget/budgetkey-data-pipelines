@@ -281,8 +281,6 @@ def methodology(scope, figures, model, generated_at):
     if scope and scope.get('items'):
         lines += ['', '**סעיפי התקציב שנכללו בניתוח:** %s' % ' · '.join(
             '[%s](%s) (%s)' % (i['title'], i['item_url'], i['code']) for i in scope['items'])]
-        if scope.get('notes'):
-            lines += ['', scope['notes']]
     lines += ['', 'נוצר ב-%s.' % generated_at.strftime('%d/%m/%Y')]
     return '\n'.join(lines)
 
@@ -497,12 +495,16 @@ def render_doc(doc, results):
         charts=R.charts(doc['template'], figures, results, captions),
         data_hash=F.data_hash(results),
         rendered_at=datetime.datetime.now(),
+        render_version=RENDER_VERSION,
     )
 
 
 # ------------------------------------------------------------------ pipeline
 
 PAGES_TABLE = 'analysis_pages'
+# Bump when rendering changes (charts, captions, methodology), so existing pages are re-rendered even when
+# their data didn't change.
+RENDER_VERSION = 2
 MAX_AGE_DAYS = 180              # regenerate pages older than this even if nothing else changed
 MAX_GENERATIONS_PER_RUN = 25    # cap on agent runs per pipeline run (cost); the rest wait for the next run
 JSON_FIELDS = ('figures', 'scope', 'charts', 'problems', 'review_notes', 'usage', 'budget_codes', 'evidence')
@@ -515,7 +517,7 @@ STATE_FIELDS = [
     ('generated_at', 'datetime'), ('rendered_at', 'datetime'), ('data_hash', 'string'), ('latest_year', 'integer'),
     ('problems', 'array'), ('review_notes', 'array'), ('needs_review', 'boolean'),
     ('temporal', 'boolean'), ('expires_at', 'date'), ('usage', 'object'), ('seconds', 'integer'),
-    ('tool_calls', 'integer'), ('revisions', 'integer'), ('critic_passes', 'integer'),
+    ('tool_calls', 'integer'), ('revisions', 'integer'), ('critic_passes', 'integer'), ('render_version', 'integer'),
 ]
 
 
@@ -588,7 +590,7 @@ def refresh_doc(doc):
     if problems:
         print('REFRESH %s failed: %s' % (doc['slug'], '; '.join(problems)))
         return doc, 'regenerate'
-    if F.data_hash(results) == doc.get('data_hash'):
+    if F.data_hash(results) == doc.get('data_hash') and doc.get('render_version') == RENDER_VERSION:
         return doc, 'skipped'
     doc = dict(doc, **render_doc(doc, results))
     return doc, 'rendered'

@@ -66,7 +66,9 @@ def trend(estimate_before=2020):
 def test_trend_descriptor_shades_estimates():
     d = F.trend_descriptor(dict(title='T'), trend())
     assert [t['name'] for t in d['chart']] == [label for _, label in F.TREND_SERIES]
-    assert d['layout']['shapes'][0]['x0'] == '2018' and d['layout']['shapes'][0]['x1'] == '2019'
+    # category axis: shapes are positioned by index (2018, 2019 are indices 0, 1)
+    assert d['layout']['shapes'][0]['x0'] == -0.5 and d['layout']['shapes'][0]['x1'] == 1.5
+    assert F.clean_title('תקציב בריאות הנפש (במיליארדי ש״ח)') == 'תקציב בריאות הנפש'
     assert 'shapes' not in F.trend_descriptor(dict(title='T'), trend(None))['layout']
 
 

@@ -86,6 +86,8 @@ def check_definition(fig):
         _require(fig.get('x'), 'x is required')
         _require(fig.get('series'), 'at least one series is required')
         _require(fig.get('title'), 'title is required')
+        _require(not SCALE_IN_TITLE_RE.search(fig['title']),
+                 'don\'t put a scale or unit in the title ("במיליארדי ש״ח"); values are shown in shekels')
         if fig.get('group_column'):
             _require(len(fig['series']) == 1, 'with group_column, give exactly one series (the value column)')
     elif kind == 'table':
@@ -179,7 +181,15 @@ def chart_descriptor(fig, rows):
         )
         if ctype == 'stacked_bar':
             layout['barmode'] = 'stack'
-    return dict(type='plotly', title=fig['title'], chart=traces, layout=layout)
+    return dict(type='plotly', title=clean_title(fig['title']), chart=traces, layout=layout)
+
+
+# Values are always raw shekels, so a title that names a scale ("במיליארדי ש"ח") would misdescribe the axis.
+SCALE_IN_TITLE_RE = re.compile(r'\s*\(\s*(?:ב|ב-)?(?:מיליארדי|מיליוני|אלפי|מיליארד|מיליון|אלף)\s*(?:ש"ח|ש״ח|שקלים|₪)?\s*\)')
+
+
+def clean_title(title):
+    return SCALE_IN_TITLE_RE.sub('', title or '').strip()
 
 
 def chart_markdown(descriptor):
@@ -223,13 +233,15 @@ def trend_descriptor(fig, trend):
         yaxis=dict(title='₪', rangemode='tozero', separatethousands=True),
     )
     before = trend.get('estimate_before')
-    if before and xs and int(xs[0]) < before:
-        last_estimated = str(before - 1)
-        layout['shapes'] = [dict(type='rect', xref='x', yref='paper', x0=xs[0], x1=last_estimated, y0=0, y1=1,
+    estimated = [i for i, x in enumerate(xs) if int(x) < before] if before else []
+    if estimated:
+        # On a category axis Plotly reads shape and annotation x values as category indices, not labels
+        # ("2015" would mean index 2015), so the shaded span is given by position.
+        layout['shapes'] = [dict(type='rect', xref='x', yref='paper', x0=-0.5, x1=estimated[-1] + 0.5, y0=0, y1=1,
                                  fillcolor='rgba(128,128,128,0.12)', line=dict(width=0), layer='below')]
-        layout['annotations'] = [dict(xref='x', yref='paper', x=xs[0], y=1, xanchor='left', yanchor='bottom',
+        layout['annotations'] = [dict(xref='x', yref='paper', x=-0.5, y=1, xanchor='left', yanchor='bottom',
                                       showarrow=False, text='הערכה')]
-    return dict(type='plotly', title=fig['title'], chart=traces, layout=layout)
+    return dict(type='plotly', title=clean_title(fig['title']), chart=traces, layout=layout)
 
 
 def trend_notes(trend):
