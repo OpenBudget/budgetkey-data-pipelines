@@ -13,6 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from datapackage_pipelines_budgetkey.common import llm
+from datapackage_pipelines_budgetkey.common.dump_to_sql_atomic import dump_to_sql_atomic
 from datapackage_pipelines_budgetkey.pipelines.analysis import figures as F
 from datapackage_pipelines_budgetkey.pipelines.analysis import history as H
 from datapackage_pipelines_budgetkey.pipelines.analysis import render as R
@@ -664,7 +665,8 @@ def flow(parameters, *_):
         DF.update_resource(-1, name=PAGES_TABLE, path=PAGES_TABLE + '.csv'),
         *[DF.set_type(name, type=type_) for name, type_ in STATE_FIELDS],
         DF.set_primary_key(['slug']),
-        DF.dump_to_sql({PAGES_TABLE: {'resource-name': PAGES_TABLE}}, engine='env://DPP_DB_ENGINE'),
+        # Atomic: an emptied state table would make the next run regenerate every page.
+        dump_to_sql_atomic({PAGES_TABLE: {'resource-name': PAGES_TABLE}}, engine='env://DPP_DB_ENGINE'),
     ).process()
 
     # 2. The published pages, for the `analysis` indexer (see CONTRACT.md).

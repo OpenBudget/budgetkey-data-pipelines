@@ -4,6 +4,7 @@ import re
 from html import unescape
 
 from datapackage_pipelines_budgetkey.common.short_doc_id import calc_short_doc_id
+from datapackage_pipelines_budgetkey.common.dump_to_sql_atomic import dump_to_sql_atomic
 
 csv.field_size_limit(2*1024*1024)
 
@@ -2078,7 +2079,8 @@ def get_flow(table, params, debug=False):
     steps.append(DF.select_fields(field_names))
     if not debug:
         steps.append(DF.dump_to_path(f'/var/datapackages/simpledb/{table}'))
-        steps.append(DF.dump_to_sql({table: {'resource-name': table}}))
+        # Written to a staging table and swapped in only when complete, so the live table is never empty.
+        steps.append(dump_to_sql_atomic({table: {'resource-name': table}}))
     else:
         steps.append(DF.printer())
     return DF.Flow(*steps)

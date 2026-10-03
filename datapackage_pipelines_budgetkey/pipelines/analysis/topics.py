@@ -15,6 +15,7 @@ from pathlib import Path
 import yaml
 
 from datapackage_pipelines_budgetkey.common import llm
+from datapackage_pipelines_budgetkey.common.dump_to_sql_atomic import dump_to_sql_atomic
 from datapackage_pipelines_budgetkey.pipelines.analysis.query import query
 
 ROOT = Path(__file__).parent
@@ -398,7 +399,7 @@ def registry_flow(registry):
         *[DF.set_type(name, type=type_) for name, type_ in FIELDS],
         DF.set_primary_key(['slug']),
         DF.dump_to_path('/var/datapackages/analysis/topics'),
-        DF.dump_to_sql(dict(analysis_topics={'resource-name': 'analysis_topics'}), engine='env://DPP_DB_ENGINE'),
+        dump_to_sql_atomic(dict(analysis_topics={'resource-name': 'analysis_topics'}), engine='env://DPP_DB_ENGINE'),
         DF.update_resource(-1, **{'dpp:streaming': True}),
     )
 
