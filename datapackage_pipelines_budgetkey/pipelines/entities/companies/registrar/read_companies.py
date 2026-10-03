@@ -89,6 +89,9 @@ def flow(*_):
         set_type('company_is_mafera', type='boolean', falseValues=['לא'], trueValues=['מפרה', 'התראה']),
         set_type('company_last_report_year', type='integer'),
         set_type('company_postal_code', type='string'),
+        # The source's PO box column is sometimes all digits, which made the inferred type integer; downstream it
+        # becomes entities' details.pob, which Elasticsearch has mapped as text, so a type change breaks indexing.
+        set_type('company_pob', type='string', transform=lambda v: None if v is None else str(v)),
         clear_bool_values,
         update_resource(**{'dpp:streaming': True}, resources='company-details'),
         set_primary_key(['id'], resources='company-details'),
