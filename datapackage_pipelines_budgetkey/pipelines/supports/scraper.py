@@ -88,6 +88,13 @@ def click_on_export(driver):
     )
     option.click()
 
+    checkbox = WebDriverWait(driver, 30).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR, "#check_ckNewCharset"))
+    )
+    if checkbox.is_selected():
+        checkbox.click()
+    assert not checkbox.is_selected(), 'Failed to uncheck ckNewCharset'
+
     ok_button = driver.find_element_by_id('OK_BTN_idExportDlg')
     ok_button.click()
 
