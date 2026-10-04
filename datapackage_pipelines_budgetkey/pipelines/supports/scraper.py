@@ -180,24 +180,30 @@ def flow(parameters, *_):
         years = [years]
     skip_if_exists = parameters.get('skip-if-exists')
     print('SKIP IF EXISTS?', skip_if_exists)
-    with wrapper() as gcd:
-        for year in years:
-            out_path = f'/var/datapackages/supports/yearly-{year}'
-            if skip_if_exists:
-                out_file = os.path.join(out_path, 'data', 'supports.csv')
-                print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
-                if os.path.exists(out_file):
-                    print('FILE SIZE', os.stat(out_file).st_size)
-                    if os.stat(out_file).st_size > 102400:
-                        print('SKIPPING')
-                        continue
-            DF.Flow(
-                DF.load(scraper(gcd, year), format='csv', 
-                        infer_strategy=DF.load.INFER_STRINGS,
-                        cast_strategy=DF.load.CAST_DO_NOTHING),
-                DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
-                DF.dump_to_path(out_path)
-            ).process()
+    needed_years = []
+    for year in years:
+        out_path = f'/var/datapackages/supports/yearly-{year}'
+        if skip_if_exists:
+            out_file = os.path.join(out_path, 'data', 'supports.csv')
+            print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
+            if os.path.exists(out_file):
+                print('FILE SIZE', os.stat(out_file).st_size)
+                if os.stat(out_file).st_size > 102400:
+                    print('SKIPPING')
+                    continue
+        needed_years.append(year)
+
+    if needed_years:
+        with wrapper() as gcd:
+            for year in years:
+                out_path = f'/var/datapackages/supports/yearly-{year}'
+                DF.Flow(
+                    DF.load(scraper(gcd, year), format='csv', 
+                            infer_strategy=DF.load.INFER_STRINGS,
+                            cast_strategy=DF.load.CAST_DO_NOTHING),
+                    DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
+                    DF.dump_to_path(out_path)
+                ).process()
 
 
 if __name__ == '__main__':
