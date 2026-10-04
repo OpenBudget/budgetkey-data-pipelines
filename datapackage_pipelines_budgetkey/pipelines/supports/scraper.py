@@ -44,7 +44,7 @@ def switch_to_results_page(driver: Chrome):
     results_wh.remove(driver.current_window_handle)
     results_wh = results_wh.pop()
     driver.switch_to.window(results_wh)
-    WebDriverWait(driver, 30).until(
+    WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.ID, "ivuFrm_page0ivu0"))
     )
     # Now select the iframe:
