@@ -2,6 +2,7 @@ import dataflows as DF
 import time
 import logging
 import os
+from contextlib import contextmanager
 
 from selenium.webdriver import Chrome
 from selenium.webdriver.common.action_chains import ActionChains
@@ -14,15 +15,15 @@ ChromiumRemoteConnection.set_timeout(300)
 from datapackage_pipelines_budgetkey.common.google_chrome import google_chrome_driver
 
 
-def wrapper(year):
-    gcd = None
+@contextmanager
+def wrapper():
+    logging.info('Creating new google_chrome_driver')
+    gcd = google_chrome_driver(initial='http://example.com/')
     try:
-        gcd = google_chrome_driver(initial='http://example.com/')
-        return scraper(gcd, year)
+        yield gcd
     finally:
         logging.info('Tearing down %r', gcd)
-        if gcd:
-            gcd.teardown()
+        gcd.teardown()
 
 
 def get_chart(driver):
@@ -172,25 +173,31 @@ def scraper(gcd, selected_year):
 
 
 def flow(parameters, *_):
-    year = parameters['year']
+    years = parameters['year']
+    if isinstance(years, str):
+        years = [int(y) for y in years.split(',')]
+    else:
+        years = [years]
     skip_if_exists = parameters.get('skip-if-exists')
-    out_path = f'/var/datapackages/supports/yearly-{year}'
     print('SKIP IF EXISTS?', skip_if_exists)
-    if skip_if_exists:
-        out_file = os.path.join(out_path, 'data', 'supports.csv')
-        print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
-        if os.path.exists(out_file):
-            print('FILE SIZE', os.stat(out_file).st_size)
-            if os.stat(out_file).st_size > 102400:
-                print('SKIPPING')
-                return None
-    return DF.Flow(
-        DF.load(wrapper(year), format='csv', 
-                infer_strategy=DF.load.INFER_STRINGS,
-                cast_strategy=DF.load.CAST_DO_NOTHING),
-        DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
-        DF.dump_to_path(out_path)
-    )
+    with wrapper() as gcd:
+        for year in years:
+            out_path = f'/var/datapackages/supports/yearly-{year}'
+            if skip_if_exists:
+                out_file = os.path.join(out_path, 'data', 'supports.csv')
+                print('OUT FILE', out_file, 'EXISTS', os.path.exists(out_file))
+                if os.path.exists(out_file):
+                    print('FILE SIZE', os.stat(out_file).st_size)
+                    if os.stat(out_file).st_size > 102400:
+                        print('SKIPPING')
+                        continue
+            DF.Flow(
+                DF.load(scraper(gcd, year), format='csv', 
+                        infer_strategy=DF.load.INFER_STRINGS,
+                        cast_strategy=DF.load.CAST_DO_NOTHING),
+                DF.update_resource(None, **{'dpp:streaming': True, 'name': 'supports', 'path': 'data/supports.csv'}),
+                DF.dump_to_path(out_path)
+            ).process()
 
 
 if __name__ == '__main__':

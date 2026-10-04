@@ -131,41 +131,17 @@ supports-2022:
       year: 2022
       skip-if-exists: true
 
-supports-2023:
+supports-latest:
   schedule:
     crontab: "0 20 * * *"
   pipeline:
   - flow: scraper
     parameters:
-      year: 2023
-
-supports-2024:
-  schedule:
-    crontab: "0 21 * * *"
-  pipeline:
-  - flow: scraper
-    parameters:
-      year: 2024
-
-supports-2025:
-  schedule:
-    crontab: "0 22 * * *"
-  pipeline:
-  - flow: scraper
-    parameters:
-      year: 2025
-
-supports-2026:
-  schedule:
-    crontab: "0 23 * * *"
-  pipeline:
-  - flow: scraper
-    parameters:
-      year: 2026
+      year: 2023,2024,2025,2026
 
 all:
   dependencies:
-    - pipeline: ./supports/supports-2026
+    - pipeline: ./supports/supports-latest
 
   pipeline:
     - run: add_metadata
