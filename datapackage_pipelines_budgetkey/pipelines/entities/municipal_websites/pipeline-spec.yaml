@@ -1,0 +1,9 @@
+websites:
+  schedule:
+    crontab: 0 3 * * 0
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: municipal-websites
+        title: אתרי האינטרנט של הרשויות המקומיות
+    - flow: municipal_websites
