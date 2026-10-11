@@ -521,6 +521,7 @@ def scraped_flow(limit=None):
 def flow(*_):
     return DF.Flow(
         scraped_flow(),
+        DF.update_resource(None, **{'dpp:streaming': True}),
         DF.dump_to_path(OUT_PATH),
         DF.dump_to_sql(dict(
             municipal_budget_pages={'resource-name': 'budget_pages'},

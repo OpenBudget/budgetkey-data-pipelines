@@ -270,6 +270,7 @@ def flow(*_):
         DF.update_resource(-1, name='municipal_websites', path='municipal_websites.csv'),
         DF.set_type('needs_review', type='boolean'),
         DF.set_primary_key(['authority_code']),
+        DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path('/var/datapackages/entities/municipal_websites'),
         DF.dump_to_sql(dict(
             municipal_websites={
