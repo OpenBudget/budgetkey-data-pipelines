@@ -1,10 +1,12 @@
 """Keeps a copy of every municipal budget file in the budgetkey-files object store and analyzes it once.
 
 Objects live at municipal-budgets/<authority_code>/<url hash>.<ext>, with the analysis cached next to them as
-<object>.analysis.json. A file is only downloaded from the authority's site once; later runs reuse the stored copy,
+<object>.analysis.json and the extracted table rows as <object>.rows.csv. A file is only downloaded from the authority's site once; later runs reuse the stored copy,
 and re-analyze it only when the analyzer changes.
 """
+import csv
 import hashlib
+import io
 import json
 import logging
 import os
@@ -29,7 +31,7 @@ HEADERS = {
 }
 
 ANALYSIS_FIELDS = ['table_kind', 'ready_to_process', 'n_tables', 'n_rows', 'value_columns', 'expected_columns',
-                   'income_sign', 'expense_sign', 'units', 'issues']
+                   'income_sign', 'expense_sign', 'units', 'balance', 'issues']
 
 
 def storage():
@@ -115,18 +117,52 @@ def process_file(f):
         except Exception as e:
             logging.warning('Failed to analyze %s: %s', f['file_url'], e)
             result.update(summary={}, tables=[], status='analysis-failed')
+    rows = rows_csv(result['tables'])
+    result['has_rows'] = rows is not None
+    if rows is not None:
+        store.write(name + '.rows.csv', data=rows, content_type='text/csv')
     store.write(name + '.analysis.json', data=json.dumps(result, ensure_ascii=False), content_type='application/json')
     return apply(f, result)
+
+
+ROW_FIELDS = ['table_index', 'sheet', 'row', 'code', 'title', 'column', 'kind', 'year', 'header', 'value']
+
+
+def rows_csv(tables):
+    """The extracted table rows in long format (one line per value), or None when there are none."""
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(ROW_FIELDS)
+    n = 0
+    for index, t in enumerate(tables):
+        for row in t.pop('rows', None) or []:
+            for column_no, (column, value) in enumerate(zip(t['value_columns'], row['values'])):
+                if value is None:
+                    continue
+                writer.writerow([index, t['sheet'], row['row'], row['code'], row['title'], column_no,
+                                 column['kind'], column['year'], column['header'],
+                                 int(value) if float(value).is_integer() else value])
+                n += 1
+    return out.getvalue() if n else None
+
+
+def read_rows(f):
+    """The extracted rows of a file analyzed earlier, as dicts."""
+    data = read_object(storage(), object_name(f) + '.rows.csv')
+    if not data:
+        return []
+    return list(csv.DictReader(io.StringIO(data.decode('utf-8') if isinstance(data, bytes) else data)))
 
 
 def apply(f, result):
     f.update(file_size=result.get('size'), analysis_status=result['status'],
              **{k: result['summary'].get(k) for k in ANALYSIS_FIELDS})
     tables = []
-    for t in result['tables']:
+    for index, t in enumerate(result['tables']):
         if t['kind'] == 'none':
             continue
         tables.append(dict(
+            table_index=index, duplicate_columns=[n for n, c in enumerate(t['value_columns']) if c.get('duplicate')],
             authority_code=f['authority_code'], name=f['name'], fiscal_year=f['fiscal_year'],
             file_url=f['file_url'], stored_url=f['stored_url'], format=f['format'],
             sheet=t['sheet'], kind=t['kind'], header_row=t['header_row'], first_col=t['first_col'],

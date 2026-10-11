@@ -1,9 +1,11 @@
+import ast
 import csv
 import os
 import re
 import time
 import logging
 import datetime
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from urllib.parse import urljoin, urlparse, unquote
 
@@ -185,22 +187,58 @@ def fiscal_year(link_text, filename, context):
     return None, None
 
 
+def budget_file(page_url, url, text, context):
+    """A file row if the link is a budget document, else None."""
+    fmt = file_format(url)
+    if not fmt:
+        return None
+    filename = unquote(urlparse(url).path.rsplit('/', 1)[-1])
+    doc_type = classify(text, filename, context)
+    if not doc_type:
+        return None
+    year, year_source = fiscal_year(text, filename, context)
+    return dict(
+        page_url=page_url, file_url=url, link_text=text[:300], context=context[:300],
+        format=fmt, doc_type=doc_type, fiscal_year=year, fiscal_year_source=year_source,
+    )
+
+
 def budget_files(doc, page_url, folder=''):
+    files = (budget_file(page_url, url, text, clean('%s %s' % (folder, heading_context(a))))
+             for a, url, text in page_links(doc))
+    return [f for f in files if f]
+
+
+TLV_TABLES = '/_vti_bin/TlvSP2013PublicSite/TlvList.svc/GetTables'
+
+
+def sharepoint_tables(session, doc, page_url):
+    """Tel Aviv's SharePoint pages fill their document tables in the browser, from TlvList.svc/GetTables.
+
+    Each table widget carries its query in ng-init="tab.init({...})"; replaying it returns the documents
+    with their attachment URLs and fields such as "שנת תקציב".
+    """
     files = []
-    for a, url, text in page_links(doc):
-        fmt = file_format(url)
-        if not fmt:
+    for el in doc.xpath('//*[@ng-init][contains(@ng-init, "tab.init(")]'):
+        init = el.get('ng-init')
+        try:
+            literal = init[init.index('(') + 1:init.rindex(')')]
+            literal = literal.replace('true', 'True').replace('false', 'False').replace('null', 'None')
+            query = next(a for a in ast.literal_eval('(%s,)' % literal) if isinstance(a, dict))
+            resp = session.post(urljoin(page_url, TLV_TABLES), json=query, timeout=60, verify=False,
+                                headers=dict(HEADERS, Accept='application/json'))
+            items = resp.json().get('items') or []
+        except Exception as e:
+            logging.info('SharePoint table on %s failed: %s', page_url, e)
             continue
-        filename = unquote(urlparse(url).path.rsplit('/', 1)[-1])
-        context = clean('%s %s' % (folder, heading_context(a)))
-        doc_type = classify(text, filename, context)
-        if not doc_type:
-            continue
-        year, year_source = fiscal_year(text, filename, context)
-        files.append(dict(
-            page_url=page_url, file_url=url, link_text=text[:300], context=context[:300],
-            format=fmt, doc_type=doc_type, fiscal_year=year, fiscal_year_source=year_source,
-        ))
+        for item in items:
+            fields = {f.get('Caption'): f.get('Value') for f in item.get('Fields') or []}
+            text = clean(str(fields.get('שם') or fields.get('כותרת') or ''))
+            context = clean(' '.join('%s %s' % (k, v) for k, v in fields.items() if k and 'שנ' in k and v))
+            for url in item.get('Attachments') or []:
+                f = budget_file(page_url, url, text or unquote(url.rsplit('/', 1)[-1]), context)
+                if f:
+                    files.append(f)
     return files
 
 
@@ -223,6 +261,8 @@ def collect_files(session, url):
 def files_in(session, page_url, doc):
     """Budget files on a page, including ones in same-site iframes and CMS file-browser subfolders."""
     files = budget_files(doc, page_url)
+    if doc.xpath('//*[@ng-init][contains(@ng-init, "tab.init(")]'):
+        files.extend(sharepoint_tables(session, doc, page_url))
     for frame_url in iframes(doc):
         if not same_site(frame_url, page_url):
             continue
@@ -524,10 +564,65 @@ FILE_FIELDS = ['authority_code', 'entity_id', 'name', 'fiscal_year', 'doc_type',
                'link_text', 'context', 'fiscal_year_source', 'page_url']
 ANALYZED_FILE_FIELDS = FILE_FIELDS + [
     'stored_url', 'file_size', 'analysis_status', 'table_kind', 'ready_to_process', 'n_tables', 'n_rows',
-    'value_columns', 'expected_columns', 'income_sign', 'expense_sign', 'units', 'issues']
-TABLE_FIELDS = ['authority_code', 'name', 'fiscal_year', 'file_url', 'stored_url', 'format', 'sheet', 'kind',
+    'value_columns', 'expected_columns', 'income_sign', 'expense_sign', 'units', 'balance', 'issues']
+TABLE_FIELDS = ['authority_code', 'name', 'fiscal_year', 'file_url', 'stored_url', 'format', 'table_index', 'sheet', 'kind',
                 'header_row', 'first_col', 'code_col', 'title_col', 'n_rows', 'value_columns', 'income_sign',
                 'expense_sign', 'units', 'units_source', 'expected_columns', 'ready', 'issues']
+
+
+# Kept narrow: there are about a million lines. File details are in budget_files, joined on file_url.
+LINE_FIELDS = ['authority_code', 'entity_id', 'name', 'fiscal_year', 'doc_type', 'code', 'chapter', 'direction',
+               'title', 'column_kind', 'column_year', 'amount', 'value', 'units', 'sign_normalized',
+               'format', 'sheet', 'row', 'file_url']
+FORMAT_RANK = {'xlsx': 0, 'xls': 0, 'csv': 0, 'pdf': 1}
+
+
+def line_sources(files):
+    """Ready files, preferring spreadsheets when the same document is also published as a PDF."""
+    ready = [f for f in files if f.get('ready_to_process')]
+    best = {}
+    for f in ready:
+        key = (f['authority_code'], f['fiscal_year'], f['doc_type'])
+        best[key] = min(best.get(key, 9), FORMAT_RANK[f['format']])
+    return [f for f in ready if FORMAT_RANK[f['format']] == best[(f['authority_code'], f['fiscal_year'], f['doc_type'])]]
+
+
+def budget_lines(files, tables):
+    """One row per budget line and value column, in NIS, with incomes and expenses both positive."""
+    import budget_file_store
+    import budget_file_analysis
+    by_file = defaultdict(dict)
+    for t in tables:
+        by_file[t['file_url']][t['table_index']] = t
+    for f in line_sources(files):
+        file_tables = by_file.get(f['file_url'], {})
+        for row in budget_file_store.read_rows(f):
+            t = file_tables.get(int(row['table_index']))
+            if not t or not t['ready'] or int(row['column']) in t['duplicate_columns']:
+                continue
+            value = float(row['value'])
+            direction = budget_file_analysis.chapter_kind(row['code'])
+            sign = {'income': t['income_sign'], 'expense': t['expense_sign']}.get(direction)
+            amount = value * (1000 if t['units'] == 'thousands' else 1) * (-1 if sign == 'negative' else 1)
+            yield dict(
+                authority_code=f['authority_code'], entity_id=f['entity_id'], name=f['name'],
+                fiscal_year=f['fiscal_year'], doc_type=f['doc_type'], code=row['code'],
+                chapter=budget_file_analysis.chapter_of(row['code']),
+                direction=direction, title=row['title'], column_kind=row['kind'] or None,
+                column_year=int(row['year']) if row['year'] else None,
+                amount=amount, value=value, units=t['units'], sign_normalized=sign is not None,
+                format=f['format'], sheet=row['sheet'], row=row['row'], file_url=f['file_url'],
+            )
+
+
+def with_placeholder(rows, fields):
+    # dataflows needs at least one row to infer a schema; the placeholder is filtered out right after
+    empty = True
+    for row in rows:
+        empty = False
+        yield row
+    if empty:
+        yield {k: None for k in fields}
 
 
 def rows_or_placeholder(rows, fields):
@@ -550,12 +645,20 @@ def output_flow(pages, files, tables):
         DF.filter_rows(lambda row: row['file_url'] is not None, resources='budget_files'),
         DF.set_type('(fiscal_year|file_size|n_tables|n_rows)', type='integer', resources='budget_files'),
         DF.set_type('(ready_to_process|expected_columns)', type='boolean', resources='budget_files'),
+        DF.set_type('balance', type='number', resources='budget_files'),
         rows_or_placeholder(tables, TABLE_FIELDS),
         DF.update_resource(-1, name='budget_file_tables', path='budget_file_tables.csv'),
         DF.filter_rows(lambda row: row['file_url'] is not None, resources='budget_file_tables'),
         DF.set_type('(fiscal_year|header_row|first_col|title_col|n_rows)', type='integer',
                     resources='budget_file_tables'),
         DF.set_type('(ready|expected_columns)', type='boolean', resources='budget_file_tables'),
+        with_placeholder(budget_lines(files, tables), LINE_FIELDS),
+        DF.update_resource(-1, name='budget_lines', path='budget_lines.csv'),
+        DF.filter_rows(lambda row: row['file_url'] is not None, resources='budget_lines'),
+        DF.set_type('(fiscal_year|column_year)', type='integer', resources='budget_lines'),
+        DF.set_type('(amount|value)', type='number', resources='budget_lines'),
+        DF.set_type('sign_normalized', type='boolean', resources='budget_lines'),
+        DF.set_type('(code|chapter|row|sheet|title)', type='string', resources='budget_lines'),
     )
 
 
@@ -588,6 +691,7 @@ def flow(*_):
             municipal_budget_pages={'resource-name': 'budget_pages'},
             municipal_budget_files={'resource-name': 'budget_files'},
             municipal_budget_file_tables={'resource-name': 'budget_file_tables'},
+            municipal_budget_lines={'resource-name': 'budget_lines'},
         )),
         write_report(OUT_PATH, pages, files),
     )

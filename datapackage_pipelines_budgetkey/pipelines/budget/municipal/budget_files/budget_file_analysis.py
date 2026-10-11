@@ -15,17 +15,20 @@ import subprocess
 import tempfile
 from collections import Counter
 
-ANALYZER_VERSION = 1
+ANALYZER_VERSION = 3
+BALANCE_TOLERANCE = 0.05
 
 MAX_ROWS = 20000
 HEADER_SEARCH = 12
 MIN_CODE_ROWS = 5
 
 CODE = re.compile(r'^[1-9]\d{9}$')
+# Some cities (Tel Aviv) use their own codes, chapter first: 11000/121/8 = פרק 11000, סעיף 121, check digit
+SLASH_CODE = re.compile(r'^[1-9]\d{3,5}/\d{1,4}(/\d{1,2})?$')
 YEAR = re.compile(r'(?<!\d)(19[9]\d|20[0-4]\d)(?!\d)')
 THOUSANDS = re.compile(r'אלפי|באלפים|אלפים|אלש"?״?ח|בא?לפי|K ?₪|thousands|بالآلاف|آلاف', re.I)
 NIS = re.compile(r'ש"?״?ח|₪|שקל|NIS|شيكل', re.I)
-NOT_VALUE_HEADER = re.compile(r'פרק|סעיף|סוג|מס\'|מספר|קוד|כרטיס|משרות|תקנים|אחוז|%|שורה|מזהה', re.I)
+NOT_VALUE_HEADER = re.compile(r'פרק|סעיף|סוג|מס\'|מספר|קוד|כרטיס|משרות|תקנים|תקן|אחוז|%|שורה|מזהה', re.I)
 TEXT_HEADER = re.compile(r'שם|תיאור|פירוט|הסבר|title|name|اسم|بيان', re.I)
 
 VALUE_KINDS = [
@@ -72,14 +75,23 @@ def code_of(cell):
     if isinstance(cell, float) and not cell.is_integer():
         return None
     s = re.sub(r'[\s\-]', '', text(cell))
-    return s if CODE.match(s) else None
+    return s if CODE.match(s) or SLASH_CODE.match(s) else None
+
+
+def chapter_of(code):
+    """The 2-digit chapter (פרק): digits 2-3 of a 10-digit code, or the start of a slash-separated one."""
+    if code and CODE.match(code):
+        return code[1:3]
+    if code and SLASH_CODE.match(code):
+        return code[:2]
 
 
 def chapter_kind(code):
-    """'income' or 'expense' from the chapter digits of a 10-digit code."""
-    if len(code) != 10:
+    """'income' or 'expense' from the chapter of a budget code."""
+    chapter = chapter_of(code)
+    if chapter is None:
         return None
-    chapter = int(code[1:3])
+    chapter = int(chapter)
     if 10 <= chapter <= 59:
         return 'income'
     if 60 <= chapter <= 99:
@@ -244,12 +256,15 @@ def analyze_rows(rows, name='', fiscal_year=None):
         if numeric < len(data) * 0.3:
             continue
         head = column_header(rows, header, above, c) if header is not None else ''
-        if NOT_VALUE_HEADER.search(head) and not YEAR.search(head):
+        if NOT_VALUE_HEADER.search(head) and (not YEAR.search(head) or STAFF.search(head)):
             continue
         if all(abs(number(rows[i][c]) or 0) < 1000 and float(number(rows[i][c]) or 0).is_integer() for i in data) \
                 and not YEAR.search(head):
             continue  # small integers without a year in the header: chapter numbers and the like
         value_cols.append(c)
+    if header is not None and any(YEAR.search(column_header(rows, header, above, c)) for c in value_cols):
+        # Unlabelled numbers next to a labelled budget table are helper columns, not budget values
+        value_cols = [c for c in value_cols if column_header(rows, header, above, c)]
     result['value_columns'] = [dict(describe_value_column(column_header(rows, header, above, c)
                                                           if header is not None else ''), col=c)
                                for c in value_cols]
@@ -265,16 +280,20 @@ def analyze_rows(rows, name='', fiscal_year=None):
     if value_cols:
         main = next((v['col'] for v in result['value_columns'] if fiscal_year and v['year'] == fiscal_year),
                     value_cols[-1])
+        # Signs are judged on all value columns together: a single column may be empty for incomes or expenses
         by_kind = {}
         for i in data:
-            kind, value = chapter_kind(code_of(rows[i][code_col])), number(rows[i][main])
-            if kind and value is not None:
-                by_kind.setdefault(kind, []).append(value)
+            kind = chapter_kind(code_of(rows[i][code_col]))
+            for c in value_cols:
+                value = number(rows[i][c])
+                if kind and value is not None:
+                    by_kind.setdefault(kind, []).append(value)
         result['income_sign'], result['expense_sign'] = signs(by_kind)
         # Units: the main column's own header and the title rows above the table, not other columns' headers
         header_text = ' '.join([name, column_header(rows, header, above, main) if header is not None else '']
                                + [text(c) for r in rows[:header or 0] for c in r])
-        result['units'], result['units_source'] = units(header_text, by_kind.get('income', []) + by_kind.get('expense', []))
+        main_values = [number(rows[i][main]) for i in data if number(rows[i][main]) is not None]
+        result['units'], result['units_source'] = units(header_text, main_values)
         if result['income_sign'] is None and result['expense_sign'] is None:
             result['issues'].append('sign-unknown')
         if result['units'] is None:
@@ -285,6 +304,10 @@ def analyze_rows(rows, name='', fiscal_year=None):
     if composite:
         result['code_col'] = 'composite:' + '+'.join(str(c) for c in composite[1:] if c is not None)
         result['issues'].append('composite-code')
+    result['rows'] = [dict(row=i + 1, code=code_of(rows[i][code_col]),
+                           title=text(rows[i][result['title_col']]) if result['title_col'] is not None else '',
+                           values=[number(rows[i][c]) for c in value_cols])
+                      for i in data]
     result['expected_columns'] = expected_columns(result['value_columns'], fiscal_year)
     result['ready'] = bool(result['title_col'] is not None and value_cols and result['units']
                            and (result['income_sign'] or result['expense_sign'])
@@ -420,6 +443,188 @@ def analyze_pdf_text(content, pages, fiscal_year=None):
     return result
 
 
+HEBREW = re.compile(r'[\u0590-\u05ff\u0600-\u06ff]')
+WORD = re.compile(r'<page width="[\d.]+" height="[\d.]+">|'
+                  r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>')
+ROW_TOLERANCE = 3
+COLUMN_GAP = 30
+HEADER_DISTANCE = 45
+
+
+def pdf_words(path, max_pages=300):
+    """Words with their boxes, per page. Right-to-left words come out in glyph order and are flipped back."""
+    import html
+    with tempfile.NamedTemporaryFile(suffix='.html') as out:
+        subprocess.run(['pdftotext', '-bbox', '-l', str(max_pages), path, out.name],
+                       check=True, timeout=300, capture_output=True)
+        with open(out.name, encoding='utf-8', errors='replace') as f:
+            content = f.read()
+    pages = []
+    for m in WORD.finditer(content):
+        if m.group(1) is None:
+            pages.append([])
+            continue
+        word = RTL_MARKS.sub('', html.unescape(m.group(5)))
+        if HEBREW.search(word):
+            word = word[::-1]
+        x0, y0, x1, y1 = (float(v) for v in m.group(1, 2, 3, 4))
+        if pages and word:
+            pages[-1].append(dict(x=(x0 + x1) / 2, x0=x0, x1=x1, y=(y0 + y1) / 2, text=word))
+    return pages
+
+
+def visual_rows(words):
+    rows = []
+    for w in sorted(words, key=lambda w: w['y']):
+        if rows and abs(rows[-1][0]['y'] - w['y']) <= ROW_TOLERANCE:
+            rows[-1].append(w)
+        else:
+            rows.append([w])
+    return rows
+
+
+def split_row(row):
+    """(code, title, values) for a table row: values are the outermost run of numbers, away from the code."""
+    code_word = next((w for w in row if re.fullmatch(r'[1-9]\d{9}', w['text'])), None)
+    if code_word is None:
+        return None
+    others = [w for w in row if w is not code_word]
+    left = [w for w in others if w['x'] < code_word['x']]
+    right = [w for w in others if w['x'] > code_word['x']]
+    numeric = lambda w: number(w['text']) is not None and not YEAR.fullmatch(w['text'])
+    # Values sit on the side of the code with more numbers (left in right-to-left tables)
+    side = left if sum(map(numeric, left)) >= sum(map(numeric, right)) else right
+    side = sorted(side, key=lambda w: -abs(w['x'] - code_word['x']))
+    values = []
+    for w in side:
+        if not numeric(w):
+            break
+        values.append(w)
+    title = [w for w in side if w not in values and not re.fullmatch(r'[-–]', w['text'])]
+    title = ' '.join(w['text'] for w in sorted(title, key=lambda w: -w['x']))
+    return code_word['text'], title, values
+
+
+def cluster(xs):
+    groups = []
+    for x in sorted(xs):
+        if groups and x - groups[-1][-1] <= COLUMN_GAP:
+            groups[-1].append(x)
+        else:
+            groups.append([x])
+    return [sum(g) / len(g) for g in groups]
+
+
+STAFF = re.compile(r'תקנים|משרות|תקן')
+PHRASE_GAP = 10
+
+
+def header_phrases(rows):
+    """Header words grouped into phrases ("תקציב 2022 מעודכן") by the gaps between them."""
+    phrases = []
+    for row in rows:
+        words = sorted((w for w in row if number(w['text']) is None or YEAR.fullmatch(w['text'])),
+                       key=lambda w: w['x0'])
+        for w in words:
+            if phrases and phrases[-1][-1]['y'] == w['y'] and w['x0'] - phrases[-1][-1]['x1'] <= PHRASE_GAP:
+                phrases[-1].append(w)
+            else:
+                phrases.append([w])
+    return [dict(x=(p[0]['x0'] + p[-1]['x1']) / 2, y=p[0]['y'],
+                 text=' '.join(w['text'] for w in sorted(p, key=lambda w: -w['x']))) for p in phrases]
+
+
+def column_key(label, used):
+    column = describe_value_column(label)
+    key = '%s %s' % (column['kind'], column['year']) if column['year'] else (label or 'column')
+    n = 1
+    while ('%s #%d' % (key, n) if n > 1 else key) in used:
+        n += 1
+    return '%s #%d' % (key, n) if n > 1 else key
+
+
+def extract_pdf_table(pages):
+    """Rows and value columns of a coded budget table, placing each value under its column by position."""
+    columns, rows, previous = {}, [], []
+    for page_no, words in enumerate(pages, 1):
+        all_rows = visual_rows(words)
+        page_rows = [(r, split_row(row)) for r, row in enumerate(all_rows)]
+        page_rows = [(r, split) for r, split in page_rows if split]
+        if not page_rows:
+            continue
+        xs = [w['x'] for _, (_, _, values) in page_rows for w in values]
+        centers = [c for c in cluster(xs)
+                   if sum(1 for x in xs if abs(x - c) <= COLUMN_GAP) >= max(3, len(page_rows) * 0.03)]
+        if not centers:
+            continue
+        nearest = lambda x: min(range(len(centers)), key=lambda i: abs(centers[i] - x))
+
+        # Header: phrases in the rows just above the first table row, each attached to the nearest column
+        first = page_rows[0][0]
+        heads = {i: [] for i in range(len(centers))}
+        for phrase in header_phrases(all_rows[max(0, first - 4):first]):
+            i = nearest(phrase['x'])
+            if abs(centers[i] - phrase['x']) <= HEADER_DISTANCE:
+                heads[i].append(phrase)
+        labels = [' '.join(p['text'] for p in sorted(heads[i], key=lambda p: p['y'])) for i in range(len(centers))]
+        if not any(YEAR.search(l) for l in labels) and previous:
+            # Continuation pages repeat no header: take the label of the nearest column seen before
+            labels = [min(previous, key=lambda p: abs(p[0] - c))[1]
+                      if min(abs(p[0] - c) for p in previous) <= COLUMN_GAP else '' for c in centers]
+        elif any(YEAR.search(l) for l in labels):
+            previous = list(zip(centers, labels))
+
+        keys, used = [], set()
+        for label in labels:
+            key = column_key(label, used)
+            used.add(key)
+            keys.append(key)
+            if key not in columns and not STAFF.search(label):
+                # A second column with the same kind and year on one page is ambiguous: keep it, but flag it
+                columns[key] = dict(describe_value_column(label), order=len(columns), duplicate='#' in key)
+        for _, (code, title, values) in page_rows:
+            cells = {}
+            for w in values:
+                i = nearest(w['x'])
+                if abs(centers[i] - w['x']) <= COLUMN_GAP and keys[i] in columns:
+                    cells[keys[i]] = number(w['text'])
+            rows.append(dict(row='page %d' % page_no, code=code, title=title, cells=cells))
+    ordered = sorted(columns, key=lambda k: columns[k]['order'])
+    for row in rows:
+        cells = row.pop('cells')
+        row['values'] = [cells.get(key) for key in ordered]
+    return [{k: v for k, v in columns[key].items() if k != 'order'} for key in ordered], rows
+
+
+def analyze_pdf(path, fiscal_year=None):
+    pages = pdf_pages(path)
+    result = analyze_pdf_text(pdf_text(path), pages, fiscal_year)
+    if result['kind'] != 'detailed':
+        return result
+    columns, rows = extract_pdf_table(pdf_words(path))
+    if len(rows) < MIN_CODE_ROWS or not columns:
+        result['issues'].append('no-positions')
+        return result
+    result.update(value_columns=columns, rows=rows, n_rows=len(rows))
+    result['issues'] = [i for i in result['issues'] if i != 'ragged-rows']
+    main = next((n for n, c in enumerate(columns) if fiscal_year and c['year'] == fiscal_year), 0)
+    by_kind = {}
+    for row in rows:
+        kind = chapter_kind(row['code'])
+        for value in row['values']:
+            if kind and value is not None:
+                by_kind.setdefault(kind, []).append(value)
+    result['income_sign'], result['expense_sign'] = signs(by_kind)
+    result['units'], result['units_source'] = units(columns[main]['header'],
+                                                    [r['values'][main] for r in rows if r['values'][main] is not None])
+    has_years = any(c['year'] for c in columns)
+    if not has_years and 'no-years-in-headers' not in result['issues']:
+        result['issues'].append('no-years-in-headers')
+    result['expected_columns'] = expected_columns(columns, fiscal_year)
+    result['ready'] = bool(result['units'] and (result['income_sign'] or result['expense_sign']) and has_years)
+    return result
+
+
 def split_header(head, n_values):
     """Best-effort header text per value column: one chunk per year mentioned, in order of appearance."""
     chunks = re.split(r'\s{3,}', head.strip())
@@ -427,6 +632,43 @@ def split_header(head, n_values):
     if len(with_year) >= n_values:
         return with_year[:n_values]
     return with_year + [''] * (n_values - len(with_year))
+
+
+def budget_column(columns, fiscal_year):
+    """The column holding the budget for the file's year: approved/proposed for that year, else the latest year."""
+    candidates = [n for n, c in enumerate(columns) if not c.get('duplicate') and c['year']
+                  and c['kind'] in ('approved', 'proposed', 'revised')]
+    exact = [n for n in candidates if columns[n]['year'] == fiscal_year]
+    if exact:
+        return exact[0]
+    if candidates:
+        return max(candidates, key=lambda n: columns[n]['year'])
+
+
+def balance(tables, fiscal_year):
+    """Normalized incomes / expenses of the year's budget column across the file's ready tables."""
+    totals = {'income': 0.0, 'expense': 0.0}
+    for t in tables:
+        column = budget_column(t['value_columns'], fiscal_year) if t['ready'] else None
+        if column is None:
+            continue
+        factor = 1000 if t['units'] == 'thousands' else 1
+        for row in t.get('rows') or []:
+            kind, value = chapter_kind(row['code']), row['values'][column]
+            if kind and value is not None:
+                sign = -1 if t['%s_sign' % kind] == 'negative' else 1
+                totals[kind] += value * factor * sign
+    return totals
+
+
+def check_balance(tables, fiscal_year):
+    """A regular budget balances: flag files whose incomes and expenses disagree, which usually means
+    misread columns or signs."""
+    totals = balance(tables, fiscal_year)
+    if not totals['income'] or not totals['expense']:
+        return None, 'one-sided' if totals['income'] or totals['expense'] else None
+    ratio = totals['income'] / totals['expense']
+    return ratio, None if abs(1 - ratio) <= BALANCE_TOLERANCE else 'unbalanced'
 
 
 def analyze_file(path, fmt, fiscal_year=None):
@@ -438,8 +680,14 @@ def analyze_file(path, fmt, fiscal_year=None):
     elif fmt == 'csv':
         tables.append(analyze_rows(csv_rows(path), 'csv', fiscal_year))
     elif fmt == 'pdf':
-        tables.append(analyze_pdf_text(pdf_text(path), pdf_pages(path), fiscal_year))
-    return summarize(tables), tables
+        tables.append(analyze_pdf(path, fiscal_year))
+    summary = summarize(tables)
+    summary['balance'], issue = check_balance(tables, fiscal_year)
+    if issue:
+        summary['issues'] = ','.join(filter(None, [summary['issues'], issue]))
+    if issue == 'unbalanced':
+        summary['ready_to_process'] = False
+    return summary, tables
 
 
 def summarize(tables):

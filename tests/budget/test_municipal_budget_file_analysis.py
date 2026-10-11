@@ -27,14 +27,15 @@ INCOMES_NEGATIVE = sheet(
         [1614000750, 'עבודות קבלניות', 400000, 413000, 420000],
         [1741000752, 'אחזקת מתקני משחקים', 230000, 240000, 250000],
         [1766000110, 'ועדים מקומיים', 300000, 306000, 310000],
-        [None, 'סה"כ', -227088000, -233311000, -241441000],
+        [1811000110, 'שכר חינוך', 227088000, 233311000, 241441000],
+        [None, 'סה"כ', 0, 0, 0],
     ])
 
 
 def test_detailed_sheet_with_title_rows():
     t = a.analyze_rows(INCOMES_NEGATIVE, 'תקציב', fiscal_year=2017)
     assert (t['kind'], t['header_row'], t['first_col'], t['code_col'], t['title_col']) == ('detailed', 2, 0, 0, 1)
-    assert t['n_rows'] == 6
+    assert t['n_rows'] == 7
     assert [(v['kind'], v['year']) for v in t['value_columns']] == [
         ('executed', 2015), ('approved', 2016), ('approved', 2017)]
     assert t['expected_columns']
@@ -186,11 +187,17 @@ def test_process_file_downloads_stores_and_reuses_analysis(tmp_path, monkeypatch
     assert f['analysis_status'] == 'ok' and f['ready_to_process'] and f['units'] == 'nis'
     assert f['stored_url'].startswith('https://s3.example/budgetkey-files/municipal-budgets/31/')
     assert len(tables) == 1 and json.loads(tables[0]['value_columns'])[0]['kind'] == 'executed'
-    assert len(fake.writes) == 2  # the file and its analysis
+    assert len(fake.writes) == 3  # the file, its rows and its analysis
 
     f2, tables2 = store.process_file(dict(FILE))
-    assert downloads == [FILE['file_url']] and len(fake.writes) == 2
+    assert downloads == [FILE['file_url']] and len(fake.writes) == 3
     assert f2['ready_to_process'] and tables2 == tables
+
+    rows = store.read_rows(f2)
+    assert len(rows) == 7 * 3
+    assert f2['balance'] == 1.0
+    assert rows[0] == dict(table_index='0', sheet='Sheet', row='4', code='1111000100', title='ארנונה כללית',
+                           column='0', kind='executed', year='2015', header='ביצוע 2015', value='-224000000')
 
 
 def test_process_file_rejects_html_pages(tmp_path, monkeypatch):
@@ -221,3 +228,68 @@ def test_report_ranks_machine_readable_years_first():
     html = report.render(pages, files)
     assert html.index('שקופה') < html.index('סרוקה') < html.index('נעלמה')
     assert 'לא נמצא דף תקציב' in html and 'XLS ✓' in html and 'סרוק' in html
+
+
+def test_detailed_sheet_rows():
+    t = a.analyze_rows(INCOMES_NEGATIVE, 'תקציב', fiscal_year=2017)
+    assert len(t['rows']) == 7
+    assert t['rows'][0] == dict(row=4, code='1111000100', title='ארנונה כללית',
+                                values=[-224000000, -230000000, -237500000])
+
+
+def word(text, x, y, width=20):
+    return dict(text=text, x=x, x0=x - width / 2, x1=x + width / 2, y=y)
+
+
+def test_pdf_values_are_placed_under_their_columns():
+    # A right-to-left table: values on the left, then the title, then the code; one row has gaps
+    page = [word('2023', 90, 10, 16), word('תקציב', 112, 10, 22),
+            word('2022', 180, 10, 16), word('תקציב', 202, 10, 22), word('מעודכן', 154, 10, 24),
+            word('ביצוע', 300, 10, 22), word('2021', 278, 10, 16)]
+    for i in range(6):
+        y = 30 + i * 12
+        page += [word('3,000,00%d' % i, 100, y), word('2,900,000', 200, y), word('2,800,000', 290, y),
+                 word('ארנונה %d' % i, 400, y, 40), word(str(1111000110 + i), 500, y, 40)]
+    page += [word('962,000', 200, 110), word('ארנונה נוספת', 400, 110, 50), word('1111100110', 500, 110, 40)]
+    columns, rows = a.extract_pdf_table([page])
+    assert [(c['kind'], c['year']) for c in columns] == [('approved', 2023), ('revised', 2022), ('executed', 2021)]
+    assert rows[0] == dict(row='page 1', code='1111000110', title='ארנונה 0', values=[3000000, 2900000, 2800000])
+    assert rows[-1]['values'] == [None, 962000, None]
+
+
+def test_budget_lines_normalize_units_and_signs(monkeypatch):
+    import budget_files_scraper as scraper
+    files = [dict(authority_code='31', entity_id='500200316', name='אופקים', fiscal_year=2024, doc_type='budget',
+                  format=fmt, ready_to_process=True, file_url='https://x/%s' % fmt, stored_url='s3://%s' % fmt)
+             for fmt in ('pdf', 'xlsx')]
+    tables = [dict(file_url='https://x/xlsx', table_index=0, ready=True, units='thousands', income_sign='negative',
+                   expense_sign='positive', duplicate_columns=[1])]
+    rows = [dict(table_index='0', sheet='s', row='5', code=code, title='t', column=column, kind='approved',
+                 year='2024', header='תקציב 2024', value=value)
+            for code, column, value in [('1111000100', '0', '-250'), ('1614000750', '0', '40'), ('1614000750', '1', '7')]]
+    monkeypatch.setattr(store, 'read_rows', lambda f: rows if f['format'] == 'xlsx' else pytest.fail('PDF read'))
+    lines = list(scraper.budget_lines(files, tables))
+    # The PDF copy of the same budget is skipped, and so is the ambiguous duplicate column
+    assert [(l['direction'], l['amount'], l['value'], l['format']) for l in lines] == [
+        ('income', 250000, -250, 'xlsx'), ('expense', 40000, 40, 'xlsx')]
+    assert lines[0]['chapter'] == '11' and lines[0]['sign_normalized']
+
+
+def test_unbalanced_budget_is_not_ready(tmp_path):
+    path = tmp_path / 'b.csv'
+    lines = ['קוד,שם,תקציב 2025', '1111000100,ארנונה,1000000', '1112000100,אגרות,200000', '1113000100,היטלים,300000',
+             '1611000100,שכר,400000', '1612000100,רכש,100000']
+    path.write_text('\n'.join(lines), encoding='utf-8')
+    summary, tables = a.analyze_file(str(path), 'csv', 2025)
+    assert tables[0]['ready'] and not summary['ready_to_process']
+    assert summary['balance'] == 3 and 'unbalanced' in summary['issues']
+
+
+def test_slash_codes():
+    rows = sheet(['פרק', 'סעיף', 'סעיף תקציב', 'שם סעיף', 'תקציב חדש 2026', 'תקן חדש 2026', 'הוצאה בפועל 2024'],
+                 data=[[11000, 121, '11000/121/8', 'גביה שוטפת', 1320000000, 0, 1095136150]] * 3
+                 + [[61111, 124, '61111/124/2', 'החזר הוצאות', 1320000000, 2, 1095136150]] * 3)
+    t = a.analyze_rows(rows, 'הכנסות', 2026)
+    assert (t['code_col'], t['title_col']) == (2, 3)
+    assert [(v['kind'], v['year']) for v in t['value_columns']] == [('approved', 2026), ('executed', 2024)]
+    assert a.chapter_kind('11000/121/8') == 'income' and a.chapter_of('61111/124/2') == '61'

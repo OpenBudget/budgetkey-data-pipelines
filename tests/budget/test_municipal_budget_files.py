@@ -140,3 +140,29 @@ def test_unreachable_site_keeps_previous_results(monkeypatch):
     assert (page['status'], page['budget_page_url'], page['last_checked']) == \
         ('stale', 'https://muni.example.il/budget/', '2026-02-01')
     assert page['error'].startswith('unreachable') and len(files) == 1
+
+
+def test_tel_aviv_sharepoint_tables():
+    init = ("tab.init({'dataSource':{'ListId':'c598','ViewId':'8668'},'showTitle':false,'title':'טבלה'},"
+            "'False',{'dataSource':{'ListId':null}})")
+    page = '<html><body><div ng-init="%s"></div></body></html>' % init.replace('"', '&quot;')
+    posted = []
+
+    class Session(FakeSession):
+        def post(self, url, json=None, **kwargs):
+            posted.append((url, json))
+            resp = FakeResponse(url, '')
+            resp.json = lambda: {'items': [
+                {'Attachments': ['https://www.tel-aviv.gov.il/Transparency/DocLib5/תקציב העירייה הרגיל לשנת 2026.xlsx'],
+                 'Fields': [{'Caption': 'שנת תקציב', 'Value': '2026'},
+                            {'Caption': 'שם', 'Value': 'תקציב העירייה הרגיל לשנת 2026.xlsx'}]},
+                {'Attachments': ['https://www.tel-aviv.gov.il/Transparency/DocLib5/צו ארנונה.pdf'],
+                 'Fields': [{'Caption': 'שנת תקציב', 'Value': '2026'}, {'Caption': 'שם', 'Value': 'צו ארנונה.pdf'}]},
+            ]}
+            return resp
+
+    session = Session({'https://www.tel-aviv.gov.il/Transparency/Pages/CityFunds.aspx': page})
+    _, files = m.collect_files(session, 'https://www.tel-aviv.gov.il/Transparency/Pages/CityFunds.aspx')
+    assert posted[0][0] == 'https://www.tel-aviv.gov.il/_vti_bin/TlvSP2013PublicSite/TlvList.svc/GetTables'
+    assert posted[0][1]['dataSource']['ListId'] == 'c598'
+    assert [(f['fiscal_year'], f['format'], f['doc_type']) for f in files] == [(2026, 'xlsx', 'budget')]
