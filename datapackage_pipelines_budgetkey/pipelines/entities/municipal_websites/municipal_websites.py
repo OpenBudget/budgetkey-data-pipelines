@@ -2,6 +2,7 @@ import csv
 import os
 import re
 import logging
+import time
 from concurrent.futures import ThreadPoolExecutor, wait
 from urllib.parse import urlparse, unquote
 
@@ -34,20 +35,32 @@ INFOBOX_WEBSITE = re.compile(r'^\s*\|\s*(?:אתר אינטרנט|אתר)\s*=\s*(
 URL = re.compile(r'https?://[^\s|\]\[}{<>"]+')
 
 
+def with_retries(request, attempts=4):
+    # Wikidata's query service and data.gov.il both have the occasional 5xx or timeout
+    for attempt in range(attempts):
+        try:
+            resp = request()
+            resp.raise_for_status()
+            return resp.json()
+        except (requests.exceptions.HTTPError, requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            status = getattr(e.response, 'status_code', None)
+            if attempt == attempts - 1 or (status is not None and status < 500 and status != 429):
+                raise
+            logging.warning('Request failed (%s), retrying', e)
+            time.sleep(10 * 2 ** attempt)
+
+
 def get(url, **kwargs):
     headers = {'User-Agent': USER_AGENT}
     headers.update(kwargs.pop('headers', {}))
-    resp = requests.get(url, headers=headers, timeout=60, **kwargs)
-    resp.raise_for_status()
-    return resp.json()
+    return with_retries(lambda: requests.get(url, headers=headers, timeout=60, **kwargs))
 
 
 def sparql(query):
-    resp = requests.post(WIKIDATA_SPARQL, data=dict(query=query), timeout=120, headers={
+    data = with_retries(lambda: requests.post(WIKIDATA_SPARQL, data=dict(query=query), timeout=120, headers={
         'User-Agent': USER_AGENT, 'Accept': 'application/sparql-results+json'
-    })
-    resp.raise_for_status()
-    for binding in resp.json()['results']['bindings']:
+    }))
+    for binding in data['results']['bindings']:
         yield {k: v['value'].replace('http://www.wikidata.org/entity/', '') for k, v in binding.items()}
 
 

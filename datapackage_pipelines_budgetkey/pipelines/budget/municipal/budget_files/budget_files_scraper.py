@@ -35,6 +35,10 @@ NAV_KEYWORDS = [
     (re.compile(r'דו"?״?ח(ות)? כספי|מידע (כספי|פיננסי)|כספים'), 5),
     (re.compile(r'שקיפות|מידע לציבור|חופש המידע|מידע ציבורי'), 4),
     (re.compile(r'budget|taktziv|takziv|finance|transparen|shkifut', re.I), 4),
+    # Arabic-language sections of Arab local authorities' sites
+    (re.compile(r'ميزانية|موازنة'), 10),
+    (re.compile(r'تقارير مالية|التقارير المالية|معلومات مالية|المالية'), 5),
+    (re.compile(r'الشفافية|حرية المعلومات|معلومات للجمهور'), 4),
     (re.compile(r'אודות|העירייה|המועצה|על העיר|על המועצה'), 1),
 ]
 NAV_EXCLUDE = re.compile(r'facebook|instagram|twitter|youtube|whatsapp|mailto:|tel:|javascript:', re.I)
@@ -45,14 +49,18 @@ SPREADSHEETS = {'xlsx', 'xls', 'csv'}
 
 # Order matters: the first matching type wins
 DOC_TYPES = [
-    ('budget_vs_execution', re.compile(r'ביצוע|bitzua|bitsua|execution', re.I)),
-    ('development_budget', re.compile(r'פיתוח|תב"?״?ר|בלתי[- ]רגיל|tabar|pituach', re.I)),
-    ('budget_update', re.compile(r'עדכון|תיקון|update|idkun', re.I)),
-    ('budget_proposal', re.compile(r'הצעת|proposal|hatzaat', re.I)),
-    ('budget', re.compile(r'תקציב|taktziv|takziv|tktzib|budget', re.I)),
+    ('budget_vs_execution', re.compile(r'ביצוע|bitzua|bitsua|execution|تنفيذ', re.I)),
+    ('development_budget', re.compile(r'פיתוח|תב"?״?ר|בלתי[- ]רגיל|tabar|pituach|تطوير|غير عادي', re.I)),
+    ('budget_update', re.compile(r'עדכון|תיקון|update|idkun|تعديل|تحديث', re.I)),
+    ('budget_proposal', re.compile(r'הצעת|proposal|hatzaat|اقتراح|مقترح', re.I)),
+    ('budget', re.compile(r'תקציב|taktziv|takziv|tktzib|budget|ميزانية|موازنة', re.I)),
 ]
-NOT_BUDGET = re.compile(r'מבקר|ביקורת|ארנונה|עמותות|תמיכות|שכר|דו"?״?ח(ות)?\s+ה?כספי|מבוקר|ועדת|רבעון|רבעוני', re.I)
-BUDGET_WORD = re.compile(r'תקציב|taktziv|takziv|tktzib|budget', re.I)
+# Not budgets unless the link itself says it's a budget (e.g. a bare "2016" under a mixed heading)
+NOT_BUDGET = re.compile(r'מבקר|ביקורת|ארנונה|ارنونا|جمعيات|עמותות|תמיכות|שכר|דו"?״?ח(ות)?\s+ה?כספי|מבוקר|ועדת|רבעון|רבעוני'
+                        r'|تقارير مالية|التقارير المالية|البيانات المالية|بيانات مالية|تقرير مالي|مراقب|مدقق', re.I)
+# Never budgets, even when they mention one: meeting minutes and protocols
+NEVER_BUDGET = re.compile(r'פרוטוקול|פרטיכל|ישיבת (מועצה|מליאה|ועד)|ועדת כספים|محضر|بروتوكول', re.I)
+BUDGET_WORD = re.compile(r'תקציב|taktziv|takziv|tktzib|budget|ميزانية|موازنة', re.I)
 YEAR = re.compile(r'(?<!\d)(19[9]\d|20[0-4]\d)(?!\d)')
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -159,6 +167,8 @@ def classify(link_text, filename, context):
     if not BUDGET_WORD.search(text):
         return None
     if NOT_BUDGET.search(own) and not BUDGET_WORD.search(own):
+        return None
+    if NEVER_BUDGET.search(own):
         return None
     for doc_type, pattern in DOC_TYPES:
         if pattern.search(text):
@@ -405,6 +415,7 @@ def process_authority(authority, known_page):
     now = datetime.datetime.now().replace(microsecond=0)
     result = dict(
         authority_code=code, entity_id=authority['entity_id'], name=name, website=website,
+        authority_type=authority.get('authority_type'),
         budget_page_url=None, page_source=None, status=None, error=None,
         discovered_at=None, last_checked=now,
     )
@@ -494,14 +505,37 @@ def scrape(limit=None):
     return pages, files
 
 
-PAGE_FIELDS = ['authority_code', 'entity_id', 'name', 'website', 'budget_page_url', 'page_source', 'status',
-               'error', 'n_files', 'n_spreadsheets', 'latest_fiscal_year', 'discovered_at', 'last_checked']
+def store_and_analyze(files):
+    """Keeps a copy of each file in the object store and checks whether it's ready to process."""
+    import budget_file_store
+    with ThreadPoolExecutor(8) as executor:
+        results = list(executor.map(budget_file_store.process_file, files))
+    files = [f for f, _ in results]
+    tables = [t for _, ts in results for t in ts]
+    logging.info('Analyzed %d files: %d ready to process, %d could not be downloaded', len(files),
+                 sum(1 for f in files if f.get('ready_to_process')),
+                 sum(1 for f in files if f.get('analysis_status') != 'ok'))
+    return files, tables
+
+
+PAGE_FIELDS = ['authority_code', 'entity_id', 'name', 'authority_type', 'website', 'budget_page_url', 'page_source',
+               'status', 'error', 'n_files', 'n_spreadsheets', 'latest_fiscal_year', 'discovered_at', 'last_checked']
 FILE_FIELDS = ['authority_code', 'entity_id', 'name', 'fiscal_year', 'doc_type', 'format', 'file_url',
                'link_text', 'context', 'fiscal_year_source', 'page_url']
+ANALYZED_FILE_FIELDS = FILE_FIELDS + [
+    'stored_url', 'file_size', 'analysis_status', 'table_kind', 'ready_to_process', 'n_tables', 'n_rows',
+    'value_columns', 'expected_columns', 'income_sign', 'expense_sign', 'units', 'issues']
+TABLE_FIELDS = ['authority_code', 'name', 'fiscal_year', 'file_url', 'stored_url', 'format', 'sheet', 'kind',
+                'header_row', 'first_col', 'code_col', 'title_col', 'n_rows', 'value_columns', 'income_sign',
+                'expense_sign', 'units', 'units_source', 'expected_columns', 'ready', 'issues']
 
 
-def scraped_flow(limit=None):
-    pages, files = scrape(limit)
+def rows_or_placeholder(rows, fields):
+    # dataflows needs at least one row to infer a schema; the placeholder is filtered out right after
+    return [{k: r.get(k) for k in fields} for r in rows] or [{k: None for k in fields}]
+
+
+def output_flow(pages, files, tables):
     return DF.Flow(
         [{k: p.get(k) for k in PAGE_FIELDS} for p in pages],
         DF.update_resource(-1, name='budget_pages', path='budget_pages.csv'),
@@ -511,29 +545,61 @@ def scraped_flow(limit=None):
         DF.set_type('discovered_at', type='datetime', resources='budget_pages'),
         DF.set_type('last_checked', type='datetime', resources='budget_pages'),
         DF.set_primary_key(['authority_code'], resources='budget_pages'),
-        [{k: f.get(k) for k in FILE_FIELDS} for f in files] or [{k: None for k in FILE_FIELDS}],
+        rows_or_placeholder(files, ANALYZED_FILE_FIELDS),
         DF.update_resource(-1, name='budget_files', path='budget_files.csv'),
         DF.filter_rows(lambda row: row['file_url'] is not None, resources='budget_files'),
-        DF.set_type('fiscal_year', type='integer', resources='budget_files'),
+        DF.set_type('(fiscal_year|file_size|n_tables|n_rows)', type='integer', resources='budget_files'),
+        DF.set_type('(ready_to_process|expected_columns)', type='boolean', resources='budget_files'),
+        rows_or_placeholder(tables, TABLE_FIELDS),
+        DF.update_resource(-1, name='budget_file_tables', path='budget_file_tables.csv'),
+        DF.filter_rows(lambda row: row['file_url'] is not None, resources='budget_file_tables'),
+        DF.set_type('(fiscal_year|header_row|first_col|title_col|n_rows)', type='integer',
+                    resources='budget_file_tables'),
+        DF.set_type('(ready|expected_columns)', type='boolean', resources='budget_file_tables'),
     )
 
 
+def write_report(path, pages, files):
+    """Writes index.html next to the datapackage, once all rows have been dumped."""
+    def func(package):
+        yield package.pkg
+        yield from package
+        import budget_report
+        os.makedirs(path, exist_ok=True)
+        with open(os.path.join(path, 'index.html'), 'w', encoding='utf-8') as f:
+            f.write(budget_report.render(pages, files))
+    return func
+
+
+def build(limit=None):
+    pages, files = scrape(limit)
+    files, tables = store_and_analyze(files)
+    return pages, files, tables
+
+
 def flow(*_):
+    # MUNICIPAL_BUDGET_FILES_LIMIT runs on the first N authorities only, for testing the pipeline end to end
+    pages, files, tables = build(int(os.environ.get('MUNICIPAL_BUDGET_FILES_LIMIT') or 0) or None)
     return DF.Flow(
-        scraped_flow(),
+        output_flow(pages, files, tables),
         DF.update_resource(None, **{'dpp:streaming': True}),
         DF.dump_to_path(OUT_PATH),
         DF.dump_to_sql(dict(
             municipal_budget_pages={'resource-name': 'budget_pages'},
             municipal_budget_files={'resource-name': 'budget_files'},
+            municipal_budget_file_tables={'resource-name': 'budget_file_tables'},
         )),
+        write_report(OUT_PATH, pages, files),
     )
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     limit = int(os.environ['LIMIT']) if os.environ.get('LIMIT') else None
+    out = os.environ.get('OUT', 'municipal_budget_files_out')
+    pages, files, tables = build(limit)
     DF.Flow(
-        scraped_flow(limit),
-        DF.dump_to_path(os.environ.get('OUT', 'municipal_budget_files_out')),
+        output_flow(pages, files, tables),
+        DF.dump_to_path(out),
+        write_report(out, pages, files),
     ).process()
