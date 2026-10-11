@@ -1,0 +1,9 @@
+scraper:
+  dependencies:
+    - pipeline: ./entities/municipal_websites/websites
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: municipal-budget-files
+        title: קבצי התקציב של הרשויות המקומיות
+    - flow: budget_files_scraper

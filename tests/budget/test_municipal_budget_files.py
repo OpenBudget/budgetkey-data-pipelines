@@ -1,0 +1,142 @@
+import importlib.util
+import io
+from pathlib import Path
+
+import pytest
+
+SCRAPER = Path(__file__).parents[2] / 'datapackage_pipelines_budgetkey/pipelines/budget/municipal/budget_files/budget_files_scraper.py'
+spec = importlib.util.spec_from_file_location('budget_files_scraper', SCRAPER)
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+
+
+class FakeResponse:
+    def __init__(self, url, html, status=200):
+        self.url, self.status_code = url, status
+        self.headers = {'content-type': 'text/html'}
+        self.raw = io.BytesIO(html.encode('utf-8'))
+        self.raw.read = lambda n=-1, decode_content=True, _read=self.raw.read: _read(n)
+        self.text = html
+
+    def close(self):
+        pass
+
+
+class FakeSession:
+    def __init__(self, pages):
+        self.pages = pages
+        self.requested = []
+
+    def get(self, url, **kwargs):
+        self.requested.append(url)
+        if url not in self.pages:
+            return FakeResponse(url, 'not found', status=404)
+        return FakeResponse(url, self.pages[url])
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('תקציב 2025', 'budget'),
+    ('הצעת התקציב הרגיל 2025', 'budget_proposal'),
+    ('תקציב בלתי רגיל לשנת 2026', 'development_budget'),
+    ('התקציב הבלתי רגיל לשנת 2026', 'development_budget'),
+    ('תקציב פיתוח לשנת 2025', 'development_budget'),
+    ('עדכון תקציב מס\' 1 לשנת 2026', 'budget_update'),
+    ('דו"ח תקציב מול ביצוע 2017', 'budget_vs_execution'),
+    ('תמצית הדוחות הכספיים לשנת 2016', None),
+    ('צו ארנונה 2025', None),
+    ('דוח מבקר המועצה לשנת 2018', None),
+])
+def test_classify(text, expected):
+    assert m.classify(text, '', '') == expected
+
+
+def test_classify_uses_heading_only_for_bare_links():
+    assert m.classify('2016', 'file.xlsx', 'תקציב רגיל') == 'budget'
+    assert m.classify('צו ארנונה', 'file.pdf', 'תקציב שנתי, דוח כספי, צו ארנונה') is None
+    assert m.classify('תמצית הדוחות הכספיים לשנת 2022', 'a.pdf', 'עדכון תקציב 2023') is None
+    assert m.classify('רבעון ראשון 2021', 'a.pdf', 'תקציב 2021') is None
+
+
+@pytest.mark.parametrize('args, expected', [
+    (('תקציב 2025', 'a.xlsx', ''), (2025, 'link_text')),
+    (('חוברת תקציב', 'taktziv__2019.pdf', ''), (2019, 'filename')),
+    (('2016', 'x.xlsx', 'תקציב רגיל'), (2016, 'link_text')),
+    (('אקסל', '1755517403.1298.xlsx', 'תקציב 2023'), (2023, 'context')),
+    (('נתוני ביצוע מבוקר 2016, עדכון תקציב 2017, תקציב 2018', '', ''), (2018, 'link_text')),
+    (('תקציב', '', ''), (None, None)),
+])
+def test_fiscal_year(args, expected):
+    assert m.fiscal_year(*args) == expected
+
+
+def test_page_with_base_href_iframe_and_file_browser():
+    session = FakeSession({
+        'https://muni.example.il/budget/': '''
+            <html><head><base href="https://muni.example.il/"></head><body>
+            <h3>תקציב רגיל</h3><a href="uploads/n/1.xlsx">2024</a>
+            <a href="uploads/n/2.pdf">צו ארנונה</a>
+            <iframe src="./filebrowser/?folder=42"></iframe>
+            </body></html>''',
+        'https://muni.example.il/filebrowser/?folder=42': '''
+            <ul><li><a href="./?folder=42&sub=471">2025</a></li></ul>''',
+        'https://muni.example.il/filebrowser/?folder=42&sub=471': '''
+            <a href="./?folder=42&sub=42">תיקייה למעלה</a>
+            <a href="../uploads/n/3.xlsx">‏‏הצעת התקציב הרגיל</a>''',
+    })
+    page_url, files = m.collect_files(session, 'https://muni.example.il/budget/')
+    by_url = {f['file_url']: f for f in files}
+    assert set(by_url) == {'https://muni.example.il/uploads/n/1.xlsx', 'https://muni.example.il/uploads/n/3.xlsx'}
+    assert by_url['https://muni.example.il/uploads/n/1.xlsx']['fiscal_year'] == 2024
+    proposal = by_url['https://muni.example.il/uploads/n/3.xlsx']
+    assert (proposal['fiscal_year'], proposal['fiscal_year_source']) == (2025, 'context')
+    assert proposal['doc_type'] == 'budget_proposal'
+    assert proposal['link_text'] == 'הצעת התקציב הרגיל'
+    assert proposal['page_url'] == 'https://muni.example.il/budget/'
+
+
+AUTHORITY = dict(authority_code='31', entity_id='500200316', name='אופקים', website='https://muni.example.il/')
+FILE = dict(file_url='https://muni.example.il/b.xlsx', format='xlsx', fiscal_year=2025)
+
+
+def test_known_page_with_files_skips_discovery(monkeypatch):
+    monkeypatch.setattr(m, 'check_page', lambda session, url: (url, [dict(FILE)]))
+    monkeypatch.setattr(m, 'discover', lambda *args: pytest.fail('should not rediscover'))
+    page, files = m.process_authority(AUTHORITY, dict(budget_page_url='https://muni.example.il/budget/',
+                                                      page_source='heuristic', discovered_at='2026-01-01'))
+    assert (page['status'], page['page_source'], page['discovered_at']) == ('ok', 'heuristic', '2026-01-01')
+    assert len(files) == 1 and files[0]['authority_code'] == '31'
+
+
+@pytest.mark.parametrize('known_page_result', [[], m.FetchError('http-404')])
+def test_known_page_gone_or_empty_rediscovers(monkeypatch, known_page_result):
+    def check_page(session, url):
+        if isinstance(known_page_result, Exception):
+            raise known_page_result
+        return url, known_page_result
+    monkeypatch.setattr(m, 'check_page', check_page)
+    monkeypatch.setattr(m, 'discover', lambda *args: ('https://muni.example.il/new/', [dict(FILE)], 'heuristic'))
+    page, files = m.process_authority(AUTHORITY, dict(budget_page_url='https://muni.example.il/old/',
+                                                      page_source='heuristic'))
+    assert (page['status'], page['budget_page_url'], page['n_spreadsheets']) == ('ok', 'https://muni.example.il/new/', 1)
+    assert page['error'] is None
+
+
+def test_unreachable_site(monkeypatch):
+    def discover(*args):
+        raise m.FetchError('blocked', '403')
+    monkeypatch.setattr(m, 'discover', discover)
+    page, files = m.process_authority(AUTHORITY, None)
+    assert page['status'] == 'unreachable-blocked' and files == []
+
+
+def test_unreachable_site_keeps_previous_results(monkeypatch):
+    def fail(*args):
+        raise m.FetchError('blocked', '403')
+    monkeypatch.setattr(m, 'check_page', fail)
+    monkeypatch.setattr(m, 'discover', fail)
+    known = dict(budget_page_url='https://muni.example.il/budget/', page_source='heuristic',
+                 discovered_at='2026-01-01', last_checked='2026-02-01', files=[dict(FILE)])
+    page, files = m.process_authority(AUTHORITY, known)
+    assert (page['status'], page['budget_page_url'], page['last_checked']) == \
+        ('stale', 'https://muni.example.il/budget/', '2026-02-01')
+    assert page['error'].startswith('unreachable') and len(files) == 1

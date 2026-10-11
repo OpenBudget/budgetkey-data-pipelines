@@ -1,6 +1,6 @@
 websites:
   schedule:
-    crontab: 0 3 * * 0
+    crontab: 0 3 sun * *  # dpp passes fields to celery: minute hour day_of_week day_of_month month_of_year
   pipeline:
     - run: add_metadata
       parameters:
