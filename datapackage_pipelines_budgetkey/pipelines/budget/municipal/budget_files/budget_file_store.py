@@ -5,6 +5,7 @@ Objects live at municipal-budgets/<authority_code>/<url hash>.<ext>, with the an
 and re-analyze it only when the analyzer changes.
 """
 import csv
+import datetime
 import hashlib
 import io
 import json
@@ -154,9 +155,32 @@ def read_rows(f):
     return list(csv.DictReader(io.StringIO(data.decode('utf-8') if isinstance(data, bytes) else data)))
 
 
+REGULAR_BUDGET = ('budget', 'budget_proposal')
+
+
+def check_budget_columns(f, result):
+    """A regular budget's year comes from its columns when they disagree with the page, and the file is flagged
+    when its ready tables lack one of the three budget columns."""
+    if f.get('doc_type') not in REGULAR_BUDGET:
+        return
+    ready = [t['value_columns'] for t in result['tables'] if t.get('ready')]
+    year = analysis.budget_year(ready, f['fiscal_year'], datetime.date.today().year + 1)
+    if year != f['fiscal_year']:
+        f.update(fiscal_year=year, fiscal_year_source='columns')
+    for t in result['tables']:
+        t['expected_columns'] = analysis.expected_columns(t['value_columns'], year)
+    if not ready:
+        return
+    found = set(kind for columns in ready for kind in analysis.budget_columns(columns, year).values())
+    missing = ['missing-' + kind for kind in analysis.BUDGET_COLUMNS.values() if kind not in found]
+    f['expected_columns'] = not missing
+    f['issues'] = ','.join(filter(None, [f.get('issues')] + missing)) or None
+
+
 def apply(f, result):
     f.update(file_size=result.get('size'), analysis_status=result['status'],
              **{k: result['summary'].get(k) for k in ANALYSIS_FIELDS})
+    check_budget_columns(f, result)
     tables = []
     for index, t in enumerate(result['tables']):
         if t['kind'] == 'none':

@@ -263,7 +263,9 @@ def test_budget_lines_normalize_units_and_signs(monkeypatch):
                   format=fmt, ready_to_process=True, file_url='https://x/%s' % fmt, stored_url='s3://%s' % fmt)
              for fmt in ('pdf', 'xlsx')]
     tables = [dict(file_url='https://x/xlsx', table_index=0, ready=True, units='thousands', income_sign='negative',
-                   expense_sign='positive', duplicate_columns=[1])]
+                   expense_sign='positive', duplicate_columns=[1],
+                   value_columns=json.dumps([dict(kind='approved', year=2024), dict(kind='approved', year=2024,
+                                                                                    duplicate=True)]))]
     rows = [dict(table_index='0', sheet='s', row='5', code=code, title='t', column=column, kind='approved',
                  year='2024', header='תקציב 2024', value=value)
             for code, column, value in [('1111000100', '0', '-250'), ('1614000750', '0', '40'), ('1614000750', '1', '7')]]
@@ -293,3 +295,82 @@ def test_slash_codes():
     assert (t['code_col'], t['title_col']) == (2, 3)
     assert [(v['kind'], v['year']) for v in t['value_columns']] == [('approved', 2026), ('executed', 2024)]
     assert a.chapter_kind('11000/121/8') == 'income' and a.chapter_of('61111/124/2') == '61'
+
+
+def columns(*kind_years):
+    return [dict(kind=k, year=y) for k, y in kind_years]
+
+
+def headed(*headers):
+    return [a.describe_value_column(h) for h in headers]
+
+
+@pytest.mark.parametrize('fiscal_year, headers, expected', [
+    # Reviewed by hand: (budget year, the value column headers, the three budget columns among them)
+    (2025, ['הצעת תקציב 2025'], {0: 'proposed'}),  # Kiryat Bialik
+    (2024, ['תקציב 2024'], {0: 'proposed'}),  # Bat Yam, Ramla: a lone column is the proposal
+    (2021, ['ביצוע 2019', 'תקציב 2020', 'ביצוע 2020 (לא סופי)', 'תקציב 2021'],  # Kiryat Shmona
+     {0: 'executed', 1: 'approved', 3: 'proposed'}),
+    (2024, ['תקציב 2024', 'ביצוע 2023 (לא מבוקר)', 'תקציב  2023'], {0: 'proposed', 2: 'approved'}),  # Kfar Saba
+    (2025, ['תקציב 2024 מקורי*', 'אומדן 2024', 'תקציב 2025'], {2: 'proposed'}),  # Hadera
+    (2025, ['תקציב 2025 מאושר', 'תקציב מעודכן שוטף 2024', 'שינוי', 'תקציב 2024 מאושר'],  # Rishon LeZion
+     {0: 'proposed', 1: 'approved'}),
+    (2024, ['מחלקה', 'תקציב מעודכן', 'ביצוע מצטבר 2', 'בקשת מחלקה', 'בסיס 2024', 'מותנה 2024',  # Ashdod
+            'תקציב 2024 כולל מותנה'], {1: 'approved', 6: 'proposed'}),
+    (2022, ['תקציב חדש 2022', 'תקציב ישן 2021', 'הוצאה בפועל 2020'],  # Tel Aviv
+     {0: 'proposed', 1: 'approved', 2: 'executed'}),
+    (2025, ['ביצוע 2023', 'תקציב 2024', 'הצעת תקציב 2025'], {0: 'executed', 1: 'approved', 2: 'proposed'}),  # Haifa
+])
+def test_budget_columns(fiscal_year, headers, expected):
+    assert a.budget_columns(headed(*headers), fiscal_year) == expected
+    assert a.expected_columns(headed(*headers), fiscal_year) == (len(expected) == 3)
+
+
+def test_budget_year_comes_from_the_columns():
+    cols = [columns(('approved', 2018), ('approved', 2017), ('executed', 2016))]
+    assert a.budget_year(cols, 2017, 2027) == 2018
+    assert a.budget_year(cols, 2018, 2027) == 2018
+    assert a.budget_year([columns(('approved', 2022))], 2021, 2027) == 2021
+    assert a.budget_year(cols, None, 2027) == 2018
+    assert a.budget_year([headed('ביצוע', 'תקציב 2024', 'הצעת תקציב 2025')], None, 2027) == 2025
+    # Only a year off: a multi-year table doesn't move a budget around
+    assert a.budget_year([columns(*(('approved', y) for y in range(2019, 2030)))], 2023, 2027) == 2023
+
+
+def test_files_are_flagged_and_relabelled_by_their_columns():
+    f = dict(doc_type='budget', fiscal_year=2017, issues=None, expected_columns=False)
+    result = dict(tables=[dict(ready=True, value_columns=columns(('approved', 2018), ('approved', 2017),
+                                                                 ('executed', 2016)))])
+    store.check_budget_columns(f, result)
+    assert (f['fiscal_year'], f['fiscal_year_source']) == (2018, 'columns')
+    assert f['expected_columns'] and f['issues'] is None and result['tables'][0]['expected_columns']
+
+    f = dict(doc_type='budget', fiscal_year=2022, issues='units-unknown', expected_columns=False)
+    store.check_budget_columns(f, dict(tables=[dict(ready=True, value_columns=columns(('approved', 2022)))]))
+    assert f['fiscal_year'] == 2022 and not f['expected_columns']
+    assert f['issues'] == 'units-unknown,missing-executed,missing-approved'
+
+    update = dict(doc_type='budget_update', fiscal_year=2022, issues=None)
+    store.check_budget_columns(update, dict(tables=[dict(ready=True, value_columns=columns(('revised', 2022)))]))
+    assert update['issues'] is None
+
+
+def test_budget_lines_take_a_table_published_twice_once(monkeypatch):
+    import budget_files_scraper as scraper
+    files = [dict(authority_code='4000', entity_id='500', name='חיפה', fiscal_year=2025, doc_type='budget',
+                  format='xlsx', ready_to_process=True, file_url='https://x/%s.xlsx' % n, stored_url='s3://%s' % n)
+             for n in ('details', 'workbook')]
+    value_columns = json.dumps(columns(('executed', 2023), ('approved', 2024), ('proposed', 2025)))
+    tables = [dict(file_url=f['file_url'], table_index=i, ready=True, units='thousands', income_sign='positive',
+                   expense_sign='positive', duplicate_columns=[], value_columns=value_columns)
+              for f in files for i in (0, 1)]
+    details = [dict(table_index='0', sheet='פירוט', row='7', code='1611000110', title='שכר', column=str(c),
+                    kind='approved', year=str(2023 + c), header='', value=str(100 + c)) for c in range(3)]
+    summary = [dict(row, table_index='1', sheet='ריכוז', code='1611000999', value='5') for row in details]
+    monkeypatch.setattr(store, 'read_rows',
+                        lambda f: details if 'details' in f['file_url'] else details + summary)
+    lines = list(scraper.budget_lines(files, tables))
+    assert [(l['file_url'][-13:], l['column_kind'], l['column_year']) for l in lines] == [
+        ('/details.xlsx', 'executed', 2023), ('/details.xlsx', 'approved', 2024), ('/details.xlsx', 'proposed', 2025),
+        ('workbook.xlsx', 'executed', 2023), ('workbook.xlsx', 'approved', 2024), ('workbook.xlsx', 'proposed', 2025)]
+    assert [l['code'] for l in lines[3:]] == ['1611000999'] * 3

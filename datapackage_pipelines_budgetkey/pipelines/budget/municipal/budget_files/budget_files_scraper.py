@@ -1,5 +1,6 @@
 import ast
 import csv
+import json
 import os
 import re
 import time
@@ -126,7 +127,36 @@ def clean(text):
     return ' '.join(re.sub(r'[\u200e\u200f\u202a-\u202e]', '', text or '').split())
 
 
+SECTION_TITLE_TAGS = {'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'summary', 'dt', 'legend', 'button'}
+SECTION_TITLE_CLASS = re.compile(r'title|head|toggle|trigger|caption', re.I)
+
+
+def section_title(a):
+    """The title of the collapsible section the link sits in, e.g. Haifa's accordion "תקציב רגיל לשנת 2025 – הוצאות"
+    above a file labelled only "פירוט הוצאות"."""
+    el = a
+    for _ in range(8):
+        parent = el.getparent()
+        if parent is None:
+            break
+        title = el.getprevious()
+        while title is not None and not isinstance(title.tag, str):
+            title = title.getprevious()
+        if title is not None and (title.tag in SECTION_TITLE_TAGS or SECTION_TITLE_CLASS.search(title.get('class') or '')):
+            text = clean(title.text_content())
+            if 0 < len(text) < 150:
+                return text
+        el = parent
+    return ''
+
+
 def heading_context(a):
+    label = nearest_label(a)
+    title = section_title(a)
+    return label if not title or title in label else clean('%s %s' % (title, label))
+
+
+def nearest_label(a):
     # The nearest preceding heading-like text, e.g. a bare "2016" link under "תקציב רגיל"
     for el in a.itersiblings(lxml.etree.Element, preceding=True):
         text = clean(el.text_content())
@@ -587,6 +617,18 @@ def line_sources(files):
     return [f for f in ready if FORMAT_RANK[f['format']] == best[(f['authority_code'], f['fiscal_year'], f['doc_type'])]]
 
 
+def column_kinds(f, t):
+    """Value column index -> kind. In a regular budget the kind follows the column's year (executed Y-2,
+    approved Y-1, proposed Y) and other columns get none; elsewhere it's the header's."""
+    import budget_file_analysis
+    import budget_file_store
+    columns = t['value_columns']
+    columns = json.loads(columns) if isinstance(columns, str) else columns
+    if f['doc_type'] in budget_file_store.REGULAR_BUDGET:
+        return budget_file_analysis.budget_columns(columns, f['fiscal_year'])
+    return {n: c['kind'] for n, c in enumerate(columns)}
+
+
 def budget_lines(files, tables):
     """One row per budget line and value column, in NIS, with incomes and expenses both positive."""
     import budget_file_store
@@ -594,9 +636,22 @@ def budget_lines(files, tables):
     by_file = defaultdict(dict)
     for t in tables:
         by_file[t['file_url']][t['table_index']] = t
-    for f in line_sources(files):
+    # The same table is often published twice, e.g. on its own and as a sheet of a workbook with all the others
+    seen_tables = set()
+    for f in sorted(line_sources(files), key=lambda f: f['file_url']):
         file_tables = by_file.get(f['file_url'], {})
+        rows_by_table = defaultdict(list)
         for row in budget_file_store.read_rows(f):
+            rows_by_table[int(row['table_index'])].append(row)
+        unique = set()
+        for index, table_rows in rows_by_table.items():
+            content = frozenset((r['code'], r['year'], r['value']) for r in table_rows)
+            key = (f['authority_code'], f['fiscal_year'], content)
+            if key not in seen_tables:
+                seen_tables.add(key)
+                unique.add(index)
+        kinds = {index: column_kinds(f, t) for index, t in file_tables.items() if t['ready']}
+        for row in (r for index in sorted(unique) for r in rows_by_table[index]):
             t = file_tables.get(int(row['table_index']))
             if not t or not t['ready'] or int(row['column']) in t['duplicate_columns']:
                 continue
@@ -608,7 +663,8 @@ def budget_lines(files, tables):
                 authority_code=f['authority_code'], entity_id=f['entity_id'], name=f['name'],
                 fiscal_year=f['fiscal_year'], doc_type=f['doc_type'], code=row['code'],
                 chapter=budget_file_analysis.chapter_of(row['code']),
-                direction=direction, title=row['title'], column_kind=row['kind'] or None,
+                direction=direction, title=row['title'],
+                column_kind=kinds[int(row['table_index'])].get(int(row['column'])),
                 column_year=int(row['year']) if row['year'] else None,
                 amount=amount, value=value, units=t['units'], sign_normalized=sign is not None,
                 format=f['format'], sheet=row['sheet'], row=row['row'], file_url=f['file_url'],

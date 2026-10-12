@@ -108,14 +108,80 @@ def describe_value_column(header):
     return dict(header=header, kind=kind, year=max(years) if years else None)
 
 
-def expected_columns(columns, fiscal_year):
-    """The usual trio for budget year Y: executed (before Y), approved for Y-1 and the budget for Y itself."""
+# A regular budget for year Y has three value columns: executed Y-2 (ביצוע), approved Y-1 (מאושר) and proposed Y
+# (מקורי). Any of them may be missing; every other column is ignored.
+BUDGET_COLUMNS = {-2: 'executed', -1: 'approved', 0: 'proposed'}
+ESTIMATE = re.compile(r'אומדן|צפי|תחזית|הערכה|estimate', re.I)
+# Parts of a budget, e.g. "בסיס 2024" and "מותנה 2024" next to "תקציב 2024 כולל מותנה"
+PART = re.compile(r'בסיס|מותנה|בקשת|ללא')
+TOTAL = re.compile(r'כולל|סה"?״?כ')
+ORIGINAL = re.compile(r'מקורי')
+UPDATED = re.compile(r'מעודכן|עדכון')
+
+
+def budget_column_kind(column, fiscal_year):
+    """Which of the three budget columns this is, if any. The year decides, since the same budget is headed
+    "תקציב 2025" in one file and "הצעת תקציב 2025" in another; the header only rules out what isn't one."""
+    header, kind, year = column.get('header') or '', column.get('kind'), column.get('year')
+    if column.get('duplicate') or ESTIMATE.search(header) or (PART.search(header) and not TOTAL.search(header)):
+        return None
+    if year is None and UPDATED.search(header):
+        year = fiscal_year - 1  # The only updated budget a year-Y file can hold is Y-1's
+    if year is None:
+        return None
+    offset = year - fiscal_year
+    if offset == -2:
+        return 'executed' if kind == 'executed' else None
+    if offset == -1:
+        # Y-1's original budget comes from Y-1's own file, and its execution isn't final yet
+        return None if kind == 'executed' or ORIGINAL.search(header) else 'approved'
+    if offset == 0:
+        return None if kind == 'executed' else 'proposed'
+
+
+def column_rank(column, kind):
+    """Lower is better among columns of the same kind: the latest figure for Y-1, the total for Y."""
+    header = column.get('header') or ''
+    if kind == 'approved':
+        return 0 if UPDATED.search(header) else 1
+    if kind == 'proposed':
+        return 0 if TOTAL.search(header) else 1
+    return 0
+
+
+def budget_columns(columns, fiscal_year):
+    """Maps value column indexes to the three budget columns."""
+    result = {}
     if not fiscal_year:
-        return False
-    executed = any(c['kind'] == 'executed' and c['year'] and c['year'] < fiscal_year for c in columns)
-    current = any(c['kind'] in ('approved', 'revised') and c['year'] == fiscal_year - 1 for c in columns)
-    upcoming = any(c['kind'] in ('approved', 'proposed') and c['year'] == fiscal_year for c in columns)
-    return executed and current and upcoming
+        return result
+    for kind in BUDGET_COLUMNS.values():
+        candidates = [n for n, c in enumerate(columns) if budget_column_kind(c, fiscal_year) == kind]
+        if candidates:
+            result[min(candidates, key=lambda n: column_rank(columns[n], kind))] = kind
+    return result
+
+
+def expected_columns(columns, fiscal_year):
+    return len(budget_columns(columns, fiscal_year)) == len(BUDGET_COLUMNS)
+
+
+def budget_year(tables_columns, fiscal_year, max_year):
+    """The year whose budget the columns hold: one with columns for the two years before it. Pages often label
+    files a year off, e.g. a file under "2024" with columns for 2023, 2024 and 2025."""
+    candidates = set()
+    for columns in tables_columns:
+        years = {c['year'] for c in columns if c.get('year') and not c.get('duplicate')}
+        candidates |= {y for y in years if y - 1 in years and y - 2 in years and y <= max_year}
+    if fiscal_year:
+        # Only a year off: tables with many years, e.g. multi-year plans, have candidates all over
+        candidates &= {fiscal_year - 1, fiscal_year, fiscal_year + 1}
+    elif not candidates:
+        # No year on the page either: the latest column is the budget's, e.g. "תקציב 2024 | הצעת תקציב 2025"
+        candidates = {c['year'] for columns in tables_columns for c in columns
+                      if c.get('year') and not c.get('duplicate') and c['year'] <= max_year}
+    if not candidates or fiscal_year in candidates:
+        return fiscal_year
+    return max(candidates)
 
 
 # --- signs and units ---------------------------------------------------------

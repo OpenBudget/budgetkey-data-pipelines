@@ -166,3 +166,21 @@ def test_tel_aviv_sharepoint_tables():
     assert posted[0][0] == 'https://www.tel-aviv.gov.il/_vti_bin/TlvSP2013PublicSite/TlvList.svc/GetTables'
     assert posted[0][1]['dataSource']['ListId'] == 'c598'
     assert [(f['fiscal_year'], f['format'], f['doc_type']) for f in files] == [(2026, 'xlsx', 'budget')]
+
+
+def test_section_title_gives_context_to_bare_file_labels():
+    # Haifa: the year and the word "תקציב" are only in the accordion's title, and the file's own label is wrong
+    html = '''<ul class="accordion"><li class="accordion-item">
+        <a class="accordion-title">תקציב רגיל לשנת 2025 – הוצאות (12)</a>
+        <div class="accordion-content">
+          <div class="tr_item"><div class="col"><span>נושאים שונים</span></div>
+            <div class="col"><a href="https://h.example.il/a.xlsx"></a></div></div>
+          <div class="tr_item"><div class="col"><span>פירוט הוצאות 2024</span></div>
+            <div class="col"><a href="https://h.example.il/%D7%A4%D7%99%D7%A8%D7%95%D7%98.xlsx"></a></div></div>
+        </div></li></ul>'''
+    doc = m.lxml.html.fromstring(html, base_url='https://h.example.il/budget/')
+    files = {f['file_url'].rsplit('/', 1)[-1]: f for f in m.budget_files(doc, 'https://h.example.il/budget/')}
+    detail = files['%D7%A4%D7%99%D7%A8%D7%95%D7%98.xlsx']
+    assert detail['context'] == 'תקציב רגיל לשנת 2025 – הוצאות (12) פירוט הוצאות 2024'
+    assert (detail['doc_type'], detail['fiscal_year']) == ('budget', 2025)
+    assert files['a.xlsx']['context'] == 'תקציב רגיל לשנת 2025 – הוצאות (12) נושאים שונים'
