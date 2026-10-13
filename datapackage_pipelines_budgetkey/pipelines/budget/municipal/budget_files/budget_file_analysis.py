@@ -112,11 +112,16 @@ def describe_value_column(header):
 # (מקורי). Any of them may be missing; every other column is ignored.
 BUDGET_COLUMNS = {-2: 'executed', -1: 'approved', 0: 'proposed'}
 ESTIMATE = re.compile(r'אומדן|צפי|תחזית|הערכה|estimate', re.I)
-# Parts of a budget, e.g. "בסיס 2024" and "מותנה 2024" next to "תקציב 2024 כולל מותנה"
+# Parts of a budget, e.g. "בסיס 2024" and "מותנה 2024" next to "תקציב 2024 כולל מותנה" or "בסיס+מותנה 2024"
 PART = re.compile(r'בסיס|מותנה|בקשת|ללא')
-TOTAL = re.compile(r'כולל|סה"?״?כ')
+TOTAL = re.compile(r'כולל|סה"?״?כ|\+')
 ORIGINAL = re.compile(r'מקורי')
-UPDATED = re.compile(r'מעודכן|עדכון')
+UPDATED = re.compile(r'מעודכ[ןנ]|עדכון')
+FINAL = re.compile(r'(?<!לא )סופי')
+# Columns derived from the budget rather than holding it: "אחוז השינוי מול 2023", "שינוי מתקציב 2019",
+# "ניצול 2012 % שנתי", "תקציב יחסי". "תקציב 2023 שינוי 1" is the budget after its first amendment, so it stays
+DERIVED = re.compile(r'אחוז|%|שינוי|פער|סטיה|יחס')
+AMENDED = re.compile(r'תקציב\s*\d{4}\s*שינוי\s*\d')
 
 
 def budget_column_kind(column, fiscal_year):
@@ -124,6 +129,8 @@ def budget_column_kind(column, fiscal_year):
     "תקציב 2025" in one file and "הצעת תקציב 2025" in another; the header only rules out what isn't one."""
     header, kind, year = column.get('header') or '', column.get('kind'), column.get('year')
     if column.get('duplicate') or ESTIMATE.search(header) or (PART.search(header) and not TOTAL.search(header)):
+        return None
+    if DERIVED.search(header) and not AMENDED.search(header):
         return None
     if year is None and UPDATED.search(header):
         year = fiscal_year - 1  # The only updated budget a year-Y file can hold is Y-1's
@@ -133,8 +140,12 @@ def budget_column_kind(column, fiscal_year):
     if offset == -2:
         return 'executed' if kind == 'executed' else None
     if offset == -1:
-        # Y-1's original budget comes from Y-1's own file, and its execution isn't final yet
-        return None if kind == 'executed' or ORIGINAL.search(header) else 'approved'
+        # Y-1's original budget ("מקורי", "הצעה") comes from Y-1's own file, and its execution isn't final yet
+        if kind == 'executed':
+            return None
+        if UPDATED.search(header):
+            return 'approved'
+        return None if kind == 'proposed' or ORIGINAL.search(header) else 'approved'
     if offset == 0:
         return None if kind == 'executed' else 'proposed'
 
@@ -143,7 +154,7 @@ def column_rank(column, kind):
     """Lower is better among columns of the same kind: the latest figure for Y-1, the total for Y."""
     header = column.get('header') or ''
     if kind == 'approved':
-        return 0 if UPDATED.search(header) else 1
+        return 0 if UPDATED.search(header) or FINAL.search(header) else 1
     if kind == 'proposed':
         return 0 if TOTAL.search(header) else 1
     return 0

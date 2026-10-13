@@ -320,6 +320,19 @@ def headed(*headers):
     (2022, ['תקציב חדש 2022', 'תקציב ישן 2021', 'הוצאה בפועל 2020'],  # Tel Aviv
      {0: 'proposed', 1: 'approved', 2: 'executed'}),
     (2025, ['ביצוע 2023', 'תקציב 2024', 'הצעת תקציב 2025'], {0: 'executed', 1: 'approved', 2: 'proposed'}),  # Haifa
+    # Columns derived from the budget are never one of its three columns
+    (2024, ['אחוז השינוי מול 2023', 'הצעה\n2024', 'הצעה\n2023', 'ביצוע\n2022'], {1: 'proposed', 3: 'executed'}),  # Holon
+    (2013, ['הצעה 2013 %', 'הצעה 2013'], {1: 'proposed'}),  # Gush Etzion
+    (2020, ['שינוי מתקציב 2019', 'תקציב 2020'], {1: 'proposed'}),  # Maghar
+    (2023, ['תקציב 2022 שינוי 1', 'תקציב 2023'], {0: 'approved', 1: 'proposed'}),  # an amended budget is a budget
+    # Base plus conditional is the total; the final figure is the latest
+    (2022, ['בקשת מחלקה 2022', 'בסיס לתקציב 2022', 'מותנה 2022', 'תקציב כולל מותנה 2022', 'בסיס+מותנה 2021'],  # Ashdod
+     {3: 'proposed', 4: 'approved'}),
+    (2019, ['תקציב 2019', 'אומדן 2018', 'סופי 2018', 'מקורי 2018', 'ביצוע 2017'],  # Herzliya
+     {0: 'proposed', 2: 'approved', 4: 'executed'}),
+    (2019, ['תקציב 2019', '2018', 'סופי 2018'], {0: 'proposed', 2: 'approved'}),
+    (2021, ['תקציב 2021', 'תקציב 2020', 'סופי'], {0: 'proposed', 1: 'approved'}),  # an undated final isn't dated by it
+    (2018, ['הצעת מעודכנת  2017', 'תקציב 2018'], {0: 'approved', 1: 'proposed'}),  # Pasuta: updated, not a proposal
 ])
 def test_budget_columns(fiscal_year, headers, expected):
     assert a.budget_columns(headed(*headers), fiscal_year) == expected
