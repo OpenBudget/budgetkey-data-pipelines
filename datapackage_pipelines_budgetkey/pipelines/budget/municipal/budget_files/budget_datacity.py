@@ -252,11 +252,12 @@ def publish(loads):
 
 
 def start(datacity, ids):
-    """Airflow runs them one at a time; new DAGs need a parse cycle before they can be triggered."""
+    """Airflow runs them one at a time; new DAGs need a parse cycle before they can be triggered, which took
+    over 5 minutes for a first batch of 350."""
     pending = list(ids)
-    for attempt in range(4):
+    for attempt in range(16):
         if attempt:
-            time.sleep(90)
+            time.sleep(120)
         pending = [pid for pid in pending if not datacity.start(pid)]
         if not pending:
             break
