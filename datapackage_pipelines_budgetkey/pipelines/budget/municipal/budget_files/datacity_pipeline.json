@@ -1,0 +1,322 @@
+{
+ "constants": [],
+ "loader": {},
+ "model": {
+  "mapping": [
+   {
+    "name": "card-code",
+    "title": "מזהה כרטיס",
+    "description": "מזהה של כרטיס (סעיף התקציבי)",
+    "columnType": "card:code",
+    "options": {}
+   },
+   {
+    "name": "card-name",
+    "title": "שם כרטיס",
+    "description": "שם בעברית של כרטיס (סעיף התקציבי)",
+    "columnType": "card:name",
+    "options": {}
+   },
+   {
+    "name": "municipality-name",
+    "title": "שם הרשות המקומית",
+    "description": "השם של הרשות המקומית",
+    "columnType": "municipality:name",
+    "options": {}
+   },
+   {
+    "name": "phase",
+    "title": "שלב",
+    "description": "השלב התקצובי, למשל: מתוכנן, מאושר, מבוצע וכו׳",
+    "columnType": "phase",
+    "options": {}
+   },
+   {
+    "name": "fiscal-year",
+    "title": "שנת התקציב",
+    "description": "שנת התקציב אליה התקציב מתייחס",
+    "columnType": "fiscal-year",
+    "options": {
+     "bareNumber": true
+    }
+   },
+   {
+    "name": "value",
+    "title": "סכום",
+    "description": "התקציב עצמו, בשקלים חדשים",
+    "columnType": "value",
+    "options": {}
+   }
+  ],
+  "extraFields": [],
+  "primary_key": [
+   "card:code",
+   "phase",
+   "fiscal-year"
+  ]
+ },
+ "publish": {
+  "allowed": false
+ },
+ "source": {
+  "path": "",
+  "format": "csv",
+  "encoding": "utf-8",
+  "deduplicate_headers": true,
+  "force_strings": true
+ },
+ "structure": {
+  "skip_rows": 0,
+  "skip_cols": 0
+ },
+ "taxonomy": {
+  "columnTypes": [
+   {
+    "dataType": "integer",
+    "description": "מזהה משרד הפנים של הרשות המקומית",
+    "name": "municipality:code",
+    "title": "מזהה הרשות המקומית",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "השם של הרשות המקומית",
+    "labelOf": "municipality:code",
+    "mandatory": true,
+    "name": "municipality:name",
+    "title": "שם הרשות המקומית"
+   },
+   {
+    "dataType": "string",
+    "description": "מזהה משרד הפנים הישוב בתוך הרשות המקומית",
+    "name": "city:code",
+    "title": "מזהה הישוב",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "שם הישוב בתוך הרשות המקומית",
+    "labelOf": "city:code",
+    "name": "city:name",
+    "title": "שם הישוב"
+   },
+   {
+    "alternatives": [
+     [
+      "card:code:part1",
+      "card:code:part2"
+     ],
+     [
+      "card:code:part1",
+      "card:code:part2",
+      "card:code:part3"
+     ]
+    ],
+    "dataType": "string",
+    "description": "מזהה של כרטיס (סעיף התקציבי)",
+    "mandatory": true,
+    "name": "card:code",
+    "title": "מזהה כרטיס",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "שם בעברית של כרטיס (סעיף התקציבי)",
+    "labelOf": "card:code",
+    "name": "card:name",
+    "title": "שם כרטיס"
+   },
+   {
+    "dataType": "string",
+    "description": "מזהה של כרטיס שמופיע בחלקים 1 (סעיף התקציבי)",
+    "name": "card:code:part1",
+    "title": "מזהה כרטיס מפורק - חלק 1"
+   },
+   {
+    "dataType": "string",
+    "description": "מזהה של כרטיס שמופיע בחלקים 2 (סעיף התקציבי)",
+    "name": "card:code:part2",
+    "title": "מזהה כרטיס מפורק - חלק 2"
+   },
+   {
+    "dataType": "string",
+    "description": "מזהה של כרטיס שמופיע בחלקים 3 (סעיף התקציבי)",
+    "name": "card:code:part3",
+    "title": "מזהה כרטיס מפורק - חלק 3"
+   },
+   {
+    "dataType": "integer",
+    "description": "שנת התקציב אליה התקציב מתייחס",
+    "mandatory": true,
+    "name": "fiscal-year",
+    "title": "שנת התקציב",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "השלב התקצובי, למשל: מתוכנן, מאושר, מבוצע וכו׳",
+    "mandatory": true,
+    "name": "phase",
+    "options": {
+     "constraints": {
+      "enum": [
+       "מקורי",
+       "מאושר",
+       "ביצוע"
+      ]
+     }
+    },
+    "title": "שלב",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "הכנסה או הוצאה",
+    "name": "direction:code",
+    "title": "כיוון",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "הקוד של הרמה העליונה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level1:code",
+    "title": "ספרור משרד הפנים - קוד רמה 1",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "הקוד של הרמה השניה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level2:code",
+    "title": "ספרור משרד הפנים - קוד רמה 2",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "הקוד של הרמה השלישית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level3:code",
+    "title": "ספרור משרד הפנים - קוד רמה 3",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "הקוד של הרמה הרביעית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level4:code",
+    "title": "ספרור משרד הפנים - קוד רמה 4",
+    "unique": true
+   },
+   {
+    "dataType": "string",
+    "description": "השם של הרמה העליונה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level1:name",
+    "title": "ספרור משרד הפנים - שם רמה 1"
+   },
+   {
+    "dataType": "string",
+    "description": "השם של הרמה השניה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level2:name",
+    "title": "ספרור משרד הפנים - שם רמה 2"
+   },
+   {
+    "dataType": "string",
+    "description": "השם של הרמה השלישית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level3:name",
+    "title": "ספרור משרד הפנים - שם רמה 3"
+   },
+   {
+    "dataType": "string",
+    "description": "השם של הרמה הרביעית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level4:name",
+    "title": "ספרור משרד הפנים - שם רמה 4"
+   },
+   {
+    "dataType": "string",
+    "description": "השם באנגלית של הרמה העליונה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level1:name-en",
+    "title": "ספרור משרד הפנים - שם רמה 1 באנגלית"
+   },
+   {
+    "dataType": "string",
+    "description": "השם באנגלית של הרמה השניה בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level2:name-en",
+    "title": "ספרור משרד הפנים - שם רמה 2 באנגלית"
+   },
+   {
+    "dataType": "string",
+    "description": "השם באנגלית של הרמה השלישית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level3:name-en",
+    "title": "ספרור משרד הפנים - שם רמה 3 באנגלית"
+   },
+   {
+    "dataType": "string",
+    "description": "השם באנגלית של הרמה הרביעית בספרור התקני של משרד הפנים",
+    "name": "functional-classification:moin:level4:name-en",
+    "title": "ספרור משרד הפנים - שם רמה 4 באנגלית"
+   },
+   {
+    "alternatives": [
+     [
+      "value-thousands"
+     ]
+    ],
+    "dataType": "number",
+    "description": "התקציב עצמו, בשקלים חדשים",
+    "mandatory": true,
+    "name": "value",
+    "title": "סכום"
+   },
+   {
+    "dataType": "number",
+    "description": "התקציב עצמו, באלפי שקלים חדשים",
+    "name": "value-thousands",
+    "title": "סכום באלפים"
+   }
+  ],
+  "id": "muni-budgets",
+  "missingValues": [
+   ""
+  ],
+  "options": [
+   {
+    "id": "muni-budgets",
+    "title": "תקציב"
+   },
+   {
+    "id": "muni-procurement",
+    "title": "תהליכי רכש/השמה"
+   },
+   {
+    "id": "muni-businesses",
+    "title": "מאגר עסקים"
+   },
+   {
+    "id": "schools",
+    "title": "מוסדות חינוך"
+   },
+   {
+    "id": "events",
+    "title": "אירועים"
+   },
+   {
+    "id": "expenses",
+    "title": "הוצאות"
+   },
+   {
+    "id": "tax-code-rates",
+    "title": "צו ארנונה"
+   },
+   {
+    "id": "property-tax-business-kinds",
+    "title": "ארנונה עסקית"
+   },
+   {
+    "id": "business-licensing-items-by-property",
+    "title": "פריטי רישוי לפי נכס פיזי"
+   },
+   {
+    "id": "business-kind-common-names",
+    "title": "שמות נפוצים לסוגי בתי עסק"
+   }
+  ],
+  "settings": {}
+ }
+}

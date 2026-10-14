@@ -8,3 +8,14 @@ scraper:
         title: קבצי התקציב של הרשויות המקומיות
         revision: '2026-10-13'
     - flow: budget_files_scraper
+
+datacity:
+  dependencies:
+    - pipeline: ./budget/municipal/budget_files/scraper
+    - pipeline: ./lamas/municipal-data
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: municipal-budget-datacity
+        title: טעינת תקציבי הרשויות המקומיות לדאטאסיטי
+    - flow: budget_datacity
