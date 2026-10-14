@@ -63,7 +63,10 @@
   "format": "csv",
   "encoding": "utf-8",
   "deduplicate_headers": true,
-  "force_strings": true
+  "force_strings": true,
+  "delimiter": ",",
+  "quotechar": "\"",
+  "doublequote": true
  },
  "structure": {
   "skip_rows": 0,
