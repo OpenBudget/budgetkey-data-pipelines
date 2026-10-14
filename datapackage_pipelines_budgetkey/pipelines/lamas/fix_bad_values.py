@@ -32,6 +32,8 @@ def process_resource(res_):
             if row['name_municipality'] in CITY_NAMES:
                 logging.error('FOUND BAD CITY %s', row['name_municipality'])
                 row['name_municipality'] = CITY_NAMES[row['name_municipality']]
+            # The CBS file stars a few names (a footnote marker, e.g. "סביון*"); consumers match names exactly
+            row['name_municipality'] = row['name_municipality'].rstrip('*').strip()
             yield row
         except (ValueError, TypeError):
             continue
