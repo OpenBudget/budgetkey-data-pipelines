@@ -885,6 +885,9 @@ municipal-data:
         source-field: name_municipality
         target-field: fingerprint
         resource-name: lamas-municipal-data
+    - run: match_renamed_authorities
+      parameters:
+        resource-name: lamas-municipal-data
     - run: join
       parameters:
         source:
