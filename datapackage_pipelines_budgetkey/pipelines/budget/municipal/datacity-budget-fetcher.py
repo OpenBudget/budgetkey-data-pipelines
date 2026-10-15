@@ -1,9 +1,14 @@
+import os
+
 import dataflows as DF
 from pathlib import Path
 from decimal import Decimal
 
 
 DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
+# The municipalities' budget pages, found by ./budget/municipal/budget_files/scraper
+BUDGET_FILES = os.environ.get('MUNICIPAL_BUDGET_FILES_DATAPACKAGE',
+                              '/var/datapackages/budget/municipal/budget_files/datapackage.json')
 
 def get_code_to_entity_id_map():
     rows = DF.Flow(
@@ -13,6 +18,24 @@ def get_code_to_entity_id_map():
     return dict(
         (row['symbol_municipality_2015'], row['entity_id'])
         for row in rows
+    )
+
+
+def cbs_symbol(authority_code):
+    # Regional councils are 55xx at the Interior Ministry and xx at the CBS; the others share one code
+    code = int(authority_code)
+    return code - 5500 if 5500 < code < 5600 else code
+
+
+def get_budget_pages():
+    """CBS symbol -> the authority's budget page and entity id, from the budget files scraper."""
+    rows = DF.Flow(
+        DF.load(BUDGET_FILES, resources=['budget_pages']),
+    ).results()[0][0]
+    return dict(
+        (cbs_symbol(row['authority_code']), row)
+        for row in rows
+        if row['authority_code']
     )
 
 
@@ -69,6 +92,11 @@ def flow(*_):
         DF.dump_to_path('/var/datapackages/budget/municipal/datacity-budgets-raw'),
     ).process()
     eid_map = get_code_to_entity_id_map()
+    pages = get_budget_pages()
+
+    def page(row):
+        code = row['muni_code'] or ''
+        return pages.get(int(code)) or {} if code.isdigit() else {}
     DF.Flow(
         DF.load('/var/datapackages/budget/municipal/datacity-budgets-raw/datapackage.json'),
         DF.add_field('parent', 'string', default=lambda row: parent(row['code'])),
@@ -128,6 +156,7 @@ def flow(*_):
                 revised=float(row['revised']) if row['revised'] else None,
                 executed=float(row['executed']) if row['executed'] else None,
                 children=row.get('children'),
+                source_files=row['source_files'],
             )),
         DF.sort_rows('{year}'),
         DF.join_with_self('muni_budgets', ['code', 'muni_code'], dict(
@@ -149,16 +178,24 @@ def flow(*_):
             executed=dict(aggregate='last'),
             history=dict(aggregate='array'),
         )),
-        DF.add_field('entity_id', 'string', default=lambda row: eid_map.get(row['muni_code'])),
+        DF.add_field('entity_id', 'string',
+                     default=lambda row: eid_map.get(row['muni_code']) or page(row).get('entity_id')),
         DF.add_field('entity_doc_id', 'string', default=lambda row: f'org/municipality/{row["entity_id"]}'),
 
         DF.add_field('nice-category', 'string', default=lambda row: row['func_1_name'] or 'סעיף ראשי'),
         DF.add_field('nice-code', 'string', default=nice_code),
         DF.add_field('nice-breadcrumbs', 'string', default=nice_breadcrumbs),
 
+        # Provenance: the authority's web page holding its budget files, and the files datacity loaded
+        # (our processed copies, in the budgetkey-files bucket) for each year - the doc's year here and
+        # every year in history
+        DF.add_field('source_page_url', 'string', default=lambda row: page(row).get('budget_page_url'),
+                     **{'es:index': False}),
+        DF.add_field('source_files', 'array', **{'es:itemType': 'string', 'es:index': False}),
         DF.add_field('children', 'array'),
         lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),
+        DF.set_type('muni_code', **{'es:keyword': True}),
         DF.set_type('.*name', type='string'),
         DF.set_type('title', type='string', transform=lambda v, row: v if v else f'סעיף {row["code"]}'),
         DF.set_type('direction', type='string'),
