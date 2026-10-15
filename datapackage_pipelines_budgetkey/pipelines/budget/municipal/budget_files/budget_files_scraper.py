@@ -484,7 +484,23 @@ def discover(session, name, website):
     return best
 
 
-def process_authority(authority, known_page):
+def listed_files(page_url, rows, found):
+    """Files listed by hand in budget-files.csv, for pages whose links scripts fill in (Netanya's search web part)."""
+    seen = {f['file_url'] for f in found}
+    files = []
+    for row in rows:
+        if row['file_url'] in seen:
+            continue
+        f = budget_file(page_url, row['file_url'], row['link_text'], '') or dict(
+            page_url=page_url, file_url=row['file_url'], link_text=row['link_text'], context='',
+            format=file_format(row['file_url']), doc_type='budget', fiscal_year=None, fiscal_year_source=None)
+        if row.get('fiscal_year'):
+            f.update(fiscal_year=int(row['fiscal_year']), fiscal_year_source='manual')
+        files.append(f)
+    return files
+
+
+def process_authority(authority, known_page, manual_files=()):
     code, name, website = authority['authority_code'], authority['name'], authority['website']
     now = datetime.datetime.now().replace(microsecond=0)
     result = dict(
@@ -495,19 +511,24 @@ def process_authority(authority, known_page):
     )
     files = []
     session = requests.Session()
+    # A page set by hand in budget-files.csv stays, even when it lists no files we can see
+    override = bool(known_page and known_page.get('page_source') == 'override')
 
     if known_page and known_page.get('budget_page_url'):
         # Only re-discover when the known page is gone or no longer lists budget files
         try:
             page_url, files = check_page(session, known_page['budget_page_url'])
-            if files:
+            if files or override:
                 result.update(budget_page_url=page_url, page_source=known_page['page_source'], status='ok',
                               discovered_at=known_page.get('discovered_at') or now)
         except FetchError as e:
             result['error'] = 'known page: %s' % e
             logging.info('%s: known budget page failed: %s', name, e)
+            if override:
+                result.update(budget_page_url=known_page['budget_page_url'], page_source='override',
+                              status='unreachable-%s' % e.kind)
 
-    if not files:
+    if not files and not override:
         if not website:
             result['status'] = 'no-website'
         else:
@@ -527,6 +548,7 @@ def process_authority(authority, known_page):
                                   page_source=known_page['page_source'], discovered_at=known_page.get('discovered_at'),
                                   last_checked=known_page.get('last_checked'), error='unreachable: %s' % e)
 
+    files += listed_files(result['budget_page_url'] or website, manual_files, files)
     for f in files:
         f.update(authority_code=code, entity_id=authority['entity_id'], name=name)
     result.update(
@@ -564,13 +586,25 @@ def load_known_pages():
     return pages
 
 
+def load_manual_files():
+    """authority code -> the files listed by hand in budget-files.csv."""
+    files = defaultdict(list)
+    with open(os.path.join(HERE, 'budget-files.csv')) as f:
+        for row in csv.DictReader(f):
+            files[row['authority_code']].append(row)
+    return files
+
+
 def scrape(limit=None):
     authorities = load_websites()
     if limit:
         authorities = authorities[:limit]
     known = load_known_pages()
+    manual = load_manual_files()
     with ThreadPoolExecutor(8) as executor:
-        results = list(executor.map(lambda a: process_authority(a, known.get(a['authority_code'])), authorities))
+        results = list(executor.map(
+            lambda a: process_authority(a, known.get(a['authority_code']), manual.get(a['authority_code'], [])),
+            authorities))
     pages = [r for r, _ in results]
     files = [f for _, fs in results for f in fs]
     logging.info('Budget pages found for %d/%d authorities (%d more kept from the previous run), %d files',

@@ -121,6 +121,31 @@ def test_known_page_gone_or_empty_rediscovers(monkeypatch, known_page_result):
     assert page['error'] is None
 
 
+def test_override_page_without_visible_files_keeps_its_page_and_listed_files(monkeypatch):
+    # Netanya: the budget page fills its file list by script, so the files are listed in budget-files.csv
+    monkeypatch.setattr(m, 'check_page', lambda session, url: (url, []))
+    monkeypatch.setattr(m, 'discover', lambda *args: pytest.fail('should not rediscover an override page'))
+    listed = [dict(file_url='https://muni.example.il/b2026.xlsx', fiscal_year='2026',
+                   link_text='ספר תקציב עירוני רגיל לשנת 2026 (excel)'),
+              dict(file_url='https://muni.example.il/notes.pdf', fiscal_year='', link_text='דברי הסבר לתקציב 2025')]
+    page, files = m.process_authority(AUTHORITY, dict(budget_page_url='https://muni.example.il/budget/',
+                                                      page_source='override'), listed)
+    assert (page['status'], page['page_source'], page['budget_page_url']) == \
+        ('ok', 'override', 'https://muni.example.il/budget/')
+    assert [(f['format'], f['fiscal_year'], f['fiscal_year_source'], f['page_url'], f['authority_code']) for f in files] == [
+        ('xlsx', 2026, 'manual', 'https://muni.example.il/budget/', '31'),
+        ('pdf', 2025, 'link_text', 'https://muni.example.il/budget/', '31')]
+    assert page['n_files'] == 2 and page['latest_fiscal_year'] == 2026
+
+
+def test_listed_files_found_on_the_page_are_not_repeated(monkeypatch):
+    monkeypatch.setattr(m, 'check_page', lambda session, url: (url, [dict(FILE, page_url=url)]))
+    listed = [dict(file_url=FILE['file_url'], fiscal_year='2025', link_text='תקציב 2025')]
+    page, files = m.process_authority(AUTHORITY, dict(budget_page_url='https://muni.example.il/budget/',
+                                                      page_source='heuristic'), listed)
+    assert len(files) == 1
+
+
 def test_unreachable_site(monkeypatch):
     def discover(*args):
         raise m.FetchError('blocked', '403')
