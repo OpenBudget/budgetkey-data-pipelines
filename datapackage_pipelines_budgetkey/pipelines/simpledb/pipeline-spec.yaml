@@ -1,6 +1,6 @@
 process_simple_dbs:
   schedule:
-    crontab: "0 0 * * 1"
+    crontab: "0 0 mon * *"
   dependencies:
     - pipeline: ./budget/national/processed/with-extras
     - pipeline: ./government_decisions/government_decisions

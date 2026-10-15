@@ -2,7 +2,7 @@ cooperatives:
   title: רשימת אגודות שיתופיות
   description: רשימת אגודות שיתופיות, מתוך ממשק נתונים של מאגר של משרד הכלכלה / האגף לאיגוד שיתופי, מתעדכן שבועית
   schedule:
-    crontab: 0 0 * * 1
+    crontab: 0 0 mon * *
   pipeline:
     - run: add_metadata
       parameters:

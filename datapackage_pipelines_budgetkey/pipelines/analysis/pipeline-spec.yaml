@@ -3,7 +3,7 @@
 topics:
   # Weekly, after the simpledb tables are rebuilt (process_simple_dbs runs Monday 00:00).
   schedule:
-    crontab: "0 6 * * 2"
+    crontab: "0 6 tue * *"
   pipeline:
     - run: add_metadata
       parameters:

@@ -1,6 +1,6 @@
 ethics_committee_decisions:
   schedule:
-    crontab: "0 20 * * 2"
+    crontab: "0 20 tue * *"
 
   pipeline:
   - run: update_package
@@ -10,7 +10,7 @@ ethics_committee_decisions:
 
 knesset_legal_advisor:
   schedule:
-    crontab: "0 21 * * 2"
+    crontab: "0 21 tue * *"
 
   pipeline:
   - run: update_package
@@ -20,7 +20,7 @@ knesset_legal_advisor:
 
 knesset_committee_decisions:
   schedule:
-    crontab: "0 22 * * 2"
+    crontab: "0 22 tue * *"
 
   pipeline:
   - run: update_package
@@ -30,7 +30,7 @@ knesset_committee_decisions:
 
 knesset_legal_advisor_letters:
   schedule:
-    crontab: "0 23 * * 2"
+    crontab: "0 23 tue * *"
 
   pipeline:
   - run: update_package
