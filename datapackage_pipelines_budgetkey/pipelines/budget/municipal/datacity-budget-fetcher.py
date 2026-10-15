@@ -1,3 +1,4 @@
+import csv
 import os
 from collections import defaultdict
 
@@ -13,6 +14,11 @@ RAW = '/var/datapackages/budget/municipal/datacity-budgets-raw'
 # The municipalities' budget pages, found by ./budget/municipal/budget_files/scraper
 BUDGET_FILES = os.environ.get('MUNICIPAL_BUDGET_FILES_DATAPACKAGE',
                               '/var/datapackages/budget/municipal/budget_files/datapackage.json')
+# Authorities renamed since datacity loaded their budgets (datacity still matches rows by the old name)
+RENAMED = dict(
+    (x['from'], x['to']) for x in
+    csv.DictReader(open(Path(__file__).parents[2] / 'lamas' / 'renamed_authorities.csv'))
+)
 
 def get_code_to_entity_id_map():
     rows = DF.Flow(
@@ -212,6 +218,7 @@ def flow(*_):
         DF.add_field('entity_id', 'string',
                      default=lambda row: eid_map.get(row['muni_code']) or page(row).get('entity_id')),
         DF.add_field('entity_doc_id', 'string', default=lambda row: f'org/municipality/{row["entity_id"]}'),
+        lambda row: row.update(muni_name=RENAMED.get(row['muni_name'], row['muni_name'])),
 
         DF.add_field('nice-category', 'string', default=lambda row: row['func_1_name'] or 'סעיף ראשי'),
         DF.add_field('nice-code', 'string', default=nice_code),
