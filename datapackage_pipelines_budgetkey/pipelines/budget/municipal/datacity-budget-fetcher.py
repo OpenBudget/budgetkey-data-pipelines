@@ -233,7 +233,6 @@ def flow(*_):
         DF.add_field('children', 'array'),
         lambda row: row.update(row['history'][-1]),
         DF.set_type('.*code', type='string'),
-        DF.set_type('muni_code', **{'es:keyword': True}),
         DF.set_type('.*name', type='string'),
         DF.set_type('title', type='string', transform=lambda v, row: v if v else f'סעיף {row["code"]}'),
         DF.set_type('direction', type='string'),
