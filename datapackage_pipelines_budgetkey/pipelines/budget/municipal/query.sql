@@ -24,12 +24,21 @@ WITH src AS
           array_agg(DISTINCT source_file ORDER BY source_file) AS source_files
    FROM src
    GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-   -- the files each functional-classification rollup was summed from
+   -- the files each functional-classification rollup was summed from. Grouped straight from muni_budgets:
+   -- a second reference to src would make postgres materialize all of it, past datacity's temp_file_limit
+   leaf_sources AS
+  (SELECT "municipality-code" AS muni_code, "fiscal-year" AS YEAR,
+          "functional-classification-moin-level1-code" AS func_1_code,
+          "functional-classification-moin-level2-code" AS func_2_code,
+          "functional-classification-moin-level3-code" AS func_3_code,
+          _source AS source_file
+   FROM muni_budgets
+   GROUP BY 1, 2, 3, 4, 5, 6),
    rollup_sources AS
   (SELECT muni_code, code, YEAR, array_agg(DISTINCT source_file ORDER BY source_file) AS source_files
-   FROM (SELECT muni_code, func_1_code AS code, YEAR, source_file FROM src
-         UNION SELECT muni_code, func_2_code, YEAR, source_file FROM src
-         UNION SELECT muni_code, func_3_code, YEAR, source_file FROM src) s
+   FROM (SELECT muni_code, func_1_code AS code, YEAR, source_file FROM leaf_sources
+         UNION ALL SELECT muni_code, func_2_code, YEAR, source_file FROM leaf_sources
+         UNION ALL SELECT muni_code, func_3_code, YEAR, source_file FROM leaf_sources) s
    GROUP BY 1, 2, 3),
    rollups AS
   (SELECT muni_code, muni_name, func_3_code AS code, func_3_name AS title, YEAR, direction,
