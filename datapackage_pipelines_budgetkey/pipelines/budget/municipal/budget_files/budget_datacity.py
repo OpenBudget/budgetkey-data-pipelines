@@ -54,10 +54,20 @@ def resource_rows(datapackage, name):
         yield from csv.DictReader(f)
 
 
-def lamas_names():
-    """CBS symbol -> the name datacity looks the authority up by."""
-    rows = DF.Flow(DF.load(LAMAS), DF.select_fields(['symbol_municipality_2015', 'name_municipality'])).results()[0][0]
-    return {r['symbol_municipality_2015']: r['name_municipality'] for r in rows}
+LAMAS_EXPENSES = 'total_expenses_of_municipality_budget_regular_1000s_nis_2015'
+
+
+def lamas_authorities():
+    """CBS symbol -> (the name datacity looks the authority up by, its 2015 regular budget expenses in NIS)."""
+    rows = DF.Flow(DF.load(LAMAS), DF.select_fields(['symbol_municipality_2015', 'name_municipality',
+                                                     LAMAS_EXPENSES])).results()[0][0]
+
+    def expenses(r):
+        try:
+            return float(r[LAMAS_EXPENSES]) * 1000 or None
+        except (TypeError, ValueError):
+            return None
+    return {r['symbol_municipality_2015']: (r['name_municipality'], expenses(r)) for r in rows}
 
 
 def datacity_coverage():
@@ -158,7 +168,7 @@ def pipeline_record(code, year, name, csv_url, json_url):
 
 def build():
     covered = datacity_coverage()
-    names = lamas_names()
+    lamas = lamas_authorities()
     previous = previous_loads()
     files = {f['file_url']: f for f in resource_rows(SCRAPED, 'budget_files')}
     agg = X.Aggregates()
@@ -179,7 +189,7 @@ def build():
     loads = []
     for code, year in sorted(set(chosen) | set(previous)):
         symbol = X.cbs_symbol(code)
-        name = names.get(symbol)
+        name, expenses = lamas.get(symbol, (None, None))
         if not name:
             logging.warning('Authority %d is not in the LAMAS list datacity looks names up in; skipping', code)
             continue
@@ -199,8 +209,27 @@ def build():
             phases.append(dict(old, source='carried', carried_since=old.get('carried_since') or old_meta.get('updated')))
         loads.append(dict(code=code, year=year, name=name, rows=X.sort_rows(rows), phases=phases,
                           datacity=sorted(p for p in X.PHASE_ORDER if (symbol, year, p) in covered),
-                          previous=old_meta))
+                          previous=old_meta, rejected=[], anchor=expenses))
+    reject_implausible(loads)
     return loads
+
+
+def reject_implausible(loads):
+    """Drops the phases that are not a line-item budget: chapter summaries, or amounts read in the wrong unit.
+    A rejected phase is left out of the snapshot's metadata too, so it is never carried."""
+    summaries = defaultdict(dict)
+    for load in loads:
+        for p in load['phases']:
+            summaries[load['code']][(load['year'], p['phase'])] = p
+    for load in loads:
+        off = X.implausible(summaries[load['code']], load['anchor'])
+        bad = {phase: reason for (year, phase), reason in off.items() if year == load['year']}
+        if not bad:
+            continue
+        logging.warning('%s %d: leaving out %s', load['name'], load['year'], bad)
+        load['rejected'] = [dict(p, rejected_because=bad[p['phase']]) for p in load['phases'] if p['phase'] in bad]
+        load['phases'] = [p for p in load['phases'] if p['phase'] not in bad]
+        load['rows'] = [r for r in load['rows'] if r['phase'] not in bad]
 
 
 def publish(loads):
@@ -221,7 +250,7 @@ def publish(loads):
         csv_url, json_url = store.urlfor(csv_name), store.urlfor(json_name)
         meta = dict(authority_code=code, authority=load['name'], fiscal_year=year, csv_url=csv_url,
                     csv_sha256=digest, rows=len(load['rows']), phases=load['phases'],
-                    loaded_by_datacity=load['datacity'],
+                    loaded_by_datacity=load['datacity'], rejected_phases=load.get('rejected', []),
                     updated=datetime.datetime.utcnow().isoformat(timespec='seconds') if changed else old.get('updated'))
         if changed and not DRY_RUN:
             store.write(csv_name, data=body, content_type='text/csv; charset=utf-8')
@@ -241,6 +270,7 @@ def publish(loads):
             authority_code=code, name=load['name'], fiscal_year=year, rows=len(load['rows']), action=action,
             phases=[p['phase'] for p in load['phases']],
             carried_phases=[p['phase'] for p in load['phases'] if p['source'] == 'carried'],
+            rejected_phases=[p['phase'] for p in load.get('rejected', [])],
             datacity_phases=load['datacity'], csv_url=csv_url, sources_url=json_url,
             pipeline_id=record['id'] if datacity else None,
             pipeline_url='https://app.datacity.org.il/dashboard/pipelines/' + record['id'] if datacity else None,
@@ -266,7 +296,7 @@ def start(datacity, ids):
 
 
 LOAD_FIELDS = ['authority_code', 'name', 'fiscal_year', 'rows', 'action', 'phases', 'carried_phases',
-               'datacity_phases', 'csv_url', 'sources_url', 'pipeline_id', 'pipeline_url']
+               'rejected_phases', 'datacity_phases', 'csv_url', 'sources_url', 'pipeline_id', 'pipeline_url']
 
 
 def flow(*_):
@@ -276,7 +306,7 @@ def flow(*_):
         DF.update_resource(-1, name='datacity_loads', path='datacity_loads.csv'),
         DF.filter_rows(lambda row: row['authority_code'] is not None),
         DF.set_type('(authority_code|fiscal_year|rows)', type='integer'),
-        DF.set_type('(phases|carried_phases|datacity_phases)', type='array'),
+        DF.set_type('(phases|carried_phases|rejected_phases|datacity_phases)', type='array'),
         DF.set_primary_key(['authority_code', 'fiscal_year']),
         DF.update_resource(-1, **{'dpp:streaming': True}),
         DF.dump_to_path(OUT_PATH),

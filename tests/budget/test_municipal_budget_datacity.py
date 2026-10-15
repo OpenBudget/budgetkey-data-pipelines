@@ -97,3 +97,27 @@ def test_negative_expenses_are_flipped_and_zero_lines_kept():
     parts = x.choose(aggregate(lines), set())[(70, 2024)]['מקורי']
     rows, _ = x.phase_rows(parts, by_part(lines), 'מקורי', 2024, 'אשדוד')
     assert {r['card-code']: r['value'] for r in rows} == {'1611000110': 6e6, '1711000110': 0, '1111000100': -6e6}
+
+
+def phase(rows, expense, income=None):
+    return dict(rows=rows, expense=expense, income=-expense if income is None else income)
+
+
+def test_implausible_phases_are_found():
+    # Beersheba 2013: one phase read in the wrong unit; Kfar Saba 2012: a chapter summary
+    budgets = {(2012, 'ביצוע'): phase(5958, 1.16e9), (2013, 'מאושר'): phase(5958, 1.24e9),
+               (2013, 'מקורי'): phase(5559, 1.23e12), (2012, 'מאושר'): phase(23, 4.6e6, 0)}
+    assert x.implausible(budgets, anchor=1.45e9) == {(2013, 'מקורי'): '991.9 times the typical budget',
+                                                    (2012, 'מאושר'): '23 lines'}
+
+
+def test_implausible_phases_reference():
+    # Harish outgrew its 2015 budget: its complete budgets agree with each other, not with the anchor
+    harish = {(2025, 'מאושר'): phase(881, 4.3e8), (2026, 'מקורי'): phase(1037, 4.8e8), (2021, 'מקורי'): phase(334, 5.1e7, 0)}
+    assert x.implausible(harish, anchor=2.6e7) == {(2021, 'מקורי'): '0.1062 times the typical budget'}
+    # Kiryat Malachi's one complete budget is 30 times its anchor: the anchor wins
+    malachi = {(2020, 'מקורי'): phase(1110, 5.5e9)}
+    assert list(x.implausible(malachi, anchor=1.8e8)) == [(2020, 'מקורי')]
+    # Without an anchor, a single complete budget is the reference; with nothing complete, sizes go unjudged
+    assert list(x.implausible({(2023, 'מקורי'): phase(936, 6.8e8), (2022, 'מאושר'): phase(111, 4e6)})) == [(2022, 'מאושר')]
+    assert x.implausible({(2022, 'מאושר'): phase(111, 4e6, 0)}) == {}

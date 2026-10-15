@@ -22,6 +22,9 @@ OUT_PATH = '/var/datapackages/budget/municipal/budget_files'
 WEBSITES = os.environ.get('MUNICIPAL_WEBSITES_DATAPACKAGE',
                           '/var/datapackages/entities/municipal_websites/datapackage.json')
 PREVIOUS = os.environ.get('MUNICIPAL_BUDGET_FILES_PREVIOUS', OUT_PATH + '/datapackage.json')
+# dpp re-runs this flow when this file changes, not when budget_file_analysis.py does: keep this equal to its
+# ANALYZER_VERSION, so that a new analyzer re-analyzes the stored files
+ANALYZER_VERSION = 4
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '

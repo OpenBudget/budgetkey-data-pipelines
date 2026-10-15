@@ -400,3 +400,8 @@ def test_budget_lines_take_a_table_published_twice_once(monkeypatch):
         ('/details.xlsx', 'executed', 2023), ('/details.xlsx', 'approved', 2024), ('/details.xlsx', 'proposed', 2025),
         ('workbook.xlsx', 'executed', 2023), ('workbook.xlsx', 'approved', 2024), ('workbook.xlsx', 'proposed', 2025)]
     assert [l['code'] for l in lines[3:]] == ['1611000999'] * 3
+
+
+def test_the_scraper_reruns_on_a_new_analyzer():
+    import budget_files_scraper as scraper
+    assert scraper.ANALYZER_VERSION == a.ANALYZER_VERSION

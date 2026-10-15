@@ -27,6 +27,11 @@ SPREADSHEETS = ('xlsx', 'xls', 'csv')
 DIRECTIONS = ('expense', 'income')
 FIELDS = ['card-code', 'card-name', 'municipality-name', 'phase', 'fiscal-year', 'value']
 MIN_SIDE = 1e6   # smaller sides are ratios, staff counts or summaries, not a budget
+# A phase this many times off the authority's complete budgets is a summary table or a misread unit
+MAX_DEVIATION = 5
+MIN_ROWS = 50   # fewer lines are a chapter summary
+MIN_COMPLETE_ROWS = 200
+MAX_ANCHOR_DEVIATION = 4   # complete budgets of 2007-2026 are 0.4-2.8 times their authority's 2015 expenses
 TLV = re.compile(r'(\d{5})/(\d{3})/(\d)')
 CARD = re.compile(r'[0-9]{10,15}')   # datacity drops any other card code
 # What a row needs of a budget line; a million of them are held at once
@@ -171,6 +176,35 @@ def phase_rows(parts, lines_by_part, phase, year, name):
                                file_year=p['file_year'], lines=p['lines'], sheets_left_out=p['dropped_sheets'])
                           for p in parts])
     return rows, summary
+
+
+def size(summary):
+    return summary['expense'] or -summary['income']
+
+
+def complete(summary):
+    """A whole budget: hundreds of lines, and income within 10% of the expenses."""
+    expense, income = summary['expense'], -summary['income']
+    return summary['rows'] >= MIN_COMPLETE_ROWS and expense > 0 and abs(expense - income) <= 0.1 * expense
+
+
+def implausible(summaries, anchor=None):
+    """{(year, phase): reason} for those of one authority's phase summaries that are not a line-item budget: too
+    few lines (a chapter summary), or a size more than MAX_DEVIATION times off its typical budget. That is the
+    median of its complete budgets which agree with the anchor (its 2015 expenses at the CBS); failing those, of
+    its complete budgets if there are two or more (a fast-growing town outgrows its 2015 budget); failing that,
+    the anchor; and failing that, its one complete budget."""
+    whole = sorted(size(s) for s in summaries.values() if complete(s))
+    anchored = [x for x in whole if anchor and anchor / MAX_ANCHOR_DEVIATION <= x <= anchor * MAX_ANCHOR_DEVIATION]
+    reference = anchored or (whole if len(whole) > 1 else None) or ([anchor] if anchor else whole)
+    median = reference[len(reference) // 2] if reference else None
+    off = {}
+    for key, s in summaries.items():
+        if s['rows'] < MIN_ROWS:
+            off[key] = '%d lines' % s['rows']
+        elif median and not median / MAX_DEVIATION <= size(s) <= median * MAX_DEVIATION:
+            off[key] = '%.4g times the typical budget' % (size(s) / median)
+    return off
 
 
 def sort_rows(rows):
