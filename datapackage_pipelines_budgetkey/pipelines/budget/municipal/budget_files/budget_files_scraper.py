@@ -22,11 +22,10 @@ OUT_PATH = '/var/datapackages/budget/municipal/budget_files'
 WEBSITES = os.environ.get('MUNICIPAL_WEBSITES_DATAPACKAGE',
                           '/var/datapackages/entities/municipal_websites/datapackage.json')
 PREVIOUS = os.environ.get('MUNICIPAL_BUDGET_FILES_PREVIOUS', OUT_PATH + '/datapackage.json')
-# dpp re-runs this flow when this file changes, not when the modules it imports do: keep this equal to
-# budget_file_analysis.ANALYZER_VERSION, so that a new analyzer re-analyzes the stored files, and bump
-# REPORT_REVISION with changes to budget_report.py
+# dpp re-runs this flow when this file or its revision in pipeline-spec.yaml changes, not when the modules it
+# imports do: keep this equal to budget_file_analysis.ANALYZER_VERSION, so that a new analyzer re-analyzes the
+# stored files, and bump the revision with changes to the other modules (e.g. budget_report.py)
 ANALYZER_VERSION = 4
-REPORT_REVISION = 2
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '

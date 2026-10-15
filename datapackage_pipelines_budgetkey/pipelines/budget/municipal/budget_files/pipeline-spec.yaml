@@ -6,7 +6,7 @@ scraper:
       parameters:
         name: municipal-budget-files
         title: קבצי התקציב של הרשויות המקומיות
-        revision: '2026-10-13'
+        revision: '2026-10-15'
     - flow: budget_files_scraper
 
 datacity:
