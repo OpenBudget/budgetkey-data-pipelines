@@ -6,6 +6,8 @@ from decimal import Decimal
 
 
 DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
+# dpp re-runs this flow when this file changes, not when query.sql does: bump this with every query edit
+QUERY_REVISION = 2
 # The municipalities' budget pages, found by ./budget/municipal/budget_files/scraper
 BUDGET_FILES = os.environ.get('MUNICIPAL_BUDGET_FILES_DATAPACKAGE',
                               '/var/datapackages/budget/municipal/budget_files/datapackage.json')
