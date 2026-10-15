@@ -14,34 +14,17 @@ WITH src AS
           "functional-classification-moin-level2-code" AS func_2_code,
           "functional-classification-moin-level2-name" AS func_2_name,
           "functional-classification-moin-level3-code" AS func_3_code,
-          "functional-classification-moin-level3-name" AS func_3_name,
-          _source AS source_file
-   FROM muni_budgets),
+          "functional-classification-moin-level3-name" AS func_3_name
+   FROM muni_budgets), 
    combined AS
   (SELECT muni_code, muni_name, code, title, YEAR, direction,
           func_1_code, func_1_name, func_2_code, func_2_name, func_3_code, func_3_name,
-          max(allocated) AS allocated, max(revised) AS revised, max(executed) AS executed,
-          array_agg(DISTINCT source_file ORDER BY source_file) AS source_files
+          max(allocated) AS allocated, max(revised) AS revised, max(executed) AS executed
    FROM src
-   GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-   -- the files each functional-classification rollup was summed from. Grouped straight from muni_budgets:
-   -- a second reference to src would make postgres materialize all of it, past datacity's temp_file_limit
-   leaf_sources AS
-  (SELECT "municipality-code" AS muni_code, "fiscal-year" AS YEAR,
-          "functional-classification-moin-level1-code" AS func_1_code,
-          "functional-classification-moin-level2-code" AS func_2_code,
-          "functional-classification-moin-level3-code" AS func_3_code,
-          _source AS source_file
-   FROM muni_budgets
-   GROUP BY 1, 2, 3, 4, 5, 6),
-   rollup_sources AS
-  (SELECT muni_code, code, YEAR, array_agg(DISTINCT source_file ORDER BY source_file) AS source_files
-   FROM (SELECT muni_code, func_1_code AS code, YEAR, source_file FROM leaf_sources
-         UNION ALL SELECT muni_code, func_2_code, YEAR, source_file FROM leaf_sources
-         UNION ALL SELECT muni_code, func_3_code, YEAR, source_file FROM leaf_sources) s
-   GROUP BY 1, 2, 3),
-   rollups AS
-  (SELECT muni_code, muni_name, func_3_code AS code, func_3_name AS title, YEAR, direction,
+   GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
+SELECT * FROM combined
+UNION ALL
+SELECT muni_code, muni_name, func_3_code AS code, func_3_name AS title, YEAR, direction,
        func_1_code, func_1_name, func_2_code, func_2_name, NULL AS func_3_name, NULL AS func_3_code,
        sum(allocated) AS allocated, sum(revised) AS revised, sum(executed) AS executed
 FROM combined
@@ -57,9 +40,4 @@ SELECT muni_code, muni_name, func_1_code AS code, func_1_name AS title, YEAR, di
        NULL AS func_1_code, NULL AS func_1_name, NULL AS func_2_code, NULL AS func_2_name, NULL AS func_3_name, NULL AS func_3_code,
        sum(allocated) AS allocated, sum(revised) AS revised, sum(executed) AS executed
 FROM combined
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
-SELECT * FROM combined
-UNION ALL
-SELECT r.*, s.source_files
-FROM rollups r
-LEFT JOIN rollup_sources s ON s.muni_code = r.muni_code AND s.code = r.code AND s.YEAR = r.YEAR
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12

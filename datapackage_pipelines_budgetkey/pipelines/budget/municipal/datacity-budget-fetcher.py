@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 
 import dataflows as DF
 from pathlib import Path
@@ -6,8 +7,9 @@ from decimal import Decimal
 
 
 DATACITY_DB = 'postgresql://readonly:readonly@db.datacity.org.il:5432/datasets'
-# dpp re-runs this flow when this file changes, not when query.sql does: bump this with every query edit
-QUERY_REVISION = 2
+# dpp re-runs this flow when this file changes, not when the .sql files do: bump this with every query edit
+QUERY_REVISION = 3
+RAW = '/var/datapackages/budget/municipal/datacity-budgets-raw'
 # The municipalities' budget pages, found by ./budget/municipal/budget_files/scraper
 BUDGET_FILES = os.environ.get('MUNICIPAL_BUDGET_FILES_DATAPACKAGE',
                               '/var/datapackages/budget/municipal/budget_files/datapackage.json')
@@ -39,6 +41,22 @@ def get_budget_pages():
         for row in rows
         if row['authority_code']
     )
+
+
+def rollup_sources(raw):
+    """(muni_code, functional-classification code, year) -> the files of the budget items under it."""
+    sources = defaultdict(set)
+
+    def collect(rows):
+        for row in rows:
+            if row['source_files']:
+                for level in ('func_1_code', 'func_2_code', 'func_3_code'):
+                    if row[level]:
+                        sources[(row['muni_code'], row[level], row['year'])].update(row['source_files'])
+            yield row
+
+    DF.Flow(DF.load(raw), collect).process()
+    return sources
 
 
 def get_score(row):
@@ -88,11 +106,21 @@ def nice_breadcrumbs(row):
 
 def flow(*_):
     QUERY = Path(__file__).with_name('query.sql').read_text()
+    SOURCES = Path(__file__).with_name('sources.sql').read_text()
     DF.Flow(
+        DF.load(DATACITY_DB, query=SOURCES, name='sources'),
         DF.load(DATACITY_DB, query=QUERY, name='muni_budgets'),
         DF.set_type('.*code', type='string'),
-        DF.dump_to_path('/var/datapackages/budget/municipal/datacity-budgets-raw'),
+        DF.join('sources', ['muni_code', 'code', 'year'],
+                'muni_budgets', ['muni_code', 'code', 'year'],
+                dict(source_files=None)),
+        DF.dump_to_path(RAW),
     ).process()
+    rollups = rollup_sources(RAW + '/datapackage.json')
+
+    def fill_rollup_sources(row):
+        if 'source_files' in row and not row['source_files']:
+            row['source_files'] = sorted(rollups.get((row['muni_code'], row['code'], row['year']), [])) or None
     eid_map = get_code_to_entity_id_map()
     pages = get_budget_pages()
 
@@ -100,7 +128,7 @@ def flow(*_):
         code = row['muni_code'] or ''
         return pages.get(int(code)) or {} if code.isdigit() else {}
     DF.Flow(
-        DF.load('/var/datapackages/budget/municipal/datacity-budgets-raw/datapackage.json'),
+        DF.load(RAW + '/datapackage.json'),
         DF.add_field('parent', 'string', default=lambda row: parent(row['code'])),
         DF.add_field('entry', 'object', default=lambda row: dict(
             code=row['code'],
@@ -115,7 +143,8 @@ def flow(*_):
     ).process()
     return DF.Flow(
         DF.load('/var/datapackages/budget/municipal/datacity-budgets-hierarchy/datapackage.json'),
-        DF.load('/var/datapackages/budget/municipal/datacity-budgets-raw/datapackage.json'),
+        DF.load(RAW + '/datapackage.json'),
+        fill_rollup_sources,
         DF.join('hierarchy', ['parent', 'muni_code', 'year'], 
                 'muni_budgets', ['code', 'muni_code', 'year'],
                 dict(
