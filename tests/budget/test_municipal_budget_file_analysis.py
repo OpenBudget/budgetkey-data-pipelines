@@ -230,6 +230,22 @@ def test_report_ranks_machine_readable_years_first():
     assert 'לא נמצא דף תקציב' in html and 'XLS ✓' in html and 'סרוק' in html
 
 
+def test_report_shows_every_year_and_file():
+    pages = [dict(authority_code=c, name=n, website=None, status='ok', budget_page_url=None)
+             for c, n in [('1', 'ותיקה'), ('2', 'חדשה')]]
+    pdf = dict(format='pdf', table_kind='detailed', analysis_status='ok', doc_type='budget')
+    # Twenty years of PDFs outrank three recent spreadsheets; old years and undated files are listed too
+    files = [dict(pdf, authority_code='1', fiscal_year=y, file_url='https://1/%d' % y) for y in range(2003, 2023)] + \
+            [dict(pdf, authority_code='1', fiscal_year='', file_url='https://1/undated')] + \
+            [dict(authority_code='2', fiscal_year=y, format='xlsx', ready_to_process=True, analysis_status='ok',
+                  file_url='https://2/%d/%d' % (y, i), doc_type='budget') for y in (2024, 2025, 2026) for i in range(6)]
+    html = report.render(pages, files)
+    assert '>2003</th>' in html and '>ללא שנה</th>' in html
+    assert 'https://1/2003' in html and 'https://1/undated' in html and 'https://2/2026/5' in html
+    top = html[html.index('הרשויות השקופות ביותר'):]
+    assert top.index('ותיקה') < top.index('חדשה')
+
+
 def test_detailed_sheet_rows():
     t = a.analyze_rows(INCOMES_NEGATIVE, 'תקציב', fiscal_year=2017)
     assert len(t['rows']) == 7

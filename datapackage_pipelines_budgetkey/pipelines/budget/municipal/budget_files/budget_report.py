@@ -3,8 +3,7 @@ import datetime
 from collections import defaultdict
 from html import escape
 
-YEARS_SHOWN = 10
-CHIPS_PER_YEAR = 4
+CHIPS_PER_YEAR = 4   # more files in a year are behind a "+N" toggle
 LEAST_SHOWN = 20
 SPREADSHEETS = {'xlsx', 'xls', 'csv'}
 STATUS_HE = {
@@ -49,9 +48,10 @@ def chip(f):
 
 def year_cell(files):
     files = sorted(files, key=lambda f: -grade(f))
-    more = len(files) - CHIPS_PER_YEAR
-    return ''.join(chip(f) for f in files[:CHIPS_PER_YEAR]) + (
-        '<span class="more">+%d</span>' % more if more > 0 else '')
+    shown, rest = files[:CHIPS_PER_YEAR], files[CHIPS_PER_YEAR:]
+    return ''.join(chip(f) for f in shown) + (
+        '<details class="more"><summary>+%d</summary>%s</details>' % (len(rest), ''.join(chip(f) for f in rest))
+        if rest else '')
 
 
 DOC_TYPE_HE = {
@@ -68,10 +68,11 @@ def render(pages, files, now=None):
     now = now or datetime.datetime.now()
     by_authority = defaultdict(lambda: defaultdict(list))
     for f in files:
-        if f.get('fiscal_year'):
-            by_authority[f['authority_code']][f['fiscal_year']].append(f)
-    max_year = max([y for a in by_authority.values() for y in a if y <= now.year + 1] or [now.year])
-    years = list(range(max_year, max_year - YEARS_SHOWN, -1))
+        by_authority[f['authority_code']][f.get('fiscal_year') or None].append(f)
+    # Every year with a file, newest first; a year later than next year is a misread
+    found = [y for a in by_authority.values() for y in a if y and y <= now.year + 1] or [now.year]
+    years = list(range(max(found), min(found) - 1, -1))
+    undated = any(None in a for a in by_authority.values())
 
     rows = []
     for p in pages:
@@ -116,7 +117,8 @@ def render(pages, files, now=None):
     body = []
     for r in rows:
         p = r['page']
-        cells = ''.join('<td class="y">%s</td>' % year_cell(r['per_year'].get(y, [])) for y in years)
+        cells = ''.join('<td class="y">%s</td>' % year_cell(r['per_year'].get(y, []))
+                        for y in years + ([None] if undated else []))
         body.append(
             '<tr data-score="%d"><td class="n">%d</td><td class="name">%s<div class="type">%s</div></td>'
             '<td>%s</td><td class="n score">%d</td><td class="n">%d</td><td class="n">%d</td>%s<td class="status">%s</td></tr>' % (
@@ -140,7 +142,8 @@ def render(pages, files, now=None):
         top=short_list(top),
         least=short_list(least[:LEAST_SHOWN], empty_reason=True) + (
             '<li class="muted">ועוד %d רשויות</li>' % (len(least) - LEAST_SHOWN) if len(least) > LEAST_SHOWN else ''),
-        year_headers=''.join('<th class="y sortable" data-type="year">%d</th>' % y for y in years),
+        year_headers=''.join('<th class="y sortable" data-type="year">%d</th>' % y for y in years) + (
+            '<th class="y sortable" data-type="year">ללא שנה</th>' if undated else ''),
         rows='\n'.join(body),
         first_year=years[-1], last_year=years[0],
     )
@@ -191,7 +194,9 @@ td.n, th.n {{ text-align: center; }}
 td.name {{ white-space: nowrap; font-weight: 600; }}
 td.y {{ min-width: 64px; }}
 td.status {{ color: var(--muted); font-size: 13px; min-width: 150px; }}
-.more {{ color: var(--muted); font-size: 12px; margin-inline-start: 2px; }}
+.more {{ display: inline; color: var(--muted); font-size: 12px; margin-inline-start: 2px; }}
+.more summary {{ display: inline; cursor: pointer; }}
+.more[open] summary {{ display: none; }}
 .chip {{ display: inline-flex; align-items: center; border-radius: 4px; margin: 1px; font-size: 12px;
   font-weight: 600; white-space: nowrap; }}
 .chip a {{ color: var(--chip-fg); padding: 1px 6px; }}
