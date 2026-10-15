@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 from collections import Counter
 
-ANALYZER_VERSION = 3
+ANALYZER_VERSION = 4
 BALANCE_TOLERANCE = 0.05
 
 MAX_ROWS = 20000
@@ -660,11 +660,17 @@ def extract_pdf_table(pages):
                 # A second column with the same kind and year on one page is ambiguous: keep it, but flag it
                 columns[key] = dict(describe_value_column(label), order=len(columns), duplicate='#' in key)
         for _, (code, title, values) in page_rows:
-            cells = {}
+            cells, inner = {}, []
             for w in values:
                 i = nearest(w['x'])
                 if abs(centers[i] - w['x']) <= COLUMN_GAP and keys[i] in columns:
-                    cells[keys[i]] = number(w['text'])
+                    if keys[i] in cells:
+                        # Values run outwards from the title, so a second number in a filled column is the end
+                        # of the title, e.g. a vehicle's licence number ("עגלה ניגררת 9292600")
+                        inner.append(w['text'])
+                    else:
+                        cells[keys[i]] = number(w['text'])
+            title = ' '.join([title] + inner) if inner else title
             rows.append(dict(row='page %d' % page_no, code=code, title=title, cells=cells))
     ordered = sorted(columns, key=lambda k: columns[k]['order'])
     for row in rows:

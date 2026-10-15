@@ -57,7 +57,7 @@ def resource_rows(datapackage, name):
 def lamas_names():
     """CBS symbol -> the name datacity looks the authority up by."""
     rows = DF.Flow(DF.load(LAMAS), DF.select_fields(['symbol_municipality_2015', 'name_municipality'])).results()[0][0]
-    return {int(r['symbol_municipality_2015']): r['name_municipality'] for r in rows}
+    return {r['symbol_municipality_2015']: r['name_municipality'] for r in rows}
 
 
 def datacity_coverage():
@@ -72,8 +72,8 @@ def datacity_coverage():
             'where _source not like :ours group by 1, 2, 3, 4'), dict(ours=storage().urlfor(PREFIX) + '/%'))
         for code, year, phase, source in result:
             try:
-                covered[(int(code), int(year), phase)].add(source)
-            except (TypeError, ValueError):
+                covered[(code.strip(), int(year), phase)].add(source)
+            except (AttributeError, TypeError, ValueError):
                 continue
     if not covered:
         raise RuntimeError('muni_budgets has no rows from datacity\'s own pipelines; not loading anything')

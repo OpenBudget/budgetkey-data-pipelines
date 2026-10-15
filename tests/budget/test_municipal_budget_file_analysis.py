@@ -257,6 +257,19 @@ def test_pdf_values_are_placed_under_their_columns():
     assert rows[-1]['values'] == [None, 962000, None]
 
 
+def test_pdf_numbers_at_the_end_of_a_title_are_not_values():
+    # Ofakim 2018: a licence number ends the title, right beside the value column it would otherwise fill
+    page = [word('2018', 100, 10, 16), word('תקציב', 122, 10, 22)]
+    for i in range(4):
+        page += [word(str(i + 1), 100, 30 + i * 12, 6), word('רכב %d' % i, 200, 30 + i * 12, 30),
+                 word(str(1741000733 + i * 1000), 300, 30 + i * 12, 40)]
+    page += [word('1', 100, 90, 6), word('9292600', 123, 90, 37), word('ניגררת', 155, 90, 28),
+             word('עגלה', 185, 90, 23), word('1741006733', 300, 90, 40)]
+    columns, rows = a.extract_pdf_table([page])
+    assert [(c['kind'], c['year']) for c in columns] == [('approved', 2018)]
+    assert rows[-1] == dict(row='page 1', code='1741006733', title='עגלה ניגררת 9292600', values=[1])
+
+
 def test_budget_lines_normalize_units_and_signs(monkeypatch):
     import budget_files_scraper as scraper
     files = [dict(authority_code='31', entity_id='500200316', name='אופקים', fiscal_year=2024, doc_type='budget',

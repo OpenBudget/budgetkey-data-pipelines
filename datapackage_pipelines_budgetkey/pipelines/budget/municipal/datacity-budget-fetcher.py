@@ -32,9 +32,10 @@ def get_code_to_entity_id_map():
 
 
 def cbs_symbol(authority_code):
-    # Regional councils are 55xx at the Interior Ministry and xx at the CBS; the others share one code
+    # muni_code as datacity writes it: regional councils are 55xx at the Interior Ministry and "xx" (two digits)
+    # at the CBS; the others share one code, in four digits (Ofakim, 31, is "0031"; Nahal Sorek, 5531, is "31")
     code = int(authority_code)
-    return code - 5500 if 5500 < code < 5600 else code
+    return '%02d' % (code - 5500) if 5500 < code < 5600 else '%04d' % code
 
 
 def get_budget_pages():
@@ -131,8 +132,7 @@ def flow(*_):
     pages = get_budget_pages()
 
     def page(row):
-        code = row['muni_code'] or ''
-        return pages.get(int(code)) or {} if code.isdigit() else {}
+        return pages.get(row['muni_code']) or {}
     DF.Flow(
         DF.load(RAW + '/datapackage.json'),
         DF.add_field('parent', 'string', default=lambda row: parent(row['code'])),

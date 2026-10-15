@@ -38,9 +38,11 @@ def line_of(row):
 
 
 def cbs_symbol(authority_code):
-    """Regional councils are 55xx at the Interior Ministry and xx at the CBS; the others share one code."""
+    """The CBS symbol as LAMAS and datacity write it. Regional councils are 55xx at the Interior Ministry and
+    "xx" (two digits) at the CBS; the others share one code, in four digits. Ofakim (31) is "0031" and Nahal
+    Sorek (5531) is "31": as numbers they would collide."""
     code = int(authority_code)
-    return code - 5500 if 5500 < code < 5600 else code
+    return '%02d' % (code - 5500) if 5500 < code < 5600 else '%04d' % code
 
 
 def card_code(code):

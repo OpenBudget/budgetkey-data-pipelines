@@ -29,7 +29,9 @@ def by_part(lines):
 
 
 def test_codes():
-    assert x.cbs_symbol(5506) == 6 and x.cbs_symbol(70) == 70 and x.cbs_symbol(5000) == 5000
+    assert x.cbs_symbol(5506) == '06' and x.cbs_symbol(70) == '0070' and x.cbs_symbol(5000) == '5000'
+    # Ofakim (a city, 31) and Nahal Sorek (a regional council, 5531) are distinct
+    assert x.cbs_symbol(31) == '0031' and x.cbs_symbol(5531) == '31'
     assert x.card_code('81111/110/5') == '1811115110'
     assert x.card_code('1611000110') == '1611000110'
 
@@ -45,7 +47,7 @@ def test_spreadsheet_beats_pdf_and_covered_phases_are_skipped():
     cands = aggregate(lines)
     chosen = x.choose(cands, covered=set())
     assert [p['file_url'] for p in chosen[(70, 2024)]['מקורי']] == ['b.xlsx']
-    assert x.choose(cands, covered={(70, 2024, 'מקורי')}) == {}
+    assert x.choose(cands, covered={('0070', 2024, 'מקורי')}) == {}
 
 
 def test_small_sides_are_not_budgets():
