@@ -1,2 +1,3 @@
 authority_code,budget_page_url,note
 7400,https://www.netanya.muni.il/CityHall/transparency/FIL/Pages/CityBudget.aspx,"The discovered page listed accessibility-exemption forms for the budget books; this one lists the budget reports (by a search web part, so its files are not in the HTML)"
+3000,https://www.jerusalem.muni.il/he/city/budget/,"The budget index, which lists no files itself; each year's page (budget2017-budget2026) lists about 200 PDFs, the total books and every department's share of them as tables (-t), explanations (-d) and both (-m), so budget-files.csv names the total books. Left out: 2017's (a dead link), and the 2023 and 2025 expense books, whose text is unreadable in places (a missing font, numbers split apart); the next year's book has their budgets"

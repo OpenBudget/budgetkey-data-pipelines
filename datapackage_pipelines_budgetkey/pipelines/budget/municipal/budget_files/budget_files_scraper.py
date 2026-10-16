@@ -12,6 +12,7 @@ from urllib.parse import urljoin, urlparse, unquote
 
 import requests
 import urllib3
+from curl_cffi import requests as browser_requests
 import lxml.html
 import lxml.etree
 import dataflows as DF
@@ -25,7 +26,7 @@ PREVIOUS = os.environ.get('MUNICIPAL_BUDGET_FILES_PREVIOUS', OUT_PATH + '/datapa
 # dpp re-runs this flow when this file or its revision in pipeline-spec.yaml changes, not when the modules it
 # imports do: keep this equal to budget_file_analysis.ANALYZER_VERSION, so that a new analyzer re-analyzes the
 # stored files, and bump the revision with changes to the other modules (e.g. budget_report.py)
-ANALYZER_VERSION = 4
+ANALYZER_VERSION = 5
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -81,28 +82,51 @@ class FetchError(Exception):
         self.kind = kind
 
 
+BLOCKED = (401, 403, 451)
+
+
+def browser(session):
+    """A session that shakes hands like Chrome, for sites whose bot manager turns away Python's TLS handshake
+    (Jerusalem's Akamai answers 403 to requests whatever its headers). It stays in use for the rest of the site."""
+    if not hasattr(session, 'browser'):
+        session.browser = browser_requests.Session(impersonate='chrome')
+    return session.browser
+
+
 def get(session, url):
     try:
-        resp = session.get(url, headers=HEADERS, timeout=30, verify=False, stream=True)
+        if hasattr(session, 'browser'):
+            resp = browser_get(session, url)
+        else:
+            resp = session.get(url, headers=HEADERS, timeout=30, verify=False, stream=True)
+            if resp.status_code in BLOCKED:
+                resp.close()
+                resp = browser_get(session, url)
     except requests.exceptions.ConnectionError as e:
         kind = 'dns' if re.search(r'Name or service not known|nodename nor servname|getaddrinfo', str(e)) else 'connection'
         raise FetchError(kind, str(e)[:200])
-    except requests.exceptions.Timeout:
+    except (requests.exceptions.Timeout, browser_requests.exceptions.Timeout):
         raise FetchError('timeout')
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, browser_requests.exceptions.RequestException) as e:
         raise FetchError('error', str(e)[:200])
-    if resp.status_code in (401, 403, 451):
+    if resp.status_code in BLOCKED:
         raise FetchError('blocked', str(resp.status_code))
     if resp.status_code >= 400:
         raise FetchError('http-%d' % resp.status_code)
     return resp
 
 
+def browser_get(session, url):
+    # Not streamed: pages are small, and curl_cffi's streamed responses have no .text
+    return browser(session).get(url, headers={'Accept-Language': HEADERS['Accept-Language']}, timeout=30,
+                                verify=False)
+
+
 def fetch(session, url):
     resp = get(session, url)
     if 'html' not in resp.headers.get('content-type', 'text/html'):
         raise FetchError('not-html', resp.headers.get('content-type'))
-    content = resp.raw.read(MAX_HTML, decode_content=True)
+    content = resp.raw.read(MAX_HTML, decode_content=True) if hasattr(resp, 'raw') else resp.content[:MAX_HTML]
     resp.close()
     # Without a declared charset lxml falls back to Latin-1, which garbles Hebrew
     charset = (re.search(r'charset=["\']?([\w-]+)', resp.headers.get('content-type', ''))

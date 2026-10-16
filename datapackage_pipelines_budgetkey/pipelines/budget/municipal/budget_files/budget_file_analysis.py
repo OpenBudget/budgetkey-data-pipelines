@@ -15,7 +15,7 @@ import subprocess
 import tempfile
 from collections import Counter
 
-ANALYZER_VERSION = 4
+ANALYZER_VERSION = 5
 BALANCE_TOLERANCE = 0.05
 
 MAX_ROWS = 20000
@@ -25,6 +25,11 @@ MIN_CODE_ROWS = 5
 CODE = re.compile(r'^[1-9]\d{9}$')
 # Some cities (Tel Aviv) use their own codes, chapter first: 11000/121/8 = פרק 11000, סעיף 121, check digit
 SLASH_CODE = re.compile(r'^[1-9]\d{3,5}/\d{1,4}(/\d{1,2})?$')
+# Jerusalem's codes: function, economic class and a check digit, 61011119 in spreadsheets and 6101-111-9 in PDFs.
+# Eight digits are also an amount, so a code must carry a valid check digit
+JERUSALEM_CODE = re.compile(r'^[1-9]\d{7}$')
+JERUSALEM_WEIGHTS = (1, 3, 7, 9, 1, 3, 7)
+PDF_JERUSALEM_CODE = re.compile(r'(?<![\d-])([1-9]\d{3}-\d{3}-\d)(?![\d-])')
 YEAR = re.compile(r'(?<!\d)(19[9]\d|20[0-4]\d)(?!\d)')
 THOUSANDS = re.compile(r'אלפי|באלפים|אלפים|אלש"?״?ח|בא?לפי|K ?₪|thousands|بالآلاف|آلاف', re.I)
 NIS = re.compile(r'ש"?״?ח|₪|שקל|NIS|شيكل', re.I)
@@ -71,18 +76,34 @@ def number(cell):
     return -value if negative else value
 
 
+def jerusalem_code(s):
+    return bool(JERUSALEM_CODE.match(s)) and \
+        sum(w * int(d) for w, d in zip(JERUSALEM_WEIGHTS, s)) % 10 == int(s[7])
+
+
 def code_of(cell):
     if isinstance(cell, float) and not cell.is_integer():
         return None
     s = re.sub(r'[\s\-]', '', text(cell))
-    return s if CODE.match(s) or SLASH_CODE.match(s) else None
+    return s if CODE.match(s) or SLASH_CODE.match(s) or jerusalem_code(s) else None
+
+
+def pdf_code(line):
+    """(code, its text) of the first budget code in a line of PDF text, or None."""
+    m = re.search(r'(?<!\d)([1-9]\d{9})(?!\d)', line)
+    if m:
+        return m[1], m[1]
+    for m in PDF_JERUSALEM_CODE.finditer(line):
+        if jerusalem_code(m[1].replace('-', '')):
+            return m[1].replace('-', ''), m[1]
 
 
 def chapter_of(code):
-    """The 2-digit chapter (פרק): digits 2-3 of a 10-digit code, or the start of a slash-separated one."""
+    """The 2-digit chapter (פרק): digits 2-3 of a 10-digit code, or the start of a slash-separated or
+    Jerusalem one."""
     if code and CODE.match(code):
         return code[1:3]
-    if code and SLASH_CODE.match(code):
+    if code and (SLASH_CODE.match(code) or jerusalem_code(code)):
         return code[:2]
 
 
@@ -472,7 +493,7 @@ def analyze_pdf_text(content, pages, fiscal_year=None):
         return result
 
     lines = content.splitlines()
-    code_lines = [i for i, line in enumerate(lines) if re.search(r'(?<!\d)[1-9]\d{9}(?!\d)', line)]
+    code_lines = [i for i, line in enumerate(lines) if pdf_code(line)]
     if len(code_lines) < MIN_CODE_ROWS:
         summary_lines = [l for l in lines if len(re.findall(r'\d{1,3}(?:,\d{3})+', l)) >= 2]
         if len(summary_lines) >= 5:
@@ -483,11 +504,11 @@ def analyze_pdf_text(content, pages, fiscal_year=None):
     rows, widths = [], Counter()
     for i in code_lines:
         line = lines[i]
-        code = re.search(r'(?<!\d)([1-9]\d{9})(?!\d)', line).group(1)
+        code, code_text = pdf_code(line)
         # Layout text separates columns with runs of spaces; numbers inside a title stay part of the title
-        cells = [c for c in re.split(r'\s{2,}', line.strip()) if c and c != code]
+        cells = [c for c in re.split(r'\s{2,}', line.strip()) if c and c != code_text]
         values = [number(c) for c in cells if number(c) is not None and not YEAR.fullmatch(c)]
-        title = ' '.join(c.replace(code, '').strip() for c in cells if number(c) is None)
+        title = ' '.join(c.replace(code_text, '').strip() for c in cells if number(c) is None)
         rows.append((code, title, values))
         widths[len(values)] += 1
     n_values = widths.most_common(1)[0][0]
@@ -525,6 +546,7 @@ WORD = re.compile(r'<page width="[\d.]+" height="[\d.]+">|'
                   r'<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">(.*?)</word>')
 ROW_TOLERANCE = 3
 COLUMN_GAP = 30
+SIGN_GAP = 2   # between the words of one number or code
 HEADER_DISTANCE = 45
 
 
@@ -560,9 +582,42 @@ def visual_rows(words):
     return rows
 
 
+def joined(words):
+    return dict(words[-1], x0=words[0]['x0'], x=(words[0]['x0'] + words[-1]['x1']) / 2,
+                text=''.join(w['text'] for w in words))
+
+
+def merge_words(row):
+    """Words that are one: a Jerusalem code broken at its dashes ("6156 - 111 - 9"), and a minus sign printed
+    as a word of its own right against its number ("- 15,300,000")."""
+    row = sorted(row, key=lambda w: w['x0'])
+    codes, i = [], 0
+    while i < len(row):
+        parts = row[i:i + 5]
+        if len(parts) == 5 and all(b['x0'] - a['x1'] <= SIGN_GAP for a, b in zip(parts, parts[1:])) \
+                and PDF_JERUSALEM_CODE.fullmatch(''.join(w['text'] for w in parts)):
+            codes.append(joined(parts))
+            i += 5
+        else:
+            codes.append(row[i])
+            i += 1
+    merged = []
+    for w in codes:
+        previous = merged[-1] if merged else None
+        if previous and previous['text'] in ('-', '–') and w['x0'] - previous['x1'] <= SIGN_GAP \
+                and number(w['text']) is not None:
+            merged[-1] = joined([previous, w])
+        else:
+            merged.append(w)
+    return merged
+
+
 def split_row(row):
     """(code, title, values) for a table row: values are the outermost run of numbers, away from the code."""
-    code_word = next((w for w in row if re.fullmatch(r'[1-9]\d{9}', w['text'])), None)
+    row = merge_words(row)
+    code_word = next((w for w in row if re.fullmatch(r'[1-9]\d{9}', w['text'])
+                      or PDF_JERUSALEM_CODE.fullmatch(w['text']) and jerusalem_code(w['text'].replace('-', ''))),
+                     None)
     if code_word is None:
         return None
     others = [w for w in row if w is not code_word]
@@ -579,7 +634,7 @@ def split_row(row):
         values.append(w)
     title = [w for w in side if w not in values and not re.fullmatch(r'[-–]', w['text'])]
     title = ' '.join(w['text'] for w in sorted(title, key=lambda w: -w['x']))
-    return code_word['text'], title, values
+    return code_word['text'].replace('-', ''), title, values
 
 
 def cluster(xs):
@@ -630,8 +685,12 @@ def extract_pdf_table(pages):
         if not page_rows:
             continue
         xs = [w['x'] for _, (_, _, values) in page_rows for w in values]
+        # A column needs a few values to count. A page of a line or two (a small department's) has too few to place
+        # its columns by, so there a column counts where there was one on the pages before
+        short = len(page_rows) < MIN_CODE_ROWS
         centers = [c for c in cluster(xs)
-                   if sum(1 for x in xs if abs(x - c) <= COLUMN_GAP) >= max(3, len(page_rows) * 0.03)]
+                   if sum(1 for x in xs if abs(x - c) <= COLUMN_GAP) >= max(3, len(page_rows) * 0.03)
+                   or short and any(abs(c - p) <= COLUMN_GAP for p, _ in previous)]
         if not centers:
             continue
         nearest = lambda x: min(range(len(centers)), key=lambda i: abs(centers[i] - x))

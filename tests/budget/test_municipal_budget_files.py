@@ -154,6 +154,31 @@ def test_unreachable_site(monkeypatch):
     assert page['status'] == 'unreachable-blocked' and files == []
 
 
+class BrowserResponse:
+    """curl_cffi's response when not streamed: content, but no raw."""
+    def __init__(self, url, html, status=200):
+        self.url, self.status_code, self.headers = url, status, {'content-type': 'text/html'}
+        self.content, self.text = html.encode('utf-8'), html
+
+    def close(self):
+        pass
+
+
+def test_a_site_that_blocks_requests_is_fetched_as_a_browser(monkeypatch):
+    # Jerusalem's Akamai answers Python's TLS handshake with a 403, whatever its headers
+    blocked = FakeSession({})
+    blocked.get = lambda url, **kw: blocked.requested.append(url) or FakeResponse(url, 'Access Denied', status=403)
+    browser = FakeSession({})
+    browser.get = lambda url, **kw: browser.requested.append(url) or BrowserResponse(url, '<a href="b.xlsx">תקציב 2026</a>')
+    monkeypatch.setattr(m.browser_requests, 'Session', lambda impersonate: browser)
+    _, files = m.collect_files(blocked, 'https://muni.example.il/budget/')
+    assert [f['file_url'] for f in files] == ['https://muni.example.il/budget/b.xlsx']
+    # The rest of the site goes straight to the browser session
+    m.fetch(blocked, 'https://muni.example.il/other/')
+    assert blocked.requested == ['https://muni.example.il/budget/']
+    assert browser.requested == ['https://muni.example.il/budget/', 'https://muni.example.il/other/']
+
+
 def test_unreachable_site_keeps_previous_results(monkeypatch):
     def fail(*args):
         raise m.FetchError('blocked', '403')

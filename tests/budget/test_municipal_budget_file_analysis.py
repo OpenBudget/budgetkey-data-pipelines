@@ -205,6 +205,8 @@ def test_process_file_rejects_html_pages(tmp_path, monkeypatch):
     monkeypatch.setattr(store, 'storage', lambda: fake)
 
     class Resp:
+        status_code = 200
+
         def raise_for_status(self):
             pass
 
@@ -324,6 +326,40 @@ def test_slash_codes():
     assert (t['code_col'], t['title_col']) == (2, 3)
     assert [(v['kind'], v['year']) for v in t['value_columns']] == [('approved', 2026), ('executed', 2024)]
     assert a.chapter_kind('11000/121/8') == 'income' and a.chapter_of('61111/124/2') == '61'
+
+
+def test_jerusalem_codes():
+    # Function, economic class and a check digit; an amount of the same length is not a code
+    assert a.code_of(61011119) == '61011119' and a.code_of('6126-111-8') == '61261118'
+    assert a.code_of(61011118) is None and a.code_of('6126-111-9') is None
+    assert a.chapter_kind('11001218') == 'income' and a.chapter_of('61261118') == '61'
+    assert a.pdf_code('   1,702,912   משכורת ושכר משולבים   6126-111-8') == ('61261118', '6126-111-8')
+    assert a.pdf_code('   1,702,912   6126-111-9') is None
+
+
+def jerusalem_row(y, values, code='6126-111-8', title='משכורת'):
+    return [word(v, x, y, 30) for x, v in values] + [word(title, 400, y, 30), word(code, 500, y, 50)]
+
+
+def test_pdf_code_and_minus_sign_words_are_joined():
+    # Jerusalem 2023 breaks a code at its dashes, and its books print a minus sign apart from the number
+    parts = [word(p, x, 30, w) for p, x, w in [('6156', 460, 20), ('-', 472, 4), ('111', 484, 20), ('-', 496, 4),
+                                               ('9', 501, 6)]]
+    row = [word('-', 88, 30, 4), word('15,300,000', 110, 30, 40), word('הפחתה', 400, 30, 30)] + parts
+    code, title, values = a.split_row(row)
+    assert (code, title, [v['text'] for v in values]) == ('61561119', 'הפחתה', ['-15,300,000'])
+    assert a.number(values[0]['text']) == -15300000
+
+
+def test_pdf_columns_of_a_short_page_are_those_of_the_page_before():
+    # A small department's page has a line or two, too few values to place its columns by on their own
+    header = [word('2025', 100, 10, 16), word('תקציב', 122, 10, 22), word('2026', 210, 10, 16), word('תקציב', 232, 10, 22)]
+    codes = ['6126-111-8', '6126-112-5', '6126-113-2', '6126-116-3']
+    first = header + [w for i, c in enumerate(codes) for w in jerusalem_row(30 + i * 12, [(110, '1,000'), (220, '2,000')], c)]
+    second = header + jerusalem_row(30, [(110, '645,000'), (220, '800,000')], '6126-117-0')
+    columns, rows = a.extract_pdf_table([first, second])
+    assert [(c['kind'], c['year']) for c in columns] == [('approved', 2025), ('approved', 2026)]
+    assert rows[-1] == dict(row='page 2', code='61261170', title='משכורת', values=[645000, 800000])
 
 
 def columns(*kind_years):

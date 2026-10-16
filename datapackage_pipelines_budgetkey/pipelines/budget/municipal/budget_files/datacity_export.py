@@ -33,6 +33,7 @@ MIN_ROWS = 50   # fewer lines are a chapter summary
 MIN_COMPLETE_ROWS = 200
 MAX_ANCHOR_DEVIATION = 4   # complete budgets of 2007-2026 are 0.4-2.8 times their authority's 2015 expenses
 TLV = re.compile(r'(\d{5})/(\d{3})/(\d)')
+JERUSALEM = re.compile(r'(\d{4})(\d{3})\d')
 CARD = re.compile(r'[0-9]{10,15}')   # datacity drops any other card code
 # What a row needs of a budget line; a million of them are held at once
 Line = collections.namedtuple('Line', 'sheet code title amount')
@@ -52,9 +53,13 @@ def cbs_symbol(authority_code):
 
 def card_code(code):
     """Tel Aviv's "81111/110/5" (function, economic class, serial) becomes 1 + function + serial + economic
-    class: datacity reads the function from digits 2-5 and the economic class from the last 3."""
+    class: datacity reads the function from digits 2-5 and the economic class from the last 3. Jerusalem's
+    "61011119" (function, economic class, check digit) becomes 1 + function + 00 + economic class."""
     m = TLV.fullmatch(code or '')
-    return '1' + m[1] + m[3] + m[2] if m else code
+    if m:
+        return '1' + m[1] + m[3] + m[2]
+    m = JERUSALEM.fullmatch(code or '')
+    return '1' + m[1] + '00' + m[2] if m else code
 
 
 class Aggregates:

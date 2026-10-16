@@ -14,6 +14,7 @@ import os
 import tempfile
 
 import requests
+from curl_cffi import requests as browser_requests
 
 import budget_file_analysis as analysis
 
@@ -63,6 +64,10 @@ class NotAFile(Exception):
 
 def download(url, fmt, dest):
     resp = requests.get(url, headers=HEADERS, timeout=120, verify=False, stream=True)
+    if resp.status_code in (401, 403, 451):
+        # A bot manager that turned away Python's TLS handshake (Jerusalem's Akamai) lets a browser's through
+        resp.close()
+        resp = browser_requests.get(url, impersonate='chrome', timeout=120, verify=False, stream=True)
     resp.raise_for_status()
     size = 0
     with open(dest, 'wb') as out:

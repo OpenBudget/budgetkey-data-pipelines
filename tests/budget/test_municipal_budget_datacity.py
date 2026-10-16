@@ -34,6 +34,7 @@ def test_codes():
     assert x.cbs_symbol(31) == '0031' and x.cbs_symbol(5531) == '31'
     assert x.card_code('81111/110/5') == '1811115110'
     assert x.card_code('1611000110') == '1611000110'
+    assert x.card_code('61011119') == '1610100111' and x.card_code('11001218') == '1110000121'
 
 
 def test_phase_years():
