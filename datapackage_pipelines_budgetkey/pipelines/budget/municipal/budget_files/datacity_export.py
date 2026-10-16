@@ -18,9 +18,6 @@ Rows hold the 6 fields a muni-budgets pipeline maps: expenses positive and incom
 of muni_budgets, and one row per card code and phase (the pipelines' primary key).
 """
 import collections
-import csv
-import functools
-import os
 import re
 
 KIND_PHASE = {'proposed': ('מקורי', 0), 'approved': ('מאושר', -1), 'executed': ('ביצוע', -2)}
@@ -54,43 +51,16 @@ def cbs_symbol(authority_code):
     return '%02d' % (code - 5500) if 5500 < code < 5600 else '%04d' % code
 
 
-@functools.lru_cache()
-def jerusalem_codes():
-    """Jerusalem's codes, functions and chapters -> the Interior Ministry's.
-
-    Jerusalem numbers its budget its own way (education above all: its 80 is the Ministry's 81, its 86 and 87
-    are 82), so neither its functions nor its economic classes can be read as the Ministry's.
-    jerusalem-codes.csv maps the 3,692 codes of its 2017-2022 budgets, from a municipal budget expert's template.
-    A function's codes all go to one of the Ministry's functions but for three of Jerusalem's 362 functions;
-    a new code takes its function's most common one, and a new function its chapter's."""
-    codes = {}
-    functions, chapters = collections.defaultdict(collections.Counter), collections.defaultdict(collections.Counter)
-    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'jerusalem-codes.csv')) as f:
-        for row in csv.DictReader(f):
-            code, standard = row['jerusalem_code'], row['standard_code']
-            codes[code] = standard
-            functions[code[:4]][standard[1:5]] += 1
-            chapters[code[:2]][standard[1:3]] += 1
-
-    def most_common(counters):
-        return {k: c.most_common(1)[0][0] for k, c in counters.items()}
-    return codes, most_common(functions), most_common(chapters)
-
-
 def card_code(code):
     """Tel Aviv's "81111/110/5" (function, economic class, serial) becomes 1 + function + serial + economic
     class: datacity reads the function from digits 2-5 and the economic class from the last 3. Jerusalem's
-    "61011119" (function, economic class, check digit) becomes the Ministry's code it maps to, or for a code
-    not in the map, 1 + the Ministry's function (or chapter) + 00 + Jerusalem's economic class."""
+    "61011119" (function, economic class, check digit) becomes 1 + function + 00 + economic class. Both keep
+    their city's own numbering, which differs from the Interior Ministry's: the fetcher names their chapters."""
     m = TLV.fullmatch(code or '')
     if m:
         return '1' + m[1] + m[3] + m[2]
     m = JERUSALEM.fullmatch(code or '')
-    if not m:
-        return code
-    codes, functions, chapters = jerusalem_codes()
-    function = functions.get(m[1]) or chapters.get(m[1][:2], m[1][:2]) + m[1][2:]
-    return codes.get(code) or '1' + function + '00' + m[2]
+    return '1' + m[1] + '00' + m[2] if m else code
 
 
 class Aggregates:

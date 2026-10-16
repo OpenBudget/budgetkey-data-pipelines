@@ -19,6 +19,28 @@ RENAMED = dict(
     (x['from'], x['to']) for x in
     csv.DictReader(open(Path(__file__).parents[2] / 'lamas' / 'renamed_authorities.csv'))
 )
+# datacity names a chapter (8, 81, 817) by the Interior Ministry's chart, but Jerusalem, Haifa and Tel Aviv number
+# their chapters their own way: Tel Aviv's and Haifa's 817 holds their high schools, the Ministry's holds
+# additional school services. chapter-names.csv names their chapters by what they hold, in the chart's words where
+# one fits, so that a name means the same in every city
+CHAPTER_NAMES = dict(
+    ((x['muni_code'], x['code']), x['name']) for x in
+    csv.DictReader(open(Path(__file__).with_name('chapter-names.csv')))
+)
+
+
+def name_chapters(rows):
+    if rows.res.name != 'muni_budgets':
+        yield from rows
+        return
+    for row in rows:
+        for level in (1, 2, 3):
+            name = CHAPTER_NAMES.get((row['muni_code'], row[f'func_{level}_code']))
+            if name:
+                row[f'func_{level}_name'] = name
+        if row['code'] and len(row['code']) <= 3:
+            row['title'] = CHAPTER_NAMES.get((row['muni_code'], row['code']), row['title'])
+        yield row
 
 def get_code_to_entity_id_map():
     rows = DF.Flow(
@@ -118,6 +140,7 @@ def flow(*_):
         DF.load(DATACITY_DB, query=SOURCES, name='sources'),
         DF.load(DATACITY_DB, query=QUERY, name='muni_budgets'),
         DF.set_type('.*code', type='string'),
+        name_chapters,
         DF.join('sources', ['muni_code', 'code', 'year'],
                 'muni_budgets', ['muni_code', 'code', 'year'],
                 dict(source_files=None)),

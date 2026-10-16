@@ -34,12 +34,8 @@ def test_codes():
     assert x.cbs_symbol(31) == '0031' and x.cbs_symbol(5531) == '31'
     assert x.card_code('81111/110/5') == '1811115110'
     assert x.card_code('1611000110') == '1611000110'
-    # Jerusalem's codes become the Interior Ministry's: arnona 1100 is 1111-1114 there, education 80 is 81
-    assert x.card_code('11001218') == '1111118100' and x.card_code('61011119') == '1610110119'
-    assert x.card_code('80101116') == '1811011116'
-    # A code missing from the map takes its function's, and a function missing from it its chapter's
-    assert '80101234' not in x.jerusalem_codes()[0] and x.card_code('80101234') == '1811000123'
-    assert '8038' not in x.jerusalem_codes()[1] and x.card_code('80381117') == '1813800111'
+    # Jerusalem's own numbering is kept: function, 00, economic class
+    assert x.card_code('61011119') == '1610100111' and x.card_code('11001218') == '1110000121'
 
 
 def test_phase_years():
