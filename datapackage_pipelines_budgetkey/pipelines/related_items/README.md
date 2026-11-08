@@ -90,6 +90,23 @@ narrow budget matching. Drafts come from `build_bodies.py`, which collects names
 candidates and lets Gemini propose; every row is then checked by hand. Re-run it when new names show up in
 `related_items_mentions` with status `not_in_bodies`. Existing rows are kept, and new ones are appended as drafts.
 
+### Bodies without an entity
+
+Some of the most often named bodies have no record in `entities`. Their mentions are kept as `no_entity`. Counts
+are from about 900 sample decisions and 32 chapters:
+
+| Body | Mentions |
+|---|---|
+| משרד הביטחון (the ministry's HQ; only its units have records) | 199 |
+| צבא ההגנה לישראל / צה"ל (only corps and directorates have records) | ~100 |
+| המשרד לביטחון הפנים / המשרד לביטחון לאומי (HQ) | ~125 |
+| מועצת מקרקעי ישראל | 80 |
+| מזכירות הממשלה | 43 |
+| המטה לביטחון לאומי, שירות הביטחון הכללי, המוסד | ~90 |
+
+When such an entity is added, set `entity_id` on the body's row in bodies.csv. Its past and future mentions then
+link on the next run, because LLM answers are cached and only the resolution changes.
+
 ## Adding a source
 
 Write an adapter in `sources.py` that yields documents. See the docstring of `linker.py` for their shape:
