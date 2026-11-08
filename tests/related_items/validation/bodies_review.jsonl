@@ -1,0 +1,254 @@
+{"name": "הכנסת", "entity_id": "500100029", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד ראש הממשלה", "entity_id": "500100037", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ועדת הבחירות המרכזית לכנסת", "entity_id": "500105606", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד המשפטים", "entity_id": "500102033", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "פרקליטות המדינה", "entity_id": "500103353", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המינהל למחקר, פיתוח אמצעי לחימה ותשתית טכנולוגית", "entity_id": "500100516", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד החינוך", "entity_id": "500101282", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד התקשורת", "entity_id": "500103155", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משטרת ישראל", "entity_id": "500101944", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות האוכלוסין וההגירה", "entity_id": "500106505", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הרווחה והביטחון החברתי", "entity_id": "500106406", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הבריאות", "entity_id": "500100904", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד התיירות", "entity_id": "500102876", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד התחבורה והבטיחות בדרכים", "entity_id": "500102736", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המשרד להגנת הסביבה", "entity_id": "500100284", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות שוק ההון, ביטוח וחיסכון", "entity_id": "500501986", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (רשות שוק ההון, 2026)"], "reason": "Matches."}
+{"name": "רשות הטבע והגנים", "entity_id": "500500285", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (רשות הטבע והגנים, 2012-2014 and 2026)"], "reason": "Matches."}
+{"name": "נתיבי ישראל - החברה הלאומית לתשתיות תחבורה בע\"מ", "entity_id": "513467209", "verdict": "y", "alias_problems": ["מע\"צ / מע\"ץ: until 2003 this was the government Public Works Department, a separate registry body (500100896 \"משרד האנרגיה והמים/מע\"צ\"); the company (registered 2003-11) was only called מע\"צ 2003-2010. Older mentions of מע\"צ would be misattributed."], "chapter_problems": [], "reason": "Same company (renamed from מע\"צ - החברה הלאומית לדרכים to נתיבי ישראל)."}
+{"name": "מועצה אזורית מגילות ים המלח", "entity_id": "500275748", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית תמר", "entity_id": "500262514", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד האוצר", "entity_id": "500100110", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המכון הגיאולוגי", "entity_id": "500106679", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המשרד לשיתוף פעולה אזורי", "entity_id": "500106851", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0004 (שיתוף פעולה אזורי, 2026)"], "reason": "Matches."}
+{"name": "החברה הממשלתית להגנות ים המלח בע\"מ", "entity_id": "514129097", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות ניקוז ים המלח", "entity_id": "501800098", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ענבל חברה לביטוח בע״מ", "entity_id": "520031030", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות מקרקעי ישראל", "entity_id": "500101761", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד האנרגיה", "entity_id": "500100292", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Energy Ministry record (old HQ id range; no separate \"/המשרד הראשי\" record)."}
+{"name": "משרד הכלכלה והתעשייה", "entity_id": "500102926", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בנק ישראל", "entity_id": "500500517", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד התחבורה / השירות המטאורולוגי", "entity_id": "500102843", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד האוצר / אגף החשב הכללי", "entity_id": "500100136", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות המיסים בישראל", "entity_id": "500106158", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אגף התקציבים", "entity_id": "500100128", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הבינוי והשיכון", "entity_id": "500100797", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד החוץ", "entity_id": "500101076", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות התחרות", "entity_id": "500103049", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (רשויות פיקוח, holds רשות ההגבלים/רשות התחרות 2013-2026)"], "reason": "Competition Authority under the Economy Ministry."}
+{"name": "המועצה הלאומית לכלכלה", "entity_id": "500107180", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת החשמל לישראל בע\"מ", "entity_id": "520000472", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "נגה - ניהול מערכת החשמל בע\"מ", "entity_id": "514195874", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת נמלי ישראל - פיתוח ונכסים בע\"מ", "entity_id": "513569780", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת קו צינור אירופה אסיה בע\"מ", "entity_id": "515633253", "verdict": "y", "alias_problems": ["קצא\"א - קו צינור הנפט אילת ואשקלון: names the original Eilat-Ashkelon Pipeline Co., a different, still-active registry company (510494842 \"חברת קו צינור אילת אשקלון בעמ\", 1968). The chosen record was registered in 2017."], "chapter_problems": [], "reason": "Entity matches the row name (EAPC, Europe Asia Pipeline Co.); the historical alias points to another corporation."}
+{"name": "תשתיות אנרגיה בע\"מ", "entity_id": "520027293", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות להגנת הצרכן ולסחר הוגן", "entity_id": "500107669", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (הרשות להגנת הצרכן, 2026)"], "reason": "Matches."}
+{"name": "המועצה הישראלית לצרכנות", "entity_id": "510535073", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing (optional): 0054 has \"המועצה הישראלית\" programs (2013-14, 2026), likely this council"], "reason": "Matches."}
+{"name": "רשות האכיפה והגבייה", "entity_id": "500106521", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המשרד לשוויון חברתי וקידום מעמד האישה", "entity_id": "500107800", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0004 (המשרד לשוויון חברתי, 2017-2026)"], "reason": "Matches."}
+{"name": "משרד החקלאות וביטחון המזון", "entity_id": "500101654", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות החברות הממשלתיות", "entity_id": "500107859", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מינהל התכנון", "entity_id": "500102579", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (יחידת סמך מינהל התכנון, 2026)"], "reason": "Planning Administration, now under Finance."}
+{"name": "הלשכה המרכזית לסטטיסטיקה", "entity_id": "500100045", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "איגוד הבנקים בישראל", "entity_id": "580019073", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות הממשלתית למים ולביוב", "entity_id": "500101753", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מכון התקנים הישראלי", "entity_id": "500500137", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הפנים", "entity_id": "500102546", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות ניירות ערך", "entity_id": "500500210", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אגף השכר והסכמי עבודה", "entity_id": "500100193", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "נציבות שירות המדינה", "entity_id": "500104823", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0005 (the commission was budgeted under Finance until 2009)"], "reason": "Matches."}
+{"name": "המוסד לביטוח לאומי", "entity_id": "500500772", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הנהלת בתי המשפט", "entity_id": "500102173", "verdict": "y", "alias_problems": ["(minor) הרשות השופטת: names the judiciary as a whole (courts and judges), which is broader than its administration. Acceptable only if this record deliberately stands for the court system."], "chapter_problems": [], "reason": "Courts administration record."}
+{"name": "נת\"ע - נתיבי תחבורה עירוניים להסעת המונים בע\"מ", "entity_id": "520042789", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רכבת ישראל בע\"מ", "entity_id": "520043613", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות ניקוז ונחלים שרון", "entity_id": "501800064", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "שירותי בריאות כללית", "entity_id": "589906114", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הסוכנות לעסקים קטנים ובינוניים", "entity_id": "500103064", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0038 (small-business programs 2004-2018)"], "reason": "Small and Medium Business Agency unit at the Economy Ministry."}
+{"name": "עיריית אשדוד", "entity_id": "500200704", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית באר שבע", "entity_id": "500290002", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית כפר סבא", "entity_id": "500269006", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית ראשון לציון", "entity_id": "500283007", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המכון הישראלי לייצוא ולשיתוף פעולה בין-לאומי", "entity_id": "580025021", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ביחד בשבילך בע\"מ", "entity_id": "515318012", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועדון \"חבר\" צרכנות בע\"מ", "entity_id": "511824906", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברה למפעלי כלכלה ותרבות לעובדי המדינה בע\"מ", "entity_id": "520020264", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חוצה ישראל בע\"מ", "entity_id": "520038662", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מפעל הפיס", "entity_id": "520018714", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מערך הדיגיטל הלאומי", "entity_id": "500107792", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0004 (מערך הדיגיטל הלאומי sits in 0004 in 2026)"], "reason": "Main digital-agency unit (not the \"מחשוב\" sub-unit 500108113)."}
+{"name": "קרנות השוטרים בישראל בע\"מ", "entity_id": "520035577", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית אור יהודה", "entity_id": "500224001", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית בני ברק", "entity_id": "500261003", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית בת-ים", "entity_id": "500262001", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית גבעת שמואל", "entity_id": "500206818", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית גבעתיים", "entity_id": "500263009", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית הרצליה", "entity_id": "500264007", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית חולון", "entity_id": "500266002", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "יהוד מונוסון", "entity_id": "500213574", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית פתח תקוה", "entity_id": "500279005", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית קרית אונו", "entity_id": "500226204", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית רמת גן", "entity_id": "500286000", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית תל אביב-יפו", "entity_id": "500250006", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת נתיבי אילון בע\"מ", "entity_id": "510536352", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "העמותה לתכנון, פיתוח ושימור אורבני - ירושלים (ע\"ר)", "entity_id": "580127538", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת דואר ישראל בע\"מ", "entity_id": "513467191", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מקורות חברת מים בע\"מ", "entity_id": "520010869", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות הספנות והנמלים", "entity_id": "500102835", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "נתיבי הגז הטבעי לישראל בע\"מ", "entity_id": "513436394", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית חיפה", "entity_id": "500240007", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "קו מוצרי דלק בע\"מ", "entity_id": "510234487", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת נמל אשדוד בע\"מ", "entity_id": "513569772", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת נמל חיפה בע\"מ", "entity_id": "513569749", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז לבריאות הנפש שער מנשה", "entity_id": "500107495", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המרכז הרפואי ע\"ש יצחק שמיר", "entity_id": "520037128", "verdict": "n", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is a private company (registered 1992, flagged \"מפרה\") named after Assaf Harofeh, not the government hospital (Shamir/Assaf Harofeh is a Health Ministry hospital, chapter 0094). No government_office record for the hospital was found, so the row should have no entity rather than this company."}
+{"name": "מרכז רפואי פלימן", "entity_id": "500107453", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בית חולים גריאטרי שמואל הרופא", "entity_id": "500107446", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית אל-בטוף", "entity_id": "500225651", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית אל קסום", "entity_id": "500262696", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית בוסתאן אל-מרג'", "entity_id": "500225669", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית זבולון", "entity_id": "500231121", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית חוף אשקלון", "entity_id": "500261367", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית חוף הכרמל", "entity_id": "500232152", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית מבואות החרמון", "entity_id": "500221551", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מנוחה נכונה - באר שבע והסביבה (ע\"ר)", "entity_id": "580237758", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. פקיעין", "entity_id": "500205364", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. פסוטה", "entity_id": "500205356", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. כעבייה-טבאש-חג'אג'רה", "entity_id": "500209788", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות שדות התעופה", "entity_id": "500102868", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות התעופה האזרחית", "entity_id": "500102827", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Ministry accounting unit of the Civil Aviation Administration; the CAA (2005) is its direct successor within the ministry. Borderline but acceptable."}
+{"name": "קופת חולים מאוחדת מרכזית עממי", "entity_id": "589958495", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המועצה להשכלה גבוהה/המשרד הראשי", "entity_id": "500500798", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד לבטחון פנים/שרות בתי הסוהר", "entity_id": "500102025", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד העלייה והקליטה", "entity_id": "500102637", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית ירושלים", "entity_id": "500230008", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מכבי שירותי בריאות", "entity_id": "589902279", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אוניברסיטת בר אילן", "entity_id": "580063683", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז רפואי סורוקה", "entity_id": "500800446", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז רפואי מאיר", "entity_id": "500800438", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז רפואי רמב\"ם", "entity_id": "500107040", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז רפואי עירוני-ממשלתי ע\"ש א. סוראסקי, תל אביב-יפו", "entity_id": "500106919", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז רפואי ע\"ש ד\"ר ח. שיבא, תל השומר", "entity_id": "500106265", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המועצה האזורית מעלה יוסף", "entity_id": "500262522", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה למשק וכלכלה של השלטון המקומי בע\"מ", "entity_id": "520029844", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המועצה האזורית עמק חפר", "entity_id": "500241161", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אוניברסיטת בן גוריון בנגב", "entity_id": "500701644", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המכללה האקדמית להנדסה בראודה בכרמיאל", "entity_id": "580264877", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז השלטון המקומי בישראל", "entity_id": "580002244", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המשרד לשירותי דת", "entity_id": "500100987", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Old accounting name of the religious ministry HQ (ענייני דתות, the predecessor of שירותי דת). Borderline: the ministry was dissolved 2003/4 and re-created 2008, but chapter 0022 is continuous and no other HQ record exists."}
+{"name": "עיריית חדרה", "entity_id": "500265004", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הטכניון - מכון טכנולוגי לישראל", "entity_id": "500701636", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה הממשלתית לתיירות", "entity_id": "510141146", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד התרבות והספורט", "entity_id": "500106646", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "איגוד הכדורסל בישראל", "entity_id": "580002160", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות השידור", "entity_id": "500500566", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אל על נתיבי אויר לישראל בעמ", "entity_id": "520017146", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "איגוד ערים נפת אשקלון (איכות הסביבה)", "entity_id": "501400220", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית ראש העין", "entity_id": "500226402", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בית חולים \"רבקה זיו\" צפת", "entity_id": "500107404", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המרכז הרפואי צפון", "entity_id": "500107396", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד האוצר/המדפיס הממשלתי", "entity_id": "500100250", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בי\"ח לחולי נפש כפר שאול-איתנים", "entity_id": "500100912", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הבריאות/המרכז הרפואי לגליל", "entity_id": "500104559", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המרכז לבריאות הנפש מזור", "entity_id": "500106976", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הנהלת בתי הדין הרבניים", "entity_id": "500101035", "verdict": "y", "alias_problems": ["(minor) בתי הדין הרבניים: names the court system, not its administration (the registry also has individual courts, e.g. \"משרד לענייני דתות/בי\"ד/ר ירושלים\"). Acceptable if deliberate."], "chapter_problems": ["missing: 0008 (rabbinical courts were budgeted there 2012-2018)"], "reason": "Rabbinical courts administration accounting unit."}
+{"name": "הרבנות הראשית לישראל", "entity_id": "500100995", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0004 (הרבנות הראשית לישראל, 2018-2021)"], "reason": "Chief Rabbinate unit."}
+{"name": "אוניברסיטת אריאל בשומרון (ע\"ר)", "entity_id": "580367290", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אוניברסיטת חיפה", "entity_id": "500701628", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אוניברסיטת תל אביב", "entity_id": "500502042", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "האוניברסיטה העברית בירושלים", "entity_id": "500701610", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משמר הגבול", "entity_id": "500102017", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "דירה להשכיר - החברה הממשלתית לדיור ולהשכרה בע\"מ", "entity_id": "515009652", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות לפיתוח ירושלים", "entity_id": "500500392", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות הממשלתית להתחדשות עירונית", "entity_id": "500501978", "verdict": "y", "alias_problems": [], "chapter_problems": ["missing: 0054 (הרשות להתחדשות עירונית, 2026)"], "reason": "Matches."}
+{"name": "הסתדרות מדיצינית הדסה", "entity_id": "520008095", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית עמק יזרעאל", "entity_id": "500223094", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה אזורית רמת הנגב", "entity_id": "500262480", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה מקומית בית ג'ן", "entity_id": "500204805", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה מקומית חורפיש", "entity_id": "500204961", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה מקומית יפיע", "entity_id": "500204995", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מועצה מקומית כפר ורדים", "entity_id": "500212634", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. כפר שמריהו", "entity_id": "500202676", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. מטולה", "entity_id": "500200431", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. עילוט", "entity_id": "500205117", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית אום-אל-פחם", "entity_id": "500227103", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית באקה אל-גרבייה", "entity_id": "500260005", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית טמרה", "entity_id": "500289004", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית כפר קאסם", "entity_id": "500206347", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית קריית אתא", "entity_id": "500268008", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית קריית שמונה", "entity_id": "500228002", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות העתיקות", "entity_id": "500500491", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "פיקוד העורף", "entity_id": "500100755", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הוועדה לאנרגיה אטומית", "entity_id": "500100102", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "התעשייה האווירית לישראל בע\"מ", "entity_id": "520027194", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ארכיון המדינה", "entity_id": "500100060", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות הארצית לתחבורה ציבורית", "entity_id": "500107933", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "יפה נוף תחבורה תשתיות ובנייה בע\"מ", "entity_id": "512241696", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד הנגב, הגליל והחוסן הלאומי", "entity_id": "500107099", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות לפיתוח הנגב", "entity_id": "500500293", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המרכז הרפואי וולפסון", "entity_id": "500107438", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות הלאומית לביטחון קהילתי", "entity_id": "500500426", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "The statutory anti-drug authority, renamed by law to הרשות למאבק באלימות, בסמים ובאלכוהול and then הרשות הלאומית לביטחון קהילתי: one corporation. Note there is also a PMO accounting unit 500100086 \"משרד רוה\"מ/הרשות למלחמה בסמים\"."}
+{"name": "מעגלים - הקרן למען בעלי מקצועות שוחקים (ע\"ר)", "entity_id": "580469880", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עזריאלי - מכללה אקדמית להנדסה ירושלים (ע\"ר)", "entity_id": "580283729", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת העובדים השיתופית הכללית בארץ ישראל בע\"מ", "entity_id": "570000174", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הסוכנות היהודית לארץ ישראל", "entity_id": "500500046", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות הארצית לכבאות והצלה", "entity_id": "500102629", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Fire & Rescue Commission accounting unit; the commission heads the national authority. Acceptable."}
+{"name": "חברת הגיחון בע\"מ", "entity_id": "512291295", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ההסתדרות הרפואית בישראל", "entity_id": "589903046", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מגן דוד אדום בישראל", "entity_id": "500502059", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה להגנת הטבע", "entity_id": "580017499", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית אריאל", "entity_id": "500235700", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית לוד", "entity_id": "500270004", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית נשר", "entity_id": "500225008", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית רמלה", "entity_id": "500285002", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית רעננה", "entity_id": "500287008", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. שהם", "entity_id": "500213046", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית עכו", "entity_id": "500276001", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית אל-טירה", "entity_id": "500227202", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בית - הספר המרכזי למלונאות בעמ", "entity_id": "510328636", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המכללה האקדמית עמק יזרעאל ע״ש מקס שטרן בע״מ (חל״צ)", "entity_id": "520044330", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ערים חברה לפתוח עירוני בעמ", "entity_id": "520029810", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "קרן קסריה אדמונד בנימין דה רוטשילד", "entity_id": "510370430", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה לפיתוח קיסריה אדמונד בנימין דה רוטשילד בע״מ", "entity_id": "510107378", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית יקנעם עילית", "entity_id": "500202403", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. בני עי\"ש", "entity_id": "500210661", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מ. מ. רמת ישי", "entity_id": "500201223", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עירית אשקלון", "entity_id": "500271002", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "תעש מערכות בע\"מ", "entity_id": "515218436", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית אילת", "entity_id": "500226006", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה לפיתוח חוף אילת בע\"מ", "entity_id": "520026881", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המועצה להסדר ההימורים בספורט", "entity_id": "500500384", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות השנייה לטלוויזיה ולרדיו", "entity_id": "500500061", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חברת נמל אילת בע\"מ", "entity_id": "513569764", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "חלמיש חברה ממשלתית עירונית לדיור ולשיקום ולהתחדשות שכונות בתל-אביב יפו בע\"מ", "entity_id": "520023920", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית יבנה", "entity_id": "500226600", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית בית שמש", "entity_id": "500226105", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "עיריית מודיעין עילית", "entity_id": "500237979", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "החברה למתנ\"סים - מרכזים קהילתיים בישראל בע\"מ", "entity_id": "510525348", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אגד חברה לתחבורה בע\"מ", "entity_id": "516041118", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "דן חברה לתחבורה ציבורית בע\"מ", "entity_id": "513183046", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "היכלי הספורט תל אביב-יפו בע\"מ", "entity_id": "510492648", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רפאל מערכות לחימה מתקדמות בע\"מ", "entity_id": "520042185", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אלתא מערכות בע״מ", "entity_id": "510487986", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "פי גלילות מסופי נפט וצנורות בעמ", "entity_id": "510192776", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "תור אויר ישראל בעמ", "entity_id": "520027350", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "שח״מ מקורות ביצוע בע״מ", "entity_id": "510284037", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "בתי זקוק לנפט בע״מ", "entity_id": "520036658", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "שמנים בסיסיים חיפה בעמ", "entity_id": "520025693", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מכון טכנולוגי חולון - מ.ט.ח (ע\"ר)", "entity_id": "580344109", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "יד חיים ויצמן (חל״צ)", "entity_id": "510143423", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מכון ויצמן למדע", "entity_id": "520016858", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משטרת ישראל - מחוז ש\"י", "entity_id": "500104948", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "ההתאחדות לכדורגל בישראל", "entity_id": "580001717", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מרכז ההשקעות", "entity_id": "500103056", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "האגודה למען החייל", "entity_id": "580004307", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מינהל הרכב הממשלתי", "entity_id": "500100276", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "המכון למורשת בן גוריון", "entity_id": "500500343", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "תש\"ת - חברה למפעלי תיירות ושירותי תעופה בע\"מ", "entity_id": "510519259", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות לשיקום האסיר", "entity_id": "500102462", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות לרישום והסדר זכויות מקרקעין", "entity_id": "500102124", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "מתאם פעולות הממשלה בשטחים", "entity_id": "500100441", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "אגף שומת מקרקעין", "entity_id": "500102132", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "האפוטרופוס הכללי והכונס הרשמי", "entity_id": "500102165", "verdict": "y", "alias_problems": ["הממונה על הליכי חדלות פירעון ושיקום כלכלי: on its own this names only the insolvency commissioner (the official receiver's successor), a component of the merged unit and not the whole body. The combined names are fine."], "chapter_problems": [], "reason": "Accounting unit of the Administrator General and Official Receiver at the Justice Ministry."}
+{"name": "משרד העבודה", "entity_id": "500107537", "verdict": "y", "alias_problems": [], "chapter_problems": ["0023 is the Welfare Ministry's chapter (משרד הרווחה), not the Labor Ministry's. This record is the post-2021 Labor Ministry, whose budget is 0036 (תעסוקה)."], "reason": "The current Labor Ministry record."}
+{"name": "משרד המשפטים/המחלקה לסיוע משפטי", "entity_id": "500102116", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "הרשות לאכיפה במקרקעין", "entity_id": "500107693", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "משרד המדע והטכנולוגיה", "entity_id": "500101878", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
+{"name": "רשות הפטנטים", "entity_id": "500102140", "verdict": "y", "alias_problems": [], "chapter_problems": [], "reason": "Registry record is this body (or its HQ)."}
