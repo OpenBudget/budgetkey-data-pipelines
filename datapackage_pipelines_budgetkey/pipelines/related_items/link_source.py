@@ -56,6 +56,8 @@ def run(source):
     docs = select(documents(source))
     logging.info('%s: %d documents', source, len(docs))
     kinds = ['entities', 'decisions', 'budget', 'supports']
+    if os.environ.get('RELATED_ITEMS_TENDERS'):
+        kinds.append('tenders')  # not validated yet: off by default
     if source == 'state_comptroller':
         kinds.append('chapters')  # earlier reports cited by the chapters
     targets = Targets.load(kinds)
