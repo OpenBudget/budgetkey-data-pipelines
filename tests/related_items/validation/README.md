@@ -18,3 +18,7 @@ y / n / ?.
   ones. All are fixed in bodies.csv.
 
 Score a sample with `python -m datapackage_pipelines_budgetkey.pipelines.related_items.sample_links score <csv>`.
+
+- `tenders.csv`: every tender link from the comptroller samples and the 569 decisions that mention a tender (4 links,
+  all correct). A number alone is often several offices' tenders; the other 11 citations stayed unlinked: 6 not in
+  the tenders data, 3 ambiguous, 2 with no matching publisher.
