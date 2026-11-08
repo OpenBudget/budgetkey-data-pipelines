@@ -1,5 +1,6 @@
 import os
 import pickle
+import threading
 from hashlib import sha256
 from pathlib import Path
 
@@ -22,13 +23,17 @@ def get_from_cache(hash):
         with path.open('rb') as f:
             try:
                 return pickle.load(f)
-            except EOFError:
-                # Handle the case where the file is empty or corrupted
+            except Exception:
+                # An empty or corrupted entry (e.g. one cut off by a crash) is a cache miss
                 pass
     return None
 
 
 def save_to_cache(hash, data):
+    """Written to a temporary file and renamed into place, so a reader in another thread or process never sees a
+    partly written entry."""
     path = path_for_hash(hash)
-    with path.open('wb') as f:
+    tmp = path.with_name('%s.%d.%d.tmp' % (path.name, os.getpid(), threading.get_ident()))
+    with tmp.open('wb') as f:
         pickle.dump(data, f)
+    os.replace(tmp, path)
