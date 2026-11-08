@@ -3,7 +3,8 @@
 Parameters: source ('state_comptroller' or 'gov_decisions'), out-path.
 Local runs: python -m datapackage_pipelines_budgetkey.pipelines.related_items.link_source <source> with
 OUT (output dir), LIMIT, DOC_IDS (comma separated source doc ids), and for the comptroller CHAPTERS (the chapters
-datapackage dir); decisions are read from the DB (or the API, locally) with DECISIONS_WHERE as an extra SQL filter.
+datapackage dir) and REPORTS (the reports datapackage dir, for chapters citing earlier ones). Decisions are read
+from the DB (or the API, locally), with DECISIONS_WHERE as an extra SQL filter.
 """
 import csv
 import logging
@@ -54,7 +55,10 @@ def select(docs):
 def run(source):
     docs = select(documents(source))
     logging.info('%s: %d documents', source, len(docs))
-    targets = Targets.load()
+    kinds = ['entities', 'decisions', 'budget', 'supports']
+    if source == 'state_comptroller':
+        kinds.append('chapters')  # earlier reports cited by the chapters
+    targets = Targets.load(kinds)
     links, mentions, usage = link_documents(docs, targets)
     logging.info('%s: %d links, %d mentions; LLM usage %s', source, len(links), len(mentions), usage.by_model)
     return links, mentions

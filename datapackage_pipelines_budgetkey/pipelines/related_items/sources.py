@@ -34,6 +34,16 @@ def comptroller_finding_text(f):
     return '\n'.join(lines)
 
 
+def earlier_reports(a):
+    """The earlier comptroller reports a chapter cites or follows up on: `earlier_reports` when the chapters
+    pipeline has it, else the single follow-up reference of its older schema."""
+    refs = _list(a.get('earlier_reports'))
+    if not refs and a.get('follows_up_report') and a.get('follows_up_title'):
+        refs = [dict(report=a['follows_up_report'], year=_int(a.get('follows_up_year')),
+                     title=a['follows_up_title'], relation='followed_up')]
+    return [r for r in refs if isinstance(r, dict) and r.get('title')]
+
+
 def comptroller_documents(audits, findings):
     """One document per Hebrew audit chapter; its findings are the parts."""
     by_chapter = {}
@@ -71,6 +81,7 @@ def comptroller_documents(audits, findings):
                        'if only in the summary.'.format(chapter_id),
             hints=dict(
                 bodies=[dict(code=b.get('code'), name=b.get('name'), relation='audited') for b in audited],
+                earlier_reports=earlier_reports(a),
                 years=(_int(a.get('audit_period_start_year')), _int(a.get('audit_period_end_year'))),
                 llm=True,
                 same_government_default=False,

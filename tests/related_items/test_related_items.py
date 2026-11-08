@@ -5,6 +5,7 @@ import pytest
 
 from datapackage_pipelines_budgetkey.pipelines.related_items import linker as LK
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_budget as RB
+from datapackage_pipelines_budgetkey.pipelines.related_items import ri_comptroller as RC
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_entities as E
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_llm as L
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
@@ -317,3 +318,70 @@ def test_ubiquitous_bodies_only_in_specific_roles(monkeypatch):
     links, mentions = LK.DocLinker(doc, targets(), None).run()
     assert [l['target_doc_id'] for l in links] == ['org/government_office/500100904']
     assert ('הכנסת', 'ubiquitous') in {(m['mention'], m['status']) for m in mentions}
+
+
+# --- earlier comptroller reports -----------------------------------------------------------------------------------
+
+def chapters():
+    pubs = [dict(pub_id=1, title='דוח שנתי 67ב', publish_date='2017-05-01', report_code='67ב'),
+            dict(pub_id=2, title='דוחות על הביקורת בשלטון המקומי לשנת 2014', publish_date='2014-07-01',
+                 report_code=''),
+            dict(pub_id=3, title='דוח שנתי 72א', publish_date='2021-10-01', report_code='72א')]
+    chs = [dict(chapter_id=10, pub_id=1, title='זיהומי מים בין מדינת ישראל לשטחי יהודה, שומרון ורצועת עזה - המשרד '
+                'להגנת הסביבה - מטלה בין-משרדית',
+                publish_date='2017-05-01', report_code='67ב'),
+           dict(chapter_id=11, pub_id=1, title='ילדים ובני נוער בסיכון בפנימיות של משרד הרווחה',
+                publish_date='2017-05-01', report_code='67ב'),
+           dict(chapter_id=12, pub_id=1, title='ילדים ובני נוער בסיכון במשרד החינוך', publish_date='2017-05-01',
+                report_code='67ב'),
+           dict(chapter_id=20, pub_id=2, title='מתקני ספורט ציבוריים ברשויות המקומיות', publish_date='2014-07-01'),
+           dict(chapter_id=30, pub_id=3, title='אי מיצוי של זכויות חברתיות: ביקורת מעקב',
+                publish_date='2021-10-01', report_code='72א')]
+    return RC.ChapterIndex(chs, pubs)
+
+
+@pytest.mark.parametrize('text,code', [('דוח שנתי 67ב', '67ב'), ("דוח שנתי 72 א'", '72א'), ('דוח שנתי 49', None),
+                                       ('דוחות על הביקורת בשלטון המקומי לשנת 2014', None)])
+def test_report_code(text, code):
+    assert RC.report_code(text) == code
+
+
+def test_chapter_resolution():
+    idx = chapters()
+    ref = dict(report='דוח שנתי 67ב', year=2017, title='זיהומי מים בין ישראל לשטחי יהודה, שומרון ורצועת עזה')
+    entry, confidence, how = idx.resolve(ref, D(2024, 3, 19))
+    assert entry['id'] == '10' and how == 'title'
+    # Reports without a code: by the publication's title and year.
+    ref = dict(report='דוחות על הביקורת בשלטון המקומי לשנת 2014', year=2014,
+               title='מתקני ספורט ציבוריים ברשויות המקומיות')
+    assert idx.resolve(ref, D(2023, 5, 2))[0]['id'] == '20'
+    # Two similar chapters: the LLM chooses.
+    ref = dict(report='דוח שנתי 67ב', year=2017, title='ילדים ובני נוער בסיכון')
+    entry, candidates, how = idx.resolve(ref, D(2023, 5, 2))
+    assert entry is None and how == 'llm' and {c['id'] for c, _ in candidates} == {'11', '12'}
+    # Unknown report, or one published after the citing chapter.
+    assert idx.resolve(dict(report='דוח שנתי 53ב', year=2003, title='השירות לציבור'))[2] == 'no_report'
+    assert idx.resolve(dict(report='דוח שנתי 72א', year=2021, title='אי מיצוי של זכויות חברתיות'),
+                       D(2020, 1, 1))[2] == 'no_report'
+
+
+def test_linker_earlier_reports():
+    audits = [dict(chapter_id=7824, title='זיהום אוויר', publish_date='2024-03-19', language='he',
+                   earlier_reports=[
+                       dict(report='דוח שנתי 67ב', year=2017, relation='followed_up',
+                            title='זיהומי מים בין מדינת ישראל לשטחי יהודה, שומרון ורצועת עזה'),
+                       dict(report='דוח שנתי 53ב', year=2003, title='השירות לציבור', relation='referenced')])]
+    doc = next(S.comptroller_documents(audits, []))
+    doc['hints']['llm'] = False
+    t = targets()
+    t.chapters = chapters()
+    links, mentions = LK.DocLinker(doc, t, None).run()
+    assert [(l['target_doc_id'], l['relation'], l['method']) for l in links] == [
+        ('state_comptroller_audits/10', 'follows_up', 'comptroller_ref:title')]
+    assert any(m['status'] == 'no_report' and m['details']['year'] == 2003 for m in mentions)
+
+
+def test_earlier_reports_from_the_older_schema():
+    a = dict(follows_up_report='דוח שנתי 67ב', follows_up_year='2017', follows_up_title='זיהומי מים')
+    assert S.earlier_reports(a) == [dict(report='דוח שנתי 67ב', year=2017, title='זיהומי מים',
+                                         relation='followed_up')]

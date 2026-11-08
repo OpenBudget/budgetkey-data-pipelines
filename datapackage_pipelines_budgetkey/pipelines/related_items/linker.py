@@ -20,6 +20,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datapackage_pipelines_budgetkey.common import llm
 
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_budget as RB
+from datapackage_pipelines_budgetkey.pipelines.related_items import ri_comptroller as RC
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_entities as E
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_llm as L
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
@@ -42,8 +43,8 @@ MENTION_FIELDS = [
 ]
 
 # Which relation wins when one target is linked several ways from the same place.
-RELATION_ORDER = ['audited', 'subject', 'amends', 'cancels', 'cites', 'responsible', 'funded', 'contractor',
-                  'mentioned']
+RELATION_ORDER = ['audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible', 'funded',
+                  'contractor', 'mentioned']
 
 ORG_KINDS = {
     'ministry': {'government_office', 'law_mandated_organization'},
@@ -64,7 +65,7 @@ ALL_KINDS = set().union(*ORG_KINDS.values()) | E.FUZZY_KINDS
 # Confidence by method; only links at or above MIN_CONFIDENCE are emitted.
 CONFIDENCE = {
     'regex:corp_number': 0.97, 'comptroller_code': 0.95, 'alias': 0.93, 'exact_name': 0.9,
-    'llm_resolve': 0.85, 'regex:budget_code': 0.95,
+    'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95,
 }
 MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 
@@ -72,19 +73,21 @@ MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 class Targets:
     """The target indexes, loaded once per run."""
 
-    def __init__(self, entities=None, decisions=None, budget=None, supports=None):
+    def __init__(self, entities=None, decisions=None, budget=None, supports=None, chapters=None):
         self.entities = entities
         self.decisions = decisions
         self.budget = budget
         self.supports = supports
+        self.chapters = chapters
 
     @classmethod
-    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports')):
+    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters')):
         return cls(
             entities=E.EntityIndex.load() if 'entities' in kinds else None,
             decisions=DecisionIndex.load() if 'decisions' in kinds else None,
             budget=RB.BudgetIndex.load() if 'budget' in kinds else None,
             supports=RB.SupportProgramIndex.load() if 'supports' in kinds else None,
+            chapters=RC.ChapterIndex.load() if 'chapters' in kinds else None,
         )
 
 
@@ -423,11 +426,45 @@ class DocLinker:
                       'llm_resolve', CONFIDENCE['llm_resolve'], part_id)
         return emit
 
+    def earlier_reports(self):
+        """The comptroller's references to its own earlier reports (hints['earlier_reports'])."""
+        refs = self.hints.get('earlier_reports') or []
+        if not refs or not self.t.chapters:
+            return
+        to_decide = []
+        for ref in refs:
+            mention = '{} ({}): {}'.format(ref.get('report'), ref.get('year'), ref.get('title'))
+            relation = 'follows_up' if ref.get('relation') == 'followed_up' else 'cites'
+            details = dict(report=ref.get('report'), year=ref.get('year'), title=ref.get('title'),
+                           relation=ref.get('relation'))
+            entry, result, how = self.t.chapters.resolve(ref, self.doc.get('date'))
+            if entry is not None:
+                target = RC.ChapterIndex.doc_id(entry)
+                if target == self.doc['doc_id']:
+                    continue
+                self.link(target, 'state_comptroller_audits', entry['title'], relation, mention, None,
+                          'comptroller_ref:title', result)
+                self.mention('comptroller_report', mention, 'linked', 'comptroller_ref:title', target, result,
+                             details=details)
+            elif how == 'llm':
+                entries = {RC.ChapterIndex.doc_id(c): c for c, _ in result}
+                to_decide.append(dict(
+                    kind='comptroller_report', mention=mention, excerpt=None, parts=[None], context=mention,
+                    hint=ref.get('relation'), details=details,
+                    candidates=[(RC.ChapterIndex.doc_id(c), RC.ChapterIndex.label(c)) for c, _ in result],
+                    emit=lambda doc_id, part_id, entries=entries, mention=mention, relation=relation: self.link(
+                        doc_id, 'state_comptroller_audits', entries[doc_id]['title'], relation, mention, None,
+                        'llm_resolve', CONFIDENCE['llm_resolve'], part_id)))
+            else:
+                self.mention('comptroller_report', mention, how, 'comptroller_ref', details=details)
+        self.decide(to_decide, L.COMPTROLLER_GUIDANCE)
+
     def run(self):
         self.corporation_numbers()
         self.decisions()
         self.budget_codes()
         self.hint_bodies()
+        self.earlier_reports()
         self.llm_mentions()
         return list(self.links.values()), self.mentions
 

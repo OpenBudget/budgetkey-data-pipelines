@@ -119,6 +119,10 @@ stands for the ministry as a whole; ministry names there are often outdated). A 
 hospital is a different record from the ministry. Municipalities: "עירית"/"עיריית" is a city, "מ. מ." a local
 council, "מ. א." a regional council.'''
 
+COMPTROLLER_GUIDANCE = '''Each item is an earlier State Comptroller report chapter the audit refers to, as (report, year,
+title). The records are chapters of that report. Choose the chapter that is the one referred to; a follow-up chapter,
+a chapter on a related subject or on another body is not it.'''
+
 PROGRAM_GUIDANCE = '''The records are items of the Israeli state budget (chapter > domain > program, with the code)
 and support programs (תמיכות) of government ministries, with their years. Choose the budget item whose budget is
 the program meant, at the level that matches it best (a domain if the text means the whole domain), or the support

@@ -20,9 +20,9 @@ stores links that can be read in both directions:
 | `link_id` | hash of source doc, part and target |
 | `source_doc_id`, `source_kind`, `source_part_id` | e.g. `state_comptroller_audits/7534`, part `7534-3` (a finding); `gov_decisions/{id}` |
 | `source_title`, `source_date` | |
-| `target_doc_id`, `target_kind`, `target_title` | ES doc ids: `org/{kind}/{id}`, `gov_decisions/{id}`, `budget/{code}/{year}`, `support_programs/{key}` |
+| `target_doc_id`, `target_kind`, `target_title` | ES doc ids: `org/{kind}/{id}`, `gov_decisions/{id}`, `budget/{code}/{year}`, `support_programs/{key}`, `state_comptroller_audits/{chapter_id}` |
 | `target_year`, `target_code` | budget: the year the source is about, and the item's code that year |
-| `relation` | `audited`, `subject`, `responsible`, `funded`, `contractor`, `cites` / `amends` / `cancels` (decisions), `mentioned` |
+| `relation` | `audited`, `subject`, `responsible`, `funded`, `contractor`, `cites` / `amends` / `cancels` (decisions), `follows_up` / `cites` (comptroller chapters), `mentioned` |
 | `mention`, `excerpt` | the text as it appears in the source, and the passage around it |
 | `confidence`, `method` | see below |
 
@@ -45,6 +45,7 @@ Most certain first. Only links with confidence ≥ 0.8 are emitted.
 | `regex:decision:month` / `date_close` / `date_government` | the date is a month, or up to a month off, or only gives the government (numbers restart per government) | 0.9 / 0.93 / 0.85 |
 | `regex:decision:same_government` | an undated citation in a government decision: the latest N of the same government | 0.8 |
 | `regex:decision:same_document` | an undated citation of a number already cited with a date in the same document | as that one |
+| `comptroller_ref:title` | an earlier comptroller chapter the audit cites (`earlier_reports`): the report by code, or by publication title and year; the chapter by a clear title match (else `llm_resolve`) | 0.95 |
 | `regex:budget_code` | "תקנה 20-38-02-01": the item with that code in the source's years | 0.95 |
 | `comptroller_code` | the comptroller's audited institutions, via `bodies.csv` | 0.95 |
 | `alias` | a name listed in `bodies.csv` | 0.93 |
