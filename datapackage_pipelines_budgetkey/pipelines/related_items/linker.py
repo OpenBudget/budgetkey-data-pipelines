@@ -23,6 +23,7 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_budget as
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_comptroller as RC
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_entities as E
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_llm as L
+from datapackage_pipelines_budgetkey.pipelines.related_items import ri_procurement as RP
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
 from datapackage_pipelines_budgetkey.pipelines.related_items.ri_decisions import DecisionIndex
 
@@ -65,7 +66,7 @@ ALL_KINDS = set().union(*ORG_KINDS.values()) | E.FUZZY_KINDS
 # Confidence by method; only links at or above MIN_CONFIDENCE are emitted.
 CONFIDENCE = {
     'regex:corp_number': 0.97, 'comptroller_code': 0.95, 'alias': 0.93, 'exact_name': 0.9,
-    'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95,
+    'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95, 'regex:tender': 0.9,
 }
 MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 
@@ -73,22 +74,30 @@ MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 class Targets:
     """The target indexes, loaded once per run."""
 
-    def __init__(self, entities=None, decisions=None, budget=None, supports=None, chapters=None):
+    def __init__(self, entities=None, decisions=None, budget=None, supports=None, chapters=None, tenders=None):
         self.entities = entities
         self.decisions = decisions
         self.budget = budget
         self.supports = supports
         self.chapters = chapters
+        self.tenders = tenders
 
     @classmethod
-    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters')):
+    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters', 'tenders')):
         return cls(
             entities=E.EntityIndex.load() if 'entities' in kinds else None,
             decisions=DecisionIndex.load() if 'decisions' in kinds else None,
             budget=RB.BudgetIndex.load() if 'budget' in kinds else None,
             supports=RB.SupportProgramIndex.load() if 'supports' in kinds else None,
             chapters=RC.ChapterIndex.load() if 'chapters' in kinds else None,
+            tenders=RP.TenderIndex.load() if 'tenders' in kinds else None,
         )
+
+    def prepare(self):
+        """Builds the lazily computed parts of the indexes (embeddings), before the linker's threads share them."""
+        for index in (self.budget, self.supports):
+            if index is not None:
+                index.prepare()
 
 
 class DocLinker:
@@ -459,6 +468,35 @@ class DocLinker:
                 self.mention('comptroller_report', mention, how, 'comptroller_ref', details=details)
         self.decide(to_decide, L.COMPTROLLER_GUIDANCE)
 
+    def tenders(self):
+        if not self.t.tenders or not self.t.entities:
+            return
+        # The bodies the document is about: curated ones resolved so far, and any whose entity got linked.
+        linked = {l['target_doc_id'] for l in self.links.values()}
+        bodies = self.bodies + [b for b in self.t.entities.bodies if b['entity'] and b.get('status') == 'ok'
+                                and E.doc_id(b['entity']) in linked]
+        seen = set()
+        for part_id, text in self.segments():
+            for m in T.tender_numbers(text):
+                key = (part_id, m['number'])
+                if key in seen or (part_id is None and any(k[1] == m['number'] for k in seen)):
+                    continue
+                seen.add(key)
+                context = text[max(0, m['start'] - 250):m['end'] + 250]
+                tender, how = self.t.tenders.resolve(m['number'], self.t.entities, bodies, context,
+                                                     self.doc.get('date'))
+                excerpt = T.excerpt(text, m['start'], m['end'])
+                if tender is None:
+                    self.mention('tender', m['mention'], how, 'regex:tender', details=dict(number=m['number']),
+                                 excerpt=excerpt, part_id=part_id)
+                    continue
+                target = RP.TenderIndex.doc_id(tender)
+                self.link(target, 'tenders', tender['title'], 'mentioned', m['mention'], excerpt, 'regex:tender',
+                          CONFIDENCE['regex:tender'], part_id)
+                self.mention('tender', m['mention'], 'linked', 'regex:tender', target, CONFIDENCE['regex:tender'],
+                             details=dict(number=m['number'], publisher=tender['publisher']), excerpt=excerpt,
+                             part_id=part_id)
+
     def run(self):
         self.corporation_numbers()
         self.decisions()
@@ -466,12 +504,14 @@ class DocLinker:
         self.hint_bodies()
         self.earlier_reports()
         self.llm_mentions()
+        self.tenders()  # after the bodies the document is about are known
         return list(self.links.values()), self.mentions
 
 
 def link_documents(docs, targets, threads=THREADS):
     """Links every document; returns (links, mentions, usage)."""
     usage = llm.Usage()
+    targets.prepare()
 
     def one(doc):
         try:

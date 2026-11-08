@@ -10,6 +10,7 @@ Matching:
   relevant years, ranked by embedding similarity of "chapter > domain > program" paths; the LLM decides.
 """
 import json
+import threading
 
 import numpy as np
 
@@ -48,6 +49,7 @@ class BudgetIndex:
             self.by_code_year[(row['code'], year)] = item
             self.items.append(item)
         self._vectors = None
+        self._lock = threading.Lock()
 
     @classmethod
     def load(cls):
@@ -75,14 +77,21 @@ class BudgetIndex:
         code, title = item['years'].get(year, (item['code'], item['title'])) if year else (item['code'], item['title'])
         return '{} ({})'.format(' > '.join(item['path'][:-1] + [title]), code)
 
-    def _embedded(self, depths):
-        """Unit vectors of the "chapter > domain > program" paths of all items at `depths`, computed once."""
-        if self._vectors is None or self._vectors[0] != depths:
-            items = [i for i in self.items if i['depth'] in depths]
-            m = np.array(embed_many([' > '.join(i['path']) for i in items]), dtype=np.float32)
-            m /= np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
-            self._vectors = (depths, items, m)
-        return self._vectors[1], self._vectors[2]
+    def _embedded(self, depths=(2, 3)):
+        """Unit vectors of the "chapter > domain > program" paths of all items at `depths`, computed once - also when
+        the linker's threads ask for them together (call prepare() before starting them to pay it up front)."""
+        vectors = self._vectors
+        if vectors is None or vectors[0] != depths:
+            with self._lock:
+                vectors = self._vectors
+                if vectors is None or vectors[0] != depths:
+                    items = [i for i in self.items if i['depth'] in depths]
+                    vectors = (depths, items, unit_rows(embed_many([' > '.join(i['path']) for i in items])))
+                    self._vectors = vectors
+        return vectors[1], vectors[2]
+
+    def prepare(self):
+        self._embedded((2, 3))
 
     def candidates(self, query_vector, chapters, years, depths=(2, 3), limit=10):
         """Items under the given chapters (4-digit codes) that existed in any of `years`, most similar first."""
@@ -129,6 +138,8 @@ class SupportProgramIndex:
                 chapters={c[1][:4] for c in codes if len(c) > 1 and c[1]},
                 titles=sorted({t[2] for t in titles if len(t) > 2 and t[2]} | {row['title']}),
             ))
+        self._vectors = None
+        self._lock = threading.Lock()
 
     @classmethod
     def load(cls):
@@ -146,26 +157,42 @@ class SupportProgramIndex:
         return '{} - {} ({}-{})'.format(' / '.join(program['titles'][:3]), program['ministry'],
                                         program['min_year'], program['max_year'])
 
+    def _embedded(self):
+        """Unit vectors of all programs' titles, computed once (thread-safe, like BudgetIndex._embedded)."""
+        vectors = self._vectors
+        if vectors is None:
+            with self._lock:
+                vectors = self._vectors
+                if vectors is None:
+                    vectors = unit_rows(embed_many(['{} - {}'.format(' / '.join(p['titles'][:3]), p['ministry'])
+                                                    for p in self.programs]))
+                    self._vectors = vectors
+        return vectors
+
+    def prepare(self):
+        self._embedded()
+
     def candidates(self, query_vector, chapters, years, limit=8):
-        pool = [p for p in self.programs
+        keep = [k for k, p in enumerate(self.programs)
                 if (not chapters or p['chapters'] & set(chapters))
                 and (not years or p['min_year'] is None
                      or any(p['min_year'] - 1 <= y <= (p['max_year'] or p['min_year']) + 1 for y in years))]
-        if not pool:
+        if not keep:
             return []
-        texts = ['{} - {}'.format(' / '.join(p['titles'][:3]), p['ministry']) for p in pool]
-        m = np.array(embed_many(texts), dtype=np.float32)
-        m /= np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
-        sims = m @ query_vector
+        sims = self._embedded()[keep] @ query_vector
         order = np.argsort(-sims)[:limit]
-        return [(pool[k], float(sims[k])) for k in order]
+        return [(self.programs[keep[k]], float(sims[k])) for k in order]
+
+
+def unit_rows(vectors):
+    m = np.array(vectors, dtype=np.float32)
+    return m / np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
 
 
 def embed_queries(texts):
     if not texts:
         return []
-    m = np.array(embed_many(texts), dtype=np.float32)
-    return list(m / np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9))
+    return list(unit_rows(embed_many(texts)))
 
 
 def chapters_of(bodies):

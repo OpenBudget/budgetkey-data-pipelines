@@ -405,3 +405,66 @@ def test_issue_links():
     # The strongest finding link wins, and stays traceable to its finding.
     assert (d['relation'], d['confidence'], d['source_part_id'], d['method']) == ('subject', 0.93, '9-4',
                                                                                   'derived:issue')
+
+
+# --- tenders -------------------------------------------------------------------------------------------------------
+
+def test_tender_resolution_needs_the_publisher():
+    from datapackage_pipelines_budgetkey.pipelines.related_items import ri_procurement as RP
+    idx = RP.TenderIndex([
+        dict(tender_type='office', publication_id=1, tender_id='205/2014', publisher='משרד הרווחה',
+             description='שירותי רווחה', publication_date='2014-03-01'),
+        dict(tender_type='office', publication_id=2, tender_id='205-2014', publisher='משרד החינוך',
+             description='הסעות', publication_date='2014-05-01'),
+    ])
+    bodies = [dict(name='משרד הרווחה והביטחון החברתי', aliases=['משרד הרווחה'], entity_id='500101662',
+                   comptroller_codes=[], budget_chapters=['0023'], status='ok'),
+              dict(name='משרד החינוך', aliases=[], entity_id='', comptroller_codes=[], budget_chapters=['0020'],
+                   status='ok')]
+    ents = E.EntityIndex([], bodies)
+    welfare = ents.bodies_for_name('משרד הרווחה')
+    # The number alone is two tenders; the document's body tells them apart.
+    assert idx.resolve('205/2014', ents, [], 'מכרז פומבי מס\' 205/2014')[1] == 'no_publisher'
+    t, how = idx.resolve('205/2014', ents, welfare, 'מכרז פומבי מס\' 205/2014')
+    assert RP.TenderIndex.doc_id(t) == 'tenders/office/1/205/2014'
+    # Or the publisher named next to the number.
+    t, how = idx.resolve('205/2014', ents, [], 'משרד החינוך פרסם את מכרז 205-2014 להסעות')
+    assert t['publication_id'] == '2'
+    # Not a tender published after the source.
+    assert idx.resolve('205/2014', ents, welfare, '', datetime.date(2013, 1, 1))[0] is None
+
+
+# --- shared indexes under the linker's threads ---------------------------------------------------------------------
+
+@pytest.mark.parametrize('make', ['budget', 'supports'])
+def test_embeddings_are_built_once_across_threads(monkeypatch, make):
+    import threading
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+    import numpy as np
+
+    calls = []
+
+    def embed_many(texts):
+        calls.append(len(texts))
+        time.sleep(0.05)  # long enough for the other threads to arrive while the first one builds
+        return [[1.0, float(i)] for i in range(len(texts))]
+
+    monkeypatch.setattr(RB, 'embed_many', embed_many)
+    if make == 'budget':
+        idx = budget()
+        ask = lambda: idx.candidates(np.array([1.0, 0.0], dtype=np.float32), ['0020'], [2014])  # noqa: E731
+    else:
+        idx = RB.SupportProgramIndex([dict(program_key='p1', title='סל הספורט', supporting_ministry='משרד התרבות',
+                                           min_year='2015', max_year='2020', budget_codes='[]', all_titles='[]')])
+        ask = lambda: idx.candidates(np.array([1.0, 0.0], dtype=np.float32), [], [2016])  # noqa: E731
+    barrier = threading.Barrier(8)
+
+    def go(_):
+        barrier.wait()
+        return ask()
+
+    with ThreadPoolExecutor(8) as pool:
+        results = list(pool.map(go, range(8)))
+    assert len(calls) == 1
+    assert all(r == results[0] for r in results) and results[0]

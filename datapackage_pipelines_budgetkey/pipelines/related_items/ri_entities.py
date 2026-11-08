@@ -12,6 +12,7 @@ Resolution order, most certain first:
 """
 import csv
 import os
+import threading
 from collections import defaultdict
 from pathlib import Path
 
@@ -61,6 +62,7 @@ class EntityIndex:
         self.fuzzy_names = []
         self.fuzzy_entities = []
         self._company_names = None
+        self._lock = threading.Lock()
         for row in rows:
             if row['kind'] in NEVER_KINDS or not row.get('name'):
                 continue
@@ -109,9 +111,10 @@ class EntityIndex:
         return self.by_norm.get(T.normalize_name(name), [])
 
     def _companies(self):
-        if self._company_names is None:
-            entities = [e for e in self.by_id.values() if e['kind'] in EXACT_ONLY_KINDS]
-            self._company_names = ([T.normalize_name(e['name']) for e in entities], entities)
+        with self._lock:  # build_bodies asks from several threads
+            if self._company_names is None:
+                entities = [e for e in self.by_id.values() if e['kind'] in EXACT_ONLY_KINDS]
+                self._company_names = ([T.normalize_name(e['name']) for e in entities], entities)
         return self._company_names
 
     def candidates(self, name, limit=12, kinds=None, include_companies=False):
