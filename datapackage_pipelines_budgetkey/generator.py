@@ -162,6 +162,14 @@ class Generator(GeneratorBase):
                         'db-table': db_table,
                         'key-fields': key_fields
                     }),
+                    # A field added to a type (e.g. by its extra-steps) gets a column in the existing mirror table
+                    ('add_missing_columns', {
+                        'tables': {
+                            db_table: {
+                                'resource-name': doc_type,
+                            }
+                        }
+                    }),
                     ('dump.to_sql', {
                         'tables': {
                             db_table: {
