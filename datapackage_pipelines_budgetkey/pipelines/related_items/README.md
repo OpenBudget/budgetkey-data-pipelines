@@ -130,6 +130,13 @@ Without `DPP_DB_ENGINE`, target tables are downloaded once through next.obudget.
 `DOC_IDS` selects documents. `RELATED_ITEMS_MIN_CONFIDENCE`, `RELATED_ITEMS_MODEL` and `RELATED_ITEMS_THREADS`
 tune a run.
 
+## Checking a run
+
+`check_links.py` runs read-only sanity queries on the tables, through next.obudget.org's query API or `--engine`:
+counts by kind, method and mention status; duplicate ids, self-links and malformed doc ids; links whose target is
+missing from its table; the busiest sources and most linked targets; and a stable sample of 20 links to check by hand.
+`--sql` prints the queries for /api/query.
+
 ## In Elasticsearch
 
 `budgetkey/elasticsearch/add_related_items.py`, an indexer `extra-step` per doc type, adds:
