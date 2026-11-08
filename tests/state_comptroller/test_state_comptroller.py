@@ -502,3 +502,32 @@ def test_es_documents(tmp_path):
     assert tracked[0]['chapter_ids'] == [1] and tracked[0]['chapter_titles'] == ['מינהל הרכב']
     fields = {f.name: f.descriptor for f in dp.get_resource(ed.AUDITS).schema.fields}
     assert 'text_md' not in fields and fields['title']['es:title'] and fields['findings']['es:index'] is False
+
+
+def test_incremental_scrape(monkeypatch):
+    year = datetime.date.today().year
+
+    def ms_date(y):
+        return '/Date(%d)/' % int(datetime.datetime(y, 6, 1).timestamp() * 1000)
+    hits = [dict(ListItemID=str(i), PublicationType='דוחות שנתיים', PublicationStartDate=ms_date(y), Path='p%d' % i)
+            for i, y in ((1, year), (2, year - 10), (3, year - 20), (4, year - 15))]
+    scraped = []
+
+    def scrape_publication(hit):
+        scraped.append(int(hit['ListItemID']))
+        return dict(pub_id=int(hit['ListItemID']), title='new', publish_date=None), [dict(Order=1)]
+    monkeypatch.setattr(ms, 'scrape_publication', scrape_publication)
+    monkeypatch.setattr(ms, 'scrape_chapter', lambda task, pub, inst: dict(chapter_id=pub['pub_id'] * 10, pub_id=pub['pub_id']))
+    monkeypatch.setattr(ms, 'Institutions', lambda: None)
+    previous_pubs = [dict(pub_id=i, title='old') for i in (1, 2, 3, 5)]  # 4 is new to us, 5 no longer listed
+    previous_chapters = [dict(chapter_id=i * 10, pub_id=i, title='old') for i in (1, 2, 3, 5)]
+    pubs, chapters = ms.scrape(previous=previous_pubs, recent_years=3, hits=hits)
+    assert sorted(scraped) == [1, 4]  # the recent one, and the one not seen before
+    listed = {int(h['ListItemID']) for h in hits}
+    pubs, chapters = ms.merge((previous_pubs, previous_chapters), listed, pubs, chapters)
+    assert sorted((p['pub_id'], p['title']) for p in pubs) == [(1, 'new'), (2, 'old'), (3, 'old'), (4, 'new')]
+    assert sorted(c['chapter_id'] for c in chapters) == [10, 20, 30, 40]
+    # Without an earlier run, everything is scraped
+    scraped.clear()
+    ms.scrape(hits=hits)
+    assert sorted(scraped) == [1, 2, 3, 4]

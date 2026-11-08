@@ -294,10 +294,20 @@ def scrape_publication(hit):
     return publication, tasks
 
 
-def scrape(limit=None, min_year=None, pub_ids=None):
-    hits = [h for h in search_publications() if h.get('PublicationType') in TYPES]
+def scrape(limit=None, min_year=None, pub_ids=None, previous=None, recent_years=None, hits=None):
+    """Scrapes the publications and their chapters. With `previous` (publication rows of an earlier run) and
+    `recent_years`, only publications from the last `recent_years` years, or not in `previous`, are scraped; the
+    caller keeps the rest from the earlier run. `hits`: the library's listing, if already fetched."""
+    hits = [h for h in (search_publications() if hits is None else hits) if h.get('PublicationType') in TYPES]
     if pub_ids:
         hits = [h for h in hits if int(h['ListItemID']) in pub_ids]
+    if previous is not None and recent_years:
+        since = datetime.date.today().year - recent_years
+        known = {p['pub_id'] for p in previous}
+        listed = len(hits)
+        hits = [h for h in hits if int(h['ListItemID']) not in known
+                or (parse_ms_date(h.get('PublicationStartDate')) or datetime.date.today()).year >= since]
+        logging.info('Scraping %d of %d publications: new ones, and those since %d', len(hits), listed, since)
     hits.sort(key=lambda h: parse_ms_date(h.get('PublicationStartDate')) or datetime.date(1900, 1, 1), reverse=True)
     if min_year:
         hits = [h for h in hits if (parse_ms_date(h.get('PublicationStartDate')) or datetime.date.today()).year >= min_year]
@@ -353,9 +363,46 @@ def output_flow(publications, chapters):
     )
 
 
+# After the first full scrape, a run re-scrapes only the publications of the last few years (and any it hasn't seen):
+# older publications don't change. STATE_COMPTROLLER_FULL=1 scrapes everything again.
+RECENT_YEARS = 3
+
+
+def previous_output(path):
+    """(publications, chapters) of the last run's datapackage, or None."""
+    try:
+        results, dp, _ = DF.Flow(DF.load(os.path.join(path, 'datapackage.json'))).results()
+    except Exception:
+        logging.info('No earlier run at %s, scraping everything', path)
+        return None
+    by_name = dict(zip([r.name for r in dp.resources], results))
+    if not by_name.get('publications'):
+        return None
+    return by_name['publications'], by_name.get('chapters') or []
+
+
+def merge(previous, listed_ids, publications, chapters):
+    """The scraped publications and chapters, plus the earlier run's for the publications not scraped again (if the
+    library still lists them)."""
+    old_pubs, old_chapters = previous
+    scraped = {p['pub_id'] for p in publications}
+    kept = {p['pub_id'] for p in old_pubs if p['pub_id'] not in scraped and p['pub_id'] in listed_ids}
+    publications = publications + [p for p in old_pubs if p['pub_id'] in kept]
+    chapters = chapters + [c for c in old_chapters if c['pub_id'] in kept]
+    logging.info('Kept %d publications from the last run', len(kept))
+    return publications, chapters
+
+
 def flow(*_):
     limit = int(os.environ.get('STATE_COMPTROLLER_LIMIT') or 0) or None
-    publications, chapters = scrape(limit)
+    previous = None if os.environ.get('STATE_COMPTROLLER_FULL') or limit else previous_output(OUT_PATH)
+    hits = search_publications()
+    publications, chapters = scrape(limit, previous=previous[0] if previous else None, recent_years=RECENT_YEARS,
+                                    hits=hits)
+    if previous:
+        listed = {int(h['ListItemID']) for h in hits if h.get('PublicationType') in TYPES}
+        publications, chapters = merge(previous, listed, publications, chapters)
+    publications.sort(key=lambda p: (p.get('publish_date') or datetime.date(1900, 1, 1), p['pub_id']), reverse=True)
     return DF.Flow(
         output_flow(publications, chapters),
         DF.update_resource(None, **{'dpp:streaming': True}),

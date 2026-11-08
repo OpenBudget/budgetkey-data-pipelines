@@ -6,7 +6,7 @@ answered, and whether later follow-up audits found it fixed.
 
 | Pipeline | Module | Writes |
 |---|---|---|
-| `reports` (weekly) | `mevaker_scraper.py` | `state_comptroller_publications`, `state_comptroller_chapters`: every annual/special report and its chapters, all years, with the audited bodies and links to the files |
+| `reports` (weekly) | `mevaker_scraper.py` | `state_comptroller_publications`, `state_comptroller_chapters`: every annual/special report and its chapters, all years, with the audited bodies and links to the files. After the first full scrape, a run re-scrapes only the last 3 years' publications and any new ones, and keeps the rest from the previous run (`STATE_COMPTROLLER_FULL=1` scrapes everything again) |
 | `chapters` | `chapter_analysis.py` | `state_comptroller_audits` (a chapter with its summary, audit period, follow-up reference, topics, key figures and full markdown text), `state_comptroller_findings` (one row per finding) - from 2000 on |
 | `pm_responses` (weekly) | `pm_responses.py` | `state_comptroller_response_docs`, `state_comptroller_responses`: the PM's comments books and the follow-up (מעקב) books from gov.il, one row per finding answered |
 | `issues` | `issue_linking.py` | `state_comptroller_links` (every link made, with its method), `state_comptroller_issues` (findings and responses grouped into issues, each with a timeline), `state_comptroller_issue_members` |
