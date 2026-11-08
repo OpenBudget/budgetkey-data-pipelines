@@ -68,6 +68,7 @@ AUDIT_FIELDS = [
     ('issue_ids', 'array', dict(STRINGS, **{'es:keyword': True})),
     ('tracked_issues', 'integer', {}),
     ('text', 'string', {'es:hebrew': True}),
+    ('text_truncated', 'boolean', {}),
     ('pdf_url', 'string', NOT_INDEXED),
     ('docx_url', 'string', NOT_INDEXED),
     ('abstract_pdf_url', 'string', NOT_INDEXED),
@@ -101,6 +102,9 @@ ISSUE_FIELDS = [
 ]
 
 INDEXED_STATUSES = ('ok', 'low-verification', 'partial-text', 'no-findings')
+# The indexer's load_big reads fields of up to 2M characters; a chapter whose file was a whole book can be longer.
+# The full text stays at md_url.
+MAX_TEXT = 1_000_000
 
 
 def read_resource(path, name):
@@ -164,7 +168,8 @@ def audit_document(row, findings, issues):
         findings_text='\n\n'.join('%s\n%s' % (f['title'] or '', f['description'] or '') for f in doc_findings),
         issue_ids=sorted({f['issue_id'] for f in doc_findings if f['issue_id']}),
         tracked_issues=len(tracked),
-        text=row.get('text_md'),
+        text=(row.get('text_md') or '')[:MAX_TEXT] or None,
+        text_truncated=len(row.get('text_md') or '') > MAX_TEXT,
         pdf_url=row.get('full_pdf_stored'),
         docx_url=row.get('full_docx_stored'),
         abstract_pdf_url=row.get('abstract_pdf_stored'),

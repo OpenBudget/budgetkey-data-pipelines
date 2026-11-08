@@ -23,6 +23,11 @@ budget:
         source-fields:
           - title
         target-field: semantic_tags
+    - flow: add_related_items
+      parameters:
+        resource: budget
+        doc-id-pattern: 'budget/{code}/{year}'
+        code-field: code
   document-steps:
     - run: make_budget_charts
     - run: add_redirects_for_connected_items
@@ -70,6 +75,11 @@ entities:
   document-steps:
     - run: enrich_entities
     - run: make_entity_charts
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: entities
+        doc-id-pattern: 'org/{kind}/{id}'
 
 contract-spending:
   kind: indexer
@@ -147,6 +157,11 @@ support_programs:
     type: year-range
     from-field: min_year
     to-field: max_year
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: support_programs
+        doc-id-pattern: 'support_programs/{program_key}'
 
 tenders:
   kind: indexer
@@ -181,6 +196,10 @@ tenders:
         types:
           publication_id:
             type: integer
+    - flow: add_related_items
+      parameters:
+        resource: tenders
+        doc-id-pattern: 'tenders/{tender_type}/{publication_id}/{tender_id}'
   document-steps:
     - run: add_tender_timeline      
   date-range:
@@ -285,6 +304,11 @@ gov_decisions:
   date-range:
     type: year
     field: publish_date
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: gov_decisions
+        doc-id-pattern: 'gov_decisions/{id}'
 
 analysis:
   kind: indexer
@@ -384,6 +408,11 @@ state_comptroller_audits:
     type: date-range
     from-field: publish_date
     to-field: publish_date
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: state_comptroller_audits
+        doc-id-pattern: 'state_comptroller_audits/{chapter_id}'
 
 state_comptroller_issues:
   kind: indexer
@@ -403,3 +432,8 @@ state_comptroller_issues:
     type: date-range
     from-field: first_reported
     to-field: last_seen
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: state_comptroller_issues
+        doc-id-pattern: 'state_comptroller_issues/{issue_id}'
