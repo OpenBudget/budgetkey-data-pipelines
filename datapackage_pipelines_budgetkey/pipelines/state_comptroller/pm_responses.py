@@ -219,8 +219,13 @@ TEXT_OVERLAP = 2_000
 
 
 def page_texts(path):
-    out = subprocess.run(['pdftotext', '-enc', 'UTF-8', '-layout', path, '-'], capture_output=True, timeout=600)
-    return [sc.normalize_for_match(p) for p in out.stdout.decode('utf-8', 'replace').split('\f')]
+    """Each page's normalized text, as pdftotext reads it both with and without -layout: with it, the cells of a
+    table with narrow columns come out cut up line by line, interleaved with the neighbouring columns; without it,
+    some layouts come out out of order. An item's text is looked for in both."""
+    def read(*args):
+        out = subprocess.run(['pdftotext', '-enc', 'UTF-8', *args, path, '-'], capture_output=True, timeout=600)
+        return [sc.normalize_for_match(p) for p in out.stdout.decode('utf-8', 'replace').split('\f')]
+    return [' '.join(p) for p in itertools.zip_longest(read('-layout'), read(), fillvalue='')]
 
 
 def word_text(path, ext):
@@ -371,15 +376,41 @@ def analyze_windows(windows, doc):
     content = [n for n, k in kinds.items() if k in ('items', 'narrative')]
     with_items = {p for item in items for p in item['pages']}
     coverage = (len([p for p in content if p in with_items or p - 1 in with_items]) / len(content)) if content else None
-    verified = sum(1 for i in items if i['verified'])
-    status = 'ok'
+    return set_status(dict(items=items, coverage=coverage, pages=total, report_code=report_code,
+                           page_kinds={str(k): v for k, v in sorted(kinds.items())}, failed_windows=failed))
+
+
+def set_status(result):
+    items = result['items']
+    result['n_verified'] = verified = sum(1 for i in items if i.get('verified'))
+    coverage = result.get('coverage')
+    result['status'] = 'ok'
     if not items:
-        status = 'no-items'
-    elif (coverage is not None and coverage < LOW_COVERAGE) or verified < len(items) * LOW_COVERAGE or failed:
-        status = 'low-coverage'
-    return dict(status=status, items=items, coverage=coverage, pages=total, report_code=report_code,
-                page_kinds={str(k): v for k, v in sorted(kinds.items())}, n_verified=verified,
-                failed_windows=failed)
+        result['status'] = 'no-items'
+    elif ((coverage is not None and coverage < LOW_COVERAGE) or verified < len(items) * LOW_COVERAGE
+          or result.get('failed_windows')):
+        result['status'] = 'low-coverage'
+    return result
+
+
+def reverify(result, path, ext):
+    """Checks a cached result's items against the file's text again, so improvements to the checking apply to
+    results cached before them without asking Gemini again."""
+    if ext == 'pdf':
+        texts = page_texts(path)
+
+        def hay(item):
+            # The pages of the window(s) the item could have come from, and the one after it
+            pages = item.get('pages') or [1]
+            return ' '.join(texts[max(0, min(pages) - WINDOW - 1):max(pages) + 1])
+    else:
+        whole = sc.normalize_for_match(word_text(path, ext))
+
+        def hay(item):
+            return whole
+    for item in result['items']:
+        item['verified'] = sc.fuzzy_contains(hay(item), item.get('finding_text') or '', min_ratio=0.7)
+    return set_status(result)
 
 
 def analyze_file(doc, f):
@@ -394,7 +425,11 @@ def analyze_file(doc, f):
             digest = hashlib.sha256(fh.read()).hexdigest()
         cached = sc.read_json(name + '.analysis.json')
         if cached and cached.get('version') == ANALYZER_VERSION and cached.get('sha256') == digest:
-            return cached['result']
+            try:
+                return reverify(cached['result'], path, f['ext'])
+            except Exception:
+                logging.exception('Failed to check %s again, keeping its cached checks', f['url'])
+                return cached['result']
         try:
             if f['ext'] == 'pdf':
                 result = analyze_windows(pdf_windows(path), doc)
@@ -412,9 +447,24 @@ def analyze_file(doc, f):
     return result
 
 
+WORD = ('doc', 'docx')
+READ_OK = ('ok', 'low-coverage')
+
+
+def word_copies(doc):
+    """Most books up to 2018 are published twice, as a PDF and as a Word copy of the same text (and where the PDF
+    is a short summary of a follow-up book, the Word copy is the full book). Reading both would count every
+    response twice, so only the Word copy is read: it's text, cheaper to read and checked exactly against its
+    source. The PDFs are read when there's no Word copy, or it couldn't be read."""
+    words = [f for f in doc['files'] if f['ext'] in WORD and f.get('stored_url')]
+    pdfs = [f for f in doc['files'] if f['ext'] == 'pdf' and f.get('stored_url')]
+    return (words, pdfs) if words and pdfs else (words + pdfs, [])
+
+
 def analyze(docs):
     responses = []
-    tasks = [(doc, f) for doc in docs if doc['kind'] != 'other' for f in doc['files']]
+    books = [doc for doc in docs if doc['kind'] != 'other']
+    plans = {doc['url_name']: word_copies(doc) for doc in books}
 
     def one(task):
         doc, f = task
@@ -425,7 +475,15 @@ def analyze(docs):
         return task, result
 
     with ThreadPoolExecutor(THREADS) as executor:
-        for (doc, f), result in executor.map(one, tasks):
+        results = list(executor.map(one, [(doc, f) for doc in books for f in plans[doc['url_name']][0]]))
+        read = {doc['url_name'] for (doc, f), r in results if r and r['status'] in READ_OK}
+        fallback = [(doc, f) for doc in books if doc['url_name'] not in read for f in plans[doc['url_name']][1]]
+        for doc in books:
+            if doc['url_name'] in read:
+                for f in plans[doc['url_name']][1]:
+                    f['analysis_status'] = 'word-copy-read'
+        results += list(executor.map(one, fallback))
+        for (doc, f), result in results:
             if result is None:
                 continue
             f.update(analysis_status=result['status'], n_items=len(result['items']), coverage=result.get('coverage'),

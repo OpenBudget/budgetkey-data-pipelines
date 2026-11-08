@@ -235,6 +235,56 @@ def test_analyze_windows_stitches_continuations_and_overlaps(monkeypatch):
     assert result['status'] == 'ok'
 
 
+def book_file(name, ext):
+    return dict(file_name=name, ext=ext, url='https://src/' + name, stored_url='https://x/' + name)
+
+
+def test_word_copies_prefers_the_word_copy():
+    pdf, word = book_file('files_68A.pdf', 'pdf'), book_file('files_68Aword.docx', 'docx')
+    assert pm.word_copies(dict(files=[pdf, word])) == ([word], [pdf])
+    # Two PDFs (e.g. two books under one page), or only Word files: all are read
+    other = book_file('files_note110324.pdf', 'pdf')
+    assert pm.word_copies(dict(files=[pdf, other])) == ([pdf, other], [])
+    doc1, doc2 = book_file('files_53 2.doc', 'doc'), book_file('files_53 1 2.doc', 'doc')
+    assert pm.word_copies(dict(files=[doc1, doc2])) == ([doc1, doc2], [])
+    # A file that wasn't backed up isn't counted as a copy
+    assert pm.word_copies(dict(files=[pdf, dict(word, stored_url=None)])) == ([pdf], [])
+
+
+def test_analyze_falls_back_to_the_pdf_when_the_word_copy_fails(monkeypatch):
+    pdf, word = book_file('a.pdf', 'pdf'), book_file('a.doc', 'doc')
+    good, bad = book_file('b.pdf', 'pdf'), book_file('b.docx', 'docx')
+    item = dict(finding_text='ליקוי', responses=[], verified=True, pages=[1])
+    read = []
+
+    def analyze_file(doc, f):
+        read.append(f['file_name'])
+        if f['file_name'] == 'b.docx':
+            return dict(status='analysis-failed', items=[])
+        return dict(status='ok', items=[item], coverage=1.0, pages=1)
+    monkeypatch.setattr(pm, 'analyze_file', analyze_file)
+    docs = [dict(url_name=n, title=n, kind='pm_comments', publish_date=None, files=files)
+            for n, files in (('a', [pdf, word]), ('b', [good, bad]))]
+    _, responses = pm.analyze(docs)
+    assert sorted(read) == ['a.doc', 'b.docx', 'b.pdf']
+    assert pdf['analysis_status'] == 'word-copy-read'
+    assert sorted(r['file_name'] for r in responses) == ['a.doc', 'b.pdf']
+
+
+def test_reverify_rechecks_cached_items(monkeypatch):
+    text = 'בביקורת עלה כי המשרד לא קבע נוהל לטיפול בפניות הציבור ולא מינה ממונה על הפניות'
+    monkeypatch.setattr(pm, 'word_text', lambda path, ext: 'כותרת\n\n' + text)
+    result = dict(items=[dict(finding_text=text, verified=False, pages=[1]),
+                         dict(finding_text='טקסט שאינו מופיע במסמך כלל ועיקר אלא הומצא', verified=True, pages=[1])],
+                  coverage=1.0, failed_windows=0, status='low-coverage')
+    pm.reverify(result, 'unused.doc', 'doc')
+    assert [i['verified'] for i in result['items']] == [True, False]
+    assert result['n_verified'] == 1
+    assert result['status'] == 'low-coverage'  # 1 of 2 is below LOW_COVERAGE
+    result['items'].pop()
+    assert pm.reverify(result, 'unused.doc', 'doc')['status'] == 'ok'
+
+
 # --- issue_linking ----------------------------------------------------------------------------------------------
 
 def test_union_find():

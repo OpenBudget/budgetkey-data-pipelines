@@ -30,10 +30,12 @@ The documents' formatting (headings, section splits, tables, page layouts) is in
 So nothing relies on it:
 - Chapters are read whole, or in overlapping windows if very long.
 - Response books are read in overlapping page windows, with context carried over and items stitched across windows.
+- Most response books up to 2018 are published both as a PDF and as a Word copy; only the Word copy is read (the PDF
+  only if it can't be), so no response is counted twice.
 - Pages set in old fonts that pdftotext can't read (legacy-encoded letters, missing final letters) are transcribed
   by Gemini from the PDF.
-- Every extracted finding or response is checked against the source text (`verified`), and files get a coverage
-  status rather than being trusted blindly.
+- Every extracted finding or response is checked against the source text (`verified`; response books are checked
+  again on every run, cached results included), and files get a coverage status rather than being trusted blindly.
 
 Local runs: each module has a `__main__` block that takes `LIMIT`, `OUT` and selection env vars
 (`PUB_IDS`, `CHAPTER_IDS`, `NAMES`), plus `REPORTS`/`CHAPTERS`/`RESPONSES` for input datapackages.
