@@ -22,3 +22,14 @@ Score a sample with `python -m datapackage_pipelines_budgetkey.pipelines.related
 - `tenders.csv`: every tender link from the comptroller samples and the 569 decisions that mention a tender (4 links,
   all correct). A number alone is often several offices' tenders; the other 11 citations stayed unlinked: 6 not in
   the tenders data, 3 ambiguous, 2 with no matching publisher.
+
+## Against the prod chapters (2026-11-08)
+
+- `chapter_refs_prod.csv`: every chapter→chapter link from the 62 sample audits, resolved against the full prod
+  `state_comptroller/reports` (5,657 chapters): 42 links, all correct (Wilson 95% lower bound 0.92); 36 by a clear title match (2 of them through
+  the new fallbacks: an old annual report by its bare number, a generically named report by a clear title match in
+  its year) and 6 chosen by the LLM. Of the other 34 references, most name a report or chapter that isn't in the prod data (single-subject reports
+  of the 90s, local-government reports) or one too vaguely to choose.
+- `bodies_prod_review.jsonl`: an independent review of the 70 new bodies.csv rows (from the 684 prod audited-body
+  codes) whose entity name isn't the body's own: 68 ok, 2 doubtful (one entity cleared, one kept). The other new rows
+  were checked by hand; 26 entities were found by a direct registry search where the drafts had none.

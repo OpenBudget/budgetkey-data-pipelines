@@ -66,7 +66,7 @@ ALL_KINDS = set().union(*ORG_KINDS.values()) | E.FUZZY_KINDS
 # Confidence by method; only links at or above MIN_CONFIDENCE are emitted.
 CONFIDENCE = {
     'regex:corp_number': 0.97, 'comptroller_code': 0.95, 'alias': 0.93, 'exact_name': 0.9,
-    'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95, 'regex:tender': 0.9,
+    'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95, 'comptroller_ref:title_in_year': 0.9, 'regex:tender': 0.9,
 }
 MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 
@@ -451,9 +451,10 @@ class DocLinker:
                 target = RC.ChapterIndex.doc_id(entry)
                 if target == self.doc['doc_id']:
                     continue
-                self.link(target, 'state_comptroller_audits', entry['title'], relation, mention, None,
-                          'comptroller_ref:title', result)
-                self.mention('comptroller_report', mention, 'linked', 'comptroller_ref:title', target, result,
+                method = 'comptroller_ref:' + how
+                self.link(target, 'state_comptroller_audits', entry['title'], relation, mention, None, method,
+                          CONFIDENCE[method])
+                self.mention('comptroller_report', mention, 'linked', method, target, CONFIDENCE[method],
                              details=details)
             elif how == 'llm':
                 entries = {RC.ChapterIndex.doc_id(c): c for c, _ in result}

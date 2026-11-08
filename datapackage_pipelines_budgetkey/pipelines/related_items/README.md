@@ -46,6 +46,7 @@ Most certain first. Only links with confidence ≥ 0.8 are emitted.
 | `regex:decision:same_government` | an undated citation in a government decision: the latest N of the same government | 0.8 |
 | `regex:decision:same_document` | an undated citation of a number already cited with a date in the same document | as that one |
 | `comptroller_ref:title` | an earlier comptroller chapter the audit cites (`earlier_reports`): the report by code, or by publication title and year; the chapter by a clear title match (else `llm_resolve`) | 0.95 |
+| `comptroller_ref:title_in_year` | the same, when the report can't be told ("דוח מבקר המדינה (2016)", a report on one subject): a clear title match among all chapters within a year of the cited one | 0.9 |
 | `regex:tender` | a tender number whose publisher is a body the document is about, or is named next to it (tender publishers are bodies.csv aliases) | 0.9 |
 | `regex:budget_code` | "תקנה 20-38-02-01": the item with that code in the source's years | 0.95 |
 | `comptroller_code` | the comptroller's audited institutions, via `bodies.csv` | 0.95 |
@@ -89,6 +90,11 @@ HQ). Its mentions are recorded as `no_entity` rather than fuzzy-matched to a nam
 narrow budget matching. Drafts come from `build_bodies.py`, which collects names from the sources, retrieves
 candidates and lets Gemini propose; every row is then checked by hand. Re-run it when new names show up in
 `related_items_mentions` with status `not_in_bodies`. Existing rows are kept, and new ones are appended as drafts.
+A collected name that already identifies a row (by its comptroller code, or by the row's name or one alias) extends
+that row instead - a new alias or new codes - and a name pointing at two rows is printed as a conflict to settle by
+hand; `--dry-run` does only this. The full run over prod `state_comptroller_chapters` (684 codes, Nov 2026) took
+the share of audited-body mentions in chapters since 2000 with a body from 90% to 99%, and with an entity from 77% to
+85%; the codes left without a body have no name in the chapters.
 
 ### Bodies without an entity
 
