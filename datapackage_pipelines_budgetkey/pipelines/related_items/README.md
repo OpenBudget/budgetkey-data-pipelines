@@ -9,7 +9,7 @@ stores links that can be read in both directions:
 |---|---|---|
 | `related_items/state_comptroller` | `state_comptroller/chapters` (audits + findings) | `/var/datapackages/related_items/state_comptroller` |
 | `related_items/gov_decisions` | `government_decisions` | `/var/datapackages/related_items/gov_decisions` |
-| `related_items/all` | both of the above | tables `related_items`, `related_items_mentions` |
+| `related_items/all` | both of the above, and `state_comptroller/issues` | tables `related_items`, `related_items_mentions`; finding links lifted to their issues (`state_comptroller_issues/{issue_id}`, method `derived:issue`) |
 
 ## Tables
 

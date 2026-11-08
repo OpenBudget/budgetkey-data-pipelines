@@ -385,3 +385,23 @@ def test_earlier_reports_from_the_older_schema():
     a = dict(follows_up_report='דוח שנתי 67ב', follows_up_year='2017', follows_up_title='זיהומי מים')
     assert S.earlier_reports(a) == [dict(report='דוח שנתי 67ב', year=2017, title='זיהומי מים',
                                          relation='followed_up')]
+
+
+def test_issue_links():
+    from datapackage_pipelines_budgetkey.pipelines.related_items import merge_sources as MS
+    base = dict(source_kind='state_comptroller_audits', source_title='פרק', mention='m', excerpt='e')
+    rows = [dict(base, link_id='1', source_doc_id='state_comptroller_audits/7', source_part_id='7-1',
+                 target_doc_id='org/x/1', relation='responsible', confidence=0.85, method='llm_resolve'),
+            dict(base, link_id='2', source_doc_id='state_comptroller_audits/9', source_part_id='9-4',
+                 target_doc_id='org/x/1', relation='subject', confidence=0.93, method='alias'),
+            dict(base, link_id='3', source_doc_id='state_comptroller_audits/9', source_part_id=None,
+                 target_doc_id='org/x/2', relation='audited', confidence=0.95, method='comptroller_code')]
+    out = list(MS.issue_links(rows, {'7-1': '7-1', '9-4': '7-1'}, {'7-1': 'ליקוי מתמשך'}))
+    derived = out[len(rows):]
+    assert len(derived) == 1
+    d = derived[0]
+    assert (d['source_doc_id'], d['source_kind'], d['source_title']) == \
+        ('state_comptroller_issues/7-1', 'state_comptroller_issues', 'ליקוי מתמשך')
+    # The strongest finding link wins, and stays traceable to its finding.
+    assert (d['relation'], d['confidence'], d['source_part_id'], d['method']) == ('subject', 0.93, '9-4',
+                                                                                  'derived:issue')

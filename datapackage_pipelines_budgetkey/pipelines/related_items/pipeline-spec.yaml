@@ -30,6 +30,7 @@ all:
   dependencies:
     - pipeline: ./related_items/state_comptroller
     - pipeline: ./related_items/gov_decisions
+    - pipeline: ./state_comptroller/issues
   pipeline:
     - run: add_metadata
       parameters:
@@ -41,4 +42,5 @@ all:
         sources:
           - /var/datapackages/related_items/state_comptroller
           - /var/datapackages/related_items/gov_decisions
+        issues: /var/datapackages/state_comptroller/issues
         out-path: /var/datapackages/related_items/all
