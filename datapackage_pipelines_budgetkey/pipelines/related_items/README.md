@@ -110,3 +110,16 @@ DECISIONS_WHERE="policy_type='החלטות ממשלה' and md5(id) < '08'" LIMIT
 Without `DPP_DB_ENGINE`, target tables are downloaded once through next.obudget.org's query API and cached.
 `DOC_IDS` selects documents. `RELATED_ITEMS_MIN_CONFIDENCE`, `RELATED_ITEMS_MODEL` and `RELATED_ITEMS_THREADS`
 tune a run.
+
+## Surfacing links in Elasticsearch (proposed, not implemented)
+
+An indexer `document-step` per doc type, reading `related_items` by doc id:
+- **sources** (`state_comptroller_audits`, `gov_decisions`): `related_items: [{doc_id, kind, title, relation, part_id, year}]`,
+  grouped by target kind, best confidence first;
+- **targets** (`entities`, `budget`, `gov_decisions`, `support_programs`): `mentioned_in: [{doc_id, kind, title, date, relation,
+  part_id, excerpt}]`, the 20 most recent, plus `mentioned_in_count` per source kind.
+
+`gov_decisions` is both a source and a target: a decision's page lists what it cites and which later decisions and
+audits cite it. Budget back-links already sit on the connected item's doc, so they cover all of its years. A finding
+(`source_part_id`) can link to its anchor on the audit's page. Links of a lower confidence than the page shows by
+default can stay in the table for search and auditing.
