@@ -365,6 +365,32 @@ def test_chapter_resolution():
                        D(2020, 1, 1))[2] == 'no_report'
 
 
+def test_chapter_resolution_without_a_report_code():
+    pubs = [dict(pub_id=1, title='דוח שנתי 42 לשנת 1991 ולחשבונות שנת הכספים 1990', publish_date='1992-03-25'),
+            dict(pub_id=2, title='הקמת מערך המצלמות האלקטרוניות ואכיפת חוקי תעבורה', publish_date='2016-02-24'),
+            dict(pub_id=3, title='דוח שנתי 66ב', publish_date='2016-05-01', report_code='66ב')]
+    chs = [dict(chapter_id=1, pub_id=1, title='הקצאת קרקעות לחברות ממשלתיות לצורך תכנון ופיתוח; הקצאת קרקע לבנייה '
+                'עצמית; שינוי ייעודן של קרקעות חקלאיות ופדיון זכויות בהן', publish_date='1992-03-25'),
+           dict(chapter_id=2, pub_id=1, title='חברות משכנות וסדרי הפעלתן', publish_date='1992-03-25'),
+           dict(chapter_id=3, pub_id=2, title='הקמת מערך המצלמות האלקטרוניות ואכיפת חוקי תעבורה',
+                publish_date='2016-02-24'),
+           dict(chapter_id=4, pub_id=3, title='אכיפת חוקי התעבורה בכבישים הבין-עירוניים', publish_date='2016-05-01',
+                report_code='66ב')]
+    idx = RC.ChapterIndex(chs, pubs)
+    # An old annual report by its bare number; the cited topic is one of a chapter's topics.
+    entry, confidence, how = idx.resolve(dict(report='דוח מבקר המדינה 42', year=1992,
+                                              title='שינוי יעודן של קרקעות חקלאיות ופדיון זכויות בהן'), D(2010, 1, 1))
+    assert entry['id'] == '1' and how == 'title'
+    # A report named only generically: a clear title match among the year's chapters.
+    ref = dict(report='דוח מבקר המדינה', year=2016, title='הקמת מערך המצלמות האלקטרוניות ואכיפת חוקי תעבורה')
+    entry, confidence, how = idx.resolve(ref, D(2017, 5, 16))
+    assert entry['id'] == '3' and how == 'title_in_year'
+    # ... but not a vague one, nor one published after the citing chapter.
+    assert idx.resolve(dict(report='דוח מבקר המדינה', year=2016, title='אכיפת חוקי תעבורה'),
+                       D(2017, 5, 16))[2] == 'no_report'
+    assert idx.resolve(ref, D(2015, 1, 1))[2] == 'no_report'
+
+
 def test_linker_earlier_reports():
     audits = [dict(chapter_id=7824, title='זיהום אוויר', publish_date='2024-03-19', language='he',
                    earlier_reports=[

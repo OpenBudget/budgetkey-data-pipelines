@@ -128,6 +128,42 @@ def collect(args):
     return found
 
 
+def merge_known(bodies, found):
+    """Extends reviewed rows instead of drafting new ones, for collected names that already identify a body:
+    - a name whose comptroller code exactly one row has becomes that row's alias;
+    - a row named by the name (its own name first, else a single row with it as an alias) gains its codes.
+    Names that point at more than one row are left for review. Returns ({norm: (body, change)}, [conflicts])."""
+    by_code, by_name, by_alias = {}, {}, {}
+    for body in bodies:
+        for code in body['comptroller_codes']:
+            by_code.setdefault(code, []).append(body)
+        by_name.setdefault(T.normalize_name(body['name']), []).append(body)
+        for alias in body['aliases']:
+            by_alias.setdefault(T.normalize_name(alias), []).append(body)
+    merged, conflicts = {}, []
+    for norm, entry in found.items():
+        owners = {id(b): b for code in entry['codes'] for b in by_code.get(code, [])}
+        named = by_name.get(norm) or by_alias.get(norm) or []
+        named = list({id(b): b for b in named}.values())
+        if len(owners) > 1 or (owners and named and set(owners) != {id(b) for b in named}) or len(named) > 1:
+            conflicts.append((norm, entry, list(owners.values()) + named))
+            continue
+        if not owners and not named:
+            continue
+        body = next(iter(owners.values())) if owners else named[0]
+        changes = []
+        if not named:
+            name = entry['names'].most_common(1)[0][0]
+            body['aliases'].append(name)
+            changes.append('alias ' + name)
+        new = sorted(set(entry['codes']) - set(body['comptroller_codes']))
+        if new:
+            body['comptroller_codes'] = sorted(set(body['comptroller_codes']) | set(new))
+            changes.append('codes ' + '|'.join(new))
+        merged[norm] = (body, ', '.join(changes) or 'known')
+    return merged, conflicts
+
+
 def candidate_lines(index, names):
     seen, lines = set(), []
     for name in names:
@@ -182,6 +218,7 @@ def main():
     parser.add_argument('--decisions', action='store_true')
     parser.add_argument('--out', default=str(E.BODIES_CSV))
     parser.add_argument('--institution-names', help='AuditedInstitutions JSON: add aliases to reviewed bodies')
+    parser.add_argument('--dry-run', action='store_true', help='only merge names and codes into reviewed rows')
     args = parser.parse_args()
 
     existing = E.load_bodies(args.out)
@@ -190,14 +227,21 @@ def main():
             print('ALIASES', name, '<-', ' | '.join(aliases))
         write(args.out, existing, [])
         return
-    known = set()
-    for body in existing:
-        for name in [body['name']] + body['aliases']:
-            known.add(T.normalize_name(name))
     found = collect(args)
-    todo = [(norm, entry) for norm, entry in found.items() if norm not in known]
-    logging.info('%d names, %d new', len(found), len(todo))
+    merged, conflicts = merge_known(existing, found)
+    for norm, (body, change) in merged.items():
+        if change != 'known':
+            print('MERGED', body['name'], '<-', change)
+    for norm, entry, bodies in conflicts:
+        print('CONFLICT', ' = '.join(entry['names']), sorted(entry['codes']), '->', ' | '.join(b['name'] for b in bodies))
+    handled = set(merged) | {norm for norm, _, _ in conflicts}
+    todo = [(norm, entry) for norm, entry in found.items() if norm not in handled]
+    if args.dry_run:
+        todo = todo[:0]
+    logging.info('%d names, %d merged into reviewed rows, %d conflicts, %d new', len(found),
+                 sum(1 for _, c in merged.values() if c != 'known'), len(conflicts), len(todo))
     if not todo:
+        write(args.out, existing, [])
         return
 
     index = E.EntityIndex.load(bodies=existing)

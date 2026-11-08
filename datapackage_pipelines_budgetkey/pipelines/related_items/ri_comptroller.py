@@ -19,6 +19,8 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
 REPORTS_PATH = '/var/datapackages/state_comptroller/reports'
 # Same shape as the chapters pipeline's report codes: an annual report's number and part letter.
 REPORT_CODE = re.compile(r'(?<!\d)([4-9]\d)\s*([אבגד])(?![א-ת])')
+# An annual report by its number alone, as the ones before the part letters: "דוח מבקר המדינה 41", "דוח שנתי 47".
+ANNUAL_NUMBER = re.compile(r'(?:דוח שנתי|דוח מבקר המדינה)\s+([1-9]\d)(?![\dא-ת])')
 CLEAR = 88       # title similarity (0-100) for a match without the LLM
 MARGIN = 10      # ... and its lead over the next chapter of the same report
 CANDIDATE = 55   # below this a chapter is not offered at all
@@ -36,11 +38,16 @@ def _norm(s):
 
 def _variants(title):
     """A chapter title, and the same without the audited body or report part appended after a dash
-    ("זיהומי מים ... - המשרד להגנת הסביבה - מטלה בין-משרדית"), which references usually leave out."""
+    ("זיהומי מים ... - המשרד להגנת הסביבה - מטלה בין-משרדית"), which references usually leave out; and each of
+    its topics when it has several, separated by semicolons."""
     parts = re.split(r'\s+[-–]\s+', T.clean_quotes(title or ''))
     out = [_norm(title)]
     for k in range(1, len(parts)):
         out.append(_norm(' - '.join(parts[:k])))
+    # Older reports put several topics in one chapter: "אישור השקעות במפעל תעשייה; סיוע למפעלים ...".
+    topics = [t for t in T.clean_quotes(title or '').split(';') if t.strip()]
+    if len(topics) > 1:
+        out.extend(_norm(t) for t in topics)
     return [v for v in out if v]
 
 
@@ -94,12 +101,19 @@ class ChapterIndex:
     def report_chapters(self, report, year, before=None):
         """The chapters of the report a reference names, or [] if the report can't be told."""
         code = report_code(report)
+        found = []
         if code:
             found = self.by_code.get(code, [])
         else:
+            number = ANNUAL_NUMBER.search(T.clean_quotes(report or ''))
+            if number:
+                # Annual reports before the 50s have no part letter: "דוח שנתי 41 לשנת 1990 ...".
+                prefix = 'דוח שנתי {} '.format(number.group(1))
+                for pub in self.publications.values():
+                    if T.clean_quotes(pub['title']).startswith(prefix):
+                        found.extend(pub['chapters'])
             norm = _norm(report)
-            found = []
-            if norm and year:
+            if not found and norm and year:
                 from rapidfuzz import fuzz
                 for pub in self.publications.values():
                     if pub['date'] and abs(pub['date'].year - int(year)) <= 1 and \
@@ -109,22 +123,43 @@ class ChapterIndex:
             found = [c for c in found if c['date'] is None or c['date'] <= before]
         return found
 
+    def year_chapters(self, year, before=None):
+        """All chapters published within a year of `year`: for a reference whose report can't be told."""
+        if not year:
+            return []
+        return [c for c in self.chapters if c['date'] and abs(c['date'].year - int(year)) <= 1
+                and (not before or c['date'] <= before)]
+
+    @staticmethod
+    def _scored(title, chapters):
+        from rapidfuzz import fuzz
+        return sorted(((c, max(max(fuzz.token_sort_ratio(title, v), fuzz.ratio(title, v))
+                               for v in _variants(c['title'])))
+                       for c in chapters), key=lambda x: -x[1])
+
+    @staticmethod
+    def _clear(scored):
+        second = scored[1][1] if len(scored) > 1 else 0
+        return scored[0][1] >= CLEAR and scored[0][1] - second >= MARGIN
+
     def resolve(self, ref, before=None):
         """(entry, confidence, how) for a clear match; (None, candidates, 'llm') when the LLM should choose among
         candidates [(entry, score)]; (None, 0, reason) otherwise."""
-        from rapidfuzz import fuzz
+        title = _norm(ref.get('title'))
         chapters = self.report_chapters(ref.get('report'), ref.get('year'), before)
         if not chapters:
+            # A report named only generically ("דוח מבקר המדינה (2016)"), or by its subject: a clear title match
+            # among the year's chapters - a stand-alone report's one chapter carries its title.
+            if title:
+                scored = self._scored(title, self.year_chapters(ref.get('year'), before))
+                if scored and self._clear(scored):
+                    return scored[0][0], 0.95, 'title_in_year'
             return None, 0, 'no_report'
-        title = _norm(ref.get('title'))
         if not title:
             return None, 0, 'no_title'
-        scored = sorted(((c, max(max(fuzz.token_sort_ratio(title, v), fuzz.ratio(title, v))
-                                 for v in _variants(c['title'])))
-                         for c in chapters), key=lambda x: -x[1])
+        scored = self._scored(title, chapters)
         best, score = scored[0]
-        second = scored[1][1] if len(scored) > 1 else 0
-        if score >= CLEAR and score - second >= MARGIN:
+        if self._clear(scored):
             return best, 0.95, 'title'
         candidates = [(c, s) for c, s in scored[:6] if s >= CANDIDATE]
         if not candidates:
