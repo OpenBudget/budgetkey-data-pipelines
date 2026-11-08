@@ -29,15 +29,15 @@ def client():
     return _client
 
 
-def _cache_key(text, structured, schema, model, temperature):
+def _cache_key(text, structured, schema, model, temperature, thinking=None):
     # Plain calls keep the bare-text key, so answers cached before the move to Gemini
     # (gpt-4.1, same prompts) are still hits and don't get re-billed.
-    if schema is None and model is None and temperature is None:
+    if schema is None and model is None and temperature is None and thinking is None:
         return hash_text(text)
-    return hash_text(json.dumps(
-        dict(text=text, structured=structured, schema=schema, model=model, temperature=temperature),
-        sort_keys=True, ensure_ascii=False
-    ))
+    key = dict(text=text, structured=structured, schema=schema, model=model, temperature=temperature)
+    if thinking is not None:
+        key['thinking'] = thinking
+    return hash_text(json.dumps(key, sort_keys=True, ensure_ascii=False))
 
 
 class Usage:
@@ -132,16 +132,18 @@ def generate(contents, config, model=None, retries=4):
             delay *= 2
 
 
-def complete(text, structured=False, schema=None, model=None, temperature=None, use_cache=True, usage=None):
-    """Returns (cache_hit, content). With structured=True (or a JSON schema) content is parsed JSON."""
+def complete(text, structured=False, schema=None, model=None, temperature=None, use_cache=True, usage=None,
+             thinking=None):
+    """Returns (cache_hit, content). With structured=True (or a JSON schema) content is parsed JSON.
+    thinking: an optional Gemini 3 thinking level ('low'/'medium'/'high'); None keeps the model default."""
     structured = structured or schema is not None
-    key = _cache_key(text, structured, schema, model, temperature)
+    key = _cache_key(text, structured, schema, model, temperature, thinking)
     if use_cache:
         cached = get_from_cache(key)
         if cached:
             return True, cached
 
-    config = types.GenerateContentConfig(temperature=temperature)
+    config = apply_thinking(types.GenerateContentConfig(temperature=temperature), thinking)
     if structured:
         config.response_mime_type = 'application/json'
         if schema is not None:
@@ -153,6 +155,40 @@ def complete(text, structured=False, schema=None, model=None, temperature=None, 
     parts = response.candidates[0].content.parts if response.candidates and response.candidates[0].content else []
     content = ''.join(p.text for p in parts or [] if p.text and not p.thought)
     if structured:
+        content = json.loads(content)
+    if use_cache:
+        save_to_cache(key, content)
+    return False, content
+
+
+def complete_with_file(text, data, mime_type, schema=None, model=None, temperature=None, use_cache=True,
+                       usage=None, thinking=None):
+    """Like complete(), with a file (e.g. a PDF's bytes) sent alongside the prompt. Returns (cache_hit, content).
+
+    Cached on the prompt, the file's hash and the call's settings, so the same file and prompt are billed once.
+    """
+    import hashlib
+    key = hash_text(json.dumps(
+        dict(text=text, file=hashlib.sha256(data).hexdigest(), mime_type=mime_type, schema=schema,
+             model=model, temperature=temperature, thinking=thinking),
+        sort_keys=True, ensure_ascii=False
+    ))
+    if use_cache:
+        cached = get_from_cache(key)
+        if cached:
+            return True, cached
+
+    config = apply_thinking(types.GenerateContentConfig(temperature=temperature), thinking)
+    if schema is not None:
+        config.response_mime_type = 'application/json'
+        config.response_json_schema = schema
+    contents = [types.Part.from_bytes(data=data, mime_type=mime_type), text]
+    response = generate(contents, config, model=model)
+    if usage is not None:
+        usage.add(model or MODEL, response)
+    parts = response.candidates[0].content.parts if response.candidates and response.candidates[0].content else []
+    content = ''.join(p.text for p in parts or [] if p.text and not p.thought)
+    if schema is not None:
         content = json.loads(content)
     if use_cache:
         save_to_cache(key, content)

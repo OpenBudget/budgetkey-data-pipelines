@@ -11,7 +11,7 @@ RUN adduser --disabled-password --home /home/dpp dpp && adduser dpp dpp && \
     chown dpp.dpp /var/run/dpp -R && \
     chmod 700 /home/dpp/.ssh && \
     echo '%root ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/root
-RUN mkdir -p /usr/share/man/man1 && apt-get install -y antiword poppler-utils libmagic1 default-jre-headless
+RUN mkdir -p /usr/share/man/man1 && apt-get install -y antiword poppler-utils pandoc libmagic1 default-jre-headless
 
 RUN pip install "numpy<2" && pip install textract==1.5.0 pyquery "rfc3986<1.0" filemagic tabula-py paramiko boto3
 

@@ -1,0 +1,47 @@
+# State Comptroller (מבקר המדינה) reports and the government's responses to them, structured for tracking
+# audit issues over time. Source files are backed up to budgetkey-files under state-comptroller/.
+
+reports:
+  schedule:
+    crontab: "0 4 sat * *"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: state-comptroller-reports
+        title: דוחות מבקר המדינה - פרסומים ופרקים
+        revision: '2026-11-08'
+    - flow: mevaker_scraper
+
+chapters:
+  dependencies:
+    - pipeline: ./state_comptroller/reports
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: state-comptroller-audits
+        title: דוחות מבקר המדינה - ביקורות וממצאים
+        revision: '2026-11-08'
+    - flow: chapter_analysis
+
+pm_responses:
+  schedule:
+    crontab: "0 4 sat * *"
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: state-comptroller-pm-responses
+        title: הערות ראש הממשלה לדוחות מבקר המדינה
+        revision: '2026-11-08'
+    - flow: pm_responses
+
+issues:
+  dependencies:
+    - pipeline: ./state_comptroller/chapters
+    - pipeline: ./state_comptroller/pm_responses
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: state-comptroller-issues
+        title: דוחות מבקר המדינה - מעקב אחר ליקויים
+        revision: '2026-11-08'
+    - flow: issue_linking
