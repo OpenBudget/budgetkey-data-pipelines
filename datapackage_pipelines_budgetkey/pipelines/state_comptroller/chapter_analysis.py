@@ -17,6 +17,7 @@ import hashlib
 import json
 import logging
 import os
+import re
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 
@@ -28,7 +29,7 @@ from mevaker_scraper import file_object_name
 
 from datapackage_pipelines_budgetkey.common import llm
 
-ANALYZER_VERSION = 1
+ANALYZER_VERSION = 2
 MIN_YEAR = 2000
 REPORTS_PATH = '/var/datapackages/state_comptroller/reports'
 OUT_PATH = '/var/datapackages/state_comptroller/chapters'
@@ -73,16 +74,30 @@ def transcribe(pdf_path, page_numbers):
         runs.append(run)
     result = {}
     with tempfile.TemporaryDirectory() as tmp:
-        for run in runs:
+        while runs:
+            run = runs.pop(0)
             path = sc.pdf_slice(pdf_path, run[0], run[-1], os.path.join(tmp, 'slice.pdf'))
             with open(path, 'rb') as f:
                 data = f.read()
-            try:
-                _, out = llm.complete_with_file(
-                    TRANSCRIBE_PROMPT.format(first=run[0], last=run[-1]), data, 'application/pdf',
-                    schema=TRANSCRIBE_SCHEMA, model=llm.MODEL_FAST, temperature=0, usage=USAGE, thinking='low')
-            except Exception as e:
-                logging.warning('Transcription of pages %s-%s failed: %s', run[0], run[-1], e)
+            out = None
+            # Gemini now and then returns an empty response, and blocks some PDF pages outright
+            # (block_reason OTHER) while reading the same page fine as an image: try again, then in halves,
+            # then a single page as an image
+            attempts = [('application/pdf', data)] * 2
+            if len(run) == 1:
+                attempts.append(('image/png', sc.page_image(pdf_path, run[0], tmp)))
+            for mime_type, payload in attempts:
+                try:
+                    _, out = llm.complete_with_file(
+                        TRANSCRIBE_PROMPT.format(first=run[0], last=run[-1]), payload, mime_type,
+                        schema=TRANSCRIBE_SCHEMA, model=llm.MODEL_FAST, temperature=0, usage=USAGE, thinking='low')
+                    break
+                except Exception as e:
+                    logging.warning('Transcription of pages %s-%s (%s) failed (%s)', run[0], run[-1], mime_type, e)
+            if out is None:
+                if len(run) > 1:
+                    half = len(run) // 2
+                    runs[:0] = [run[:half], run[half:]]
                 continue
             for page in out.get('pages') or []:
                 n = run[0] + int(page.get('page', 0)) - 1
@@ -95,7 +110,7 @@ def pdf_markdown(path):
     """Markdown for a PDF, and which pages had to be transcribed."""
     pages = ct.pdf_pages(path)
     repeated = ct.running_lines(pages)
-    garbled = [i + 1 for i, p in enumerate(pages) if ct.broken_page(p, GARBLED_PAGE)]
+    garbled = sorted({i + 1 for i, p in enumerate(pages) if ct.broken_page(p, GARBLED_PAGE)} | set(ct.scanned_pages(pages)))
     transcribed = transcribe(path, garbled) if garbled else {}
     parts, plain = [], []
     for i, page in enumerate(pages, 1):
@@ -183,10 +198,13 @@ ANALYSIS_SCHEMA = {
             'properties': {'name': STR, 'role': {'type': 'string', 'enum': ['main', 'secondary']}},
             'required': ['name', 'role'],
         }},
-        'is_follow_up': {'type': 'boolean'},
-        'follows_up_report': STR,
-        'follows_up_year': {'type': 'integer'},
-        'follows_up_title': STR,
+        'follow_up': {'type': 'string', 'enum': ['follow_up_audit', 'includes_follow_up', 'none']},
+        'earlier_reports': {'type': 'array', 'items': {
+            'type': 'object',
+            'properties': {'report': STR, 'year': {'type': 'integer'}, 'title': STR,
+                           'relation': {'type': 'string', 'enum': ['followed_up', 'referenced']}},
+            'required': ['report', 'relation'],
+        }},
         'topics': STRS,
         'key_figures': {'type': 'array', 'items': {
             'type': 'object', 'properties': {'label': STR, 'value': STR}, 'required': ['label', 'value'],
@@ -214,7 +232,8 @@ ANALYSIS_SCHEMA = {
             'required': ['title', 'description', 'finding_type', 'severity', 'followup_status', 'excerpt'],
         }},
     },
-    'required': ['summary', 'audit_subject', 'audited_bodies', 'is_follow_up', 'topics', 'findings'],
+    'required': ['summary', 'audit_subject', 'audited_bodies', 'follow_up', 'earlier_reports', 'topics',
+                 'findings'],
 }
 
 ANALYSIS_PROMPT = '''You are analyzing one chapter of a report by the Israeli State Comptroller (מבקר המדינה).
@@ -230,9 +249,13 @@ Extract, writing every value in Hebrew (except enum values):
 - audit_subject: a short phrase naming the subject of the audit.
 - audit_period: the period the audit covered, as stated (e.g. "2021 - 2024"), plus its start/end years if stated.
 - audited_bodies: every audited body, with role main (the chapter is mainly about it) or secondary.
-- is_follow_up: whether this is a follow-up audit (ביקורת מעקב) of an earlier report; if so follows_up_report
-  (the earlier report's name, e.g. "דוח שנתי 68ב"), follows_up_year and follows_up_title (the earlier chapter's
-  title), as far as they are stated.
+- follow_up: follow_up_audit if the chapter is a follow-up audit (ביקורת מעקב / ממצאי מעקב) checking whether the
+  deficiencies of an earlier comptroller report were rectified; includes_follow_up if it is a new audit that also
+  checks the rectification of deficiencies found in an earlier comptroller report; none otherwise. Merely
+  mentioning or quoting an earlier report, or the body's own internal follow-up, is not a follow-up.
+- earlier_reports: every earlier State Comptroller report the chapter refers to: report (its name, e.g. "דוח שנתי
+  68ב"), year, title (the earlier chapter's title), and relation: followed_up if this chapter checks the
+  rectification of its deficiencies, referenced otherwise. As far as they are stated.
 - topics: 3-8 short subject tags.
 - key_figures: up to 8 key figures stated in the text (label and value, with units).
 - findings: every distinct finding of the audit - each deficiency (ליקוי) the comptroller found, and noteworthy
@@ -343,6 +366,13 @@ def verify(md, findings):
     return findings
 
 
+def language(text):
+    """'he', 'en' or 'ar', by the letters most of the text is written in."""
+    counts = dict(he=len(re.findall('[\u05d0-\u05ea]', text)), en=len(re.findall('[A-Za-z]', text)),
+                  ar=len(re.findall('[\u0621-\u064a]', text)))
+    return max(counts, key=counts.get) if any(counts.values()) else None
+
+
 def analyze_chapter(chapter):
     """Returns (audit row, finding rows) for a chapter."""
     row = dict(chapter_id=chapter['chapter_id'], analysis_status=None)
@@ -355,6 +385,12 @@ def analyze_chapter(chapter):
                text_md=md, md_url=sc.stored_url(md_name) if md_name else None)
     if md is None:
         row['analysis_status'] = meta.get('status')
+        return row, []
+    row['language'] = language(md)
+    if row['language'] != 'he':
+        # English and Arabic translations of chapters (recent reports have them); their findings are the Hebrew
+        # chapter's, so they aren't read again
+        row['analysis_status'] = 'not-hebrew'
         return row, []
     _, _, name = source_file(chapter)
     if meta.get('garbled_pages') and set(meta['garbled_pages']) - set(meta.get('transcribed_pages') or []):
@@ -379,6 +415,8 @@ def analyze_chapter(chapter):
         status = 'no-findings'
     elif verified < len(findings) * 0.6:
         status = 'low-verification'
+    follow_up = result.get('follow_up') or 'none'
+    followed = next((r for r in result.get('earlier_reports') or [] if r.get('relation') == 'followed_up'), {})
     row.update(
         summary=result.get('summary'),
         audit_subject=result.get('audit_subject'),
@@ -386,10 +424,12 @@ def analyze_chapter(chapter):
         audit_period_start_year=result.get('audit_period_start_year') or None,
         audit_period_end_year=result.get('audit_period_end_year') or None,
         llm_audited_bodies=result.get('audited_bodies') or [],
-        is_follow_up=bool(result.get('is_follow_up')),
-        follows_up_report=result.get('follows_up_report') or None,
-        follows_up_year=result.get('follows_up_year') or None,
-        follows_up_title=result.get('follows_up_title') or None,
+        follow_up=follow_up,
+        is_follow_up=follow_up in ('follow_up_audit', 'includes_follow_up'),
+        follows_up_report=followed.get('report') or None,
+        follows_up_year=followed.get('year') or None,
+        follows_up_title=followed.get('title') or None,
+        earlier_reports=result.get('earlier_reports') or [],
         topics=result.get('topics') or [],
         key_figures=result.get('key_figures') or [],
         n_findings=len(findings),
@@ -464,10 +504,12 @@ AUDIT_FIELDS = [
     ('publication_type', 'string'), ('report_code', 'string'), ('main_body', 'string'), ('audited_bodies', 'array'),
     ('full_pdf_url', 'string'), ('full_docx_url', 'string'), ('full_pdf_stored', 'string'),
     ('full_docx_stored', 'string'), ('abstract_pdf_stored', 'string'), ('abstract_docx_stored', 'string'),
+    ('language', 'string'),
     ('summary', 'string'), ('audit_subject', 'string'), ('audit_period', 'string'),
     ('audit_period_start_year', 'integer'), ('audit_period_end_year', 'integer'), ('llm_audited_bodies', 'array'),
-    ('is_follow_up', 'boolean'), ('follows_up_report', 'string'), ('follows_up_year', 'integer'),
-    ('follows_up_title', 'string'), ('topics', 'array'), ('key_figures', 'array'), ('n_findings', 'integer'),
+    ('follow_up', 'string'), ('is_follow_up', 'boolean'), ('follows_up_report', 'string'),
+    ('follows_up_year', 'integer'), ('follows_up_title', 'string'), ('earlier_reports', 'array'), ('topics', 'array'),
+    ('key_figures', 'array'), ('n_findings', 'integer'),
     ('n_verified', 'integer'), ('text_source', 'string'), ('transcribed_pages', 'integer'), ('md_url', 'string'),
     ('text_md', 'string'), ('analysis_status', 'string'),
 ]

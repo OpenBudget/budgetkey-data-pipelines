@@ -125,6 +125,16 @@ def test_broken_pages():
     assert not ct.broken_page(good)
     assert ct.broken_page(legacy)
     assert ct.broken_page(no_finals.replace('ם', '').replace('ן', '').replace('ך', ''))
+    # Fonts that come out as symbols of other scripts (from the 56א and 71ג response books)
+    latin1 = '§£ª££ª¬ ©¥´ ©³² ±¦¡ §£²³ ´¬ ´¢¦¡ ¬°£ ²¡ ±¬¨ ª£¨ ´²±£ £ª££ª¬¦ ' * 10
+    ipa = 'ʬʥʧʡ ʤʷʥʶʮʡ ʭʩʬʠʸʹʩʡ ʵʥʧʤ ʣʸʹʮ ʬʥʴʩʨ ʩʸʬʥʱʰʥʷʤ ʺʥʸʩʹʤ ' * 10
+    assert ct.broken_page(latin1)
+    assert ct.broken_page(ipa)
+    # Arabic (the reports' Arabic abstracts) and English pages are fine
+    arabic = 'يعرض هذا التقرير نتائج الرقابة على أنشطة الوزارات الحكومية في مجال التخطيط ' * 10
+    english = 'The State Comptroller audited the ministry of finance and found deficiencies. ' * 10
+    assert not ct.broken_page(arabic)
+    assert not ct.broken_page(english)
 
 
 def test_pdf_pages_to_markdown_joins_lines_and_drops_running_headers():
@@ -263,6 +273,7 @@ def test_analyze_falls_back_to_the_pdf_when_the_word_copy_fails(monkeypatch):
             return dict(status='analysis-failed', items=[])
         return dict(status='ok', items=[item], coverage=1.0, pages=1)
     monkeypatch.setattr(pm, 'analyze_file', analyze_file)
+    monkeypatch.setattr(pm, 'find_duplicates', lambda books, plans: {})
     docs = [dict(url_name=n, title=n, kind='pm_comments', publish_date=None, files=files)
             for n, files in (('a', [pdf, word]), ('b', [good, bad]))]
     _, responses = pm.analyze(docs)
@@ -338,3 +349,115 @@ def test_pace_spaces_requests_per_host(monkeypatch):
     times.sort()
     gaps = [b - a for a, b in zip(times, times[1:])]
     assert min(gaps) > 0.04
+
+
+def test_find_duplicates_across_books(monkeypatch):
+    import numpy as np
+    a = np.arange(0, 1000, dtype=np.int64)
+    prints = {
+        'a.doc': (a, False),
+        'a-copy.pdf': (np.arange(0, 900, dtype=np.int64), False),   # the same book under another page
+        'b.pdf': (np.arange(500, 1600, dtype=np.int64), False),      # a follow-up book, sharing less than half
+        'a-scan.pdf': (np.arange(5000, 5100, dtype=np.int64), True),  # unreadable, same title as 'a'
+        'c-scan.pdf': (np.arange(6000, 6100, dtype=np.int64), True),  # unreadable, no other book with its title
+    }
+    monkeypatch.setattr(pm, 'fingerprint', lambda f: prints[f['file_name']])
+    books = [dict(url_name=n, title=t, files=[book_file(n, n.split('.')[-1])]) for n, t in (
+        ('a.doc', 'הערות ראש הממשלה לדוח 59 ב'), ('a-copy.pdf', 'הערות לדוח 59ב'), ('b.pdf', 'מעקב 59ב'),
+        ('a-scan.pdf', 'הערות ראש הממשלה לדוח 59 ב'), ('c-scan.pdf', 'הערות ראש הממשלה לדוח 60 א'))]
+    plans = {b['url_name']: (b['files'], []) for b in books}
+    assert pm.find_duplicates(books, plans) == {'a-copy.pdf/a-copy.pdf': 'a.doc/a.doc',
+                                                'a-scan.pdf/a-scan.pdf': 'a.doc/a.doc'}
+
+
+def test_find_duplicates_prefers_the_word_copy(monkeypatch):
+    import numpy as np
+    prints = {'p.pdf': (np.arange(0, 1100, dtype=np.int64), False), 'w.doc': (np.arange(50, 1000, dtype=np.int64), False)}
+    monkeypatch.setattr(pm, 'fingerprint', lambda f: prints[f['file_name']])
+    books = [dict(url_name=n, title=n, files=[book_file(n, n.split('.')[-1])]) for n in prints]
+    plans = {b['url_name']: (b['files'], []) for b in books}
+    assert pm.find_duplicates(books, plans) == {'p.pdf/p.pdf': 'w.doc/w.doc'}
+
+
+def test_uncheckable_items_dont_count():
+    items = [dict(verified=True), dict(verified=None), dict(verified=None), dict(verified=None)]
+    result = pm.set_status(dict(items=items, coverage=1.0, failed_windows=0))
+    assert result['status'] == 'ok'
+    assert result['n_uncheckable'] == 3
+    result = pm.set_status(dict(items=items + [dict(verified=False)] * 2, coverage=1.0, failed_windows=0))
+    assert result['status'] == 'low-coverage'
+
+
+def test_scanned_pages():
+    text = 'משרד הפנים לא הוציא הנחיות רוחביות לרשויות המקומיות. ' * 5
+    assert ct.scanned_pages(['', ' \n', '', text]) == [1, 2, 3]
+    # A blank page in a document that has text is just blank
+    assert ct.scanned_pages([text, '', text, text]) == []
+
+
+def test_language():
+    assert ca.language('דוח ביקורת על משרד האוצר, 2023. Ministry of Finance') == 'he'
+    assert ca.language('The State Comptroller audited the Ministry of Finance (משרד האוצר).') == 'en'
+    assert ca.language('يعرض هذا التقرير نتائج الرقابة') == 'ar'
+
+
+def test_transcribe_retries_and_splits(monkeypatch, tmp_path):
+    def pdf_slice(path, first, last, dest):
+        with open(dest, 'w') as f:
+            f.write('%d-%d' % (first, last))
+        return dest
+    calls = []
+
+    def complete_with_file(prompt, data, mime, **kwargs):
+        first, last = map(int, data.decode().split('-'))
+        calls.append((first, last))
+        if last - first >= 2:  # windows of 3+ pages always come back empty
+            raise ValueError('Expecting value: line 1 column 1 (char 0)')
+        return False, dict(pages=[dict(page=i + 1, markdown='עמוד %d' % n) for i, n in enumerate(range(first, last + 1))])
+    monkeypatch.setattr(ca.sc, 'pdf_slice', pdf_slice)
+    monkeypatch.setattr(ca.llm, 'complete_with_file', complete_with_file)
+    result = ca.transcribe('x.pdf', [3, 4, 5, 6])
+    assert result == {n: 'עמוד %d' % n for n in (3, 4, 5, 6)}
+    assert calls[:2] == [(3, 6), (3, 6)]  # tried twice, then in halves
+    assert (3, 4) in calls and (5, 6) in calls
+
+
+def test_transcribe_falls_back_to_an_image(monkeypatch):
+    def pdf_slice(path, first, last, dest):
+        with open(dest, 'w') as f:
+            f.write('pdf')
+        return dest
+    mimes = []
+
+    def complete_with_file(prompt, data, mime, **kwargs):
+        mimes.append(mime)
+        if mime == 'application/pdf':
+            raise ValueError('Empty response (finish reason None, prompt feedback block_reason=OTHER)')
+        return False, dict(pages=[dict(page=1, markdown='עמוד 21')])
+    monkeypatch.setattr(ca.sc, 'pdf_slice', pdf_slice)
+    monkeypatch.setattr(ca.sc, 'page_image', lambda path, page, tmp: b'png')
+    monkeypatch.setattr(ca.llm, 'complete_with_file', complete_with_file)
+    assert ca.transcribe('x.pdf', [21]) == {21: 'עמוד 21'}
+    assert mimes == ['application/pdf', 'application/pdf', 'image/png']
+
+
+def test_failed_window_is_read_page_by_page(monkeypatch):
+    def pdf_slice(path, first, last, dest):
+        with open(dest, 'w') as f:
+            f.write('%d-%d' % (first, last))
+        return dest
+    calls = []
+
+    def ask_once(window, prompt, doc, mime_type=None, data=None):
+        calls.append((window['first'], window['last'], mime_type))
+        if window['n'] > 1 or (window['first'] == 3 and mime_type is None):
+            return None  # the whole window fails, and page 3 is blocked as a PDF
+        return dict(pages=[dict(page=1, kind='items')], items=[dict(page=1, finding_text='ליקוי %d' % window['first'])])
+    monkeypatch.setattr(pm.sc, 'pdf_slice', pdf_slice)
+    monkeypatch.setattr(pm.sc, 'page_image', lambda path, page, tmp: b'png')
+    monkeypatch.setattr(pm, 'ask_once', ask_once)
+    window = dict(first=2, last=4, n=3, total=10, path='x.pdf', data=b'', what='')
+    out = pm.ask(window, lambda w: 'prompt', dict(url_name='x'))
+    assert [i['finding_text'] for i in out['items']] == ['ליקוי 2', 'ליקוי 3', 'ליקוי 4']
+    assert [i['page'] for i in out['items']] == [1, 2, 3]  # relative to the window
+    assert (3, 3, 'image/png') in calls

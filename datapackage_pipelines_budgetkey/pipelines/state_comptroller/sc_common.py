@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import tempfile
 import threading
 import time
@@ -285,6 +286,15 @@ def report_code(*texts):
         if m:
             return m.group(1) + m.group(2)
     return None
+
+
+def page_image(pdf_path, page, tmp):
+    """A PNG of one page of a PDF (Gemini blocks some PDF pages that it reads fine as images)."""
+    prefix = os.path.join(tmp, 'page-%d' % page)
+    subprocess.run(['pdftoppm', '-f', str(page), '-l', str(page), '-r', '150', '-png', '-singlefile', pdf_path,
+                    prefix], check=True, capture_output=True, timeout=300)
+    with open(prefix + '.png', 'rb') as f:
+        return f.read()
 
 
 def pdf_slice(path, first, last, dest):

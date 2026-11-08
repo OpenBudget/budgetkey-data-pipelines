@@ -25,6 +25,7 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 import dataflows as DF
+import numpy as np
 
 import sc_common as sc
 import chapter_text as ct
@@ -218,14 +219,23 @@ TEXT_WINDOW = 24_000
 TEXT_OVERLAP = 2_000
 
 
-def page_texts(path):
-    """Each page's normalized text, as pdftotext reads it both with and without -layout: with it, the cells of a
+def pdf_texts(path):
+    """Each page's normalized text, as pdftotext reads it both with and without -layout (with it, the cells of a
     table with narrow columns come out cut up line by line, interleaved with the neighbouring columns; without it,
-    some layouts come out out of order. An item's text is looked for in both."""
+    some layouts come out out of order, so an item's text is looked for in both), and the pages whose text layer
+    can't be read (set in old fonts pdftotext doesn't decode; Gemini reads them from the page image)."""
     def read(*args):
         out = subprocess.run(['pdftotext', '-enc', 'UTF-8', *args, path, '-'], capture_output=True, timeout=600)
-        return [sc.normalize_for_match(p) for p in out.stdout.decode('utf-8', 'replace').split('\f')]
-    return [' '.join(p) for p in itertools.zip_longest(read('-layout'), read(), fillvalue='')]
+        return out.stdout.decode('utf-8', 'replace').split('\f')
+    raw = read()
+    broken = {n for n, p in enumerate(raw, 1) if ct.textless(p) or (len(p.strip()) > 200 and ct.broken_page(p))}
+    texts = [' '.join(sc.normalize_for_match(t) for t in p)
+             for p in itertools.zip_longest(read('-layout'), raw, fillvalue='')]
+    return texts, broken
+
+
+def page_texts(path):
+    return pdf_texts(path)[0]
 
 
 def word_text(path, ext):
@@ -256,7 +266,7 @@ def pdf_windows(path):
                 break
             with open(sc.pdf_slice(path, start, end, os.path.join(tmp, 'slice.pdf')), 'rb') as f:
                 data = f.read()
-            yield dict(first=start, last=end, n=end - start + 1, total=total, data=data,
+            yield dict(first=start, last=end, n=end - start + 1, total=total, data=data, path=path,
                        what=PDF_WHAT.format(first=start, last=end, total=total),
                        hay=' '.join(texts[max(0, start - 2):end]))
 
@@ -314,18 +324,47 @@ def merge_into(target, item):
     target['hay'] = target.get('hay', '') + ' ' + item.get('hay', '')
 
 
-def ask(window, prompt, doc):
+def ask_once(window, prompt, doc, mime_type=None, data=None):
     for attempt in range(2):
         try:
             if 'data' in window:
-                return llm.complete_with_file(prompt, window['data'], 'application/pdf', schema=WINDOW_SCHEMA,
-                                              model=llm.MODEL_FAST, temperature=0, usage=USAGE, thinking='low')[1]
+                return llm.complete_with_file(prompt, data or window['data'], mime_type or 'application/pdf',
+                                              schema=WINDOW_SCHEMA, model=llm.MODEL_FAST, temperature=0, usage=USAGE,
+                                              thinking='low')[1]
             return llm.complete(prompt + '\n\nTEXT:\n' + window['text'], schema=WINDOW_SCHEMA, model=llm.MODEL_FAST,
                                 temperature=0, usage=USAGE, thinking='low')[1]
         except Exception as e:
-            logging.warning('%s part %s-%s failed (%s)%s', doc['url_name'], window['first'], window['last'], e,
-                            ', retrying' if attempt == 0 else '')
+            logging.warning('%s part %s-%s%s failed (%s)%s', doc['url_name'], window['first'], window['last'],
+                            ' (%s)' % mime_type if mime_type else '', e, ', retrying' if attempt == 0 else '')
     return None
+
+
+def ask(window, prompt_for, doc):
+    """Gemini's reading of a window. Gemini now and then returns nothing for a PDF window, and blocks some PDF
+    pages outright (block_reason OTHER) while reading the same page fine as an image: a PDF window that fails is
+    read again page by page, each page as a PDF and then as an image. Page numbers stay relative to the window."""
+    out = ask_once(window, prompt_for(window), doc)
+    if out is not None or 'path' not in window:
+        return out
+    combined, read = dict(report_code=None, pages=[], items=[]), 0
+    with tempfile.TemporaryDirectory() as tmp:
+        for offset in range(window['n']):
+            page = window['first'] + offset
+            single = dict(window, first=page, last=page, n=1,
+                          what=PDF_WHAT.format(first=page, last=page, total=window['total']))
+            with open(sc.pdf_slice(window['path'], page, page, os.path.join(tmp, 'p.pdf')), 'rb') as f:
+                single['data'] = f.read()
+            prompt = prompt_for(single)
+            part = ask_once(single, prompt, doc)
+            if part is None:
+                part = ask_once(single, prompt, doc, 'image/png', sc.page_image(window['path'], page, tmp))
+            if part is None:
+                continue
+            read += 1
+            combined['report_code'] = combined['report_code'] or part.get('report_code')
+            combined['pages'] += [dict(p, page=offset + 1) for p in part.get('pages') or []]
+            combined['items'] += [dict(i, page=offset + 1) for i in part.get('items') or []]
+    return combined if read == window['n'] else None
 
 
 def analyze_windows(windows, doc):
@@ -342,11 +381,14 @@ def analyze_windows(windows, doc):
                                               (last.get('finding_text') or '')[:200],
                                               ((last['responses'][-1].get('text') or '')[-200:]
                                                if last.get('responses') else ''))
-        prompt = WINDOW_PROMPT.format(
-            what=window['what'], title=doc['title'], date=doc['publish_date'], chapter=chapter or 'unknown',
-            ministry=ministry or 'unknown', last_item=last_desc, overlap_note=OVERLAP_NOTE if start > 1 else '',
-            n=window['n'])
-        out = ask(window, prompt, doc)
+
+        def prompt_for(w):
+            return WINDOW_PROMPT.format(
+                what=w['what'], title=doc['title'], date=doc['publish_date'], chapter=chapter or 'unknown',
+                ministry=ministry or 'unknown', last_item=last_desc,
+                overlap_note=OVERLAP_NOTE if w['first'] == start > 1 else '',
+                n=w['n'])
+        out = ask(window, prompt_for, doc)
         if out is None:
             failed += 1
             continue
@@ -383,21 +425,25 @@ def analyze_windows(windows, doc):
 def set_status(result):
     items = result['items']
     result['n_verified'] = verified = sum(1 for i in items if i.get('verified'))
+    # Items on pages whose text can't be read can't be checked (verified is None), and don't count either way
+    checkable = sum(1 for i in items if i.get('verified') is not None)
+    result['n_uncheckable'] = len(items) - checkable
     coverage = result.get('coverage')
     result['status'] = 'ok'
     if not items:
         result['status'] = 'no-items'
-    elif ((coverage is not None and coverage < LOW_COVERAGE) or verified < len(items) * LOW_COVERAGE
+    elif ((coverage is not None and coverage < LOW_COVERAGE) or verified < checkable * LOW_COVERAGE
           or result.get('failed_windows')):
         result['status'] = 'low-coverage'
     return result
 
 
 def reverify(result, path, ext):
-    """Checks a cached result's items against the file's text again, so improvements to the checking apply to
-    results cached before them without asking Gemini again."""
+    """Checks a result's items against the file's text. Runs on cached results too, so improvements to the
+    checking apply to them without asking Gemini again."""
+    broken = set()
     if ext == 'pdf':
-        texts = page_texts(path)
+        texts, broken = pdf_texts(path)
 
         def hay(item):
             # The pages of the window(s) the item could have come from, and the one after it
@@ -409,7 +455,9 @@ def reverify(result, path, ext):
         def hay(item):
             return whole
     for item in result['items']:
-        item['verified'] = sc.fuzzy_contains(hay(item), item.get('finding_text') or '', min_ratio=0.7)
+        found = sc.fuzzy_contains(hay(item), item.get('finding_text') or '', min_ratio=0.7)
+        pages = set(item.get('pages') or [])
+        item['verified'] = None if not found and pages and pages <= broken else found
     return set_status(result)
 
 
@@ -423,26 +471,28 @@ def analyze_file(doc, f):
             return dict(status='download-failed', items=[])
         with open(path, 'rb') as fh:
             digest = hashlib.sha256(fh.read()).hexdigest()
-        cached = sc.read_json(name + '.analysis.json')
-        if cached and cached.get('version') == ANALYZER_VERSION and cached.get('sha256') == digest:
+        stored = sc.read_json(name + '.analysis.json')
+        cached = bool(stored and stored.get('version') == ANALYZER_VERSION and stored.get('sha256') == digest)
+        if cached:
+            result = stored['result']
+        else:
             try:
-                return reverify(cached['result'], path, f['ext'])
+                if f['ext'] == 'pdf':
+                    result = analyze_windows(pdf_windows(path), doc)
+                else:
+                    text = word_text(path, f['ext'])
+                    sc.write_text(name + '.md', text, 'md')
+                    result = analyze_windows(text_windows(text), doc)
+                    result['units'] = 'text-parts'
             except Exception:
-                logging.exception('Failed to check %s again, keeping its cached checks', f['url'])
-                return cached['result']
+                logging.exception('Failed to analyze %s', f['url'])
+                return dict(status='analysis-failed', items=[])
         try:
-            if f['ext'] == 'pdf':
-                result = analyze_windows(pdf_windows(path), doc)
-            else:
-                text = word_text(path, f['ext'])
-                sc.write_text(name + '.md', text, 'md')
-                result = analyze_windows(text_windows(text), doc)
-                result['units'] = 'text-parts'
+            reverify(result, path, f['ext'])
         except Exception:
-            logging.exception('Failed to analyze %s', f['url'])
-            return dict(status='analysis-failed', items=[])
+            logging.exception('Failed to check %s against its text, keeping the checks made while reading it', f['url'])
     # A result with windows Gemini failed on isn't cached, so the next run tries again
-    if not MAX_WINDOWS and not result.get('failed_windows'):
+    if not cached and not MAX_WINDOWS and not result.get('failed_windows'):
         sc.write_json(name + '.analysis.json', dict(version=ANALYZER_VERSION, sha256=digest, result=result))
     return result
 
@@ -461,10 +511,86 @@ def word_copies(doc):
     return (words, pdfs) if words and pdfs else (words + pdfs, [])
 
 
+DUPLICATE_SHARE = 0.7
+
+
+def fingerprint(f):
+    """A sample of the file's 6-word shingles (sorted hashes), and whether its text can't be read (a PDF set in old
+    fonts pdftotext doesn't decode)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, 'file.' + f['ext'])
+        if not sc.fetch_stored(f['object_name'], f['url'], path):
+            return np.array([], dtype=np.int64), False
+        if f['ext'] == 'pdf':
+            out = subprocess.run(['pdftotext', '-enc', 'UTF-8', path, '-'], capture_output=True, timeout=600)
+            pages = out.stdout.decode('utf-8', 'replace').split('\f')
+            readable = [p for p in pages if len(p.strip()) > 200 and not ct.broken_page(p)]
+            # Scanned books (no text layer) and books set in fonts pdftotext can't decode
+            unreadable = len(readable) < len([p for p in pages if p.strip()]) / 2 or not readable
+            text = '\n'.join(readable)
+        else:
+            text, unreadable = word_text(path, f['ext']), False
+    words = sc.normalize_for_match(text).split()
+    hashes = {hash(' '.join(words[i:i + 6])) for i in range(len(words) - 5)}
+    return np.array(sorted(h for h in hashes if h % 4 == 0), dtype=np.int64), unreadable
+
+
+def find_duplicates(books, plans):
+    """Some books are published more than once, under different gov.il pages (sometimes the very same file, or a
+    PDF on one page and its Word copy on another). Going from the largest file down, a file is a duplicate when
+    most of its text is in a file already kept. Related books share less: follow-up books quote the findings of
+    the books they follow up on, but measured on all the books, no such pair shares more than about half.
+    A file whose text can't be read is a duplicate of a kept file of another book with the same title."""
+    files = [(doc, f) for doc in books for f in plans[doc['url_name']][0]]
+    with ThreadPoolExecutor(THREADS) as executor:
+        prints = list(executor.map(lambda task: fingerprint(task[1]), files))
+    key = lambda doc, f: '%s/%s' % (doc['url_name'], f['file_name'])  # noqa: E731
+    order = sorted(range(len(files)), key=lambda i: -len(prints[i][0]))
+    kept, copy_of = [], {}
+    for i in order:
+        hashes, unreadable = prints[i]
+        if unreadable or not len(hashes):
+            continue
+        for n, j in enumerate(kept):
+            shared = len(np.intersect1d(hashes, prints[j][0], assume_unique=True))
+            if shared >= DUPLICATE_SHARE * len(hashes):
+                if (files[i][1]['ext'] in WORD and files[j][1]['ext'] == 'pdf'
+                        and shared >= DUPLICATE_SHARE * len(prints[j][0])):
+                    # The same text both ways (a PDF looks bigger, with its page headers): the Word copy is read
+                    kept[n] = i
+                    copy_of = {a: (i if b == j else b) for a, b in copy_of.items()}
+                    copy_of[j] = i
+                else:
+                    copy_of[i] = j
+                break
+        else:
+            kept.append(i)
+    duplicates = {key(*files[a]): key(*files[b]) for a, b in copy_of.items()}
+    titles = {}
+    for j in kept:
+        titles.setdefault(sc.normalize_for_match(files[j][0]['title']), j)
+    for i in order:
+        doc, f = files[i]
+        j = titles.get(sc.normalize_for_match(doc['title']))
+        if prints[i][1] and j is not None and files[j][0]['url_name'] != doc['url_name']:
+            duplicates[key(doc, f)] = key(*files[j])
+    for a, b in duplicates.items():
+        logging.info('%s is a copy of %s, not read again', a, b)
+    return duplicates
+
+
 def analyze(docs):
     responses = []
     books = [doc for doc in docs if doc['kind'] != 'other']
     plans = {doc['url_name']: word_copies(doc) for doc in books}
+    duplicates = find_duplicates(books, plans)
+    for doc in books:
+        first, rest = plans[doc['url_name']]
+        for f in first:
+            f['duplicate_of'] = duplicates.get('%s/%s' % (doc['url_name'], f['file_name']))
+            if f['duplicate_of']:
+                f['analysis_status'] = 'duplicate'
+        plans[doc['url_name']] = ([f for f in first if not f['duplicate_of']], rest)
 
     def one(task):
         doc, f = task
@@ -477,9 +603,11 @@ def analyze(docs):
     with ThreadPoolExecutor(THREADS) as executor:
         results = list(executor.map(one, [(doc, f) for doc in books for f in plans[doc['url_name']][0]]))
         read = {doc['url_name'] for (doc, f), r in results if r and r['status'] in READ_OK}
-        fallback = [(doc, f) for doc in books if doc['url_name'] not in read for f in plans[doc['url_name']][1]]
+        # The PDFs of a book whose Word copy couldn't be read are read instead
+        failed = {doc['url_name'] for (doc, f), r in results} - read
+        fallback = [(doc, f) for doc in books if doc['url_name'] in failed for f in plans[doc['url_name']][1]]
         for doc in books:
-            if doc['url_name'] in read:
+            if doc['url_name'] not in failed:
                 for f in plans[doc['url_name']][1]:
                     f['analysis_status'] = 'word-copy-read'
         results += list(executor.map(one, fallback))

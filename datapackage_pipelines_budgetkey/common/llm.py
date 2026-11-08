@@ -188,6 +188,9 @@ def complete_with_file(text, data, mime_type, schema=None, model=None, temperatu
         usage.add(model or MODEL, response)
     parts = response.candidates[0].content.parts if response.candidates and response.candidates[0].content else []
     content = ''.join(p.text for p in parts or [] if p.text and not p.thought)
+    if not content.strip():
+        reason = response.candidates[0].finish_reason if response.candidates else None
+        raise ValueError('Empty response (finish reason %s, prompt feedback %s)' % (reason, response.prompt_feedback))
     if schema is not None:
         content = json.loads(content)
     if use_cache:

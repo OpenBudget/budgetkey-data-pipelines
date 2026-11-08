@@ -11,7 +11,7 @@ import subprocess
 
 import sc_common as sc
 
-TEXT_VERSION = 2
+TEXT_VERSION = 3
 
 
 def docx_to_markdown(path):
@@ -111,12 +111,43 @@ def final_letter_share(text):
     return len(FINAL_LETTER.findall(text)) / letters
 
 
-def broken_page(text, max_garbled=0.02, min_finals=0.012):
-    """Whether pdftotext's text of a page is unusable: legacy-font garbage or missing final letters."""
+def is_expected_char(c):
+    return ('֐' <= c <= '׿' or 'יִ' <= c <= 'ﭏ'  # Hebrew
+            or '؀' <= c <= 'ۿ' or 'ﭐ' <= c <= '﷿' or 'ﹰ' <= c <= '﻿'  # Arabic
+            or ' ' <= c <= '⁯' or c in '₪€°×·')  # punctuation, directional marks
+
+
+def foreign_share(text):
+    """The share of a page's non-ASCII characters that are neither Hebrew, Arabic nor common punctuation. Fonts
+    that pdftotext can't decode come out as symbols of other scripts: Latin-1 ('§£ª££ª¬'), Hebrew letters shifted
+    into the IPA block ('ʬʥʧʡ'), and others. None when the text has too few non-ASCII characters to tell."""
+    chars = [c for c in text if ord(c) > 0x7f and not c.isspace()]
+    if len(chars) < 100:
+        return None
+    return sum(1 for c in chars if not is_expected_char(c)) / len(chars)
+
+
+def broken_page(text, max_garbled=0.02, min_finals=0.012, max_foreign=0.3):
+    """Whether pdftotext's text of a page is unusable: legacy-font garbage, foreign symbols, or missing final
+    letters."""
     if garbled_share(text) > max_garbled:
+        return True
+    foreign = foreign_share(text)
+    if foreign is not None and foreign > max_foreign:
         return True
     finals = final_letter_share(text)
     return finals is not None and finals < min_finals
+
+
+def textless(text):
+    return len(''.join(text.split())) < 30
+
+
+def scanned_pages(pages):
+    """The pages with no text layer, when most of the document has none (a scanned document); a blank page here and
+    there in a document that has text is just blank."""
+    empty = [i + 1 for i, p in enumerate(pages) if textless(p)]
+    return empty if pages and len(empty) > len(pages) / 2 else []
 
 
 def page_paragraphs(page, repeated):

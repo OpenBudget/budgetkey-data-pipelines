@@ -31,9 +31,19 @@ So nothing relies on it:
 - Chapters are read whole, or in overlapping windows if very long.
 - Response books are read in overlapping page windows, with context carried over and items stitched across windows.
 - Most response books up to 2018 are published both as a PDF and as a Word copy; only the Word copy is read (the PDF
-  only if it can't be), so no response is counted twice.
-- Pages set in old fonts that pdftotext can't read (legacy-encoded letters, missing final letters) are transcribed
-  by Gemini from the PDF.
+  only if it can't be). Some books are also published again under another gov.il page: a file most of whose text is
+  in another file (or, if its text can't be read, a file of another book with the same title) isn't read again. So
+  no response is counted twice.
+- Pages whose text layer can't be used are found by their characters, not by assumptions about fonts: legacy-encoded
+  letters, symbols of other scripts (Latin-1, Hebrew shifted into the IPA block), missing final letters, or no text
+  at all (scans). In chapters they are transcribed by Gemini; in response books Gemini reads the page image anyway,
+  and items found only on such pages are marked as not checkable (`verified` is null) instead of failed.
+- Gemini blocks some PDF pages outright (block_reason OTHER) while reading the same page as an image, and now and
+  then returns nothing: windows that fail are retried, split, and read page by page, and single pages as PNGs.
+- Chapters in English or Arabic (translations in recent reports) are listed but not analyzed (`not-hebrew`).
+- Follow-up audits: `follow_up` tells a follow-up audit (ממצאי מעקב) and a new audit that also follows up earlier
+  findings from one that only cites earlier reports; `earlier_reports` lists every earlier report a chapter refers
+  to, with the relation.
 - Every extracted finding or response is checked against the source text (`verified`; response books are checked
   again on every run, cached results included), and files get a coverage status rather than being trusted blindly.
 
