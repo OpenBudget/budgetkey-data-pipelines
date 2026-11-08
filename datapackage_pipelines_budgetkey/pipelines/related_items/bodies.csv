@@ -1,0 +1,375 @@
+name,aliases,entity_id,entity_name,entity_kind,comptroller_codes,budget_chapters,status,note
+המטה לביטחון לאומי,"המטה לביטחון לאומי (מל""ל)",,,,1446,0010,ok,"high: The National Security Council (מל""ל) is not present in the candidates list, which only includes similarly named NGOs and cooperatives. Budget chapter 0010 specifically refers to it."
+משרד ראש הממשלה,,500100037,"משרד רוה""מ/המשרד הראשי",government_office,1254,0004|0089,ok,high: Matched to the main headquarters record of the Prime Minister's Office. Budget includes its main chapter and its development enterprises.
+שירות הביטחון הכללי,,,,,1254.13,0004,ok,"high: The Israel Security Agency (Shin Bet / Shabak) is not present among the candidates. It operates under the Prime Minister's Office, so its budget falls under the PMO chapter."
+מערך הסייבר הלאומי,,,,,06857,0004,ok,"high: The National Cyber Directorate is not listed among the candidates (which mistakenly include the Digital Directorate and unrelated national associations). As a unit under the PMO, its budget is part of chapter 0004."
+ועדת הבחירות המרכזית לכנסת,ועדת הבחירות המרכזית,500105606,ועדת הבחירות המרכזית לכנסת,government_office,14,0014,ok,high: Exact match found in both the candidate registry and budget chapters.
+משרד המשפטים,,500102033,משרד המשפטים/המשרד הראשי,government_office,1,0008|0053,ok,high: Matched to the Ministry of Justice's main headquarters. Assigned its main operational and structural (court buildings) budget chapters.
+פרקליטות המדינה,,500103353,משרד המשפטים/פרקליטות המדינה,government_office,1.9,0008,ok,high: Matched to the exact State Attorney's Office record within the Ministry of Justice. The budget originates from its parent ministry's chapter.
+"המינהל למחקר, פיתוח אמצעי לחימה ותשתית טכנולוגית","מפא""ת (המינהל למחקר, פיתוח אמצעי לחימה ותשתית טכנולוגית)",500100516,"משרד הביטחון/מינהל המחקר, פיתוח",government_office,07299,0015,ok,high: Matched to the Ministry of Defense's R&D directorate record (MAFAT). Budget belongs to the Ministry of Defense.
+משרד הביטחון,,,,,1431,0015|0031,ok,medium: None of the candidates clearly represent the main headquarters ('המשרד הראשי') of the Ministry of Defense. Budget chapters assigned for Defense and miscellaneous defense expenses.
+משרד החינוך,,500101282,משרד החינוך והתרבות/המשרד הראשי,government_office,1341,0020|0060,ok,high: Matched with historical name 'משרד החינוך והתרבות/המשרד הראשי'. Assigned chapters for Education and Education Development.
+משרד התקשורת,,500103155,משרד התקשורת/המשרד הראשי,government_office,1259,0039|0081,ok,high: Exact match for main headquarters. Assigned chapters for Communications and Communications Development.
+רשות החירום הלאומית,"רשות החירום הלאומית (רח""ל)",,,,1447,0015,ok,"medium: National Emergency Management Authority is a unit of the Ministry of Defense, hence chapter 0015. No matching entity found in candidates."
+משרד התפוצות והמאבק באנטישמיות,,,,,1255,,ok,high: No direct matching entity candidate. No distinct budget chapter listed in the provided schema for this ministry.
+משרד המודיעין,,,,,1258,,ok,"high: No direct matching entity candidate. Budgeted either via PMO or unlisted chapter, so left empty."
+"משרד החדשנות, המדע והטכנולוגיה",,,,,31,0019,ok,high: No direct match in candidates. Assigned chapter 0019 which corresponds to the Ministry of Science/Technology.
+משטרת ישראל,,500101944,משטרת ישראל-מטה ארצי,government_office,40,0007|0052,ok,high: Matched with the National Headquarters ('מטה ארצי') which represents the whole body. Assigned chapters for Police/National Security and structures.
+רשות האוכלוסין וההגירה,"רשות האוכלוסין, ההגירה ומעברי הגבול",500106505,רשות האוכלוסין הגירה ומעברי גבול,government_office,6,0068,ok,high: Matched Population and Immigration Authority.
+משרד הרווחה והביטחון החברתי,"משרד הרווחה|משרד הרווחה/המשרד הראשי|משרד העבודה, הרווחה והשירותים החברתיים",500106406,משרד הרווחה/המשרד הראשי,government_office,1252,0023,ok,high: Matched Ministry of Welfare headquarters.
+משרד הבריאות,,500100904,משרד הבריאות/המשרד הראשי,government_office,1137,0024|0067,ok,high: Matched Ministry of Health headquarters.
+משרד התיירות,,500102876,משרד התיירות/המשרד הראשי,government_office,32,0037|0078,ok,high: Matched Ministry of Tourism headquarters.
+משרד התחבורה והבטיחות בדרכים,משרד התחבורה,500102736,משרד התחבורה/המשרד הראשי,government_office,1857|41,0040|0079|0080,ok,high: Matched Ministry of Transport headquarters.
+המשרד להגנת הסביבה,,500100284,המשרד לאיכות הסביבה/המשרד הראשי,government_office,1512,0026,ok,high: Matched Ministry of Environmental Protection (old name).
+"רשות שוק ההון, ביטוח וחיסכון",,500501986,משרד האוצר/רשות שוק ההון,law_mandated_organization,29.8,0005,ok,reviewed: entity set by hand. medium: No matching entity record found; it's a unit of the Ministry of Finance.
+רשות הטבע והגנים,,,,,1509|4,,ok,medium: The actual statutory corporation is not among the candidates (the candidate 'רשות הגנים ה' is an old ministry sub-unit).
+"נתיבי ישראל - החברה הלאומית לתשתיות תחבורה בע""מ","חברת נתיבי ישראל - החברה הלאומית לתשתיות תחבורה בע""מ",513467209,נתיבי ישראל - החברה הלאומית לתשתיות תחבורה בע״מ,company,7,,ok,high: Exact match with the government company record.
+מועצה אזורית מגילות ים המלח,המועצה האזורית מגילות ים המלח,500275748,מ. א. מגילות ים המלח,municipality,188,,ok,high: Exact match with the regional council record.
+מועצה אזורית תמר,המועצה האזורית תמר,500262514,מ. א. תמר,municipality,212,,ok,high: Exact match with the regional council record.
+משרד האוצר,,500100110,משרד האוצר/המשרד הראשי,government_office,29,0005|0055,ok,high: Matched with the main headquarters record for the Ministry of Finance.
+המכון הגיאולוגי,,500106679,משרד האנרגיה/מכון גיאולוגי,government_office,1903,0034,ok,reviewed: entity set by hand. high: The Geological Survey of Israel is a unit within the Ministry of Energy. None of the provided candidates match the exact body.
+המשרד לשיתוף פעולה אזורי,,500106851,משרד לשיתוף פעולה אזורי,government_office,06146,,ok,high: Exact match with the ministry record. No specific budget chapter from the provided list perfectly applies.
+"החברה הממשלתית להגנות ים המלח בע""מ",,514129097,החברה הממשלתית להגנות ים המלח בע״מ,company,1499,,ok,high: Exact match with the government company record.
+רשות ניקוז ים המלח,,501800098,רשות ניקוז ים המלח,drainage_authority,2169,,ok,high: Exact match with the drainage authority record.
+ענבל חברה לביטוח בע״מ,"ענבל חברה לביטוח בע""מ",520031030,ענבל חברה לביטוח בע״מ,company,34,,ok,"high: Exact match with the government company. As a government company, it operates outside the state budget."
+רשות מקרקעי ישראל,,500101761,מינהל מקרקעי ישראל/המשרד הראשי,government_office,2,0098,ok,high: Matched with the main office under the old name 'מינהל מקרקעי ישראל'.
+צבא ההגנה לישראל,צבא הגנה לישראל,,,,1430,0015,ok,medium: No direct candidate in the provided list is the IDF itself. Assigned to the Ministry of Defense budget chapter.
+משרד האנרגיה,משרד האנרגיה והתשתיות|משרד האנרגייה והתשתיות,500100292,משרד האנרגיה,government_office,30,0034,ok,high: Selected the main ministry record for Energy and Infrastructure.
+משרד הכלכלה והתעשייה,"משרד התעשייה, המסחר והתעסוקה",500102926,משרד הכלכלה/המשרד הראשי,government_office,1978,0036|0038|0076,ok,high: Matched with the headquarters under the older name 'משרד הכלכלה'.
+בנק ישראל,,500500517,בנק ישראל/ המשרד הראשי,law_mandated_organization,26,,ok,high: Selected the main office. Empty budget chapters as the Bank of Israel is outside the state budget.
+משרד התחבורה / השירות המטאורולוגי,השירות המטאורולוגי,500102843,משרד התחבורה/השירות המטאורולוגי,government_office,1837,0040|0079,ok,high: Exact match with the meteorological unit inside the Ministry of Transport.
+משרד האוצר / אגף החשב הכללי,החשב הכללי,500100136,משרד האוצר/אגף החשב הכללי,government_office,29.7,0005|0055,ok,high: Exact match with the Accountant General department under the Ministry of Finance.
+רשות המיסים בישראל,רשות המסים בישראל,500106158,משרד האוצר/רשות המסים,government_office,1247,0005,ok,reviewed: entity set by hand. high: Body is part of the Ministry of Finance. Correct entity ID not present in the provided candidates for this item.
+אגף התקציבים,משרד האוצר - אגף התקציבים|משרד האוצר/אגף התקציבים,500100128,משרד האוצר/אגף התקציבים,government_office,29.6,0005|0055,ok,high: Matched exactly to the Budget Department unit of the Ministry of Finance.
+משרד המורשת,,,,,06116,,ok,high: No matching candidate found in the registry records. No clear distinct budget chapter for this relatively new/separated ministry in the provided list.
+משרד הבינוי והשיכון,,500100797,משרד הבינוי והשיכון/המשרד הראשי,government_office,1142,0029|0042|0070,ok,high: Matched to the ministry's headquarters. Added relevant housing and construction chapters.
+המשרד לביטחון לאומי,המשרד לביטחון הפנים|המשרד לביטחון פנים,,,,1429,0007|0052,ok,high: No matching headquarters record in the provided candidates (formerly Ministry of Public Security). Mapped to relevant National Security / Police chapters.
+רשות הגז הטבעי,,,,,30.9,0034,ok,high: Authority under the Ministry of Energy. No matching candidate found.
+משרד החוץ,,500101076,משרד החוץ/המשרד הראשי,government_office,1474,0009,ok,high: Matched to the ministry's headquarters.
+רשות התחרות,,500103049,משרד הכלכלה/רשות התחרות,government_office,36,0036,ok,high: Matched to the Competition Authority unit under the Ministry of Economy.
+רשות החשמל,,,,,42,0034,ok,high: No matching candidate for the Electricity Authority.
+המועצה הלאומית לכלכלה,,500107180,"משרד רוה""מ/המועצה הלאומית לכלכלה",government_office,07373,0004,ok,high: Exact match found.
+"חברת החשמל לישראל בע""מ",הנהלת חברת החשמל|חברת החשמל לישראל בע״מ,520000472,חברת החשמל לישראל בעמ,company,1432,,ok,high: Exact match found. Government company outside state budget.
+"נגה - ניהול מערכת החשמל בע""מ",,514195874,נגה - ניהול מערכת החשמל   בע״מ,company,1923,,ok,high: Exact match found. Government company outside state budget.
+"חברת נמלי ישראל - פיתוח ונכסים בע""מ",,513569780,חברת נמלי ישראל - פיתוח ונכסים בע״מ,company,1855,,ok,high: Exact match found. Government company outside state budget.
+"חברת קו צינור אירופה אסיה בע""מ","קצא""א - קו צינור הנפט אילת ואשקלון",515633253,חברת קו צינור אירופה אסיה בע״מ,company,1913|06836,,ok,"medium: EAPC's exact company name (previously קו צינור אילת אשקלון, now קו צינור אירופה אסיה) is missing. 'חברת קו צינור אילת בעמ' is likely an older or different entity."
+"תשתיות אנרגיה בע""מ",,520027293,תשתיות אנרגיה  בע״מ,company,39,,ok,high: Exact match found. Government company outside state budget.
+הרשות להגנת הצרכן ולסחר הוגן,,500107669,הרשות להגנת הצרכן ולסחר הוגן,government_office,1960,0036,ok,high: Exact match found. Unit within the Ministry of Economy.
+המועצה הישראלית לצרכנות,,510535073,המועצה הישראלית לצרכנות,company,1962,,ok,high: Government company; operates outside the regular state budget.
+רשות האכיפה והגבייה,,500106521,משרד המשפטים/רשות האכיפה והגביה,government_office,5,0008,ok,high: Unit of the Ministry of Justice.
+המשרד לשוויון חברתי וקידום מעמד האישה,המשרד לשוויון חברתי  וקידום מעמד האישה|המשרד לשוויון חברתי,500107800,המשרד לשוויון חברתי,government_office,2260,,ok,medium: Ministry chapter is not explicitly listed in the provided budget chapters list; often budgeted via PMO or standalone.
+משרד החקלאות וביטחון המזון,משרד החקלאות|משרד החקלאות/המשרד הראשי|משרד החקלאות ופיתוח הכפר,500101654,משרד החקלאות/המשרד הראשי,government_office,9,0033|0072,ok,high: Matched to the Ministry of Agriculture headquarters.
+רשות החברות הממשלתיות,,500107859,רשות החברות הממשלתיות,government_office,37,0004|0005,ok,high: Has moved between the Ministry of Finance and the Prime Minister's Office over the years.
+מינהל התכנון,מנהל התכנון,500102579,משרד האוצר/מינהל התכנון,government_office,8.12,0005|0006,ok,"high: Candidate lists it under Finance, though historically and currently it also aligns with the Interior Ministry."
+הלשכה המרכזית לסטטיסטיקה,,500100045,"משרד רוה""מ/הלמ""ס",government_office,1254.10,0004,ok,reviewed: entity set by hand. high: The correct registry candidate (under PMO) is not present in this list of options.
+איגוד הבנקים בישראל,איגוד הבנקים,580019073,"אגוד הבנקים בישראל (ע""ר)",association,07150,,ok,high: An NGO/association (עמותה); operates outside the state budget.
+הרשות לפיתוח כלכלי של מגזר המיעוטים,,,,,07277,0004|0089,ok,"high: A government unit (currently under the Ministry for Social Equality / PMO), none of the candidates match."
+הרשות הממשלתית למים ולביוב,,500101753,הרשות הממשלתית למים ולביוב,government_office,3,0041|0073,ok,high: Exact match with the government office record.
+מכון התקנים הישראלי,,500500137,מכון התקנים הישראלי,law_mandated_organization,1975,,ok,high: Exact match with the statutory corporation. Outside the state budget.
+משרד הפנים,,500102546,משרד הפנים/המשרד הראשי,government_office,8,0006|0057,ok,high: Exact match with the headquarters record of the Ministry of Interior.
+רשות ניירות ערך,,500500210,רשות ניירות ערך,law_mandated_organization,38,,ok,high: Exact match with the statutory corporation. Budgeted externally.
+אגף השכר והסכמי עבודה,אגף שכר והסכמי עבודה,500100193,משרד האוצר/היחידה לשכר והסכמים,government_office,29.9,0005|0055,ok,reviewed: entity set by hand. high: Department within the Ministry of Finance. No matching candidate provided.
+נציבות שירות המדינה,,500104823,"משרד רוה""מ/נציבות שרות המדינה",government_office,1470,0004|0089,ok,"reviewed: entity set by hand. high: Civil Service Commission, operates under the Prime Minister's Office. No matching candidate."
+המוסד לביטוח לאומי,,500500772,ביטוח לאומי המשרד הראשי,law_mandated_organization,1246,0027,ok,"reviewed: entity set by hand. high: National Insurance Institute. The candidates only include specific branches and departments, but not the main body itself."
+הנהלת בתי המשפט,הרשות השופטת,500102173,בתי המשפט/ההנהלה,government_office,16,0053|0008,ok,high: Matches the headquarters record for the courts system.
+"אגף הכלכלן הראשי - הכנסות המדינה, מחקר וקשרים בינלאומיים",,,,,29.10,0005,ok,"reviewed: entity dropped. medium: Matched to the historical State Revenues Administration division in the Ministry of Finance, which forms part of the current Chief Economist Division."
+"נת""ע - נתיבי תחבורה עירוניים להסעת המונים בע""מ",,520042789,נת״ע - נתיבי תחבורה עירוניים להסעת המונים בע״מ,company,1842,,ok,high: Exact match with the government company.
+"רכבת ישראל בע""מ",,520043613,רכבת ישראל בע״מ,company,27,,ok,high: Exact match with the government company.
+רשות ניקוז ונחלים שרון,,501800064,רשות ניקוז שרון,drainage_authority,2050,,ok,high: Exact match with the regional drainage authority.
+שירותי בריאות כללית,,589906114,שירותי בריאות כללית,ottoman-association,1138,,ok,high: Exact match for the HMO.
+הסוכנות לעסקים קטנים ובינוניים,,500103064,משרד הכלכלה/מנהל עסקים קטנים,government_office,1959,0036,ok,reviewed: entity set by hand. high: No exact matching record found among the candidates for this agency of the Ministry of Economy.
+זרוע העבודה,"זרוע העבודה – משרד העבודה, הרווחה והשירותים החברתיים",,,,07246,0023|0036,ok,reviewed: entity dropped. medium: No general 'headquarters' record for the Labor Branch (which moves between Economy and Welfare ministries) was found among the candidates.
+הרשות להגנת הפרטיות,,,,,1.12,0008|0053,ok,high: Unit of the Ministry of Justice. No matching record in candidates.
+עיריית אשדוד,,500200704,עירית אשדוד,municipality,408,,ok,high: Exact match found.
+עיריית באר שבע,,500290002,עירית באר שבע,municipality,56,,ok,high: Exact match found.
+עיריית כפר סבא,,500269006,עירית כפר סבא,municipality,427,,ok,high: Exact match found.
+עיריית ראשון לציון,,500283007,עירית ראשון לציון,municipality,444,,ok,high: Exact match found.
+המכון הישראלי לייצוא ולשיתוף פעולה בין-לאומי,,580025021,"המכון הישראלי לייצוא ולשיתוף פעולה בין-לאומי (ע""ר)",association,1974,,ok,high: Exact match found as association.
+"ביחד בשבילך בע""מ",,515318012,ביחד בשבילך בע״מ,company,07280,,ok,high: Exact match found as company.
+"חבר משרתי הקבע והגימלאים בע""מ",,,,,45,,ok,high: Company not found in candidate list.
+"מועדון ""חבר"" צרכנות בע""מ",,511824906,מועדון ״חבר״ צרכנות בע״מ,company,06331,,ok,high: Exact match to company record.
+"חברה למפעלי כלכלה ותרבות לעובדי המדינה בע""מ",,520020264,חברה למפעלי כלכלה ותרבות לעובדי המדינה בעמ,company,1795,,ok,high: Exact match to company record.
+"חוצה ישראל בע""מ",,520038662,חוצה ישראל  בע״מ,company,55,,ok,high: Exact match to government company record.
+מפעל הפיס,,520018714,מפעל הפיס (חל״צ),association,1602,,ok,high: Exact match to the main statutory/independent association record.
+מערך הדיגיטל הלאומי,,500107792,משרד הכלכלה/מערך הדיגיטל הלאומי,government_office,07303,0036|0076,ok,high: Matched to the unit under the Ministry of Economy. Selected Economy chapters (regular and development).
+"קרנות השוטרים בישראל בע""מ",,520035577,קרנות השוטרים בישראל בע״מ (חל״צ),association,1556,,ok,high: Exact match to company/association record.
+עיריית אור יהודה,,500224001,עירית אור יהודה,municipality,403,,ok,high: Exact match to municipality record.
+עיריית בני ברק,,500261003,עירית בני ברק,municipality,1152,,ok,high: Exact match to municipality record.
+עירית בת-ים,עיריית בת ים,500262001,עירית בת-ים,municipality,1277,,ok,high: Exact match with the municipality candidate.
+עיריית גבעת שמואל,,500206818,עיריית גבעת שמואל,municipality,1274,,ok,high: Exact match with the municipality candidate.
+עירית גבעתיים,עיריית גבעתיים,500263009,עירית גבעתיים,municipality,1149,,ok,high: Exact match with the municipality candidate.
+עירית הרצליה,עיריית הרצליה,500264007,עירית הרצליה,municipality,418,,ok,high: Exact match with the municipality candidate.
+עירית חולון,עיריית חולון,500266002,עירית חולון,municipality,1146,,ok,high: Exact match with the municipality candidate.
+יהוד מונוסון,עיריית יהוד-מונוסון,500213574,יהוד מונוסון,municipality,425,,ok,high: Matched with the municipality record.
+עירית פתח תקוה,עיריית פתח תקווה,500279005,עירית פתח תקוה,municipality,1271,,ok,high: Exact match with the municipality candidate.
+עירית קרית אונו,עיריית קריית אונו,500226204,עירית קרית אונו,municipality,440,,ok,high: Exact match with the municipality candidate.
+עיריית רמת גן,,500286000,עירית רמת גן,municipality,1270,,ok,high: Exact match with municipality record.
+עיריית תל אביב-יפו,,500250006,עירית תל-אביב-יפו,municipality,1143,,ok,high: Exact match with municipality record.
+"חברת נתיבי אילון בע""מ","נתיבי אילון בע""מ|חברת נתיבי איילון בע""מ",510536352,חברת נתיבי אילון בעמ,company,1158,,ok,high: Exact match with the government company.
+"העמותה לתכנון, פיתוח ושימור אורבני - ירושלים (ע""ר)","העמותה לתכנון, פיתוח ושימור אורבני - ירושלים",580127538,"העמותה לתכנון, פיתוח ושימור אורבני - ירושלים (ע""ר) THE ASSOCIATION (.FOR URBAN P",association,1836,,ok,high: Exact match with the association.
+הרשות לאיסור הלבנת הון ומימון טרור,הרשות לאיסור הלבנת הון ומימון הטרור,,,,06831,0008|0053,ok,high: Unit within the Ministry of Justice; no exact matching record in candidates.
+"חברת דואר ישראל בע""מ",,513467191,חברת דואר ישראל בע״מ,company,1336,,ok,high: Exact match with the government company.
+"מקורות חברת מים בע""מ",,520010869,מקורות חברת מים בע״מ,company,10,,ok,high: Exact match with the government company.
+הוועדה הארצית לתכנון ולבנייה של תשתיות לאומיות,ועדה ארצית לתכנון ובנייה של תשתיות לאומיות,,,,4060,0005|0006,ok,high: A government committee (VATAL) operating under the Planning Administration (moved between Ministries of Interior and Finance over the years). None of the candidates match exactly.
+רשות הספנות והנמלים,,500102835,משרד התחבורה/מינהל הספנות והנמלי,government_office,41.15,0040|0079,ok,high: Administration of Shipping and Ports is a unit within the Ministry of Transport (משרד התחבורה).
+"נתיבי הגז הטבעי לישראל בע""מ",,513436394,נתיבי הגז הטבעי לישראל בע״מ,company,1918,,ok,high: Government-owned company; operates outside the regular state budget.
+עיריית חיפה,,500240007,עירית חיפה,municipality,1345,,ok,high: Municipality; operates outside the regular state budget.
+"קו מוצרי דלק בע""מ",,510234487,קו מוצרי דלק בעמ,company,1912,,ok,high: Government-owned company (subsidiary/related to Petroleum & Energy Infrastructures Ltd); operates outside the regular state budget.
+"חברת נמל אשדוד בע""מ",,513569772,חברת נמל אשדוד בע״מ,company,1854,,ok,high: Government-owned company; operates outside the regular state budget.
+"חברת נמל חיפה בע""מ",,513569749,חברת נמל חיפה בע״מ,company,1926,,ok,"high: Government-owned company (recently privatized, but historically a public body); operates outside the regular state budget."
+מרכז לבריאות הנפש לב השרון,"מרכז לבריאות הנפש לב השרון, נתניה",,,,1199,0024|0067|0093,ok,high: Government psychiatric hospital in Netanya (under the Ministry of Health). None of the candidates represent the hospital itself.
+"מרכז לבריאות הנפש ע""ש יהודה אברבנאל","מרכז לבריאות הנפש ע""ש יהודה אברבנאל, בת ים",,,,1201,0093,ok,high: No matching entity in candidates. Psychiatric hospital.
+מרכז לבריאות הנפש באר יעקב,"מרכז לבריאות הנפש, באר יעקב",,,,1205,0093,ok,high: No matching entity in candidates. Psychiatric hospital.
+מרכז לבריאות הנפש שער מנשה,"מרכז לבריאות הנפש, שער מנשה",500107495,בית חולים ממשלתי שער מנשה,government_office,1208,0093,ok,reviewed: entity set by hand. high: No matching entity in candidates. Psychiatric hospital.
+"המרכז הרפואי ע""ש יצחק שמיר",,520037128,המרכז הרפואי ע״ש אסף הרופא,company,1210,0094,ok,reviewed: entity set by hand. high: No matching entity in candidates. General government hospital.
+מרכז רפואי פלימן,"בית חולים גריאטרי פלימן, חיפה",500107453,מרכז רפואי פלימן,government_office,1227,0092,ok,high: Exact match found. Geriatric hospital.
+בית חולים גריאטרי שמואל הרופא,"בית חולים גריאטרי שמואל הרופא, באר יעקב",500107446,בית חולים שמואל הרופא,government_office,1228,0092,ok,reviewed: entity set by hand. high: No matching entity in candidates. Geriatric hospital.
+מועצה אזורית אל-בטוף,המועצה האזורית אל בטוף,500225651,מ. א. אל-בטוף,municipality,1417,,ok,high: Exact match found. Regional council outside the state budget.
+מועצה אזורית אל קסום,המועצה האזורית אל קסום,500262696,מ.א. אל קסום,municipality,1250,,ok,high: Exact match found. Regional council outside the state budget.
+מועצה אזורית בוסתאן אל-מרג',המועצה האזורית בוסתאן אל מרג',500225669,מ. א. בוסתאן אל-מרג',municipality,164,,ok,"high: Municipality, matched exactly to candidate. Operates outside the state budget."
+מועצה אזורית זבולון,המועצה האזורית זבולון,500231121,מ. א. זבולון,municipality,176,,ok,"high: Municipality, matched exactly to candidate."
+מועצה אזורית חוף אשקלון,המועצה האזורית חוף אשקלון,500261367,מ. א. חוף אשקלון,municipality,180,,ok,"high: Municipality, matched exactly to candidate."
+מועצה אזורית חוף הכרמל,המועצה האזורית חוף הכרמל,500232152,מ. א. חוף הכרמל,municipality,181,,ok,"high: Municipality, matched exactly to candidate."
+מועצה אזורית מבואות החרמון,המועצה האזורית מבואות החרמון,500221551,מ. א. מבואות החרמון,municipality,1424,,ok,"high: Municipality, matched exactly to candidate."
+המרכז הגריאטרי המשולב שוהם,"המרכז הגריאטרי המשולב ע""ש שוהם, פרדס חנה-כרכור",,,,1229,0024|0092,ok,high: Government geriatric hospital operated by the Ministry of Health. None of the provided candidates match this specific hospital.
+מועצת הרשות הממשלתית למים ולביוב,מועצת המים,,,,1907,0041,ok,medium: The Water Council is part of the Governmental Water and Sewage Authority. No matching candidate found among the provided list.
+"מנוחה נכונה - באר שבע והסביבה (ע""ר)",מנוחה נכונה באר שבע,580237758,"מנוחה נכונה - באר שבע והסביבה (ע""ר)",association,06694,,ok,high: NGO providing alternative civil burial services. Matched exactly to candidate.
+מ. מ. פקיעין,המועצה המקומית פקיעין (בוקייעה),500205364,מ. מ. פקיעין,municipality,1416,,ok,high: Peki'in Local Council.
+מ. מ. פסוטה,המועצה המקומית פסוטה,500205356,מ. מ. פסוטה,municipality,2083,,ok,high: Fassuta Local Council.
+מ. מ. כעבייה-טבאש-חג'אג'רה,המועצה המקומית כעבייה-טבאש-חג'אג'ירה,500209788,מ. מ. כעבייה-טבאש-חג'אג'רה,municipality,1392,,ok,high: Ka'abiyye-Tabbash-Hajajre Local Council.
+רשות שדות התעופה,,500102868,רשות שדות התעופה,government_office,1433,,ok,high: Israel Airports Authority. A statutory corporation with an independent budget.
+רשות התעופה האזרחית,,500102827,משרד התחבורה/מינהל התעופה,government_office,1853,0040|0079,ok,reviewed: entity set by hand. high: Civil Aviation Authority. The matching registry record is absent from the candidate list. It operates within the Ministry of Transport.
+קופת חולים מאוחדת מרכזית עממי,קופת חולים מאוחדת,589958495,קופת חולים מאוחדת מרכזית עממי,ottoman-association,1141,,ok,high: Meuhedet Health Fund. Operates outside the state budget.
+המועצה להשכלה גבוהה/המשרד הראשי,המועצה להשכלה גבוהה,500500798,המועצה להשכלה גבוהה/המשרד הראשי,law_mandated_organization,1342,0021,ok,high: Council for Higher Education.
+משרד לבטחון פנים/שרות בתי הסוהר,שירות בתי הסוהר,500102025,משרד לבטחון פנים/שרות בתי הסוהר,government_office,1269,0007|0052,ok,high: Israel Prison Service (IPS). Selected the standard ministry/unit format.
+משרד העלייה והקליטה,,500102637,המשרד לקליטת עליה/המשרד הראשי,government_office,17,0030,ok,high: Matched with the main office record of the Ministry of Aliyah and Integration.
+עיריית ירושלים,,500230008,עירית ירושלים,municipality,2133,,ok,high: Municipalities are outside the state budget.
+מכבי שירותי בריאות,,589902279,מכבי שירותי בריאות,ottoman-association,1140|1830,,ok,high: HMOs are outside the state budget.
+לאומית שירותי בריאות,,,,,1139|1831,,ok,high: No appropriate candidate was found in the list.
+אוניברסיטת בר אילן,,580063683,"אוניברסיטת בר אילן (ע""ר)",association,1560,,ok,high: Universities are outside the state budget.
+מרכז רפואי סורוקה,"מרכז רפואי ע""ש סורוקה, באר שבע",500800446,בית חולים סורוקה,health_service,1196,,ok,"high: Soroka is owned by Clalit Health Services, which is outside the state budget."
+מרכז רפואי מאיר,"מרכז רפואי ע""ש ספיר, מאיר, כפר סבא",500800438,בית חולים מאיר,health_service,1214,,ok,reviewed: entity set by hand. high: No appropriate candidate for Meir Medical Center was found in the list.
+"מרכז רפואי רמב""ם","מרכז רפואי ע""ש רמב""ם, חיפה",500107040,"משרד הבריאות/בי""ח הממשלתי רמב""ם",government_office,1215,0024|0067|0094,ok,high: Government hospital under the Ministry of Health. Associated with Health ministry chapters and government hospitals business enterprise chapter.
+"מרכז רפואי עירוני-ממשלתי ע""ש א. סוראסקי, תל אביב-יפו",,500106919,"משרד הבריאות/בי""ח איכילוב",government_office,1193,0024|0067|0094,ok,reviewed: entity set by hand. high: No direct match in the candidates. Sourasky is a municipal-government hospital.
+"מרכז רפואי ע""ש ד""ר ח. שיבא, תל השומר",,500106265,"משרד הבריאות/מ""ר תל-השומר(שיבה)",government_office,1195,0024|0067|0094,ok,"reviewed: entity set by hand. medium: Candidate 520037086 is a company, likely the health corporation (תאגיד בריאות) rather than the government hospital unit itself."
+המועצה האזורית מעלה יוסף,,500262522,מ. א. מעלה יוסף,municipality,1422,,ok,high: Exact match with the municipality record.
+"החברה למשק וכלכלה של השלטון המקומי בע""מ","חברה למשק וכלכלה של השלטון המקומי בע""מ",520029844,החברה למשק וכלכלה של השלטון המקומי  בע״מ,company,1985,,ok,high: Exact match with the company record.
+המועצה האזורית עמק חפר,,500241161,מ. א. עמק חפר,municipality,200,,ok,high: Exact match with the municipality record.
+אוניברסיטת בן גוריון בנגב,,500701644,אוניברסיטת בן גוריון,university,1559,,ok,high: Exact match with the university record.
+המכללה האקדמית להנדסה בראודה בכרמיאל,המכללה האקדמית להנדסה אורט בראודה,580264877,"המכללה האקדמית להנדסה בראודה בכרמיאל (ע""ר)",association,1585,,ok,"high: Matches the current official name of ORT Braude College, registered as an association."
+רשות השירות הלאומי-אזרחי,רשות השירות הלאומי - אזרחי,,,,6094,0004,ok,high: No matching record in the candidates. Budgeted under the Prime Minister's Office or related ministries.
+מרכז השלטון המקומי בישראל,"מרכז השלטון המקומי|מרכז השלטון המקומי בישראל (ע""ר)",580002244,"מרכז השלטון המקומי בישראל (ע""ר)",association,398,,ok,high: Matched the exact NGO record for the Federation of Local Authorities in Israel.
+מועצת הצמחים (ייצור ושיווק),,,,,20,,ok,high: No exact matching record for the Plants Board among the candidates.
+המשרד לשירותי דת,,500100987,המשרד לענייני דתות/המשרד הראשי,government_office,1260,0022,ok,high: Matched the headquarters record of the Ministry of Religious Affairs (old name). Budget chapter is 0022.
+עיריית חדרה,,500265004,עירית חדרה,municipality,419,,ok,high: Matched the municipality record for Hadera.
+הטכניון - מכון טכנולוגי לישראל,הטכניון מכון טכנולוגי לישראל,500701636,הטכניון - מכון טכנולוגי לישראל,university,1565,,ok,high: Matched the exact university record for the Technion. Universities operate outside direct state budget chapters.
+החברה הממשלתית לתיירות,,510141146,החברה הממשלתית לתיירות,company,1492,,ok,high: Matched the exact company record for the Government Tourism Corporation.
+משרד התרבות והספורט,,500106646,משרד התרבות והספורט,government_office,33,0019,ok,high: Matched the exact government office record. Budget chapter is 0019.
+איגוד הכדורסל בישראל,,580002160,"איגוד הכדורסל הישראלי  (ע""ר)",association,1759,,ok,high: Matched the exact NGO record for the Israel Basketball Association.
+רשות השידור,רשות השידור הישראלי (בפירוק),500500566,רשות השידור/ המשרד הראשי,law_mandated_organization,450,,ok,reviewed: entity set by hand. high: Israel Broadcasting Authority (in liquidation). No matching candidate in the provided list.
+אל על נתיבי אויר לישראל בעמ,"אל על נתיבי אויר לישראל בע""מ|אל-על נתיבי אויר לישראל בע""מ",520017146,אל על נתיבי אויר לישראל בעמ,company,1832,,ok,high: Matched exactly to the company record.
+איגוד ערים נפת אשקלון (איכות הסביבה),איגוד ערים נפת אשקלון (שמירה על איכות הסביבה),501400220,איגוד ערים נפת אשקלון (איכות הסב,conurbation,64,,ok,high: Matched with the corresponding conurbation record.
+עירית ראש העין,עיריית ראש העין,500226402,עירית ראש העין,municipality,443,,ok,high: Matched exactly to the municipality record.
+"בית חולים ""רבקה זיו"" צפת","בית החולים ע""ש רבקה זיו, צפת",500107404,"בית חולים ""רבקה זיו"" צפת",government_office,1216,0024|0067|0094,ok,high: Government hospital under the Ministry of Health. Associated with Health chapters and Government Hospitals chapter.
+המרכז הרפואי צפון,,500107396,המרכז הרפואי צפון,government_office,1218,0024|0067|0094,ok,high: Government hospital (formerly Poriya) under the Ministry of Health.
+דורות - מרכז רפואי לשיקום וגריאטריה,"דורות – מרכז רפואי לשיקום וגריאטריה, נתניה",,,,1230,0024|0067|0092,ok,"high: Government geriatric hospital. No matching government unit candidate in the list, though it falls under the Ministry of Health and geriatric hospitals chapter."
+משרד האוצר/המדפיס הממשלתי,המדפיס הממשלתי,500100250,משרד האוצר/המדפיס הממשלתי,government_office,1871,0005|0055,ok,high: Unit within the Ministry of Finance. Skipped the accounting unit ('חשבות') record.
+המרכז הגריאטרי ראשון לציון,,,,,1231,0024|0067|0092,ok,high: No matching record for the hospital in the candidates.
+"בי""ח לחולי נפש כפר שאול-איתנים",בית חולים איתנים,500100912,"בי""ח לחולי נפש כפר שאול-איתנים",government_office,06481,0024|0067|0093,ok,high: Matched with the combined Kfar Shaul - Eitanim psychiatric hospital record.
+משרד הבריאות/המרכז הרפואי לגליל,המרכז הרפואי לגליל,500104559,משרד הבריאות/המרכז הרפואי לגליל,government_office,1223,0024|0067|0094,ok,high: Matched exactly to the hospital's record under the Ministry of Health.
+המרכז לבריאות הנפש מזור,"המרכז לבריאות הנפש , מזור",500106976,משרד הבריאות/מ' בריאות הנפש מזור,government_office,1200,0024|0067|0093,ok,reviewed: entity set by hand. high: No valid government psychiatric hospital record in the candidates.
+הנהלת בתי הדין הרבניים,בתי הדין הרבניים,500101035,משרד המשפטים/מח.בתי הדין הרבניים,government_office,1.13,0022,ok,reviewed: entity set by hand. high: No matching government record found in candidates. Budget usually falls under the Ministry of Religious Services.
+הרבנות הראשית לישראל,,500100995,"משרד רוה""מ/הרבנות הראשית",government_office,1262,0022,ok,reviewed: entity set by hand. high: No matching government record found in candidates. Budget usually falls under the Ministry of Religious Services.
+"אוניברסיטת אריאל בשומרון (ע""ר)",,580367290,"אוניברסיטת אריאל בשומרון (ע""ר)",association,1593,,ok,high: Matched exactly with the university's association record. Universities are independent entities outside the state budget.
+אוניברסיטת חיפה,,500701628,אוניברסיטת חיפה,university,1339,,ok,high: Matched exactly with the university record. Universities are independent entities outside the state budget.
+אוניברסיטת תל אביב,,500502042,אוניברסיטת תל-אביב,law_mandated_organization,1561,,ok,"high: Tel Aviv University is a university (law mandated organization), operating outside the direct state budget chapters."
+האוניברסיטה העברית בירושלים,,500701610,אוניברסיטה העברית,university,1338,,ok,"high: Hebrew University of Jerusalem. Independent budget, not directly represented by a state budget chapter."
+הרשות לפיתוח והתיישבות הבדואים בנגב,,,,,2.23,,ok,"high: No exact matching record in candidates. The Authority frequently moved between ministries (Agriculture, Welfare, Social Equality), making its budget chapter variable."
+שירות התעסוקה הישראלי,שירות התעסוקה,,,,1253,0036|0023,ok,"high: Entity ID is null because all candidates are specific accounting units or branches (e.g., חשבות) rather than the main statutory body."
+משמר הגבול,"משמר הגבול (מג""ב)",500102017,"משטרת ישראל-אגף משמר הגבול(מג""ב)",government_office,40.18,0007|0052,ok,"high: Border Police (Magav), a branch of the Israel Police under the Ministry of National Security."
+"דירה להשכיר - החברה הממשלתית לדיור ולהשכרה בע""מ",,515009652,דירה להשכיר - החברה הממשלתית לדיור ולהשכרה בע״מ,company,6002,,ok,"high: Government company, therefore it has an independent budget outside the regular state budget chapters."
+הרשות לפיתוח ירושלים,,500500392,הרשות לפיתוח ירושלים,law_mandated_organization,2128,,ok,"high: Jerusalem Development Authority, a statutory corporation operating outside the direct state budget."
+הרשות הממשלתית להתחדשות עירונית,,500501978,הרשות להתחדשות עירונית,law_mandated_organization,07296,0029|0070,ok,"high: Government Authority for Urban Renewal, acting under the Ministry of Construction and Housing."
+המנהל האזרחי,המנהל האזרחי ביהודה ושומרון,,,,1430.11,0017,ok,high: Civil Administration in Judea and Samaria. It is a unit under COGAT (budget chapter 0017). No suitable candidate found in the registry.
+הסתדרות מדיצינית הדסה,,520008095,הסתדרות מדיצינית הדסה (חל״צ),association,3001,,ok,"high: Matched with the exact association record. As an NGO/public benefit company, it does not have its own state budget chapter."
+מועצה אזורית עמק יזרעאל,המועצה האזורית עמק יזרעאל,500223094,מ. א. עמק יזרעאל,municipality,3000,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מועצה אזורית רמת הנגב,המועצה האזורית רמת הנגב,500262480,מ. א. רמת נגב,municipality,206,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מועצה מקומית בית ג'ן,המועצה המקומית בית ג'ן,500204805,מ. מ. בית-ג'ן,municipality,1379,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מועצה מקומית חורפיש,המועצה המקומית חורפיש,500204961,מ. מ. חורפיש,municipality,1366,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מועצה מקומית יפיע,המועצה המקומית יפיע,500204995,מ. מ. יפיע,municipality,1386,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מועצה מקומית כפר ורדים,המועצה המקומית כפר ורדים,500212634,מ. מ. כפר ורדים,municipality,1390,,ok,high: Matched with the exact municipality record. Municipalities are outside the state budget.
+מ. מ. כפר שמריהו,המועצה המקומית כפר שמריהו,500202676,מ. מ. כפר שמריהו,municipality,352,,ok,high: Exact match found.
+מ. מ. מטולה,המועצה המקומית מטולה,500200431,מ. מ. מטולה,municipality,1401,,ok,high: Exact match found.
+מ. מ. עילוט,המועצה המקומית עילוט,500205117,מ. מ. עילוט,municipality,1407,,ok,high: Exact match found.
+מרכז לבריאות הנפש שלוותה,"מרכז לבריאות הנפש שלוותה, הוד השרון",,,,1202,,ok,high: Shalvata is a hospital owned by Clalit Health Services; no matching candidate in the list.
+עירית אום-אל-פחם,עיריית אום אל-פחם,500227103,עירית אום-אל-פחם,municipality,401,,ok,high: Exact match found.
+עיריית באקה אל-גרבייה,עיריית באקה אל ר'רבייה (באקה אל-גרבייה),,,,410,,ok,high: No matching municipality candidate found in the list.
+עירית טמרה,עיריית טמרה,500289004,עירית טמרה,municipality,423,,ok,high: Exact match found.
+עיריית כפר קאסם,,500206347,עיריית כפר קאסם,municipality,428,,ok,high: Exact match found.
+עיריית קריית אתא,,500268008,עירית קרית אתא,municipality,1347,,ok,high: Municipality
+עיריית קריית שמונה,,500228002,עירית קרית שמונה,municipality,1362,,ok,high: Municipality
+קרן קיימת לישראל - חטיבת פיתוח הקרקע,"חטיבת פיתוח הקרקע - קק""ל",,,,2199,,ok,high: No matching record for KKL-JNF or this specific division in the given candidates. KKL is a national institution operating outside the state budget.
+רשות העתיקות,,500500491,רשות העתיקות הקריה הלאומית לארכי,law_mandated_organization,1708,,ok,high: Statutory corporation; largely self-budgeted outside the direct state budget chapters.
+פיקוד העורף,,500100755,"צה""ל/מפקדת פיקוד העורף",government_office,1430.4.4,0015,ok,high: Unit within the IDF (Ministry of Defense).
+הוועדה לאנרגיה אטומית,הוועדה לאנרגייה אטומית,500100102,"משרד רוה""מ/הועדה לאנרגיה אטומית",government_office,1254.12,0035,ok,high: Unit in the Prime Minister's Office with its own distinct budget chapter.
+"התעשייה האווירית לישראל בע""מ","התעשייה האוירית לישראל בע""מ",520027194,התעשיה האוירית לישראל בע״מ,company,48,,ok,high: Government company; operates outside the state budget.
+ארכיון המדינה,"ארכיון מדינת ישראל|גנזך המדינה|משרד רוה""מ/ארכיון המדינה",500100060,"משרד רוה""מ/ארכיון המדינה",government_office,1254.8,0004,ok,high: No matching record for the Israel State Archives in the candidates. It is a unit of the Prime Minister's Office.
+המוסד למודיעין ולתפקידים מיוחדים,,,,,1254.11,0004|0031,ok,"high: The Mossad itself is not among the candidates, which are mostly affiliated associations. The budget typically falls under the Prime Minister's Office and miscellaneous defense expenses."
+מזכירות הממשלה,,,,,06122,0004,ok,high: The Government Secretariat is a unit within the Prime Minister's Office. No specific candidate record matches this unit.
+הרשות הארצית לתחבורה ציבורית,,500107933,הרשות הארצית לתחבורה ציבורית,government_office,41.14,0040|0079,ok,high: Exact match found in the candidate list. This is a unit under the Ministry of Transport.
+הוועדה המחוזית לתכנון ובנייה מחוז תל אביב,הוועדה המחוזית לתכנון ובניה - מחוז תל אביב,,,,8.12.3,0006,ok,high: No matching entity for the district committee. Budget falls under the Ministry of Interior.
+"יפה נוף תחבורה תשתיות ובנייה בע""מ","יפה נוף תחבורה תשתיות ובניה בע""מ",512241696,יפה נוף תחבורה תשתיות ובנייה בע״מ,company,2189,,ok,"high: Exact match found for the municipal company. As a municipal company, it operates outside the state budget."
+"משרד הנגב, הגליל והחוסן הלאומי","המשרד לפיתוח הפריפריה, הנגב והגליל",500107099,משרד לפיתוח הנגב והגליל,government_office,1892,0004,ok,"reviewed: entity set by hand. medium: The candidate provided is an accounting unit (חשבות), so it must be skipped. The ministry's budget historically derived from the Prime Minister's Office."
+הרשות לפיתוח הנגב,,500500293,הרשות לפיתוח הנגב,law_mandated_organization,1894,,ok,"high: Exact match found. As a statutory corporation, it has its own record and operates largely outside the direct state budget."
+המרכז הרפואי וולפסון,"מרכז רפואי ע""ש א. וולפסון, חולון",500107438,"בית חולים ע""ש אידית וולפסון",government_office,1209,0024|0067|0094,ok,reviewed: entity set by hand. high: No match found for Wolfson Medical Center among the candidates. It is a government hospital budgeted under the Ministry of Health.
+"מרכז רפואי ע""ש רבין","מרכז רפואי ע""ש רבין, קמפוס בלינסון, פתח תקוה",,,,1779,,ok,high: Rabin Medical Center (Beilinson) is a Clalit Health Services hospital; no matching record for the hospital itself is in the candidates.
+הרשות הלאומית לביטחון קהילתי,"הרשות למאבק באלימות, בסמים ובאלכוהול",500500426,הרשות למלחמה בסמים,law_mandated_organization,2267.1.10.12,0007|0052,ok,high: Matched to the previous name 'הרשות למלחמה בסמים'. The authority is now under the Ministry of National Security.
+"מעגלים - הקרן למען בעלי מקצועות שוחקים (ע""ר)",,580469880,"מעגלים - הקרן למען בעלי מקצועות שוחקים (ע""ר)",association,06134,,ok,high: Exact match for the NGO.
+"עזריאלי - מכללה אקדמית להנדסה ירושלים (ע""ר)",עזריאלי- מכללה אקדמית להנדסה ירושלים,580283729,"עזריאלי - מכללה אקדמית להנדסה ירושלים (ע""ר)",association,1581,,ok,high: Exact match for the academic college (NGO).
+"חברת העובדים השיתופית הכללית בארץ ישראל בע""מ",,570000174,"חברת העובדים השיתופית הכללית בארץ ישראל בע""מ",cooperative,1787,,ok,high: Exact match for the cooperative society.
+הסוכנות היהודית לארץ ישראל,,500500046,סוכנות היהודית,law_mandated_organization,06132,,ok,high: Matched to 'סוכנות היהודית' as the statutory body.
+הרשות הארצית לכבאות והצלה,כבאות והצלה לישראל,500102629,משרד לבטחון פנים/נציבות כבאות וה,government_office,1557,0007|0052,ok,"high: National Fire and Rescue Authority, operating under the Ministry of National Security. Not listed in the candidates."
+"חברת הגיחון בע""מ",,512291295,חברת הגיחון בע״מ,company,1948,,ok,high: Exact match for the municipal water corporation.
+ההסתדרות הרפואית בישראל,,589903046,ההסתדרות הרפואית בישראל,ottoman-association,06585,,ok,"high: Exact match with ottoman-association candidate. As an NGO, it operates outside the state budget."
+מרכז גריאטרי בית רבקה,"מרכז גריאטרי בית רבקה, פתח תקוה",,,,1197,,ok,high: No matching candidate represents the hospital itself. It is a facility owned by Clalit Health Services and does not have its own state budget chapter.
+מגן דוד אדום בישראל,מגן דוד אדום,500502059,מגן דוד אדום בישראל,law_mandated_organization,1191,,ok,high: Matched with the statutory corporation (law_mandated_organization) for MDA. Statutory corporations are outside the direct state budget chapters.
+החברה להגנת הטבע,,580017499,"החברה להגנת הטבע (ע""ר)",association,1490,,ok,high: Exact match with the association (NGO) candidate. Has no state budget chapters.
+עיריית אריאל,,500235700,עירית אריאל,municipality,407,,ok,high: Exact match with the municipality candidate. Municipalities are outside the state budget.
+עיריית לוד,,500270004,עירית לוד,municipality,2267,,ok,high: Exact match with the municipality candidate. Municipalities are outside the state budget.
+עיריית נשר,,500225008,עירית נשר,municipality,1357,,ok,high: Exact match with the municipality candidate. Municipalities are outside the state budget.
+עיריית רמלה,,500285002,עירית רמלה,municipality,1256,,ok,high: Exact match with the municipality candidate. Municipalities are outside the state budget.
+עירית רעננה,עיריית רעננה,500287008,עירית רעננה,municipality,448,,ok,"high: Municipality, outside the state budget."
+מ. מ. שהם,המועצה המקומית שוהם,500213046,מ. מ. שהם,municipality,392,,ok,"high: Local council, outside the state budget."
+הוועדה המקומית לתכנון ולבנייה אבו בסמה,,,,,2305,,ok,high: No matching candidate found in the registry.
+עירית עכו,עיריית עכו,500276001,עירית עכו,municipality,1355,,ok,"high: Municipality, outside the state budget."
+עירית אל-טירה,עיריית אל`טירה,500227202,עירית אל-טירה,municipality,421,,ok,"high: Municipality, outside the state budget."
+בית - הספר המרכזי למלונאות בעמ,"בית הספר המרכזי למלונאות בע""מ",510328636,בית - הספר המרכזי למלונאות בעמ,company,1491,,ok,"high: Company, outside the state budget."
+המועצה לשידורי כבלים ולשידורי לווין,,,,,1272,0039|0081,ok,high: No exact candidate found; body is under the Ministry of Communications.
+הסתדרות העובדים הלאומית בארץ ישראל,,,,,1789,,ok,"high: Labor union (NGO), no matching candidate found."
+המכללה האקדמית עמק יזרעאל ע״ש מקס שטרן בע״מ (חל״צ),"המכללה האקדמית עמק יזרעאל בע""מ",520044330,המכללה האקדמית עמק יזרעאל ע״ש מקס שטרן בע״מ (חל״צ),association,1566,,ok,"high: Matched to the company registry record of the college. Publicly funded academic institution, but operates as an NGO/company outside the direct state budget."
+ערים חברה לפתוח עירוני בעמ,"ערים, חברה לפיתוח עירוני בע""מ",520029810,ערים חברה לפתוח עירוני בעמ,company,2262,,ok,"high: Government company, therefore operates outside the state budget."
+קרן קסריה אדמונד בנימין דה רוטשילד,,510370430,קרן קסריה אדמונד בנימין דה רוטשילד,company,06131,,ok,high: Matched to the foundation's company record.
+החברה לפיתוח קיסריה אדמונד בנימין דה רוטשילד בע״מ,"החברה לפיתוח קיסריה אדמונד בנימין דה רוטשילד בע""מ",510107378,החברה לפיתוח קיסריה אדמונד בנימין דה רוטשילד בע״מ,company,75,,ok,high: Matched to the development company's record.
+עירית יקנעם עילית,עיריית יקנעם עילית,500202403,עירית יקנעם עילית,municipality,426,,ok,"high: Municipality, outside the state budget."
+"מ. מ. בני עי""ש","המועצה המקומית בני עי""ש",500210661,"מ. מ. בני עי""ש",municipality,316,,ok,"high: Local council, outside the state budget."
+מ. מ. רמת ישי,המועצה המקומית רמת ישי,500201223,מ. מ. רמת ישי,municipality,388,,ok,"high: Local council, outside the state budget."
+עירית אשקלון,עיריית אשקלון,500271002,עירית אשקלון,municipality,409,,ok,"high: Municipality, outside the state budget."
+"תעש מערכות בע""מ","תע""ש מערכות",515218436,תעש מערכות בע״מ,company,06526|49,,ok,high: Exact match with company record. Government company outside the state budget.
+עיריית אילת,,500226006,עירית אילת,municipality,405,,ok,high: Exact match with municipality record.
+"החברה לפיתוח חוף אילת בע""מ",,520026881,החברה לפיתוח חוף אילת בעמ,company,1493,,ok,high: Exact match with company record.
+המועצה להסדר ההימורים בספורט,המועצה להסדר ההימורים בספורט (הטוטו),500500384,המועצה להסדר ההימורים בספורט,law_mandated_organization,1763,,ok,high: Exact match with statutory corporation record.
+הרשות השנייה לטלוויזיה ולרדיו,,500500061,הרשות השניה לטלויזיה ורדיו,law_mandated_organization,1273,,ok,high: Exact match with statutory corporation record.
+בית מכס אילת,,,,,06646,0005,ok,high: No matching entity in the candidate list. It is a unit of the Tax Authority under the Ministry of Finance.
+"חברת נמל אילת בע""מ",,513569764,חברת נמל אילת בע״מ,company,1856,,ok,high: Exact match with company record.
+"חלמיש חברה ממשלתית עירונית לדיור ולשיקום ולהתחדשות שכונות בתל-אביב יפו בע""מ",,520023920,חלמיש חברה ממשלתית עירונית לדיור לשיקום ולהתחדשות שכונות בתל-אביב יפ,company,1157,,ok,high: Exact match with candidate record. Name is truncated in the registry.
+עיריית יבנה,,500226600,עירית יבנה,municipality,424,,ok,"high: Municipality, correctly matched."
+עיריית בית שמש,,500226105,עירית בית-שמש,municipality,1275,,ok,"high: Municipality, correctly matched."
+עיריית מודיעין עילית,,500237979,עיריית מודיעין עילית,municipality,432,,ok,"high: Municipality, correctly matched."
+"החברה למתנ""סים - מרכזים קהילתיים בישראל בע""מ",,510525348,החברה למתנ״סים - מרכזים קהילתיים בישראל בע״מ (חל״צ),association,1621,,ok,"high: Government company/NGO, correctly matched."
+"אגד חברה לתחבורה בע""מ",,516041118,אגד חברה לתחבורה  בע״מ,company,24,,ok,"high: Public transport company, correctly matched."
+"דן חברה לתחבורה ציבורית בע""מ",,513183046,דן חברה לתחבורה ציבורית בע״מ,company,23,,ok,"high: Public transport company, correctly matched."
+"היכלי הספורט תל אביב-יפו בע""מ",,510492648,היכלי הספורט תל - אביב - יפו בע״מ,company,2009,,ok,"high: Municipal company, correctly matched."
+"רפאל מערכות לחימה מתקדמות בע""מ",,520042185,רפאל מערכות לחימה מתקדמות בע״מ,company,51,,ok,"high: Government company, correctly matched."
+אלתא מערכות בע״מ,"אלתא מערכות בע""מ",510487986,אלתא מערכות בע״מ,company,53,,ok,high: Exact match.
+פי גלילות מסופי נפט וצנורות בעמ,"פי גלילות מסופי נפט וצינורות בע""מ",510192776,פי גלילות מסופי נפט וצנורות בעמ,company,1910,,ok,high: Exact match with minor spelling variance.
+תור אויר ישראל בעמ,"תור אויר ישראל בע""מ",520027350,תור אויר ישראל בעמ,company,1851,,ok,high: Exact match.
+שח״מ מקורות ביצוע בע״מ,"שחמ מקורות ביצוע בע""מ",510284037,שח״מ מקורות ביצוע בע״מ,company,1915,,ok,high: Exact match.
+בתי זקוק לנפט בע״מ,בתי זקוק לנפט חיפה,520036658,בתי זקוק לנפט בע״מ,company,1899,,ok,high: Matches Oil Refineries Ltd (BAZAN) which operates in Haifa.
+הוועדה המחוזית לתכנון ובניה - מחוז חיפה,,,,,8.12.4,0006,ok,high: No direct entity record found; typically funded through the Ministry of Interior or Planning Administration.
+שמנים בסיסיים חיפה בעמ,"שמנים בסיסיים חיפה בע""מ",520025693,שמנים בסיסיים חיפה בעמ,company,1917,,ok,high: Exact match.
+"מכון טכנולוגי חולון - מ.ט.ח (ע""ר)",,580344109,"מכון טכנולוגי חולון - מ.ט.ח (ע""ר)",association,1589,,ok,high: Exact match.
+יד חיים ויצמן (חל״צ),יד חיים ויצמן,510143423,יד חיים ויצמן (חל״צ),association,1702,,ok,high: Matched exactly to Yad Chaim Weizmann (a public benefit company). It is independent and does not have a state budget chapter.
+מכון ויצמן למדע,,520016858,מכון ויצמן למדע,company,1570,,ok,high: Matched to the Weizmann Institute of Science record. Universities do not have their own state budget chapter.
+רשות התאגידים,,,,,,0008,ok,"medium: The Corporations Authority is a unit in the Ministry of Justice, but its specific record is missing from the candidates. Budget chapter belongs to the Ministry of Justice."
+המינהל האזרחי,"המינהל האזרחי (יחידת קמ""ט סביבה ויחידת הפיקוח)|המינהל האזרחי (יחידת הפיקוח ויחידת קמ""ט סביבה)|המינהל האזרחי (יחידת קמ""ט סביבה ויועמ""ש יו""ש)|الإدارة المدنية في يهودا والسامرة",,,,,0017,ok,medium: No exact candidate for the Civil Administration or these specific units. Budget chapter corresponds to COGAT (Coordinator of Government Activities in the Territories).
+"משטרת ישראל - מחוז ש""י","משטרת ישראל (מחוז ש""י)",500104948,"משטרת ישראל-מחוז ש""י",government_office,,0007|0052,ok,high: Judea and Samaria district of Israel Police. Matches exact record.
+איגוד ערים לאיכות הסביבה נפת אשקלון,,,,,,,ok,high: Conurbation for environmental protection. No exact match in the candidate list.
+ההתאחדות לכדורגל בישראל,,580001717,"ההתאחדות לכדורגל בישראל (ע""ר)",association,,,ok,high: Israeli Football Association. Matches exact NGO record. Outside the state budget.
+נציבות שוויון זכויות לאנשים עם מוגבלות,נציבות שוויון זכויות לאנשים עם מוגבלות במשרד המשפטים,,,,,0008,ok,high: Unit in the Ministry of Justice. Not specifically listed in the candidates.
+לשכת הקשר נתיב,"לשכת הקשר ""נתיב""",,,,,0004,ok,high: Independent unit within the Prime Minister's Office. No matching candidate found.
+המועצה הלאומית לגריאטריה,,,,,,0024|0067,ok,"high: No exact candidate match. As a council within the Ministry of Health, it is associated with the health budget chapters."
+מרכז ההשקעות,,500103056,משרד הכלכלה/מרכז ההשקעות,government_office,,0036|0038|0076,ok,high: Matched to the specific unit within the Ministry of Economy. Uses the ministry's budget chapters.
+מועצת מקרקעי ישראל,,,,,,0098,ok,"medium: The governing council of the Israel Land Authority has no exact match in the candidate list (the candidates contain the Authority itself, not the Council). Assigned the ILA budget chapter."
+האגודה למען החייל,,580004307,"האגודה למען החייל (ע""ר)",association,,,ok,"high: Matched to its exact NGO record. As an NGO, it does not have state budget chapters."
+הקרן למען ביטחון ישראל,,,,,,,ok,"high: Also known as LIBI Fund. While related to an existing merged NGO in candidates, there is no exact standalone match for this historical entity. Outside the state budget."
+"כתית בע""מ",,510063308,כתית בעמ,company,,,not_a_body,"high: Matched to the private company 'כתית בעמ'. It is a private entity, not a public body."
+משרדי הממשלה,,,,,,,not_a_body,high: Generic phrase referring to government ministries collectively.
+ועדת ההצמדות,,,,,,,not_a_body,high: A specific committee rather than a distinct public body with its own budget chapter or registry record.
+מינהל הרכב הממשלתי,,500100276,משרד האוצר/מינהל הרכב הממשלתי,government_office,,0005,ok,high: Unit within the Ministry of Finance.
+מינהל הדיור הממשלתי,,,,,,0005|0051,ok,"high: Known government unit (part of the Accountant General in the Ministry of Finance), associated with the government housing budget chapter, but no exact matching record in candidates."
+משרדי הממשלה שנבדקו,,,,,,,not_a_body,high: Generic phrase referring to the audited ministries.
+ממשלת ישראל,,,,,,,not_a_body,"high: Refers to the government as a whole, not a specific budget entity."
+"המינהל האזרחי - קמ""ט סביבה","המינהל האזרחי (יחידת קמ""ט סביבה)",,,,,0017,ok,"high: Unit within the Civil Administration, which is part of COGAT. No exact candidate match."
+המכון למורשת בן גוריון,המכון למורשת דוד בן-גוריון,500500343,המכון למורשת בן גוריון,law_mandated_organization,,,ok,high: A statutory corporation (law_mandated_organization) operating independently outside the direct state budget chapters.
+"צה""ל/אגף התכנון",אגף התכנון,,,,,0015,ok,"reviewed: entity dropped. medium: Context strongly implies the IDF's Planning Directorate (אג""ת). Matched to the closest IDF registry record, although the registry string oddly combines planning and logistics."
+אגף התקשוב וההגנה בסייבר,אגף התקשוב,,,,,0015,ok,high: IDF's Computer Service Directorate. No matching candidate found in the provided list.
+"לשכת הרמטכ""ל ולשכת סגן הרמטכ""ל",,,,,,0015,ok,high: Specific high-level offices within the IDF. No matching candidates provided.
+המטה הכללי,,,,,,0015,ok,high: The IDF General Staff. No exact matching candidate among the options.
+"לשכת סגן הרמטכ""ל",,,,,,0015,ok,high: Office of the Deputy Chief of Staff in the IDF. No matching candidate provided.
+"מפא""ת",,,,,,0015,ok,high: MAFAT is a joint unit of the Ministry of Defense and the IDF. None of the candidates is the actual government body (most are NGOs or private companies).
+חיל האוויר,,,,,,0015,ok,"high: Israeli Air Force. The provided IDF candidates are for other corps (Education, Military Police, Intelligence). No matching candidate."
+זרוע היבשה,,,,,,0015,ok,high: IDF Ground Forces. All candidates are unrelated religious or charitable associations.
+"אגף המבצעים במטכ""ל",,,,,,0015,ok,high: Operations Directorate in the IDF General Staff. No matching IDF directorate is present among the candidates.
+"ועדת המכרזים לנדל""ן",,,,,,,not_a_body,"high: A generic name for a real estate tenders committee (often an internal inter-ministerial or specific ministry's committee), rather than an independent public body."
+אגף לוגיסטיקה ונכסים,,,,,,,not_a_body,high: A highly generic department name that exists in various ministries and organizations. Cannot be assigned to a specific body without further context.
+דירקטוריון חברת החשמל,,,,,,,not_a_body,"high: Refers to the board of directors (a group of people/organ), not the company itself. The IEC itself is a government company (which also does not appear in the candidates)."
+ועדת נכסים ובינוי של הדירקטוריון,,,,,,,not_a_body,"high: Generic committee of a board of directors, not an independent public body."
+היועץ המשפטי של חברת החשמל,"היועץ המשפטי של חח""י",,,,,,not_a_body,"high: Refers to a specific role/position within a company, not an independent public body."
+ועדת נכסים ובינוי,,,,,,,not_a_body,high: Generic committee name.
+אגף כספים וכלכלה,,,,,,,not_a_body,high: Generic department name.
+מפקדת הזרוע לבניין הכוח ביבשה,,,,,,0015,ok,high: IDF Ground Forces command (part of the defense budget). No matching candidate found.
+אגף כוח אדם,,,,,,,not_a_body,"medium: Generic department name (Human Resources). Could specifically refer to the IDF Manpower Directorate, but without context it is treated as a generic phrase."
+"תש""ת - חברה למפעלי תיירות ושירותי תעופה בע""מ","תש""ת חברה למפעלי תיירות ושירותי תעופה בע""מ",510519259,תשת - חברה למפעלי תיירות ושירותי תעופה בע״מ,company,,,ok,high: Matches the exact name of the government company. Budget chapters are empty as companies operate outside the regular state budget.
+אגף בכיר אזרחים ותיקים,,,,,,,ok,medium: A department currently residing within the Ministry for Social Equality. None of the provided candidates fit this specific public body unit.
+היחידה הארצית לאכיפת דיני התכנון והבניה,,,,,,0005,ok,"high: This unit is known today as 'הרשות לאכיפה במקרקעין' (under the Ministry of Finance). However, it is not present in the provided candidates for this entry, so ID is null."
+הרשות לשיקום האסיר,,500102462,משרד העבודה/הרשות לשיקום האסיר,government_office,,0023,ok,high: Matched to its historical registry entry under the Ministry of Labor and Welfare. Assigned to the welfare ministry budget chapter.
+gov.il,,,,,,,not_a_body,high: Refers to a government portal/domain rather than a specific administrative public body. Unit equivalent would be 'ממשל זמין' or 'מערך הדיגיטל הלאומי'.
+רשם הזוגיות והיחידה לענייני עדות דתיות,,,,,,0008,ok,high: A specific unit and registrar operating within the Ministry of Justice. No corresponding candidate is listed in the prompt.
+הרשות לרישום והסדר זכויות מקרקעין,,500102124,משרד המשפטים/אגף רישום והסדר מקר,government_office,,0008,ok,"reviewed: entity set by hand. high: Also known as Tabu, it is a unit within the Ministry of Justice. None of the provided candidates are a correct match."
+בית הדין לעררים לפי חוק הכניסה לישראל,בתי הדין לאוכלוסין והגירה,,,,,0008,ok,"high: The population and immigration tribunals are a unit within the Ministry of Justice. They are distinct from the general Courts Administration (בתי המשפט/ההנהלה), so no candidate matches."
+משרד ירושלים ומסורת ישראל,,,,,,,ok,"medium: A standalone ministry, but no matching registry candidate was provided and no specific historic budget chapter from the list cleanly applies."
+מתאם פעולות הממשלה בשטחים,תיאום פעולות הממשלה בשטחים,500100441,משרד הביטחון/מתאם הפעולות בשטחים,government_office,,0017,ok,"reviewed: entity set by hand. high: COGAT is a unit within the Ministry of Defense with its own budget chapter (0017). The PMO coordination candidate (משרד רוה""מ/תיאום) is incorrect."
+שותפויות רב מגזריות ושיתוף ציבור,,,,,,,not_a_body,"high: This is a generic concept or field of practice ('cross-sector partnerships and public participation'), not a specific public body."
+אגף שומת מקרקעין,,500102132,משרד המשפטים/אגף שומת מקרקעין,government_office,,0008,ok,high: Exact match for the Real Estate Valuation Division under the Ministry of Justice.
+האפוטרופוס הכללי והכונס הרשמי,"האפוטרופוס הכללי, הכונס הרשמי והממונה על הליכי חדלות פירעון ושיקום כלכלי והרשם לענייני ירושה|האפוטרופוס הכללי, הממונה על הליכי חדלות פירעון והרשם לענייני ירושה|הממונה על הליכי חדלות פירעון ושיקום כלכלי|האפוטרופוס הכללי והממונה על ענייני ירושה",500102165,משרד המשפטים/האפוטרופוס/הכונס הר,government_office,,0008|0053,ok,reviewed: entity set by hand. high: Matched with the Ministry of Justice unit for Administrator General and Official Receiver.
+משרד העבודה,,500107537,משרד העבודה,government_office,,0023|0036,ok,"medium: Refers to the Labor branch, matched to the Ministry of Labor record. Budget was historically under Welfare or Economy."
+האגף לרישוי כלי ירייה,,,,,,0007|0052,ok,high: Unit under the Ministry of National Security. No matching candidate provided.
+רשות המים,,,,,,0041|0073,ok,"medium: Matches the Governmental Water Authority. The only candidate is a specific fund, not the main body, so null was chosen."
+פרויקט נימבוס,נימבוס Cloud Me In,,,,,,not_a_body,"high: Nimbus is a government cloud computing project, not a public body."
+שיתוף ציבור,,,,,,,not_a_body,high: Generic phrase referring to public participation.
+בדיקות QA,,,,,,,not_a_body,high: Generic phrase.
+מטה המיזם הלאומי ישראל דיגיטלית,"מטה המיזם הלאומי ישראל דיגיטלית, במשרד לשוויון חברתי",,,,,,ok,high: Unit formerly within the Ministry of Social Equality. No specific unit candidate found in the registry candidates.
+בדיקות QA QA,,,,,,,not_a_body,"high: Generic term for Quality Assurance testing, not a public body."
+משרד ירושלים ומורשת,,,,,,,ok,high: Ministry of Jerusalem and Heritage. No matching government office record found in candidates.
+הרשות הלאומית לבטיחות בדרכים,,,,,,0040|0079,ok,high: Statutory authority under the Ministry of Transport. No matching candidate found.
+אגף ממשל וחברה,,,,,,0004,ok,high: Department within the Prime Minister's Office. No matching candidate found.
+משרד המשפטים/המחלקה לסיוע משפטי,סיוע משפטי,500102116,משרד המשפטים/המחלקה לסיוע משפטי,government_office,,0008,ok,high: Exact match to the Legal Aid Department within the Ministry of Justice.
+המטה הלאומי להגנה על ילדים ברשת,,,,,,0007,ok,"high: Unit 105, operated primarily by the Israel Police/Ministry of National Security. None of the listed candidates match this state unit."
+הרשות לזכויות ניצולי השואה,,,,,,0025,ok,"high: Government authority with its own budget chapter (0025). The candidates are various NGOs or unrelated entities, none of which is the statutory authority."
+היחידה הממשלתית לחופש המידע,,,,,,0008,ok,high: A government unit under the Ministry of Justice. All candidates are NGOs (like the Movement for Freedom of Information) or unrelated bodies.
+המרכז למיפוי ישראל,,,,,,0043,ok,high: Survey of Israel. Has its own specific budget chapter (0043). The correct entity record is not present among the candidates.
+בתי הדין הדתיים הדרוזיים בישראל,,,,,,0008,ok,"medium: State religious courts, typically budgeted under the Ministry of Justice. None of the candidates match the court system itself."
+מנהלת היחידות המקצועיות,מנהלת היחידות המקצועיות (הסדרת מקצועות הרישוי),,,,,,ok,low: Refers to a specific ministry unit regulating licensed professions (often in Labor/Economy/Health). No matching candidate found.
+בית הדין לענייני פיצויי נזק עקיף לעסקים (ארצי),,,,,,0005|0008,ok,high: No exact match in candidates; this administrative tribunal operates under the Ministry of Finance or Ministry of Justice.
+רשות הצעירים,,,,,,0004|0020,ok,high: No exact match in candidates; the Youth Authority has moved between several ministries over the years.
+האגף לאסדרת מקצועות (מנהלת היחידות המקצועיות),,,,,,0008,ok,high: No exact match in candidates; this department regulates professions under the Ministry of Justice.
+הרשות לאכיפה במקרקעין,,500107693,משרד האוצר/הרשות לאכיפה במקרקעין,government_office,,0005|0007,ok,"high: Exact match with candidate 500107693 (previously in Finance, now related to National Security)."
+מגזין נקודת מבט,,,,,,,not_a_body,"high: This is a magazine name, not a public body."
+בתי הדין לפי חוק הכניסה לישראל,,,,,,0008,ok,high: No exact match in candidates; these administrative tribunals operate under the Ministry of Justice.
+רשות התקשוב הממשלתי,,,,,,0004|0036,ok,high: No exact match in candidates; the Government ICT Authority has operated under the PMO and the Ministry of Economy.
+רשות המאגר הביומטרי הלאומי,,,,,,0004|0006|0068,ok,high: Independent authority/unit previously under the Ministry of Interior and National Cyber Directorate. No matching candidate provided.
+ועדת חקירה ממלכתית - אסון מירון,ועדת חקירה ממלכתית - אסון  מירון,,,,,,ok,high: Temporary state commission of inquiry. Does not have a permanent registry record among the candidates.
+המכון להכשרה משפטית,,,,,,0008|0053,ok,high: Unit within the Ministry of Justice. No matching candidate provided.
+מערך הגיור,,,,,,0004|0022,ok,"high: State conversion authority, historically under the PMO or Ministry of Religious Services. No matching candidate provided."
+מענקים והטבות לתעשיינים,,,,,,,not_a_body,"high: A budget item or government policy concept, not a distinct public body."
+היחידה הממשלתית לתיאום המאבק בגזענות,,,,,,0008,ok,high: A unit within the Ministry of Justice. None of the candidates match.
+המערך לטקסים ולאירועים ממלכתיים,,,,,,0004|0019,ok,high: A government unit whose affiliation changed over the years (Ministry of Culture and PMO). No matching candidate.
+רשומות,,,,,,,not_a_body,"high: The official gazette of the State of Israel published by the Ministry of Justice, not an independent public body."
+אגף בכיר לפיתוח כלכלי חברתי בחברה הבדואית בנגב,,,,,,0004|0023|0033,ok,"medium: A government division that was moved between several ministries including Agriculture, Social Equality, and Welfare. No candidate matches exactly."
+התכנית הממשלתית לשילוב יוצאי אתיופיה,,,,,,,not_a_body,"high: A government plan or program, not a public body."
+נתיב - לשכת הקשר,"משרד ראש הממשלה, ""נתיב""",,,,,0004,ok,high: A dedicated unit within the Prime Minister's Office. No specific Nativ unit record in the candidates.
+משרד המדע והטכנולוגיה,,500101878,משרד המדע והטכנולוגיה/המשרד הראש,government_office,,0019,ok,high: Headquarters record for the Ministry of Science and Technology.
+הרשות לקידום מעמד האישה,,,,,,0004,ok,medium: No matching candidate found. Budget historically under PMO or the Ministry for Social Equality.
+רשות הפטנטים,,500102140,"משרד המשפטים/רשות הפטנטים,",government_office,,0008,ok,high: Matches the Patent Authority unit under the Ministry of Justice.
+הרשות לפיתוח כלכלי-חברתי של המגזר החרדי,,,,,,0004,ok,medium: No matching candidate found. Functions under the Prime Minister's Office or related ministry.
+ועדת הבדיקה הממשלתית לאירוע בריחת האסירים הביטחוניים מבית סוהר גלבוע,,,,,,0007,ok,"high: Ad-hoc government committee, no permanent entity record. Budgeted via the Ministry of National Security or PMO."

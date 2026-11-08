@@ -1,0 +1,44 @@
+state_comptroller:
+  dependencies:
+    - pipeline: ./state_comptroller/chapters
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: related-items-state-comptroller
+        title: פריטים קשורים - דוחות מבקר המדינה
+        revision: '2026-11-08'
+    - flow: link_source
+      parameters:
+        source: state_comptroller
+        out-path: /var/datapackages/related_items/state_comptroller
+
+gov_decisions:
+  dependencies:
+    - pipeline: ./government_decisions/government_decisions
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: related-items-gov-decisions
+        title: פריטים קשורים - החלטות ממשלה
+        revision: '2026-11-08'
+    - flow: link_source
+      parameters:
+        source: gov_decisions
+        out-path: /var/datapackages/related_items/gov_decisions
+
+all:
+  dependencies:
+    - pipeline: ./related_items/state_comptroller
+    - pipeline: ./related_items/gov_decisions
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: related-items
+        title: פריטים קשורים
+        revision: '2026-11-08'
+    - flow: merge_sources
+      parameters:
+        sources:
+          - /var/datapackages/related_items/state_comptroller
+          - /var/datapackages/related_items/gov_decisions
+        out-path: /var/datapackages/related_items/all
