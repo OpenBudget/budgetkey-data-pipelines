@@ -130,15 +130,20 @@ Without `DPP_DB_ENGINE`, target tables are downloaded once through next.obudget.
 `DOC_IDS` selects documents. `RELATED_ITEMS_MIN_CONFIDENCE`, `RELATED_ITEMS_MODEL` and `RELATED_ITEMS_THREADS`
 tune a run.
 
-## Surfacing links in Elasticsearch (proposed, not implemented)
+## In Elasticsearch
 
-An indexer `document-step` per doc type, reading `related_items` by doc id:
-- **sources** (`state_comptroller_audits`, `gov_decisions`): `related_items: [{doc_id, kind, title, relation, part_id, year}]`,
-  grouped by target kind, best confidence first;
-- **targets** (`entities`, `budget`, `gov_decisions`, `support_programs`): `mentioned_in: [{doc_id, kind, title, date, relation,
-  part_id, excerpt}]`, the 20 most recent, plus `mentioned_in_count` per source kind.
+`budgetkey/elasticsearch/add_related_items.py`, an indexer `extra-step` per doc type, adds:
+- `related_items` (the doc as a source): `[{doc_id, kind, title, relation, relations, confidence, parts, year, code}]`,
+  one entry per target with its links folded over the doc's parts (findings). Sorted by kind, then confidence, then title;
+- `mentioned_in` (the doc as a target): `[{doc_id, kind, title, date, relation, confidence, excerpt, part_id, parts, year,
+  same_item}]`, one entry per source doc, newest first, the first 20; `mentioned_in_count` counts them all.
 
-`gov_decisions` is both a source and a target: a decision's page lists what it cites and which later decisions and
-audits cite it. Budget back-links already sit on the connected item's doc, so they cover all of its years. A finding
-(`source_part_id`) can link to its anchor on the audit's page. Links of a lower confidence than the page shows by
-default can stay in the table for search and auditing.
+Both are display-only (`es:index: false`). `gov_decisions` and `state_comptroller_audits` are both sources and targets: a
+decision's page lists what it cites and which later decisions and audits cite it. A budget doc is a connected item, so
+its own back-links cover all its years (`year` is the year cited); with `code-field: code`, links to other connected
+items with the same code follow, marked `same_item: false`. `part_id` (a finding) can anchor to its place on the
+audit's page. Issue pages get the links lifted from their findings, so an organization's `mentioned_in` can list both
+an audit and its issue.
+
+The step runs before `manage-revisions`, so a doc whose links change is re-indexed, and its output depends only on the
+table. It reads `related_items` once per run; if the table can't be read, the fields stay empty.
