@@ -117,7 +117,10 @@ class Generator(GeneratorBase):
                 db_table = '_elasticsearch_mirror__{}'.format(snake_doc_type)
                 revision = parameters.get('revision', 0) + bumper
 
-                if doc_type not in ('people', 'activities', 'units', 'calls_for_bids', 'support_criteria', 'reports'):
+                # Not in the sitemaps: types without item pages of their own (the State Comptroller's, until the
+                # frontend has pages for them)
+                if doc_type not in ('people', 'activities', 'units', 'calls_for_bids', 'support_criteria', 'reports',
+                                    'state_comptroller_audits', 'state_comptroller_issues'):
                     all_pipelines.append(pipeline_id)
                     sitemap_params.append({
                         'kind': doc_type,

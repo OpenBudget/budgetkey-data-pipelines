@@ -361,3 +361,45 @@ muni_tenders:
   #   - flow: activity_add_nice_org_hierarchy
   # document-steps:
   #   - flow: activity_fetch_extra_data
+
+state_comptroller_audits:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./state_comptroller/documents
+  source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
+  page-title-pattern: 'דוח מבקר המדינה - {title}'
+  chunker:
+    - 'דוח מבקר המדינה: "{title}" ({publication_title})'
+    - field: summary
+      method: chunk
+      chunk_size: 2000
+      chunk_overlap: 400
+    - field: findings_text
+      method: chunk
+      chunk_size: 2000
+      chunk_overlap: 400
+  key-fields:
+    - chapter_id
+  date-range:
+    type: date-range
+    from-field: publish_date
+    to-field: publish_date
+
+state_comptroller_issues:
+  kind: indexer
+  revision: 1
+  dependent_pipeline: ./state_comptroller/documents
+  source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
+  page-title-pattern: 'מעקב ליקוי מדוחות מבקר המדינה - {title}'
+  chunker:
+    - 'ליקוי שהעלה מבקר המדינה: "{title}"'
+    - field: description
+      method: chunk
+      chunk_size: 2000
+      chunk_overlap: 400
+  key-fields:
+    - issue_id
+  date-range:
+    type: date-range
+    from-field: first_reported
+    to-field: last_seen

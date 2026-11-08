@@ -461,3 +461,44 @@ def test_failed_window_is_read_page_by_page(monkeypatch):
     assert [i['finding_text'] for i in out['items']] == ['ליקוי 2', 'ליקוי 3', 'ליקוי 4']
     assert [i['page'] for i in out['items']] == [1, 2, 3]  # relative to the window
     assert (3, 3, 'image/png') in calls
+
+
+def test_es_documents(tmp_path):
+    import dataflows as DF
+    import es_documents as ed
+    chapters, issues = tmp_path / 'chapters', tmp_path / 'issues'
+    audit = dict(chapter_id=1, title='מינהל הרכב', publication_title='דוח שנתי 61ב', publication_type='annual',
+                 report_code='61ב', publish_date=datetime.date(2011, 5, 17), page_url='https://x/1', main_body='משרד האוצר',
+                 audited_bodies=[dict(code='29', name='משרד האוצר')], llm_audited_bodies=[dict(name='החשב הכללי', role='secondary')],
+                 language='he', analysis_status='ok', text_md='טקסט מלא', summary='סיכום', topics=['רכב'],
+                 full_pdf_stored='https://s/1.pdf', earlier_reports=[], key_figures=[], n_findings=2)
+    english = dict(audit, chapter_id=2, language='en', analysis_status='not-hebrew')
+    findings = [dict(finding_id='1-%d' % i, chapter_id=1, seq=i, title='ממצא %d' % i, description='תיאור %d' % i,
+                     responsible_bodies=['משרד האוצר'], severity='high', followup_status='not_applicable', verified=True)
+                for i in (2, 1)]
+    DF.Flow([audit, english], DF.update_resource(-1, name='audits'), [dict(f) for f in findings],
+            DF.update_resource(-1, name='findings'), DF.dump_to_path(str(chapters))).process()
+    timeline = [dict(date='2011-05-17', kind='finding', id='1-1', chapter_id=1, source='מינהל הרכב', title='ממצא 1'),
+                dict(date='2012-01-01', kind='response', id='r/1', source='הערות', title='תגובה')]
+    DF.Flow([dict(issue_id='1-1', title='ממצא 1', timeline=timeline, bodies=['משרד האוצר'],
+                  first_reported=datetime.date(2011, 5, 17), last_seen=None),
+             dict(issue_id='1-2', title='ממצא 2', timeline=timeline[:1], bodies=[])],
+            DF.update_resource(-1, name='issues'),
+            [dict(issue_id='1-1', member_type='finding', member_id='1-1'),
+             dict(issue_id='1-1', member_type='response', member_id='r/1'),
+             dict(issue_id='1-2', member_type='finding', member_id='1-2')],
+            DF.update_resource(-1, name='issue_members'), DF.dump_to_path(str(issues))).process()
+
+    results, dp, _ = DF.Flow(ed.documents_flow(str(chapters), str(issues))).results()
+    by_name = dict(zip([r.name for r in dp.resources], results))
+    audits, tracked = by_name[ed.AUDITS], by_name[ed.ISSUES]
+    assert [a['chapter_id'] for a in audits] == [1]  # the English chapter isn't indexed
+    a = audits[0]
+    assert [f['finding_id'] for f in a['findings']] == ['1-1', '1-2']
+    assert a['findings'][0]['issue_id'] == '1-1' and a['findings'][0]['issue_size'] == 2
+    assert a['audited_bodies'] == ['משרד האוצר', 'החשב הכללי'] and a['audited_body_codes'] == ['29']
+    assert a['tracked_issues'] == 1 and a['year'] == 2011 and a['text'] == 'טקסט מלא'
+    assert [i['issue_id'] for i in tracked] == ['1-1']  # a single-finding issue is in its audit already
+    assert tracked[0]['chapter_ids'] == [1] and tracked[0]['chapter_titles'] == ['מינהל הרכב']
+    fields = {f.name: f.descriptor for f in dp.get_resource(ed.AUDITS).schema.fields}
+    assert 'text_md' not in fields and fields['title']['es:title'] and fields['findings']['es:index'] is False

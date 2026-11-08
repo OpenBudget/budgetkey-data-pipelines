@@ -45,3 +45,14 @@ issues:
         title: דוחות מבקר המדינה - מעקב אחר ליקויים
         revision: '2026-11-08'
     - flow: issue_linking
+
+documents:
+  dependencies:
+    - pipeline: ./state_comptroller/issues
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: state-comptroller-documents
+        title: דוחות מבקר המדינה - מסמכים לחיפוש
+        revision: '2026-11-08'
+    - flow: es_documents

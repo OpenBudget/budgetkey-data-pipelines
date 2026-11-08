@@ -1,0 +1,269 @@
+"""State Comptroller audits and issues as Elasticsearch documents.
+
+Builds the two resources the indexer loads (`budgetkey/elasticsearch/budgetkey.source-spec.yaml`), each named after
+its ES type:
+- state_comptroller_audits: one document per analyzed Hebrew chapter, with its findings, the bodies audited, the
+  follow-up information, links to the files and its full text.
+- state_comptroller_issues: issues found in more than one source (several audits, or an audit and the government's
+  responses), each with its timeline. An issue of a single finding is already a finding of its audit's document.
+
+Links to other budgetkey records (related_items, mentioned_in) are added by the indexer's add_related_items step.
+"""
+import collections
+import logging
+import os
+
+import dataflows as DF
+
+import sc_common as sc  # noqa: F401 (raises the csv field size limit, for the chapters' full texts)
+
+CHAPTERS_PATH = os.environ.get('CHAPTERS', '/var/datapackages/state_comptroller/chapters')
+ISSUES_PATH = os.environ.get('ISSUES', '/var/datapackages/state_comptroller/issues')
+OUT_PATH = '/var/datapackages/state_comptroller/documents'
+
+AUDITS = 'state_comptroller_audits'
+ISSUES = 'state_comptroller_issues'
+
+NOT_INDEXED = {'es:index': False}
+OBJECTS = {'es:itemType': 'object', 'es:index': False}
+STRINGS = {'es:itemType': 'string'}
+
+FINDING_SCHEMA = {'fields': [
+    {'name': n, 'type': t} for n, t in (
+        ('finding_id', 'string'), ('seq', 'integer'), ('title', 'string'), ('description', 'string'),
+        ('recommendation', 'string'), ('responsible_bodies', 'array'), ('finding_type', 'string'),
+        ('severity', 'string'), ('followup_status', 'string'), ('followup_status_text', 'string'),
+        ('section', 'string'), ('body_responses', 'array'), ('verified', 'boolean'), ('issue_id', 'string'),
+        ('issue_size', 'integer'))
+]}
+
+# The audit document's fields: (name, type, ES hints); existing fields keep their type when None
+AUDIT_FIELDS = [
+    ('chapter_id', 'integer', {}),
+    ('title', 'string', {'es:title': True}),
+    ('publication_title', 'string', {'es:boost': True}),
+    ('publication_type', 'string', {'es:keyword': True}),
+    ('report_code', 'string', {'es:keyword': True}),
+    ('publish_date', 'date', {}),
+    ('year', 'integer', {}),
+    ('page_url', 'string', NOT_INDEXED),
+    ('main_body', 'string', {'es:boost': True}),
+    ('audited_bodies', 'array', dict(STRINGS, **{'es:boost': True})),
+    ('audited_body_codes', 'array', dict(STRINGS, **{'es:keyword': True})),
+    ('audit_subject', 'string', {'es:boost': True}),
+    ('summary', 'string', {'es:hebrew': True}),
+    ('audit_period', 'string', NOT_INDEXED),
+    ('audit_period_start_year', 'integer', {}),
+    ('audit_period_end_year', 'integer', {}),
+    ('topics', 'array', dict(STRINGS, **{'es:boost': True})),
+    ('key_figures', 'array', OBJECTS),
+    ('follow_up', 'string', {'es:keyword': True}),
+    ('follows_up_report', 'string', {}),
+    ('follows_up_year', 'integer', {}),
+    ('follows_up_title', 'string', {}),
+    ('earlier_reports', 'array', OBJECTS),
+    ('findings', 'array', dict(OBJECTS, **{'es:schema': FINDING_SCHEMA})),
+    ('n_findings', 'integer', {}),
+    ('findings_text', 'string', {'es:hebrew': True}),
+    ('issue_ids', 'array', dict(STRINGS, **{'es:keyword': True})),
+    ('tracked_issues', 'integer', {}),
+    ('text', 'string', {'es:hebrew': True}),
+    ('pdf_url', 'string', NOT_INDEXED),
+    ('docx_url', 'string', NOT_INDEXED),
+    ('abstract_pdf_url', 'string', NOT_INDEXED),
+    ('abstract_docx_url', 'string', NOT_INDEXED),
+    ('md_url', 'string', NOT_INDEXED),
+    ('source_url', 'string', NOT_INDEXED),
+    ('analysis_status', 'string', {'es:keyword': True}),
+]
+
+TIMELINE_SCHEMA = {'fields': [
+    {'name': n, 'type': t} for n, t in (
+        ('date', 'string'), ('kind', 'string'), ('id', 'string'), ('chapter_id', 'integer'), ('source', 'string'),
+        ('url', 'string'), ('title', 'string'), ('status', 'string'), ('text', 'string'))
+]}
+
+ISSUE_FIELDS = [
+    ('issue_id', 'string', {'es:keyword': True}),
+    ('title', 'string', {'es:title': True}),
+    ('description', 'string', {'es:hebrew': True}),
+    ('bodies', 'array', dict(STRINGS, **{'es:boost': True})),
+    ('severity', 'string', {'es:keyword': True}),
+    ('first_reported', 'date', {}),
+    ('last_seen', 'date', {}),
+    ('n_audits', 'integer', {}),
+    ('n_responses', 'integer', {}),
+    ('latest_status', 'string', {'es:keyword': True}),
+    ('chapter_ids', 'array', {'es:itemType': 'integer'}),
+    ('chapter_titles', 'array', dict(STRINGS, **{'es:boost': True})),
+    ('timeline', 'array', dict(OBJECTS, **{'es:schema': TIMELINE_SCHEMA})),
+    ('timeline_text', 'string', {'es:hebrew': True}),
+]
+
+INDEXED_STATUSES = ('ok', 'low-verification', 'partial-text', 'no-findings')
+
+
+def read_resource(path, name):
+    return DF.Flow(DF.load(os.path.join(path, 'datapackage.json'), resources=[name])).results()[0][0]
+
+
+def issue_index(issues_path):
+    """{finding id: (issue id, number of members)}, from the issues' members."""
+    try:
+        members = read_resource(issues_path, 'issue_members')
+    except Exception:
+        logging.warning('No issues at %s, audits are indexed without them', issues_path)
+        return {}
+    sizes = collections.Counter(m['issue_id'] for m in members)
+    return {m['member_id']: (m['issue_id'], sizes[m['issue_id']]) for m in members if m['member_type'] == 'finding'}
+
+
+def audit_document(row, findings, issues):
+    own = sorted(findings.get(row['chapter_id'], []), key=lambda f: f.get('seq') or 0)
+    doc_findings = []
+    for f in own:
+        issue_id, size = issues.get(f['finding_id'], (None, None))
+        doc_findings.append(dict(
+            finding_id=f['finding_id'], seq=f.get('seq'), title=f.get('title'), description=f.get('description'),
+            recommendation=f.get('recommendation'), responsible_bodies=f.get('responsible_bodies') or [],
+            finding_type=f.get('finding_type'), severity=f.get('severity'),
+            followup_status=f.get('followup_status'), followup_status_text=f.get('followup_status_text'),
+            section=f.get('section'), body_responses=f.get('body_responses') or [], verified=f.get('verified'),
+            issue_id=issue_id, issue_size=size,
+        ))
+    bodies = row.get('audited_bodies') or []
+    names = [b.get('name') for b in bodies if isinstance(b, dict) and b.get('name')]
+    names += [b.get('name') for b in row.get('llm_audited_bodies') or [] if isinstance(b, dict) and b.get('name')]
+    tracked = sorted({f['issue_id'] for f in doc_findings if f['issue_id'] and (f['issue_size'] or 0) > 1})
+    return dict(
+        chapter_id=row['chapter_id'],
+        title=row.get('title'),
+        publication_title=row.get('publication_title'),
+        publication_type=row.get('publication_type'),
+        report_code=row.get('report_code'),
+        publish_date=row.get('publish_date'),
+        year=row['publish_date'].year if row.get('publish_date') else None,
+        page_url=row.get('page_url'),
+        main_body=row.get('main_body'),
+        audited_bodies=list(dict.fromkeys(names)),
+        audited_body_codes=[str(b.get('code')) for b in bodies if isinstance(b, dict) and b.get('code')],
+        audit_subject=row.get('audit_subject'),
+        summary=row.get('summary'),
+        audit_period=row.get('audit_period'),
+        audit_period_start_year=row.get('audit_period_start_year'),
+        audit_period_end_year=row.get('audit_period_end_year'),
+        topics=row.get('topics') or [],
+        key_figures=row.get('key_figures') or [],
+        follow_up=row.get('follow_up'),
+        follows_up_report=row.get('follows_up_report'),
+        follows_up_year=row.get('follows_up_year'),
+        follows_up_title=row.get('follows_up_title'),
+        earlier_reports=row.get('earlier_reports') or [],
+        findings=doc_findings,
+        n_findings=len(doc_findings),
+        findings_text='\n\n'.join('%s\n%s' % (f['title'] or '', f['description'] or '') for f in doc_findings),
+        issue_ids=sorted({f['issue_id'] for f in doc_findings if f['issue_id']}),
+        tracked_issues=len(tracked),
+        text=row.get('text_md'),
+        pdf_url=row.get('full_pdf_stored'),
+        docx_url=row.get('full_docx_stored'),
+        abstract_pdf_url=row.get('abstract_pdf_stored'),
+        abstract_docx_url=row.get('abstract_docx_stored'),
+        md_url=row.get('md_url'),
+        source_url=row.get('full_pdf_url') or row.get('full_docx_url'),
+        analysis_status=row.get('analysis_status'),
+    )
+
+
+def indexed_audit(row):
+    return (row.get('language') == 'he' and row.get('analysis_status') in INDEXED_STATUSES
+            and bool(row.get('text_md')))
+
+
+def issue_document(row):
+    timeline = row.get('timeline') or []
+    chapters = {}
+    for e in timeline:
+        if e.get('chapter_id') and e['chapter_id'] not in chapters:
+            chapters[e['chapter_id']] = e.get('source')
+    return dict(
+        issue_id=row['issue_id'], title=row.get('title'), description=row.get('description'),
+        bodies=row.get('bodies') or [], severity=row.get('severity'), first_reported=row.get('first_reported'),
+        last_seen=row.get('last_seen'), n_audits=row.get('n_audits'), n_responses=row.get('n_responses'),
+        latest_status=row.get('latest_status'), chapter_ids=sorted(chapters),
+        chapter_titles=[chapters[c] for c in sorted(chapters) if chapters[c]], timeline=timeline,
+        timeline_text='\n\n'.join('%s %s: %s' % (e.get('date') or '', e.get('title') or '', e.get('text') or '')
+                                  for e in timeline),
+    )
+
+
+def tracked_issue(row):
+    return len(row.get('timeline') or []) > 1
+
+
+def ensure_fields(resource, fields):
+    """Adds the fields a resource doesn't have (their values are set by the row step that follows)."""
+    def step(package):
+        for res in package.pkg.descriptor['resources']:
+            if res['name'] == resource:
+                names = {f['name'] for f in res['schema']['fields']}
+                res['schema']['fields'] += [dict(name=n, type=t) for n, t, _ in fields if n not in names]
+        yield package.pkg
+        yield from package
+    return step
+
+
+def typed(resource, fields):
+    """Steps that give a resource exactly these fields, with their types and ES hints."""
+    steps = [DF.select_fields([n for n, _, _ in fields], resources=[resource])]
+    for name, type_, hints in fields:
+        steps.append(DF.set_type(name, resources=[resource], type=type_, **hints))
+    return steps
+
+
+def audits_flow(chapters_path, issues):
+    findings = collections.defaultdict(list)
+    for f in read_resource(chapters_path, 'findings'):
+        findings[f['chapter_id']].append(f)
+    logging.info('%d findings in %d chapters', sum(len(v) for v in findings.values()), len(findings))
+    return DF.Flow(
+        DF.load(os.path.join(chapters_path, 'datapackage.json'), resources=['audits']),
+        DF.filter_rows(indexed_audit, resources=['audits']),
+        ensure_fields('audits', AUDIT_FIELDS),
+        lambda row: row.update(audit_document(row, findings, issues)) if 'chapter_id' in row else None,
+        DF.update_resource('audits', name=AUDITS, path=AUDITS + '.csv'),
+        *typed(AUDITS, AUDIT_FIELDS),
+    )
+
+
+def issues_flow(issues_path):
+    return DF.Flow(
+        DF.load(os.path.join(issues_path, 'datapackage.json'), resources=['issues']),
+        DF.filter_rows(tracked_issue, resources=['issues']),
+        ensure_fields('issues', ISSUE_FIELDS),
+        lambda row: row.update(issue_document(row)) if 'issue_id' in row else None,
+        DF.update_resource('issues', name=ISSUES, path=ISSUES + '.csv'),
+        *typed(ISSUES, ISSUE_FIELDS),
+    )
+
+
+def documents_flow(chapters_path=CHAPTERS_PATH, issues_path=ISSUES_PATH):
+    issues = issue_index(issues_path)
+    steps = [audits_flow(chapters_path, issues)]
+    if issues:
+        steps.append(issues_flow(issues_path))
+    return DF.Flow(*steps)
+
+
+def flow(*_):
+    return DF.Flow(
+        documents_flow(),
+        DF.update_resource(None, **{'dpp:streaming': True}),
+        DF.dump_to_path(OUT_PATH),
+    )
+
+
+if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
+    DF.Flow(documents_flow(), DF.printer(num_rows=1, fields=['chapter_id', 'issue_id', 'title', 'n_findings']),
+            DF.dump_to_path(os.environ.get('OUT', 'state_comptroller_documents_out'))).process()
