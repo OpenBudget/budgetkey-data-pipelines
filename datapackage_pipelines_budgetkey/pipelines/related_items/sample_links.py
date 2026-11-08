@@ -38,7 +38,13 @@ def draw(paths, per_kind, out, seed):
         rows.extend(csv.DictReader(open(path, encoding='utf8')))
     rng = random.Random(seed)
     by_kind = defaultdict(lambda: defaultdict(list))
+    # One row per (source document, target): the same link repeated for each finding it appears in is one
+    # judgement.
+    seen = set()
     for r in rows:
+        if (r['source_doc_id'], r['target_doc_id']) in seen:
+            continue
+        seen.add((r['source_doc_id'], r['target_doc_id']))
         by_kind[r['target_kind']][method_group(r['method'])].append(r)
     sample = []
     for kind, methods in sorted(by_kind.items()):

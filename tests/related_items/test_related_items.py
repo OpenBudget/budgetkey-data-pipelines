@@ -146,6 +146,14 @@ def test_budget_codes():
     assert T.budget_codes('ראו סעיף 12.04 לנוהל') == []
 
 
+def test_budget_codes_without_separators():
+    text = 'בחלוקה של 210 מלש"ח בתוכנית 062001 במשרד הפנים ו-90 מלש"ח בתוכנית 23012061, בתוכנית פעילות ופרויקטים ' \
+           'שמספרה 206701 שעניינה גרעינים תורניים'
+    assert [m['code'] for m in T.budget_codes(text)] == ['00062001', '0023012061', '00206701']
+    # Years and other numbers are not program numbers.
+    assert T.budget_codes('תוכנית 2025 ותכנית 123456789 ותכנית 12345') == []
+
+
 def test_tender_numbers():
     text = "מכרז מס' 33/2006 ומכרז 2020 ומכרז פומבי 12-2019"
     assert [m['number'] for m in T.tender_numbers(text)] == ['33/2006', '12-2019']
@@ -192,6 +200,7 @@ def test_find_quote():
 # --- the linker, with canned LLM answers -------------------------------------------------------------------------
 
 ENTITIES = [
+    dict(id='500100029', name='הכנסת', kind='government_office', kind_he='משרד ממשלתי'),
     dict(id='500100904', name='משרד הבריאות/המשרד הראשי', kind='government_office', kind_he='משרד ממשלתי'),
     dict(id='500106919', name='משרד הבריאות/בי"ח איכילוב', kind='government_office', kind_he='משרד ממשלתי'),
     dict(id='520000472', name='חברת החשמל לישראל בע"מ', kind='company', kind_he='חברה ציבורית'),
@@ -200,7 +209,9 @@ ENTITIES = [
     dict(id='580000002', name='עמותת לתת', kind='association', kind_he='עמותה'),
 ]
 BODIES = [dict(name='משרד הבריאות', aliases=['משרד הבריאות והרווחה'], entity_id='500100904',
-               comptroller_codes=['1137'], budget_chapters=['0024', '0067'], status='ok')]
+               comptroller_codes=['1137'], budget_chapters=['0024', '0067'], status='ok'),
+          dict(name='הכנסת', aliases=[], entity_id='500100029', comptroller_codes=[], budget_chapters=['0002'],
+               ubiquitous='yes', status='ok')]
 
 
 def targets():
@@ -287,3 +298,22 @@ def test_decision_documents():
     assert docs[0]['text'] == 'היתר\nמחליטים: להתיר' and docs[0]['hints']['same_government_default']
     assert docs[0]['hints']['llm'] is False  # too short to bother
     assert docs[1]['hints']['llm'] is False and not docs[1]['hints']['same_government_default']
+
+
+def test_ubiquitous_bodies_only_in_specific_roles(monkeypatch):
+    def extract(what, source, parts_hint, usage=None):
+        orgs = [dict(name='הכנסת', org_type='statutory_body', parent=None, role='mentioned',
+                     quote='הצעת החוק תוגש לכנסת', parts=[]),
+                dict(name='משרד הבריאות', org_type='ministry', parent=None, role='responsible',
+                     quote='משרד הבריאות יפעל', parts=[])]
+        for o in orgs:
+            o['position'] = L.find_quote(L._norm_ws(source), o['quote'])
+            o['verified'] = o['position'] >= 0
+        return orgs, []
+
+    monkeypatch.setattr(L, 'extract', extract)
+    doc = dict(doc_id='gov_decisions/y', kind='gov_decisions', title='הצעת חוק', date=D(2024, 1, 1),
+               text='הצעת החוק תוגש לכנסת. משרד הבריאות יפעל ליישומה.', hints=dict(llm=True))
+    links, mentions = LK.DocLinker(doc, targets(), None).run()
+    assert [l['target_doc_id'] for l in links] == ['org/government_office/500100904']
+    assert ('הכנסת', 'ubiquitous') in {(m['mention'], m['status']) for m in mentions}

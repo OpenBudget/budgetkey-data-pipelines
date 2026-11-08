@@ -13,6 +13,7 @@ import argparse
 import csv
 import json
 import logging
+import re
 from collections import Counter, OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 
@@ -23,7 +24,7 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_entities 
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
 
 FIELDS = ['name', 'aliases', 'entity_id', 'entity_name', 'entity_kind', 'comptroller_codes', 'budget_chapters',
-          'status', 'note']
+          'ubiquitous', 'status', 'note']
 BATCH = 8
 
 SCHEMA = {
@@ -137,6 +138,41 @@ def candidate_lines(index, names):
     return lines
 
 
+def institution_aliases(bodies, path):
+    """Aliases for reviewed bodies from the comptroller's institution list (AuditedInstitutions: one string per
+    institution, its names separated by commas and semicolons - and names have commas of their own). A part becomes
+    an alias of a body when another part of the same entry is already one of the body's names, and the part is
+    either an acronym (נתג"ז) or shares most of its words with the body's name - so name fragments split at a comma
+    ("חברה להנדסה בע"מ") are not taken. Returns {body name: [new aliases]}."""
+    entries = json.load(open(path, encoding='utf8'))
+    by_norm = {}
+    for body in bodies:
+        if body.get('status') != 'ok':
+            continue
+        for name in [body['name']] + body['aliases']:
+            by_norm.setdefault(T.normalize_name(name), body)
+    added = {}
+    for entry in entries:
+        parts = [p.strip() for p in re.split(r'[,;]', entry) if p.strip()]
+        norms = {T.normalize_name(p): p for p in parts}
+        bodies_here = {id(by_norm[n]): by_norm[n] for n in norms if n in by_norm}
+        if len(bodies_here) != 1:
+            continue
+        body = next(iter(bodies_here.values()))
+        known = {T.normalize_name(n) for n in [body['name']] + body['aliases']}
+        words = set(T.normalize_name(body['name']).split())
+        for norm, part in norms.items():
+            if not norm or norm in known:
+                continue
+            is_acronym = re.fullmatch(r'[\u05d0-\u05ea]+"[\u05d0-\u05ea]', part.strip()) is not None
+            shared = len(set(norm.split()) & words) / max(len(norm.split()), 1)
+            if is_acronym or (shared >= 0.6 and len(norm.split()) >= 2):
+                body['aliases'].append(part)
+                known.add(norm)
+                added.setdefault(body['name'], []).append(part)
+    return added
+
+
 def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     parser = argparse.ArgumentParser()
@@ -145,9 +181,15 @@ def main():
     parser.add_argument('--findings', nargs='*')
     parser.add_argument('--decisions', action='store_true')
     parser.add_argument('--out', default=str(E.BODIES_CSV))
+    parser.add_argument('--institution-names', help='AuditedInstitutions JSON: add aliases to reviewed bodies')
     args = parser.parse_args()
 
     existing = E.load_bodies(args.out)
+    if args.institution_names:
+        for name, aliases in institution_aliases(existing, args.institution_names).items():
+            print('ALIASES', name, '<-', ' | '.join(aliases))
+        write(args.out, existing, [])
+        return
     known = set()
     for body in existing:
         for name in [body['name']] + body['aliases']:
@@ -200,8 +242,13 @@ def main():
     batches = [todo[i:i + BATCH] for i in range(0, len(todo), BATCH)]
     with ThreadPoolExecutor(4) as pool:
         drafted = [row for rows in pool.map(decide, batches) for row in rows]
-    with open(args.out, 'w', encoding='utf8', newline='') as f:
-        w = csv.DictWriter(f, FIELDS)
+    write(args.out, existing, drafted)
+    logging.info('Wrote %d new rows to %s; usage %s', len(drafted), args.out, usage.by_model)
+
+
+def write(path, existing, drafted):
+    with open(path, 'w', encoding='utf8', newline='') as f:
+        w = csv.DictWriter(f, FIELDS, extrasaction='ignore')
         w.writeheader()
         for body in existing:
             w.writerow(dict(body, aliases='|'.join(body['aliases']),
@@ -209,7 +256,6 @@ def main():
                             budget_chapters='|'.join(body['budget_chapters'])))
         for row in drafted:
             w.writerow(row)
-    logging.info('Wrote %d new rows to %s; usage %s', len(drafted), args.out, usage.by_model)
 
 
 if __name__ == '__main__':

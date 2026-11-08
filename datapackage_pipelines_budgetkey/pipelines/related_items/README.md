@@ -78,6 +78,8 @@ names, as "משרד הרווחה/המשרד הראשי". Each row holds:
 - `entity_id`: the entity that stands for it;
 - `comptroller_codes`: its codes in the comptroller's institution list;
 - `budget_chapters`: its 4-digit budget chapters;
+- `ubiquitous`: `yes` for bodies named in passing in most documents of a kind (the Knesset, in every bill's
+  decision), which are linked only in a more specific role than `mentioned`;
 - `status`: `ok` (reviewed), `draft` or `not_a_body` (a generic phrase or a private company, left to name matching).
 
 Only `ok` rows are used. An `ok` body without an `entity_id` has no entity record (the IDF, the Ministry of Defense

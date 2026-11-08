@@ -11,10 +11,10 @@ from datapackage_pipelines_budgetkey.pipelines.related_items.linker import LINK_
 
 def flow(parameters, *_):
     steps = []
-    for path in parameters['sources']:
-        steps.append(DF.load(os.path.join(path, 'datapackage.json'),
-                             resources=['related_items', 'related_items_mentions']))
     for name, fields in (('related_items', LINK_FIELDS), ('related_items_mentions', MENTION_FIELDS)):
+        # concatenate wants the resources it merges next to each other.
+        for path in parameters['sources']:
+            steps.append(DF.load(os.path.join(path, 'datapackage.json'), resources=[name]))
         steps.append(DF.concatenate({f: [] for f, _ in fields}, target=dict(name=name, path=name + '.csv'),
                                     resources=name))
         steps.extend(DF.set_type(f, type=t, resources=name) for f, t in fields)

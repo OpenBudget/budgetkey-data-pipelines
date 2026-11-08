@@ -73,12 +73,15 @@ class EntityIndex:
                     self.fuzzy_names.append(norm)
                     self.fuzzy_entities.append(entity)
         self.bodies = []
+        self.ubiquitous = set()  # doc ids of entities that are only linked as more than a passing mention
         self.body_by_code = {}
         self.body_by_norm = defaultdict(list)
         for body in bodies if bodies is not None else load_bodies():
             entity = self.by_id.get(body.get('entity_id') or '')
             body = dict(body, entity=entity)
             self.bodies.append(body)
+            if entity and (body.get('ubiquitous') or '').strip().lower() in ('yes', 'true', '1'):
+                self.ubiquitous.add(doc_id(entity))
             for code in body['comptroller_codes']:
                 self.body_by_code[code] = body
             for name in [body['name']] + body['aliases']:

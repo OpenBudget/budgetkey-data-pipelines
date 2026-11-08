@@ -272,10 +272,19 @@ BUDGET_CODE = re.compile(
     r'(?<!\d)(\d{2})[-. ](\d{2})(?:[-. ](\d{2}))?(?:[-. ](\d{2}))?(?![\d])'
 )
 BUDGET_CONTEXT = re.compile(r'תקציב|תקנ|₪|ש"ח|אלפי|מיליון')
+# Program and line numbers written without separators, as in government decisions: "בתוכנית 062001",
+# "תוכנית פעילות ופרויקטים שמספרה 206701", "תקנה 23012061". Only 6 or 8 digits (program, line), which years and
+# most other numbers aren't.
+BUDGET_CODE_PLAIN = re.compile(
+    r'(?<![' + HEB + r'])[ובלה]{0,2}(?:תקנ(?:ה|ת)|תוכנית|תכנית|סעיף תקציבי|רכיב)'
+    r'(?:(?:\s+[' + HEB + r'"\']+){0,4}?\s+(?:שמספרה|שמספרו|מס(?:\'|")|מספר))?\s*:?\s*'
+    r'(?<![\d.,/-])(\d{6}|\d{8})(?![\d/-])(?![.,]\d)'
+)
 
 
 def budget_codes(text):
-    """Explicit budget codes ("תקנה 20-38-02-01", "תכנית תקציבית 20.38"), as budgetkey codes ('0020380201').
+    """Explicit budget codes ("תקנה 20-38-02-01", "תכנית תקציבית 20.38", "בתוכנית 062001"), as budgetkey codes
+    ('0020380201').
     Two-group codes ("20-38") count only when the sentence is about money, since they look like other numbers."""
     text = clean_quotes(text)
     out = []
@@ -287,6 +296,9 @@ def budget_codes(text):
                 continue
         code = '00' + ''.join(groups)
         out.append(dict(code=code, mention=m.group(0).strip(), start=m.start(), end=m.end()))
+    for m in BUDGET_CODE_PLAIN.finditer(text):
+        if not any(o['start'] <= m.start() < o['end'] for o in out):
+            out.append(dict(code='00' + m.group(1), mention=m.group(0).strip(), start=m.start(), end=m.end()))
     return out
 
 

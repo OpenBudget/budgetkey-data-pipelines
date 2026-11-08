@@ -297,6 +297,9 @@ class DocLinker:
                 self.mention('org', item['name'], 'no_entity', 'alias', details=dict(org_type=item['org_type']),
                              excerpt=excerpt)
                 continue
+            if target is not None and relation == 'mentioned' and E.doc_id(target) in self.t.entities.ubiquitous:
+                self.mention('org', item['name'], 'ubiquitous', method, E.doc_id(target), excerpt=excerpt)
+                continue
             if target is not None:
                 for part_id in parts:
                     self.link(E.doc_id(target), 'entities', target['name'], relation, item['name'], excerpt,
@@ -368,7 +371,7 @@ class DocLinker:
             if not p['verified']:
                 self.mention(p['kind'], p['name'], 'unverified', 'llm', details=dict(quote=p['quote']))
         vectors = RB.embed_queries(['{} - {}'.format(p['name'], p.get('ministry') or '') for p in queries])
-        budget_items, support_items = [], []
+        to_decide = []
         for p, vector in zip(queries, vectors):
             excerpt, parts = where(p)
             chapters = set(RB.chapters_of(self.bodies))
@@ -381,25 +384,23 @@ class DocLinker:
             if not chapters:
                 self.mention(p['kind'], p['name'], 'no_ministry', 'llm', details=base['details'], excerpt=excerpt)
                 continue
-            if p['kind'] == 'budget_program' and self.t.budget:
-                candidates = self.t.budget.candidates(vector, chapters, years, limit=10)
-                labels = [(RB.BudgetIndex.doc_id(i), RB.BudgetIndex.label(i, self.year_of(i, years))) for i, _ in
-                          candidates]
-                items = {RB.BudgetIndex.doc_id(i): i for i, _ in candidates}
-                if labels:
-                    budget_items.append(dict(base, candidates=labels, emit=self.budget_emitter(base, items, years)))
-                    continue
-            if p['kind'] == 'support_program' and self.t.supports:
-                candidates = self.t.supports.candidates(vector, chapters, years)
-                labels = [(RB.SupportProgramIndex.doc_id(s), RB.SupportProgramIndex.label(s)) for s, _ in
-                          candidates]
-                items = {RB.SupportProgramIndex.doc_id(s): s for s, _ in candidates}
-                if labels:
-                    support_items.append(dict(base, candidates=labels, emit=self.support_emitter(base, items)))
-                    continue
-            self.mention(p['kind'], p['name'], 'not_found', 'llm', details=base['details'], excerpt=excerpt)
-        self.decide(budget_items, L.BUDGET_GUIDANCE)
-        self.decide(support_items, L.SUPPORT_GUIDANCE)
+            # What the text calls a program may be a budget item or a support program (or neither): offer both,
+            # the kind the model gave first.
+            budget = self.t.budget.candidates(vector, chapters, years, limit=8) if self.t.budget else []
+            supports = self.t.supports.candidates(vector, chapters, years, limit=5) if self.t.supports else []
+            budget_labels = [(RB.BudgetIndex.doc_id(i),
+                              'budget item: ' + RB.BudgetIndex.label(i, self.year_of(i, years))) for i, _ in budget]
+            support_labels = [(RB.SupportProgramIndex.doc_id(s),
+                               'support program: ' + RB.SupportProgramIndex.label(s)) for s, _ in supports]
+            labels = support_labels + budget_labels if p['kind'] == 'support_program' else budget_labels + support_labels
+            if not labels:
+                self.mention(p['kind'], p['name'], 'not_found', 'llm', details=base['details'], excerpt=excerpt)
+                continue
+            budget_emit = self.budget_emitter(base, {RB.BudgetIndex.doc_id(i): i for i, _ in budget}, years)
+            support_emit = self.support_emitter(base, {RB.SupportProgramIndex.doc_id(s): s for s, _ in supports})
+            to_decide.append(dict(base, candidates=labels, emit=lambda doc_id, part_id, b=budget_emit, s=support_emit:
+                                  (s if doc_id.startswith('support_programs/') else b)(doc_id, part_id)))
+        self.decide(to_decide, L.PROGRAM_GUIDANCE)
 
     @staticmethod
     def year_of(item, years):

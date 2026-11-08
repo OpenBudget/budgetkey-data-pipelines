@@ -119,11 +119,10 @@ stands for the ministry as a whole; ministry names there are often outdated). A 
 hospital is a different record from the ministry. Municipalities: "עירית"/"עיריית" is a city, "מ. מ." a local
 council, "מ. א." a regional council.'''
 
-BUDGET_GUIDANCE = '''The records are items of the Israeli state budget (chapter > domain > program, with the code).
-Choose the item whose budget is the program meant, at the level that matches it best (a domain if the text means
-the whole domain).'''
-
-SUPPORT_GUIDANCE = '''The records are support programs (תמיכות) of government ministries, with their years.'''
+PROGRAM_GUIDANCE = '''The records are items of the Israeli state budget (chapter > domain > program, with the code)
+and support programs (תמיכות) of government ministries, with their years. Choose the budget item whose budget is
+the program meant, at the level that matches it best (a domain if the text means the whole domain), or the support
+program that is the grant or support meant.'''
 
 
 def _norm_ws(s):
