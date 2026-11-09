@@ -22,12 +22,17 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_db
 MIN_YEAR, MAX_YEAR = 1997, 2026
 
 
+def _desc(code):
+    """A sort key that orders codes descending, so the max of ranks takes the smallest code on a tie."""
+    return tuple(-ord(c) for c in code)
+
+
 class BudgetIndex:
     KIND = 'budget'
 
     def __init__(self, rows):
         self.items = []
-        self.by_code_year = {}
+        own, from_history = {}, {}
         for row in rows:
             depth = int(row['depth']) if row.get('depth') not in (None, '') else None
             if depth is None or depth < 1:
@@ -45,9 +50,17 @@ class BudgetIndex:
                 for code_title in code_titles or []:
                     code, _, title = code_title.partition(':')
                     item['years'].setdefault(int(y), (code, title))
-                    self.by_code_year.setdefault((code, int(y)), item)
-            self.by_code_year[(row['code'], year)] = item
+                    # A code can be in the history of an item and of its parent (a domain with one program): the
+                    # item of the code's own depth (same length) is the one, then the latest - as ri_site_links.
+                    rank = (len(item['code']) == len(code), year, _desc(item['code']))
+                    key = (code, int(y))
+                    if key not in from_history or rank > from_history[key][0]:
+                        from_history[key] = (rank, item)
+            own[(row['code'], year)] = item
             self.items.append(item)
+        # A (code, year) that is an item's own wins over one listed in another item's history.
+        self.by_code_year = {key: item for key, (_, item) in from_history.items()}
+        self.by_code_year.update(own)
         self._vectors = None
         self._lock = threading.Lock()
 

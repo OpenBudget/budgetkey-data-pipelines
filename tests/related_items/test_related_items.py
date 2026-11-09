@@ -179,6 +179,26 @@ def test_budget_connected_items():
     assert idx.by_code('002240', [2016]) == (None, None)
 
 
+def test_budget_history_tie_break():
+    """A code in the history of both an item and its parent goes to the item of its own depth, then the latest -
+    whichever row loads first."""
+    rows = [
+        dict(code='0020', year=2026, title='משרד החינוך', depth=1, hierarchy='[]',
+             history='{"2015": ["0020:משרד החינוך", "002041:חינוך יסודי"]}'),
+        dict(code='002041', year=2018, title='חינוך יסודי', depth=2, hierarchy='[["0020", "משרד החינוך"]]',
+             history='{"2015": ["002041:חינוך יסודי"]}'),
+        dict(code='002041', year=2023, title='חינוך יסודי', depth=2, hierarchy='[["0020", "משרד החינוך"]]',
+             history='{"2015": ["002041:חינוך יסודי"]}'),
+        dict(code='002043', year=2023, title='חינוך מיוחד', depth=2, hierarchy='[["0020", "משרד החינוך"]]',
+             history='{"2023": ["002041:חינוך יסודי"]}'),
+    ]
+    for ordered in (rows, rows[::-1]):
+        idx = RB.BudgetIndex(ordered)
+        assert RB.BudgetIndex.doc_id(idx.by_code('002041', [2015])[0]) == 'budget/002041/2023'
+        assert RB.BudgetIndex.doc_id(idx.by_code('002041', [2023])[0]) == 'budget/002041/2023'  # its own
+        assert RB.BudgetIndex.doc_id(idx.by_code('0020', [2015])[0]) == 'budget/0020/2026'
+
+
 @pytest.mark.parametrize('date,start,end,years', [
     (D(2023, 5, 1), None, None, [2022, 2023]),
     (D(2023, 5, 1), 2018, 2021, [2018, 2019, 2020, 2021]),
