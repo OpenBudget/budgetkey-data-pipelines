@@ -92,6 +92,28 @@ def test_parse_chapter_page():
     assert ms.pick(page['files'], 'תקציר', 'docx') is None
 
 
+def _files(*spec):
+    return [dict(label=label, url='https://x/Documents/' + path, ext=path.rsplit('.', 1)[1], stored_url='s/' + path)
+            for label, path in spec]
+
+
+def test_chapter_files_prefer_hebrew_over_the_english_abstract():
+    # chapter 10383: the whole Hebrew chapter is labelled 'תקציר הדוח'; the English abstract was picked before
+    row = ms.chapter_file_fields(_files(('תקציר הדוח', '2026/I/2026-I-101.docx'), ('תקציר הדוח', '2026/I/2026-I-101.pdf'),
+                                       ('Abstract', '2026/I/EN/2026-I-101-EN.docx'),
+                                       ('Abstract', '2026/I/EN/2026-I-101-EN.pdf')))
+    assert row['full_docx_url'].endswith('/2026-I-101.docx') and row['full_pdf_url'].endswith('/2026-I-101.pdf')
+    assert row['full_docx_stored'] == 's/2026/I/2026-I-101.docx'
+    # chapter 8187: only a Hebrew abstract besides the English one
+    row = ms.chapter_file_fields(_files(('תקציר', '2025/c-Taktzir.pdf'), ('Abstract', '2025/EN/c-EN.pdf')))
+    assert row['full_pdf_url'].endswith('/c-Taktzir.pdf') and row['abstract_pdf_url'].endswith('/c-Taktzir.pdf')
+    # the labelled full report wins; an English-only chapter still gets its file
+    row = ms.chapter_file_fields(_files(('Abstract', 'EN/a-EN.pdf'), ('הדוח המלא', 'a.pdf')))
+    assert row['full_pdf_url'].endswith('/a.pdf')
+    assert ms.chapter_file_fields(_files(('Report', 'EN/a-EN.pdf')))['full_pdf_url'].endswith('/a-EN.pdf')
+    assert ms.chapter_file_fields(_files(('קובץ', 'old.pdf')))['full_docx_url'] is None
+
+
 def test_parse_publication_page():
     page = ms.parse_publication_page(PUBLICATION_PAGE)
     assert page['publish_date'] == datetime.date(2026, 6, 24)

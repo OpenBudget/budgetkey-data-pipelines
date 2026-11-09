@@ -234,17 +234,43 @@ def scrape_chapter(task, publication, institutions):
         general_report_id=(inst.get('generalReportId') or None),
         files=files,
     )
-    for kind, word in (('full', 'המלא'), ('abstract', 'תקציר')):
-        for ext in ('docx', 'pdf'):
-            f = pick(files, word, ext)
-            row['%s_%s_url' % (kind, ext)] = f['url'] if f else None
-            row['%s_%s_stored' % (kind, ext)] = f['stored_url'] if f else None
-    # Old chapters label their only file differently; fall back to any pdf/docx on the page
+    row.update(chapter_file_fields(files))
+    return row
+
+
+def english_file(f):
+    """A translation: labelled in English only ('Abstract'), or under an EN folder / with an -EN suffix."""
+    label = f.get('label') or ''
+    return ((bool(re.search(r'[A-Za-z]', label)) and not re.search(r'[֐-׿]', label))
+            or '/EN/' in f['url'] or bool(re.search(r'-EN\.\w+$', f['url'], re.I)))
+
+
+def full_file(files, ext):
+    """The full chapter among `files`: labelled 'הדוח המלא', else (old chapters label their only file differently)
+    any file that isn't an abstract."""
+    return pick(files, 'המלא', ext) or next((f for f in files if f['ext'] == ext and 'תקציר' not in f['label']), None)
+
+
+def chapter_file_fields(files):
+    """{full,abstract}_{docx,pdf}_{url,stored}. Labels are unreliable (an English file labelled 'הדוח המלא', the
+    whole Hebrew chapter labelled 'תקציר הדוח'), so the full text is the first of:
+    - the Hebrew full chapter, per format;
+    - if there's none in either format, a Hebrew abstract (or a whole chapter labelled as one), but never a
+      publication-wide 'ספר התקצירים';
+    - an English file - so a chapter with Hebrew text is never analyzed from its English abstract."""
+    row = {}
     for ext in ('docx', 'pdf'):
-        if row['full_%s_url' % ext] is None:
-            others = [f for f in files if f['ext'] == ext and 'תקציר' not in f['label']]
-            if others:
-                row['full_%s_url' % ext], row['full_%s_stored' % ext] = others[0]['url'], others[0]['stored_url']
+        f = pick(files, 'תקציר', ext)
+        row['abstract_%s_url' % ext], row['abstract_%s_stored' % ext] = (f['url'], f.get('stored_url')) if f else (None, None)
+    hebrew = [f for f in files if not english_file(f)]
+    full = {ext: full_file(hebrew, ext) for ext in ('docx', 'pdf')}
+    if not any(full.values()):
+        full = {ext: next((f for f in hebrew if f['ext'] == ext and not f['label'].startswith('ספר')), None)
+                for ext in ('docx', 'pdf')}
+    if not any(full.values()):
+        full = {ext: full_file(files, ext) for ext in ('docx', 'pdf')}
+    for ext, f in full.items():
+        row['full_%s_url' % ext], row['full_%s_stored' % ext] = (f['url'], f.get('stored_url')) if f else (None, None)
     return row
 
 
