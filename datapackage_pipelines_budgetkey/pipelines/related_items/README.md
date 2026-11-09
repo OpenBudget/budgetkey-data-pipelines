@@ -9,7 +9,13 @@ stores links that can be read in both directions:
 |---|---|---|
 | `related_items/state_comptroller` | `state_comptroller/chapters` (audits + findings) | `/var/datapackages/related_items/state_comptroller` |
 | `related_items/gov_decisions` | `government_decisions` | `/var/datapackages/related_items/gov_decisions` |
-| `related_items/all` | both of the above, and `state_comptroller/issues` | tables `related_items`, `related_items_mentions`; finding links lifted to their issues (`state_comptroller_issues/{issue_id}`, method `derived:issue`) |
+| `related_items/analysis` | `analysis/pages` (the AI analysis pages) | `/var/datapackages/related_items/analysis` |
+| `related_items/all` | the three above, and `state_comptroller/issues` | tables `related_items`, `related_items_mentions`; finding links lifted to their issues (`state_comptroller_issues/{issue_id}`, method `derived:issue`) |
+
+`related_items/all` doesn't depend on `related_items/analysis`. dpp holds a pipeline while any of its dependencies
+failed or hasn't run, and the analysis pages are a separate chain, so they would hold back the comptroller and decision
+links. Instead `all` merges each source's last successful output, skipping a missing one. New analysis links are
+merged at its next run (gov_decisions runs daily).
 
 ## Tables
 
@@ -18,9 +24,9 @@ stores links that can be read in both directions:
 | Field | |
 |---|---|
 | `link_id` | hash of source doc, part and target |
-| `source_doc_id`, `source_kind`, `source_part_id` | e.g. `state_comptroller_audits/7534`, part `7534-3` (a finding); `gov_decisions/{id}` |
+| `source_doc_id`, `source_kind`, `source_part_id` | e.g. `state_comptroller_audits/7534`, part `7534-3` (a finding); `gov_decisions/{id}`; `analysis/{slug}` |
 | `source_title`, `source_date` | |
-| `target_doc_id`, `target_kind`, `target_title` | ES doc ids: `org/{kind}/{id}`, `gov_decisions/{id}`, `budget/{code}/{year}`, `support_programs/{key}`, `state_comptroller_audits/{chapter_id}`, `tenders/{type}/{publication_id}/{tender_id}` |
+| `target_doc_id`, `target_kind`, `target_title` | ES doc ids: `org/{kind}/{id}`, `gov_decisions/{id}`, `budget/{code}/{year}`, `support_programs/{key}`, `state_comptroller_audits/{chapter_id}`, `tenders/{type}/{publication_id}/{tender_id}`; from analysis pages also `contract-spending/{publisher_key}/{order_id}/{budget_code}`, `supports/{budget_code}/{year_requested}/{short_id}/{request_type}`, `activities/{kind}/{id}` |
 | `target_year`, `target_code` | budget: the year the source is about, and the item's code that year |
 | `relation` | `audited`, `subject`, `responsible`, `funded`, `contractor`, `cites` / `amends` / `cancels` (decisions), `follows_up` / `cites` (comptroller chapters), `mentioned` |
 | `mention`, `excerpt` | the text as it appears in the source, and the passage around it |
@@ -40,6 +46,7 @@ Most certain first. Only links with confidence ≥ 0.8 are emitted.
 
 | Method | Targets | Confidence |
 |---|---|---|
+| `site_link` | an explicit link to an item page on the site (analysis pages); see below | 1.0 |
 | `regex:corp_number` | a valid corporation number (check digit) of an existing entity | 0.97 |
 | `regex:decision:date` | "החלטת הממשלה מס' N מיום D": the decision N dated within 3 days of D | 0.98 |
 | `regex:decision:month` / `date_close` / `date_government` | the date is a month, or up to a month off, or only gives the government (numbers restart per government) | 0.9 / 0.93 / 0.85 |
@@ -72,6 +79,35 @@ A second LLM call per document picks among the candidates; anything but "certain
 
 Private individuals are never linked. Exemption committee (ועדת פטור) decisions, mostly land deals of private
 people, get only the deterministic extractors.
+
+## Explicit site links (analysis pages)
+
+The AI analysis pages (`analysis/pages`, see `pipelines/analysis/CONTRACT.md`) link every record they cite to its
+page on the site, so they need no extraction: `sources.analysis_documents` collects the links of each page's markdown
+into `hints['links']`, and the linker's `site_links` step resolves them with `ri_site_links.SiteLinkIndex`. Nothing
+else runs on these pages: no regex extractors and no LLM.
+
+- **URL forms:** `/i/org/<kind>/<id>` is checked against `entities` by id. `/i/<12 hex>` is a short id,
+  `md5(doc_id)[:12]`, which is what the simpledb tables' `item_url` columns hold. Since those tables drop the key
+  columns, short ids are resolved by hashing the doc ids of each kind in SQL on its own table (`budget`, `entities`
+  as `entities/{id}`, `government_decisions`, `support_programs`, `contract_spending`, `supports_by_request_year`,
+  `activities`), in batches of short ids. Any other readable doc id is resolved through its own short id.
+- **Budget:** a link names one year (`budget/{code}/{year}`, usually the latest with money). It resolves to the
+  connected item that has the (code, year) as its own or in its history, keeping that year and code. When an item and
+  its parent (a domain with one program) both list the code, the item of the code's own depth wins, and then the
+  latest one. The site's redirect isn't consistent there (it's whichever was written last).
+- **Context:** each link gets the `## section` it's in and where it sits: the sentence; the table row as
+  "header: cell · ..."; or for a list of linked items, its label, with the chart's title for a chart's caption.
+  The excerpt is "section: context", capped at about 300 characters.
+- **Relation:** an organization under "התקשרויות וספקים" is `contractor`, one under "מי אחראי" is `responsible`, and
+  everything else is `mentioned`.
+- **Dedupe:** one link per (page, target), with no part. The best placed occurrence gives the excerpt (a sentence,
+  then a table row, then a list), and the most specific relation wins. There is one mention per (page, URL), with
+  `details` {url, short_id, occurrences, sections}. A URL that resolves to nothing is kept as a mention with status
+  `not_found` (or `not_an_item` for a site URL that isn't an item page).
+
+On the 100 pages of Nov 2026, all 6,243 links (3,436 distinct URLs) resolved, into 3,777 links. Resolving them through
+the API, uncached, took about 2 minutes. Against the DB the batches are larger (2000 short ids per query).
 
 ## bodies.csv
 
@@ -117,7 +153,9 @@ link on the next run, because LLM answers are cached and only the resolution cha
 
 Write an adapter in `sources.py` that yields documents. See the docstring of `linker.py` for their shape:
 `doc_id, kind, title, date, text, llm_text, what, parts, hints`. Then add a branch in
-`link_source.documents()` and a pipeline in `pipeline-spec.yaml`.
+`link_source.documents()` (and its target indexes in `SOURCE_TARGETS` if not the default) and a pipeline in
+`pipeline-spec.yaml`. A source whose links are explicit site URLs passes them as `hints['links']` and loads only the
+`site_links` index, as the analysis pages do.
 
 Adding a target kind (people, activities, units) means an index class with `load()`, `doc_id()` and candidate
 retrieval, plus a resolver step in `DocLinker`.
@@ -130,6 +168,8 @@ export PYTHONPATH=<repo> GEMINI_API_KEY=... OPENAI_API_KEY=... AI_CACHE_DIR=<rep
 CHAPTERS=<chapters datapackage dir> OUT=out/sc python -m datapackage_pipelines_budgetkey.pipelines.related_items.link_source state_comptroller
 DECISIONS_WHERE="policy_type='החלטות ממשלה' and md5(id) < '08'" LIMIT=50 OUT=out/gd \
     python -m datapackage_pipelines_budgetkey.pipelines.related_items.link_source gov_decisions
+ANALYSIS=<pages datapackage dir, or its analysis.csv> OUT=out/an \
+    python -m datapackage_pipelines_budgetkey.pipelines.related_items.link_source analysis
 ```
 
 Without `DPP_DB_ENGINE`, target tables are downloaded once through next.obudget.org's query API and cached.
@@ -160,3 +200,15 @@ an audit and its issue.
 
 The step runs before `manage-revisions`, so a doc whose links change is re-indexed, and its output depends only on the
 table. It reads `related_items` once per run; if the table can't be read, the fields stay empty.
+
+It is on the types `budget`, `entities`, `support_programs`, `tenders`, `gov_decisions`, `analysis`,
+`state_comptroller_audits`, `state_comptroller_issues`, `contract-spending`, `supports` and `activities`. Targets of
+any other type are in the table, but their pages show no back-links. An analysis page lists its outgoing links, and
+every record it links to lists the page in `mentioned_in`.
+
+Adding the step to a type re-indexes all of its docs once. `manage-revisions` hashes every schema field of a row, so
+the three new fields change the hash of every row, including rows with no links (`[]`, `[]`, `0`). After that, a row
+changes only when its links do. Adding it to `contract-spending` (~1.05M docs), `supports` (~423k) and `activities`
+(242) costs one full re-index of each. The step itself is cheap: the links of the type are read in one query and held
+as finished entries, so a row costs a dict lookup. Measured on 1M synthetic contract rows, it added 1.8 s to a 15.9 s
+pass. Peak memory grew by 9 MB with 5k links of the type, and by 130 MB with 50k.

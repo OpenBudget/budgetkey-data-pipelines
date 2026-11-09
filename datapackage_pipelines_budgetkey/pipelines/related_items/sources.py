@@ -1,5 +1,6 @@
 """Source adapters: turn each source's rows into the linker's documents (see linker.py for the shape)."""
 import json
+import re
 
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
 from datapackage_pipelines_budgetkey.pipelines.related_items.linker import as_date
@@ -124,4 +125,148 @@ def decision_documents(rows):
                 same_government_default=is_decision,
                 exclude_decision=r['id'],
             ),
+        )
+
+
+# --- AI analysis pages --------------------------------------------------------------------------------------------
+
+# The text may hold one level of brackets: decision titles cite laws as "[נוסח חדש]".
+MD_LINK = re.compile(r'\[((?:[^\[\]]|\[[^\[\]]*\])*)\]\((https?://[^)\s]+)\)')
+TABLE_SEPARATOR = re.compile(r'^\|?\s*:?-{3,}')
+SENTENCE_END = re.compile(r'(?<=[.!?])\s+')
+EXCERPT_MAX = 300
+# Where a link sits, best context first: a sentence says why the page mentions the target, a table row shows its
+# figures, and a chart caption or the list of budget lines covered only says it's included.
+PLACES = ['prose', 'table', 'list']
+# An organization's role by the section it's linked from; anything else is `mentioned`.
+ANALYSIS_ORG_RELATIONS = {'מי אחראי': 'responsible', 'התקשרויות וספקים': 'contractor'}
+
+
+def _plain(md):
+    """Markdown inline text -> (plain text, [(start, end, text, url)] of its links in the plain text)."""
+    out, links, last = '', [], 0
+    for m in MD_LINK.finditer(md):
+        out += md[last:m.start()]
+        links.append((len(out), len(out) + len(m.group(1)), m.group(1).strip(), m.group(2)))
+        out += m.group(1)
+        last = m.end()
+    out += md[last:]
+    # Emphasis markers aren't text; dropping them would shift the link offsets, so blank them out instead.
+    return re.sub(r'[*_`]', ' ', out), links
+
+
+def _squash(s):
+    return re.sub(r'\s+', ' ', s or '').strip()
+
+
+def _cap(s, start=0, end=0):
+    """At most EXCERPT_MAX characters, around [start, end) when given."""
+    s = _squash(s)
+    if len(s) <= EXCERPT_MAX:
+        return s
+    if end:
+        return T.excerpt(s, start, end, width=(EXCERPT_MAX - (end - start)) // 2)
+    return s[:EXCERPT_MAX - 1].rsplit(' ', 1)[0] + '…'
+
+
+def _cells(line):
+    line = line.strip()
+    if line.startswith('|'):
+        line = line[1:]
+    if line.endswith('|'):
+        line = line[:-1]
+    return [c.strip() for c in line.split('|')]
+
+
+def _chart_title(block):
+    try:
+        return json.loads(block).get('title')
+    except (ValueError, AttributeError):
+        m = re.search(r'"title"\s*:\s*"([^"]*)"', block)
+        return m.group(1) if m else None
+
+
+def markdown_links(body):
+    """Every site link in a markdown page: [{url, mention, section, place, context}] in page order, where context
+    says where it sits - the sentence, the table row as "header: cell" pairs, or a list's label (with the chart's title
+    for a chart's caption)."""
+    out = []
+    section, chart, table, block = None, None, None, None
+    for line in (body or '').split('\n'):
+        stripped = line.strip()
+        if block is not None:
+            if stripped.startswith('```'):
+                chart = _chart_title('\n'.join(block)) or chart
+                block = None
+            else:
+                block.append(line)
+            continue
+        if stripped.startswith('```'):
+            block = []
+            continue
+        if stripped.startswith('#'):
+            section = _squash(stripped.lstrip('#'))
+            chart, table = None, None
+            continue
+        if stripped.startswith('|'):
+            if table is None:
+                table = [_squash(_plain(c)[0]) for c in _cells(stripped)]
+                continue
+            if TABLE_SEPARATOR.match(stripped):
+                continue
+            cells = [_plain(c) for c in _cells(stripped)]
+            row = ' · '.join('{}: {}'.format(h, _squash(c)) if h else _squash(c)
+                             for h, (c, _) in zip(table + [''] * len(cells), cells) if _squash(c))
+            for _, links in cells:
+                for _, _, text, url in links:
+                    out.append(dict(url=url, mention=text, section=section, place='table', context=_cap(row)))
+            continue
+        table = None
+        if not stripped:
+            continue
+        text, links = _plain(stripped)
+        if not links:
+            chart = None if not stripped.startswith('*') else chart
+            continue
+        if (stripped.startswith('*') and not stripped.startswith('* ')) or (len(links) > 2 and ' · ' in stripped):
+            # A list of linked items: a chart's caption, or the budget lines the page covers.
+            label = _squash(text[:links[0][0]]).rstrip(':').strip()
+            context = 'תרשים "{}" - {}'.format(chart, label) if chart and stripped.startswith('*') else label
+            for _, _, mention, url in links:
+                out.append(dict(url=url, mention=mention, section=section, place='list', context=_cap(context)))
+            chart = None
+            continue
+        bounds = [0] + [m.end() for m in SENTENCE_END.finditer(text)] + [len(text)]
+        for start, end, mention, url in links:
+            a = max(b for b in bounds if b <= start)
+            z = min([b for b in bounds if b >= end] or [len(text)])
+            out.append(dict(url=url, mention=mention, section=section, place='prose',
+                            context=_cap(text[a:z], start - a, end - a)))
+        chart = None
+    return out
+
+
+def analysis_documents(rows):
+    """One document per AI analysis page. Its links are explicit (hints['links']), so nothing else is extracted."""
+    for r in rows:
+        links = []
+        for link in markdown_links(r.get('body')):
+            if not link['mention']:
+                continue
+            relation = ANALYSIS_ORG_RELATIONS.get(link['section'], 'mentioned') \
+                if '/i/org/' in link['url'] else 'mentioned'
+            excerpt = '{}: {}'.format(link['section'], link['context']) if link['section'] else link['context']
+            links.append(dict(url=link['url'], mention=link['mention'], section=link['section'],
+                              place=link['place'], relation=relation, excerpt=excerpt))
+        # The best placed occurrence of a target first: the linker keeps the first excerpt of each target.
+        links.sort(key=lambda link: PLACES.index(link['place']))
+        yield dict(
+            doc_id='analysis/' + r['slug'],
+            kind='analysis',
+            title=r.get('title'),
+            date=as_date(r.get('generated_at')),
+            text='',
+            what='an AI analysis page ("{}")'.format(r.get('title')),
+            parts=[],
+            hints=dict(links=links, llm=False),
         )

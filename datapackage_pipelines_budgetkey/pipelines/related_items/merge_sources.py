@@ -1,12 +1,14 @@
 """dpp flow: unions the per-source outputs into the related_items and related_items_mentions tables.
 
-Parameters: sources (datapackage dirs written by link_source), out-path, and optionally issues: the State
+Parameters: sources (datapackage dirs written by link_source; a missing one is skipped, so a source that hasn't run
+or failed doesn't hold back the others), out-path, and optionally issues: the State
 Comptroller issues datapackage. With it, links made from findings are lifted to the issues the findings belong to
 (`state_comptroller_issues/{issue_id}`, method `derived:issue`), so an issue's page can list what it is about across
 all its reports.
 """
 import csv
 import hashlib
+import logging
 import os
 
 import dataflows as DF
@@ -56,10 +58,14 @@ def issue_links(rows, members, titles):
 
 def flow(parameters, *_):
     members, titles = load_issues(parameters.get('issues'))
+    sources = [p for p in parameters['sources'] if os.path.exists(os.path.join(p, 'datapackage.json'))]
+    for p in parameters['sources']:
+        if p not in sources:
+            logging.warning('merge_sources: %s has no datapackage, skipped', p)
     steps = []
     for name, fields in (('related_items', LINK_FIELDS), ('related_items_mentions', MENTION_FIELDS)):
         # concatenate wants the resources it merges next to each other.
-        for path in parameters['sources']:
+        for path in sources:
             steps.append(DF.load(os.path.join(path, 'datapackage.json'), resources=[name]))
         steps.append(DF.concatenate({f: [] for f, _ in fields}, target=dict(name=name, path=name + '.csv'),
                                     resources=name))

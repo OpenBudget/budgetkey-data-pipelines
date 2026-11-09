@@ -105,6 +105,10 @@ contract-spending:
         resource: contract-spending
         source-field: budget_code
         target-field: 'nice-budget-code'
+    - flow: add_related_items
+      parameters:
+        resource: contract-spending
+        doc-id-pattern: 'contract-spending/{publisher_key}/{order_id}/{budget_code}'
   date-range:
     type: date-range
     from-field: order_date
@@ -130,6 +134,10 @@ supports:
         source-field: budget_code
         target-field: 'nice-budget-code'
     - run: add_support_helpers
+    - flow: add_related_items
+      parameters:
+        resource: supports
+        doc-id-pattern: 'supports/{budget_code}/{year_requested}/{short_id}/{request_type}'
   # keep-history:
   #   -
   #     key: payments
@@ -324,6 +332,11 @@ analysis:
       chunk_overlap: 400
   key-fields:
     - slug
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: analysis
+        doc-id-pattern: 'analysis/{slug}'
 
 activities:
   kind: indexer
@@ -336,6 +349,11 @@ activities:
   key-fields:
     - kind
     - id
+  extra-steps:
+    - flow: add_related_items
+      parameters:
+        resource: activities
+        doc-id-pattern: 'activities/{kind}/{id}'
 
 units:
   kind: indexer

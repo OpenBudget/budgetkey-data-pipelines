@@ -115,6 +115,17 @@ having count(*) filter (where coalesce(source_title, '') = '' or source_date is 
          sql=_dangling('state_comptroller_audits', "left join state_comptroller_chapters c "
                                                    "on 'state_comptroller_audits/' || c.chapter_id = r.target_doc_id",
                        'c.chapter_id')),
+    dict(name='dangling_contracts', expect=_few(0.01), doc='dangling <= 1% of links (from analysis pages)',
+         sql=_dangling('contract-spending', "left join contract_spending c on 'contract-spending/' || c.publisher_key "
+                                            "|| '/' || c.order_id || '/' || c.budget_code = r.target_doc_id",
+                       'c.order_id')),
+    dict(name='dangling_supports', expect=_few(0.01), doc='dangling <= 1% of links (from analysis pages)',
+         sql=_dangling('supports', "left join supports_by_request_year s on 'supports/' || s.budget_code "
+                                   "|| '/' || s.year_requested || '/' || s.short_id || '/' || s.request_type "
+                                   "= r.target_doc_id", 's.short_id')),
+    dict(name='dangling_activities', expect=_few(0.01), doc='dangling <= 1% of links (from analysis pages)',
+         sql=_dangling('activities', "left join activities a on 'activities/' || a.kind || '/' || a.id "
+                                     "= r.target_doc_id", 'a.id')),
     dict(name='busiest_sources', doc='the documents with the most links (a long list may be boilerplate)',
          sql="""select source_doc_id, max(source_title) as title, count(*) as links,
   count(distinct target_doc_id) as targets

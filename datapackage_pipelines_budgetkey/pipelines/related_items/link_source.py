@@ -1,10 +1,11 @@
 """dpp flow: links one source's documents to budgetkey records (see linker.py and README.md).
 
-Parameters: source ('state_comptroller' or 'gov_decisions'), out-path.
+Parameters: source ('state_comptroller', 'gov_decisions' or 'analysis'), out-path.
 Local runs: python -m datapackage_pipelines_budgetkey.pipelines.related_items.link_source <source> with
 OUT (output dir), LIMIT, DOC_IDS (comma separated source doc ids), and for the comptroller CHAPTERS (the chapters
 datapackage dir) and REPORTS (the reports datapackage dir, for chapters citing earlier ones). Decisions are read
-from the DB (or the API, locally), with DECISIONS_WHERE as an extra SQL filter.
+from the DB (or the API, locally), with DECISIONS_WHERE as an extra SQL filter. Analysis pages are read from ANALYSIS
+(the pages datapackage dir, or a CSV of it).
 """
 import csv
 import logging
@@ -19,6 +20,7 @@ from datapackage_pipelines_budgetkey.pipelines.related_items.linker import (
     LINK_FIELDS, MENTION_FIELDS, Targets, link_documents)
 
 CHAPTERS_PATH = '/var/datapackages/state_comptroller/chapters'
+ANALYSIS_PATH = '/var/datapackages/analysis/pages'
 DECISIONS_PATH = '/var/datapackages/government_decisions'
 DECISION_COLUMNS = ['id', 'title', 'text', 'doc_published_date', 'publish_date', 'office', 'government',
                     'policy_type', 'procedure_number_str']
@@ -26,6 +28,8 @@ DECISION_COLUMNS = ['id', 'title', 'text', 'doc_published_date', 'publish_date',
 
 def load(path, resource):
     csv.field_size_limit(1 << 30)  # chapters' full texts
+    if path.endswith('.csv'):
+        return DF.Flow(DF.load(path)).results()[0][0]
     return DF.Flow(DF.load(os.path.join(path, 'datapackage.json'), resources=[resource])).results()[0][0]
 
 
@@ -41,7 +45,16 @@ def documents(source):
             rows = ri_db.query('select {} from government_decisions{}'.format(
                 ', '.join(DECISION_COLUMNS), ' where ' + where if where else ''), DECISION_COLUMNS)
         return list(S.decision_documents(rows))
+    if source == 'analysis':
+        return list(S.analysis_documents(load(os.environ.get('ANALYSIS') or ANALYSIS_PATH, 'analysis')))
     raise ValueError(source)
+
+
+DEFAULT_TARGETS = ['entities', 'decisions', 'budget', 'supports', 'tenders']
+SOURCE_TARGETS = {
+    'state_comptroller': DEFAULT_TARGETS + ['chapters'],  # earlier reports cited by the chapters
+    'analysis': ['site_links'],  # explicit links only
+}
 
 
 def select(docs):
@@ -55,10 +68,8 @@ def select(docs):
 def run(source):
     docs = select(documents(source))
     logging.info('%s: %d documents', source, len(docs))
-    kinds = ['entities', 'decisions', 'budget', 'supports', 'tenders']
-    if source == 'state_comptroller':
-        kinds.append('chapters')  # earlier reports cited by the chapters
-    targets = Targets.load(kinds)
+    kinds = SOURCE_TARGETS.get(source, DEFAULT_TARGETS)
+    targets = Targets.load(kinds, docs)
     links, mentions, usage = link_documents(docs, targets)
     logging.info('%s: %d links, %d mentions; LLM usage %s', source, len(links), len(mentions), usage.by_model)
     return links, mentions

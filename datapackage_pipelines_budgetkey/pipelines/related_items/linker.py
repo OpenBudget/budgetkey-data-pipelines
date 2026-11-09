@@ -6,7 +6,9 @@ A source supplies documents as dicts:
     parts ([{part_id, text}]: sub-items such as a report's findings, so links can point at them),
     hints: bodies ([{code, name}] known to be the document's subject, e.g. the comptroller's audited bodies),
            years ((start, end) the document is about), llm (run the LLM steps), same_government_default
-           (undated decision citations refer to the source's own government), exclude_decision (its own id)
+           (undated decision citations refer to the source's own government), exclude_decision (its own id),
+           links (explicit links to the site's item pages: [{url, mention, excerpt, relation, section, part_id}],
+           best placed first; resolved by ri_site_links, without text matching)
 
 and gets back two lists of rows: links (LINK_FIELDS) and mentions (MENTION_FIELDS) - every reference found,
 linked or not, with why, for auditing and for improving recall later.
@@ -24,6 +26,7 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_comptroll
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_entities as E
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_llm as L
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_procurement as RP
+from datapackage_pipelines_budgetkey.pipelines.related_items import ri_site_links as RS
 from datapackage_pipelines_budgetkey.pipelines.related_items import ri_text as T
 from datapackage_pipelines_budgetkey.pipelines.related_items.ri_decisions import DecisionIndex
 
@@ -67,6 +70,7 @@ ALL_KINDS = set().union(*ORG_KINDS.values()) | E.FUZZY_KINDS
 CONFIDENCE = {
     'regex:corp_number': 0.97, 'comptroller_code': 0.95, 'alias': 0.93, 'exact_name': 0.9,
     'llm_resolve': 0.85, 'regex:budget_code': 0.95, 'comptroller_ref:title': 0.95, 'comptroller_ref:title_in_year': 0.9, 'regex:tender': 0.9,
+    'site_link': 1.0,
 }
 MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 
@@ -74,7 +78,9 @@ MIN_CONFIDENCE = float(os.environ.get('RELATED_ITEMS_MIN_CONFIDENCE') or 0.8)
 class Targets:
     """The target indexes, loaded once per run."""
 
-    def __init__(self, entities=None, decisions=None, budget=None, supports=None, chapters=None, tenders=None):
+    def __init__(self, entities=None, decisions=None, budget=None, supports=None, chapters=None, tenders=None,
+                 site_links=None):
+        self.site_links = site_links
         self.entities = entities
         self.decisions = decisions
         self.budget = budget
@@ -83,8 +89,12 @@ class Targets:
         self.tenders = tenders
 
     @classmethod
-    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters', 'tenders')):
+    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters', 'tenders'), docs=()):
+        """The indexes of `kinds`. 'site_links' resolves the links the documents (`docs`) hold."""
         return cls(
+            site_links=RS.SiteLinkIndex.load(
+                link['url'] for doc in docs for link in (doc.get('hints') or {}).get('links') or []
+            ) if 'site_links' in kinds else None,
             entities=E.EntityIndex.load() if 'entities' in kinds else None,
             decisions=DecisionIndex.load() if 'decisions' in kinds else None,
             budget=RB.BudgetIndex.load() if 'budget' in kinds else None,
@@ -278,6 +288,37 @@ class DocLinker:
             else:
                 self.mention('org', name, 'not_in_bodies', None, details=dict(code=b.get('code'),
                                                                              exact=len(entities)))
+
+    def site_links(self):
+        """Explicit links to the site's item pages (hints['links']). One mention per URL, with every section it
+        appears in; the link keeps its first (best placed) excerpt and its most specific relation."""
+        links = self.hints.get('links') or []
+        if not links or not self.t.site_links:
+            return
+        by_url = {}
+        for link in links:
+            by_url.setdefault(link['url'], []).append(link)
+        for url, occurrences in by_url.items():
+            first = occurrences[0]
+            form, value = RS.parse(url)
+            details = dict(url=url, occurrences=len(occurrences),
+                           sections=list(dict.fromkeys(o['section'] for o in occurrences if o.get('section'))))
+            if form == 'short':
+                details['short_id'] = value
+            target, status = self.t.site_links.resolve(url)
+            if target is None:
+                self.mention('site_link', first['mention'], status, 'site_link', details=details,
+                             excerpt=first.get('excerpt'), part_id=first.get('part_id'))
+                continue
+            if target['doc_id'] == self.doc['doc_id']:
+                continue
+            for o in occurrences:
+                self.link(target['doc_id'], target['kind'], target['title'], o.get('relation') or 'mentioned',
+                          o['mention'], o.get('excerpt'), 'site_link', CONFIDENCE['site_link'], o.get('part_id'),
+                          target_year=target.get('year'), target_code=target.get('code'))
+            self.mention('site_link', first['mention'], 'linked', 'site_link', target['doc_id'],
+                         CONFIDENCE['site_link'], details=details, excerpt=first.get('excerpt'),
+                         part_id=first.get('part_id'))
 
     # --- LLM ---
 
@@ -499,6 +540,7 @@ class DocLinker:
                              part_id=part_id)
 
     def run(self):
+        self.site_links()
         self.corporation_numbers()
         self.decisions()
         self.budget_codes()
