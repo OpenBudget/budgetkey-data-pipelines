@@ -30,8 +30,8 @@ FIELDS = ['source_doc_id', 'source_kind', 'source_part_id', 'source_title', 'sou
 # Same order as the linker's RELATION_ORDER (kept here so indexing doesn't import the linker).
 RELATION_ORDER = ['audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible', 'funded',
                   'contractor', 'mentioned']
-KIND_ORDER = ['entities', 'gov_decisions', 'state_comptroller_audits', 'state_comptroller_issues', 'budget',
-              'support_programs', 'tenders']
+KIND_ORDER = ['entities', 'gov_decisions', 'state_comptroller_audits', 'state_comptroller_issues', 'analysis', 'budget',
+              'support_programs', 'activities', 'tenders', 'contract-spending', 'supports']
 
 RELATED_SCHEMA = dict(fields=[
     dict(name='doc_id', type='string'),

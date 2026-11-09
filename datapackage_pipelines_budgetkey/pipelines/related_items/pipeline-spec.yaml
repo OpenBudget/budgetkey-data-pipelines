@@ -26,6 +26,23 @@ gov_decisions:
         source: gov_decisions
         out-path: /var/datapackages/related_items/gov_decisions
 
+analysis:
+  dependencies:
+    - pipeline: ./analysis/pages
+  pipeline:
+    - run: add_metadata
+      parameters:
+        name: related-items-analysis
+        title: פריטים קשורים - עמודי ניתוח
+        revision: '2026-11-09'
+    - flow: link_source
+      parameters:
+        source: analysis
+        out-path: /var/datapackages/related_items/analysis
+
+# Not a dependency: related_items/analysis. dpp holds a pipeline while any dependency is unsuccessful or hasn't run,
+# so the analysis pages (a separate chain) would block the comptroller and decision links. Their links are merged
+# from the last successful output at the next run (gov_decisions runs daily); a missing output is skipped.
 all:
   dependencies:
     - pipeline: ./related_items/state_comptroller
@@ -42,5 +59,6 @@ all:
         sources:
           - /var/datapackages/related_items/state_comptroller
           - /var/datapackages/related_items/gov_decisions
+          - /var/datapackages/related_items/analysis
         issues: /var/datapackages/state_comptroller/issues
         out-path: /var/datapackages/related_items/all
