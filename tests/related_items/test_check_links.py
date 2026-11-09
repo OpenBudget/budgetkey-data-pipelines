@@ -32,8 +32,8 @@ def test_expectations():
 
 def test_run_reports_errors_and_goes_on():
     def query(sql):
-        if 'state_comptroller_chapters' in sql:
-            raise RuntimeError('relation "state_comptroller_chapters" does not exist\nLINE 1')
+        if 'state_comptroller_audits' in sql:
+            raise RuntimeError('relation "state_comptroller_audits" does not exist\nLINE 1')
         if 'row_number()' in sql:
             return [dict(source_doc_id='gov_decisions/a', source_title='s', target_doc_id='org/association/1',
                          target_title='t', relation='funded', method='alias', confidence=0.93, mention='m',
@@ -46,5 +46,5 @@ def test_run_reports_errors_and_goes_on():
     out = io.StringIO()
     C.report(results, out)
     text = out.getvalue()
-    assert 'relation "state_comptroller_chapters" does not exist' in text and 'LINE 1' not in text
+    assert 'relation "state_comptroller_audits" does not exist' in text and 'LINE 1' not in text
     assert 'https://next.obudget.org/i/org/association/1' in text and 'line break' in text

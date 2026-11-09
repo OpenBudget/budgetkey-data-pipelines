@@ -33,3 +33,19 @@ Score a sample with `python -m datapackage_pipelines_budgetkey.pipelines.related
 - `bodies_prod_review.jsonl`: an independent review of the 70 new bodies.csv rows (from the 684 prod audited-body
   codes) whose entity name isn't the body's own: 68 ok, 2 doubtful (one entity cleared, one kept). The other new rows
   were checked by hand; 26 entities were found by a direct registry search where the drafts had none.
+
+## All prod audits (2026-11-09)
+
+Every `earlier_reports` reference in the prod `state_comptroller/chapters` run (2,290 audits; 1,739 indexed audits
+cite 5,280 earlier chapters), resolved against the prod `state_comptroller/reports` (5,657 chapters):
+- 3,551 links (2,849 `comptroller_ref:title`, 289 `title_in_year`, 413 `llm_resolve`). 585 more references resolve
+  to a chapter without a page (`not_indexed`: before 2000, or a translation). The rest are `no_report` (526: local
+  government and other reports that aren't scraped), `no_title_match` (451), and the LLM's `no_match` / `ambiguous`
+  (163).
+- `chapter_refs_prod_full.csv`: 40 links per method, drawn before the `not_indexed` gate (so some targets have no
+  page; `has_page`). I checked them by hand, and an independent reviewer checked them blind (`reviewer`). Neither found
+  a wrong link: 118 y, 2 ? (both `llm_resolve`; the cited title is narrower than the chapter's).
+- `chapter_refs_year_fallback.csv`: every link added by the fallback for reports named without a code ("דוח מיוחד
+  (2019)" fuzzy-matches the title of every special report that year). There are 58, 57 y and 1 ?.
+- Without the gate, 481 of the 3,969 links pointed at chapters with no page: 461 to chapters from before 2000 and
+  19 to Hebrew-titled chapters that were analyzed from their English abstract.

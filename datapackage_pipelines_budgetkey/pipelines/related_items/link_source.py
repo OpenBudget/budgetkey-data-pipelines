@@ -66,10 +66,13 @@ def select(docs):
 
 
 def run(source):
-    docs = select(documents(source))
+    all_docs = documents(source)
+    docs = select(all_docs)
     logging.info('%s: %d documents', source, len(docs))
     kinds = SOURCE_TARGETS.get(source, DEFAULT_TARGETS)
-    targets = Targets.load(kinds, docs)
+    # The comptroller chapters that have a page: the audits documents, all of them even when a few are selected.
+    audits = {d['doc_id'] for d in all_docs if d['kind'] == 'state_comptroller_audits'} or None
+    targets = Targets.load(kinds, docs, audits)
     links, mentions, usage = link_documents(docs, targets)
     logging.info('%s: %d links, %d mentions; LLM usage %s', source, len(links), len(mentions), usage.by_model)
     return links, mentions

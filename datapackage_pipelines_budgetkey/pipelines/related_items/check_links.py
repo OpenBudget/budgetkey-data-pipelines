@@ -5,7 +5,7 @@
     python -m datapackage_pipelines_budgetkey.pipelines.related_items.check_links --sql    # print the queries
 
 Each query is a single SELECT, so it can also be pasted into /api/query. A check whose table doesn't exist yet
-(state_comptroller_chapters before the first chapters run) reports an error and the rest go on. Exits 1 if a check
+(state_comptroller_audits before the first chapters run) reports an error and the rest go on. Exits 1 if a check
 fails, or if the table can't be read at all.
 """
 import argparse
@@ -48,6 +48,11 @@ def _totals(rows):
     if not r.get('links'):
         return 'fail'
     return 'ok' if float(r['min_confidence']) >= MIN_CONFIDENCE and r['versions'] == 1 else 'warn'
+
+
+# The audits that have a page (state_comptroller/es_documents.py's indexed_audit).
+INDEXED_AUDITS = ("select chapter_id from state_comptroller_audits where language = 'he' and analysis_status in "
+                  "('ok', 'low-verification', 'partial-text', 'no-findings') and coalesce(text_md, '') <> ''")
 
 
 def _dangling(kind, join, key):
@@ -111,10 +116,15 @@ having count(*) filter (where coalesce(source_title, '') = '' or source_date is 
     dict(name='dangling_tenders', expect=_few(0.01), doc='dangling <= 1% of links',
          sql=_dangling('tenders', "left join procurement_tenders_processed t on 'tenders/' || t.tender_type || '/' "
                                   "|| t.publication_id || '/' || t.tender_id = r.target_doc_id", 't.tender_id')),
-    dict(name='dangling_audits', expect=_few(0.01), doc='dangling <= 1% of links (cited earlier chapters)',
-         sql=_dangling('state_comptroller_audits', "left join state_comptroller_chapters c "
-                                                   "on 'state_comptroller_audits/' || c.chapter_id = r.target_doc_id",
-                       'c.chapter_id')),
+    dict(name='dangling_audits', expect=_few(0.01),
+         doc='dangling <= 1% of links (cited earlier chapters without a page: not an indexed audit)',
+         sql=_dangling('state_comptroller_audits', "left join ({}) c "
+                                                   "on 'state_comptroller_audits/' || c.chapter_id = r.target_doc_id"
+                       .format(INDEXED_AUDITS), 'c.chapter_id')),
+    dict(name='unindexed_audit_sources', expect=_zero('n'), doc='n = 0: every audit source is an indexed audit',
+         sql="""select count(*) as n, min(r.source_doc_id) as example
+from related_items r left join ({}) c on 'state_comptroller_audits/' || c.chapter_id = r.source_doc_id
+where r.source_kind = 'state_comptroller_audits' and c.chapter_id is null""".format(INDEXED_AUDITS)),
     dict(name='dangling_contracts', expect=_few(0.01), doc='dangling <= 1% of links (from analysis pages)',
          sql=_dangling('contract-spending', "left join contract_spending c on 'contract-spending/' || c.publisher_key "
                                             "|| '/' || c.order_id || '/' || c.budget_code = r.target_doc_id",
