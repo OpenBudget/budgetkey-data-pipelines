@@ -6,7 +6,9 @@ Comptroller chapters name earlier reports as (report, year, title) - "דוח ש�
   המקומי לשנת 2014");
 - the chapter in it: by title similarity. A clear best match is linked; close calls go to the LLM; a report with a
   single chapter is that chapter when the titles agree.
-Only chapters published before the citing one are candidates.
+Only chapters published before the citing one are candidates. A reference is resolved among all the reports' chapters
+(so it isn't matched to a similar one instead), but linked only if its chapter has a page (an indexed audit: from
+2000 on, in Hebrew); otherwise it stays a mention (`not_indexed`) that names the chapter.
 """
 import csv
 import datetime
@@ -61,7 +63,9 @@ def _date(s):
 class ChapterIndex:
     KIND = 'state_comptroller_audits'
 
-    def __init__(self, chapters, publications):
+    def __init__(self, chapters, publications, indexed=None):
+        """`indexed`: the doc ids of the chapters that have a page (None: all of them)."""
+        self.indexed = None if indexed is None else set(indexed)
         pubs = {str(p['pub_id']): p for p in publications}
         self.chapters = []
         self.by_code = defaultdict(list)
@@ -81,18 +85,21 @@ class ChapterIndex:
             self.publications[pub_id] = dict(title=cs[0]['publication_title'], date=cs[0]['date'], chapters=cs)
 
     @classmethod
-    def load(cls, path=None):
+    def load(cls, path=None, indexed=None):
         path = path or os.environ.get('REPORTS') or REPORTS_PATH
         csv.field_size_limit(1 << 30)
 
         def rows(name):
             with open(os.path.join(path, name + '.csv'), encoding='utf8') as f:
                 return list(csv.DictReader(f))
-        return cls(rows('chapters'), rows('publications'))
+        return cls(rows('chapters'), rows('publications'), indexed)
 
     @staticmethod
     def doc_id(entry):
         return 'state_comptroller_audits/' + entry['id']
+
+    def has_page(self, doc_id):
+        return self.indexed is None or doc_id in self.indexed
 
     @staticmethod
     def label(entry):
@@ -161,6 +168,12 @@ class ChapterIndex:
         best, score = scored[0]
         if self._clear(scored):
             return best, 0.95, 'title'
+        if not report_code(ref.get('report')):
+            # A report named without its code may be named loosely - "דוח מיוחד (2019)" matches the title of every
+            # special report that year: a clear match among the year's chapters, before asking the LLM.
+            in_year = self._scored(title, self.year_chapters(ref.get('year'), before))
+            if in_year and self._clear(in_year):
+                return in_year[0][0], 0.95, 'title_in_year'
         candidates = [(c, s) for c, s in scored[:6] if s >= CANDIDATE]
         if not candidates:
             return None, 0, 'no_title_match'

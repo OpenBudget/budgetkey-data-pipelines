@@ -89,8 +89,10 @@ class Targets:
         self.tenders = tenders
 
     @classmethod
-    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters', 'tenders'), docs=()):
-        """The indexes of `kinds`. 'site_links' resolves the links the documents (`docs`) hold."""
+    def load(cls, kinds=('entities', 'decisions', 'budget', 'supports', 'chapters', 'tenders'), docs=(),
+             audits=None):
+        """The indexes of `kinds`. 'site_links' resolves the links the documents (`docs`) hold; `audits` are the
+        doc ids of the comptroller chapters that have a page, the only ones 'chapters' links to."""
         return cls(
             site_links=RS.SiteLinkIndex.load(
                 link['url'] for doc in docs for link in (doc.get('hints') or {}).get('links') or []
@@ -99,7 +101,7 @@ class Targets:
             decisions=DecisionIndex.load() if 'decisions' in kinds else None,
             budget=RB.BudgetIndex.load() if 'budget' in kinds else None,
             supports=RB.SupportProgramIndex.load() if 'supports' in kinds else None,
-            chapters=RC.ChapterIndex.load() if 'chapters' in kinds else None,
+            chapters=RC.ChapterIndex.load(indexed=audits) if 'chapters' in kinds else None,
             tenders=RP.TenderIndex.load() if 'tenders' in kinds else None,
         )
 
@@ -492,6 +494,10 @@ class DocLinker:
                 target = RC.ChapterIndex.doc_id(entry)
                 if target == self.doc['doc_id']:
                     continue
+                if not self.t.chapters.has_page(target):
+                    self.mention('comptroller_report', mention, 'not_indexed', 'comptroller_ref:' + how, target,
+                                 details=details)
+                    continue
                 method = 'comptroller_ref:' + how
                 self.link(target, 'state_comptroller_audits', entry['title'], relation, mention, None, method,
                           CONFIDENCE[method])
@@ -499,16 +505,27 @@ class DocLinker:
                              details=details)
             elif how == 'llm':
                 entries = {RC.ChapterIndex.doc_id(c): c for c, _ in result}
+                if not any(self.t.chapters.has_page(d) for d in entries):
+                    self.mention('comptroller_report', mention, 'not_indexed', 'comptroller_ref', details=dict(
+                        details, candidates=list(entries)))
+                    continue
+                # All candidates go to the LLM, so that it can't choose a similar chapter instead of one without
+                # a page; that choice is then a mention, not a link.
                 to_decide.append(dict(
                     kind='comptroller_report', mention=mention, excerpt=None, parts=[None], context=mention,
                     hint=ref.get('relation'), details=details,
                     candidates=[(RC.ChapterIndex.doc_id(c), RC.ChapterIndex.label(c)) for c, _ in result],
                     emit=lambda doc_id, part_id, entries=entries, mention=mention, relation=relation: self.link(
                         doc_id, 'state_comptroller_audits', entries[doc_id]['title'], relation, mention, None,
-                        'llm_resolve', CONFIDENCE['llm_resolve'], part_id)))
+                        'llm_resolve', CONFIDENCE['llm_resolve'], part_id) if self.t.chapters.has_page(doc_id)
+                    else None))
             else:
                 self.mention('comptroller_report', mention, how, 'comptroller_ref', details=details)
+        decided = len(self.mentions)
         self.decide(to_decide, L.COMPTROLLER_GUIDANCE)
+        for m in self.mentions[decided:]:
+            if m['status'] == 'linked' and not self.t.chapters.has_page(m['target_doc_id']):
+                m['status'] = 'not_indexed'
 
     def tenders(self):
         if not self.t.tenders or not self.t.entities:

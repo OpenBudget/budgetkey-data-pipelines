@@ -306,8 +306,11 @@ def test_linker_comptroller_bodies_and_llm(monkeypatch):
 
 def test_comptroller_documents_skip_translations():
     audits = [dict(chapter_id=1, title='Audit', language='en', analysis_status='not-hebrew'),
-              dict(chapter_id=2, title='ביקורת', language='he', publish_date='2020-01-01')]
-    assert [d['doc_id'] for d in S.comptroller_documents(audits, [])] == ['state_comptroller_audits/2']
+              dict(chapter_id=2, title='ביקורת', language='he', publish_date='2020-01-01'),
+              dict(chapter_id=3, title='ביקורת', language='', analysis_status='no-file'),
+              dict(chapter_id=4, title='ביקורת', language='he', analysis_status='partial-text', text_md='טקסט')]
+    assert [d['doc_id'] for d in S.comptroller_documents(audits, [])] == [
+        'state_comptroller_audits/2', 'state_comptroller_audits/4']
 
 
 def test_decision_documents():
@@ -405,6 +408,10 @@ def test_chapter_resolution_without_a_report_code():
     ref = dict(report='דוח מבקר המדינה', year=2016, title='הקמת מערך המצלמות האלקטרוניות ואכיפת חוקי תעבורה')
     entry, confidence, how = idx.resolve(ref, D(2017, 5, 16))
     assert entry['id'] == '3' and how == 'title_in_year'
+    # A report named loosely matches a publication's title, but its chapter is in another one that year.
+    ref = dict(report='הקמת מערך', year=2016, title='אכיפת חוקי התעבורה בכבישים הבין-עירוניים')
+    entry, confidence, how = idx.resolve(ref, D(2017, 5, 16))
+    assert entry['id'] == '4' and how == 'title_in_year'
     # ... but not a vague one, nor one published after the citing chapter.
     assert idx.resolve(dict(report='דוח מבקר המדינה', year=2016, title='אכיפת חוקי תעבורה'),
                        D(2017, 5, 16))[2] == 'no_report'
@@ -425,6 +432,41 @@ def test_linker_earlier_reports():
     assert [(l['target_doc_id'], l['relation'], l['method']) for l in links] == [
         ('state_comptroller_audits/10', 'follows_up', 'comptroller_ref:title')]
     assert any(m['status'] == 'no_report' and m['details']['year'] == 2003 for m in mentions)
+
+
+def test_earlier_reports_link_only_chapters_with_a_page(monkeypatch):
+    """A cited chapter that isn't an indexed audit (before 2000, a translation) is a mention, not a link - also when
+    the LLM chooses it over a similar chapter that has a page."""
+    asked = []
+
+    def decide(what, title, date, guidance, items, usage):
+        asked.append(items)
+        return {n: ('state_comptroller_audits/12', 'certain') for n in range(len(items))}
+
+    monkeypatch.setattr(L, 'decide', decide)
+    audits = [dict(chapter_id=7824, title='זיהום אוויר', publish_date='2024-03-19', language='he', earlier_reports=[
+        dict(report='דוח שנתי 67ב', year=2017, title='זיהומי מים בין מדינת ישראל לשטחי יהודה, שומרון ורצועת עזה'),
+        dict(report='דוח שנתי 67ב', year=2017, title='ילדים ובני נוער בסיכון')])]
+    doc = next(S.comptroller_documents(audits, []))
+    doc['hints']['llm'] = False
+    t = targets()
+    t.chapters = chapters()
+    t.chapters.indexed = {'state_comptroller_audits/11', 'state_comptroller_audits/30'}
+    links, mentions = LK.DocLinker(doc, t, None).run()
+    assert links == []
+    assert {(m['target_doc_id'], m['status'], m['method']) for m in mentions} == {
+        ('state_comptroller_audits/10', 'not_indexed', 'comptroller_ref:title'),
+        ('state_comptroller_audits/12', 'not_indexed', 'llm_resolve')}
+    # The LLM saw both similar chapters; with a page, its choice is linked.
+    assert {c for c, _ in asked[0][0]['candidates']} == {'state_comptroller_audits/11', 'state_comptroller_audits/12'}
+    t.chapters.indexed.add('state_comptroller_audits/12')
+    links, _ = LK.DocLinker(doc, t, None).run()
+    assert [(l['target_doc_id'], l['method']) for l in links] == [('state_comptroller_audits/12', 'llm_resolve')]
+    # No candidate with a page: not asked at all.
+    t.chapters.indexed = {'state_comptroller_audits/30'}
+    asked.clear()
+    _, mentions = LK.DocLinker(doc, t, None).run()
+    assert not asked and {m['status'] for m in mentions} == {'not_indexed'}
 
 
 def test_earlier_reports_from_the_older_schema():

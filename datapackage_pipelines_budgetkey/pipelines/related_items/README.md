@@ -54,6 +54,11 @@ Most certain first. Only links with confidence ≥ 0.8 are emitted.
 | `regex:decision:same_document` | an undated citation of a number already cited with a date in the same document | as that one |
 | `comptroller_ref:title` | an earlier comptroller chapter the audit cites (`earlier_reports`): the report by code, or by publication title and year; the chapter by a clear title match (else `llm_resolve`) | 0.95 |
 | `comptroller_ref:title_in_year` | the same, when the report can't be told ("דוח מבקר המדינה (2016)", a report on one subject): a clear title match among all chapters within a year of the cited one | 0.9 |
+
+A cited chapter is linked only if it has a page: an indexed audit (Hebrew, from 2000 on). Older chapters, the
+reports' translations and chapters that weren't analyzed are still resolved, and kept as mentions with status
+`not_indexed` and the chapter's doc id, ready to link if they get indexed. The source documents are the indexed audits
+too.
 | `regex:tender` | a tender number whose publisher is a body the document is about, or is named next to it (tender publishers are bodies.csv aliases) | 0.9 |
 | `regex:budget_code` | "תקנה 20-38-02-01": the item with that code in the source's years | 0.95 |
 | `comptroller_code` | the comptroller's audited institutions, via `bodies.csv` | 0.95 |

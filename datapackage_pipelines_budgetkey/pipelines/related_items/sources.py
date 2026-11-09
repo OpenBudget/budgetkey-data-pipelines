@@ -24,6 +24,16 @@ def _int(v):
 
 # --- State Comptroller ---------------------------------------------------------------------------------------
 
+# The audits the indexer makes documents of (state_comptroller/es_documents.py: Hebrew, analyzed). A link from or to
+# any other chapter would point at a page that doesn't exist.
+INDEXED_STATUSES = ('ok', 'low-verification', 'partial-text', 'no-findings')
+
+
+def indexed_audit(a):
+    status = a.get('analysis_status')
+    return (a.get('language') or 'he') == 'he' and (not status or status in INDEXED_STATUSES)
+
+
 def comptroller_finding_text(f):
     lines = ['[{}] {}'.format(f['finding_id'], f.get('title') or '')]
     for key, label in (('description', 'ממצא'), ('recommendation', 'המלצה'), ('excerpt', 'מתוך הדוח')):
@@ -46,12 +56,12 @@ def earlier_reports(a):
 
 
 def comptroller_documents(audits, findings):
-    """One document per Hebrew audit chapter; its findings are the parts."""
+    """One document per indexed (Hebrew, analyzed) audit chapter; its findings are the parts."""
     by_chapter = {}
     for f in findings:
         by_chapter.setdefault(str(f['chapter_id']), []).append(f)
     for a in audits:
-        if (a.get('language') or 'he') != 'he' or a.get('analysis_status') == 'not-hebrew':
+        if not indexed_audit(a):
             continue
         chapter_id = str(a['chapter_id'])
         fs = sorted(by_chapter.get(chapter_id, []), key=lambda f: _int(f.get('seq')) or 0)
