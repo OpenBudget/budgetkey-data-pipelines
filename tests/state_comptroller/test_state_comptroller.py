@@ -441,6 +441,37 @@ def test_transcribe_falls_back_to_an_image(monkeypatch):
     assert mimes == ['application/pdf', 'application/pdf', 'image/png']
 
 
+def test_transcribe_survives_pages_poppler_cant_cut(monkeypatch):
+    def pdf_slice(path, first, last, dest):
+        if last > 2:  # a 2-page file
+            raise RuntimeError('pdfseparate returned non-zero exit status 99')
+        with open(dest, 'w') as f:
+            f.write('%d-%d' % (first, last))
+        return dest
+
+    def page_image(path, page, tmp):
+        if page > 2:
+            raise RuntimeError('pdftoppm failed')
+        return b'png'
+
+    def complete_with_file(prompt, data, mime, **kwargs):
+        first, last = (1, 1) if mime == 'image/png' else map(int, data.decode().split('-'))
+        return False, dict(pages=[dict(page=i + 1, markdown='עמוד %d' % n) for i, n in enumerate(range(first, last + 1))])
+    monkeypatch.setattr(ca.sc, 'pdf_slice', pdf_slice)
+    monkeypatch.setattr(ca.sc, 'page_image', page_image)
+    monkeypatch.setattr(ca.llm, 'complete_with_file', complete_with_file)
+    assert ca.transcribe('x.pdf', [1, 2, 3]) == {1: 'עמוד 1', 2: 'עמוד 2'}
+
+
+def test_split_pages_drops_the_piece_after_the_last_form_feed():
+    assert ct.split_pages('one\ftwo\f') == ['one', 'two']
+    assert ct.split_pages('one\f\ftwo\f') == ['one', '', 'two']  # a blank page is still a page
+    assert ct.split_pages('no form feeds') == ['no form feeds']
+    assert ct.split_pages('') == ['']
+    # a 2-page scanned map: both pages textless, and no phantom page 3
+    assert ct.scanned_pages(ct.split_pages('\n\f \f')) == [1, 2]
+
+
 def test_failed_window_is_read_page_by_page(monkeypatch):
     def pdf_slice(path, first, last, dest):
         with open(dest, 'w') as f:

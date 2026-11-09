@@ -76,16 +76,23 @@ def transcribe(pdf_path, page_numbers):
     with tempfile.TemporaryDirectory() as tmp:
         while runs:
             run = runs.pop(0)
-            path = sc.pdf_slice(pdf_path, run[0], run[-1], os.path.join(tmp, 'slice.pdf'))
-            with open(path, 'rb') as f:
-                data = f.read()
-            out = None
             # Gemini now and then returns an empty response, and blocks some PDF pages outright
             # (block_reason OTHER) while reading the same page fine as an image: try again, then in halves,
-            # then a single page as an image
-            attempts = [('application/pdf', data)] * 2
+            # then a single page as an image. A page poppler can't cut out or render is left untranscribed
+            # (and so is reported missing) rather than failing the whole chapter.
+            try:
+                path = sc.pdf_slice(pdf_path, run[0], run[-1], os.path.join(tmp, 'slice.pdf'))
+                with open(path, 'rb') as f:
+                    attempts = [('application/pdf', f.read())] * 2
+            except Exception as e:
+                logging.warning('Cutting out pages %s-%s failed (%s)', run[0], run[-1], e)
+                attempts = []
             if len(run) == 1:
-                attempts.append(('image/png', sc.page_image(pdf_path, run[0], tmp)))
+                try:
+                    attempts.append(('image/png', sc.page_image(pdf_path, run[0], tmp)))
+                except Exception as e:
+                    logging.warning('Rendering page %s failed (%s)', run[0], e)
+            out = None
             for mime_type, payload in attempts:
                 try:
                     _, out = llm.complete_with_file(

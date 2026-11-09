@@ -47,7 +47,14 @@ def pdf_pages(path):
     out = subprocess.run(['pdftotext', '-enc', 'UTF-8', path, '-'], capture_output=True, timeout=600)
     if out.returncode != 0:
         raise RuntimeError('pdftotext failed: %s' % out.stderr.decode('utf-8', 'replace')[:500])
-    return [sc.clean_text(p) for p in out.stdout.decode('utf-8', 'replace').split('\f')]
+    return [sc.clean_text(p) for p in split_pages(out.stdout.decode('utf-8', 'replace'))]
+
+
+def split_pages(text):
+    """pdftotext's output split into pages. It ends every page with a form feed, so the piece after the last one is
+    not a page (counting it made a 2-page scanned map ask for a page 3, and pdfseparate failed)."""
+    pages = text.split('\f')
+    return pages[:-1] if len(pages) > 1 and not pages[-1].strip() else pages
 
 
 def page_count(path):

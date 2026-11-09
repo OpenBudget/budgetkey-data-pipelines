@@ -7,6 +7,8 @@ import json
 import threading
 import time
 
+import httpx
+
 from google import genai
 from google.genai import types
 
@@ -119,7 +121,8 @@ class PromptCache:
 
 
 def generate(contents, config, model=None, retries=4):
-    """Raw generate_content with retry on transient errors (429/5xx)."""
+    """Raw generate_content with retry on transient errors (429/5xx, and dropped connections: one
+    httpx.ReadError used to fail a whole multi-hour run)."""
     delay = 5
     for attempt in range(retries + 1):
         try:
@@ -128,8 +131,12 @@ def generate(contents, config, model=None, retries=4):
             if attempt == retries or e.code not in (429, 500, 502, 503, 504):
                 raise
             print('GEMINI ERROR {}, retrying in {}s'.format(e.code, delay))
-            time.sleep(delay)
-            delay *= 2
+        except httpx.TransportError as e:
+            if attempt == retries:
+                raise
+            print('GEMINI CONNECTION ERROR {!r}, retrying in {}s'.format(e, delay))
+        time.sleep(delay)
+        delay *= 2
 
 
 def complete(text, structured=False, schema=None, model=None, temperature=None, use_cache=True, usage=None,
