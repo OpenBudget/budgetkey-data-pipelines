@@ -370,28 +370,62 @@ class UnionFind:
             self.parent[max(ra, rb)] = min(ra, rb)
 
 
+class IssueGroups(UnionFind):
+    """Union-find in which a group holds at most one finding per audit: a link that would put two findings of the
+    same chapter in one issue is refused. Without it, one response row or follow-up finding mapped to several findings
+    of an audit glues them together, and chains of those build issues of dozens of findings across many audits."""
+
+    def __init__(self):
+        super().__init__()
+        self.chapters = {}
+
+    def add(self, node, chapter_id=None):
+        root = self.find(node)
+        self.chapters.setdefault(root, set())
+        if chapter_id is not None:
+            self.chapters[root].add(chapter_id)
+
+    def union(self, a, b):
+        ra, rb = self.find(a), self.find(b)
+        if ra == rb:
+            return True
+        ca, cb = self.chapters.get(ra, set()), self.chapters.get(rb, set())
+        if ca & cb:
+            return False
+        super().union(a, b)
+        root = self.find(a)
+        self.chapters[root] = ca | cb
+        self.chapters.pop(rb if root == ra else ra, None)
+        return True
+
+
 STATUS_ORDER = {'rectified': 0, 'mostly_rectified': 1, 'partially_rectified': 2, 'in_progress': 3,
                 'not_rectified': 4, 'disputed': 4}
 
 
 def build_issues(findings, responses, links):
-    """Groups linked findings and response items into issues. Only components with a finding are issues."""
-    uf = UnionFind()
+    """Groups linked findings and response items into issues, at most one finding per audit (see IssueGroups); the
+    follow-up links, which say a finding was audited again, are applied before the response links. Only components
+    with a finding are issues."""
+    uf = IssueGroups()
     nodes = {}
     for f in findings:
         key = ('finding', f['finding_id'])
         nodes[key] = f
-        uf.find(key)
+        uf.add(key, f.get('chapter_id'))
     response_by_id = {r['response_id']: r for r in responses}
-    for link in links:
-        if link['level'] != 'item':
-            continue
+    refused = defaultdict(int)
+    item_links = [link for link in links if link['level'] == 'item']
+    item_links.sort(key=lambda link: link.get('kind') != 'follow_up')
+    for link in item_links:
         a, b = (link['from_type'], link['from_id']), (link['to_type'], link['to_id'])
         for node in (a, b):
             if node[0] == 'response' and node not in nodes and node[1] in response_by_id:
                 nodes[node] = response_by_id[node[1]]
-        if a in nodes and b in nodes:
-            uf.union(a, b)
+                uf.add(node)
+        if a in nodes and b in nodes and not uf.union(a, b):
+            refused[link.get('kind')] += 1
+    logging.info('Item links not applied (they would join two findings of one audit): %s', dict(refused))
     groups = defaultdict(list)
     for node in nodes:
         groups[uf.find(node)].append(node)

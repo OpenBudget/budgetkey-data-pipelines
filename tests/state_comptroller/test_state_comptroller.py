@@ -357,6 +357,29 @@ def test_build_issues_follows_a_finding_through_response_and_follow_up():
     assert len([m for m in members if m['issue_id'] == '100-1']) == 3
 
 
+def test_build_issues_keeps_one_finding_per_audit():
+    def finding(fid, year):
+        return dict(finding_id=fid, chapter_id=int(fid.split('-')[0]), publish_date=datetime.date(year, 1, 1),
+                    title=fid, description=fid, responsible_bodies=[], severity='low', followup_status=None)
+    findings = [finding('100-1', 2015), finding('100-2', 2015), finding('200-1', 2019), finding('200-2', 2019)]
+    responses = [dict(response_id='r1', publish_date=datetime.date(2015, 6, 1), title='r', responses=[]),
+                 dict(response_id='r2', publish_date=datetime.date(2019, 6, 1), title='r', responses=[])]
+    links = [
+        # a response row mapped to two findings of audit 100: it joins the first, not both
+        dict(level='item', kind='response', from_type='response', from_id='r1', to_type='finding', to_id='100-1'),
+        dict(level='item', kind='response', from_type='response', from_id='r1', to_type='finding', to_id='100-2'),
+        # the follow-up links go first, so 200-2 -> 100-2 holds although r2 would join 200-2 to 100-1's issue
+        dict(level='item', kind='response', from_type='response', from_id='r2', to_type='finding', to_id='200-2'),
+        dict(level='item', kind='response', from_type='response', from_id='r2', to_type='finding', to_id='100-1'),
+        dict(level='item', kind='follow_up', from_type='finding', from_id='200-2', to_type='finding', to_id='100-2'),
+        dict(level='item', kind='follow_up', from_type='finding', from_id='200-1', to_type='finding', to_id='100-1'),
+    ]
+    issues, members = il.build_issues(findings, responses, links)
+    groups = {i['issue_id']: sorted(m['member_id'] for m in members if m['issue_id'] == i['issue_id']) for i in issues}
+    assert groups == {'100-1': ['100-1', '200-1', 'r1'], '100-2': ['100-2', '200-2', 'r2']}
+    assert all(i['n_audits'] == 2 for i in issues)
+
+
 def test_pace_spaces_requests_per_host(monkeypatch):
     import time
     from concurrent.futures import ThreadPoolExecutor
