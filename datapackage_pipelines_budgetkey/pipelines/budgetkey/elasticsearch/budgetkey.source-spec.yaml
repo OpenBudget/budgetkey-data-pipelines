@@ -406,7 +406,8 @@ muni_tenders:
 
 state_comptroller_audits:
   kind: indexer
-  revision: 1
+  # 2: the first run's mirror rows were marked indexed though the run failed before ES
+  revision: 2
   dependent_pipeline: ./state_comptroller/documents
   source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
   page-title-pattern: 'דוח מבקר המדינה - {title}'
@@ -427,6 +428,10 @@ state_comptroller_audits:
     from-field: publish_date
     to-field: publish_date
   extra-steps:
+    # The documents datapackage holds both comptroller types, and load_big's `resource` doesn't limit the load
+    - run: drop_resource
+      parameters:
+        resource: state_comptroller_issues
     - flow: add_related_items
       parameters:
         resource: state_comptroller_audits
@@ -451,6 +456,10 @@ state_comptroller_issues:
     from-field: first_reported
     to-field: last_seen
   extra-steps:
+    # The documents datapackage holds both comptroller types, and load_big's `resource` doesn't limit the load
+    - run: drop_resource
+      parameters:
+        resource: state_comptroller_audits
     - flow: add_related_items
       parameters:
         resource: state_comptroller_issues
