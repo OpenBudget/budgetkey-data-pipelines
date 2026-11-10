@@ -495,6 +495,18 @@ def test_issue_links():
                                                                                   'derived:issue')
 
 
+def test_load_issues_skips_single_member_issues(tmp_path):
+    from datapackage_pipelines_budgetkey.pipelines.related_items import merge_sources as MS
+    (tmp_path / 'issue_members.csv').write_text(
+        'issue_id,member_type,member_id,date\n'
+        '7-1,finding,7-1,\n7-1,finding,9-4,\n'      # two audits: an issue page
+        '8-2,finding,8-2,\n8-2,response,r/1,\n'     # a finding and a response: an issue page
+        '8-3,finding,8-3,\n', encoding='utf8')       # a single finding: no page
+    (tmp_path / 'issues.csv').write_text('issue_id,title\n7-1,a\n8-2,b\n8-3,c\n', encoding='utf8')
+    members, titles = MS.load_issues(str(tmp_path))
+    assert members == {'7-1': '7-1', '9-4': '7-1', '8-2': '8-2'}
+
+
 # --- tenders -------------------------------------------------------------------------------------------------------
 
 def test_tender_resolution_needs_the_publisher():

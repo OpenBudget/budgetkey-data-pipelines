@@ -6,6 +6,7 @@ Comptroller issues datapackage. With it, links made from findings are lifted to 
 (`state_comptroller_issues/{issue_id}`, method `derived:issue`), so an issue's page can list what it is about across
 all its reports.
 """
+import collections
 import csv
 import hashlib
 import logging
@@ -18,15 +19,20 @@ from datapackage_pipelines_budgetkey.pipelines.related_items.linker import (
 
 
 def load_issues(path):
-    """({finding_id: issue_id}, {issue_id: title}) from the issues datapackage, or empty maps."""
+    """({finding_id: issue_id}, {issue_id: title}) from the issues datapackage, or empty maps. Only issues with more
+    than one member: an issue of a single finding has no page (it's already a finding of its audit's page), so links
+    aren't lifted to it."""
     members, titles = {}, {}
     if not path or not os.path.exists(os.path.join(path, 'issue_members.csv')):
         return members, titles
     csv.field_size_limit(1 << 30)
+    findings, sizes = {}, collections.Counter()
     with open(os.path.join(path, 'issue_members.csv'), encoding='utf8') as f:
         for r in csv.DictReader(f):
+            sizes[r['issue_id']] += 1
             if r['member_type'] == 'finding':
-                members[r['member_id']] = r['issue_id']
+                findings[r['member_id']] = r['issue_id']
+    members = {finding: issue for finding, issue in findings.items() if sizes[issue] > 1}
     with open(os.path.join(path, 'issues.csv'), encoding='utf8') as f:
         for r in csv.DictReader(f):
             titles[r['issue_id']] = r['title']
