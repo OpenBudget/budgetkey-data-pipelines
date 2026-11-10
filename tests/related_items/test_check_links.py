@@ -1,6 +1,8 @@
 """check_links: its queries are single SELECTs the query API accepts; expectations and the report."""
 import io
 import re
+import threading
+import time
 
 from datapackage_pipelines_budgetkey.pipelines.related_items import check_links as C
 
@@ -48,3 +50,20 @@ def test_run_reports_errors_and_goes_on():
     text = out.getvalue()
     assert 'relation "state_comptroller_audits" does not exist' in text and 'LINE 1' not in text
     assert 'https://next.obudget.org/i/org/association/1' in text and 'line break' in text
+
+
+def test_api_query_gives_up_on_a_stalled_request(monkeypatch):
+    calls = []
+
+    def stalled(req, timeout=None):
+        calls.append(timeout)
+        threading.Event().wait(5)  # a connection that stays open
+    monkeypatch.setattr(C.urllib.request, 'urlopen', stalled)
+    monkeypatch.setattr(C.time, 'sleep', lambda s: None)  # the pause between retries
+    start = time.monotonic()
+    try:
+        C.api_query('select 1', retries=2, timeout=0.2)
+        assert False, 'expected a timeout'
+    except TimeoutError:
+        pass
+    assert len(calls) == 2 and time.monotonic() - start < 2

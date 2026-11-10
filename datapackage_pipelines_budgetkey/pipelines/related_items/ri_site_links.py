@@ -24,6 +24,16 @@ from datapackage_pipelines_budgetkey.pipelines.related_items import ri_db
 SITE_LINK = re.compile(r'^https?://(?:next\.)?obudget\.org/i/([^?#\s]+?)/?(?:[?#].*)?$')
 SHORT_ID = re.compile(r'^[0-9a-f]{12}$')
 
+
+def contract_title(r):
+    """A contract's purpose; thousands have none (as their page has no title either): who bought from whom."""
+    if r.get('site_title'):
+        return r['site_title']
+    if r.get('entity_name'):
+        return 'התקשרות של {} עם {}'.format(r.get('publisher_name') or 'משרד ממשלתי', r['entity_name'])
+    return 'התקשרות של {}'.format(r['publisher_name']) if r.get('publisher_name') else None
+
+
 # Doc kinds that short ids are resolved against: the `item_url` kinds of the simpledb tables, with the table holding
 # their docs. A doc id is `<kind>/<key 1>/<key 2>...`, as the indexers build it.
 KINDS = [
@@ -32,12 +42,14 @@ KINDS = [
     dict(kind='gov_decisions', table='government_decisions', keys=['id'], title='title'),
     dict(kind='support_programs', table='support_programs', keys=['program_key'], title='title'),
     dict(kind='contract-spending', table='contract_spending', keys=['publisher_key', 'order_id', 'budget_code'],
-         title='purpose'),
+         title='purpose', extra=['publisher_name', 'entity_name'], title_of=contract_title),
     dict(kind='supports', table='supports_by_request_year',
          keys=['budget_code', 'year_requested', 'short_id', 'request_type'], title='support_title',
          extra=['recipient'], title_of=lambda r: ' - '.join(x for x in (r['site_title'], r['recipient']) if x)),
     dict(kind='activities', table='activities', keys=['kind', 'id'], title='name'),
 ]
+
+
 # Short ids per query: the API passes the SQL in the URL.
 BATCH = 2000 if os.environ.get('DPP_DB_ENGINE') else 150
 

@@ -158,6 +158,16 @@ def test_site_link_index(monkeypatch):
     assert idx.resolve('https://next.obudget.org/dashboards/x') == (None, 'not_an_item')
 
 
+def test_contract_title_fallback():
+    assert RS.contract_title(dict(site_title='שירותי ייעוץ', publisher_name='משרד', entity_name='חברה')) == \
+        'שירותי ייעוץ'
+    assert RS.contract_title(dict(site_title=None, publisher_name='משרד ראש הממשלה', entity_name='סוכנות היהודית')) \
+        == 'התקשרות של משרד ראש הממשלה עם סוכנות היהודית'
+    assert RS.contract_title(dict(site_title='', publisher_name='קרן הניקיון', entity_name=None)) == \
+        'התקשרות של קרן הניקיון'
+    assert RS.contract_title(dict(site_title=None, publisher_name=None, entity_name=None)) is None
+
+
 def test_kind_columns_dont_collide():
     for spec in RS.KINDS:
         assert not {'site_title', 'site_short_id'} & set(spec['keys'] + spec.get('extra', []))

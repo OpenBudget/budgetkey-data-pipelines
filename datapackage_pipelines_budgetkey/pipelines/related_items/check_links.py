@@ -11,6 +11,7 @@ fails, or if the table can't be read at all.
 import argparse
 import json
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -19,6 +20,8 @@ import urllib.request
 API = 'https://next.obudget.org/api/query?query='
 SITE = 'https://next.obudget.org/i/'
 MIN_CONFIDENCE = 0.8
+# Seconds for a whole API query: each runs in seconds; a stalled one is given up on (and retried).
+QUERY_TIMEOUT = 300
 
 
 def _none(rows):
@@ -153,15 +156,36 @@ where k <= 4 order by k, target_kind limit 20"""),
 ]
 
 
-def api_query(sql, retries=3):
+def _fetch(req, timeout):
+    """The JSON at `req`, within `timeout` seconds in all. urlopen's own timeout bounds each socket read, not the
+    request: a connection that stays open without finishing (one /api/query call did, for over 90 minutes) would
+    block the run."""
+    box = {}
+
+    def get():
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                box['ret'] = json.load(resp)
+        except Exception as e:  # handed to the caller's thread
+            box['error'] = e
+    thread = threading.Thread(target=get, daemon=True)
+    thread.start()
+    thread.join(timeout)
+    if thread.is_alive():
+        raise TimeoutError('no complete answer in {}s'.format(timeout))
+    if 'error' in box:
+        raise box['error']
+    return box['ret']
+
+
+def api_query(sql, retries=3, timeout=None):
     req = urllib.request.Request(API + urllib.parse.quote(sql), headers={'User-Agent': 'budgetkey-related-items'})
     for attempt in range(retries):
         try:
-            with urllib.request.urlopen(req, timeout=300) as resp:
-                ret = json.load(resp)
+            ret = _fetch(req, timeout or QUERY_TIMEOUT)
             break
-        except urllib.error.HTTPError as e:
-            if e.code < 500 or attempt == retries - 1:
+        except (urllib.error.HTTPError, TimeoutError) as e:
+            if (isinstance(e, urllib.error.HTTPError) and e.code < 500) or attempt == retries - 1:
                 raise
             time.sleep(5 * (attempt + 1))
     if not ret.get('success'):
@@ -171,7 +195,10 @@ def api_query(sql, retries=3):
 
 def engine_query(engine):
     from sqlalchemy import create_engine, text
-    eng = create_engine(engine)
+    # The same bound as the API's, on the server's side.
+    connect_args = {'options': '-c statement_timeout={}'.format(QUERY_TIMEOUT * 1000)} \
+        if engine.startswith('postgres') else {}
+    eng = create_engine(engine, connect_args=connect_args)
 
     def query(sql):
         with eng.connect() as conn:

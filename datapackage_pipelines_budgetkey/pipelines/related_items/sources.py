@@ -107,6 +107,18 @@ DECISION_TYPE = 'החלטות ממשלה'
 # references, but not read by the LLM.
 LLM_TYPES = {DECISION_TYPE, 'החלטות ועדת שירות המדינה', 'מסמכי מדיניות', 'החלטות הנהלה'}
 NO_LLM_TYPES = {'החלטות ועדת פטור'}
+SUBJECT = re.compile(r'^[ \t]*נושא ההחלטה:[ \t]*\n?[ \t]*(\S.*)', re.M)
+
+
+def decision_title(r, text):
+    """The title; else the text's subject line ("נושא ההחלטה: ..."), or the decision's number."""
+    if (r.get('title') or '').strip():
+        return r['title']
+    m = SUBJECT.search(text or '')
+    if m:
+        return m.group(1).strip()[:200]
+    number = (r.get('procedure_number_str') or '').strip()
+    return 'החלטת ממשלה {}'.format(number) if number and r.get('policy_type') == DECISION_TYPE else None
 
 
 def decision_documents(rows):
@@ -114,17 +126,18 @@ def decision_documents(rows):
         text = T.html_to_text(r.get('text'))
         if not text and not r.get('title'):
             continue
+        title = decision_title(r, text)
         policy_type = r.get('policy_type')
         date = as_date(r.get('doc_published_date')) or as_date(r.get('publish_date'))
         is_decision = policy_type == DECISION_TYPE
         what = 'an Israeli government decision (החלטת ממשלה {}, "{}", {})'.format(
-            r.get('procedure_number_str') or '', r.get('title'), date) if is_decision else \
+            r.get('procedure_number_str') or '', title, date) if is_decision else \
             'a publication of {} ({}, "{}", {})'.format(r.get('office') or 'an Israeli government office',
-                                                       policy_type, r.get('title'), date)
+                                                       policy_type, title, date)
         yield dict(
             doc_id='gov_decisions/' + r['id'],
             kind='gov_decisions',
-            title=r.get('title'),
+            title=title,
             date=date,
             text='{}\n{}'.format(r.get('title') or '', text),
             what=what,

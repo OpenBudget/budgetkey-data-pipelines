@@ -324,6 +324,17 @@ def test_decision_documents():
     assert docs[1]['hints']['llm'] is False and not docs[1]['hints']['same_government_default']
 
 
+def test_decision_title_fallbacks():
+    subject = dict(id='u3', title=None, policy_type='החלטות ממשלה', procedure_number_str='1849',
+                   text='<h2>נושא ההחלטה:</h2>הכרזה על מתחמים לפינוי לשם בינוי - הרצליה<h2><br/>מחליטים:</h2><p>1. על פי</p>')
+    numbered = dict(id='u4', title='', policy_type='החלטות ממשלה', procedure_number_str='12', text='<p>מחליטים</p>')
+    other = dict(id='u5', title=None, policy_type='מסמכי מדיניות', text='<p>מסמך</p>')
+    docs = {d['doc_id']: d for d in S.decision_documents([subject, numbered, other])}
+    assert docs['gov_decisions/u3']['title'] == 'הכרזה על מתחמים לפינוי לשם בינוי - הרצליה'
+    assert docs['gov_decisions/u4']['title'] == 'החלטת ממשלה 12'
+    assert docs['gov_decisions/u5']['title'] is None
+
+
 def test_ubiquitous_bodies_only_in_specific_roles(monkeypatch):
     def extract(what, source, parts_hint, usage=None):
         orgs = [dict(name='הכנסת', org_type='statutory_body', parent=None, role='mentioned',

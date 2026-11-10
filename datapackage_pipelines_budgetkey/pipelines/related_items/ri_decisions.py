@@ -59,7 +59,8 @@ class DecisionIndex:
                 if row['id'] < seen[key]['id']:
                     seen[key].update(id=row['id'])
                 continue
-            entry = dict(id=row['id'], number=number, date=date, government=gov, title=row.get('title'))
+            entry = dict(id=row['id'], number=number, date=date, government=gov,
+                         title=row.get('title') or 'החלטת ממשלה {}'.format(number))
             seen[key] = entry
             self.by_number[str(int(number))].append(entry)
 
