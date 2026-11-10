@@ -449,7 +449,7 @@ def build_issues(findings, responses, links):
             else:
                 timeline.append(dict(date=str(date) if date else None, kind='response', id=x['response_id'],
                                      source=x.get('doc_title'), url=x.get('stored_url'), title=x.get('title'),
-                                     status=x.get('status'),
+                                     status=x.get('status'), finding_text=x.get('finding_text'),
                                      text='\n'.join('%s: %s' % (r.get('body'), r.get('text'))
                                                     for r in x.get('responses') or [])))
             members.append(dict(issue_id=issue_id, member_type=n[0], member_id=n[1],

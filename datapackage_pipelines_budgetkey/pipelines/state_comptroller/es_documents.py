@@ -81,7 +81,8 @@ AUDIT_FIELDS = [
 TIMELINE_SCHEMA = {'fields': [
     {'name': n, 'type': t} for n, t in (
         ('date', 'string'), ('kind', 'string'), ('id', 'string'), ('chapter_id', 'integer'), ('source', 'string'),
-        ('url', 'string'), ('title', 'string'), ('status', 'string'), ('text', 'string'))
+        ('url', 'string'), ('title', 'string'), ('status', 'string'), ('text', 'string'),
+        ('finding_text', 'string'))
 ]}
 
 ISSUE_FIELDS = [
