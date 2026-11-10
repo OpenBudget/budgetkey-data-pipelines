@@ -104,18 +104,18 @@ Suggested Hebrew labels:
 | `analysis` | ניתוחים |
 | `activities` | שירותים חברתיים |
 
-| relation | label (on the target's "mentioned in") |
-|---|---|
-| `audited` | גוף מבוקר |
-| `responsible` | גוף אחראי |
-| `subject` | נושא הדוח / ההחלטה |
-| `funded` | מימון |
-| `contractor` | ספק / קבלן |
-| `cites` | מצוטט |
-| `amends` | תיקון החלטה |
-| `cancels` | ביטול החלטה |
-| `follows_up` | דוח המשך |
-| `mentioned` | אזכור |
+| relation | label on the target's "mentioned in" | label on the source's "related items" |
+|---|---|---|
+| `audited` | גוף מבוקר | גוף מבוקר |
+| `responsible` | גוף אחראי | גוף אחראי |
+| `subject` | נושא הדוח / ההחלטה | נושא |
+| `funded` | מימון | מימון |
+| `contractor` | ספק / קבלן | ספק / קבלן |
+| `cites` | מצוטט | מאוזכר |
+| `amends` | תיקון החלטה | מתקנת את ההחלטה |
+| `cancels` | ביטול החלטה | מבטלת את ההחלטה |
+| `follows_up` | דוח המשך | דוח מקורי |
+| `mentioned` | אזכור | אזכור |
 
 ## Display suggestions
 
