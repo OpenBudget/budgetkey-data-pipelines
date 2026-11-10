@@ -156,7 +156,10 @@ AND length(code)=8
 AND YEAR={}
 GROUP BY 1, 2"""
 
-engine = create_engine(os.environ['DPP_DB_ENGINE']).connect()
+# AUTOCOMMIT: the queries run per row through the whole index_budget run. In a transaction (SQLAlchemy 2.0 begins one
+# on the first query and never ends it here) their read locks on raw_budget would last all run and block its rewrite
+# by budget/national/processed - and every reader queued behind that.
+engine = create_engine(os.environ['DPP_DB_ENGINE'], isolation_level='AUTOCOMMIT').connect()
 
 
 def query_based_charts(row):
