@@ -139,12 +139,63 @@ GET https://next.obudget.org/api/query?query=select source_doc_id, source_kind, 
 (URL-encode the query. There's one row per source part, so dedupe by `source_doc_id`.) If you need this often, ask
 and I'll add a dedicated field or endpoint.
 
-## Status (2026-11-10)
+## Test documents
 
-- The fields exist on the docs now, but they're empty: the `related_items` table is written by
-  `related_items/all`, which is running today. Each type gets its links at its indexer's next run after that, within
-  hours to a day for most types.
-- Once filled, a good first check is `/get/gov_decisions/e9df0ca8-b543-4da0-8878-3a2efc1babbb`. Its `mentioned_in`
-  should list the comptroller audit 10624 (the Dead Sea report), which cites it.
-- Scale: about 50k links from comptroller audits (mostly to organizations), about 34k from government decisions, and
-  about 3.8k from the 100 analysis pages.
+All of these were checked against `https://next.obudget.org/get/<doc_id>` on 2026-11-10. The counts can move by a
+few at each re-index; see the status below.
+
+### Government decisions with `related_items`
+
+| doc_id | title | `related_items` | also |
+|---|---|---|---|
+| `gov_decisions/ed4ad920-872d-42c2-a121-5cbeb46e7a92` | יישום הסכמים קואליציוניים בשנת הכספים 2025 - תיקון החלטות ממשלה | 25: 20 decisions, 2 orgs, 2 support programs, 1 budget item; relations `cites`, `amends`, `funded`, `mentioned` | `mentioned_in`: 1 decision |
+| `gov_decisions/139b12aa-6bf1-4149-aa58-561048fa34b6` | תוספת תקציב בשנת 2026 – סיוע לגופים הפועלים בתחומי התרבות והספורט ... | 11: 6 decisions, 2 orgs, 2 budget items, 1 support program; all five relation kinds | `mentioned_in`: 1 analysis page |
+| `gov_decisions/bfcfa076-c607-418f-800f-c9cb79c0aa20` | חיזוק החינוך הבלתי פורמאלי ותיקון החלטת ממשלה | 14: 10 decisions, 2 budget items, 1 org, 1 support program | no `mentioned_in` (the empty-section case) |
+| `gov_decisions/0587fb6d-67b8-43e6-a1c7-a91b7e815f2e` | תכנית לטיפול בתופעות הפשיעה והאלימות בחברה הערבית 2022-2026 | 33: 24 orgs (mostly `responsible`), 8 decisions, 1 support program | `mentioned_in`: 18, from decisions, audits, an issue and an analysis page: **both sections full** |
+| `gov_decisions/128f95fa-2c32-4159-a2fc-cbb334813d10` | הארכת סיוע המדינה לתושבי יישובי הדרום ... | 7 | `mentioned_in`: exactly 20, so the cap (`mentioned_in_count` = 20, no "ועוד") |
+
+### Docs with back-links (`mentioned_in`)
+
+| doc_id | page | `mentioned_in` | shows |
+|---|---|---|---|
+| `org/government_office/500100904` | משרד הבריאות | 20 of **2,665** | the "ועוד N" case, and the full-list query |
+| `org/association/580151637` | המרכז הארצי לפתוח המקומות הקדושים | 20 of 22 | just over the cap; all four source kinds |
+| `org/municipality/500205026` | מ. מ. ירכא | 19 | a municipality: 7 audits, 8 issues, 3 decisions, 1 analysis page |
+| `budget/00045704/2020` | מטה ישראל דיגיטאלית | 13 | a budget item: decisions, an audit, issues |
+| `budget/00242003/2026` | קופות ובתי חולים | 7 | **`same_item: false`** entries (year 2012), from a connected item with the same code |
+| `budget/00206701/2026` | פעילויות ופרוייקטים | 20 of 22 | a budget item cited across 7 years (`year` varies) |
+| `support_programs/0018010101_מענקאיזוןלרשויו` | מענק איזון לרשויות | 20 of 38 | a support program: decisions, audits, issues, analysis |
+| `tenders/office/4000525105/83/2020` | מכרז 83/2020 (קטיעת שרשרת ההדבקה) | 1 | a tender cited by one audit (`part_id` → finding anchor) |
+| `contract-spending/משרד_ירושלים_ומסורת_ישראל/4502359277/0083030402` | תכנית אגן העיר העתיקה | 3 | a contract, from analysis pages only (no excerpt `[id]` prefix) |
+| `gov_decisions/e9df0ca8-b543-4da0-8878-3a2efc1babbb` | בולעני ים המלח | 11 | a decision cited by the Dead Sea audit, `state_comptroller_audits/10624` (`part_id` `10624-1`) |
+
+### Other sources
+
+- `analysis/ethiopian-israelis`: an analysis page with 95 `related_items` across six kinds (50 budget items, 11
+  decisions, 11 orgs, 10 support programs, 10 contracts, 3 social services). The long-list case.
+- `state_comptroller_audits/624`: an audit with 14 `related_items` (9 orgs, 5 earlier audits) and 20 `mentioned_in`,
+  all later audits citing it.
+- `state_comptroller_audits/10624`: the Dead Sea audit, 25 `related_items`, where `parts` lists the findings.
+- `state_comptroller_issues/1603-1`: an issue followed through 8 audits and 2 responses (10 timeline entries).
+
+## Status (2026-11-10, evening)
+
+- **Filled:** the `related_items` table is complete, rebuilt at 20:17 with 113k links:
+  - 52k from comptroller audits (mostly to organizations);
+  - 35k from government decisions;
+  - 22k from comptroller issues;
+  - 4k from the analysis pages.
+- **The docs lag the table.** Each type's docs carry the table as it was at that type's last index run. Most types
+  were indexed from the 11:45 version, before today's issue rebuild.
+- **Re-index timing:**
+  - Organizations are being re-indexed tonight.
+  - The comptroller types, analysis and social services (`activities`, which have no back-links yet) re-index
+    tonight or tomorrow.
+  - Budget, contracts, supports, support programs and tenders re-index on Friday 2026-11-13 (the weekly re-index).
+  - Decisions re-index daily.
+- **What changes when they catch up:**
+  - Entries pointing to `state_comptroller_issues/10624-*` drop out of the e9df0ca8 decision's `mentioned_in`
+    (11 → 2). Those issues now have one finding each, so they have no page.
+  - Issue `1603-1`'s `related_items` drops from 31 to 8.
+  - Issue `state_comptroller_issues/1085-6` (7 audits, 19 responses) gets its 6 `related_items`.
+  - Until then, an entry can point to an issue whose page doesn't exist: treat a failed fetch as "no page" and skip it.
