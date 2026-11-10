@@ -506,6 +506,12 @@ WHERE aha='יש אישור'
 ]
 
 
+# Every query has run and its results are in memory. Under SQLAlchemy 2.0 the connection's transaction (begun by the
+# first query) holds read locks on every table it touched until it's closed - here, otherwise, for the whole ~10 hour
+# indexing run, so a rewrite of `entities` waited on it all night and every other reader queued behind that rewrite.
+engine.close()
+
+
 def process_row(row, *_):
     for e in ENRICHERS:
         e.process_row(row)

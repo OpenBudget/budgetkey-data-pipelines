@@ -8,7 +8,10 @@ from datapackage_pipelines_budgetkey.common.datacity_api import hit_datacity_api
 
 import logging
 
-engine = create_engine(os.environ['DPP_DB_ENGINE'])
+# AUTOCOMMIT: the queries run per row through the whole ~10 hour index_entities run. In a transaction (SQLAlchemy 2.0
+# begins one on the first query and never ends it here) their read locks would last all run and block the rewrites of
+# guidestar_processed, lamas_muni and publisher_entity_analysis - and every reader queued behind those.
+engine = create_engine(os.environ['DPP_DB_ENGINE'], isolation_level='AUTOCOMMIT')
 conn = engine.connect()
 
 UNREPORTED_TURNOVER_ASSOCIATIONS_QUERY = """
