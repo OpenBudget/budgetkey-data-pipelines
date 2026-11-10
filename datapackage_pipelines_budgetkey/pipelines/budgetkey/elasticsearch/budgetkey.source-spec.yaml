@@ -320,7 +320,7 @@ gov_decisions:
 
 analysis:
   kind: indexer
-  revision: 1
+  revision: 2  # 2: pick up the current related_items
   dependent_pipeline: ./analysis/pages
   source_datapackage: /var/datapackages/analysis/pages/datapackage.json
   page-title-pattern: '{title}'
@@ -340,7 +340,7 @@ analysis:
 
 activities:
   kind: indexer
-  revision: 37
+  revision: 38  # 38: pick up related_items (the last run predates the table)
   dependent_pipeline: ./activities/social_services/social_services
   source_datapackage: /var/datapackages/activities/social_services/datapackage.json
   page-title-pattern: '{kind_he} של {office} - {name}'
@@ -407,7 +407,8 @@ muni_tenders:
 state_comptroller_audits:
   kind: indexer
   # 2: the first run's mirror rows were marked indexed though the run failed before ES
-  revision: 2
+  # 3: re-index with the related_items of the 39 re-detected Hebrew chapters and the rebuilt issues (2026-11-10)
+  revision: 3
   dependent_pipeline: ./state_comptroller/documents
   source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
   page-title-pattern: 'דוח מבקר המדינה - {title}'
@@ -439,7 +440,8 @@ state_comptroller_audits:
 
 state_comptroller_issues:
   kind: indexer
-  revision: 1
+  # 2: re-index with the related_items of the rebuilt issues (2026-11-10)
+  revision: 2
   dependent_pipeline: ./state_comptroller/documents
   source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
   page-title-pattern: 'מעקב ליקוי מדוחות מבקר המדינה - {title}'
