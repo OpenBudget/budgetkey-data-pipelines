@@ -126,6 +126,7 @@ Suggested Hebrew labels:
   mention the target.
 - `confidence` is always ≥ 0.8 (nothing less certain is linked), so it doesn't need to be shown.
 - Hide both sections when they're empty.
+- **Placement:** after the item's own content and **before the queries section** (the questions panel, "שאילתות").
 
 ## More than 20 back-links
 
