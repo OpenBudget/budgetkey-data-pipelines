@@ -409,12 +409,14 @@ def previous_output(path):
 
 def merge(previous, listed_ids, publications, chapters):
     """The scraped publications and chapters, plus the earlier run's for the publications not scraped again (if the
-    library still lists them)."""
+    library still lists them). Kept chapters get their file fields recomputed from their `files`."""
     old_pubs, old_chapters = previous
     scraped = {p['pub_id'] for p in publications}
     kept = {p['pub_id'] for p in old_pubs if p['pub_id'] not in scraped and p['pub_id'] in listed_ids}
     publications = publications + [p for p in old_pubs if p['pub_id'] in kept]
-    chapters = chapters + [c for c in old_chapters if c['pub_id'] in kept]
+    # The file choice is recomputed from the kept files list, so a change to chapter_file_fields reaches old chapters
+    chapters = chapters + [dict(c, **chapter_file_fields(c.get('files') or [])) for c in old_chapters
+                           if c['pub_id'] in kept]
     logging.info('Kept %d publications from the last run', len(kept))
     return publications, chapters
 

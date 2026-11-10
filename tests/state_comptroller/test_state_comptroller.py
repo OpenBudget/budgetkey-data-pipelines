@@ -580,6 +580,13 @@ def test_incremental_scrape(monkeypatch):
     pubs, chapters = ms.merge((previous_pubs, previous_chapters), listed, pubs, chapters)
     assert sorted((p['pub_id'], p['title']) for p in pubs) == [(1, 'new'), (2, 'old'), (3, 'old'), (4, 'new')]
     assert sorted(c['chapter_id'] for c in chapters) == [10, 20, 30, 40]
+    # A kept chapter's file fields are recomputed from its files (an old run had picked the English abstract)
+    old_files = _files(('תקציר הדוח', 'o/c.docx'), ('Abstract', 'o/EN/c-EN.docx'))
+    previous_chapters[1].update(files=old_files, full_docx_url='https://x/Documents/o/EN/c-EN.docx')
+    _, chapters = ms.merge((previous_pubs, previous_chapters), listed, [p for p in pubs if p['title'] == 'new'], [])
+    kept = {c['chapter_id']: c for c in chapters}
+    assert kept[20]['full_docx_url'] == 'https://x/Documents/o/c.docx' and kept[20]['title'] == 'old'
+    assert kept[30]['full_docx_url'] is None  # no files at all
     # Without an earlier run, everything is scraped
     scraped.clear()
     ms.scrape(hits=hits)
