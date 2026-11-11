@@ -12,6 +12,7 @@ Links to other budgetkey records (related_items, mentioned_in) are added by the 
 import collections
 import logging
 import os
+import re
 
 import dataflows as DF
 
@@ -48,6 +49,7 @@ AUDIT_FIELDS = [
     ('year', 'integer', {}),
     ('page_url', 'string', NOT_INDEXED),
     ('main_body', 'string', {'es:boost': True}),
+    ('report_group', 'string', {'es:keyword': True}),
     ('audited_bodies', 'array', dict(STRINGS, **{'es:boost': True})),
     ('audited_body_codes', 'array', dict(STRINGS, **{'es:keyword': True})),
     ('audit_subject', 'string', {'es:boost': True}),
@@ -139,6 +141,7 @@ def audit_document(row, findings, issues):
     bodies = row.get('audited_bodies') or []
     names = [b.get('name') for b in bodies if isinstance(b, dict) and b.get('name')]
     names += [b.get('name') for b in row.get('llm_audited_bodies') or [] if isinstance(b, dict) and b.get('name')]
+    main_body, report_group = lead_body(row)
     tracked = sorted({f['issue_id'] for f in doc_findings if f['issue_id'] and (f['issue_size'] or 0) > 1})
     return dict(
         chapter_id=row['chapter_id'],
@@ -149,8 +152,9 @@ def audit_document(row, findings, issues):
         publish_date=row.get('publish_date'),
         year=row['publish_date'].year if row.get('publish_date') else None,
         page_url=row.get('page_url'),
-        main_body=row.get('main_body'),
-        audited_bodies=list(dict.fromkeys(names)),
+        main_body=main_body,
+        report_group=report_group,
+        audited_bodies=list(dict.fromkeys(([main_body] if main_body else []) + names)),
         audited_body_codes=[str(b.get('code')) for b in bodies if isinstance(b, dict) and b.get('code')],
         audit_subject=row.get('audit_subject'),
         summary=row.get('summary'),
@@ -179,6 +183,29 @@ def audit_document(row, findings, issues):
         source_url=row.get('full_pdf_url') or row.get('full_docx_url'),
         analysis_status=row.get('analysis_status'),
     )
+
+
+def _body_key(name):
+    """A body's name for comparison: letters only, doubled yod/vav as single ("האנרגייה" = "האנרגיה")."""
+    s = re.sub(r'[^א-תa-zA-Z]', '', name or '')
+    return s.replace('יי', 'י').replace('וו', 'ו')
+
+
+def lead_body(row):
+    """(main body, report group). The scraper's main_body is the comptroller site's main institution, but when the site
+    names none it is the chapter's group in the report's table of contents ("דוח ביקורת מיוחד", "מטלות רוחב", "רשויות
+    מקומיות"), which is not a body. That's the case exactly when it isn't one of the site's audited bodies: it then
+    becomes report_group, and the main body is the one the chapter analysis marked main (in the site's spelling when
+    the site lists it), or none: a cross-cutting audit may have no lead body."""
+    site = [b.get('name') for b in row.get('audited_bodies') or [] if isinstance(b, dict) and b.get('name')]
+    given = row.get('main_body')
+    if not given or given in site:
+        return given or None, None
+    by_key = {_body_key(n): n for n in site}
+    for b in row.get('llm_audited_bodies') or []:
+        if isinstance(b, dict) and b.get('role') == 'main' and b.get('name'):
+            return by_key.get(_body_key(b['name']), b['name']), given
+    return None, given
 
 
 def indexed_audit(row):

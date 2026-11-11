@@ -549,10 +549,18 @@ def test_es_documents(tmp_path):
                  language='he', analysis_status='ok', text_md='טקסט מלא', summary='סיכום', topics=['רכב'],
                  full_pdf_stored='https://s/1.pdf', earlier_reports=[], key_figures=[], n_findings=2)
     english = dict(audit, chapter_id=2, language='en', analysis_status='not-hebrew')
+    # the site names no main institution: main_body is the report's group heading, the analysis has the lead body
+    special = dict(audit, chapter_id=3, main_body='דוח ביקורת מיוחד',
+                   audited_bodies=[dict(code='1512', name='המשרד להגנת הסביבה'), dict(code='30', name='משרד האנרגייה והתשתיות')],
+                   llm_audited_bodies=[dict(name='משרד האנרגיה והתשתיות', role='main'),
+                                       dict(name='המשרד להגנת הסביבה', role='main')])
+    # ... and no lead body at all
+    crosscut = dict(audit, chapter_id=4, main_body='מטלות רוחב', audited_bodies=[],
+                    llm_audited_bodies=[dict(name='משטרת ישראל', role='secondary')])
     findings = [dict(finding_id='1-%d' % i, chapter_id=1, seq=i, title='ממצא %d' % i, description='תיאור %d' % i,
                      responsible_bodies=['משרד האוצר'], severity='high', followup_status='not_applicable', verified=True)
                 for i in (2, 1)]
-    DF.Flow([audit, english], DF.update_resource(-1, name='audits'), [dict(f) for f in findings],
+    DF.Flow([audit, english, special, crosscut], DF.update_resource(-1, name='audits'), [dict(f) for f in findings],
             DF.update_resource(-1, name='findings'), DF.dump_to_path(str(chapters))).process()
     timeline = [dict(date='2011-05-17', kind='finding', id='1-1', chapter_id=1, source='מינהל הרכב', title='ממצא 1'),
                 dict(date='2012-01-01', kind='response', id='r/1', source='הערות', title='תגובה')]
@@ -568,8 +576,12 @@ def test_es_documents(tmp_path):
     results, dp, _ = DF.Flow(ed.documents_flow(str(chapters), str(issues))).results()
     by_name = dict(zip([r.name for r in dp.resources], results))
     audits, tracked = by_name[ed.AUDITS], by_name[ed.ISSUES]
-    assert [a['chapter_id'] for a in audits] == [1]  # the English chapter isn't indexed
-    a = audits[0]
+    assert [a['chapter_id'] for a in audits] == [1, 3, 4]  # the English chapter isn't indexed
+    a, sp, cc = audits
+    assert (a['main_body'], a['report_group']) == ('משרד האוצר', None)
+    assert (sp['main_body'], sp['report_group']) == ('משרד האנרגייה והתשתיות', 'דוח ביקורת מיוחד')
+    assert sp['audited_bodies'][0] == 'משרד האנרגייה והתשתיות' and 'דוח ביקורת מיוחד' not in sp['audited_bodies']
+    assert (cc['main_body'], cc['report_group'], cc['audited_bodies']) == (None, 'מטלות רוחב', ['משטרת ישראל'])
     assert [f['finding_id'] for f in a['findings']] == ['1-1', '1-2']
     assert a['findings'][0]['issue_id'] == '1-1' and a['findings'][0]['issue_size'] == 2
     assert a['audited_bodies'] == ['משרד האוצר', 'החשב הכללי'] and a['audited_body_codes'] == ['29']
