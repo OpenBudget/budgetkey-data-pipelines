@@ -408,7 +408,8 @@ state_comptroller_audits:
   kind: indexer
   # 2: the first run's mirror rows were marked indexed though the run failed before ES
   # 3: re-index with the related_items of the 39 re-detected Hebrew chapters and the rebuilt issues (2026-11-10)
-  revision: 3
+  # 4: earlier_reports[].doc_id (add_earlier_report_ids)
+  revision: 4
   dependent_pipeline: ./state_comptroller/documents
   source_datapackage: /var/datapackages/state_comptroller/documents/datapackage.json
   page-title-pattern: 'דוח מבקר המדינה - {title}'
@@ -434,6 +435,10 @@ state_comptroller_audits:
       parameters:
         resource: state_comptroller_issues
     - flow: add_related_items
+      parameters:
+        resource: state_comptroller_audits
+        doc-id-pattern: 'state_comptroller_audits/{chapter_id}'
+    - flow: add_earlier_report_ids
       parameters:
         resource: state_comptroller_audits
         doc-id-pattern: 'state_comptroller_audits/{chapter_id}'
