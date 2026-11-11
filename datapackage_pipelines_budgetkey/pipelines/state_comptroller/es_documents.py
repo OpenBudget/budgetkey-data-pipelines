@@ -262,7 +262,9 @@ def issue_document(row):
 
 
 def tracked_issue(row):
-    return len(row.get('timeline') or []) > 1
+    """More than one finding or response. The bodies' responses quoted in the report don't count: a single finding
+    with them is still just a finding of its audit's document."""
+    return sum(1 for e in row.get('timeline') or [] if e.get('kind') != 'body_response') > 1
 
 
 def ensure_fields(resource, fields):

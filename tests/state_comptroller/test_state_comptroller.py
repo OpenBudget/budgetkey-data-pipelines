@@ -673,3 +673,13 @@ def test_incremental_scrape(monkeypatch):
     scraped.clear()
     ms.scrape(hits=hits)
     assert sorted(scraped) == [1, 2, 3, 4]
+
+
+def test_an_issue_is_tracked_only_with_more_than_one_finding_or_response():
+    import es_documents as ed
+    finding = dict(kind='finding', id='1-1')
+    quoted = dict(kind='body_response', id='1-1')
+    assert not ed.tracked_issue(dict(timeline=[quoted, quoted, finding]))
+    assert not ed.tracked_issue(dict(timeline=None))
+    assert ed.tracked_issue(dict(timeline=[quoted, finding, dict(kind='response', id='r')]))
+    assert ed.tracked_issue(dict(timeline=[finding, dict(kind='follow_up', id='2-1')]))
