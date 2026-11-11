@@ -615,7 +615,13 @@ def test_es_documents(tmp_path):
              dict(issue_id='1-2', member_type='finding', member_id='1-2')],
             DF.update_resource(-1, name='issue_members'), DF.dump_to_path(str(issues))).process()
 
-    results, dp, _ = DF.Flow(ed.documents_flow(str(chapters), str(issues))).results()
+    taxonomy = tmp_path / 'taxonomy'
+    DF.Flow([dict(chapter_id=1, domain='economy_finance', domains=['economy_finance', 'transport'],
+                  lenses=['procurement'], event=None),
+             dict(chapter_id=3, domain='energy_water', domains=['energy_water'], lenses=['it_cyber'], event='9')],
+            DF.update_resource(-1, name='audit_taxonomy'), DF.dump_to_path(str(taxonomy))).process()
+
+    results, dp, _ = DF.Flow(ed.documents_flow(str(chapters), str(issues), str(taxonomy))).results()
     by_name = dict(zip([r.name for r in dp.resources], results))
     audits, tracked = by_name[ed.AUDITS], by_name[ed.ISSUES]
     assert [a['chapter_id'] for a in audits] == [1, 3, 4]  # the English chapter isn't indexed
@@ -637,6 +643,12 @@ def test_es_documents(tmp_path):
     assert tracked[0]['chapter_ids'] == [1] and tracked[0]['chapter_titles'] == ['מינהל הרכב']
     fields = {f.name: f.descriptor for f in dp.get_resource(ed.AUDITS).schema.fields}
     assert 'text_md' not in fields and fields['title']['es:title'] and fields['findings']['es:index'] is False
+    # the closed taxonomy: keyword fields the search page filters on; an untagged chapter gets empty ones
+    assert (a['domain'], a['domains'], a['lenses'], a['event']) == (
+        'economy_finance', ['economy_finance', 'transport'], ['procurement'], None)
+    assert (sp['domains'], sp['event']) == (['energy_water'], '9') and (cc['domains'], cc['lenses']) == ([], [])
+    assert fields['domains']['es:keyword'] and fields['lenses']['es:keyword'] and fields['event']['es:keyword']
+    assert (tracked[0]['domains'], tracked[0]['lenses']) == (['economy_finance', 'transport'], ['procurement'])
 
 
 def test_incremental_scrape(monkeypatch):

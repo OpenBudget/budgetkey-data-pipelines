@@ -21,6 +21,7 @@ import sc_common as sc  # noqa: F401 (raises the csv field size limit, for the c
 
 CHAPTERS_PATH = os.environ.get('CHAPTERS', '/var/datapackages/state_comptroller/chapters')
 ISSUES_PATH = os.environ.get('ISSUES', '/var/datapackages/state_comptroller/issues')
+TAXONOMY_PATH = os.environ.get('TAXONOMY', '/var/datapackages/state_comptroller/taxonomy')
 OUT_PATH = '/var/datapackages/state_comptroller/documents'
 
 AUDITS = 'state_comptroller_audits'
@@ -62,6 +63,11 @@ AUDIT_FIELDS = [
     ('audit_period_start_year', 'integer', {}),
     ('audit_period_end_year', 'integer', {}),
     ('topics', 'array', dict(STRINGS, **{'es:boost': True})),
+    # The closed taxonomy (taxonomy.py): keys the search page filters on
+    ('domain', 'string', {'es:keyword': True}),
+    ('domains', 'array', dict(STRINGS, **{'es:keyword': True})),
+    ('lenses', 'array', dict(STRINGS, **{'es:keyword': True})),
+    ('event', 'string', {'es:keyword': True}),
     ('key_figures', 'array', OBJECTS),
     ('follow_up', 'string', {'es:keyword': True}),
     ('follows_up_report', 'string', {}),
@@ -105,6 +111,8 @@ ISSUE_FIELDS = [
     ('latest_status', 'string', {'es:keyword': True}),
     ('chapter_ids', 'array', {'es:itemType': 'integer'}),
     ('chapter_titles', 'array', dict(STRINGS, **{'es:boost': True})),
+    ('domains', 'array', dict(STRINGS, **{'es:keyword': True})),
+    ('lenses', 'array', dict(STRINGS, **{'es:keyword': True})),
     ('timeline', 'array', dict(OBJECTS, **{'es:schema': TIMELINE_SCHEMA})),
     ('timeline_text', 'string', {'es:hebrew': True}),
     ('score', 'number', SCORE),
@@ -129,6 +137,29 @@ def issue_index(issues_path):
         return {}
     sizes = collections.Counter(m['issue_id'] for m in members)
     return {m['member_id']: (m['issue_id'], sizes[m['issue_id']]) for m in members if m['member_type'] == 'finding'}
+
+
+def taxonomy_index(taxonomy_path):
+    """{chapter id: its taxonomy row} (taxonomy.py's audit_taxonomy)."""
+    try:
+        rows = read_resource(taxonomy_path, 'audit_taxonomy')
+    except Exception:
+        logging.warning('No taxonomy at %s, documents are indexed without domains and lenses', taxonomy_path)
+        return {}
+    return {r['chapter_id']: r for r in rows}
+
+
+def audit_tags(chapter_id, taxonomy):
+    t = taxonomy.get(chapter_id) or {}
+    return dict(domain=t.get('domain'), domains=t.get('domains') or [], lenses=t.get('lenses') or [],
+                event=t.get('event'))
+
+
+def issue_tags(timeline, taxonomy):
+    """The union of the domains and lenses of the audits an issue's findings come from."""
+    tags = [taxonomy[e['chapter_id']] for e in timeline if e.get('chapter_id') in taxonomy]
+    return dict(domains=list(dict.fromkeys(k for t in tags for k in t.get('domains') or [])),
+                lenses=list(dict.fromkeys(k for t in tags for k in t.get('lenses') or [])))
 
 
 def audit_document(row, findings, issues):
@@ -287,7 +318,7 @@ def typed(resource, fields):
     return steps
 
 
-def audits_flow(chapters_path, issues):
+def audits_flow(chapters_path, issues, taxonomy):
     findings = collections.defaultdict(list)
     for f in read_resource(chapters_path, 'findings'):
         findings[f['chapter_id']].append(f)
@@ -296,28 +327,31 @@ def audits_flow(chapters_path, issues):
         DF.load(os.path.join(chapters_path, 'datapackage.json'), resources=['audits']),
         DF.filter_rows(indexed_audit, resources=['audits']),
         ensure_fields('audits', AUDIT_FIELDS),
-        lambda row: row.update(audit_document(row, findings, issues)) if 'chapter_id' in row else None,
+        lambda row: row.update(audit_document(row, findings, issues), **audit_tags(row['chapter_id'], taxonomy))
+        if 'chapter_id' in row else None,
         DF.update_resource('audits', name=AUDITS, path=AUDITS + '.csv'),
         *typed(AUDITS, AUDIT_FIELDS),
     )
 
 
-def issues_flow(issues_path):
+def issues_flow(issues_path, taxonomy):
     return DF.Flow(
         DF.load(os.path.join(issues_path, 'datapackage.json'), resources=['issues']),
         DF.filter_rows(tracked_issue, resources=['issues']),
         ensure_fields('issues', ISSUE_FIELDS),
-        lambda row: row.update(issue_document(row)) if 'issue_id' in row else None,
+        lambda row: row.update(issue_document(row), **issue_tags(row.get('timeline') or [], taxonomy))
+        if 'issue_id' in row else None,
         DF.update_resource('issues', name=ISSUES, path=ISSUES + '.csv'),
         *typed(ISSUES, ISSUE_FIELDS),
     )
 
 
-def documents_flow(chapters_path=CHAPTERS_PATH, issues_path=ISSUES_PATH):
+def documents_flow(chapters_path=CHAPTERS_PATH, issues_path=ISSUES_PATH, taxonomy_path=TAXONOMY_PATH):
     issues = issue_index(issues_path)
-    steps = [audits_flow(chapters_path, issues)]
+    taxonomy = taxonomy_index(taxonomy_path)
+    steps = [audits_flow(chapters_path, issues, taxonomy)]
     if issues:
-        steps.append(issues_flow(issues_path))
+        steps.append(issues_flow(issues_path, taxonomy))
     return DF.Flow(*steps)
 
 

@@ -10,6 +10,9 @@ answered, and whether later follow-up audits found it fixed.
 | `chapters` | `chapter_analysis.py` | `state_comptroller_audits` (a chapter with its summary, audit period, follow-up reference, topics, key figures and full markdown text), `state_comptroller_findings` (one row per finding) - from 2000 on |
 | `pm_responses` (weekly) | `pm_responses.py` | `state_comptroller_response_docs`, `state_comptroller_responses`: the PM's comments books and the follow-up (מעקב) books from gov.il, one row per finding answered |
 | `issues` | `issue_linking.py` | `state_comptroller_links` (every link made, with its method), `state_comptroller_issues` (findings and responses grouped into issues, each with a timeline), `state_comptroller_issue_members` |
+| `taxonomy` | `taxonomy.py` | `state_comptroller_audit_taxonomy`: each audit's policy domains and audit lenses, from two closed lists (`state_comptroller_taxonomy` has their labels); `state_comptroller_special_reports`: each special report named and classified (event, theme, recurring, follow-up), with the reports about the same event sharing an `event` key |
+| `documents` | `es_documents.py` | the ES documents of the audits and issues (no DB tables), with the taxonomy as keyword fields |
+| `dashboard` | `dashboard.py` | `state_comptroller_dash_*`: aggregates for the comptroller dashboard: per comptroller, per domain/lens and period, trends, special-report events, chronic issues (see `DASHBOARD.md`) |
 
 Sources:
 - library.mevaker.gov.il, a SharePoint site. Publications are listed with its anonymous search (CSOM).

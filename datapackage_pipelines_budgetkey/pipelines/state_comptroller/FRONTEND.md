@@ -121,6 +121,15 @@ Link finding and follow-up entries to `/i/state_comptroller_audits/<chapter_id>#
 response entries from the same book (one per row of its table). Grouping consecutive entries by `source` and date
 reads better than a flat list.
 
+## Domains, lenses and events (both types)
+
+Every audit carries `domain` (its main policy area), `domains[]` (main and secondary) and `lenses[]` (one to three
+kinds of problem it examines), all keys from two closed lists; audits in a special report also carry `event`, the key
+of the event or report. An issue carries the union of its audits' `domains[]` and `lenses[]`. Labels:
+`select axis, key, label, description from state_comptroller_taxonomy order by axis, display_order` via
+`/api/query`. They can be shown as tags linking to the filtered search; the search filters and the dashboard data are
+in `DASHBOARD.md`.
+
 ## Things to know
 
 - **When the pages ship, three switches flip:**
