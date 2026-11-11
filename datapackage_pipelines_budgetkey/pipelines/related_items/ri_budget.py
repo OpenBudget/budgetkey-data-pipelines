@@ -65,11 +65,12 @@ class BudgetIndex:
         self._lock = threading.Lock()
 
     @classmethod
-    def load(cls):
+    def load(cls, max_depth=4):
+        """From the budget table, down to `max_depth` (1: the chapters only)."""
         rows = ri_db.query(
             "select code, year, title, depth, hierarchy::text, (select jsonb_object_agg(k, v->'code_titles') "
             "from jsonb_each(case when jsonb_typeof(history)='object' then history else '{}'::jsonb end) "
-            "as h(k,v))::text as history from budget where depth between 1 and 4",
+            "as h(k,v))::text as history from budget where depth between 1 and " + str(int(max_depth)),
             ['code', 'year', 'title', 'depth', 'hierarchy', 'history'])
         return cls(rows)
 

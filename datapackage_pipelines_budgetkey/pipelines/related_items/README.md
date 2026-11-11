@@ -10,7 +10,7 @@ stores links that can be read in both directions:
 | `related_items/state_comptroller` | `state_comptroller/chapters` (audits + findings) | `/var/datapackages/related_items/state_comptroller` |
 | `related_items/gov_decisions` | `government_decisions` | `/var/datapackages/related_items/gov_decisions` |
 | `related_items/analysis` | `analysis/pages` (the AI analysis pages) | `/var/datapackages/related_items/analysis` |
-| `related_items/all` | the three above, and `state_comptroller/issues` | tables `related_items`, `related_items_mentions`; finding links lifted to their issues (`state_comptroller_issues/{issue_id}`, method `derived:issue`) |
+| `related_items/all` | the three above, and `state_comptroller/issues` | tables `related_items`, `related_items_mentions`; finding links lifted to their issues (`state_comptroller_issues/{issue_id}`, method `derived:issue`); each ministry's or authority's own budget chapters (method `structural:bodies`, see bodies.csv) |
 
 `related_items/all` doesn't depend on `related_items/analysis`. dpp holds a pipeline while any of its dependencies
 failed or hasn't run, and the analysis pages are a separate chain, so they would hold back the comptroller and decision
@@ -28,7 +28,7 @@ merged at its next run (gov_decisions runs daily).
 | `source_title`, `source_date` | |
 | `target_doc_id`, `target_kind`, `target_title` | ES doc ids: `org/{kind}/{id}`, `gov_decisions/{id}`, `budget/{code}/{year}`, `support_programs/{key}`, `state_comptroller_audits/{chapter_id}`, `tenders/{type}/{publication_id}/{tender_id}`; from analysis pages also `contract-spending/{publisher_key}/{order_id}/{budget_code}`, `supports/{budget_code}/{year_requested}/{short_id}/{request_type}`, `activities/{kind}/{id}` |
 | `target_year`, `target_code` | budget: the year the source is about, and the item's code that year |
-| `relation` | `audited`, `subject`, `responsible`, `funded`, `contractor`, `cites` / `amends` / `cancels` (decisions), `follows_up` / `cites` (comptroller chapters), `mentioned` |
+| `relation` | `audited`, `subject`, `responsible`, `funded`, `contractor`, `cites` / `amends` / `cancels` (decisions), `follows_up` / `cites` (comptroller chapters), `mentioned`; `budget_owner` (an organization -> its own budget chapter, not from a document) |
 | `mention`, `excerpt` | the text as it appears in the source, and the passage around it |
 | `confidence`, `method` | see below |
 
@@ -154,6 +154,19 @@ are from about 900 sample decisions and 32 chapters:
 When such an entity is added, set `entity_id` on the body's row in bodies.csv. Its past and future mentions then
 link on the next run, because LLM answers are cached and only the resolution changes.
 
+### Budget owners
+
+`related_items/all` also links each body's entity to its own budget chapters (`ri_owners.py`): source
+`org/{kind}/{id}` (no date, no excerpt), target the chapter's budget doc (the connected item of its latest year),
+relation `budget_owner`, confidence 1, method `structural:bodies`. So the ministry's page lists its chapters and the
+chapter's page names its ministry. `budget_chapters` can't be used as is: a unit (a government hospital, a police
+district) lists its ministry's chapters. A chapter's owners are the headquarters entities ("…/המשרד הראשי") that list
+it; else the bodies named like the chapter ("הכנסת", "הועדה לאנרגיה אטומית"); else the one body listing it if it isn't
+a unit of another; else an owner of another chapter that lists it too (an authority's development chapter). A
+chapter none of these fit has no owner: on prod (Nov 2026) 47 of the 55 listed chapters have one, and the others are
+shared (0054 רשויות פיקוח), the government hospitals' (0092-0094), or a ministry's whose HQ has no entity (Defense,
+National Security). To give one an owner, fix the body's row: its entity, or its `budget_chapters`.
+
 ## Adding a source
 
 Write an adapter in `sources.py` that yields documents. See the docstring of `linker.py` for their shape:
@@ -194,7 +207,8 @@ missing from its table; the busiest sources and most linked targets; and a stabl
 - `related_items` (the doc as a source): `[{doc_id, kind, title, relation, relations, confidence, parts, year, code}]`,
   one entry per target with its links folded over the doc's parts (findings). Sorted by kind, then confidence, then title;
 - `mentioned_in` (the doc as a target): `[{doc_id, kind, title, date, relation, confidence, excerpt, part_id, parts, year,
-  same_item}]`, one entry per source doc, newest first, the first 20; `mentioned_in_count` counts them all.
+  same_item}]`, one entry per source doc, newest first, the first 20; `mentioned_in_count` counts them all. A
+  structural link (`budget_owner`: a chapter's ministry) comes first, so the cap never drops it.
 
 Both are display-only (`es:index: false`). `gov_decisions` and `state_comptroller_audits` are both sources and targets: a
 decision's page lists what it cites and which later decisions and audits cite it. A budget doc is a connected item, so
