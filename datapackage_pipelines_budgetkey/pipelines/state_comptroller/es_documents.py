@@ -89,7 +89,7 @@ TIMELINE_SCHEMA = {'fields': [
     {'name': n, 'type': t} for n, t in (
         ('date', 'string'), ('kind', 'string'), ('id', 'string'), ('chapter_id', 'integer'), ('source', 'string'),
         ('url', 'string'), ('title', 'string'), ('status', 'string'), ('text', 'string'),
-        ('finding_text', 'string'))
+        ('finding_text', 'string'), ('audit_period', 'string'), ('date_text', 'string'), ('body', 'string'))
 ]}
 
 ISSUE_FIELDS = [
@@ -141,7 +141,8 @@ def audit_document(row, findings, issues):
             recommendation=f.get('recommendation'), responsible_bodies=f.get('responsible_bodies') or [],
             finding_type=f.get('finding_type'), severity=f.get('severity'),
             followup_status=f.get('followup_status'), followup_status_text=f.get('followup_status_text'),
-            section=f.get('section'), body_responses=f.get('body_responses') or [], verified=f.get('verified'),
+            section=f.get('section'), body_responses=body_responses(f.get('body_responses')),
+            verified=f.get('verified'),
             issue_id=issue_id, issue_size=size,
         ))
     bodies = row.get('audited_bodies') or []
@@ -190,6 +191,13 @@ def audit_document(row, findings, issues):
         analysis_status=row.get('analysis_status'),
         score=audit_score(row.get('publish_date')),
     )
+
+
+def body_responses(responses):
+    """The bodies' responses quoted in a finding, with `date` normalized (YYYY-MM-DD, YYYY-MM, YYYY or None) and the
+    report's own wording kept in `date_text`."""
+    return [dict(r, date=sc.normalize_date(r.get('date')), date_text=r.get('date')) if isinstance(r, dict) else r
+            for r in responses or []]
 
 
 def _body_key(name):

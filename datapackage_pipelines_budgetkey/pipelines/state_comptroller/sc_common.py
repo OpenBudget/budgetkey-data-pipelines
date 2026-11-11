@@ -4,6 +4,7 @@ Every source file is kept once in the object store under state-comptroller/..., 
 (markdown, LLM analyses) are cached next to it, so later runs neither re-download nor re-analyze unchanged files.
 """
 import csv
+import datetime
 import difflib
 import json
 import logging
@@ -347,3 +348,49 @@ def typed_resource(rows, name, fields, key):
         steps.append(DF.filter_rows(lambda row: False, resources=name))
     steps.append(DF.set_primary_key(key, resources=name))
     return DF.Flow(*steps)
+
+
+HEBREW_MONTHS = {'ינואר': 1, 'פברואר': 2, 'מרס': 3, 'מרץ': 3, 'אפריל': 4, 'מאי': 5, 'יוני': 6, 'יולי': 7,
+                 'אוגוסט': 8, 'ספטמבר': 9, 'אוקטובר': 10, 'נובמבר': 11, 'דצמבר': 12}
+_MONTH = '|'.join(sorted(HEBREW_MONTHS, key=len, reverse=True))
+_DATE_PATTERNS = [
+    # 2008-11-05, 2008-11
+    (re.compile(r'(?<!\d)(\d{4})-(\d{1,2})(?:-(\d{1,2}))?(?!\d)'), lambda m: (m[1], m[2], m[3])),
+    # 5.11.2008, 5/11/08
+    (re.compile(r'(?<!\d)(\d{1,2})[./](\d{1,2})[./](\d{4}|\d{2})(?![\d./])'), lambda m: (m[3], m[2], m[1])),
+    # 11.2008, 11/2008
+    (re.compile(r'(?<![\d./])(\d{1,2})[./](\d{4})(?!\d)'), lambda m: (m[2], m[1], None)),
+    # 5 בנובמבר 2008, נובמבר 2008, מרץ, 2006
+    (re.compile(r'(?:(?<!\d)(\d{1,2})\s*)?(?<![א-ת])ב?-?(' + _MONTH + r')(?![א-ת])[\s,]*(\d{4})(?!\d)'),
+     lambda m: (m[3], str(HEBREW_MONTHS[m[2]]), m[1])),
+    # a year alone
+    (re.compile(r'(?<!\d)((?:19|20)\d{2})(?!\d)'), lambda m: (m[1], None, None)),
+]
+
+
+def normalize_date(text):
+    """The first date in a free-text date ("מרס 2006", "12 בספטמבר 2006", "5.11.08", "2008-11"), as YYYY-MM-DD,
+    YYYY-MM or YYYY (as precise as the text), or None. Text without a year ("לא צוין", "ספטמבר") is None."""
+    if not text:
+        return None
+    text = str(text)
+    for pattern, parts in _DATE_PATTERNS:
+        for m in pattern.finditer(text):
+            year, month, day = parts(m)
+            year = int(year)
+            if year < 100:
+                year += 2000 if year <= 40 else 1900
+            if not 1948 <= year <= 2100:
+                continue
+            if month is None:
+                return '%04d' % year
+            month = int(month)
+            if not 1 <= month <= 12:
+                continue
+            if day:
+                try:
+                    return datetime.date(year, month, int(day)).isoformat()
+                except ValueError:
+                    pass
+            return '%04d-%02d' % (year, month)
+    return None

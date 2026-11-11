@@ -403,10 +403,33 @@ STATUS_ORDER = {'rectified': 0, 'mostly_rectified': 1, 'partially_rectified': 2,
                 'not_rectified': 4, 'disputed': 4}
 
 
-def build_issues(findings, responses, links):
+# Timeline order within a date: what the audited bodies told the comptroller (quoted in the report) comes before the
+# report's finding, and the government's response books after it.
+TIMELINE_RANK = {'body_response': 0, 'finding': 1, 'follow_up': 1, 'response': 2}
+
+
+def timeline_order(timeline, answers):
+    """Sorts the timeline by date. A response book entry is dated by its book, often only to the month, so it sorts
+    no earlier than the findings it answers (`answers`: {response id: [their dates]}); a body's response quoted in a
+    report sorts no later than its finding, and right before it when undated. Entries keep their own dates."""
+    finding_dates = {e['id']: e['date'] for e in timeline if e['kind'] in ('finding', 'follow_up')}
+
+    def key(e):
+        date = e['date'] or ''
+        if e['kind'] == 'response':
+            date = max([date] + [d for d in answers.get(e['id'], []) if d])
+        elif e['kind'] == 'body_response':
+            own = finding_dates.get(e['id']) or ''
+            date = min(date, own) if date and own else (date or own)
+        return (date, TIMELINE_RANK.get(e['kind'], 1))
+    timeline.sort(key=key)
+
+
+def build_issues(findings, responses, links, periods=None):
     """Groups linked findings and response items into issues, at most one finding per audit (see IssueGroups); the
     follow-up links, which say a finding was audited again, are applied before the response links. Only components
-    with a finding are issues."""
+    with a finding are issues. `periods`: {chapter id: the audit period}, for the findings' timeline entries."""
+    periods = periods or {}
     uf = IssueGroups()
     nodes = {}
     for f in findings:
@@ -415,6 +438,7 @@ def build_issues(findings, responses, links):
         uf.add(key, f.get('chapter_id'))
     response_by_id = {r['response_id']: r for r in responses}
     refused = defaultdict(int)
+    answered = defaultdict(list)  # response node -> the finding nodes it was linked to
     item_links = [link for link in links if link['level'] == 'item']
     item_links.sort(key=lambda link: link.get('kind') != 'follow_up')
     for link in item_links:
@@ -425,6 +449,9 @@ def build_issues(findings, responses, links):
                 uf.add(node)
         if a in nodes and b in nodes and not uf.union(a, b):
             refused[link.get('kind')] += 1
+        for r, f in ((a, b), (b, a)):
+            if r[0] == 'response' and f[0] == 'finding':
+                answered[r].append(f)
     logging.info('Item links not applied (they would join two findings of one audit): %s', dict(refused))
     groups = defaultdict(list)
     for node in nodes:
@@ -445,7 +472,13 @@ def build_issues(findings, responses, links):
                 timeline.append(dict(date=str(date) if date else None, kind='follow_up' if status else 'finding',
                                      id=x['finding_id'], chapter_id=x.get('chapter_id'), source=x.get('chapter_title'),
                                      url=x.get('page_url'), title=x.get('title'), status=status,
-                                     text=x.get('description')))
+                                     text=x.get('description'), audit_period=periods.get(x.get('chapter_id'))))
+                for r in x.get('body_responses') or []:
+                    if isinstance(r, dict) and (r.get('summary') or r.get('body')):
+                        timeline.append(dict(date=sc.normalize_date(r.get('date')), date_text=r.get('date'),
+                                             kind='body_response', id=x['finding_id'], chapter_id=x.get('chapter_id'),
+                                             source=x.get('chapter_title'), url=x.get('page_url'),
+                                             body=r.get('body'), text=r.get('summary')))
             else:
                 timeline.append(dict(date=str(date) if date else None, kind='response', id=x['response_id'],
                                      source=x.get('doc_title'), url=x.get('stored_url'), title=x.get('title'),
@@ -454,8 +487,14 @@ def build_issues(findings, responses, links):
                                                     for r in x.get('responses') or [])))
             members.append(dict(issue_id=issue_id, member_type=n[0], member_id=n[1],
                                 date=date))
-        timeline.sort(key=lambda e: (e['date'] or '', e['kind'] != 'finding'))
+        answers = defaultdict(list)
+        for n in group:
+            if n[0] == 'response':
+                answers[n[1]] = [str(as_date(nodes[f].get('publish_date')) or '') for f in answered.get(n, [])
+                                 if f in nodes and uf.find(f) == root]
+        timeline_order(timeline, answers)
         statuses = [e for e in timeline if e.get('status')]
+        dated = [as_date(e['date']) for e in timeline if e['kind'] != 'body_response' and e['date']]
         latest = group_findings[-1]
         bodies = sorted({b for f in group_findings for b in f.get('responsible_bodies') or []})
         issues.append(dict(
@@ -465,7 +504,7 @@ def build_issues(findings, responses, links):
             bodies=bodies,
             severity=max((f.get('severity') for f in group_findings), key=lambda s: {'high': 2, 'medium': 1}.get(s, 0)),
             first_reported=as_date(group_findings[0].get('publish_date')),
-            last_seen=max(as_date(e['date']) for e in timeline if e['date']) if any(e['date'] for e in timeline) else None,
+            last_seen=max(dated) if dated else None,
             n_audits=len({f.get('chapter_id') for f in group_findings}),
             n_responses=sum(1 for n in group if n[0] == 'response'),
             latest_status=statuses[-1]['status'] if statuses else None,
@@ -535,7 +574,8 @@ def link_all(chapters, publications, audits, findings, responses):
                 links.append(dict(level='item', kind='follow_up', from_type='finding', from_id=ffs[i]['finding_id'],
                                   to_type='finding', to_id=ofs[j]['finding_id'], score=None, method='llm'))
 
-    issues, members = build_issues(findings, responses, links)
+    periods = {a['chapter_id']: a.get('audit_period') for a in audits if a.get('audit_period')}
+    issues, members = build_issues(findings, responses, links, periods)
     logging.info('%d links, %d issues (%d with more than one member)', len(links), len(issues),
                  sum(1 for i in issues if len(i['timeline']) > 1))
     logging.info('Gemini usage: %s', json.dumps(USAGE.by_model))

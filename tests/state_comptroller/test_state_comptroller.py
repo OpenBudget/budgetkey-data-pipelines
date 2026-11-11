@@ -357,6 +357,48 @@ def test_build_issues_follows_a_finding_through_response_and_follow_up():
     assert len([m for m in members if m['issue_id'] == '100-1']) == 3
 
 
+def test_issue_timeline_starts_with_the_bodies_responses_quoted_in_the_report():
+    # Audit 1889: carried out in 2005, the bodies answered in 2006, published 2007-05-09; the PM's response book is
+    # dated by its month only (2007-05-01) but answers that report.
+    findings = [dict(finding_id='1889-1', chapter_id=1889, publish_date=datetime.date(2007, 5, 9), title='מינוי',
+                     description='ת', responsible_bodies=['משרד האוצר'], severity='high',
+                     followup_status='not_applicable', chapter_title='ועדה',
+                     body_responses=[dict(body='אגף התקציבים', date='מרס 2006', summary='הסביר'),
+                                     dict(body='משרד ראש הממשלה', date=None, summary='לא הגיב לגופו'),
+                                     dict(body='', date='', summary='')]),
+                dict(finding_id='2500-2', chapter_id=2500, publish_date=datetime.date(2011, 5, 1), title='מעקב',
+                     description='לא תוקן', responsible_bodies=[], severity='high', followup_status='not_rectified')]
+    responses = [dict(response_id='book57b/1', publish_date=datetime.date(2007, 5, 1), doc_title='הערות ראש הממשלה',
+                      title=None, status='in_progress', responses=[dict(body='האוצר', text='בטיפול')])]
+    links = [dict(level='item', from_type='response', from_id='book57b/1', to_type='finding', to_id='1889-1'),
+             dict(level='item', from_type='finding', from_id='2500-2', to_type='finding', to_id='1889-1')]
+    issues, _ = il.build_issues(findings, responses, links, {1889: 'אוקטובר - נובמבר 2005'})
+    timeline = issues[0]['timeline']
+    assert [(e['kind'], e['date']) for e in timeline] == [
+        ('body_response', '2006-03'), ('body_response', None), ('finding', '2007-05-09'),
+        ('response', '2007-05-01'), ('follow_up', '2011-05-01')]
+    first = timeline[0]
+    assert (first['id'], first['body'], first['text'], first['date_text']) == (
+        '1889-1', 'אגף התקציבים', 'הסביר', 'מרס 2006')
+    assert timeline[2]['audit_period'] == 'אוקטובר - נובמבר 2005' and timeline[4]['audit_period'] is None
+    issue = issues[0]
+    assert issue['n_responses'] == 1 and issue['last_seen'] == datetime.date(2011, 5, 1)
+    assert issue['first_reported'] == datetime.date(2007, 5, 9)
+
+
+def test_normalize_date():
+    import sc_common
+    cases = {'מרס 2006': '2006-03', 'מרץ, 2006': '2006-03', '12 בספטמבר 2006': '2006-09-12', 'בספטמבר 2006': '2006-09',
+             '5.11.08': '2008-11-05', '05.11.2008': '2008-11-05', '11/2008': '2008-11', '2008-11': '2008-11',
+             '2008-11-05': '2008-11-05', 'מרס 2006 ויוני 2006': '2006-03', '2007': '2007', '31.2.2008': '2008-02',
+             'לא צוין': None, 'ספטמבר': None, '': None, None: None}
+    assert {t: sc_common.normalize_date(t) for t in cases} == cases
+    import es_documents as ed
+    quoted = [dict(body='א', date='מרס 2006', summary='ס'), dict(body='ב', date=None, summary='ס')]
+    assert ed.body_responses(quoted) == [dict(body='א', date='2006-03', date_text='מרס 2006', summary='ס'),
+                                         dict(body='ב', date=None, date_text=None, summary='ס')]
+
+
 def test_build_issues_keeps_one_finding_per_audit():
     def finding(fid, year):
         return dict(finding_id=fid, chapter_id=int(fid.split('-')[0]), publish_date=datetime.date(year, 1, 1),
