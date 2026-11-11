@@ -47,8 +47,9 @@ MENTION_FIELDS = [
 ]
 
 # Which relation wins when one target is linked several ways from the same place.
-RELATION_ORDER = ['audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible', 'funded',
-                  'contractor', 'mentioned']
+# budget_owner: a body's own budget chapters, from bodies.csv (ri_owners), not found in text.
+RELATION_ORDER = ['budget_owner', 'audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible',
+                  'funded', 'contractor', 'mentioned']
 
 ORG_KINDS = {
     'ministry': {'government_office', 'law_mandated_organization'},

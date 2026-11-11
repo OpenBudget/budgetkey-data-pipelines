@@ -4,7 +4,8 @@ Parameters: sources (datapackage dirs written by link_source; a missing one is s
 or failed doesn't hold back the others), out-path, and optionally issues: the State
 Comptroller issues datapackage. With it, links made from findings are lifted to the issues the findings belong to
 (`state_comptroller_issues/{issue_id}`, method `derived:issue`), so an issue's page can list what it is about across
-all its reports.
+all its reports. And budget-owners: true adds the structural links from each ministry or authority to its own
+budget chapters (ri_owners; reads the budget table).
 """
 import collections
 import csv
@@ -78,6 +79,9 @@ def flow(parameters, *_):
         steps.extend(DF.set_type(f, type=t, resources=name) for f, t in fields)
     if members:
         steps.append(_on_resource('related_items', lambda rows: issue_links(rows, members, titles)))
+    if parameters.get('budget-owners'):
+        owned = budget_owner_links()
+        steps.append(_on_resource('related_items', lambda rows: _then(rows, owned)))
     steps.append(DF.set_primary_key(['link_id'], resources='related_items'))
     steps.append(DF.update_resource(None, **{'dpp:streaming': True}))
     steps.append(DF.dump_to_path(parameters['out-path']))
@@ -88,6 +92,18 @@ def flow(parameters, *_):
             related_items_mentions={'resource-name': 'related_items_mentions'},
         )))
     return DF.Flow(*steps)
+
+
+def budget_owner_links():
+    from datapackage_pipelines_budgetkey.pipelines.related_items import ri_budget, ri_entities, ri_owners
+    links = ri_owners.owner_links(ri_entities.load_bodies(), ri_budget.BudgetIndex.load(max_depth=1))
+    logging.info('merge_sources: %d budget owner links', len(links))
+    return links
+
+
+def _then(rows, more):
+    yield from rows
+    yield from more
 
 
 def _on_resource(name, func):

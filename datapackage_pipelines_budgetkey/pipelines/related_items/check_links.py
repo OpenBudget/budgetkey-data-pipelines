@@ -96,12 +96,13 @@ union all
 select 'target', target_kind, count(*), min(target_doc_id) from related_items
 where target_doc_id not like (case target_kind when 'entities' then 'org' else target_kind end) || '/%'
 group by 1, 2"""),
-    dict(name='missing_fields', expect=_none_warn, doc='no rows: titles and source dates are set',
+    dict(name='missing_fields', expect=_none_warn,
+         doc='no rows: titles and source dates are set (structural links have no date)',
          sql="""select source_kind, target_kind, count(*) filter (where coalesce(source_title, '') = '') as no_source_title,
-  count(*) filter (where source_date is null) as no_source_date,
+  count(*) filter (where source_date is null and method not like 'structural:%') as no_source_date,
   count(*) filter (where coalesce(target_title, '') = '') as no_target_title
 from related_items group by 1, 2
-having count(*) filter (where coalesce(source_title, '') = '' or source_date is null
+having count(*) filter (where coalesce(source_title, '') = '' or (source_date is null and method not like 'structural:%')
                         or coalesce(target_title, '') = '') > 0"""),
     dict(name='dangling_entities', expect=_few(0.01), doc='dangling <= 1% of links',
          sql=_dangling('entities', "left join entities e on e.kind = split_part(r.target_doc_id, '/', 2) "

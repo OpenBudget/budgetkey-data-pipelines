@@ -5,7 +5,8 @@ Adds three fields to each row of `resource`:
   document's parts (a comptroller chapter's findings): the strongest relation and confidence, all relations, the parts.
   Sorted by target kind, then confidence, then title.
 - `mentioned_in`: the row as a target - the documents about it. One entry per source document, newest first, at most
-  `max-mentioned-in`; `mentioned_in_count` counts them all.
+  `max-mentioned-in`; `mentioned_in_count` counts them all. Structural links (a budget chapter's owning body) come
+  first.
 - `mentioned_in_count`.
 
 Parameters:
@@ -28,8 +29,11 @@ TABLE = 'related_items'
 FIELDS = ['source_doc_id', 'source_kind', 'source_part_id', 'source_title', 'source_date', 'target_doc_id',
           'target_kind', 'target_title', 'target_year', 'target_code', 'relation', 'excerpt', 'confidence']
 # Same order as the linker's RELATION_ORDER (kept here so indexing doesn't import the linker).
-RELATION_ORDER = ['audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible', 'funded',
-                  'contractor', 'mentioned']
+RELATION_ORDER = ['budget_owner', 'audited', 'subject', 'follows_up', 'amends', 'cancels', 'cites', 'responsible',
+                  'funded', 'contractor', 'mentioned']
+# Relations that state what a record is rather than where it's discussed (a chapter's owning body): first in
+# `mentioned_in`, ahead of the dated mentions, so the cap never drops them.
+STRUCTURAL = {'budget_owner'}
 KIND_ORDER = ['entities', 'gov_decisions', 'state_comptroller_audits', 'state_comptroller_issues', 'analysis', 'budget',
               'support_programs', 'activities', 'tenders', 'contract-spending', 'supports']
 
@@ -167,6 +171,7 @@ def mentioned_entries(links, same_item=True):
             part_id=best['source_part_id'], parts=_parts(members), year=best['target_year'], same_item=same_item))
     entries.sort(key=lambda e: e['doc_id'])
     entries.sort(key=lambda e: e['date'] or '', reverse=True)  # stable: same-date entries stay by doc id
+    entries.sort(key=lambda e: e['relation'] not in STRUCTURAL)
     return entries
 
 

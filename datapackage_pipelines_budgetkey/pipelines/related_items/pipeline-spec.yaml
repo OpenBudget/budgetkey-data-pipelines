@@ -61,4 +61,5 @@ all:
           - /var/datapackages/related_items/gov_decisions
           - /var/datapackages/related_items/analysis
         issues: /var/datapackages/state_comptroller/issues
+        budget-owners: true
         out-path: /var/datapackages/related_items/all
