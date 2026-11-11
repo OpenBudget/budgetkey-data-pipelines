@@ -113,8 +113,8 @@ An audit can have up to three lenses, so a year's shares add up to more than 1.
 
 ## 2. Special reports and the events behind them
 
-**`state_comptroller_dash_events`**: one row per event or special report. The 122 rows cover 138 special reports.
-The 12 reports on the 7 October war are one row, and so are the 4 on COVID.
+**`state_comptroller_dash_events`**: one row per event or special report. The 121 rows cover 138 special reports.
+The 13 reports on the 7 October war are one row, and so are the 4 on COVID.
 
 ```sql
 select event, name, kind, event_when, description, first_published, last_published, year, comptroller_name,
@@ -123,10 +123,10 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
 ```
 
 - `kind`:
-  - `event` (21 rows): a disaster, war, operation, crisis or affair, e.g. the Carmel fire, the Second Lebanon War, the
+  - `event` (25 rows, 42 reports): a disaster, war, operation, crisis or affair, e.g. the Carmel fire, the Second Lebanon War, the
     Marmara flotilla, COVID, the 7 October war.
-  - `thematic` (95): a topic examined in depth.
-  - `follow_up` (4) and `other` (2).
+  - `thematic` (90): a topic examined in depth.
+  - `follow_up` (4), `recurring` (1) and `other` (1).
   - For a "special events" widget, filter on `kind = 'event'`. The thematic reports are an optional second list.
 - `name`: a short public name, e.g. "השרפה בכרמל". `event_when` says when the event happened (e.g. "דצמבר 2010"), and
   `description` is one sentence.
