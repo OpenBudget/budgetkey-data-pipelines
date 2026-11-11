@@ -8,6 +8,7 @@ from its owner:
 2. else those whose name matches the chapter's title ("הכנסת", "רשות האוכלוסין", "הועדה לאנרגיה אטומית");
 3. else the one body listing it, when its entity is not a unit of another ("ועדת הבחירות המרכזית לכנסת");
 4. else a body that owns another chapter by 1-3 and lists this one too (an authority's development chapter).
+And the reviewed co-owners in CO_OWNERS, for a chapter two ministries share that the rules give to one.
 A chapter none of these fit has no owner: shared chapters (0054 רשויות פיקוח), the government hospitals' (0092-0094),
 and the ministries whose headquarters has no entity of its own (Defense, National Security).
 
@@ -23,6 +24,11 @@ from datapackage_pipelines_budgetkey.pipelines.related_items.linker import VERSI
 RELATION = 'budget_owner'
 METHOD = 'structural:bodies'
 TITLE_MATCH = 90  # token_set_ratio of a body's name and a chapter's title (0-100)
+# Reviewed (Adam, 2026-11-11): {chapter: [entity ids]} owning it besides the rules' owners.
+CO_OWNERS = {
+    '0019': ['500106646'],  # מדע, תרבות וספורט: משרד התרבות והספורט, with the science ministry
+    '0036': ['500107537'],  # תעסוקה: משרד העבודה, with משרד הכלכלה והתעשייה
+}
 
 
 def is_headquarters(entity_name):
@@ -42,14 +48,17 @@ def _matches(body, title):
     return bool(title) and any(fuzz.token_set_ratio(T.normalize_name(n), title) >= TITLE_MATCH for n in names if n)
 
 
-def owners(bodies, titles):
+def owners(bodies, titles, co_owners=None):
     """{chapter: [body]} for the chapters in `titles` ({chapter code: title}); `bodies` as ri_entities.load_bodies
     gives them. One body per entity."""
+    co_owners = CO_OWNERS if co_owners is None else co_owners
     listing = defaultdict(list)
     seen = set()
+    by_entity = {}
     for body in bodies:
         if body.get('status') != 'ok' or not body.get('entity_id'):
             continue
+        by_entity.setdefault(body['entity_id'], body)
         for chapter in body.get('budget_chapters') or []:
             if chapter in titles and (chapter, body['entity_id']) not in seen:
                 seen.add((chapter, body['entity_id']))
@@ -67,7 +76,14 @@ def owners(bodies, titles):
             found = [b for b in bodies_ if b['entity_id'] in owning]
             if found:
                 out[chapter] = found
-    return out
+    for chapter, entity_ids in co_owners.items():
+        if chapter not in titles:
+            continue
+        found = out.setdefault(chapter, [])
+        for entity_id in entity_ids:
+            if entity_id in by_entity and all(b['entity_id'] != entity_id for b in found):
+                found.append(by_entity[entity_id])
+    return {chapter: found for chapter, found in out.items() if found}
 
 
 def chapter_items(budget):

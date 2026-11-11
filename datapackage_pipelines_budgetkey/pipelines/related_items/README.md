@@ -162,8 +162,9 @@ relation `budget_owner`, confidence 1, method `structural:bodies`. So the minist
 chapter's page names its ministry. `budget_chapters` can't be used as is: a unit (a government hospital, a police
 district) lists its ministry's chapters. A chapter's owners are the headquarters entities ("…/המשרד הראשי") that list
 it; else the bodies named like the chapter ("הכנסת", "הועדה לאנרגיה אטומית"); else the one body listing it if it isn't
-a unit of another; else an owner of another chapter that lists it too (an authority's development chapter). A
-chapter none of these fit has no owner: on prod (Nov 2026) 47 of the 55 listed chapters have one, and the others are
+a unit of another; else an owner of another chapter that lists it too (an authority's development chapter). Two
+shared chapters have a reviewed second owner (`CO_OWNERS`: culture for 0019, labor for 0036). A chapter none of
+these fit has no owner: on prod (Nov 2026) 47 of the 55 listed chapters have one (49 links), and the others are
 shared (0054 רשויות פיקוח), the government hospitals' (0092-0094), or a ministry's whose HQ has no entity (Defense,
 National Security). To give one an owner, fix the body's row: its entity, or its `budget_chapters`.
 

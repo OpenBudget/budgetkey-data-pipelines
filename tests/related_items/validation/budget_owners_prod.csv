@@ -13,6 +13,7 @@ chapter,title,year,target_doc_id,owner,source_doc_id,listed_by
 0017,תאום הפעולות בשטחים,2026,budget/0017/2026,מתאם פעולות הממשלה בשטחים,org/government_office/500100441,1
 0018,הרשויות המקומיות,2026,budget/0018/2026,משרד הפנים,org/government_office/500102546,1
 0019,"מדע, תרבות וספורט",2026,budget/0019/2026,"משרד החדשנות, המדע והטכנולוגיה",org/government_office/500101878,4
+0019,"מדע, תרבות וספורט",2026,budget/0019/2026,משרד התרבות והספורט,org/government_office/500106646,4
 0020,משרד החינוך,2026,budget/0020/2026,משרד החינוך,org/government_office/500101282,1
 0021,ההשכלה הגבוהה,2026,budget/0021/2026,המועצה להשכלה גבוהה/המשרד הראשי,org/law_mandated_organization/500500798,1
 0022,המשרד לשירותי דת,2026,budget/0022/2026,המשרד לשירותי דת,org/government_office/500100987,3
@@ -26,6 +27,7 @@ chapter,title,year,target_doc_id,owner,source_doc_id,listed_by
 0034,משרד האנרגיה,2026,budget/0034/2026,משרד האנרגיה,org/government_office/500100292,2
 0035,הועדה לאנרגיה אטומית,2026,budget/0035/2026,הוועדה לאנרגיה אטומית,org/government_office/500100102,2
 0036,תעסוקה,2026,budget/0036/2026,משרד הכלכלה והתעשייה,org/government_office/500102926,11
+0036,תעסוקה,2026,budget/0036/2026,משרד העבודה,org/government_office/500107537,11
 0037,משרד התיירות,2026,budget/0037/2026,משרד התיירות,org/government_office/500102876,1
 0038,כלכלה ותעשייה,2026,budget/0038/2026,משרד הכלכלה והתעשייה,org/government_office/500102926,5
 0039,משרד התקשורת,2026,budget/0039/2026,משרד התקשורת,org/government_office/500103155,1

@@ -58,6 +58,18 @@ def test_owners_exclude_units():
     assert '0004' not in found
 
 
+def test_reviewed_co_owners():
+    culture = body('משרד התרבות והספורט', 'משרד התרבות והספורט', '500106646', '0019')
+    found = names(O.owners(BODIES + [culture], TITLES, co_owners={'0019': ['500106646'], '0094': ['500100904'],
+                                                                 '0099': ['500100904'], '0024': ['999']}))
+    # a second owner beside the rules' one
+    assert found['0019'] == ['משרד החדשנות, המדע והטכנולוגיה', 'משרד התרבות והספורט']
+    # or the only one; a chapter not in the budget, or an entity not in bodies.csv, adds nothing
+    assert found['0094'] == ['משרד הבריאות'] and '0099' not in found and found['0024'] == ['משרד הבריאות']
+    # without co-owners, culture isn't an owner of 0019
+    assert names(O.owners(BODIES + [culture], TITLES, co_owners={}))['0019'] == ['משרד החדשנות, המדע והטכנולוגיה']
+
+
 def test_unit_and_headquarters_names():
     assert O.is_headquarters('משרד המדע והטכנולוגיה/המשרד הראש') and O.is_headquarters('ביטוח לאומי המשרד הראשי')
     assert O.is_unit('משרד האוצר/רשות המסים') and not O.is_unit('משרד הבריאות/המשרד הראשי')
