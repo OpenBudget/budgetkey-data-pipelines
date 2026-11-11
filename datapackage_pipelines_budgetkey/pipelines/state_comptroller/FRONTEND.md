@@ -5,8 +5,8 @@ ES documents are built in `es_documents.py`, which is the authoritative field li
 
 | Type | doc_id | Page | Count |
 |---|---|---|---|
-| `state_comptroller_audits` | `state_comptroller_audits/<chapter_id>` | one audit: a chapter of an annual or special report, with its findings | 2,170 (Hebrew chapters from 2000 on) |
-| `state_comptroller_issues` | `state_comptroller_issues/<issue_id>` | one deficiency tracked over time: across audits, follow-up audits and the government's responses | about 8–9k (changes with today's re-run) |
+| `state_comptroller_audits` | `state_comptroller_audits/<chapter_id>` | one audit: a chapter of an annual or special report, with its findings | 2,209 (Hebrew chapters from 2000 on) |
+| `state_comptroller_issues` | `state_comptroller_issues/<issue_id>` | one deficiency tracked over time: across audits, follow-up audits and the government's responses | 11,598 (only issues with more than one source) |
 
 Fetch either with `GET https://next.obudget.org/get/<doc_id>` (the document is under `value`). The indexer adds
 `page_title` ("דוח מבקר המדינה - ..." / "מעקב ליקוי מדוחות מבקר המדינה - ..."), `item-url` (the short `/i/<hash>` url)
@@ -131,12 +131,20 @@ reads better than a flat list.
     Don't merge it earlier: the site's "הכל" search covers every API type, so results would link to pages that don't
     exist yet. Tell me if you want them grouped or labelled in search results in a particular way.
   - Add both types to the sitemaps. Tell me when the pages are live and I'll do it.
-- **Data timing:**
-  - The ES indexes for both types failed on their first run (fixed today, deploying with the next push).
-  - The issues are being rebuilt today: an issue now holds at most one finding per audit, which splits some
-    over-merged issues. Issue ids are the id of the issue's earliest finding, so most stay the same.
-  - Expect the docs at `/get/` later today or tomorrow. Good test docs: audit `state_comptroller_audits/10624` (the
-    Dead Sea report, 17 findings, many links), and a follow-up audit such as `state_comptroller_audits/10625`.
+- **Data status (2026-11-11):** both indexes are filled and current: audits and issues were re-indexed on 2026-11-10
+  with the rebuilt issues and related items. They update weekly (the reports pipeline runs on Saturdays).
+- **Test documents:**
+  - `state_comptroller_audits/10624`: the Dead Sea audit (2026), 17 findings, 25 related items. Not a follow-up and no
+    tracked issues.
+  - `state_comptroller_audits/3274`: a follow-up audit (2020), 17 findings, 15 with issue pages, 7 positive findings
+    and `rectified` statuses.
+  - `state_comptroller_audits/10625`: a recent follow-up audit (the climate crisis), 14 findings.
+  - `state_comptroller_audits/1085`: burial services (2009), 6 findings, all tracked, 8 key figures.
+  - `state_comptroller_audits/2249`: `analysis_status` `partial-text`.
+  - `state_comptroller_audits/624`: 20 later audits cite it (`mentioned_in`).
+  - `state_comptroller_issues/1085-6`: 7 audits and 19 responses (26 timeline entries), `latest_status` `in_progress`.
+  - `state_comptroller_issues/1085-1`: 6 audits and 26 responses, `disputed`.
+  - `state_comptroller_issues/1603-1`: 8 audits and 2 responses.
 - **Hebrew only:** the indexed audits are the Hebrew chapters from 2000 on. Translations and older chapters aren't
   indexed. References to them stay as text (`earlier_reports`).
 - **Files:** all URLs point at public files (our bucket or the comptroller's library). There's no auth.
