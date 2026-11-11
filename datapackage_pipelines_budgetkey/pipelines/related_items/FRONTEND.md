@@ -128,6 +128,12 @@ Suggested Hebrew labels:
 - Hide both sections when they're empty.
 - **Placement:** after the item's own content and **before the queries section** (the questions panel, "שאילתות").
 
+**Implemented** in budgetkey-app (PR #23) as `item/item-related/`:
+- Kind groups start closed. One click opens the first 5 entries; "הצג הכל" shows the rest.
+- Analysis pages show only "מוזכר ב...". They link their targets inline, so `SKIP_RELATED_KINDS` hides their "פריטים
+  קשורים".
+- Comptroller entries show as text until their pages exist. Then they're added to `LINKABLE_KINDS`.
+
 ## More than 20 back-links
 
 There's no API endpoint for the rest yet. The `related_items` table is in the public DB, so the full list can be read

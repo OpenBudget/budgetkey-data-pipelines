@@ -123,10 +123,14 @@ reads better than a flat list.
 
 ## Things to know
 
-- **Not searchable yet:**
-  - The two types aren't in budgetkey-api's search `TYPES`. I'll add them once their indexes are filled; tell me if
-    you want them grouped or labelled in search results in a particular way.
-  - They're also left out of the sitemaps until the pages exist. Tell me when they're live and I'll add them.
+- **When the pages ship, three switches flip:**
+  - In budgetkey-app, add `'state_comptroller_audits'` and `'state_comptroller_issues'` to `LINKABLE_KINDS` in
+    `item/item-related/item-related.component.ts`. Until then, the related-items sections on other pages show these
+    entries as text. The `#finding-<part_id>` anchors are already wired.
+  - Merge budgetkey-api PR #6 (https://github.com/OpenBudget/budgetkey-api/pull/6), which adds both types to search.
+    Don't merge it earlier: the site's "הכל" search covers every API type, so results would link to pages that don't
+    exist yet. Tell me if you want them grouped or labelled in search results in a particular way.
+  - Add both types to the sitemaps. Tell me when the pages are live and I'll do it.
 - **Data timing:**
   - The ES indexes for both types failed on their first run (fixed today, deploying with the next push).
   - The issues are being rebuilt today: an issue now holds at most one finding per audit, which splits some
