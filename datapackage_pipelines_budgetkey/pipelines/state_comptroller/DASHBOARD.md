@@ -188,7 +188,8 @@ from state_comptroller_dash_chronic_issues where chain_rank = 1 order by rank li
 - **The tags and event names are LLM output.** They're good on a hand-checked sample, but don't present an
   individual tag as an official classification. Label them e.g. "סיווג אוטומטי".
 - **Comptroller terms:** Goldberg 1998–2005, Lindenstrauss 2005–2012, Shapira 2012–2019, Englman 2019–. Englman's
-  7-year term ends in July 2026. A successor will be added to `COMPTROLLERS` in `dashboard.py` once confirmed. Reports
+  term ended in July 2026 and the office has been vacant since. Until a successor is appointed, reports published
+  since then count as Englman's. A successor will be a new row in `COMPTROLLERS` in `dashboard.py`. Reports
   published in a comptroller's first year were mostly prepared under the previous one.
 - **Links between audits are automatic:** the chronic issues rely on findings linked across audits decades apart. The
   top cards were checked by hand and look right, but a card is a claim. The issue page shows the full timeline.

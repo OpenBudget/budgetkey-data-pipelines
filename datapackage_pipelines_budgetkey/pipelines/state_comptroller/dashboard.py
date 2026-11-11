@@ -33,7 +33,9 @@ OUT_PATH = '/var/datapackages/state_comptroller/dashboard'
 SITE = 'https://next.obudget.org'
 
 # The State Comptrollers whose reports were analysed (2000 on): key, name, took office, left office.
-# A new comptroller is a new row here.
+# Englman's term ended in July 2026 and the office has been vacant since. Until a successor is appointed, the reports
+# published since then count as his (his row has no end date). A successor is a new row here, with Englman's end date
+# set to the day before.
 COMPTROLLERS = [
     ('goldberg', 'אליעזר גולדברג', datetime.date(1998, 7, 1), datetime.date(2005, 7, 3)),
     ('lindenstrauss', 'מיכה לינדנשטראוס', datetime.date(2005, 7, 4), datetime.date(2012, 7, 1)),
