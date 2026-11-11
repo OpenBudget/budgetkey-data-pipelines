@@ -10,6 +10,7 @@ its ES type:
 Links to other budgetkey records (related_items, mentioned_in) are added by the indexer's add_related_items step.
 """
 import collections
+import datetime
 import logging
 import os
 import re
@@ -28,6 +29,9 @@ ISSUES = 'state_comptroller_issues'
 NOT_INDEXED = {'es:index': False}
 OBJECTS = {'es:itemType': 'object', 'es:index': False}
 STRINGS = {'es:itemType': 'string'}
+# The search API sorts an empty query by each type's score column and multiplies a term's relevance by its square
+# root, so every searchable type needs one. Other types: analysis pages 10, decisions 1, budget items their amount.
+SCORE = {'es:score-column': True}
 
 FINDING_SCHEMA = {'fields': [
     {'name': n, 'type': t} for n, t in (
@@ -78,6 +82,7 @@ AUDIT_FIELDS = [
     ('md_url', 'string', NOT_INDEXED),
     ('source_url', 'string', NOT_INDEXED),
     ('analysis_status', 'string', {'es:keyword': True}),
+    ('score', 'number', SCORE),
 ]
 
 TIMELINE_SCHEMA = {'fields': [
@@ -102,6 +107,7 @@ ISSUE_FIELDS = [
     ('chapter_titles', 'array', dict(STRINGS, **{'es:boost': True})),
     ('timeline', 'array', dict(OBJECTS, **{'es:schema': TIMELINE_SCHEMA})),
     ('timeline_text', 'string', {'es:hebrew': True}),
+    ('score', 'number', SCORE),
 ]
 
 INDEXED_STATUSES = ('ok', 'low-verification', 'partial-text', 'no-findings')
@@ -182,6 +188,7 @@ def audit_document(row, findings, issues):
         md_url=row.get('md_url'),
         source_url=row.get('full_pdf_url') or row.get('full_docx_url'),
         analysis_status=row.get('analysis_status'),
+        score=audit_score(row.get('publish_date')),
     )
 
 
@@ -208,6 +215,21 @@ def lead_body(row):
     return None, given
 
 
+def audit_score(publish_date):
+    """10 for an audit from 2000, rising evenly to 20 for one from 2026: newest first on an empty query, and level
+    with the analysis pages (10) in the all-types search."""
+    if not publish_date:
+        return 10.0
+    years = (publish_date - datetime.date(2000, 1, 1)).days / 365.25
+    return round(min(20.0, max(10.0, 10 + years * 10 / 26)), 3)
+
+
+def issue_score(n_audits, n_responses):
+    """1 + the number of sources that track the issue, at most 10 (an issue has 2 or more, so 3-10): never above
+    an audit."""
+    return float(1 + min(9, (n_audits or 0) + (n_responses or 0)))
+
+
 def indexed_audit(row):
     return (row.get('language') == 'he' and row.get('analysis_status') in INDEXED_STATUSES
             and bool(row.get('text_md')))
@@ -227,6 +249,7 @@ def issue_document(row):
         chapter_titles=[chapters[c] for c in sorted(chapters) if chapters[c]], timeline=timeline,
         timeline_text='\n\n'.join('%s %s: %s' % (e.get('date') or '', e.get('title') or '', e.get('text') or '')
                                   for e in timeline),
+        score=issue_score(row.get('n_audits'), row.get('n_responses')),
     )
 
 

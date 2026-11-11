@@ -582,6 +582,11 @@ def test_es_documents(tmp_path):
     assert (sp['main_body'], sp['report_group']) == ('משרד האנרגייה והתשתיות', 'דוח ביקורת מיוחד')
     assert sp['audited_bodies'][0] == 'משרד האנרגייה והתשתיות' and 'דוח ביקורת מיוחד' not in sp['audited_bodies']
     assert (cc['main_body'], cc['report_group'], cc['audited_bodies']) == (None, 'מטלות רוחב', ['משטרת ישראל'])
+    assert float(a['score']) == ed.audit_score(datetime.date(2011, 5, 17)) and 14 < a['score'] < 15
+    assert ed.audit_score(None) == 10 and ed.audit_score(datetime.date(1995, 1, 1)) == 10
+    assert ed.audit_score(datetime.date(2030, 1, 1)) == 20
+    assert float(tracked[0]['score']) == 1  # n_audits/n_responses unset in the fixture
+    assert ed.issue_score(7, 19) == 10
     assert [f['finding_id'] for f in a['findings']] == ['1-1', '1-2']
     assert a['findings'][0]['issue_id'] == '1-1' and a['findings'][0]['issue_size'] == 2
     assert a['audited_bodies'] == ['משרד האוצר', 'החשב הכללי'] and a['audited_body_codes'] == ['29']
