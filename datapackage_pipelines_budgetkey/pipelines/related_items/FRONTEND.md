@@ -106,6 +106,7 @@ Suggested Hebrew labels:
 
 | relation | label on the target's "mentioned in" | label on the source's "related items" |
 |---|---|---|
+| `budget_owner` | הגוף המתוקצב | תקציב הגוף |
 | `audited` | גוף מבוקר | גוף מבוקר |
 | `responsible` | גוף אחראי | גוף אחראי |
 | `subject` | נושא הדוח / ההחלטה | נושא |
@@ -125,6 +126,12 @@ Suggested Hebrew labels:
 - **Related items:** group by kind. The list is already sorted. For an audit, the `parts` can say which findings
   mention the target.
 - `confidence` is always ≥ 0.8 (nothing less certain is linked), so it doesn't need to be shown.
+- **`budget_owner` is a structural link, not a mention:**
+  - It joins a ministry or authority to its own budget chapters, e.g. משרד הבריאות → 0024 and 0067 (49 links).
+  - On the org it's a `related_items` entry (kind `budget`, label "תקציב הגוף").
+  - On the chapter's budget page it's a `mentioned_in` entry (kind `entities`, label "הגוף המתוקצב"). It has no
+    date and no excerpt, and it always comes first in `mentioned_in`.
+  - It reads better above or apart from the "מוזכר ב..." list, e.g. as a line of its own: "הגוף המתוקצב: משרד הבריאות".
 - Hide both sections when they're empty.
 - **Placement:** after the item's own content and **before the queries section** (the questions panel, "שאילתות").
 
