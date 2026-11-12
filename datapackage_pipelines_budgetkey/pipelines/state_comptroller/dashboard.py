@@ -211,6 +211,10 @@ def trend_rows(audits, labels):
     return rows
 
 
+def audit_url(chapter_id):
+    return '{}/i/state_comptroller_audits/{}'.format(SITE, chapter_id)
+
+
 def event_rows(special_reports, audits, findings):
     """One row per event (the special reports about it grouped together) or other special report."""
     by_pub = collections.defaultdict(list)
@@ -236,7 +240,8 @@ def event_rows(special_reports, audits, findings):
         kinds = collections.Counter(r['kind'] for r in reports)
         head = reports[0]
         rows.append(dict(
-            event=key, name=head['event_name'], kind=kinds.most_common(1)[0][0], event_when=head['event_when'],
+            event=key, name=head['event_name'], short_name=head.get('event_short_name') or head['event_name'],
+            kind=kinds.most_common(1)[0][0], event_when=head['event_when'],
             description=head['event_description'], first_published=first, last_published=last,
             year=first.year if first else None, comptroller=comptroller(first),
             comptroller_name=NAMES.get(comptroller(first)),
@@ -245,9 +250,10 @@ def event_rows(special_reports, audits, findings):
             domains=[k for k, _ in domains.most_common(3)], lenses=[k for k, _ in lenses.most_common(3)],
             reports=[dict(pub_id=r['pub_id'], title=r['title'], publish_date=str(as_date(r['publish_date']) or ''),
                           page_url=r['page_url']) for r in reports],
-            chapters=[dict(chapter_id=a['chapter_id'], title=a['title'],
-                           url='{}/i/state_comptroller_audits/{}'.format(SITE, a['chapter_id'])) for a in mine],
-            search_url=SEARCH_URL.format(param='event', key=key),
+            chapters=[dict(chapter_id=a['chapter_id'], title=a['title'], url=audit_url(a['chapter_id'])) for a in mine],
+            # One audit: its own page; several: the search page filtered to them
+            search_url=(audit_url(mine[0]['chapter_id']) if len(mine) == 1
+                        else SEARCH_URL.format(param='event', key=key)),
         ))
     rows.sort(key=lambda r: (r['last_published'] or datetime.date.min), reverse=True)
     logging.info('Dashboard: %d special-report groups, %s', len(rows), collections.Counter(r['kind'] for r in rows))
@@ -317,14 +323,16 @@ TREND_FIELDS = [
     ('search_url', 'string'),
 ]
 EVENT_FIELDS = [
-    ('event', 'string'), ('name', 'string'), ('kind', 'string'), ('event_when', 'string'), ('description', 'string'),
+    ('event', 'string'), ('name', 'string'), ('short_name', 'string'), ('kind', 'string'), ('event_when', 'string'),
+    ('description', 'string'),
     ('first_published', 'date'), ('last_published', 'date'), ('year', 'integer'), ('comptroller', 'string'),
     ('comptroller_name', 'string'), ('n_reports', 'integer'), ('n_chapters', 'integer'), ('n_findings', 'integer'),
     ('n_high_severity', 'integer'), ('domains', 'array'), ('lenses', 'array'), ('reports', 'array'),
     ('chapters', 'array'), ('search_url', 'string'),
 ]
 CHRONIC_FIELDS = [
-    ('rank', 'integer'), ('chain_rank', 'integer'), ('issue_id', 'string'), ('title', 'string'), ('description', 'string'), ('bodies', 'array'),
+    ('rank', 'integer'), ('chain_rank', 'integer'), ('issue_id', 'string'), ('title', 'string'),
+    ('description', 'string'), ('bodies', 'array'),
     ('severity', 'string'), ('domains', 'array'), ('lenses', 'array'), ('first_reported', 'date'),
     ('first_chapter_id', 'integer'), ('first_chapter_title', 'string'), ('latest_verdict', 'string'),
     ('latest_verdict_label', 'string'), ('latest_verdict_date', 'date'), ('latest_verdict_chapter_id', 'integer'),

@@ -42,6 +42,8 @@ def test_classify_tags_each_audit_and_its_event(monkeypatch):
 
 def test_special_reports_about_one_event_share_a_key(monkeypatch):
     def complete(prompt, **kw):
+        if 'שם קצר: השם המקובל' in prompt:
+            return False, dict(items=[dict(key='12', short_name='7 באוקטובר')])
         if 'קבץ' in prompt:
             return False, dict(groups=[dict(name='מלחמת חרבות ברזל', when='אוקטובר 2023', description='המלחמה', ids=[30, 12])])
         title = '"title": "' + prompt.split('"title": "')[1].split('"')[0]
@@ -60,6 +62,18 @@ def test_special_reports_about_one_event_share_a_key(monkeypatch):
     assert reports[12]['event'] == reports[30]['event'] == '12' and reports[30]['event_name'] == 'מלחמת חרבות ברזל'
     assert (reports[40]['event'], reports[40]['kind']) == ('40', 'thematic')
     assert reports[50]['event'] == '50' and reports[50]['kind'] == 'event'  # left out of the groups: its own
+    assert reports[12]['event_short_name'] == reports[30]['event_short_name'] == '7 באוקטובר'
+    assert reports[40]['event_short_name'] == reports[40]['event_name']  # not shortened: the full name
+
+
+def test_short_names_fall_back_and_tell_duplicates_apart(monkeypatch):
+    monkeypatch.setattr(tx.llm, 'complete', lambda prompt, **kw: (False, dict(items=[
+        dict(key='1', short_name='ירושלים'), dict(key='2', short_name='ירושלים'),
+        dict(key='3', short_name='שם ארוך מדי ' * 10), dict(key='99', short_name='לא קיים')])))
+    reports = [dict(pub_id=p, event=str(p), event_name='שם מלא %d' % p, event_description='', publish_date=d)
+               for p, d in ((1, datetime.date(2012, 1, 1)), (2, datetime.date(2022, 1, 1)), (3, None), (4, None))]
+    tx.add_short_names(reports)
+    assert [r['event_short_name'] for r in reports] == ['ירושלים (2012)', 'ירושלים (2022)', 'שם מלא 3', 'שם מלא 4']
 
 
 def test_label_rows_link_to_filtered_search():
@@ -123,7 +137,8 @@ def test_events_group_reports_and_count_their_findings():
                             audit(2, 2025, ['health'], ['emergency_readiness'], pub_id=30),
                             audit(3, 2025, ['education'], ['policy_planning'], pub_id=40)])
     reports = [dict(pub_id=p, title='דוח %d' % p, publish_date=d, page_url='https://m/%d' % p, kind=k, event=e,
-                    event_name=n, event_when=w, event_description='') for p, d, k, e, n, w in (
+                    event_name=n, event_short_name=n[:10], event_when=w, event_description='')
+               for p, d, k, e, n, w in (
         (30, '2025-06-01', 'event', '12', 'מלחמת חרבות ברזל', 'אוקטובר 2023'),
         (12, '2024-06-01', 'event', '12', 'מלחמת חרבות ברזל', 'אוקטובר 2023'),
         (40, '2025-06-01', 'thematic', '40', 'קרנות פנסיה', None))]
@@ -134,6 +149,9 @@ def test_events_group_reports_and_count_their_findings():
     assert [r['pub_id'] for r in war['reports']] == [12, 30] and war['first_published'] == datetime.date(2024, 6, 1)
     assert war['search_url'].endswith('&event=12') and war['chapters'][0]['url'].endswith('/state_comptroller_audits/1')
     assert war['lenses'] == ['emergency_readiness'] and rows['40']['kind'] == 'thematic'
+    assert war['short_name'] == 'מלחמת חרבו'
+    # a single audit links straight to its page
+    assert rows['40']['search_url'] == 'https://next.obudget.org/i/state_comptroller_audits/3'
 
 
 def test_chronic_issues_are_unfixed_at_the_last_audit():

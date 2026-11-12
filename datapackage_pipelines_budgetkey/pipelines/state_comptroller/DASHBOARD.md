@@ -57,7 +57,7 @@ next to `publication_type`. They use the existing `dynamicOptions` mechanism:
  "dynamicOptions": {"query": "SELECT key AS id, label AS display FROM state_comptroller_taxonomy WHERE axis = 'lens' ORDER BY display_order",
                     "filterField": "lenses"}},
 {"id": "event", "display": "דוח מיוחד", "options": [{"id": "all", "display": "כל הדוחות"}],
- "dynamicOptions": {"query": "SELECT event AS id, name AS display FROM state_comptroller_dash_events ORDER BY last_published DESC",
+ "dynamicOptions": {"query": "SELECT event AS id, short_name AS display FROM state_comptroller_dash_events WHERE n_chapters > 1 ORDER BY last_published DESC",
                     "filterField": "event"}}
 ```
 
@@ -117,7 +117,7 @@ An audit can have up to three lenses, so a year's shares add up to more than 1.
 The 13 reports on the 7 October war are one row, and so are the 4 on COVID.
 
 ```sql
-select event, name, kind, event_when, description, first_published, last_published, year, comptroller_name,
+select event, name, short_name, kind, event_when, description, first_published, last_published, year, comptroller_name,
        n_reports, n_chapters, n_findings, n_high_severity, domains, lenses, reports, chapters, search_url
 from state_comptroller_dash_events where kind = 'event' order by last_published desc
 ```
@@ -128,13 +128,15 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
   - `thematic` (90): a topic examined in depth.
   - `follow_up` (4), `recurring` (1) and `other` (1).
   - For a "special events" widget, filter on `kind = 'event'`. The thematic reports are an optional second list.
-- `name`: a short public name, e.g. "השרפה בכרמל". `event_when` says when the event happened (e.g. "דצמבר 2010"), and
-  `description` is one sentence.
+- `name`: the event's or report's full name, e.g. "המשט הטורקי (המרמרה)". `short_name`: its common short name, up to
+  about 30 characters (e.g. "משט המרמרה"), unique (two reports with the same name get their years). Use it in menus
+  and cards. `event_when` says when the event happened (e.g. "דצמבר 2010"), and `description` is one sentence.
 - `reports[]`: `{pub_id, title, publish_date, page_url}` per report. `page_url` is the report on the comptroller's
   site.
 - `chapters[]`: `{chapter_id, title, url}`, where `url` is our audit page.
 - `domains`, `lenses`: the top 3 keys across its chapters.
-- `search_url`: all its audits in search (needs the `event` filter menu above).
+- `search_url`: for a row with one audit (`n_chapters = 1`), that audit's page. Otherwise, all its audits in search
+  (needs the `event` filter menu above, which lists only the rows with more than one audit).
 - `event` is the row's key: the first report's `pub_id`, as a string.
 
 ## 3. Topic map (closed list) and how it changes over time

@@ -182,6 +182,17 @@ GROUP_PROMPT = '''לפניך דוחות מיוחדים של מבקר המדינ�
 לכל קבוצה: name (שם האירוע), when (מתי התרחש), description (משפט אחד על האירוע ועל מה שהמבקר בדק בו), ids.
 
 {reports}'''
+SHORT_NAME_MAX = 30
+SHORT_SCHEMA = {'type': 'object', 'properties': {'items': {'type': 'array', 'items': {'type': 'object', 'properties': {
+    'key': {'type': 'string'}, 'short_name': {'type': 'string'},
+}, 'required': ['key', 'short_name']}}}, 'required': ['items']}
+SHORT_PROMPT = '''לפניך שמות של דוחות מיוחדים של מבקר המדינה ושל האירועים שבהם עסקו. לכל אחד, תן שם קצר: השם המקובל
+בציבור ובתקשורת, עד {max} תווים (למשל "שרפת הכרמל", "משט המרמרה", "פרשת המעונות", "ההתנתקות", "7 באוקטובר",
+"מגפת הקורונה"). אם השם כבר קצר וברור, החזר אותו כמות שהוא.
+השם הקצר נשען רק על השם והתיאור שלפניך, ניטרלי ועובדתי: אל תוסיף שמות של תיקים פליליים, חקירות או כינויים
+שאינם בשם המקורי, ואל תקרא "פרשה" לדוח שהשם המלא שלו אינו מתאר פרשה. החזר פריט לכל key.
+
+{events}'''
 
 
 def name_report(pub, chapters):
@@ -241,8 +252,42 @@ def special_reports(publications, audits):
         r['event_name'] = (g or {}).get('name') or r['name']
         r['event_when'] = (g or {}).get('when') or r['when']
         r['event_description'] = (g or {}).get('description') or r['description']
+    add_short_names(reports)
     logging.info('Taxonomy: %d special reports in %d groups', len(reports), len({r['event'] for r in reports}))
     return reports
+
+
+def add_short_names(reports):
+    """Each event's colloquial name (`event_short_name`, for menus and cards), from one call over all the events.
+    A name the model doesn't give, or gives too long, falls back to the full name. Two events with the same short name
+    (e.g. two reports on Jerusalem years apart) get their years appended."""
+    events = {}
+    for r in sorted(reports, key=lambda r: (str(r['publish_date'] or ''), r['pub_id'])):
+        events.setdefault(r['event'], dict(key=r['event'], name=r['event_name'], description=r['event_description'],
+                                           year=str(r['publish_date'] or '')[:4]))
+    shorts = {}
+    if events:
+        listing = json.dumps(sorted(events.values(), key=lambda e: int(e['key'])), ensure_ascii=False)
+        try:
+            _, out = llm.complete(SHORT_PROMPT.format(max=SHORT_NAME_MAX, events=listing), schema=SHORT_SCHEMA,
+                                  model=llm.MODEL_FAST, temperature=0, usage=USAGE, thinking='low')
+        except Exception:
+            logging.exception('Taxonomy: shortening the event names failed')
+            out = {}
+        for it in (out or {}).get('items') or []:
+            name = (it.get('short_name') or '').strip()
+            if it.get('key') in events and name and len(name) <= SHORT_NAME_MAX + 10:
+                shorts[it['key']] = name
+    for key, e in events.items():
+        shorts.setdefault(key, e['name'])
+    counts = {}
+    for name in shorts.values():
+        counts[name] = counts.get(name, 0) + 1
+    for key, name in shorts.items():
+        if counts[name] > 1 and events[key]['year']:
+            shorts[key] = '{} ({})'.format(name, events[key]['year'])
+    for r in reports:
+        r['event_short_name'] = shorts[r['event']]
 
 
 def classify(audits, events=None, workers=4):
@@ -285,7 +330,7 @@ AUDIT_TAXONOMY_FIELDS = [
 REPORT_FIELDS = [
     ('pub_id', 'integer'), ('title', 'string'), ('publish_date', 'date'), ('page_url', 'string'), ('kind', 'string'),
     ('name', 'string'), ('when', 'string'), ('description', 'string'), ('event', 'string'), ('event_name', 'string'),
-    ('event_when', 'string'), ('event_description', 'string'),
+    ('event_when', 'string'), ('event_description', 'string'), ('event_short_name', 'string'),
 ]
 LABEL_FIELDS = [
     ('axis', 'string'), ('key', 'string'), ('label', 'string'), ('description', 'string'), ('field', 'string'),
