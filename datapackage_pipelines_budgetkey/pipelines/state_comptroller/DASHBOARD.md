@@ -137,8 +137,12 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
   site.
 - `chapters[]`: `{chapter_id, title, url}`, where `url` is our audit page.
 - `domains`, `lenses`: the top 3 keys across its chapters.
-- `search_url`: for a row with one audit (`n_chapters = 1`), that audit's page. Otherwise, all its audits in search
-  (needs the `event` filter menu above, which lists only the rows with more than one audit).
+- `search_url`: for a row with one audit (`n_chapters = 1`), that audit's page. For several, all its audits in search
+  (needs the `event` filter menu above, which lists only the rows with more than one audit). For none
+  (`n_chapters = 0`), the report's page on the comptroller's site.
+- `n_chapters = 0`: a report whose file can't be read (none on the comptroller's site, or restricted). It's named
+  from its title alone and has no findings, domains or lenses. There are two: the Turner affair (1994, an `event`,
+  Ben-Porat's only one) and the polygraph opinion (1997).
 - `event` is the row's key: the first report's `pub_id`, as a string.
 
 ## 3. Topic map (closed list) and how it changes over time

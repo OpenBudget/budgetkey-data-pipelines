@@ -230,9 +230,8 @@ def event_rows(special_reports, audits, findings):
     rows = []
     for key, reports in groups.items():
         reports.sort(key=lambda r: (as_date(r['publish_date']) or datetime.date.min, r['pub_id']))
+        # No audits when the report's file isn't readable (e.g. the Turner affair, 1994): the row links to the report
         mine = sorted((a for r in reports for a in by_pub.get(r['pub_id'], [])), key=lambda a: a['chapter_id'])
-        if not mine:
-            continue
         fs = [f for a in mine for f in by_chapter.get(a['chapter_id'], [])]
         domains = collections.Counter(k for a in mine for k in a['domains'])
         lenses = collections.Counter(k for a in mine for k in a['lenses'])
@@ -252,9 +251,10 @@ def event_rows(special_reports, audits, findings):
             reports=[dict(pub_id=r['pub_id'], title=r['title'], publish_date=str(as_date(r['publish_date']) or ''),
                           page_url=r['page_url']) for r in reports],
             chapters=[dict(chapter_id=a['chapter_id'], title=a['title'], url=audit_url(a['chapter_id'])) for a in mine],
-            # One audit: its own page; several: the search page filtered to them
+            # One audit: its own page; several: the search page filtered to them; none: the report on the
+            # comptroller's site
             search_url=(audit_url(mine[0]['chapter_id']) if len(mine) == 1
-                        else SEARCH_URL.format(param='event', key=key)),
+                        else SEARCH_URL.format(param='event', key=key) if mine else head.get('page_url')),
         ))
     rows.sort(key=lambda r: (r['last_published'] or datetime.date.min), reverse=True)
     logging.info('Dashboard: %d special-report groups, %s', len(rows), collections.Counter(r['kind'] for r in rows))

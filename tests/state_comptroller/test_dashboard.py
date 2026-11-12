@@ -58,10 +58,17 @@ def test_special_reports_about_one_event_share_a_key(monkeypatch):
             dict(pub_id=40, title='דוח מיוחד - קרנות פנסיה', publication_type='special', publish_date=None),
             dict(pub_id=50, title='דוח מיוחד - האסון', publication_type='special', publish_date=None),
             dict(pub_id=60, title='דוח שנתי 75א', publication_type='annual', publish_date=None),
-            dict(pub_id=70, title='דוח מיוחד בלי פרקים', publication_type='special', publish_date=None)]
-    audits = [dict(chapter_id=i, pub_id=p, title='פרק') for i, p in ((1, 12), (2, 30), (3, 40), (4, 50), (5, 60))]
+            dict(pub_id=70, title='דוח מיוחד בלי פרקים', publication_type='special', publish_date=None),
+            dict(pub_id=80, title='פרשת טרנר', publication_type='special', publish_date=datetime.date(2024, 6, 1)),
+            dict(pub_id=90, title='דוח מיוחד ישן', publication_type='special', publish_date=datetime.date(2023, 1, 1)),
+            dict(pub_id=95, title='Special report', publication_type='special', publish_date=datetime.date(2025, 1, 1))]
+    audits = [dict(chapter_id=i, pub_id=p, title='פרק', publish_date=datetime.date(2024, 1, 1))
+              for i, p in ((1, 12), (2, 30), (3, 40), (4, 50), (5, 60))]
     reports = {r['pub_id']: r for r in tx.special_reports(pubs, audits)}
-    assert sorted(reports) == [12, 30, 40, 50]  # not the annual report, nor one without analysed chapters
+    # Not the annual report. Of those without analysed chapters, only the Hebrew one from the analysed years (80): its
+    # file wasn't readable
+    assert sorted(reports) == [12, 30, 40, 50, 80]
+    assert reports[80]['event'] == '80' and reports[80]['kind'] == 'event'
     assert reports[12]['event'] == reports[30]['event'] == '12' and reports[30]['event_name'] == 'מלחמת חרבות ברזל'
     assert (reports[40]['event'], reports[40]['kind']) == ('40', 'thematic')
     assert reports[50]['event'] == '50' and reports[50]['kind'] == 'event'  # left out of the groups: its own
@@ -149,7 +156,8 @@ def test_events_group_reports_and_count_their_findings():
                for p, d, k, e, n, w in (
         (30, '2025-06-01', 'event', '12', 'מלחמת חרבות ברזל', 'אוקטובר 2023'),
         (12, '2024-06-01', 'event', '12', 'מלחמת חרבות ברזל', 'אוקטובר 2023'),
-        (40, '2025-06-01', 'thematic', '40', 'קרנות פנסיה', None))]
+        (40, '2025-06-01', 'thematic', '40', 'קרנות פנסיה', None),
+        (80, '1994-07-07', 'event', '80', 'פרשת טרנר', '1993'))]
     findings = [dict(chapter_id=1, severity='high'), dict(chapter_id=2, severity='low'), dict(chapter_id=3)]
     rows = {r['event']: r for r in db.event_rows(reports, audits, findings)}
     war = rows['12']
@@ -160,6 +168,10 @@ def test_events_group_reports_and_count_their_findings():
     assert war['short_name'] == 'מלחמת חרבו'
     # a single audit links straight to its page
     assert rows['40']['search_url'] == 'https://next.obudget.org/i/state_comptroller_audits/3'
+    # a report without a readable file: kept, linking to the report on the comptroller's site
+    turner = rows['80']
+    assert (turner['n_chapters'], turner['n_findings'], turner['domains']) == (0, 0, [])
+    assert turner['search_url'] == 'https://m/80' and turner['comptroller'] == 'benporat'
 
 
 def test_chronic_issues_are_unfixed_at_the_last_audit():

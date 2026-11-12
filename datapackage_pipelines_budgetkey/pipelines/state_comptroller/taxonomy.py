@@ -25,6 +25,7 @@ publication's name, kind and event group), `body_names` (a body name -> its cano
 labels, which the search page's filter menus read).
 """
 import collections
+import datetime
 import difflib
 import hashlib
 import json
@@ -241,14 +242,41 @@ def group_events(reports):
     return groups
 
 
+HEBREW = re.compile('[\u05d0-\u05ea]')
+
+
+def sc_date(v):
+    if isinstance(v, datetime.date):
+        return v
+    try:
+        return datetime.date.fromisoformat(str(v)[:10])
+    except ValueError:
+        return None
+
+
 def special_reports(publications, audits):
-    """The special publications that have analysed audits: named, classified and keyed by their event group."""
+    """The special publications of the analysed years: named, classified and keyed by their event group.
+
+    That includes the few whose chapters have no readable file (e.g. the 1994 report on the Turner affair, which has
+    no file on the comptroller's site): they're named from their title alone."""
     by_pub = {}
     for a in audits:
         by_pub.setdefault(a.get('pub_id'), []).append(a)
-    pubs = [p for p in publications if p.get('publication_type') == 'special' and p['pub_id'] in by_pub]
+    dates = [d for d in (sc_date(a.get('publish_date')) for a in audits) if d]
+    first = min(dates) if dates else None
+
+    def wanted(p):
+        if p.get('publication_type') != 'special':
+            return False
+        if p['pub_id'] in by_pub:
+            return True
+        d = sc_date(p.get('publish_date'))
+        return bool(first and d and d >= first and HEBREW.search(p.get('title') or ''))
+
+    pubs = [p for p in publications if wanted(p)]
     with ThreadPoolExecutor(4) as ex:
-        infos = list(ex.map(lambda p: name_report(p, sorted(by_pub[p['pub_id']], key=lambda a: a['chapter_id'])), pubs))
+        infos = list(ex.map(lambda p: name_report(p, sorted(by_pub.get(p['pub_id'], []), key=lambda a: a['chapter_id'])),
+                            pubs))
     reports = []
     for p, info in zip(pubs, infos):
         reports.append(dict(pub_id=p['pub_id'], title=p.get('title'), publish_date=p.get('publish_date'),
