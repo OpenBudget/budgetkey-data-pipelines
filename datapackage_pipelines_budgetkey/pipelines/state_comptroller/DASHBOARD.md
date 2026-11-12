@@ -113,7 +113,7 @@ An audit can have up to three lenses, so a year's shares add up to more than 1.
 
 ## 2. Special reports and the events behind them
 
-**`state_comptroller_dash_events`**: one row per event or special report. The 121 rows cover 138 special reports.
+**`state_comptroller_dash_events`**: one row per event or special report. The 137 rows cover 154 special reports.
 The 13 reports on the 7 October war are one row, and so are the 4 on COVID.
 
 ```sql
@@ -123,10 +123,10 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
 ```
 
 - `kind`:
-  - `event` (25 rows, 42 reports): a disaster, war, operation, crisis or affair, e.g. the Carmel fire, the Second Lebanon War, the
+  - `event` (27 rows, 44 reports): a disaster, war, operation, crisis or affair, e.g. the Carmel fire, the Second Lebanon War, the
     Marmara flotilla, COVID, the 7 October war.
-  - `thematic` (90): a topic examined in depth.
-  - `follow_up` (4), `recurring` (1) and `other` (1).
+  - `thematic` (103): a topic examined in depth.
+  - `follow_up` (4), `recurring` (2) and `other` (1).
   - For a "special events" widget, filter on `kind = 'event'`. The thematic reports are an optional second list.
 - `description` is copy-edited for readers (one or two sentences, varied, not repeating the name). `event_when` uses
   one dash style, an en dash without spaces ("יולי–אוגוסט 2014", "2020–2022").
@@ -143,7 +143,7 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
 
 ## 3. Topic map (closed list) and how it changes over time
 
-**`state_comptroller_dash_counts`**: per domain and lens, per period: 34 keys × 32 periods = 1,088 rows.
+**`state_comptroller_dash_counts`**: per domain and lens, per period: 34 keys × 44 periods = 1,496 rows.
 
 ```sql
 select key, label, period_kind, period, period_label, n, total, share, lift, search_url
@@ -164,7 +164,7 @@ from state_comptroller_dash_counts where axis = 'domain' and period_kind = 'comp
 ## 4. Longest-running unresolved issues
 
 **`state_comptroller_dash_chronic_issues`**: issues the comptroller audited at least twice and, at the latest
-follow-up audit, found not fixed or only partly fixed. There are 1,223, ordered by how long they've been open.
+follow-up audit, found not fixed or only partly fixed. There are 1,472, ordered by how long they've been open.
 
 ```sql
 select rank, issue_id, title, description, bodies, severity, domains, lenses,
@@ -176,16 +176,17 @@ from state_comptroller_dash_chronic_issues where chain_rank = 1 order by rank li
 - `url` is the issue page (`/i/state_comptroller_issues/<issue_id>`), the card's link.
 - `bodies`: the bodies' names deduplicated. Spelling variants and old names of renamed bodies (המשרד לאיכות הסביבה →
   המשרד להגנת הסביבה) show once, under the current name. A unit and its parent body stay separate.
-- `years_open` runs from `first_reported` to the latest verdict. The top cards run 20–26 years: hospitals' emergency
-  readiness from 2000 to the 7 October report, nursing benefits, cellular radiation rules.
+- `years_open` runs from `first_reported` to the latest verdict. The top cards run 25–32 years: the Civil Service
+  Commission's discipline follow-up (1990 → 2022), the building code regulations (1991 → 2018), hospitals' emergency
+  readiness (2000 → the 7 October report).
 - `latest_verdict` is `not_rectified` or `partially_rectified`. `latest_verdict_label` is the Hebrew label to show.
 - `government_status` is the latest status the government gave in its own response books (`in_progress`,
   `rectified`, `disputed`...), or null. It can contrast with the comptroller's verdict.
 - `chain_rank`:
-  - Several findings of the same pair of audits often qualify together (e.g. four quarry-restoration findings, 2000 →
+  - Several findings of the same pair of audits often qualify together (e.g. several quarry-restoration findings, 1995 →
     2021).
   - `chain_rank = 1` is each chain's longest-running finding. Filter on it so every card tells a different story:
-    473 issues, 87 of them open 10+ years.
+    617 issues, 117 of them open 10+ years.
 - `first_chapter_title` and `latest_verdict_chapter_title` are the audits it spans: "first reported in …, still open
   in …".
 
