@@ -94,7 +94,9 @@ def test_comptroller_terms():
     assert db.comptroller(datetime.date(2005, 7, 3)) == 'goldberg'
     assert db.comptroller(datetime.date(2005, 7, 4)) == 'lindenstrauss'
     assert db.comptroller(datetime.date(2019, 7, 1)) == 'englman' and db.comptroller(None) is None
-    assert db.comptroller(datetime.date(1990, 1, 1)) == 'benporat' and db.comptroller(datetime.date(1998, 6, 30)) == 'benporat'
+    assert db.comptroller(datetime.date(1990, 1, 1)) == 'benporat' and db.comptroller(datetime.date(1998, 7, 3)) == 'benporat'
+    assert db.comptroller(datetime.date(1988, 7, 4)) == 'benporat' and db.comptroller(datetime.date(1988, 7, 3)) is None
+    assert db.comptroller(datetime.date(1998, 7, 4)) == 'goldberg'
     assert db.comptroller(datetime.date(1988, 4, 10)) is None  # report 38, before Ben-Porat took office
 
 

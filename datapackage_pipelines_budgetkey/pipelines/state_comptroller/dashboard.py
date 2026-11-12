@@ -37,8 +37,8 @@ SITE = 'https://next.obudget.org'
 # published since then count as his (his row has no end date). A successor is a new row here, with Englman's end date
 # set to the day before.
 COMPTROLLERS = [
-    ('benporat', 'מרים בן-פורת', datetime.date(1988, 7, 1), datetime.date(1998, 6, 30)),
-    ('goldberg', 'אליעזר גולדברג', datetime.date(1998, 7, 1), datetime.date(2005, 7, 3)),
+    ('benporat', 'מרים בן-פורת', datetime.date(1988, 7, 4), datetime.date(1998, 7, 3)),
+    ('goldberg', 'אליעזר גולדברג', datetime.date(1998, 7, 4), datetime.date(2005, 7, 3)),
     ('lindenstrauss', 'מיכה לינדנשטראוס', datetime.date(2005, 7, 4), datetime.date(2012, 7, 1)),
     ('shapira', 'יוסף חיים שפירא', datetime.date(2012, 7, 2), datetime.date(2019, 6, 30)),
     ('englman', 'מתניהו אנגלמן', datetime.date(2019, 7, 1), None),
