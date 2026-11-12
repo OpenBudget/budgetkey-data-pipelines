@@ -5,7 +5,7 @@ ES documents are built in `es_documents.py`, which is the authoritative field li
 
 | Type | doc_id | Page | Count |
 |---|---|---|---|
-| `state_comptroller_audits` | `state_comptroller_audits/<chapter_id>` | one audit: a chapter of an annual or special report, with its findings | 2,209 (Hebrew chapters from 2000 on) |
+| `state_comptroller_audits` | `state_comptroller_audits/<chapter_id>` | one audit: a chapter of an annual or special report, with its findings | Hebrew chapters from 1989 on |
 | `state_comptroller_issues` | `state_comptroller_issues/<issue_id>` | one deficiency tracked over time: across audits, follow-up audits and the government's responses | 11,598 (only issues with more than one source) |
 
 Fetch either with `GET https://next.obudget.org/get/<doc_id>` (the document is under `value`). The indexer adds
@@ -157,6 +157,6 @@ names of renamed bodies show once, under the current name (`state_comptroller_bo
   - `state_comptroller_issues/1085-6`: 7 audits and 19 responses (26 timeline entries), `latest_status` `in_progress`.
   - `state_comptroller_issues/1085-1`: 6 audits and 26 responses, `disputed`.
   - `state_comptroller_issues/1603-1`: 8 audits and 2 responses.
-- **Hebrew only:** the indexed audits are the Hebrew chapters from 2000 on. Translations and older chapters aren't
+- **Hebrew only:** the indexed audits are the Hebrew chapters from 1989 on. Translations and older chapters aren't
   indexed. References to them stay as text (`earlier_reports`).
 - **Files:** all URLs point at public files (our bucket or the comptroller's library). There's no auth.

@@ -20,7 +20,7 @@ GET https://next.obudget.org/api/query?query=<url-encoded SQL>[&page=N]
 
 ## The two closed lists
 
-Every analysed audit (the 2,209 Hebrew chapters from 2000 on) is tagged with keys from two closed lists. Gemini does
+Every analysed audit (the Hebrew chapters from 1989 on, Ben-Porat's first report) is tagged with keys from two closed lists. Gemini does
 the tagging from the chapter's title, summary and topics, and it has been spot-checked by hand.
 - **Domain** (תחום): the policy area, 20 keys, e.g. `health`, `defense`, `local_gov`. Each audit has a main domain
   (`domain`) and possibly a secondary one, and `domains[]` holds both.
@@ -78,7 +78,7 @@ select key, label, n, share, share_by_comptroller, peak_comptroller, low_comptro
 from state_comptroller_dash_trends where axis = 'lens' order by n desc
 ```
 
-- `n`, `share`: audits with this lens, and their share of all 2,209.
+- `n`, `share`: audits with this lens, and their share of all analysed audits.
 - `share_by_comptroller`: e.g. `{"goldberg": 0.18, "lindenstrauss": 0.23, "shapira": 0.18, "englman": 0.07}`. Each
   value is the share of that comptroller's audits.
 - `pattern` is the headline:
@@ -91,7 +91,7 @@ from state_comptroller_dash_trends where axis = 'lens' order by n desc
   note. The threshold is p < 0.01.
 - The same table has `axis = 'domain'` rows, if the dashboard wants the same view for policy areas.
 
-**The comptrollers: `state_comptroller_dash_comptrollers`**: one row per comptroller since 2000.
+**The comptrollers: `state_comptroller_dash_comptrollers`**: one row per comptroller since 1988 (five: Ben-Porat, Goldberg, Lindenstrauss, Shapira, Englman).
 
 ```sql
 select comptroller, name, start_date, end_date, n_audits, n_findings, findings_per_audit,
@@ -153,7 +153,7 @@ from state_comptroller_dash_counts where axis = 'domain' and period_kind = 'comp
 - `period_kind`:
   - `all`: one period, `period = 'all'`.
   - `comptroller`: `period` is the comptroller key, `period_label` his name.
-  - `year`: `period` is the year as a string, 2000–2026.
+  - `year`: `period` is the year as a string, 1989–2026.
 - `n`: audits in the period with this key. `total`: the period's audits. `share = n / total`.
 - `lift`: the period's share against the overall share. Above 1 means the topic stood out in that period. It's a
   natural "what stood out" signal for highlighting or ordering a period's words.
@@ -193,10 +193,12 @@ from state_comptroller_dash_chronic_issues where chain_rank = 1 order by rank li
 
 - **The tags and event names are LLM output.** They're good on a hand-checked sample, but don't present an
   individual tag as an official classification. Label them e.g. "סיווג אוטומטי".
-- **Comptroller terms:** Goldberg 1998–2005, Lindenstrauss 2005–2012, Shapira 2012–2019, Englman 2019–. Englman's
+- **Comptroller terms:** Ben-Porat 1988–1998, Goldberg 1998–2005, Lindenstrauss 2005–2012, Shapira 2012–2019, Englman 2019–. Englman's
   term ended in July 2026 and the office has been vacant since. Until a successor is appointed, reports published
   since then count as Englman's. A successor will be a new row in `COMPTROLLERS` in `dashboard.py`. Reports
   published in a comptroller's first year were mostly prepared under the previous one.
 - **Links between audits are automatic:** the chronic issues rely on findings linked across audits decades apart. The
   top cards were checked by hand and look right, but a card is a claim. The issue page shows the full timeline.
-- Data covers the Hebrew chapters from 2000 on.
+- Data covers the Hebrew chapters from 1989 on: every report from Ben-Porat's first (annual report 39, April
+  1989). All of them have a full text layer, so no year is partial. The government's response books start in 1995
+  (report 45), so issues from 1989–1994 have no government responses.

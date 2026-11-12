@@ -94,7 +94,8 @@ def test_comptroller_terms():
     assert db.comptroller(datetime.date(2005, 7, 3)) == 'goldberg'
     assert db.comptroller(datetime.date(2005, 7, 4)) == 'lindenstrauss'
     assert db.comptroller(datetime.date(2019, 7, 1)) == 'englman' and db.comptroller(None) is None
-    assert db.comptroller(datetime.date(1990, 1, 1)) is None
+    assert db.comptroller(datetime.date(1990, 1, 1)) == 'benporat' and db.comptroller(datetime.date(1998, 6, 30)) == 'benporat'
+    assert db.comptroller(datetime.date(1988, 4, 10)) is None  # report 38, before Ben-Porat took office
 
 
 def test_chi2_sf_matches_known_critical_values():

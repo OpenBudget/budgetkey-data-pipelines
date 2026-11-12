@@ -1,7 +1,7 @@
 """Aggregated tables for the State Comptroller dashboard.
 
 From the audits' closed taxonomy (taxonomy.py), the publications and the tracked issues:
-- state_comptroller_dash_comptrollers: one row per State Comptroller since 2000: volume and format of the audits
+- state_comptroller_dash_comptrollers: one row per State Comptroller since 1988: volume and format of the audits
   published in his term.
 - state_comptroller_dash_counts: how many audits each domain and each lens covered, overall, per comptroller and per
   year (the topic map and its change over time).
@@ -32,11 +32,12 @@ TAXONOMY_PATH = os.environ.get('TAXONOMY', '/var/datapackages/state_comptroller/
 OUT_PATH = '/var/datapackages/state_comptroller/dashboard'
 SITE = 'https://next.obudget.org'
 
-# The State Comptrollers whose reports were analysed (2000 on): key, name, took office, left office.
+# The State Comptrollers whose reports were analysed (1989 on): key, name, took office, left office.
 # Englman's term ended in July 2026 and the office has been vacant since. Until a successor is appointed, the reports
 # published since then count as his (his row has no end date). A successor is a new row here, with Englman's end date
 # set to the day before.
 COMPTROLLERS = [
+    ('benporat', 'מרים בן-פורת', datetime.date(1988, 7, 1), datetime.date(1998, 6, 30)),
     ('goldberg', 'אליעזר גולדברג', datetime.date(1998, 7, 1), datetime.date(2005, 7, 3)),
     ('lindenstrauss', 'מיכה לינדנשטראוס', datetime.date(2005, 7, 4), datetime.date(2012, 7, 1)),
     ('shapira', 'יוסף חיים שפירא', datetime.date(2012, 7, 2), datetime.date(2019, 6, 30)),

@@ -30,7 +30,9 @@ from mevaker_scraper import file_object_name
 from datapackage_pipelines_budgetkey.common import llm
 
 ANALYZER_VERSION = 2
-MIN_YEAR = 2000
+# From Miriam Ben-Porat's first report (annual report 39, April 1989): she took office in July 1988, and the
+# reports published before that (report 38, April 1988) were her predecessors'.
+MIN_YEAR = 1989
 REPORTS_PATH = '/var/datapackages/state_comptroller/reports'
 OUT_PATH = '/var/datapackages/state_comptroller/chapters'
 GARBLED_PAGE = 0.02

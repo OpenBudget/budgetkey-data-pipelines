@@ -262,12 +262,12 @@ def lead_body(row):
 
 
 def audit_score(publish_date):
-    """10 for an audit from 2000, rising evenly to 20 for one from 2026: newest first on an empty query, and level
-    with the analysis pages (10) in the all-types search."""
+    """10 for an audit from 1989 (the first analysed), rising evenly to 20 for one from 2026: newest first on an
+    empty query, and level with the analysis pages (10) in the all-types search."""
     if not publish_date:
         return 10.0
-    years = (publish_date - datetime.date(2000, 1, 1)).days / 365.25
-    return round(min(20.0, max(10.0, 10 + years * 10 / 26)), 3)
+    years = (publish_date - datetime.date(1989, 1, 1)).days / 365.25
+    return round(min(20.0, max(10.0, 10 + years * 10 / 37)), 3)
 
 
 def issue_score(n_audits, n_responses):
