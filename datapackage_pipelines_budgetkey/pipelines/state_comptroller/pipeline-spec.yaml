@@ -49,6 +49,7 @@ issues:
 taxonomy:
   dependencies:
     - pipeline: ./state_comptroller/chapters
+    - pipeline: ./state_comptroller/issues
   pipeline:
     - run: add_metadata
       parameters:

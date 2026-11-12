@@ -13,11 +13,10 @@ import collections
 import datetime
 import logging
 import os
-import re
 
 import dataflows as DF
 
-import sc_common as sc  # noqa: F401 (raises the csv field size limit, for the chapters' full texts)
+import sc_common as sc  # also raises the csv field size limit, for the chapters' full texts
 
 CHAPTERS_PATH = os.environ.get('CHAPTERS', '/var/datapackages/state_comptroller/chapters')
 ISSUES_PATH = os.environ.get('ISSUES', '/var/datapackages/state_comptroller/issues')
@@ -149,6 +148,16 @@ def taxonomy_index(taxonomy_path):
     return {r['chapter_id']: r for r in rows}
 
 
+def body_names(taxonomy_path):
+    """{body name: its canonical name} (taxonomy.py's body_names): spelling variants and old names of renamed bodies."""
+    try:
+        rows = read_resource(taxonomy_path, 'body_names')
+    except Exception:
+        logging.warning('No body names at %s, bodies are indexed as written', taxonomy_path)
+        return {}
+    return {r['name']: r['canonical'] for r in rows if r.get('canonical') and r['canonical'] != r['name']}
+
+
 def audit_tags(chapter_id, taxonomy):
     t = taxonomy.get(chapter_id) or {}
     return dict(domain=t.get('domain'), domains=t.get('domains') or [], lenses=t.get('lenses') or [],
@@ -162,14 +171,15 @@ def issue_tags(timeline, taxonomy):
                 lenses=list(dict.fromkeys(k for t in tags for k in t.get('lenses') or [])))
 
 
-def audit_document(row, findings, issues):
+def audit_document(row, findings, issues, bodies=None):
     own = sorted(findings.get(row['chapter_id'], []), key=lambda f: f.get('seq') or 0)
     doc_findings = []
     for f in own:
         issue_id, size = issues.get(f['finding_id'], (None, None))
         doc_findings.append(dict(
             finding_id=f['finding_id'], seq=f.get('seq'), title=f.get('title'), description=f.get('description'),
-            recommendation=f.get('recommendation'), responsible_bodies=f.get('responsible_bodies') or [],
+            recommendation=f.get('recommendation'),
+            responsible_bodies=sc.canonical_bodies(f.get('responsible_bodies'), bodies or {}),
             finding_type=f.get('finding_type'), severity=f.get('severity'),
             followup_status=f.get('followup_status'), followup_status_text=f.get('followup_status_text'),
             section=f.get('section'), body_responses=body_responses(f.get('body_responses')),
@@ -231,10 +241,7 @@ def body_responses(responses):
             for r in responses or []]
 
 
-def _body_key(name):
-    """A body's name for comparison: letters only, doubled yod/vav as single ("האנרגייה" = "האנרגיה")."""
-    s = re.sub(r'[^א-תa-zA-Z]', '', name or '')
-    return s.replace('יי', 'י').replace('וו', 'ו')
+_body_key = sc.body_key
 
 
 def lead_body(row):
@@ -274,7 +281,7 @@ def indexed_audit(row):
             and bool(row.get('text_md')))
 
 
-def issue_document(row):
+def issue_document(row, bodies=None):
     timeline = row.get('timeline') or []
     chapters = {}
     for e in timeline:
@@ -282,7 +289,8 @@ def issue_document(row):
             chapters[e['chapter_id']] = e.get('source')
     return dict(
         issue_id=row['issue_id'], title=row.get('title'), description=row.get('description'),
-        bodies=row.get('bodies') or [], severity=row.get('severity'), first_reported=row.get('first_reported'),
+        bodies=sc.canonical_bodies(row.get('bodies'), bodies or {}), severity=row.get('severity'),
+        first_reported=row.get('first_reported'),
         last_seen=row.get('last_seen'), n_audits=row.get('n_audits'), n_responses=row.get('n_responses'),
         latest_status=row.get('latest_status'), chapter_ids=sorted(chapters),
         chapter_titles=[chapters[c] for c in sorted(chapters) if chapters[c]], timeline=timeline,
@@ -318,7 +326,7 @@ def typed(resource, fields):
     return steps
 
 
-def audits_flow(chapters_path, issues, taxonomy):
+def audits_flow(chapters_path, issues, taxonomy, bodies=None):
     findings = collections.defaultdict(list)
     for f in read_resource(chapters_path, 'findings'):
         findings[f['chapter_id']].append(f)
@@ -327,19 +335,19 @@ def audits_flow(chapters_path, issues, taxonomy):
         DF.load(os.path.join(chapters_path, 'datapackage.json'), resources=['audits']),
         DF.filter_rows(indexed_audit, resources=['audits']),
         ensure_fields('audits', AUDIT_FIELDS),
-        lambda row: row.update(audit_document(row, findings, issues), **audit_tags(row['chapter_id'], taxonomy))
+        lambda row: row.update(audit_document(row, findings, issues, bodies), **audit_tags(row['chapter_id'], taxonomy))
         if 'chapter_id' in row else None,
         DF.update_resource('audits', name=AUDITS, path=AUDITS + '.csv'),
         *typed(AUDITS, AUDIT_FIELDS),
     )
 
 
-def issues_flow(issues_path, taxonomy):
+def issues_flow(issues_path, taxonomy, bodies=None):
     return DF.Flow(
         DF.load(os.path.join(issues_path, 'datapackage.json'), resources=['issues']),
         DF.filter_rows(tracked_issue, resources=['issues']),
         ensure_fields('issues', ISSUE_FIELDS),
-        lambda row: row.update(issue_document(row), **issue_tags(row.get('timeline') or [], taxonomy))
+        lambda row: row.update(issue_document(row, bodies), **issue_tags(row.get('timeline') or [], taxonomy))
         if 'issue_id' in row else None,
         DF.update_resource('issues', name=ISSUES, path=ISSUES + '.csv'),
         *typed(ISSUES, ISSUE_FIELDS),
@@ -349,9 +357,10 @@ def issues_flow(issues_path, taxonomy):
 def documents_flow(chapters_path=CHAPTERS_PATH, issues_path=ISSUES_PATH, taxonomy_path=TAXONOMY_PATH):
     issues = issue_index(issues_path)
     taxonomy = taxonomy_index(taxonomy_path)
-    steps = [audits_flow(chapters_path, issues, taxonomy)]
+    bodies = body_names(taxonomy_path)
+    steps = [audits_flow(chapters_path, issues, taxonomy, bodies)]
     if issues:
-        steps.append(issues_flow(issues_path, taxonomy))
+        steps.append(issues_flow(issues_path, taxonomy, bodies))
     return DF.Flow(*steps)
 
 

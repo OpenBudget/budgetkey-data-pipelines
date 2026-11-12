@@ -260,7 +260,7 @@ def event_rows(special_reports, audits, findings):
     return rows
 
 
-def chronic_rows(issues, by_chapter):
+def chronic_rows(issues, by_chapter, bodies=None):
     """Issues the comptroller audited at least twice and, at the last audit with a verdict, found not fixed."""
     rows = []
     for i in issues:
@@ -281,7 +281,7 @@ def chronic_rows(issues, by_chapter):
         tags = [by_chapter[c] for c in chapters if c in by_chapter]
         rows.append(dict(
             issue_id=i['issue_id'], title=i.get('title'), description=i.get('description'),
-            bodies=i.get('bodies') or [], severity=i.get('severity'),
+            bodies=sc.canonical_bodies(i.get('bodies'), bodies or {}), severity=i.get('severity'),
             domains=list(dict.fromkeys(k for t in tags for k in t['domains'])),
             lenses=list(dict.fromkeys(k for t in tags for k in t['lenses'])),
             first_reported=first, first_chapter_id=chapters[0] if chapters else None,
@@ -349,12 +349,17 @@ def build(chapters_path, issues_path, taxonomy_path):
     issues = read(issues_path, 'issues', ['issue_id', 'title', 'description', 'bodies', 'severity', 'first_reported',
                                           'n_audits', 'n_responses', 'timeline'])
     by_chapter = {a['chapter_id']: a for a in audits}
+    try:
+        bodies = {r['name']: r['canonical'] for r in read(taxonomy_path, 'body_names')}
+    except Exception:
+        logging.warning('No body names at %s, chronic issues list bodies as written', taxonomy_path)
+        bodies = {}
     return dict(
         comptrollers=comptroller_rows(audits, findings),
         counts=count_rows(audits, labels),
         trends=trend_rows(audits, labels),
         events=event_rows(read(taxonomy_path, 'special_reports'), audits, findings),
-        chronic_issues=chronic_rows(issues, by_chapter),
+        chronic_issues=chronic_rows(issues, by_chapter, bodies),
     )
 
 

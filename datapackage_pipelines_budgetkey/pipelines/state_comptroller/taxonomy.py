@@ -14,12 +14,23 @@ theme, a recurring report or a follow-up. Reports about the same event (the many
 grouped by one more call, and every special report's audits get the group's key (`event`), which the search page
 filters on.
 
+The audited bodies' names in the findings are free text, with spelling variants and old names of renamed bodies
+("המשרד לאיכות הסביבה" / "המשרד להגנת הסביבה") that can show up side by side in one issue's list. Names that appear
+together in a finding or an issue and look alike are judged in pairs (same body or not, and which name is current);
+the same-body pairs are grouped, and `body_names` maps each name to its group's current name. The documents and the
+dashboard apply it.
+
 Outputs: `audit_taxonomy` (one row per audit, with the metadata the dashboard needs), `special_reports` (each special
-publication's name, kind and event group) and `taxonomy` (the labels, which the search page's filter menus read).
+publication's name, kind and event group), `body_names` (a body name -> its canonical name) and `taxonomy` (the
+labels, which the search page's filter menus read).
 """
+import collections
+import difflib
+import hashlib
 import json
 import logging
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 import dataflows as DF
@@ -29,6 +40,7 @@ from datapackage_pipelines_budgetkey.common import llm
 
 REPORTS_PATH = os.environ.get('REPORTS', '/var/datapackages/state_comptroller/reports')
 CHAPTERS_PATH = os.environ.get('CHAPTERS', '/var/datapackages/state_comptroller/chapters')
+ISSUES_PATH = os.environ.get('ISSUES', '/var/datapackages/state_comptroller/issues')
 OUT_PATH = '/var/datapackages/state_comptroller/taxonomy'
 SEARCH_URL = 'https://next.obudget.org/s?q=&dd=state_comptroller&{param}={key}'
 INDEXED_STATUSES = ('ok', 'low-verification', 'partial-text', 'no-findings')
@@ -252,7 +264,10 @@ def special_reports(publications, audits):
         r['event_name'] = (g or {}).get('name') or r['name']
         r['event_when'] = (g or {}).get('when') or r['when']
         r['event_description'] = (g or {}).get('description') or r['description']
+    for r in reports:
+        r['when'], r['event_when'] = normalize_when(r['when']), normalize_when(r['event_when'])
     add_short_names(reports)
+    polish_descriptions(reports, by_pub)
     logging.info('Taxonomy: %d special reports in %d groups', len(reports), len({r['event'] for r in reports}))
     return reports
 
@@ -288,6 +303,171 @@ def add_short_names(reports):
             shorts[key] = '{} ({})'.format(name, events[key]['year'])
     for r in reports:
         r['event_short_name'] = shorts[r['event']]
+
+
+POLISH_SCHEMA = {'type': 'object', 'properties': {'items': {'type': 'array', 'items': {'type': 'object', 'properties': {
+    'key': {'type': 'string'}, 'description': {'type': 'string'},
+}, 'required': ['key', 'description']}}}, 'required': ['items']}
+POLISH_PROMPT = '''לפניך תיאורים של דוחות מיוחדים של מבקר המדינה, שיוצגו לקוראים בדף על דוחות המבקר. ערוך כל תיאור:
+- משפט אחד או שניים, עד 35 מילים, בעברית תקנית וטבעית (שימוש עקבי ונכון במילות זיקה: "שבה", "שבהם" וכו').
+- גוון את המבנה בין התיאורים: אל תפתח את כולם באותה צורה ואל תסיים את כולם ב"שבו בדק המבקר את...".
+- אל תחזור על שם הדוח (name) מילה במילה; הוא מוצג מעליו.
+- הישען רק על המידע שלפניך (השם, המועד, התיאור הקיים וכותרות הפרקים). אל תוסיף עובדות, תארים או הערכות.
+החזר פריט לכל key.
+
+{events}'''
+
+
+def normalize_when(text):
+    """One dash style for date ranges: an en dash without spaces ("יולי–אוגוסט 2014", "2020–2022")."""
+    if not text:
+        return text
+    return re.sub(r'\s*[-–—]\s*', '–', text.strip())
+
+
+def polish_descriptions(reports, chapters_by_pub):
+    """Copy-edits every event's description in one call, for the dashboard's readers (variety, Hebrew usage, no
+    repetition of the name). A description the model doesn't return keeps its original."""
+    events = {}
+    for r in sorted(reports, key=lambda r: r['pub_id']):
+        e = events.setdefault(r['event'], dict(key=r['event'], name=r['event_name'], when=r['event_when'] or '',
+                                               description=r['event_description'] or '', chapters=[]))
+        e['chapters'] += [a.get('title') for a in chapters_by_pub.get(r['pub_id'], [])][:10 - len(e['chapters'])]
+    if not events:
+        return
+    listing = json.dumps(sorted(events.values(), key=lambda e: int(e['key'])), ensure_ascii=False)
+    try:
+        _, out = llm.complete(POLISH_PROMPT.format(events=listing), schema=POLISH_SCHEMA, model=llm.MODEL_FAST,
+                              temperature=0, usage=USAGE, thinking='low')
+    except Exception:
+        logging.exception('Taxonomy: polishing the event descriptions failed')
+        out = {}
+    polished = {it['key']: it['description'].strip() for it in (out or {}).get('items') or []
+                if it.get('key') in events and (it.get('description') or '').strip()
+                and len(it['description']) <= 400}
+    for r in reports:
+        r['event_description'] = polished.get(r['event'], r['event_description'])
+
+
+PAIR_SCHEMA = {'type': 'object', 'properties': {'items': {'type': 'array', 'items': {'type': 'object', 'properties': {
+    'id': {'type': 'integer'}, 'same': {'type': 'boolean'}, 'current': {'type': 'string', 'enum': ['a', 'b']},
+}, 'required': ['id', 'same', 'current']}}}, 'required': ['items']}
+PAIR_PROMPT = '''לפניך זוגות של שמות גופים שהופיעו יחד בממצא או בליקוי של מבקר המדינה. לכל זוג, קבע:
+- same: האם שני השמות הם אותו גוף עצמו: הבדל כתיב, קיצור, או שם ישן ושם חדש של אותו גוף אחרי שינוי שם
+  (למשל "המשרד לאיכות הסביבה" ו"המשרד להגנת הסביבה"). לא אותו גוף: יחידה וגוף האם שלה (אגף במשרד, בית חולים
+  ברשת), שתי רשויות, שני בתי חולים או שני סניפים שונים, תפקיד בגוף לעומת הגוף.
+- current: איזה משני השמות (a או b) הוא השם העדכני והמלא של הגוף. בזוג שאינו אותו גוף, a.
+החזר פריט לכל id.
+
+{pairs}'''
+PAIR_BUCKETS = 12
+# Words that every body of a kind shares ("עיריית X", "המועצה המקומית Y"), so they don't make two bodies look alike
+SIGNIFICANT_STOP = {'משרד', 'המשרד', 'רשות', 'הרשות', 'אגף', 'חברה', 'החברה', 'ישראל', 'לישראל', 'בישראל', 'עיריית',
+                    'מועצה', 'המועצה', 'מקומית', 'המקומית', 'אזורית', 'האזורית', 'איגוד', 'ערים', 'בית', 'חולים',
+                    'מרכז', 'המרכז', 'רפואי', 'הרפואי', 'יחידת', 'היחידה', 'מחוז', 'ועדה', 'הוועדה', 'המקומית'}
+
+
+def _words(name):
+    """A name's significant words, without the prefixes ו and ה ("והתעשייה" = "התעשייה" = "תעשייה")."""
+    words = set()
+    for w in re.findall(r'[א-ת]+', name):
+        if len(w) > 2 and w not in SIGNIFICANT_STOP:
+            w = re.sub('^ו', '', w)
+            words.add(re.sub('^ה', '', w) if len(w) > 3 else w)
+    return words
+
+
+def candidate_pairs(lists):
+    """Pairs of different names that appear in the same list (an issue's or a finding's bodies) and look alike."""
+    pairs = set()
+    for names in lists:
+        names = sorted({n.strip() for n in names or [] if isinstance(n, str) and n.strip()})
+        for i, a in enumerate(names):
+            for b in names[i + 1:]:
+                ka, kb = sc.body_key(a), sc.body_key(b)
+                if ka == kb:
+                    pairs.add((a, b))
+                    continue
+                wa, wb = _words(a), _words(b)
+                ratio = difflib.SequenceMatcher(None, ka, kb).ratio()
+                if ratio >= 0.6 or len(wa & wb) / max(1, len(wa | wb)) >= 0.25:
+                    pairs.add((a, b))
+    return sorted(pairs)
+
+
+def judge_pairs(pairs):
+    """{(a, b): current name} for the pairs that are the same body. Pairs that differ only in spelling need no call.
+    The rest go to Gemini in fixed hash buckets, so a new pair re-asks only its own bucket."""
+    same = {}
+    buckets = collections.defaultdict(list)
+    for a, b in pairs:
+        if sc.body_key(a) == sc.body_key(b):
+            same[(a, b)] = None
+        else:
+            bucket = int(hashlib.md5((a + '|' + b).encode('utf8')).hexdigest(), 16) % PAIR_BUCKETS
+            buckets[bucket].append((a, b))
+
+    def ask(bucket_pairs):
+        listing = json.dumps([dict(id=i, a=a, b=b) for i, (a, b) in enumerate(bucket_pairs)], ensure_ascii=False)
+        try:
+            _, out = llm.complete(PAIR_PROMPT.format(pairs=listing), schema=PAIR_SCHEMA, model=llm.MODEL_FAST,
+                                  temperature=0, usage=USAGE, thinking='low')
+        except Exception:
+            logging.exception('Taxonomy: judging body-name pairs failed')
+            return {}
+        answers = {}
+        for it in (out or {}).get('items') or []:
+            if isinstance(it.get('id'), int) and 0 <= it['id'] < len(bucket_pairs) and it.get('same') is True:
+                a, b = bucket_pairs[it['id']]
+                answers[(a, b)] = b if it.get('current') == 'b' else a
+        return answers
+    with ThreadPoolExecutor(4) as ex:
+        for answers in ex.map(ask, [buckets[k] for k in sorted(buckets)]):
+            same.update(answers)
+    return same
+
+
+def canonical_body_names(lists, counts):
+    """{name: canonical name}: the names judged to be the same body are grouped (union-find), and each group takes the
+    name judged current most often, then the most frequent one."""
+    same = judge_pairs(candidate_pairs(lists))
+    parent = {}
+
+    def find(x):
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+    votes = collections.Counter()
+    for (a, b), current in same.items():
+        parent[find(a)] = find(b)
+        if current:
+            votes[current] += 1
+    groups = collections.defaultdict(list)
+    for name in list(parent):
+        groups[find(name)].append(name)
+    mapping = {}
+    for names in groups.values():
+        best = max(names, key=lambda n: (votes[n], counts.get(n, 0), n))
+        mapping.update({n: best for n in names if n != best})
+    logging.info('Taxonomy: %d body-name pairs judged the same body, %d names mapped to another',
+                 len(same), len(mapping))
+    return mapping
+
+
+def load_body_lists(chapters_path, issues_path):
+    """The bodies' names as they appear together: each finding's responsible bodies and each issue's bodies."""
+    lists = [r.get('responsible_bodies') or [] for r in DF.Flow(
+        DF.load(os.path.join(chapters_path, 'datapackage.json'), resources=['findings']),
+        DF.select_fields(['responsible_bodies'])).results()[0][0]]
+    try:
+        lists += [r.get('bodies') or [] for r in DF.Flow(
+            DF.load(os.path.join(issues_path, 'datapackage.json'), resources=['issues']),
+            DF.select_fields(['bodies'])).results()[0][0]]
+    except Exception:
+        logging.warning('No issues at %s: body names are matched within findings only', issues_path)
+    return lists
 
 
 def classify(audits, events=None, workers=4):
@@ -332,6 +512,7 @@ REPORT_FIELDS = [
     ('name', 'string'), ('when', 'string'), ('description', 'string'), ('event', 'string'), ('event_name', 'string'),
     ('event_when', 'string'), ('event_description', 'string'), ('event_short_name', 'string'),
 ]
+BODY_FIELDS = [('name', 'string'), ('canonical', 'string'), ('mentions', 'integer')]
 LABEL_FIELDS = [
     ('axis', 'string'), ('key', 'string'), ('label', 'string'), ('description', 'string'), ('field', 'string'),
     ('display_order', 'integer'), ('search_url', 'string'),
@@ -353,33 +534,39 @@ def load_publications(path):
                    DF.select_fields(fields)).results()[0][0]
 
 
-def run(reports_path, chapters_path, limit=None):
+def run(reports_path, chapters_path, issues_path, limit=None):
     audits = load_audits(chapters_path)
     if limit:
         audits = audits[:limit]
     reports = special_reports(load_publications(reports_path), audits)
     rows = classify(audits, {r['pub_id']: r['event'] for r in reports})
-    return rows, reports
+    lists = load_body_lists(chapters_path, issues_path)
+    counts = collections.Counter(b.strip() for names in lists for b in names if isinstance(b, str) and b.strip())
+    mapping = canonical_body_names(lists, counts)
+    bodies = [dict(name=n, canonical=mapping.get(n, n), mentions=counts[n]) for n in sorted(counts)]
+    return rows, reports, bodies
 
 
-def output_flow(rows, reports):
+def output_flow(rows, reports, bodies):
     return DF.Flow(
         sc.typed_resource(rows, 'audit_taxonomy', AUDIT_TAXONOMY_FIELDS, ['chapter_id']),
         sc.typed_resource(reports, 'special_reports', REPORT_FIELDS, ['pub_id']),
+        sc.typed_resource(bodies, 'body_names', BODY_FIELDS, ['name']),
         sc.typed_resource(label_rows(), 'taxonomy', LABEL_FIELDS, ['axis', 'key']),
     )
 
 
 def flow(*_):
     from datapackage_pipelines_budgetkey.common.dump_to_sql_atomic import dump_to_sql_atomic
-    rows, reports = run(REPORTS_PATH, CHAPTERS_PATH)
+    rows, reports, bodies = run(REPORTS_PATH, CHAPTERS_PATH, ISSUES_PATH)
     return DF.Flow(
-        output_flow(rows, reports),
+        output_flow(rows, reports, bodies),
         DF.update_resource(None, **{'dpp:streaming': True}),
         DF.dump_to_path(OUT_PATH),
         dump_to_sql_atomic(dict(
             state_comptroller_audit_taxonomy={'resource-name': 'audit_taxonomy'},
             state_comptroller_special_reports={'resource-name': 'special_reports'},
+            state_comptroller_body_names={'resource-name': 'body_names'},
             state_comptroller_taxonomy={'resource-name': 'taxonomy'},
         )),
     )
@@ -389,6 +576,6 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO, format='%(asctime)s %(message)s')
     for noisy in ('httpx', 'httpcore', 'google_genai', 'urllib3'):
         logging.getLogger(noisy).setLevel(logging.WARNING)
-    rows, reports = run(REPORTS_PATH, CHAPTERS_PATH, int(os.environ.get('LIMIT') or 0) or None)
-    DF.Flow(output_flow(rows, reports),
+    rows, reports, bodies = run(REPORTS_PATH, CHAPTERS_PATH, ISSUES_PATH, int(os.environ.get('LIMIT') or 0) or None)
+    DF.Flow(output_flow(rows, reports, bodies),
             DF.dump_to_path(os.environ.get('OUT', 'state_comptroller_taxonomy_out'))).process()

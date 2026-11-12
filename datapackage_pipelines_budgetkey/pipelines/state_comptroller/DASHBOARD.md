@@ -128,6 +128,8 @@ from state_comptroller_dash_events where kind = 'event' order by last_published 
   - `thematic` (90): a topic examined in depth.
   - `follow_up` (4), `recurring` (1) and `other` (1).
   - For a "special events" widget, filter on `kind = 'event'`. The thematic reports are an optional second list.
+- `description` is copy-edited for readers (one or two sentences, varied, not repeating the name). `event_when` uses
+  one dash style, an en dash without spaces ("יולי–אוגוסט 2014", "2020–2022").
 - `name`: the event's or report's full name, e.g. "המשט הטורקי (המרמרה)". `short_name`: its common short name, up to
   about 30 characters (e.g. "משט המרמרה"), unique (two reports with the same name get their years). Use it in menus
   and cards. `event_when` says when the event happened (e.g. "דצמבר 2010"), and `description` is one sentence.
@@ -172,6 +174,8 @@ from state_comptroller_dash_chronic_issues where chain_rank = 1 order by rank li
 ```
 
 - `url` is the issue page (`/i/state_comptroller_issues/<issue_id>`), the card's link.
+- `bodies`: the bodies' names deduplicated. Spelling variants and old names of renamed bodies (המשרד לאיכות הסביבה →
+  המשרד להגנת הסביבה) show once, under the current name. A unit and its parent body stay separate.
 - `years_open` runs from `first_reported` to the latest verdict. The top cards run 20–26 years: hospitals' emergency
   readiness from 2000 to the 7 October report, nursing benefits, cellular radiation rules.
 - `latest_verdict` is `not_rectified` or `partially_rectified`. `latest_verdict_label` is the Hebrew label to show.

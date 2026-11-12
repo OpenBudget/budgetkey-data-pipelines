@@ -619,7 +619,10 @@ def test_es_documents(tmp_path):
     DF.Flow([dict(chapter_id=1, domain='economy_finance', domains=['economy_finance', 'transport'],
                   lenses=['procurement'], event=None),
              dict(chapter_id=3, domain='energy_water', domains=['energy_water'], lenses=['it_cyber'], event='9')],
-            DF.update_resource(-1, name='audit_taxonomy'), DF.dump_to_path(str(taxonomy))).process()
+            DF.update_resource(-1, name='audit_taxonomy'),
+            [dict(name='משרד האוצר', canonical='משרד האוצר', mentions=3),
+             dict(name='החשב הכללי', canonical='משרד האוצר - אגף החשב הכללי', mentions=1)],
+            DF.update_resource(-1, name='body_names'), DF.dump_to_path(str(taxonomy))).process()
 
     results, dp, _ = DF.Flow(ed.documents_flow(str(chapters), str(issues), str(taxonomy))).results()
     by_name = dict(zip([r.name for r in dp.resources], results))

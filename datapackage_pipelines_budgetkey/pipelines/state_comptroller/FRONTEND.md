@@ -130,6 +130,9 @@ of the event or report. An issue carries the union of its audits' `domains[]` an
 `/api/query`. They can be shown as tags linking to the filtered search; the search filters and the dashboard data are
 in `DASHBOARD.md`.
 
+Bodies' names (an issue's `bodies`, a finding's `responsible_bodies`) are deduplicated: spelling variants and old
+names of renamed bodies show once, under the current name (`state_comptroller_body_names` has the mapping).
+
 ## Things to know
 
 - **When the pages ship, three switches flip:**

@@ -394,3 +394,24 @@ def normalize_date(text):
                     pass
             return '%04d-%02d' % (year, month)
     return None
+
+
+def body_key(name):
+    """A body's name with spelling noise removed (punctuation, spaces, doubled yod/vav), for matching variants."""
+    s = re.sub(r'[^א-תa-zA-Z]', '', name or '')
+    return s.replace('יי', 'י').replace('וו', 'ו')
+
+
+def canonical_bodies(names, mapping):
+    """Body names with each one replaced by its canonical name (`mapping`: name -> canonical, from the taxonomy
+    step's body_names) and duplicates dropped, keeping the first occurrence's order."""
+    out, seen = [], set()
+    for n in names or []:
+        if not n:
+            continue
+        c = mapping.get(n.strip(), n.strip())
+        k = body_key(c)
+        if k and k not in seen:
+            seen.add(k)
+            out.append(c)
+    return out

@@ -1,5 +1,6 @@
 """Offline tests for the State Comptroller taxonomy and dashboard tables."""
 import datetime
+import json
 import sys
 from pathlib import Path
 
@@ -42,6 +43,8 @@ def test_classify_tags_each_audit_and_its_event(monkeypatch):
 
 def test_special_reports_about_one_event_share_a_key(monkeypatch):
     def complete(prompt, **kw):
+        if 'ערוך כל תיאור' in prompt:
+            return False, dict(items=[dict(key='12', description='המלחמה ומה שנבדק בה.')])
         if 'שם קצר: השם המקובל' in prompt:
             return False, dict(items=[dict(key='12', short_name='7 באוקטובר')])
         if 'קבץ' in prompt:
@@ -64,6 +67,8 @@ def test_special_reports_about_one_event_share_a_key(monkeypatch):
     assert reports[50]['event'] == '50' and reports[50]['kind'] == 'event'  # left out of the groups: its own
     assert reports[12]['event_short_name'] == reports[30]['event_short_name'] == '7 באוקטובר'
     assert reports[40]['event_short_name'] == reports[40]['event_name']  # not shortened: the full name
+    assert reports[30]['event_description'] == 'המלחמה ומה שנבדק בה.'  # copy-edited, for the whole group
+    assert reports[40]['event_description'] == ''  # not returned by the model: kept
 
 
 def test_short_names_fall_back_and_tell_duplicates_apart(monkeypatch):
@@ -170,7 +175,8 @@ def test_chronic_issues_are_unfixed_at_the_last_audit():
         issue('one-audit', [('2020-01-01', 'not_rectified', 1)], n_audits=1),
     ]
     by_chapter = {1: dict(domains=['health'], lenses=['hr']), 3: dict(domains=['welfare'], lenses=['hr'])}
-    rows = db.chronic_rows(issues, by_chapter)
+    issues[0]['bodies'] = ['המשרד לאיכות הסביבה', 'המשרד להגנת הסביבה']
+    rows = db.chronic_rows(issues, by_chapter, {'המשרד לאיכות הסביבה': 'המשרד להגנת הסביבה'})
     assert [(r['issue_id'], r['rank'], r['chain_rank']) for r in rows] == [
         ('long', 1, 1), ('long-too', 2, 2), ('short', 3, 1)]
     long = rows[0]
@@ -178,3 +184,45 @@ def test_chronic_issues_are_unfixed_at_the_last_audit():
     assert (long['domains'], long['lenses']) == (['health', 'welfare'], ['hr'])
     assert long['first_chapter_title'] == 'הביקורת הראשונה' and long['latest_verdict_chapter_id'] == 3
     assert long['url'] == 'https://next.obudget.org/i/state_comptroller_issues/long'
+    assert long['bodies'] == ['המשרד להגנת הסביבה']  # an old and a current name of one body: shown once
+
+
+def test_normalize_when():
+    assert tx.normalize_when('יולי - אוגוסט 2014') == 'יולי–אוגוסט 2014'
+    assert tx.normalize_when('2020-2022') == '2020–2022' and tx.normalize_when('2003—2006 ') == '2003–2006'
+    assert tx.normalize_when(None) is None and tx.normalize_when('אוקטובר 2023 ואילך') == 'אוקטובר 2023 ואילך'
+
+
+def test_body_names_merge_only_pairs_judged_the_same_body(monkeypatch):
+    old, new = 'המשרד לאיכות הסביבה', 'המשרד להגנת הסביבה'
+    lists = [[old, new, 'משרד הבריאות'], ['עיריית חיפה', 'עיריית חדרה'],
+             ['הרשות העליונה לאשפוז ובריאות לשעת חירום', 'הרשות העליונה לאשפוז ובריאות בשעת חירום'],
+             ['אוניברסיטת בר-אילן', 'אוניברסיטת בר אילן'], [new]]
+    pairs = tx.candidate_pairs(lists)
+    assert ('המשרד להגנת הסביבה', 'משרד הבריאות') not in pairs
+    asked = []
+
+    def complete(prompt, **kw):
+        listing = json.loads(prompt[prompt.index('['):])
+        asked.extend((p['a'], p['b']) for p in listing)
+        current = {new, 'הרשות העליונה לאשפוז ובריאות בשעת חירום'}  # the pairs the model judges the same body
+        return False, dict(items=[dict(id=p['id'], same=bool(current & {p['a'], p['b']}),
+                                       current='b' if p['b'] in current else 'a') for p in listing])
+    monkeypatch.setattr(tx.llm, 'complete', complete)
+    counts = {old: 1, new: 3, 'אוניברסיטת בר-אילן': 5, 'אוניברסיטת בר אילן': 2,
+              'הרשות העליונה לאשפוז ובריאות לשעת חירום': 1, 'הרשות העליונה לאשפוז ובריאות בשעת חירום': 2}
+    mapping = tx.canonical_body_names(lists, counts)
+    assert mapping[old] == new  # renamed: the name judged current
+    assert mapping['אוניברסיטת בר אילן'] == 'אוניברסיטת בר-אילן'  # spelling only: no call, the more frequent one
+    assert 'אוניברסיטת בר-אילן' not in mapping
+    assert 'עיריית חיפה' not in mapping and 'עיריית חדרה' not in mapping  # asked, judged different bodies
+    assert mapping['הרשות העליונה לאשפוז ובריאות לשעת חירום'] == 'הרשות העליונה לאשפוז ובריאות בשעת חירום'
+    assert ('אוניברסיטת בר-אילן', 'אוניברסיטת בר אילן') not in asked and ('אוניברסיטת בר אילן', 'אוניברסיטת בר-אילן') not in asked
+
+
+def test_canonical_bodies_maps_and_drops_duplicates():
+    import sc_common as sc
+    mapping = {'המשרד לאיכות הסביבה': 'המשרד להגנת הסביבה'}
+    assert sc.canonical_bodies(['המשרד לאיכות הסביבה', 'משרד הבריאות', 'המשרד להגנת הסביבה', ' משרד  הבריאות', ''],
+                               mapping) == ['המשרד להגנת הסביבה', 'משרד הבריאות']
+    assert sc.canonical_bodies(None, mapping) == []
