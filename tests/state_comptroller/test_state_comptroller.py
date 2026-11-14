@@ -1,5 +1,6 @@
 """Offline tests for the State Comptroller pipelines: parsing, text clean-up, stitching and issue building."""
 import datetime
+import json
 import shutil
 import sys
 from pathlib import Path
@@ -548,6 +549,35 @@ def test_transcribe_survives_pages_poppler_cant_cut(monkeypatch):
     monkeypatch.setattr(ca.sc, 'page_image', page_image)
     monkeypatch.setattr(ca.llm, 'complete_with_file', complete_with_file)
     assert ca.transcribe('x.pdf', [1, 2, 3]) == {1: 'עמוד 1', 2: 'עמוד 2'}
+
+
+def test_untranscribed_pages_are_retried_alone_for_a_few_runs(monkeypatch):
+    store, asked = {}, []
+    monkeypatch.setattr(ca.sc, 'read_json', lambda name: store.get(name))
+    monkeypatch.setattr(ca.sc, 'write_json', lambda name, obj: store.__setitem__(name, json.loads(json.dumps(obj))))
+    monkeypatch.setattr(ca.sc, 'read_object', lambda name: store[name].encode('utf-8') if name in store else None)
+    monkeypatch.setattr(ca.sc, 'write_text', lambda name, text, ext: store.__setitem__(name, text))
+    monkeypatch.setattr(ca.sc, 'fetch_stored', lambda name, url, dest: True)
+    monkeypatch.setattr(ca.ct, 'pdf_pages', lambda path: ['עמוד רגיל', '#', '#'])
+    monkeypatch.setattr(ca.ct, 'running_lines', lambda pages: set())
+    monkeypatch.setattr(ca.ct, 'broken_page', lambda page, threshold: page == '#')
+    monkeypatch.setattr(ca.ct, 'scanned_pages', lambda pages: [])
+    monkeypatch.setattr(ca.ct, 'pdf_pages_to_markdown', lambda pages, repeated: '\n'.join(pages))
+    run = [0]
+
+    def transcribe(path, pages):
+        asked.append(list(pages))
+        # page 2 reads differently each time it's transcribed; page 3 is always refused
+        return {n: 'עמוד %d, נוסח %d' % (n, run[0]) for n in pages if n == 2}
+    monkeypatch.setattr(ca, 'transcribe', transcribe)
+    chapter = dict(chapter_id=1, pub_id=5, full_pdf_url='https://x/a.pdf')
+    texts = []
+    for run[0] in range(1, 6):
+        md, meta, _ = ca.chapter_markdown(chapter)
+        texts.append(md)
+    assert asked == [[2, 3], [3], [3]]  # all garbled pages once, then only the missing one, 3 runs in all
+    assert len(set(texts)) == 1 and 'עמוד 2, נוסח 1' in texts[0]  # the text doesn't change, so no re-analysis
+    assert meta['transcribed_pages'] == [2] and meta['garbled_pages'] == [2, 3]
 
 
 def test_split_pages_drops_the_piece_after_the_last_form_feed():

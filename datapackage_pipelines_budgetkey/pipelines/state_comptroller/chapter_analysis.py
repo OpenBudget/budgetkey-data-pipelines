@@ -37,6 +37,9 @@ REPORTS_PATH = '/var/datapackages/state_comptroller/reports'
 OUT_PATH = '/var/datapackages/state_comptroller/chapters'
 GARBLED_PAGE = 0.02
 TRANSCRIBE_WINDOW = 6
+# Runs that retry the pages Gemini didn't transcribe (it refuses some outright, e.g. finish reason RECITATION)
+# before the chapter's text is taken as final without them
+TRANSCRIBE_RUNS = 3
 MAX_CHARS = 350_000
 WINDOW_CHARS = 280_000
 WINDOW_OVERLAP = 15_000
@@ -115,12 +118,15 @@ def transcribe(pdf_path, page_numbers):
     return result
 
 
-def pdf_markdown(path):
-    """Markdown for a PDF, and which pages had to be transcribed."""
+def pdf_markdown(path, known=None):
+    """Markdown for a PDF, and which pages had to be transcribed. `known` holds transcriptions from an earlier run
+    ({page: markdown}), so only the pages missing from it go to Gemini again."""
     pages = ct.pdf_pages(path)
     repeated = ct.running_lines(pages)
     garbled = sorted({i + 1 for i, p in enumerate(pages) if ct.broken_page(p, GARBLED_PAGE)} | set(ct.scanned_pages(pages)))
-    transcribed = transcribe(path, garbled) if garbled else {}
+    known = {n: t for n, t in (known or {}).items() if n in garbled}
+    missing = [n for n in garbled if n not in known]
+    transcribed = {**known, **(transcribe(path, missing) if missing else {})}
     parts, plain = [], []
     for i, page in enumerate(pages, 1):
         if i in transcribed:
@@ -133,7 +139,12 @@ def pdf_markdown(path):
     if plain:
         parts.append(ct.pdf_pages_to_markdown(plain, repeated))
     md = '\n'.join(parts)
-    return md, dict(pages=len(pages), garbled_pages=garbled, transcribed_pages=sorted(transcribed))
+    meta = dict(pages=len(pages), garbled_pages=garbled, transcribed_pages=sorted(transcribed))
+    if set(garbled) - set(transcribed):
+        # kept so the next run sends only the missing pages, and the pages read now don't change (a new
+        # transcription of the same page differs a little, which would change the text and re-run the analysis)
+        meta['transcriptions'] = {str(n): t for n, t in transcribed.items()}
+    return md, meta
 
 
 def source_file(chapter):
@@ -151,10 +162,15 @@ def chapter_markdown(chapter):
     if not name:
         return None, dict(status='no-file'), None
     meta = sc.read_json(name + '.text.json')
+    known, runs = {}, 0
     if meta and meta.get('version') == ct.TEXT_VERSION:
-        md = sc.read_object(name + '.md')
-        if md is not None:
-            return md.decode('utf-8'), meta, name + '.md'
+        missing = set(meta.get('garbled_pages') or []) - set(meta.get('transcribed_pages') or [])
+        runs = meta.get('transcribe_runs') or 1
+        if not missing or runs >= TRANSCRIBE_RUNS:
+            md = sc.read_object(name + '.md')
+            if md is not None:
+                return md.decode('utf-8'), meta, name + '.md'
+        known = {int(n): t for n, t in (meta.get('transcriptions') or {}).items()}
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, 'file.' + ext)
         if not sc.fetch_stored(name, url, path):
@@ -172,10 +188,10 @@ def chapter_markdown(chapter):
                 pdf_name = file_object_name(chapter['pub_id'], pdf_url)
                 pdf_path = os.path.join(tmp, 'file.pdf')
                 if sc.fetch_stored(pdf_name, pdf_url, pdf_path):
-                    md, pdf_meta = pdf_markdown(pdf_path)
+                    md, pdf_meta = pdf_markdown(pdf_path, known)
                     meta.update(pdf_meta, source='pdf', source_url=pdf_url)
             elif ext == 'pdf':
-                md, pdf_meta = pdf_markdown(path)
+                md, pdf_meta = pdf_markdown(path, known)
                 meta.update(pdf_meta)
     if not md or not md.strip():
         meta['status'] = 'no-text'
@@ -183,9 +199,11 @@ def chapter_markdown(chapter):
     meta['status'] = 'ok'
     meta['chars'] = len(md)
     sc.write_text(name + '.md', md, 'md')
-    # Pages Gemini failed to transcribe are left out; without the meta file the next run transcribes them again
-    if set(meta.get('garbled_pages') or []) <= set(meta.get('transcribed_pages') or []):
-        sc.write_json(name + '.text.json', meta)
+    # Pages Gemini failed to transcribe are left out of the text. The next runs try those pages again (only those),
+    # up to TRANSCRIBE_RUNS runs in all.
+    if set(meta.get('garbled_pages') or []) - set(meta.get('transcribed_pages') or []):
+        meta['transcribe_runs'] = runs + 1
+    sc.write_json(name + '.text.json', meta)
     return md, meta, name + '.md'
 
 
